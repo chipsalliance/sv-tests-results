@@ -223,7 +223,9 @@
 <a href="#l-215">215</a>
 <a href="#l-216">216</a>
 <a href="#l-217">217</a>
-<a href="#l-218">218</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">//====================================================================</span>
+<a href="#l-218">218</a>
+<a href="#l-219">219</a>
+<a href="#l-220">220</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">//====================================================================</span>
 <a name="l-2"></a><span class="c1">// bsg_idiv_iterative.v</span>
 <a name="l-3"></a><span class="c1">// 11/14/2016, shawnless.xie@gmail.com</span>
 <a name="l-4"></a><span class="c1">//====================================================================</span>
@@ -248,199 +250,201 @@
 <a name="l-23"></a><span class="c1">//    is useful for a RISC ISA, in which only quotient or remainder is need in</span>
 <a name="l-24"></a><span class="c1">//    one instruction.</span>
 <a name="l-25"></a><span class="c1">// 2. usging data detection logic to reduce the iteration cycles.</span>
-<a name="l-26"></a><span class="k">module</span> <span class="n">bsg_idiv_iterative</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
-<a name="l-27"></a>    <span class="p">(</span><span class="k">input</span>                  <span class="n">clk_i</span>
-<a name="l-28"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">reset_i</span>
-<a name="l-29"></a>
-<a name="l-30"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">v_i</span>      <span class="c1">//there is a request</span>
-<a name="l-31"></a>    <span class="p">,</span><span class="k">output</span>                 <span class="n">ready_o</span>  <span class="c1">//idiv is idle </span>
-<a name="l-32"></a>
-<a name="l-33"></a>    <span class="p">,</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>   <span class="n">dividend_i</span>
-<a name="l-34"></a>    <span class="p">,</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>   <span class="n">divisor_i</span>
-<a name="l-35"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">signed_div_i</span>
-<a name="l-36"></a>
-<a name="l-37"></a>    <span class="p">,</span><span class="k">output</span>                 <span class="n">v_o</span>      <span class="c1">//result is valid</span>
-<a name="l-38"></a>    <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>  <span class="n">quotient_o</span>
-<a name="l-39"></a>    <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>  <span class="n">remainder_o</span>
-<a name="l-40"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">yumi_i</span>
-<a name="l-41"></a>    <span class="p">);</span>
-<a name="l-42"></a>
-<a name="l-43"></a>
-<a name="l-44"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opA</span><span class="p">;</span>
-<a name="l-45"></a>   <span class="n">bsg_buf</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span> <span class="n">remainder_buf</span> <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">opA</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span> <span class="p">.</span><span class="n">o</span><span class="p">(</span><span class="n">remainder_o</span><span class="p">));</span>
-<a name="l-46"></a>
-<a name="l-47"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opC</span><span class="p">;</span>
-<a name="l-48"></a>   <span class="n">bsg_buf</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span> <span class="n">quotient_buf</span>  <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span> <span class="p">.</span><span class="n">o</span><span class="p">(</span><span class="n">quotient_o</span><span class="p">));</span>
-<a name="l-49"></a>
-<a name="l-50"></a>   <span class="kt">wire</span>         <span class="n">signed_div_r</span><span class="p">;</span>
-<a name="l-51"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">dividend_r</span><span class="p">;</span>
-<a name="l-52"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">divisor_r</span><span class="p">;</span>
-<a name="l-53"></a>   <span class="kt">wire</span> <span class="n">divisor_msb</span>  <span class="o">=</span> <span class="n">signed_div_r</span> <span class="o">&amp;</span> <span class="n">divisor_r</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
-<a name="l-54"></a>   <span class="kt">wire</span> <span class="n">dividend_msb</span> <span class="o">=</span> <span class="n">signed_div_r</span> <span class="o">&amp;</span> <span class="n">dividend_r</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
-<a name="l-55"></a>
-<a name="l-56"></a>   <span class="kt">wire</span> <span class="n">latch_inputs</span><span class="p">;</span>
-<a name="l-57"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">req_reg</span>
-<a name="l-58"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">signed_div_i</span><span class="p">)</span>
-<a name="l-59"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">signed_div_r</span><span class="p">)</span>
-<a name="l-60"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
-<a name="l-61"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-62"></a>        <span class="p">);</span>
-<a name="l-63"></a>
-<a name="l-64"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span><span class="n">dividend_reg</span>
-<a name="l-65"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">dividend_i</span><span class="p">)</span>
-<a name="l-66"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">dividend_r</span><span class="p">)</span>
-<a name="l-67"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
-<a name="l-68"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-69"></a>       <span class="p">);</span>
-<a name="l-70"></a>
-<a name="l-71"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span><span class="n">divisor_reg</span>
-<a name="l-72"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">divisor_i</span><span class="p">)</span>
-<a name="l-73"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">divisor_r</span><span class="p">)</span>
-<a name="l-74"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
-<a name="l-75"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-76"></a>       <span class="p">);</span>
-<a name="l-77"></a>
-<a name="l-78"></a>   <span class="c1">//if the divisor is zero</span>
-<a name="l-79"></a>   <span class="kt">wire</span>         <span class="n">zero_divisor_li</span>   <span class="o">=</span>  <span class="o">~</span><span class="p">(</span><span class="o">|</span> <span class="n">divisor_r</span><span class="p">);</span>
-<a name="l-80"></a>
-<a name="l-81"></a>   <span class="kt">wire</span>         <span class="n">opA_sel</span><span class="p">;</span>
-<a name="l-82"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opA_mux</span><span class="p">;</span>
-<a name="l-83"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">add_out</span><span class="p">;</span>
-<a name="l-84"></a>   <span class="n">bsg_mux</span>  <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="n">muxA</span>
-<a name="l-85"></a>       <span class="p">(.</span><span class="n">data_i</span><span class="p">({</span> <span class="p">{</span><span class="n">divisor_msb</span><span class="p">,</span> <span class="n">divisor_r</span><span class="p">},</span> <span class="n">add_out</span> <span class="p">}</span> <span class="p">)</span>
-<a name="l-86"></a>       <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">opA_mux</span><span class="p">)</span>
-<a name="l-87"></a>       <span class="p">,.</span><span class="n">sel_i</span><span class="p">(</span><span class="n">opA_sel</span><span class="p">)</span>
-<a name="l-88"></a>     <span class="p">);</span>
-<a name="l-89"></a>
-<a name="l-90"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>   <span class="n">opB_sel</span><span class="p">;</span>
-<a name="l-91"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opB_mux</span><span class="p">;</span>
-<a name="l-92"></a>   <span class="n">bsg_mux_one_hot</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="n">muxB</span>
-<a name="l-93"></a>          <span class="p">(</span> <span class="p">.</span><span class="n">data_i</span><span class="p">(</span> <span class="p">{</span><span class="n">opC</span><span class="p">,</span> <span class="n">add_out</span><span class="p">,</span> <span class="p">{</span><span class="n">add_out</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="p">]}}</span> <span class="p">)</span>
-<a name="l-94"></a>           <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span>  <span class="n">opB_mux</span> <span class="p">)</span>
-<a name="l-95"></a>           <span class="p">,.</span><span class="n">sel_one_hot_i</span><span class="p">(</span><span class="n">opB_sel</span><span class="p">)</span>
-<a name="l-96"></a>     <span class="p">);</span>
-<a name="l-97"></a>
-<a name="l-98"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>   <span class="n">opC_sel</span><span class="p">;</span>
-<a name="l-99"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opC_mux</span><span class="p">;</span>
-<a name="l-100"></a>   <span class="n">bsg_mux_one_hot</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="n">muxC</span>
-<a name="l-101"></a>          <span class="p">(</span> <span class="p">.</span><span class="n">data_i</span><span class="p">(</span> <span class="p">{{</span><span class="n">dividend_msb</span><span class="p">,</span> <span class="n">dividend_r</span><span class="p">},</span><span class="n">add_out</span><span class="p">,</span> <span class="p">{</span><span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="o">~</span><span class="n">add_out</span><span class="p">[</span><span class="n">width_p</span><span class="p">]}}</span> <span class="p">)</span>
-<a name="l-102"></a>           <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span>  <span class="n">opC_mux</span> <span class="p">)</span>
-<a name="l-103"></a>           <span class="p">,.</span><span class="n">sel_one_hot_i</span><span class="p">(</span><span class="n">opC_sel</span><span class="p">)</span>
-<a name="l-104"></a>     <span class="p">);</span>
-<a name="l-105"></a>
-<a name="l-106"></a>   <span class="kt">wire</span> <span class="n">opA_ld</span><span class="p">;</span>
-<a name="l-107"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">opA_reg</span>
-<a name="l-108"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">opA_mux</span><span class="p">)</span>
-<a name="l-109"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">opA</span>    <span class="p">)</span>
-<a name="l-110"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">opA_ld</span> <span class="p">)</span>
-<a name="l-111"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-112"></a>       <span class="p">);</span>
-<a name="l-113"></a> 
-<a name="l-114"></a>   <span class="kt">wire</span>         <span class="n">opB_ld</span><span class="p">;</span>
-<a name="l-115"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opB</span><span class="p">;</span>
-<a name="l-116"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">opB_reg</span>
-<a name="l-117"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">opB_mux</span><span class="p">)</span>
-<a name="l-118"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">opB</span>    <span class="p">)</span>
-<a name="l-119"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">opB_ld</span> <span class="p">)</span>
-<a name="l-120"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-121"></a>       <span class="p">);</span>
-<a name="l-122"></a>
-<a name="l-123"></a>   <span class="kt">wire</span> <span class="n">opC_ld</span><span class="p">;</span>
-<a name="l-124"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">opC_reg</span>
-<a name="l-125"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">opC_mux</span><span class="p">)</span>
-<a name="l-126"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">opC</span>    <span class="p">)</span>
-<a name="l-127"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">opC_ld</span> <span class="p">)</span>
-<a name="l-128"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-129"></a>       <span class="p">);</span>
-<a name="l-130"></a>   <span class="c1">// this logic is sandwiched between bitstacks -- MBT</span>
-<a name="l-131"></a>   <span class="c1">//   assign add_in0 = (opA ^ {width_p+1{opA_inv}}) &amp; {width_p+1{opA_clr_l}};</span>
-<a name="l-132"></a>   <span class="c1">//   assign add_in1 = (opB ^ {width_p+1{opB_inv}}) &amp; {width_p+1{opB_clr_l}};</span>
-<a name="l-133"></a>
-<a name="l-134"></a>  <span class="kt">wire</span>        <span class="n">opA_inv</span><span class="p">;</span>
-<a name="l-135"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opA_inv_buf</span><span class="p">;</span>
-<a name="l-136"></a>  <span class="n">bsg_buf_ctrl</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span> <span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">buf_opA_inv</span><span class="p">(</span> <span class="p">.</span><span class="n">i</span><span class="p">(</span><span class="n">opA_inv</span><span class="p">),</span> <span class="p">.</span><span class="n">o</span><span class="p">(</span><span class="n">opA_inv_buf</span><span class="p">))</span> <span class="p">;</span>
+<a name="l-26"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-27"></a>
+<a name="l-28"></a><span class="k">module</span> <span class="n">bsg_idiv_iterative</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="k">parameter</span> <span class="n">bitstack_p</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-29"></a>    <span class="p">(</span><span class="k">input</span>                  <span class="n">clk_i</span>
+<a name="l-30"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">reset_i</span>
+<a name="l-31"></a>
+<a name="l-32"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">v_i</span>      <span class="c1">//there is a request</span>
+<a name="l-33"></a>    <span class="p">,</span><span class="k">output</span>                 <span class="n">ready_o</span>  <span class="c1">//idiv is idle </span>
+<a name="l-34"></a>
+<a name="l-35"></a>    <span class="p">,</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>   <span class="n">dividend_i</span>
+<a name="l-36"></a>    <span class="p">,</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>   <span class="n">divisor_i</span>
+<a name="l-37"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">signed_div_i</span>
+<a name="l-38"></a>
+<a name="l-39"></a>    <span class="p">,</span><span class="k">output</span>                 <span class="n">v_o</span>      <span class="c1">//result is valid</span>
+<a name="l-40"></a>    <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>  <span class="n">quotient_o</span>
+<a name="l-41"></a>    <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span> <span class="mi">0</span><span class="p">]</span>  <span class="n">remainder_o</span>
+<a name="l-42"></a>    <span class="p">,</span><span class="k">input</span>                  <span class="n">yumi_i</span>
+<a name="l-43"></a>    <span class="p">);</span>
+<a name="l-44"></a>
+<a name="l-45"></a>
+<a name="l-46"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opA</span><span class="p">;</span>
+<a name="l-47"></a>   <span class="k">assign</span> <span class="n">remainder_o</span> <span class="o">=</span> <span class="n">opA</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-48"></a>
+<a name="l-49"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opC</span><span class="p">;</span>
+<a name="l-50"></a>   <span class="k">assign</span> <span class="n">quotient_o</span> <span class="o">=</span> <span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-51"></a>
+<a name="l-52"></a>   <span class="kt">wire</span>         <span class="n">signed_div_r</span><span class="p">;</span>
+<a name="l-53"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">dividend_r</span><span class="p">;</span>
+<a name="l-54"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">divisor_r</span><span class="p">;</span>
+<a name="l-55"></a>   <span class="kt">wire</span> <span class="n">divisor_msb</span>  <span class="o">=</span> <span class="n">signed_div_r</span> <span class="o">&amp;</span> <span class="n">divisor_r</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-56"></a>   <span class="kt">wire</span> <span class="n">dividend_msb</span> <span class="o">=</span> <span class="n">signed_div_r</span> <span class="o">&amp;</span> <span class="n">dividend_r</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-57"></a>
+<a name="l-58"></a>   <span class="kt">wire</span> <span class="n">latch_inputs</span><span class="p">;</span>
+<a name="l-59"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">req_reg</span>
+<a name="l-60"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">signed_div_i</span><span class="p">)</span>
+<a name="l-61"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">signed_div_r</span><span class="p">)</span>
+<a name="l-62"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
+<a name="l-63"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-64"></a>        <span class="p">);</span>
+<a name="l-65"></a>
+<a name="l-66"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span><span class="n">dividend_reg</span>
+<a name="l-67"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">dividend_i</span><span class="p">)</span>
+<a name="l-68"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">dividend_r</span><span class="p">)</span>
+<a name="l-69"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
+<a name="l-70"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-71"></a>       <span class="p">);</span>
+<a name="l-72"></a>
+<a name="l-73"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span><span class="n">divisor_reg</span>
+<a name="l-74"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">divisor_i</span><span class="p">)</span>
+<a name="l-75"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">divisor_r</span><span class="p">)</span>
+<a name="l-76"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
+<a name="l-77"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-78"></a>       <span class="p">);</span>
+<a name="l-79"></a>
+<a name="l-80"></a>   <span class="c1">//if the divisor is zero</span>
+<a name="l-81"></a>   <span class="kt">wire</span>         <span class="n">zero_divisor_li</span>   <span class="o">=</span>  <span class="o">~</span><span class="p">(</span><span class="o">|</span> <span class="n">divisor_r</span><span class="p">);</span>
+<a name="l-82"></a>
+<a name="l-83"></a>   <span class="kt">wire</span>         <span class="n">opA_sel</span><span class="p">;</span>
+<a name="l-84"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opA_mux</span><span class="p">;</span>
+<a name="l-85"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">add_out</span><span class="p">;</span>
+<a name="l-86"></a>   <span class="n">bsg_mux</span>  <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="n">muxA</span>
+<a name="l-87"></a>       <span class="p">(.</span><span class="n">data_i</span><span class="p">({</span> <span class="p">{</span><span class="n">divisor_msb</span><span class="p">,</span> <span class="n">divisor_r</span><span class="p">},</span> <span class="n">add_out</span> <span class="p">}</span> <span class="p">)</span>
+<a name="l-88"></a>       <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">opA_mux</span><span class="p">)</span>
+<a name="l-89"></a>       <span class="p">,.</span><span class="n">sel_i</span><span class="p">(</span><span class="n">opA_sel</span><span class="p">)</span>
+<a name="l-90"></a>     <span class="p">);</span>
+<a name="l-91"></a>
+<a name="l-92"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>   <span class="n">opB_sel</span><span class="p">;</span>
+<a name="l-93"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opB_mux</span><span class="p">;</span>
+<a name="l-94"></a>   <span class="n">bsg_mux_one_hot</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="n">muxB</span>
+<a name="l-95"></a>          <span class="p">(</span> <span class="p">.</span><span class="n">data_i</span><span class="p">(</span> <span class="p">{</span><span class="n">opC</span><span class="p">,</span> <span class="n">add_out</span><span class="p">,</span> <span class="p">{</span><span class="n">add_out</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="p">]}}</span> <span class="p">)</span>
+<a name="l-96"></a>           <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span>  <span class="n">opB_mux</span> <span class="p">)</span>
+<a name="l-97"></a>           <span class="p">,.</span><span class="n">sel_one_hot_i</span><span class="p">(</span><span class="n">opB_sel</span><span class="p">)</span>
+<a name="l-98"></a>     <span class="p">);</span>
+<a name="l-99"></a>
+<a name="l-100"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>   <span class="n">opC_sel</span><span class="p">;</span>
+<a name="l-101"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opC_mux</span><span class="p">;</span>
+<a name="l-102"></a>   <span class="n">bsg_mux_one_hot</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="n">muxC</span>
+<a name="l-103"></a>          <span class="p">(</span> <span class="p">.</span><span class="n">data_i</span><span class="p">(</span> <span class="p">{{</span><span class="n">dividend_msb</span><span class="p">,</span> <span class="n">dividend_r</span><span class="p">},</span><span class="n">add_out</span><span class="p">,</span> <span class="p">{</span><span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="o">~</span><span class="n">add_out</span><span class="p">[</span><span class="n">width_p</span><span class="p">]}}</span> <span class="p">)</span>
+<a name="l-104"></a>           <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span>  <span class="n">opC_mux</span> <span class="p">)</span>
+<a name="l-105"></a>           <span class="p">,.</span><span class="n">sel_one_hot_i</span><span class="p">(</span><span class="n">opC_sel</span><span class="p">)</span>
+<a name="l-106"></a>     <span class="p">);</span>
+<a name="l-107"></a>
+<a name="l-108"></a>   <span class="kt">wire</span> <span class="n">opA_ld</span><span class="p">;</span>
+<a name="l-109"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">opA_reg</span>
+<a name="l-110"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">opA_mux</span><span class="p">)</span>
+<a name="l-111"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">opA</span>    <span class="p">)</span>
+<a name="l-112"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">opA_ld</span> <span class="p">)</span>
+<a name="l-113"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-114"></a>       <span class="p">);</span>
+<a name="l-115"></a> 
+<a name="l-116"></a>   <span class="kt">wire</span>         <span class="n">opB_ld</span><span class="p">;</span>
+<a name="l-117"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">opB</span><span class="p">;</span>
+<a name="l-118"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">opB_reg</span>
+<a name="l-119"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">opB_mux</span><span class="p">)</span>
+<a name="l-120"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">opB</span>    <span class="p">)</span>
+<a name="l-121"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">opB_ld</span> <span class="p">)</span>
+<a name="l-122"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-123"></a>       <span class="p">);</span>
+<a name="l-124"></a>
+<a name="l-125"></a>   <span class="kt">wire</span> <span class="n">opC_ld</span><span class="p">;</span>
+<a name="l-126"></a>   <span class="n">bsg_dff_en</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">opC_reg</span>
+<a name="l-127"></a>       <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">opC_mux</span><span class="p">)</span>
+<a name="l-128"></a>       <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">opC</span>    <span class="p">)</span>
+<a name="l-129"></a>       <span class="p">,.</span><span class="n">en_i</span>   <span class="p">(</span><span class="n">opC_ld</span> <span class="p">)</span>
+<a name="l-130"></a>       <span class="p">,.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-131"></a>       <span class="p">);</span>
+<a name="l-132"></a>
+<a name="l-133"></a>  <span class="kt">wire</span>        <span class="n">opA_inv</span><span class="p">;</span>
+<a name="l-134"></a>  <span class="kt">wire</span>        <span class="n">opB_inv</span><span class="p">;</span>
+<a name="l-135"></a>  <span class="kt">wire</span>        <span class="n">opA_clr_l</span><span class="p">;</span>
+<a name="l-136"></a>  <span class="kt">wire</span>        <span class="n">opB_clr_l</span><span class="p">;</span>
 <a name="l-137"></a>
-<a name="l-138"></a>  <span class="kt">wire</span>        <span class="n">opB_inv</span><span class="p">;</span>
-<a name="l-139"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opB_inv_buf</span><span class="p">;</span>
-<a name="l-140"></a>  <span class="n">bsg_buf_ctrl</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span> <span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">buf_opB_inv</span><span class="p">(</span> <span class="p">.</span><span class="n">i</span><span class="p">(</span><span class="n">opB_inv</span><span class="p">),</span> <span class="p">.</span><span class="n">o</span><span class="p">(</span><span class="n">opB_inv_buf</span><span class="p">))</span> <span class="p">;</span>
+<a name="l-138"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">add_in0</span><span class="p">;</span>
+<a name="l-139"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">add_in1</span><span class="p">;</span>
+<a name="l-140"></a>
 <a name="l-141"></a>
-<a name="l-142"></a>  <span class="kt">wire</span>        <span class="n">opA_clr_l</span><span class="p">;</span>
-<a name="l-143"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opA_clr_buf</span><span class="p">;</span>
-<a name="l-144"></a>  <span class="n">bsg_buf_ctrl</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span> <span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">buf_opA_clr</span><span class="p">(</span> <span class="p">.</span><span class="n">i</span><span class="p">(</span><span class="o">~</span><span class="n">opA_clr_l</span><span class="p">),</span> <span class="p">.</span><span class="n">o</span><span class="p">(</span><span class="n">opA_clr_buf</span><span class="p">))</span> <span class="p">;</span>
-<a name="l-145"></a>
-<a name="l-146"></a>  <span class="kt">wire</span>        <span class="n">opB_clr_l</span><span class="p">;</span>
-<a name="l-147"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opB_clr_buf</span><span class="p">;</span>
-<a name="l-148"></a>  <span class="n">bsg_buf_ctrl</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span> <span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">buf_opB_clr</span><span class="p">(</span> <span class="p">.</span><span class="n">i</span><span class="p">(</span><span class="o">~</span><span class="n">opB_clr_l</span><span class="p">),</span> <span class="p">.</span><span class="n">o</span><span class="p">(</span><span class="n">opB_clr_buf</span><span class="p">))</span> <span class="p">;</span>
-<a name="l-149"></a>
-<a name="l-150"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opA_xnor</span><span class="p">;</span>
-<a name="l-151"></a>  <span class="n">bsg_xnor</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">xnor_opA</span> 
-<a name="l-152"></a>        <span class="p">(.</span><span class="n">a_i</span><span class="p">(</span><span class="n">opA_inv_buf</span><span class="p">)</span>
-<a name="l-153"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span><span class="n">opA</span><span class="p">)</span>
-<a name="l-154"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">opA_xnor</span><span class="p">)</span>
-<a name="l-155"></a>        <span class="p">);</span> 
-<a name="l-156"></a>
-<a name="l-157"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opB_xnor</span><span class="p">;</span>
-<a name="l-158"></a>  <span class="n">bsg_xnor</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">xnor_opB</span> 
-<a name="l-159"></a>        <span class="p">(.</span><span class="n">a_i</span><span class="p">(</span><span class="n">opB_inv_buf</span><span class="p">)</span>
-<a name="l-160"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span><span class="n">opB</span><span class="p">)</span>
-<a name="l-161"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">opB_xnor</span><span class="p">)</span>
-<a name="l-162"></a>        <span class="p">);</span> 
-<a name="l-163"></a>
-<a name="l-164"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">add_in0</span><span class="p">;</span>
-<a name="l-165"></a>  <span class="n">bsg_nor2</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">nor_opA</span> 
-<a name="l-166"></a>       <span class="p">(</span> <span class="p">.</span><span class="n">a_i</span><span class="p">(</span> <span class="n">opA_xnor</span> <span class="p">)</span>
-<a name="l-167"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span> <span class="n">opA_clr_buf</span><span class="p">)</span>
-<a name="l-168"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">add_in0</span><span class="p">)</span>
+<a name="l-142"></a>  <span class="c1">// this logic is sandwiched between bitstacks -- MBT</span>
+<a name="l-143"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">bitstack_p</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">bs</span>
+<a name="l-144"></a>
+<a name="l-145"></a>    <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opA_xnor</span><span class="p">;</span>
+<a name="l-146"></a>    <span class="n">bsg_xnor</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">xnor_opA</span> 
+<a name="l-147"></a>        <span class="p">(.</span><span class="n">a_i</span><span class="p">({(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">){</span><span class="n">opA_inv</span><span class="p">}})</span>
+<a name="l-148"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span><span class="n">opA</span><span class="p">)</span>
+<a name="l-149"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">opA_xnor</span><span class="p">)</span>
+<a name="l-150"></a>        <span class="p">);</span> 
+<a name="l-151"></a>
+<a name="l-152"></a>    <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">opB_xnor</span><span class="p">;</span>
+<a name="l-153"></a>    <span class="n">bsg_xnor</span><span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">xnor_opB</span> 
+<a name="l-154"></a>        <span class="p">(.</span><span class="n">a_i</span><span class="p">({(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">){</span><span class="n">opB_inv</span><span class="p">}})</span>
+<a name="l-155"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span><span class="n">opB</span><span class="p">)</span>
+<a name="l-156"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">opB_xnor</span><span class="p">)</span>
+<a name="l-157"></a>        <span class="p">);</span> 
+<a name="l-158"></a>
+<a name="l-159"></a>    <span class="n">bsg_nor2</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">nor_opA</span> 
+<a name="l-160"></a>       <span class="p">(</span> <span class="p">.</span><span class="n">a_i</span><span class="p">(</span> <span class="n">opA_xnor</span> <span class="p">)</span>
+<a name="l-161"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">({(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">){</span><span class="o">~</span><span class="n">opA_clr_l</span><span class="p">}})</span>
+<a name="l-162"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">add_in0</span><span class="p">)</span>
+<a name="l-163"></a>        <span class="p">);</span>
+<a name="l-164"></a>
+<a name="l-165"></a>    <span class="n">bsg_nor2</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">nor_opB</span> 
+<a name="l-166"></a>       <span class="p">(</span> <span class="p">.</span><span class="n">a_i</span><span class="p">(</span> <span class="n">opB_xnor</span> <span class="p">)</span>
+<a name="l-167"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span> <span class="p">{(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">){</span><span class="o">~</span><span class="n">opB_clr_l</span><span class="p">}})</span>
+<a name="l-168"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">add_in1</span><span class="p">)</span>
 <a name="l-169"></a>        <span class="p">);</span>
 <a name="l-170"></a>
-<a name="l-171"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">add_in1</span><span class="p">;</span>
-<a name="l-172"></a>  <span class="n">bsg_nor2</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">nor_opB</span> 
-<a name="l-173"></a>       <span class="p">(</span> <span class="p">.</span><span class="n">a_i</span><span class="p">(</span> <span class="n">opB_xnor</span> <span class="p">)</span>
-<a name="l-174"></a>        <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span> <span class="n">opB_clr_buf</span><span class="p">)</span>
-<a name="l-175"></a>        <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">add_in1</span><span class="p">)</span>
-<a name="l-176"></a>        <span class="p">);</span>
-<a name="l-177"></a>
-<a name="l-178"></a>  <span class="kt">wire</span> <span class="n">adder_cin</span><span class="p">;</span>
-<a name="l-179"></a>  <span class="n">bsg_adder_cin</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">adder</span>
-<a name="l-180"></a>     <span class="p">(.</span><span class="n">a_i</span>  <span class="p">(</span><span class="n">add_in0</span><span class="p">)</span>
-<a name="l-181"></a>     <span class="p">,.</span><span class="n">b_i</span>  <span class="p">(</span><span class="n">add_in1</span><span class="p">)</span>
-<a name="l-182"></a>     <span class="p">,.</span><span class="n">cin_i</span><span class="p">(</span><span class="n">adder_cin</span><span class="p">)</span>
-<a name="l-183"></a>     <span class="p">,.</span><span class="n">o</span>    <span class="p">(</span><span class="n">add_out</span><span class="p">)</span>
-<a name="l-184"></a>     <span class="p">);</span>
-<a name="l-185"></a>
-<a name="l-186"></a>  <span class="n">bsg_idiv_iterative_controller</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span> <span class="n">control</span> 
-<a name="l-187"></a>     <span class="p">(</span> <span class="p">.</span><span class="n">reset_i</span>                  <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-188"></a>      <span class="p">,.</span><span class="n">clk_i</span>                    <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-189"></a>
-<a name="l-190"></a>      <span class="p">,.</span><span class="n">v_i</span>                      <span class="p">(</span><span class="n">v_i</span><span class="p">)</span>
-<a name="l-191"></a>      <span class="p">,.</span><span class="n">ready_o</span>                  <span class="p">(</span><span class="n">ready_o</span><span class="p">)</span>
-<a name="l-192"></a>
-<a name="l-193"></a>      <span class="p">,.</span><span class="n">zero_divisor_i</span>           <span class="p">(</span><span class="n">zero_divisor_li</span><span class="p">)</span>
-<a name="l-194"></a>      <span class="p">,.</span><span class="n">signed_div_r_i</span>           <span class="p">(</span><span class="n">signed_div_r</span><span class="p">)</span>
-<a name="l-195"></a>      <span class="p">,.</span><span class="n">adder_result_is_neg_i</span>    <span class="p">(</span><span class="n">add_out</span><span class="p">[</span><span class="n">width_p</span><span class="p">])</span>
-<a name="l-196"></a>      <span class="p">,.</span><span class="n">opA_is_neg_i</span>             <span class="p">(</span><span class="n">opA</span><span class="p">[</span><span class="n">width_p</span><span class="p">])</span>
-<a name="l-197"></a>      <span class="p">,.</span><span class="n">opC_is_neg_i</span>             <span class="p">(</span><span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="p">])</span>
-<a name="l-198"></a>
-<a name="l-199"></a>      <span class="p">,.</span><span class="n">opA_sel_o</span>                <span class="p">(</span><span class="n">opA_sel</span><span class="p">)</span>
-<a name="l-200"></a>      <span class="p">,.</span><span class="n">opA_ld_o</span>                 <span class="p">(</span><span class="n">opA_ld</span><span class="p">)</span>
-<a name="l-201"></a>      <span class="p">,.</span><span class="n">opA_inv_o</span>                <span class="p">(</span><span class="n">opA_inv</span><span class="p">)</span>
-<a name="l-202"></a>      <span class="p">,.</span><span class="n">opA_clr_l_o</span>              <span class="p">(</span><span class="n">opA_clr_l</span><span class="p">)</span>
-<a name="l-203"></a>
-<a name="l-204"></a>      <span class="p">,.</span><span class="n">opB_sel_o</span>                <span class="p">(</span><span class="n">opB_sel</span><span class="p">)</span>
-<a name="l-205"></a>      <span class="p">,.</span><span class="n">opB_ld_o</span>                 <span class="p">(</span><span class="n">opB_ld</span><span class="p">)</span>
-<a name="l-206"></a>      <span class="p">,.</span><span class="n">opB_inv_o</span>                <span class="p">(</span><span class="n">opB_inv</span><span class="p">)</span>
-<a name="l-207"></a>      <span class="p">,.</span><span class="n">opB_clr_l_o</span>              <span class="p">(</span><span class="n">opB_clr_l</span><span class="p">)</span>
-<a name="l-208"></a>
-<a name="l-209"></a>      <span class="p">,.</span><span class="n">opC_sel_o</span>                <span class="p">(</span><span class="n">opC_sel</span><span class="p">)</span>
-<a name="l-210"></a>      <span class="p">,.</span><span class="n">opC_ld_o</span>                 <span class="p">(</span><span class="n">opC_ld</span><span class="p">)</span>
-<a name="l-211"></a>
-<a name="l-212"></a>      <span class="p">,.</span><span class="n">latch_inputs_o</span>           <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
-<a name="l-213"></a>      <span class="p">,.</span><span class="n">adder_cin_o</span>              <span class="p">(</span><span class="n">adder_cin</span><span class="p">)</span>
-<a name="l-214"></a>
-<a name="l-215"></a>      <span class="p">,.</span><span class="n">v_o</span><span class="p">(</span><span class="n">v_o</span><span class="p">)</span>
-<a name="l-216"></a>      <span class="p">,.</span><span class="n">yumi_i</span><span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
-<a name="l-217"></a>     <span class="p">);</span>
-<a name="l-218"></a><span class="k">endmodule</span> <span class="c1">// divide</span>
+<a name="l-171"></a>  <span class="k">end</span>
+<a name="l-172"></a>  <span class="k">else</span> <span class="k">begin</span><span class="o">:</span> <span class="n">nbs</span>
+<a name="l-173"></a>
+<a name="l-174"></a>    <span class="k">assign</span> <span class="n">add_in0</span> <span class="o">=</span> <span class="p">(</span><span class="n">opA</span> <span class="o">^</span> <span class="p">{</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">{</span><span class="n">opA_inv</span><span class="p">}})</span> <span class="o">&amp;</span> <span class="p">{</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">{</span><span class="n">opA_clr_l</span><span class="p">}};</span>
+<a name="l-175"></a>    <span class="k">assign</span> <span class="n">add_in1</span> <span class="o">=</span> <span class="p">(</span><span class="n">opB</span> <span class="o">^</span> <span class="p">{</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">{</span><span class="n">opB_inv</span><span class="p">}})</span> <span class="o">&amp;</span> <span class="p">{</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">{</span><span class="n">opB_clr_l</span><span class="p">}};</span>
+<a name="l-176"></a>
+<a name="l-177"></a>  <span class="k">end</span>
+<a name="l-178"></a>
+<a name="l-179"></a>
+<a name="l-180"></a>  <span class="kt">wire</span> <span class="n">adder_cin</span><span class="p">;</span>
+<a name="l-181"></a>  <span class="n">bsg_adder_cin</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">adder</span>
+<a name="l-182"></a>   <span class="p">(.</span><span class="n">a_i</span>  <span class="p">(</span><span class="n">add_in0</span><span class="p">)</span>
+<a name="l-183"></a>   <span class="p">,.</span><span class="n">b_i</span>  <span class="p">(</span><span class="n">add_in1</span><span class="p">)</span>
+<a name="l-184"></a>   <span class="p">,.</span><span class="n">cin_i</span><span class="p">(</span><span class="n">adder_cin</span><span class="p">)</span>
+<a name="l-185"></a>   <span class="p">,.</span><span class="n">o</span>    <span class="p">(</span><span class="n">add_out</span><span class="p">)</span>
+<a name="l-186"></a>   <span class="p">);</span>
+<a name="l-187"></a>
+<a name="l-188"></a>  <span class="n">bsg_idiv_iterative_controller</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span> <span class="n">control</span> 
+<a name="l-189"></a>     <span class="p">(</span> <span class="p">.</span><span class="n">reset_i</span>                  <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-190"></a>      <span class="p">,.</span><span class="n">clk_i</span>                    <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-191"></a>
+<a name="l-192"></a>      <span class="p">,.</span><span class="n">v_i</span>                      <span class="p">(</span><span class="n">v_i</span><span class="p">)</span>
+<a name="l-193"></a>      <span class="p">,.</span><span class="n">ready_o</span>                  <span class="p">(</span><span class="n">ready_o</span><span class="p">)</span>
+<a name="l-194"></a>
+<a name="l-195"></a>      <span class="p">,.</span><span class="n">zero_divisor_i</span>           <span class="p">(</span><span class="n">zero_divisor_li</span><span class="p">)</span>
+<a name="l-196"></a>      <span class="p">,.</span><span class="n">signed_div_r_i</span>           <span class="p">(</span><span class="n">signed_div_r</span><span class="p">)</span>
+<a name="l-197"></a>      <span class="p">,.</span><span class="n">adder_result_is_neg_i</span>    <span class="p">(</span><span class="n">add_out</span><span class="p">[</span><span class="n">width_p</span><span class="p">])</span>
+<a name="l-198"></a>      <span class="p">,.</span><span class="n">opA_is_neg_i</span>             <span class="p">(</span><span class="n">opA</span><span class="p">[</span><span class="n">width_p</span><span class="p">])</span>
+<a name="l-199"></a>      <span class="p">,.</span><span class="n">opC_is_neg_i</span>             <span class="p">(</span><span class="n">opC</span><span class="p">[</span><span class="n">width_p</span><span class="p">])</span>
+<a name="l-200"></a>
+<a name="l-201"></a>      <span class="p">,.</span><span class="n">opA_sel_o</span>                <span class="p">(</span><span class="n">opA_sel</span><span class="p">)</span>
+<a name="l-202"></a>      <span class="p">,.</span><span class="n">opA_ld_o</span>                 <span class="p">(</span><span class="n">opA_ld</span><span class="p">)</span>
+<a name="l-203"></a>      <span class="p">,.</span><span class="n">opA_inv_o</span>                <span class="p">(</span><span class="n">opA_inv</span><span class="p">)</span>
+<a name="l-204"></a>      <span class="p">,.</span><span class="n">opA_clr_l_o</span>              <span class="p">(</span><span class="n">opA_clr_l</span><span class="p">)</span>
+<a name="l-205"></a>
+<a name="l-206"></a>      <span class="p">,.</span><span class="n">opB_sel_o</span>                <span class="p">(</span><span class="n">opB_sel</span><span class="p">)</span>
+<a name="l-207"></a>      <span class="p">,.</span><span class="n">opB_ld_o</span>                 <span class="p">(</span><span class="n">opB_ld</span><span class="p">)</span>
+<a name="l-208"></a>      <span class="p">,.</span><span class="n">opB_inv_o</span>                <span class="p">(</span><span class="n">opB_inv</span><span class="p">)</span>
+<a name="l-209"></a>      <span class="p">,.</span><span class="n">opB_clr_l_o</span>              <span class="p">(</span><span class="n">opB_clr_l</span><span class="p">)</span>
+<a name="l-210"></a>
+<a name="l-211"></a>      <span class="p">,.</span><span class="n">opC_sel_o</span>                <span class="p">(</span><span class="n">opC_sel</span><span class="p">)</span>
+<a name="l-212"></a>      <span class="p">,.</span><span class="n">opC_ld_o</span>                 <span class="p">(</span><span class="n">opC_ld</span><span class="p">)</span>
+<a name="l-213"></a>
+<a name="l-214"></a>      <span class="p">,.</span><span class="n">latch_inputs_o</span>           <span class="p">(</span><span class="n">latch_inputs</span><span class="p">)</span>
+<a name="l-215"></a>      <span class="p">,.</span><span class="n">adder_cin_o</span>              <span class="p">(</span><span class="n">adder_cin</span><span class="p">)</span>
+<a name="l-216"></a>
+<a name="l-217"></a>      <span class="p">,.</span><span class="n">v_o</span><span class="p">(</span><span class="n">v_o</span><span class="p">)</span>
+<a name="l-218"></a>      <span class="p">,.</span><span class="n">yumi_i</span><span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
+<a name="l-219"></a>     <span class="p">);</span>
+<a name="l-220"></a><span class="k">endmodule</span> <span class="c1">// divide</span>
 </pre></div>
 </td></tr></table>
   </body>

@@ -191,7 +191,9 @@
 <a href="#l-183">183</a>
 <a href="#l-184">184</a>
 <a href="#l-185">185</a>
-<a href="#l-186">186</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
+<a href="#l-186">186</a>
+<a href="#l-187">187</a>
+<a href="#l-188">188</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
 <a name="l-2"></a><span class="cm"> *  bsg_serial_in_parallel_out_full.v</span>
 <a name="l-3"></a><span class="cm"> *</span>
 <a name="l-4"></a><span class="cm"> *  This is a simpler version of bsg_serial_in_parallel_out.</span>
@@ -206,177 +208,179 @@
 <a name="l-13"></a><span class="cm"> *</span>
 <a name="l-14"></a><span class="cm"> */</span>
 <a name="l-15"></a>
-<a name="l-16"></a><span class="k">module</span> <span class="n">bsg_serial_in_parallel_out_full</span>
+<a name="l-16"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
 <a name="l-17"></a>
-<a name="l-18"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>                 <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-19"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">els_p</span>                   <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-20"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">hi_to_lo_p</span>              <span class="o">=</span> <span class="mi">0</span>
-<a name="l-21"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">use_minimal_buffering_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-22"></a>  <span class="p">)</span>
-<a name="l-23"></a>  
-<a name="l-24"></a>  <span class="p">(</span><span class="k">input</span> <span class="n">clk_i</span>
-<a name="l-25"></a>  <span class="p">,</span><span class="k">input</span> <span class="n">reset_i</span>
-<a name="l-26"></a>    
-<a name="l-27"></a>  <span class="p">,</span><span class="k">input</span>                                 <span class="n">v_i</span>
-<a name="l-28"></a>  <span class="p">,</span><span class="k">output</span> <span class="kt">logic</span>                          <span class="n">ready_o</span>
-<a name="l-29"></a>  <span class="p">,</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                   <span class="n">data_i</span>
-<a name="l-30"></a>
-<a name="l-31"></a>  <span class="p">,</span><span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
-<a name="l-32"></a>  <span class="p">,</span><span class="k">output</span> <span class="kt">logic</span>                          <span class="n">v_o</span>
-<a name="l-33"></a>  <span class="p">,</span><span class="k">input</span>                                 <span class="n">yumi_i</span>
-<a name="l-34"></a>  <span class="p">);</span>
-<a name="l-35"></a>  
-<a name="l-36"></a>  <span class="k">localparam</span> <span class="n">lg_els_lp</span> <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">els_p</span><span class="p">);</span>
-<a name="l-37"></a>   
-<a name="l-38"></a>  <span class="c1">// If send hi_to_lo, reverse the output data array</span>
-<a name="l-39"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_lo</span><span class="p">;</span>
-<a name="l-40"></a>
-<a name="l-41"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">hi_to_lo_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<a name="l-42"></a>    <span class="k">begin</span><span class="o">:</span> <span class="n">lo2hi</span>
-<a name="l-43"></a>      <span class="k">assign</span> <span class="n">data_o</span> <span class="o">=</span> <span class="n">data_lo</span><span class="p">;</span>
-<a name="l-44"></a>    <span class="k">end</span>
-<a name="l-45"></a>  <span class="k">else</span>
-<a name="l-46"></a>    <span class="k">begin</span><span class="o">:</span> <span class="n">hi2lo</span>
-<a name="l-47"></a>      <span class="n">bsg_array_reverse</span>
-<a name="l-48"></a>     <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-49"></a>      <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
-<a name="l-50"></a>      <span class="p">)</span> <span class="n">bar</span>
-<a name="l-51"></a>      <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">data_lo</span><span class="p">)</span>
-<a name="l-52"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">data_o</span><span class="p">)</span>
-<a name="l-53"></a>      <span class="p">);</span>
-<a name="l-54"></a>    <span class="k">end</span>
-<a name="l-55"></a>    
-<a name="l-56"></a>
-<a name="l-57"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_valid_li</span><span class="p">,</span> <span class="n">fifo_ready_lo</span><span class="p">;</span>
-<a name="l-58"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_valid_lo</span><span class="p">;</span>
-<a name="l-59"></a>
-<a name="l-60"></a>  <span class="c1">// Full array is valid when all fifos have valid data</span>
-<a name="l-61"></a>  <span class="k">assign</span> <span class="n">v_o</span> <span class="o">=</span> <span class="o">&amp;</span> <span class="n">fifo_valid_lo</span><span class="p">;</span>
-<a name="l-62"></a>  
-<a name="l-63"></a>  <span class="c1">// Push received data into fifos in round-robin way</span>
-<a name="l-64"></a>  <span class="n">bsg_round_robin_1_to_n</span> 
-<a name="l-65"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-66"></a>  <span class="p">,.</span><span class="n">num_out_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
-<a name="l-67"></a>  <span class="p">)</span> <span class="n">brr</span>
-<a name="l-68"></a>  <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-69"></a>  <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-70"></a>  <span class="p">,.</span><span class="n">valid_i</span><span class="p">(</span><span class="n">v_i</span><span class="p">)</span>
-<a name="l-71"></a>  <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">ready_o</span><span class="p">)</span>
-<a name="l-72"></a>  <span class="p">,.</span><span class="n">valid_o</span><span class="p">(</span><span class="n">fifo_valid_li</span><span class="p">)</span>
-<a name="l-73"></a>  <span class="p">,.</span><span class="n">ready_i</span><span class="p">(</span><span class="n">fifo_ready_lo</span><span class="p">)</span>
-<a name="l-74"></a>  <span class="p">);</span>
-<a name="l-75"></a>
-<a name="l-76"></a>  <span class="c1">// Data fifos</span>
-<a name="l-77"></a>  <span class="k">genvar</span> <span class="n">i</span><span class="p">;</span>
-<a name="l-78"></a>  
-<a name="l-79"></a>  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">els_p</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> 
-<a name="l-80"></a>  <span class="k">begin</span><span class="o">:</span> <span class="n">fifos</span>
-<a name="l-81"></a>    <span class="c1">// Lowest word fifo selection depends on use_minimal_buffering_p</span>
-<a name="l-82"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">use_minimal_buffering_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<a name="l-83"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">twofifo</span>
-<a name="l-84"></a>        <span class="c1">// Use two element fifo to avoid bubble</span>
-<a name="l-85"></a>        <span class="n">bsg_two_fifo</span>
-<a name="l-86"></a>        <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-87"></a>        <span class="p">)</span> <span class="n">fifo</span>
-<a name="l-88"></a>        <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-89"></a>        <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-90"></a>
-<a name="l-91"></a>        <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo_ready_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-92"></a>        <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
-<a name="l-93"></a>        <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo_valid_li</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-94"></a>
-<a name="l-95"></a>        <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">fifo_valid_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-96"></a>        <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-97"></a>        <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
-<a name="l-98"></a>        <span class="p">);</span>
-<a name="l-99"></a>      <span class="k">end</span>
-<a name="l-100"></a>    <span class="k">else</span>
-<a name="l-101"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">onefifo</span>
-<a name="l-102"></a>        <span class="c1">// Use one element fifo to minimize hardware</span>
-<a name="l-103"></a>        <span class="n">bsg_one_fifo</span>
-<a name="l-104"></a>        <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-105"></a>        <span class="p">)</span> <span class="n">fifo</span>
-<a name="l-106"></a>        <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-107"></a>        <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-108"></a>
-<a name="l-109"></a>        <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo_ready_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-110"></a>        <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
-<a name="l-111"></a>        <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo_valid_li</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-112"></a>
-<a name="l-113"></a>        <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">fifo_valid_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-114"></a>        <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-115"></a>        <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
-<a name="l-116"></a>        <span class="p">);</span>
-<a name="l-117"></a>      <span class="k">end</span>
-<a name="l-118"></a>  <span class="k">end</span>
-<a name="l-119"></a>
-<a name="l-120"></a><span class="k">endmodule</span>
+<a name="l-18"></a><span class="k">module</span> <span class="n">bsg_serial_in_parallel_out_full</span>
+<a name="l-19"></a>
+<a name="l-20"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>                 <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-21"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">els_p</span>                   <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-22"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">hi_to_lo_p</span>              <span class="o">=</span> <span class="mi">0</span>
+<a name="l-23"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">use_minimal_buffering_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-24"></a>  <span class="p">)</span>
+<a name="l-25"></a>  
+<a name="l-26"></a>  <span class="p">(</span><span class="k">input</span> <span class="n">clk_i</span>
+<a name="l-27"></a>  <span class="p">,</span><span class="k">input</span> <span class="n">reset_i</span>
+<a name="l-28"></a>    
+<a name="l-29"></a>  <span class="p">,</span><span class="k">input</span>                                 <span class="n">v_i</span>
+<a name="l-30"></a>  <span class="p">,</span><span class="k">output</span> <span class="kt">logic</span>                          <span class="n">ready_o</span>
+<a name="l-31"></a>  <span class="p">,</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                   <span class="n">data_i</span>
+<a name="l-32"></a>
+<a name="l-33"></a>  <span class="p">,</span><span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
+<a name="l-34"></a>  <span class="p">,</span><span class="k">output</span> <span class="kt">logic</span>                          <span class="n">v_o</span>
+<a name="l-35"></a>  <span class="p">,</span><span class="k">input</span>                                 <span class="n">yumi_i</span>
+<a name="l-36"></a>  <span class="p">);</span>
+<a name="l-37"></a>  
+<a name="l-38"></a>  <span class="k">localparam</span> <span class="n">lg_els_lp</span> <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">els_p</span><span class="p">);</span>
+<a name="l-39"></a>   
+<a name="l-40"></a>  <span class="c1">// If send hi_to_lo, reverse the output data array</span>
+<a name="l-41"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_lo</span><span class="p">;</span>
+<a name="l-42"></a>
+<a name="l-43"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">hi_to_lo_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-44"></a>    <span class="k">begin</span><span class="o">:</span> <span class="n">lo2hi</span>
+<a name="l-45"></a>      <span class="k">assign</span> <span class="n">data_o</span> <span class="o">=</span> <span class="n">data_lo</span><span class="p">;</span>
+<a name="l-46"></a>    <span class="k">end</span>
+<a name="l-47"></a>  <span class="k">else</span>
+<a name="l-48"></a>    <span class="k">begin</span><span class="o">:</span> <span class="n">hi2lo</span>
+<a name="l-49"></a>      <span class="n">bsg_array_reverse</span>
+<a name="l-50"></a>     <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-51"></a>      <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-52"></a>      <span class="p">)</span> <span class="n">bar</span>
+<a name="l-53"></a>      <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">data_lo</span><span class="p">)</span>
+<a name="l-54"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">data_o</span><span class="p">)</span>
+<a name="l-55"></a>      <span class="p">);</span>
+<a name="l-56"></a>    <span class="k">end</span>
+<a name="l-57"></a>    
+<a name="l-58"></a>
+<a name="l-59"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_valid_li</span><span class="p">,</span> <span class="n">fifo_ready_lo</span><span class="p">;</span>
+<a name="l-60"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_valid_lo</span><span class="p">;</span>
+<a name="l-61"></a>
+<a name="l-62"></a>  <span class="c1">// Full array is valid when all fifos have valid data</span>
+<a name="l-63"></a>  <span class="k">assign</span> <span class="n">v_o</span> <span class="o">=</span> <span class="o">&amp;</span> <span class="n">fifo_valid_lo</span><span class="p">;</span>
+<a name="l-64"></a>  
+<a name="l-65"></a>  <span class="c1">// Push received data into fifos in round-robin way</span>
+<a name="l-66"></a>  <span class="n">bsg_round_robin_1_to_n</span> 
+<a name="l-67"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-68"></a>  <span class="p">,.</span><span class="n">num_out_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-69"></a>  <span class="p">)</span> <span class="n">brr</span>
+<a name="l-70"></a>  <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-71"></a>  <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-72"></a>  <span class="p">,.</span><span class="n">valid_i</span><span class="p">(</span><span class="n">v_i</span><span class="p">)</span>
+<a name="l-73"></a>  <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">ready_o</span><span class="p">)</span>
+<a name="l-74"></a>  <span class="p">,.</span><span class="n">valid_o</span><span class="p">(</span><span class="n">fifo_valid_li</span><span class="p">)</span>
+<a name="l-75"></a>  <span class="p">,.</span><span class="n">ready_i</span><span class="p">(</span><span class="n">fifo_ready_lo</span><span class="p">)</span>
+<a name="l-76"></a>  <span class="p">);</span>
+<a name="l-77"></a>
+<a name="l-78"></a>  <span class="c1">// Data fifos</span>
+<a name="l-79"></a>  <span class="k">genvar</span> <span class="n">i</span><span class="p">;</span>
+<a name="l-80"></a>  
+<a name="l-81"></a>  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">els_p</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> 
+<a name="l-82"></a>  <span class="k">begin</span><span class="o">:</span> <span class="n">fifos</span>
+<a name="l-83"></a>    <span class="c1">// Lowest word fifo selection depends on use_minimal_buffering_p</span>
+<a name="l-84"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">use_minimal_buffering_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-85"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">twofifo</span>
+<a name="l-86"></a>        <span class="c1">// Use two element fifo to avoid bubble</span>
+<a name="l-87"></a>        <span class="n">bsg_two_fifo</span>
+<a name="l-88"></a>        <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-89"></a>        <span class="p">)</span> <span class="n">fifo</span>
+<a name="l-90"></a>        <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-91"></a>        <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-92"></a>
+<a name="l-93"></a>        <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo_ready_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-94"></a>        <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
+<a name="l-95"></a>        <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo_valid_li</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-96"></a>
+<a name="l-97"></a>        <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">fifo_valid_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-98"></a>        <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-99"></a>        <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
+<a name="l-100"></a>        <span class="p">);</span>
+<a name="l-101"></a>      <span class="k">end</span>
+<a name="l-102"></a>    <span class="k">else</span>
+<a name="l-103"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">onefifo</span>
+<a name="l-104"></a>        <span class="c1">// Use one element fifo to minimize hardware</span>
+<a name="l-105"></a>        <span class="n">bsg_one_fifo</span>
+<a name="l-106"></a>        <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-107"></a>        <span class="p">)</span> <span class="n">fifo</span>
+<a name="l-108"></a>        <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-109"></a>        <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-110"></a>
+<a name="l-111"></a>        <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo_ready_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-112"></a>        <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
+<a name="l-113"></a>        <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo_valid_li</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-114"></a>
+<a name="l-115"></a>        <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">fifo_valid_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-116"></a>        <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_lo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-117"></a>        <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
+<a name="l-118"></a>        <span class="p">);</span>
+<a name="l-119"></a>      <span class="k">end</span>
+<a name="l-120"></a>  <span class="k">end</span>
 <a name="l-121"></a>
-<a name="l-122"></a><span class="cm">/*</span>
-<a name="l-123"></a><span class="cm">   MBT.  5/6/2019</span>
-<a name="l-124"></a><span class="cm">   </span>
-<a name="l-125"></a><span class="cm">   this version requires no fifo on the bottom, and has a potentially lower cycle time, </span>
-<a name="l-126"></a><span class="cm">   but requires a valid/ready interface on the output, and has a 1-gate delay on the ready_i-&gt;ready_o path.</span>
-<a name="l-127"></a><span class="cm">   </span>
-<a name="l-128"></a><span class="cm">   it has been nominally tested.</span>
+<a name="l-122"></a><span class="k">endmodule</span>
+<a name="l-123"></a>
+<a name="l-124"></a><span class="cm">/*</span>
+<a name="l-125"></a><span class="cm">   MBT.  5/6/2019</span>
+<a name="l-126"></a><span class="cm">   </span>
+<a name="l-127"></a><span class="cm">   this version requires no fifo on the bottom, and has a potentially lower cycle time, </span>
+<a name="l-128"></a><span class="cm">   but requires a valid/ready interface on the output, and has a 1-gate delay on the ready_i-&gt;ready_o path.</span>
 <a name="l-129"></a><span class="cm">   </span>
-<a name="l-130"></a><span class="cm">// zero bubble SIPO</span>
-<a name="l-131"></a><span class="cm">// output pulls out a full width_p words at a time</span>
-<a name="l-132"></a>
-<a name="l-133"></a><span class="cm">module bsg_serial_in_parallel_out_full</span>
-<a name="l-134"></a><span class="cm">  #(parameter width_p=&quot;inv&quot;</span>
-<a name="l-135"></a><span class="cm">    , parameter els_p=&quot;inv&quot;</span>
-<a name="l-136"></a><span class="cm">  )</span>
-<a name="l-137"></a><span class="cm">  (</span>
-<a name="l-138"></a><span class="cm">    input clk_i</span>
-<a name="l-139"></a><span class="cm">    , input reset_i</span>
-<a name="l-140"></a><span class="cm">    </span>
-<a name="l-141"></a><span class="cm">    , input v_i</span>
-<a name="l-142"></a><span class="cm">    , output logic ready_o</span>
-<a name="l-143"></a><span class="cm">    , input [width_p-1:0] data_i</span>
-<a name="l-144"></a>
-<a name="l-145"></a><span class="cm">    , output logic [els_p-1:0][width_p-1:0]  data_o</span>
-<a name="l-146"></a><span class="cm">    , output logic v_o</span>
-<a name="l-147"></a><span class="cm">    , input ready_i</span>
-<a name="l-148"></a><span class="cm">  );</span>
-<a name="l-149"></a><span class="cm">  </span>
-<a name="l-150"></a><span class="cm">  logic [els_p:0] valid_r;</span>
+<a name="l-130"></a><span class="cm">   it has been nominally tested.</span>
+<a name="l-131"></a><span class="cm">   </span>
+<a name="l-132"></a><span class="cm">// zero bubble SIPO</span>
+<a name="l-133"></a><span class="cm">// output pulls out a full width_p words at a time</span>
+<a name="l-134"></a>
+<a name="l-135"></a><span class="cm">module bsg_serial_in_parallel_out_full</span>
+<a name="l-136"></a><span class="cm">  #(parameter width_p=&quot;inv&quot;</span>
+<a name="l-137"></a><span class="cm">    , parameter els_p=&quot;inv&quot;</span>
+<a name="l-138"></a><span class="cm">  )</span>
+<a name="l-139"></a><span class="cm">  (</span>
+<a name="l-140"></a><span class="cm">    input clk_i</span>
+<a name="l-141"></a><span class="cm">    , input reset_i</span>
+<a name="l-142"></a><span class="cm">    </span>
+<a name="l-143"></a><span class="cm">    , input v_i</span>
+<a name="l-144"></a><span class="cm">    , output logic ready_o</span>
+<a name="l-145"></a><span class="cm">    , input [width_p-1:0] data_i</span>
+<a name="l-146"></a>
+<a name="l-147"></a><span class="cm">    , output logic [els_p-1:0][width_p-1:0]  data_o</span>
+<a name="l-148"></a><span class="cm">    , output logic v_o</span>
+<a name="l-149"></a><span class="cm">    , input ready_i</span>
+<a name="l-150"></a><span class="cm">  );</span>
 <a name="l-151"></a><span class="cm">  </span>
-<a name="l-152"></a><span class="cm">  assign v_o = valid_r[els_p];     // means we received all of the words</span>
-<a name="l-153"></a><span class="cm">  assign ready_o = ~v_o | ready_i; // have space, or we are dequeing; (one gate delay in-to-out)</span>
-<a name="l-154"></a><span class="cm">  </span>
-<a name="l-155"></a><span class="cm">  wire sending   = v_o &amp; ready_i;  // we have all the items, and downstream is ready</span>
-<a name="l-156"></a><span class="cm">  wire receiving = v_i &amp; ready_o;  // data is coming in, and we have space</span>
-<a name="l-157"></a><span class="cm">  </span>
-<a name="l-158"></a><span class="cm">  // counts one hot, from 0 to width_p</span>
-<a name="l-159"></a><span class="cm">  // contains one hot pointer to word to write to</span>
-<a name="l-160"></a><span class="cm">  // simultaneous restart and increment are allowed</span>
-<a name="l-161"></a><span class="cm">  </span>
-<a name="l-162"></a><span class="cm">  bsg_counter_clear_up_one_hot #(.max_val_p(els_p)) bcoh</span>
-<a name="l-163"></a><span class="cm">  (.clk_i</span>
-<a name="l-164"></a><span class="cm">   ,.reset_i</span>
-<a name="l-165"></a><span class="cm">   ,.clear_i(sending)</span>
-<a name="l-166"></a><span class="cm">   ,.up_i   (receiving)</span>
-<a name="l-167"></a><span class="cm">   ,.count_r_o(valid_r)</span>
-<a name="l-168"></a><span class="cm">  );</span>
-<a name="l-169"></a><span class="cm">  </span>
-<a name="l-170"></a><span class="cm">  genvar i;</span>
+<a name="l-152"></a><span class="cm">  logic [els_p:0] valid_r;</span>
+<a name="l-153"></a><span class="cm">  </span>
+<a name="l-154"></a><span class="cm">  assign v_o = valid_r[els_p];     // means we received all of the words</span>
+<a name="l-155"></a><span class="cm">  assign ready_o = ~v_o | ready_i; // have space, or we are dequeing; (one gate delay in-to-out)</span>
+<a name="l-156"></a><span class="cm">  </span>
+<a name="l-157"></a><span class="cm">  wire sending   = v_o &amp; ready_i;  // we have all the items, and downstream is ready</span>
+<a name="l-158"></a><span class="cm">  wire receiving = v_i &amp; ready_o;  // data is coming in, and we have space</span>
+<a name="l-159"></a><span class="cm">  </span>
+<a name="l-160"></a><span class="cm">  // counts one hot, from 0 to width_p</span>
+<a name="l-161"></a><span class="cm">  // contains one hot pointer to word to write to</span>
+<a name="l-162"></a><span class="cm">  // simultaneous restart and increment are allowed</span>
+<a name="l-163"></a><span class="cm">  </span>
+<a name="l-164"></a><span class="cm">  bsg_counter_clear_up_one_hot #(.max_val_p(els_p)) bcoh</span>
+<a name="l-165"></a><span class="cm">  (.clk_i</span>
+<a name="l-166"></a><span class="cm">   ,.reset_i</span>
+<a name="l-167"></a><span class="cm">   ,.clear_i(sending)</span>
+<a name="l-168"></a><span class="cm">   ,.up_i   (receiving)</span>
+<a name="l-169"></a><span class="cm">   ,.count_r_o(valid_r)</span>
+<a name="l-170"></a><span class="cm">  );</span>
 <a name="l-171"></a><span class="cm">  </span>
-<a name="l-172"></a><span class="cm">  for (i = 0; i &lt; els_p; i++)</span>
-<a name="l-173"></a><span class="cm">    begin: rof</span>
-<a name="l-174"></a><span class="cm">      wire my_turn = v_i &amp; (valid_r[i] | ((i == 0) &amp; sending));</span>
-<a name="l-175"></a><span class="cm">      bsg_dff_en #(.width_p(width_p), .harden_p(0)) dff</span>
-<a name="l-176"></a><span class="cm">      (.clk_i</span>
-<a name="l-177"></a><span class="cm">       ,.data_i</span>
-<a name="l-178"></a><span class="cm">       ,.en_i   (my_turn)</span>
-<a name="l-179"></a><span class="cm">       ,.data_o (data_o [i])</span>
-<a name="l-180"></a><span class="cm">      );</span>
-<a name="l-181"></a><span class="cm">    end	</span>
-<a name="l-182"></a><span class="cm">  </span>
-<a name="l-183"></a><span class="cm">endmodule</span>
-<a name="l-184"></a>
-<a name="l-185"></a><span class="cm">*/</span>
-<a name="l-186"></a>   
+<a name="l-172"></a><span class="cm">  genvar i;</span>
+<a name="l-173"></a><span class="cm">  </span>
+<a name="l-174"></a><span class="cm">  for (i = 0; i &lt; els_p; i++)</span>
+<a name="l-175"></a><span class="cm">    begin: rof</span>
+<a name="l-176"></a><span class="cm">      wire my_turn = v_i &amp; (valid_r[i] | ((i == 0) &amp; sending));</span>
+<a name="l-177"></a><span class="cm">      bsg_dff_en #(.width_p(width_p), .harden_p(0)) dff</span>
+<a name="l-178"></a><span class="cm">      (.clk_i</span>
+<a name="l-179"></a><span class="cm">       ,.data_i</span>
+<a name="l-180"></a><span class="cm">       ,.en_i   (my_turn)</span>
+<a name="l-181"></a><span class="cm">       ,.data_o (data_o [i])</span>
+<a name="l-182"></a><span class="cm">      );</span>
+<a name="l-183"></a><span class="cm">    end	</span>
+<a name="l-184"></a><span class="cm">  </span>
+<a name="l-185"></a><span class="cm">endmodule</span>
+<a name="l-186"></a>
+<a name="l-187"></a><span class="cm">*/</span>
+<a name="l-188"></a>   
 </pre></div>
 </td></tr></table>
   </body>

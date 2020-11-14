@@ -31,32 +31,36 @@
 <a href="#l-23">23</a>
 <a href="#l-24">24</a>
 <a href="#l-25">25</a>
-<a href="#l-26">26</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// NB: for larger sizes, may make sense to have a benes network implementation option</span>
+<a href="#l-26">26</a>
+<a href="#l-27">27</a>
+<a href="#l-28">28</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// NB: for larger sizes, may make sense to have a benes network implementation option</span>
 <a name="l-2"></a><span class="c1">// since it is assymptotically better than a full crossbar for datapath.</span>
 <a name="l-3"></a>
-<a name="l-4"></a><span class="k">module</span> <span class="n">bsg_crossbar_o_by_i</span> <span class="p">#(</span> <span class="k">parameter</span> <span class="n">i_els_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-5"></a>                             <span class="p">,</span><span class="k">parameter</span> <span class="n">o_els_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-6"></a>                             <span class="p">,</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-7"></a>                            <span class="p">)</span>
-<a name="l-8"></a>  <span class="p">(</span> <span class="k">input</span>  <span class="p">[</span><span class="n">i_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">i</span>
-<a name="l-9"></a>   <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">o_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">i_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">sel_oi_one_hot_i</span>
-<a name="l-10"></a>   <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">o_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
-<a name="l-11"></a>  <span class="p">);</span>
-<a name="l-12"></a>
-<a name="l-13"></a>  <span class="k">genvar</span> <span class="n">lineout</span><span class="p">;</span>
+<a name="l-4"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-5"></a>
+<a name="l-6"></a><span class="k">module</span> <span class="n">bsg_crossbar_o_by_i</span> <span class="p">#(</span> <span class="k">parameter</span> <span class="n">i_els_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-7"></a>                             <span class="p">,</span><span class="k">parameter</span> <span class="n">o_els_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-8"></a>                             <span class="p">,</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-9"></a>                            <span class="p">)</span>
+<a name="l-10"></a>  <span class="p">(</span> <span class="k">input</span>  <span class="p">[</span><span class="n">i_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">i</span>
+<a name="l-11"></a>   <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">o_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">i_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">sel_oi_one_hot_i</span>
+<a name="l-12"></a>   <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">o_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
+<a name="l-13"></a>  <span class="p">);</span>
 <a name="l-14"></a>
-<a name="l-15"></a>  <span class="k">for</span><span class="p">(</span><span class="n">lineout</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">lineout</span><span class="o">&lt;</span><span class="n">o_els_p</span><span class="p">;</span> <span class="n">lineout</span><span class="o">++</span><span class="p">)</span>
-<a name="l-16"></a>  <span class="k">begin</span>
-<a name="l-17"></a>    <span class="n">bsg_mux_one_hot</span> <span class="p">#(</span> <span class="p">.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-18"></a>                      <span class="p">,.</span><span class="n">els_p</span>  <span class="p">(</span><span class="n">i_els_p</span><span class="p">)</span>
-<a name="l-19"></a>                     <span class="p">)</span> <span class="n">mux_one_hot</span>
-<a name="l-20"></a>                     <span class="p">(</span> <span class="p">.</span><span class="n">data_i</span>        <span class="p">(</span><span class="n">i</span><span class="p">)</span>
-<a name="l-21"></a>                      <span class="p">,.</span><span class="n">sel_one_hot_i</span> <span class="p">(</span><span class="n">sel_oi_one_hot_i</span><span class="p">[</span><span class="n">lineout</span><span class="p">])</span>
-<a name="l-22"></a>                      <span class="p">,.</span><span class="n">data_o</span>        <span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="n">lineout</span><span class="p">])</span>
-<a name="l-23"></a>                     <span class="p">);</span>
-<a name="l-24"></a>  <span class="k">end</span>
-<a name="l-25"></a>
-<a name="l-26"></a><span class="k">endmodule</span> <span class="c1">// bsg_crossbar_o_by_i</span>
+<a name="l-15"></a>  <span class="k">genvar</span> <span class="n">lineout</span><span class="p">;</span>
+<a name="l-16"></a>
+<a name="l-17"></a>  <span class="k">for</span><span class="p">(</span><span class="n">lineout</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">lineout</span><span class="o">&lt;</span><span class="n">o_els_p</span><span class="p">;</span> <span class="n">lineout</span><span class="o">++</span><span class="p">)</span>
+<a name="l-18"></a>  <span class="k">begin</span>
+<a name="l-19"></a>    <span class="n">bsg_mux_one_hot</span> <span class="p">#(</span> <span class="p">.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-20"></a>                      <span class="p">,.</span><span class="n">els_p</span>  <span class="p">(</span><span class="n">i_els_p</span><span class="p">)</span>
+<a name="l-21"></a>                     <span class="p">)</span> <span class="n">mux_one_hot</span>
+<a name="l-22"></a>                     <span class="p">(</span> <span class="p">.</span><span class="n">data_i</span>        <span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<a name="l-23"></a>                      <span class="p">,.</span><span class="n">sel_one_hot_i</span> <span class="p">(</span><span class="n">sel_oi_one_hot_i</span><span class="p">[</span><span class="n">lineout</span><span class="p">])</span>
+<a name="l-24"></a>                      <span class="p">,.</span><span class="n">data_o</span>        <span class="p">(</span><span class="n">o</span><span class="p">[</span><span class="n">lineout</span><span class="p">])</span>
+<a name="l-25"></a>                     <span class="p">);</span>
+<a name="l-26"></a>  <span class="k">end</span>
+<a name="l-27"></a>
+<a name="l-28"></a><span class="k">endmodule</span> <span class="c1">// bsg_crossbar_o_by_i</span>
 </pre></div>
 </td></tr></table>
   </body>

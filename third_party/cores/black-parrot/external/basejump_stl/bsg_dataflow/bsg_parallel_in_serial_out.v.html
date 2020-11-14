@@ -215,216 +215,294 @@
 <a href="#l-207">207</a>
 <a href="#l-208">208</a>
 <a href="#l-209">209</a>
-<a href="#l-210">210</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">//</span>
+<a href="#l-210">210</a>
+<a href="#l-211">211</a>
+<a href="#l-212">212</a>
+<a href="#l-213">213</a>
+<a href="#l-214">214</a>
+<a href="#l-215">215</a>
+<a href="#l-216">216</a>
+<a href="#l-217">217</a>
+<a href="#l-218">218</a>
+<a href="#l-219">219</a>
+<a href="#l-220">220</a>
+<a href="#l-221">221</a>
+<a href="#l-222">222</a>
+<a href="#l-223">223</a>
+<a href="#l-224">224</a>
+<a href="#l-225">225</a>
+<a href="#l-226">226</a>
+<a href="#l-227">227</a>
+<a href="#l-228">228</a>
+<a href="#l-229">229</a>
+<a href="#l-230">230</a>
+<a href="#l-231">231</a>
+<a href="#l-232">232</a>
+<a href="#l-233">233</a>
+<a href="#l-234">234</a>
+<a href="#l-235">235</a>
+<a href="#l-236">236</a>
+<a href="#l-237">237</a>
+<a href="#l-238">238</a>
+<a href="#l-239">239</a>
+<a href="#l-240">240</a>
+<a href="#l-241">241</a>
+<a href="#l-242">242</a>
+<a href="#l-243">243</a>
+<a href="#l-244">244</a>
+<a href="#l-245">245</a>
+<a href="#l-246">246</a>
+<a href="#l-247">247</a>
+<a href="#l-248">248</a>
+<a href="#l-249">249</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">//</span>
 <a name="l-2"></a><span class="c1">// This data structure takes in a multi-word data and serializes</span>
 <a name="l-3"></a><span class="c1">// it to a single word output.</span>
 <a name="l-4"></a><span class="c1">//</span>
-<a name="l-5"></a><span class="c1">// The input channel handshake is a ready-then-valid interface</span>
+<a name="l-5"></a><span class="c1">// The input channel handshake is a ready-and-valid interface</span>
 <a name="l-6"></a><span class="c1">// and the output channel handshake is a valid-then-yumi</span>
 <a name="l-7"></a><span class="c1">// interface. This makes both channels &quot;helpful&quot; style</span>
 <a name="l-8"></a><span class="c1">// handshakes.</span>
 <a name="l-9"></a><span class="c1">//</span>
-<a name="l-10"></a><span class="c1">// FIXME: this module purports to be doubly helpful</span>
-<a name="l-11"></a><span class="c1">// but it waits for the output yumi signal to be asserted</span>
-<a name="l-12"></a><span class="c1">// before asserting the input ready signal, creating a dependence</span>
-<a name="l-13"></a><span class="c1">// from output to input. This avoids a bubble between successive parallel words. </span>
-<a name="l-14"></a><span class="c1">// but is a little distasteful. Logically, it is helpful on both ends,</span>
-<a name="l-15"></a><span class="c1">// since for each interface, it does not require info ahead of time.</span>
-<a name="l-16"></a><span class="c1">// But timing wise, its input helpfulness is a late helpfulness.</span>
-<a name="l-17"></a><span class="c1">//</span>
-<a name="l-18"></a><span class="c1">// There are three design choices for this module:</span>
-<a name="l-19"></a><span class="c1">// 1) zero bubbles, dependence from output to input, 1 el buffering</span>
-<a name="l-20"></a><span class="c1">// 2) one bubble, no dependence, 1 element buffer</span>
-<a name="l-21"></a><span class="c1">// 3) zero bubbles, no dependence, 2 element buffer</span>
-<a name="l-22"></a><span class="c1">//</span>
-<a name="l-23"></a><span class="c1">// a potentially better design would be to eliminate the register</span>
-<a name="l-24"></a><span class="c1">// and make that something the user can specify outside the module.</span>
-<a name="l-25"></a><span class="c1">//</span>
-<a name="l-26"></a><span class="c1">// that version would be helpful on output and demanding on input.</span>
-<a name="l-27"></a>
-<a name="l-28"></a><span class="k">module</span> <span class="n">bsg_parallel_in_serial_out</span> <span class="p">#(</span> <span class="k">parameter</span> <span class="n">width_p</span>    <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-29"></a>                                   <span class="p">,</span> <span class="k">parameter</span> <span class="n">els_p</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-30"></a>                                   <span class="p">,</span> <span class="k">parameter</span> <span class="n">hi_to_lo_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-31"></a>                                   <span class="p">)</span>
-<a name="l-32"></a>    <span class="p">(</span> <span class="k">input</span> <span class="n">clk_i</span>
-<a name="l-33"></a>    <span class="p">,</span> <span class="k">input</span> <span class="n">reset_i</span>
+<a name="l-10"></a><span class="c1">// There are two options for this module:</span>
+<a name="l-11"></a><span class="c1">//     1) zero bubbles, no dependence, 2 element buffer for first data word</span>
+<a name="l-12"></a><span class="c1">//     2) one bubble, no dependence, 1 element buffer for first data word</span>
+<a name="l-13"></a><span class="c1">// By default option 1 is used, option 2 can be enabled by setting</span>
+<a name="l-14"></a><span class="c1">// use_minimal_buffering_p = 1</span>
+<a name="l-15"></a><span class="c1">//</span>
+<a name="l-16"></a>
+<a name="l-17"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-18"></a>
+<a name="l-19"></a><span class="k">module</span> <span class="n">bsg_parallel_in_serial_out</span> 
+<a name="l-20"></a>
+<a name="l-21"></a>   <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>                 <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-22"></a>    <span class="p">,</span><span class="k">parameter</span> <span class="n">els_p</span>                   <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-23"></a>    <span class="p">,</span><span class="k">parameter</span> <span class="n">hi_to_lo_p</span>              <span class="o">=</span> <span class="mi">0</span> <span class="c1">// sending from high bits to low bits</span>
+<a name="l-24"></a>    <span class="p">,</span><span class="k">parameter</span> <span class="n">use_minimal_buffering_p</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">// using single element buffer</span>
+<a name="l-25"></a>    <span class="p">)</span>
+<a name="l-26"></a>
+<a name="l-27"></a>    <span class="p">(</span><span class="k">input</span>                           <span class="n">clk_i</span>
+<a name="l-28"></a>    <span class="p">,</span><span class="k">input</span>                           <span class="n">reset_i</span>
+<a name="l-29"></a>
+<a name="l-30"></a>    <span class="c1">// Data Input Channel (Ready and Valid)</span>
+<a name="l-31"></a>    <span class="p">,</span><span class="k">input</span>                           <span class="n">valid_i</span>
+<a name="l-32"></a>    <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
+<a name="l-33"></a>    <span class="p">,</span><span class="k">output</span>                          <span class="n">ready_and_o</span>
 <a name="l-34"></a>
-<a name="l-35"></a>    <span class="c1">// Data Input Channel (Ready then Valid)</span>
-<a name="l-36"></a>    <span class="p">,</span> <span class="k">input</span>                           <span class="n">valid_i</span>
-<a name="l-37"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
-<a name="l-38"></a>    <span class="p">,</span> <span class="k">output</span>                          <span class="n">ready_o</span>
-<a name="l-39"></a>
-<a name="l-40"></a>    <span class="c1">// Data Output Channel (Valid then Yumi)</span>
-<a name="l-41"></a>    <span class="p">,</span> <span class="k">output</span>               <span class="n">valid_o</span>
-<a name="l-42"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
-<a name="l-43"></a>    <span class="p">,</span> <span class="k">input</span>                <span class="n">yumi_i</span>
-<a name="l-44"></a>    <span class="p">);</span>
-<a name="l-45"></a>  
-<a name="l-46"></a>  
-<a name="l-47"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span><span class="n">eRX</span><span class="p">,</span> <span class="n">eTX</span><span class="p">}</span> <span class="n">state_e</span><span class="p">;</span>
-<a name="l-48"></a>  
-<a name="l-49"></a>  <span class="c1">// When els_p equals to 1, use fifo to minimize hardware.</span>
-<a name="l-50"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">els_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> 
-<a name="l-51"></a>  <span class="k">begin</span><span class="o">:</span> <span class="n">fifo</span>
-<a name="l-52"></a>    <span class="n">bsg_two_fifo</span>
-<a name="l-53"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-54"></a>    <span class="p">)</span> <span class="n">two_fifo</span>
-<a name="l-55"></a>    <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-56"></a>    <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-57"></a>    <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">ready_o</span><span class="p">)</span>
-<a name="l-58"></a>    <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
-<a name="l-59"></a>    <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">valid_i</span><span class="p">)</span>
-<a name="l-60"></a>    <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">valid_o</span><span class="p">)</span>
-<a name="l-61"></a>    <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_o</span><span class="p">)</span>
-<a name="l-62"></a>    <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">yumi_i</span><span class="p">)</span>
-<a name="l-63"></a>    <span class="p">);</span>
-<a name="l-64"></a>  <span class="k">end</span> 
-<a name="l-65"></a>  <span class="c1">// When els_p is larger than 1, use the real PISO.</span>
-<a name="l-66"></a>  <span class="k">else</span> 
-<a name="l-67"></a>  <span class="k">begin</span><span class="o">:</span> <span class="n">piso</span>
-<a name="l-68"></a>
-<a name="l-69"></a>    <span class="c1">// A small statemachine is used to transition from the recieving</span>
-<a name="l-70"></a>    <span class="c1">// state to the transmission state.</span>
-<a name="l-71"></a>
-<a name="l-72"></a>   <span class="k">localparam</span> <span class="n">clog2els_lp</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">els_p</span><span class="p">);</span>
-<a name="l-73"></a>   
-<a name="l-74"></a>    <span class="n">state_e</span>                        <span class="n">state_r</span><span class="p">,</span> <span class="n">state_n</span><span class="p">;</span>
-<a name="l-75"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_r</span><span class="p">;</span>
-<a name="l-76"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">clog2els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">shift_ctr_r</span><span class="p">,</span> <span class="n">shift_ctr_n</span><span class="p">;</span>
-<a name="l-77"></a>    <span class="kt">logic</span>                          <span class="n">done_tx_n</span><span class="p">;</span>
-<a name="l-78"></a>    
-<a name="l-79"></a>
-<a name="l-80"></a>    <span class="cm">/**</span>
-<a name="l-81"></a><span class="cm">     * Done TX Signal</span>
-<a name="l-82"></a><span class="cm">     *</span>
-<a name="l-83"></a><span class="cm">     * The done_tx_n signals that we are done with our current transmission.</span>
-<a name="l-84"></a><span class="cm">     * This occurs when we are in the eTX state, we are sending the last word</span>
-<a name="l-85"></a><span class="cm">     * of data, and the outside world is accepting the data (yumi_i). This</span>
-<a name="l-86"></a><span class="cm">     * signal indicates that we should return to the eRX state or we should</span>
-<a name="l-87"></a><span class="cm">     * accept the next data and continue transmission.</span>
-<a name="l-88"></a><span class="cm">     */</span>
-<a name="l-89"></a>    <span class="k">assign</span> <span class="n">done_tx_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">state_r</span> <span class="o">==</span> <span class="n">eTX</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">shift_ctr_r</span> <span class="o">==</span> <span class="n">clog2els_lp</span> <span class="p">&#39;</span> <span class="p">(</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="n">yumi_i</span><span class="p">;</span>
-<a name="l-90"></a>
-<a name="l-91"></a>
-<a name="l-92"></a>    <span class="cm">/**</span>
-<a name="l-93"></a><span class="cm">     * Ready Out Signal</span>
-<a name="l-94"></a><span class="cm">     *</span>
-<a name="l-95"></a><span class="cm">     * The ready_o signal means that we are ready for new input data. If we</span>
-<a name="l-96"></a><span class="cm">     * are in the eRX state then we are ready by definition. Otherwise, if</span>
-<a name="l-97"></a><span class="cm">     * we are in the eTX state but we are sending the last word and it is</span>
-<a name="l-98"></a><span class="cm">     * being accepted from the outside word, we can accept data on that cycle. </span>
-<a name="l-99"></a><span class="cm">     */</span>
-<a name="l-100"></a>    <span class="k">assign</span> <span class="n">ready_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">state_r</span> <span class="o">==</span> <span class="n">eRX</span><span class="p">)</span> <span class="o">||</span> <span class="n">done_tx_n</span><span class="p">;</span>
+<a name="l-35"></a>    <span class="c1">// Data Output Channel (Valid then Yumi)</span>
+<a name="l-36"></a>    <span class="p">,</span><span class="k">output</span>                          <span class="n">valid_o</span>
+<a name="l-37"></a>    <span class="p">,</span><span class="k">output</span>            <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
+<a name="l-38"></a>    <span class="p">,</span><span class="k">input</span>                           <span class="n">yumi_i</span>
+<a name="l-39"></a>    <span class="p">);</span>
+<a name="l-40"></a>
+<a name="l-41"></a>    <span class="c1">// Reverse the input data array if send from HI to LO</span>
+<a name="l-42"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_li</span><span class="p">;</span>
+<a name="l-43"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">hi_to_lo_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-44"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">lo2hi</span>
+<a name="l-45"></a>        <span class="k">assign</span> <span class="n">data_li</span> <span class="o">=</span> <span class="n">data_i</span><span class="p">;</span>
+<a name="l-46"></a>      <span class="k">end</span>
+<a name="l-47"></a>    <span class="k">else</span>
+<a name="l-48"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">hi2lo</span>
+<a name="l-49"></a>        <span class="n">bsg_array_reverse</span> 
+<a name="l-50"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-51"></a>        <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-52"></a>        <span class="p">)</span> <span class="n">bar</span>
+<a name="l-53"></a>        <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
+<a name="l-54"></a>        <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">data_li</span><span class="p">)</span>
+<a name="l-55"></a>        <span class="p">);</span>
+<a name="l-56"></a>      <span class="k">end</span>
+<a name="l-57"></a>
+<a name="l-58"></a>    <span class="cm">/**</span>
+<a name="l-59"></a><span class="cm">     * Buffering the first input data word</span>
+<a name="l-60"></a><span class="cm">     *</span>
+<a name="l-61"></a><span class="cm">     * By default a two-element fifo is used to eleminate bubbling.</span>
+<a name="l-62"></a><span class="cm">     * One-element fifo is optional for minimal resource utilization.</span>
+<a name="l-63"></a><span class="cm">     */</span>
+<a name="l-64"></a>    <span class="kt">logic</span> <span class="n">fifo0_ready_lo</span><span class="p">,</span> <span class="n">fifo0_v_li</span><span class="p">;</span>
+<a name="l-65"></a>    <span class="kt">logic</span> <span class="n">fifo_v_lo</span><span class="p">,</span> <span class="n">fifo_yumi_li</span><span class="p">;</span>
+<a name="l-66"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_data_lo</span><span class="p">;</span>
+<a name="l-67"></a>
+<a name="l-68"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">use_minimal_buffering_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-69"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">two_fifo</span>
+<a name="l-70"></a>        <span class="n">bsg_two_fifo</span>
+<a name="l-71"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-72"></a>        <span class="p">)</span> <span class="n">fifo0</span>
+<a name="l-73"></a>        <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-74"></a>        <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-75"></a>        <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo0_ready_lo</span><span class="p">)</span>
+<a name="l-76"></a>        <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_li</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<a name="l-77"></a>        <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo0_v_li</span><span class="p">)</span>
+<a name="l-78"></a>        <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">fifo_v_lo</span><span class="p">)</span>
+<a name="l-79"></a>        <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">fifo_data_lo</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<a name="l-80"></a>        <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">fifo_yumi_li</span><span class="p">)</span>
+<a name="l-81"></a>        <span class="p">);</span>
+<a name="l-82"></a>      <span class="k">end</span>
+<a name="l-83"></a>    <span class="k">else</span>
+<a name="l-84"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">one_fifo</span>
+<a name="l-85"></a>        <span class="n">bsg_one_fifo</span>
+<a name="l-86"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-87"></a>        <span class="p">)</span> <span class="n">fifo0</span>
+<a name="l-88"></a>        <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-89"></a>        <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-90"></a>        <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo0_ready_lo</span><span class="p">)</span>
+<a name="l-91"></a>        <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_li</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<a name="l-92"></a>        <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo0_v_li</span><span class="p">)</span>
+<a name="l-93"></a>        <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">fifo_v_lo</span><span class="p">)</span>
+<a name="l-94"></a>        <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">fifo_data_lo</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<a name="l-95"></a>        <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">fifo_yumi_li</span><span class="p">)</span>
+<a name="l-96"></a>        <span class="p">);</span>
+<a name="l-97"></a>      <span class="k">end</span>
+<a name="l-98"></a>
+<a name="l-99"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">els_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> 
+<a name="l-100"></a>  <span class="k">begin</span><span class="o">:</span> <span class="n">bypass</span>
 <a name="l-101"></a>
-<a name="l-102"></a>
-<a name="l-103"></a>    <span class="cm">/**</span>
-<a name="l-104"></a><span class="cm">     * State Machine Logic</span>
-<a name="l-105"></a><span class="cm">     *</span>
-<a name="l-106"></a><span class="cm">     * There are two states to this state machine: eRX (or recieve) and</span>
-<a name="l-107"></a><span class="cm">     * eTX (or transmission). We start in the eRX state and move to the</span>
-<a name="l-108"></a><span class="cm">     * eTX state whenever we accept new data. From the eTX state, we move</span>
-<a name="l-109"></a><span class="cm">     * back to the eRX state when we are done tranmitting (done_tx_n).</span>
-<a name="l-110"></a><span class="cm">     */</span>
-<a name="l-111"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span>
-<a name="l-112"></a>      <span class="k">begin</span>
-<a name="l-113"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-114"></a>          <span class="n">state_r</span> <span class="o">&lt;=</span> <span class="n">eRX</span><span class="p">;</span>
-<a name="l-115"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-116"></a>          <span class="n">state_r</span> <span class="o">&lt;=</span> <span class="n">state_n</span><span class="p">;</span>
-<a name="l-117"></a>        <span class="k">end</span>
-<a name="l-118"></a>      <span class="k">end</span>
-<a name="l-119"></a>
-<a name="l-120"></a>    <span class="k">always_comb</span>
-<a name="l-121"></a>      <span class="k">begin</span>
-<a name="l-122"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ready_o</span> <span class="o">&amp;</span> <span class="n">valid_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-123"></a>          <span class="n">state_n</span> <span class="o">=</span> <span class="n">eTX</span><span class="p">;</span>
-<a name="l-124"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">done_tx_n</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-125"></a>          <span class="n">state_n</span> <span class="o">=</span> <span class="n">eRX</span><span class="p">;</span>
-<a name="l-126"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-127"></a>          <span class="n">state_n</span> <span class="o">=</span> <span class="n">state_r</span><span class="p">;</span>
-<a name="l-128"></a>        <span class="k">end</span>
-<a name="l-129"></a>      <span class="k">end</span>
-<a name="l-130"></a>      
-<a name="l-131"></a>    
-<a name="l-132"></a>    <span class="c1">// If send hi_to_lo, reverse the input data array</span>
-<a name="l-133"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_li</span><span class="p">;</span>
-<a name="l-134"></a>    
-<a name="l-135"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">hi_to_lo_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-<a name="l-136"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">lo2hi</span>
-<a name="l-137"></a>        <span class="k">assign</span> <span class="n">data_li</span> <span class="o">=</span> <span class="n">data_i</span><span class="p">;</span>
-<a name="l-138"></a>      <span class="k">end</span>
-<a name="l-139"></a>    <span class="k">else</span>
-<a name="l-140"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">hi2lo</span>
-<a name="l-141"></a>        <span class="n">bsg_array_reverse</span> 
-<a name="l-142"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-143"></a>        <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
-<a name="l-144"></a>        <span class="p">)</span> <span class="n">bar</span>
-<a name="l-145"></a>        <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">data_i</span><span class="p">)</span>
-<a name="l-146"></a>        <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">data_li</span><span class="p">)</span>
-<a name="l-147"></a>        <span class="p">);</span>
-<a name="l-148"></a>      <span class="k">end</span>
-<a name="l-149"></a>
-<a name="l-150"></a>    <span class="cm">/**</span>
-<a name="l-151"></a><span class="cm">     * Input Data Logic</span>
-<a name="l-152"></a><span class="cm">     *</span>
-<a name="l-153"></a><span class="cm">     * Whenever we decide to accept new data we will take data_li and store</span>
-<a name="l-154"></a><span class="cm">     * it in data_r.</span>
-<a name="l-155"></a><span class="cm">     */</span>
-<a name="l-156"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span>
-<a name="l-157"></a>      <span class="k">begin</span>
-<a name="l-158"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-159"></a>          <span class="n">data_r</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-160"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ready_o</span> <span class="o">&amp;</span> <span class="n">valid_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-161"></a>          <span class="n">data_r</span> <span class="o">&lt;=</span> <span class="n">data_li</span><span class="p">;</span>
-<a name="l-162"></a>        <span class="k">end</span>
-<a name="l-163"></a>      <span class="k">end</span>
-<a name="l-164"></a>
-<a name="l-165"></a>
-<a name="l-166"></a>    <span class="cm">/**</span>
-<a name="l-167"></a><span class="cm">     * Shift Counter Logic</span>
-<a name="l-168"></a><span class="cm">     *</span>
-<a name="l-169"></a><span class="cm">     * The shift_ctr_r register stores the bit we are transmitting. Whenever</span>
-<a name="l-170"></a><span class="cm">     * we reset or accept new data, we clear the shift_ctr_r register. While</span>
-<a name="l-171"></a><span class="cm">     * in the eTX state, we will increment the register if the outside world</span>
-<a name="l-172"></a><span class="cm">     * is going to accept our data (ie. yumi_i). If we are done transmitting</span>
-<a name="l-173"></a><span class="cm">     * data, we should stall the counter on the last bit. </span>
-<a name="l-174"></a><span class="cm">     */</span>
-<a name="l-175"></a>
-<a name="l-176"></a>   <span class="c1">// synopsys sync_set_reset &quot;reset_i&quot;</span>
-<a name="l-177"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span>
-<a name="l-178"></a>      <span class="k">begin</span>
-<a name="l-179"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-180"></a>          <span class="n">shift_ctr_r</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-181"></a>        <span class="k">else</span>
-<a name="l-182"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ready_o</span> <span class="o">&amp;</span> <span class="n">valid_i</span><span class="p">)</span>
-<a name="l-183"></a>            <span class="n">shift_ctr_r</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-184"></a>          <span class="k">else</span>
-<a name="l-185"></a>            <span class="n">shift_ctr_r</span> <span class="o">&lt;=</span> <span class="n">shift_ctr_n</span><span class="p">;</span>
-<a name="l-186"></a>      <span class="k">end</span>
-<a name="l-187"></a>
-<a name="l-188"></a>    <span class="k">assign</span> <span class="n">shift_ctr_n</span> <span class="o">=</span> <span class="p">((</span><span class="n">state_r</span> <span class="o">==</span> <span class="n">eTX</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">yumi_i</span> <span class="o">&amp;&amp;</span> <span class="o">~</span><span class="n">done_tx_n</span><span class="p">)</span>
-<a name="l-189"></a>                           <span class="o">?</span> <span class="n">shift_ctr_r</span> <span class="o">+</span> <span class="mb">1&#39;b1</span>
-<a name="l-190"></a>                           <span class="o">:</span> <span class="n">shift_ctr_r</span><span class="p">;</span>
-<a name="l-191"></a>
-<a name="l-192"></a>    <span class="cm">/**</span>
-<a name="l-193"></a><span class="cm">     * Valid Output Signal</span>
-<a name="l-194"></a><span class="cm">     *</span>
-<a name="l-195"></a><span class="cm">     * The valid_o signal means the output data is valid. For this</span>
-<a name="l-196"></a><span class="cm">     * module, the output is valid iff we are in the eTX state.</span>
-<a name="l-197"></a><span class="cm">     */</span>
-<a name="l-198"></a>    <span class="k">assign</span> <span class="n">valid_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">state_r</span> <span class="o">==</span> <span class="n">eTX</span><span class="p">);</span>
-<a name="l-199"></a>
-<a name="l-200"></a>
-<a name="l-201"></a>    <span class="cm">/**</span>
-<a name="l-202"></a><span class="cm">     * Data Output Signal</span>
-<a name="l-203"></a><span class="cm">     *</span>
-<a name="l-204"></a><span class="cm">     * Assign data_o to the word that we have shifted to.</span>
-<a name="l-205"></a><span class="cm">     */</span>
-<a name="l-206"></a>    <span class="k">assign</span> <span class="n">data_o</span> <span class="o">=</span> <span class="n">data_r</span><span class="p">[</span><span class="n">shift_ctr_r</span><span class="p">];</span>
-<a name="l-207"></a>
-<a name="l-208"></a>  <span class="k">end</span>
-<a name="l-209"></a>
-<a name="l-210"></a><span class="k">endmodule</span>
+<a name="l-102"></a>    <span class="c1">// When conversion ratio is 1, only one data word exists</span>
+<a name="l-103"></a>    <span class="c1">// Connect fifo0 signals directly to input/output ports</span>
+<a name="l-104"></a>
+<a name="l-105"></a>    <span class="k">assign</span> <span class="n">fifo0_v_li</span>   <span class="o">=</span> <span class="n">valid_i</span><span class="p">;</span>
+<a name="l-106"></a>    <span class="k">assign</span> <span class="n">ready_and_o</span>  <span class="o">=</span> <span class="n">fifo0_ready_lo</span><span class="p">;</span>
+<a name="l-107"></a>
+<a name="l-108"></a>    <span class="k">assign</span> <span class="n">valid_o</span>      <span class="o">=</span> <span class="n">fifo_v_lo</span><span class="p">;</span>
+<a name="l-109"></a>    <span class="k">assign</span> <span class="n">data_o</span>       <span class="o">=</span> <span class="n">fifo_data_lo</span><span class="p">;</span>
+<a name="l-110"></a>    <span class="k">assign</span> <span class="n">fifo_yumi_li</span> <span class="o">=</span> <span class="n">yumi_i</span><span class="p">;</span>
+<a name="l-111"></a>
+<a name="l-112"></a>  <span class="k">end</span> 
+<a name="l-113"></a>  <span class="k">else</span> 
+<a name="l-114"></a>  <span class="k">begin</span><span class="o">:</span> <span class="n">piso</span>
+<a name="l-115"></a>
+<a name="l-116"></a>    <span class="cm">/**</span>
+<a name="l-117"></a><span class="cm">     * Buffering the rest of the data words</span>
+<a name="l-118"></a><span class="cm">     *</span>
+<a name="l-119"></a><span class="cm">     * Single element buffering is sufficient for bubble-free transmission.</span>
+<a name="l-120"></a><span class="cm">     *</span>
+<a name="l-121"></a><span class="cm">     * Output data of fifo1 is guaranteed to be valid if output data of fifo0 is </span>
+<a name="l-122"></a><span class="cm">     * valid and shift_ctr_r != 0 (Refer to Table 1 below for more information.) </span>
+<a name="l-123"></a><span class="cm">     * Therefore v_o signal of fifo1 is unused to minimize hardware utilization.</span>
+<a name="l-124"></a><span class="cm">     */</span>
+<a name="l-125"></a>    <span class="kt">logic</span> <span class="n">fifo1_ready_lo</span><span class="p">,</span> <span class="n">fifo1_v_li</span><span class="p">;</span>
+<a name="l-126"></a>
+<a name="l-127"></a>    <span class="n">bsg_one_fifo</span>
+<a name="l-128"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">((</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-129"></a>    <span class="p">)</span> <span class="n">fifo1</span>
+<a name="l-130"></a>    <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-131"></a>    <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-132"></a>    <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">fifo1_ready_lo</span><span class="p">)</span>
+<a name="l-133"></a>    <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_li</span><span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">1</span><span class="p">])</span>
+<a name="l-134"></a>    <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">fifo1_v_li</span><span class="p">)</span>
+<a name="l-135"></a>    <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="cm">/* Not used, guaranteed to be valid when needed*/</span><span class="p">)</span>
+<a name="l-136"></a>    <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">fifo_data_lo</span><span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">1</span><span class="p">])</span>
+<a name="l-137"></a>    <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">fifo_yumi_li</span><span class="p">)</span>
+<a name="l-138"></a>    <span class="p">);</span>
+<a name="l-139"></a>
+<a name="l-140"></a>    <span class="cm">/**</span>
+<a name="l-141"></a><span class="cm">     * State machine on the input data side</span>
+<a name="l-142"></a><span class="cm">     *</span>
+<a name="l-143"></a><span class="cm">     * When 2 element buffer is used, and two parallel data arrive consecutively,</span>
+<a name="l-144"></a><span class="cm">     * the first word of second parallel data may be accepted by fifo0 repeatedly.</span>
+<a name="l-145"></a><span class="cm">     * A simple state machine is used to prevent this from happening.</span>
+<a name="l-146"></a><span class="cm">     *</span>
+<a name="l-147"></a><span class="cm">     * When 1 element buffer is used, hard-wire wait_fifo1_r to 1&#39;b0 to minimize </span>
+<a name="l-148"></a><span class="cm">     * hardware utilization.</span>
+<a name="l-149"></a><span class="cm">     */</span>
+<a name="l-150"></a>    <span class="kt">logic</span> <span class="n">wait_fifo1_r</span><span class="p">;</span>
+<a name="l-151"></a>
+<a name="l-152"></a>    <span class="k">assign</span> <span class="n">fifo0_v_li</span> <span class="o">=</span> <span class="n">valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">wait_fifo1_r</span><span class="p">;</span>
+<a name="l-153"></a>    <span class="k">assign</span> <span class="n">fifo1_v_li</span> <span class="o">=</span> <span class="n">valid_i</span><span class="p">;</span>
+<a name="l-154"></a>    <span class="k">assign</span> <span class="n">ready_and_o</span> <span class="o">=</span> <span class="n">fifo1_ready_lo</span><span class="p">;</span>
+<a name="l-155"></a>
+<a name="l-156"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">use_minimal_buffering_p</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-157"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">twobuf</span>
+<a name="l-158"></a>      <span class="cm">/**</span>
+<a name="l-159"></a><span class="cm">       * Table 1: Possible states of registers</span>
+<a name="l-160"></a><span class="cm">       * +---------------+----------------+--------------+---------+------------+</span>
+<a name="l-161"></a><span class="cm">       * |Fifo0-elements | Fifo1-elements | Wait_fifo1_r | Valid_i | shift_ctr_r|</span>
+<a name="l-162"></a><span class="cm">       * |       0       |        0       |      0       |   0/1   |      0     |</span>
+<a name="l-163"></a><span class="cm">       * |       0       |        1       |   INVALID    | INVALID |   INVALID  |</span>
+<a name="l-164"></a><span class="cm">       * |       1       |        0       |      1       |    1    |      0     |</span>
+<a name="l-165"></a><span class="cm">       * |       1       |        1       |      0       |   0/1   |     any    |</span>
+<a name="l-166"></a><span class="cm">       * |       2       |        0       |   INVALID    | INVALID |   INVALID  |</span>
+<a name="l-167"></a><span class="cm">       * |       2       |        1       |      1       |    1    |     any    |</span>
+<a name="l-168"></a><span class="cm">       * +---------------+----------------+--------------+---------+------------+</span>
+<a name="l-169"></a><span class="cm">       */</span>
+<a name="l-170"></a>        <span class="n">bsg_dff_reset_set_clear</span>
+<a name="l-171"></a>       <span class="p">#(.</span><span class="n">width_p</span>         <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-172"></a>        <span class="p">)</span> <span class="n">wait_fifo1_dff</span>
+<a name="l-173"></a>        <span class="p">(.</span><span class="n">clk_i</span>           <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-174"></a>        <span class="p">,.</span><span class="n">reset_i</span>         <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-175"></a>        <span class="c1">// fifo0_ready_lo is guaranteed to be 1&#39;b1 when wait_fifo1_r == 1&#39;b0</span>
+<a name="l-176"></a>        <span class="p">,.</span><span class="n">set_i</span>           <span class="p">(</span><span class="o">~</span><span class="n">wait_fifo1_r</span> <span class="o">&amp;</span> <span class="n">valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">fifo1_ready_lo</span><span class="p">)</span>
+<a name="l-177"></a>        <span class="c1">// valid_i is guaranteed to be 1&#39;b1 when when wait_fifo1_r == 1&#39;b1</span>
+<a name="l-178"></a>        <span class="p">,.</span><span class="n">clear_i</span>         <span class="p">(</span><span class="n">wait_fifo1_r</span> <span class="o">&amp;</span> <span class="n">fifo1_ready_lo</span><span class="p">)</span>
+<a name="l-179"></a>        <span class="p">,.</span><span class="n">data_o</span>          <span class="p">(</span><span class="n">wait_fifo1_r</span><span class="p">)</span>
+<a name="l-180"></a>        <span class="p">);</span>
+<a name="l-181"></a>      <span class="k">end</span>
+<a name="l-182"></a>    <span class="k">else</span>
+<a name="l-183"></a>      <span class="k">begin</span><span class="o">:</span> <span class="n">onebuf</span>
+<a name="l-184"></a>        <span class="k">assign</span> <span class="n">wait_fifo1_r</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-185"></a>      <span class="k">end</span>
+<a name="l-186"></a>
+<a name="l-187"></a>    <span class="cm">/**</span>
+<a name="l-188"></a><span class="cm">     * Data fifo yumi signal</span>
+<a name="l-189"></a><span class="cm">     *</span>
+<a name="l-190"></a><span class="cm">     * When the piso has shifted to last data word and it is accepted by the outside, </span>
+<a name="l-191"></a><span class="cm">     * assert fifo_yumi_li to indicate done of transmission, which pops data from </span>
+<a name="l-192"></a><span class="cm">     * both fifo0 and fifo1 simutanously. </span>
+<a name="l-193"></a><span class="cm">     */</span>
+<a name="l-194"></a>    <span class="k">localparam</span> <span class="n">clog2els_lp</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">els_p</span><span class="p">);</span>
+<a name="l-195"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">clog2els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shift_ctr_r</span><span class="p">;</span>
+<a name="l-196"></a>
+<a name="l-197"></a>    <span class="k">assign</span> <span class="n">fifo_yumi_li</span> <span class="o">=</span> <span class="n">fifo_v_lo</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">shift_ctr_r</span> <span class="o">==</span> <span class="n">clog2els_lp</span> <span class="p">&#39;</span> <span class="p">(</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&amp;&amp;</span> <span class="n">yumi_i</span><span class="p">;</span>
+<a name="l-198"></a>
+<a name="l-199"></a>    <span class="cm">/**</span>
+<a name="l-200"></a><span class="cm">     * Shift Counter Logic</span>
+<a name="l-201"></a><span class="cm">     *</span>
+<a name="l-202"></a><span class="cm">     * The shift_ctr_r register stores the word we are transmitting. Whenever</span>
+<a name="l-203"></a><span class="cm">     * we reset or done transmitting data, we clear the shift_ctr_r register.</span>
+<a name="l-204"></a><span class="cm">     * When data fifo has valid data output, we will increment the register if </span>
+<a name="l-205"></a><span class="cm">     * the outside world is going to accept our data (ie. yumi_i).</span>
+<a name="l-206"></a><span class="cm">     *</span>
+<a name="l-207"></a><span class="cm">     * Possible optimization</span>
+<a name="l-208"></a><span class="cm">     *</span>
+<a name="l-209"></a><span class="cm">     * Can instead use bsg_counter_clear_up_one_hot and one-hot mux down below</span>
+<a name="l-210"></a><span class="cm">     * for faster hardware by getting rid of a comparator and decoder on the paths.</span>
+<a name="l-211"></a><span class="cm">     * The downside is that there are more registers for counter (N vs lgN).</span>
+<a name="l-212"></a><span class="cm">     * Can do some PPA analysis for the tradeoff.</span>
+<a name="l-213"></a><span class="cm">     */</span>
+<a name="l-214"></a>    <span class="n">bsg_counter_clear_up</span>
+<a name="l-215"></a>   <span class="p">#(.</span><span class="n">max_val_p</span> <span class="p">(</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-216"></a>    <span class="p">,.</span><span class="n">init_val_p</span><span class="p">(</span><span class="m">&#39;0</span><span class="p">)</span>
+<a name="l-217"></a>    <span class="p">)</span> <span class="n">shift_ctr</span>
+<a name="l-218"></a>    <span class="p">(.</span><span class="n">clk_i</span>     <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-219"></a>    <span class="p">,.</span><span class="n">reset_i</span>   <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-220"></a>    <span class="p">,.</span><span class="n">clear_i</span>   <span class="p">(</span><span class="n">fifo_yumi_li</span><span class="p">)</span>
+<a name="l-221"></a>    <span class="p">,.</span><span class="n">up_i</span>      <span class="p">(</span><span class="o">~</span><span class="n">fifo_yumi_li</span> <span class="o">&amp;</span> <span class="n">fifo_v_lo</span> <span class="o">&amp;</span> <span class="n">yumi_i</span><span class="p">)</span>
+<a name="l-222"></a>    <span class="p">,.</span><span class="n">count_o</span>   <span class="p">(</span><span class="n">shift_ctr_r</span><span class="p">)</span>
+<a name="l-223"></a>    <span class="p">);</span>
+<a name="l-224"></a>
+<a name="l-225"></a>    <span class="cm">/**</span>
+<a name="l-226"></a><span class="cm">     * Valid Output Signal</span>
+<a name="l-227"></a><span class="cm">     *</span>
+<a name="l-228"></a><span class="cm">     * The valid_o signal means the output data is valid. For this</span>
+<a name="l-229"></a><span class="cm">     * module, the output is valid iff data fifo has valid output data.</span>
+<a name="l-230"></a><span class="cm">     */</span>
+<a name="l-231"></a>    <span class="k">assign</span> <span class="n">valid_o</span> <span class="o">=</span> <span class="n">fifo_v_lo</span><span class="p">;</span>
+<a name="l-232"></a>
+<a name="l-233"></a>    <span class="cm">/**</span>
+<a name="l-234"></a><span class="cm">     * Data Output Signal</span>
+<a name="l-235"></a><span class="cm">     *</span>
+<a name="l-236"></a><span class="cm">     * Assign data_o to the word that we have shifted to.</span>
+<a name="l-237"></a><span class="cm">     */</span>
+<a name="l-238"></a>    <span class="n">bsg_mux</span>
+<a name="l-239"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-240"></a>    <span class="p">,.</span><span class="n">els_p</span>  <span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-241"></a>    <span class="p">)</span> <span class="n">data_o_mux</span>
+<a name="l-242"></a>    <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">fifo_data_lo</span><span class="p">)</span>
+<a name="l-243"></a>    <span class="p">,.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">shift_ctr_r</span><span class="p">)</span>
+<a name="l-244"></a>    <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_o</span><span class="p">)</span>
+<a name="l-245"></a>    <span class="p">);</span>
+<a name="l-246"></a>
+<a name="l-247"></a>  <span class="k">end</span>
+<a name="l-248"></a>
+<a name="l-249"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

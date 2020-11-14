@@ -148,7 +148,9 @@
 <a href="#l-140">140</a>
 <a href="#l-141">141</a>
 <a href="#l-142">142</a>
-<a href="#l-143">143</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// bsg_strobe</span>
+<a href="#l-143">143</a>
+<a href="#l-144">144</a>
+<a href="#l-145">145</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// bsg_strobe</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">//                       N</span>
 <a name="l-4"></a><span class="c1">// Outputs sequence ( 1 0  )* for 0 &lt;= N=init_val_i &lt;= (1&lt;&lt;width_p)-1</span>
@@ -178,119 +180,121 @@
 <a name="l-28"></a><span class="c1">// FIXME (bug found by Yichao Wu): does not handle case of width_p=1</span>
 <a name="l-29"></a><span class="c1">//</span>
 <a name="l-30"></a>
-<a name="l-31"></a><span class="k">module</span> <span class="n">bsg_strobe</span> <span class="p">#(</span><span class="n">width_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a name="l-32"></a>                    <span class="p">,</span><span class="n">harden_p</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<a name="l-33"></a>   <span class="p">(</span><span class="k">input</span> <span class="n">clk_i</span>
-<a name="l-34"></a>    <span class="p">,</span> <span class="k">input</span>                <span class="n">reset_r_i</span>
-<a name="l-35"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">init_val_r_i</span>
-<a name="l-36"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="n">strobe_r_o</span>
-<a name="l-37"></a>    <span class="p">);</span>
-<a name="l-38"></a>
-<a name="l-39"></a>   <span class="k">localparam</span> <span class="n">debug_lp</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-31"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-32"></a>
+<a name="l-33"></a><span class="k">module</span> <span class="n">bsg_strobe</span> <span class="p">#(</span><span class="n">width_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
+<a name="l-34"></a>                    <span class="p">,</span><span class="n">harden_p</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-35"></a>   <span class="p">(</span><span class="k">input</span> <span class="n">clk_i</span>
+<a name="l-36"></a>    <span class="p">,</span> <span class="k">input</span>                <span class="n">reset_r_i</span>
+<a name="l-37"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">init_val_r_i</span>
+<a name="l-38"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="n">strobe_r_o</span>
+<a name="l-39"></a>    <span class="p">);</span>
 <a name="l-40"></a>
-<a name="l-41"></a>   <span class="kt">logic</span> <span class="n">strobe_n</span><span class="p">,</span> <span class="n">strobe_n_buf</span><span class="p">;</span>
+<a name="l-41"></a>   <span class="k">localparam</span> <span class="n">debug_lp</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <a name="l-42"></a>
-<a name="l-43"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span>  <span class="p">]</span> <span class="n">S_r</span><span class="p">,</span> <span class="n">S_n</span><span class="p">,</span> <span class="n">S_n_n</span><span class="p">,</span><span class="n">C_n_prereset</span><span class="p">;</span>
-<a name="l-44"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">C_r</span><span class="p">,</span> <span class="n">C_n</span><span class="p">;</span>
-<a name="l-45"></a>
-<a name="l-46"></a>   <span class="kt">wire</span> <span class="n">new_val</span> <span class="o">=</span> <span class="n">reset_r_i</span> <span class="o">|</span> <span class="n">strobe_n</span><span class="p">;</span>
+<a name="l-43"></a>   <span class="kt">logic</span> <span class="n">strobe_n</span><span class="p">,</span> <span class="n">strobe_n_buf</span><span class="p">;</span>
+<a name="l-44"></a>
+<a name="l-45"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span>  <span class="p">]</span> <span class="n">S_r</span><span class="p">,</span> <span class="n">S_n</span><span class="p">,</span> <span class="n">S_n_n</span><span class="p">,</span><span class="n">C_n_prereset</span><span class="p">;</span>
+<a name="l-46"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">C_r</span><span class="p">,</span> <span class="n">C_n</span><span class="p">;</span>
 <a name="l-47"></a>
-<a name="l-48"></a>   <span class="n">bsg_dff</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-49"></a>             <span class="p">,.</span><span class="n">harden_p</span><span class="p">(</span><span class="n">harden_p</span><span class="p">)</span>
-<a name="l-50"></a>             <span class="p">,.</span><span class="n">strength_p</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<a name="l-51"></a>             <span class="p">)</span> <span class="n">C_reg</span>
-<a name="l-52"></a>     <span class="p">(.</span><span class="n">clk_i</span> <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-53"></a>      <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">C_n</span>  <span class="p">)</span>
-<a name="l-54"></a>      <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">C_r</span>  <span class="p">)</span>
-<a name="l-55"></a>      <span class="p">);</span>
-<a name="l-56"></a>
-<a name="l-57"></a>   <span class="c1">// complement of new sum bit</span>
-<a name="l-58"></a>   <span class="c1">//   assign  S_n = ~ (S_r ^ {C_r, 1&#39;b1} );</span>
-<a name="l-59"></a>
-<a name="l-60"></a>   <span class="n">bsg_xnor</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">xnor_S_n</span>
-<a name="l-61"></a>     <span class="p">(.</span><span class="n">a_i</span><span class="p">(</span><span class="n">S_r</span><span class="p">),.</span><span class="n">b_i</span><span class="p">({</span><span class="n">C_r</span><span class="p">,</span><span class="mb">1&#39;b1</span><span class="p">}),.</span><span class="n">o</span><span class="p">(</span><span class="n">S_n</span><span class="p">));</span>
-<a name="l-62"></a>
-<a name="l-63"></a>   <span class="c1">// A B S0 Y</span>
-<a name="l-64"></a>   <span class="n">bsg_muxi2_gatestack</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">muxi2_S_n</span>
-<a name="l-65"></a>     <span class="p">(.</span><span class="n">i0</span><span class="p">(</span><span class="n">S_n</span><span class="p">)</span>              <span class="c1">//i2 == 0 (complement of sum bit)</span>
-<a name="l-66"></a>      <span class="p">,</span> <span class="p">.</span><span class="n">i1</span><span class="p">(</span><span class="n">init_val_r_i</span><span class="p">)</span>   <span class="c1">//i2 == 1   // note: implicitly, this is getting inverted</span>
-<a name="l-67"></a>                                        <span class="c1">// which is what we want -- we want to take the complement of init_val_r_i</span>
-<a name="l-68"></a>      <span class="p">,</span> <span class="p">.</span><span class="n">i2</span><span class="p">(</span> <span class="p">{</span><span class="n">width_p</span> <span class="p">{</span><span class="n">new_val</span><span class="p">}</span> <span class="p">})</span>
-<a name="l-69"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">S_n_n</span><span class="p">)</span>            <span class="c1">// final sum bit, after reset</span>
-<a name="l-70"></a>      <span class="p">);</span>
-<a name="l-71"></a>
-<a name="l-72"></a>   <span class="c1">// when we receive a new value; we load sum bits with the init value</span>
-<a name="l-73"></a>   <span class="n">bsg_dff</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-74"></a>             <span class="p">,.</span><span class="n">harden_p</span><span class="p">(</span><span class="n">harden_p</span><span class="p">)</span>
-<a name="l-75"></a>             <span class="p">,.</span><span class="n">strength_p</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1">// need some additional power on this one</span>
-<a name="l-76"></a>             <span class="p">)</span> <span class="n">S_reg</span>
-<a name="l-77"></a>     <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-78"></a>      <span class="p">,.</span><span class="n">data_i</span><span class="p">(</span><span class="n">S_n_n</span><span class="p">)</span>
-<a name="l-79"></a>      <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">S_r</span><span class="p">)</span>
-<a name="l-80"></a>      <span class="p">);</span>
-<a name="l-81"></a>
-<a name="l-82"></a>   <span class="c1">// increment-by-one in carry-save representation (i.e. a counter)</span>
-<a name="l-83"></a>   <span class="c1">// the &quot;1&quot; is add by one.</span>
-<a name="l-84"></a>   <span class="c1">// implementable with an array of half-adders</span>
-<a name="l-85"></a>
-<a name="l-86"></a>   <span class="n">bsg_nand</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">nand_C_n</span>
-<a name="l-87"></a>     <span class="p">(.</span><span class="n">a_i</span><span class="p">(</span><span class="n">S_r</span><span class="p">)</span>
-<a name="l-88"></a>      <span class="p">,.</span><span class="n">b_i</span><span class="p">({</span><span class="n">C_r</span><span class="p">,</span><span class="mb">1&#39;b1</span><span class="p">})</span>
-<a name="l-89"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">C_n_prereset</span><span class="p">)</span> <span class="c1">// lo true</span>
-<a name="l-90"></a>      <span class="p">);</span>
-<a name="l-91"></a>
-<a name="l-92"></a>   <span class="c1">// this implements reset. if any of the three conditions</span>
-<a name="l-93"></a>   <span class="c1">// are true, then the carry is zerod:</span>
-<a name="l-94"></a>   <span class="c1">// 1. strobe is asserted</span>
-<a name="l-95"></a>   <span class="c1">// 2. reset is asserted</span>
-<a name="l-96"></a>   <span class="c1">// 3. C_nprereset (lo true) is asserted</span>
-<a name="l-97"></a>
-<a name="l-98"></a>   <span class="n">bsg_nor3</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">nor3_C_n</span>
-<a name="l-99"></a>     <span class="p">(.</span><span class="n">a_i</span> <span class="p">({</span> <span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="p">{</span><span class="n">strobe_n_buf</span><span class="p">}</span> <span class="p">})</span>
-<a name="l-100"></a>      <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span><span class="n">C_n_prereset</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-<a name="l-101"></a>      <span class="p">,.</span><span class="n">c_i</span><span class="p">({</span> <span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="p">{</span><span class="n">reset_r_i</span><span class="p">}})</span>
-<a name="l-102"></a>      <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">C_n</span><span class="p">)</span>
-<a name="l-103"></a>      <span class="p">);</span>
-<a name="l-104"></a>
-<a name="l-105"></a>
-<a name="l-106"></a>   <span class="c1">// we strobe when our CS value reaches -1. In CS representation, -1 iff every bit in C and S are different.</span>
-<a name="l-107"></a>   <span class="c1">// Moreover, in our counter representation, we further can show -1 is represented by all S bits being set.</span>
-<a name="l-108"></a>
-<a name="l-109"></a>   <span class="n">bsg_reduce</span> <span class="p">#(.</span><span class="n">and_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-110"></a>                <span class="p">,.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-111"></a>                <span class="p">,.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-112"></a>                <span class="p">)</span> <span class="n">andr</span>
-<a name="l-113"></a>     <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">S_r</span><span class="p">)</span>
-<a name="l-114"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">strobe_n</span><span class="p">)</span>
-<a name="l-115"></a>      <span class="p">);</span>
-<a name="l-116"></a>
-<a name="l-117"></a>   <span class="c1">// DC/ICC botches the buffering of this signal so we give it some help</span>
-<a name="l-118"></a>   <span class="n">bsg_buf</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">strobe_buf_gate</span>
-<a name="l-119"></a>   <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">strobe_n</span><span class="p">)</span>
-<a name="l-120"></a>    <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">strobe_n_buf</span><span class="p">)</span>
-<a name="l-121"></a>    <span class="p">);</span>
-<a name="l-122"></a>
-<a name="l-123"></a>   <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span>
-<a name="l-124"></a>     <span class="n">strobe_r_o</span> <span class="o">&lt;=</span> <span class="n">strobe_n_buf</span><span class="p">;</span>
-<a name="l-125"></a>
-<a name="l-126"></a>   <span class="c1">// synopsys translate_off</span>
-<a name="l-127"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">debug_lp</span><span class="p">)</span>
-<a name="l-128"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">debug</span>
-<a name="l-129"></a>        <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk_i</span><span class="p">)</span>
-<a name="l-130"></a><span class="c1">//          if (strobe_n)</span>
-<a name="l-131"></a>            <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;%t (C=%b,S=%b) reset_r_i=%d new_val=%b init_val=%d val(C,S)=%b C^S=%b&quot;</span><span class="p">,$</span><span class="kt">time</span>
-<a name="l-132"></a>                     <span class="p">,</span>  <span class="n">C_r</span><span class="p">,</span><span class="n">S_r</span><span class="p">,</span> <span class="n">reset_r_i</span><span class="p">,</span> <span class="n">new_val</span><span class="p">,</span> <span class="n">init_val_r_i</span><span class="p">,</span> <span class="p">(</span><span class="n">C_r</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">S_r</span><span class="p">,</span> <span class="n">strobe_n</span><span class="p">);</span>
-<a name="l-133"></a>     <span class="k">end</span>
-<a name="l-134"></a>   <span class="c1">// synopsys translate_on</span>
-<a name="l-135"></a>
-<a name="l-136"></a>
-<a name="l-137"></a>   <span class="c1">// synopsys translate_off</span>
-<a name="l-138"></a>   <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk_i</span><span class="p">)</span>
-<a name="l-139"></a>     <span class="k">assert</span><span class="p">((</span><span class="n">strobe_n</span> <span class="o">===</span> <span class="m">&#39;X</span><span class="p">)</span> <span class="o">||</span> <span class="n">strobe_n</span> <span class="o">==</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">C_r</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">^</span> <span class="n">S_r</span><span class="p">))</span>
-<a name="l-140"></a>       <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;## faulty assumption about strobe signal in %m (C_r=%b, S_r=%b, strobe_n=%b)&quot;</span><span class="p">,</span> <span class="n">C_r</span><span class="p">,</span><span class="n">S_r</span><span class="p">,</span> <span class="n">strobe_n</span><span class="p">);</span>
-<a name="l-141"></a>   <span class="c1">// synopsys translate_on</span>
-<a name="l-142"></a>
-<a name="l-143"></a><span class="k">endmodule</span>
+<a name="l-48"></a>   <span class="kt">wire</span> <span class="n">new_val</span> <span class="o">=</span> <span class="n">reset_r_i</span> <span class="o">|</span> <span class="n">strobe_n</span><span class="p">;</span>
+<a name="l-49"></a>
+<a name="l-50"></a>   <span class="n">bsg_dff</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-51"></a>             <span class="p">,.</span><span class="n">harden_p</span><span class="p">(</span><span class="n">harden_p</span><span class="p">)</span>
+<a name="l-52"></a>             <span class="p">,.</span><span class="n">strength_p</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a name="l-53"></a>             <span class="p">)</span> <span class="n">C_reg</span>
+<a name="l-54"></a>     <span class="p">(.</span><span class="n">clk_i</span> <span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-55"></a>      <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">C_n</span>  <span class="p">)</span>
+<a name="l-56"></a>      <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">C_r</span>  <span class="p">)</span>
+<a name="l-57"></a>      <span class="p">);</span>
+<a name="l-58"></a>
+<a name="l-59"></a>   <span class="c1">// complement of new sum bit</span>
+<a name="l-60"></a>   <span class="c1">//   assign  S_n = ~ (S_r ^ {C_r, 1&#39;b1} );</span>
+<a name="l-61"></a>
+<a name="l-62"></a>   <span class="n">bsg_xnor</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">xnor_S_n</span>
+<a name="l-63"></a>     <span class="p">(.</span><span class="n">a_i</span><span class="p">(</span><span class="n">S_r</span><span class="p">),.</span><span class="n">b_i</span><span class="p">({</span><span class="n">C_r</span><span class="p">,</span><span class="mb">1&#39;b1</span><span class="p">}),.</span><span class="n">o</span><span class="p">(</span><span class="n">S_n</span><span class="p">));</span>
+<a name="l-64"></a>
+<a name="l-65"></a>   <span class="c1">// A B S0 Y</span>
+<a name="l-66"></a>   <span class="n">bsg_muxi2_gatestack</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">muxi2_S_n</span>
+<a name="l-67"></a>     <span class="p">(.</span><span class="n">i0</span><span class="p">(</span><span class="n">S_n</span><span class="p">)</span>              <span class="c1">//i2 == 0 (complement of sum bit)</span>
+<a name="l-68"></a>      <span class="p">,</span> <span class="p">.</span><span class="n">i1</span><span class="p">(</span><span class="n">init_val_r_i</span><span class="p">)</span>   <span class="c1">//i2 == 1   // note: implicitly, this is getting inverted</span>
+<a name="l-69"></a>                                        <span class="c1">// which is what we want -- we want to take the complement of init_val_r_i</span>
+<a name="l-70"></a>      <span class="p">,</span> <span class="p">.</span><span class="n">i2</span><span class="p">(</span> <span class="p">{</span><span class="n">width_p</span> <span class="p">{</span><span class="n">new_val</span><span class="p">}</span> <span class="p">})</span>
+<a name="l-71"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">S_n_n</span><span class="p">)</span>            <span class="c1">// final sum bit, after reset</span>
+<a name="l-72"></a>      <span class="p">);</span>
+<a name="l-73"></a>
+<a name="l-74"></a>   <span class="c1">// when we receive a new value; we load sum bits with the init value</span>
+<a name="l-75"></a>   <span class="n">bsg_dff</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-76"></a>             <span class="p">,.</span><span class="n">harden_p</span><span class="p">(</span><span class="n">harden_p</span><span class="p">)</span>
+<a name="l-77"></a>             <span class="p">,.</span><span class="n">strength_p</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c1">// need some additional power on this one</span>
+<a name="l-78"></a>             <span class="p">)</span> <span class="n">S_reg</span>
+<a name="l-79"></a>     <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-80"></a>      <span class="p">,.</span><span class="n">data_i</span><span class="p">(</span><span class="n">S_n_n</span><span class="p">)</span>
+<a name="l-81"></a>      <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">S_r</span><span class="p">)</span>
+<a name="l-82"></a>      <span class="p">);</span>
+<a name="l-83"></a>
+<a name="l-84"></a>   <span class="c1">// increment-by-one in carry-save representation (i.e. a counter)</span>
+<a name="l-85"></a>   <span class="c1">// the &quot;1&quot; is add by one.</span>
+<a name="l-86"></a>   <span class="c1">// implementable with an array of half-adders</span>
+<a name="l-87"></a>
+<a name="l-88"></a>   <span class="n">bsg_nand</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">nand_C_n</span>
+<a name="l-89"></a>     <span class="p">(.</span><span class="n">a_i</span><span class="p">(</span><span class="n">S_r</span><span class="p">)</span>
+<a name="l-90"></a>      <span class="p">,.</span><span class="n">b_i</span><span class="p">({</span><span class="n">C_r</span><span class="p">,</span><span class="mb">1&#39;b1</span><span class="p">})</span>
+<a name="l-91"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">C_n_prereset</span><span class="p">)</span> <span class="c1">// lo true</span>
+<a name="l-92"></a>      <span class="p">);</span>
+<a name="l-93"></a>
+<a name="l-94"></a>   <span class="c1">// this implements reset. if any of the three conditions</span>
+<a name="l-95"></a>   <span class="c1">// are true, then the carry is zerod:</span>
+<a name="l-96"></a>   <span class="c1">// 1. strobe is asserted</span>
+<a name="l-97"></a>   <span class="c1">// 2. reset is asserted</span>
+<a name="l-98"></a>   <span class="c1">// 3. C_nprereset (lo true) is asserted</span>
+<a name="l-99"></a>
+<a name="l-100"></a>   <span class="n">bsg_nor3</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">),.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">nor3_C_n</span>
+<a name="l-101"></a>     <span class="p">(.</span><span class="n">a_i</span> <span class="p">({</span> <span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="p">{</span><span class="n">strobe_n_buf</span><span class="p">}</span> <span class="p">})</span>
+<a name="l-102"></a>      <span class="p">,.</span><span class="n">b_i</span><span class="p">(</span><span class="n">C_n_prereset</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<a name="l-103"></a>      <span class="p">,.</span><span class="n">c_i</span><span class="p">({</span> <span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="p">{</span><span class="n">reset_r_i</span><span class="p">}})</span>
+<a name="l-104"></a>      <span class="p">,.</span><span class="n">o</span>  <span class="p">(</span><span class="n">C_n</span><span class="p">)</span>
+<a name="l-105"></a>      <span class="p">);</span>
+<a name="l-106"></a>
+<a name="l-107"></a>
+<a name="l-108"></a>   <span class="c1">// we strobe when our CS value reaches -1. In CS representation, -1 iff every bit in C and S are different.</span>
+<a name="l-109"></a>   <span class="c1">// Moreover, in our counter representation, we further can show -1 is represented by all S bits being set.</span>
+<a name="l-110"></a>
+<a name="l-111"></a>   <span class="n">bsg_reduce</span> <span class="p">#(.</span><span class="n">and_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-112"></a>                <span class="p">,.</span><span class="n">harden_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-113"></a>                <span class="p">,.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-114"></a>                <span class="p">)</span> <span class="n">andr</span>
+<a name="l-115"></a>     <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">S_r</span><span class="p">)</span>
+<a name="l-116"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">strobe_n</span><span class="p">)</span>
+<a name="l-117"></a>      <span class="p">);</span>
+<a name="l-118"></a>
+<a name="l-119"></a>   <span class="c1">// DC/ICC botches the buffering of this signal so we give it some help</span>
+<a name="l-120"></a>   <span class="n">bsg_buf</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="n">strobe_buf_gate</span>
+<a name="l-121"></a>   <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">strobe_n</span><span class="p">)</span>
+<a name="l-122"></a>    <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">strobe_n_buf</span><span class="p">)</span>
+<a name="l-123"></a>    <span class="p">);</span>
+<a name="l-124"></a>
+<a name="l-125"></a>   <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span>
+<a name="l-126"></a>     <span class="n">strobe_r_o</span> <span class="o">&lt;=</span> <span class="n">strobe_n_buf</span><span class="p">;</span>
+<a name="l-127"></a>
+<a name="l-128"></a>   <span class="c1">// synopsys translate_off</span>
+<a name="l-129"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">debug_lp</span><span class="p">)</span>
+<a name="l-130"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">debug</span>
+<a name="l-131"></a>        <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk_i</span><span class="p">)</span>
+<a name="l-132"></a><span class="c1">//          if (strobe_n)</span>
+<a name="l-133"></a>            <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;%t (C=%b,S=%b) reset_r_i=%d new_val=%b init_val=%d val(C,S)=%b C^S=%b&quot;</span><span class="p">,$</span><span class="kt">time</span>
+<a name="l-134"></a>                     <span class="p">,</span>  <span class="n">C_r</span><span class="p">,</span><span class="n">S_r</span><span class="p">,</span> <span class="n">reset_r_i</span><span class="p">,</span> <span class="n">new_val</span><span class="p">,</span> <span class="n">init_val_r_i</span><span class="p">,</span> <span class="p">(</span><span class="n">C_r</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">S_r</span><span class="p">,</span> <span class="n">strobe_n</span><span class="p">);</span>
+<a name="l-135"></a>     <span class="k">end</span>
+<a name="l-136"></a>   <span class="c1">// synopsys translate_on</span>
+<a name="l-137"></a>
+<a name="l-138"></a>
+<a name="l-139"></a>   <span class="c1">// synopsys translate_off</span>
+<a name="l-140"></a>   <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk_i</span><span class="p">)</span>
+<a name="l-141"></a>     <span class="k">assert</span><span class="p">((</span><span class="n">strobe_n</span> <span class="o">===</span> <span class="m">&#39;X</span><span class="p">)</span> <span class="o">||</span> <span class="n">strobe_n</span> <span class="o">==</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">C_r</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">^</span> <span class="n">S_r</span><span class="p">))</span>
+<a name="l-142"></a>       <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;## faulty assumption about strobe signal in %m (C_r=%b, S_r=%b, strobe_n=%b)&quot;</span><span class="p">,</span> <span class="n">C_r</span><span class="p">,</span><span class="n">S_r</span><span class="p">,</span> <span class="n">strobe_n</span><span class="p">);</span>
+<a name="l-143"></a>   <span class="c1">// synopsys translate_on</span>
+<a name="l-144"></a>
+<a name="l-145"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

@@ -81,82 +81,86 @@
 <a href="#l-73">73</a>
 <a href="#l-74">74</a>
 <a href="#l-75">75</a>
-<a href="#l-76">76</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/*</span>
+<a href="#l-76">76</a>
+<a href="#l-77">77</a>
+<a href="#l-78">78</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/*</span>
 <a name="l-2"></a><span class="cm"> * This module is made for use in bsg_cams, managing the valids and tags for each entry.</span>
 <a name="l-3"></a><span class="cm"> * We separate v_rs and tags so that we can support reset with minimal hardware.</span>
 <a name="l-4"></a><span class="cm"> * This module does not protect against setting multiple entries to the same value -- this must be</span>
 <a name="l-5"></a><span class="cm"> * prevented at a higher protocol level, if desired</span>
 <a name="l-6"></a><span class="cm"> */</span>
-<a name="l-7"></a><span class="k">module</span> <span class="n">bsg_cam_1r1w_tag_array</span>
-<a name="l-8"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>  <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-9"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">els_p</span>      <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-10"></a>
-<a name="l-11"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">multiple_entries_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-12"></a>   <span class="p">)</span>
-<a name="l-13"></a>  <span class="p">(</span><span class="k">input</span>                          <span class="n">clk_i</span>
-<a name="l-14"></a>   <span class="p">,</span> <span class="k">input</span>                        <span class="n">reset_i</span>
-<a name="l-15"></a>
-<a name="l-16"></a>   <span class="c1">// zero or one-hot</span>
-<a name="l-17"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>            <span class="n">w_v_i</span>
-<a name="l-18"></a>   <span class="c1">// Mutually exclusive set or clear</span>
-<a name="l-19"></a>   <span class="p">,</span> <span class="k">input</span>                        <span class="n">w_set_not_clear_i</span>
-<a name="l-20"></a>   <span class="c1">// Tag to set or clear</span>
-<a name="l-21"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">w_tag_i</span>
-<a name="l-22"></a>   <span class="c1">// Vector of empty CAM entries</span>
-<a name="l-23"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">w_empty_o</span>
-<a name="l-24"></a>   
-<a name="l-25"></a>   <span class="c1">// Async read</span>
-<a name="l-26"></a>   <span class="p">,</span> <span class="k">input</span>                        <span class="n">r_v_i</span>
-<a name="l-27"></a>   <span class="c1">// Tag to match on read</span>
-<a name="l-28"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">r_tag_i</span>
-<a name="l-29"></a>   <span class="c1">// one or zero-hot</span>
-<a name="l-30"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">r_match_o</span>
-<a name="l-31"></a>   <span class="p">);</span>
-<a name="l-32"></a>
-<a name="l-33"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_r</span><span class="p">;</span>
-<a name="l-34"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">v_r</span><span class="p">;</span>
-<a name="l-35"></a>  
-<a name="l-36"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">els_p</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-<a name="l-37"></a>    <span class="k">begin</span> <span class="o">:</span> <span class="n">tag_array</span>
-<a name="l-38"></a>      <span class="n">bsg_dff_reset_en</span>
-<a name="l-39"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<a name="l-40"></a>       <span class="n">v_reg</span>
-<a name="l-41"></a>        <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-42"></a>         <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-43"></a>
-<a name="l-44"></a>         <span class="p">,.</span><span class="n">en_i</span><span class="p">(</span><span class="n">w_v_i</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-45"></a>         <span class="p">,.</span><span class="n">data_i</span><span class="p">(</span><span class="n">w_set_not_clear_i</span><span class="p">)</span>
-<a name="l-46"></a>
-<a name="l-47"></a>         <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">v_r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-48"></a>         <span class="p">);</span>
-<a name="l-49"></a>
-<a name="l-50"></a>      <span class="n">bsg_dff_en</span>
-<a name="l-51"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span>
-<a name="l-52"></a>       <span class="n">tag_r_reg</span>
-<a name="l-53"></a>        <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-54"></a>
-<a name="l-55"></a>         <span class="p">,.</span><span class="n">en_i</span><span class="p">(</span><span class="n">w_v_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">w_set_not_clear_i</span><span class="p">)</span>
-<a name="l-56"></a>         <span class="p">,.</span><span class="n">data_i</span><span class="p">(</span><span class="n">w_tag_i</span><span class="p">)</span>
-<a name="l-57"></a>         <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">tag_r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-58"></a>         <span class="p">);</span>
-<a name="l-59"></a>
-<a name="l-60"></a>      <span class="k">assign</span> <span class="n">r_match_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">r_v_i</span> <span class="o">&amp;</span> <span class="n">v_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tag_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">r_tag_i</span><span class="p">);</span>
-<a name="l-61"></a>	  <span class="k">assign</span> <span class="n">w_empty_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">~</span><span class="n">v_r</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-<a name="l-62"></a>    <span class="k">end</span>
-<a name="l-63"></a>
-<a name="l-64"></a>  <span class="c1">//synopsys translate_off</span>
-<a name="l-65"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-66"></a>    <span class="k">assert</span><span class="p">(</span><span class="n">multiple_entries_p</span> <span class="o">||</span> <span class="n">reset_i</span> <span class="o">||</span> <span class="p">$</span><span class="n">countones</span><span class="p">(</span><span class="n">r_match_o</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
-<a name="l-67"></a>      <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Multiple similar entries are found in match_array\</span>
-<a name="l-68"></a><span class="s">                   %x while multiple_entries_p parameter is %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">r_match_o</span><span class="p">,</span>
-<a name="l-69"></a>                   <span class="n">multiple_entries_p</span><span class="p">);</span>       
-<a name="l-70"></a>	
-<a name="l-71"></a>	<span class="k">assert</span><span class="p">(</span><span class="n">reset_i</span> <span class="o">||</span> <span class="p">$</span><span class="n">countones</span><span class="p">(</span><span class="n">w_v_i</span> <span class="o">&amp;</span> <span class="p">{</span><span class="n">els_p</span><span class="p">{</span><span class="n">w_set_not_clear_i</span><span class="p">}})</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
-<a name="l-72"></a>      <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Inv_r one-hot write address %b</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">w_v_i</span><span class="p">);</span>
-<a name="l-73"></a>  <span class="k">end</span> 
-<a name="l-74"></a>  <span class="c1">//synopsys translate_on</span>
-<a name="l-75"></a>
-<a name="l-76"></a><span class="k">endmodule</span>
+<a name="l-7"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-8"></a>
+<a name="l-9"></a><span class="k">module</span> <span class="n">bsg_cam_1r1w_tag_array</span>
+<a name="l-10"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>  <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-11"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">els_p</span>      <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-12"></a>
+<a name="l-13"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">multiple_entries_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-14"></a>   <span class="p">)</span>
+<a name="l-15"></a>  <span class="p">(</span><span class="k">input</span>                          <span class="n">clk_i</span>
+<a name="l-16"></a>   <span class="p">,</span> <span class="k">input</span>                        <span class="n">reset_i</span>
+<a name="l-17"></a>
+<a name="l-18"></a>   <span class="c1">// zero or one-hot</span>
+<a name="l-19"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>            <span class="n">w_v_i</span>
+<a name="l-20"></a>   <span class="c1">// Mutually exclusive set or clear</span>
+<a name="l-21"></a>   <span class="p">,</span> <span class="k">input</span>                        <span class="n">w_set_not_clear_i</span>
+<a name="l-22"></a>   <span class="c1">// Tag to set or clear</span>
+<a name="l-23"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">w_tag_i</span>
+<a name="l-24"></a>   <span class="c1">// Vector of empty CAM entries</span>
+<a name="l-25"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">w_empty_o</span>
+<a name="l-26"></a>   
+<a name="l-27"></a>   <span class="c1">// Async read</span>
+<a name="l-28"></a>   <span class="p">,</span> <span class="k">input</span>                        <span class="n">r_v_i</span>
+<a name="l-29"></a>   <span class="c1">// Tag to match on read</span>
+<a name="l-30"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">r_tag_i</span>
+<a name="l-31"></a>   <span class="c1">// one or zero-hot</span>
+<a name="l-32"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">r_match_o</span>
+<a name="l-33"></a>   <span class="p">);</span>
+<a name="l-34"></a>
+<a name="l-35"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_r</span><span class="p">;</span>
+<a name="l-36"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">v_r</span><span class="p">;</span>
+<a name="l-37"></a>  
+<a name="l-38"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">els_p</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<a name="l-39"></a>    <span class="k">begin</span> <span class="o">:</span> <span class="n">tag_array</span>
+<a name="l-40"></a>      <span class="n">bsg_dff_reset_en</span>
+<a name="l-41"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<a name="l-42"></a>       <span class="n">v_reg</span>
+<a name="l-43"></a>        <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-44"></a>         <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-45"></a>
+<a name="l-46"></a>         <span class="p">,.</span><span class="n">en_i</span><span class="p">(</span><span class="n">w_v_i</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-47"></a>         <span class="p">,.</span><span class="n">data_i</span><span class="p">(</span><span class="n">w_set_not_clear_i</span><span class="p">)</span>
+<a name="l-48"></a>
+<a name="l-49"></a>         <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">v_r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-50"></a>         <span class="p">);</span>
+<a name="l-51"></a>
+<a name="l-52"></a>      <span class="n">bsg_dff_en</span>
+<a name="l-53"></a>       <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">))</span>
+<a name="l-54"></a>       <span class="n">tag_r_reg</span>
+<a name="l-55"></a>        <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-56"></a>
+<a name="l-57"></a>         <span class="p">,.</span><span class="n">en_i</span><span class="p">(</span><span class="n">w_v_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">w_set_not_clear_i</span><span class="p">)</span>
+<a name="l-58"></a>         <span class="p">,.</span><span class="n">data_i</span><span class="p">(</span><span class="n">w_tag_i</span><span class="p">)</span>
+<a name="l-59"></a>         <span class="p">,.</span><span class="n">data_o</span><span class="p">(</span><span class="n">tag_r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-60"></a>         <span class="p">);</span>
+<a name="l-61"></a>
+<a name="l-62"></a>      <span class="k">assign</span> <span class="n">r_match_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">r_v_i</span> <span class="o">&amp;</span> <span class="n">v_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tag_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">r_tag_i</span><span class="p">);</span>
+<a name="l-63"></a>	  <span class="k">assign</span> <span class="n">w_empty_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">~</span><span class="n">v_r</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a name="l-64"></a>    <span class="k">end</span>
+<a name="l-65"></a>
+<a name="l-66"></a>  <span class="c1">//synopsys translate_off</span>
+<a name="l-67"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-68"></a>    <span class="k">assert</span><span class="p">(</span><span class="n">multiple_entries_p</span> <span class="o">||</span> <span class="n">reset_i</span> <span class="o">||</span> <span class="p">$</span><span class="n">countones</span><span class="p">(</span><span class="n">r_match_o</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+<a name="l-69"></a>      <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Multiple similar entries are found in match_array\</span>
+<a name="l-70"></a><span class="s">                   %x while multiple_entries_p parameter is %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">r_match_o</span><span class="p">,</span>
+<a name="l-71"></a>                   <span class="n">multiple_entries_p</span><span class="p">);</span>       
+<a name="l-72"></a>	
+<a name="l-73"></a>	<span class="k">assert</span><span class="p">(</span><span class="n">reset_i</span> <span class="o">||</span> <span class="p">$</span><span class="n">countones</span><span class="p">(</span><span class="n">w_v_i</span> <span class="o">&amp;</span> <span class="p">{</span><span class="n">els_p</span><span class="p">{</span><span class="n">w_set_not_clear_i</span><span class="p">}})</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+<a name="l-74"></a>      <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Inv_r one-hot write address %b</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">w_v_i</span><span class="p">);</span>
+<a name="l-75"></a>  <span class="k">end</span> 
+<a name="l-76"></a>  <span class="c1">//synopsys translate_on</span>
+<a name="l-77"></a>
+<a name="l-78"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

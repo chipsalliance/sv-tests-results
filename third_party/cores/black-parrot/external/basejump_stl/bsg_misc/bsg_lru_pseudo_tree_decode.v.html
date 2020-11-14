@@ -46,7 +46,9 @@
 <a href="#l-38">38</a>
 <a href="#l-39">39</a>
 <a href="#l-40">40</a>
-<a href="#l-41">41</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
+<a href="#l-41">41</a>
+<a href="#l-42">42</a>
+<a href="#l-43">43</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
 <a name="l-2"></a><span class="cm"> *  Name:</span>
 <a name="l-3"></a><span class="cm"> *    bsg_lru_pseudo_tree_decode.v</span>
 <a name="l-4"></a><span class="cm"> *</span>
@@ -58,35 +60,37 @@
 <a name="l-10"></a><span class="cm"> *    bitmaskable memory to update the corresponding LRU bits.</span>
 <a name="l-11"></a><span class="cm"> */</span>
 <a name="l-12"></a>
-<a name="l-13"></a><span class="k">module</span> <span class="n">bsg_lru_pseudo_tree_decode</span>
-<a name="l-14"></a>  <span class="p">#(</span><span class="k">parameter</span> <span class="n">ways_p</span>        <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-15"></a>    <span class="p">,</span><span class="k">localparam</span> <span class="n">lg_ways_lp</span> <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">ways_p</span><span class="p">)</span>
-<a name="l-16"></a>  <span class="p">)</span>
-<a name="l-17"></a>  <span class="p">(</span><span class="k">input</span> <span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">way_id_i</span>
-<a name="l-18"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
-<a name="l-19"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">mask_o</span>
-<a name="l-20"></a>  <span class="p">);</span>
-<a name="l-21"></a>
-<a name="l-22"></a>  <span class="k">genvar</span> <span class="n">i</span><span class="p">;</span>
-<a name="l-23"></a>  <span class="k">generate</span> 
-<a name="l-24"></a>    <span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">rof</span>
-<a name="l-25"></a>      <span class="c1">// Mask generation</span>
-<a name="l-26"></a>	  <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">fi</span>
-<a name="l-27"></a>	    <span class="k">assign</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-28"></a>	  <span class="k">end</span>
-<a name="l-29"></a>	  <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">fi</span>
-<a name="l-30"></a>	    <span class="k">assign</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_o</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">way_id_i</span><span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
-<a name="l-31"></a>	  <span class="k">end</span>
-<a name="l-32"></a>	  <span class="k">else</span> <span class="k">begin</span><span class="o">:</span> <span class="n">fi</span>
-<a name="l-33"></a>	    <span class="k">assign</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_o</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">way_id_i</span><span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
-<a name="l-34"></a>	  <span class="k">end</span>
-<a name="l-35"></a>	  
-<a name="l-36"></a>	  <span class="c1">// Data generation</span>
-<a name="l-37"></a>	  <span class="k">assign</span> <span class="n">data_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">way_id_i</span><span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)];</span>
-<a name="l-38"></a>    <span class="k">end</span>
-<a name="l-39"></a>  <span class="k">endgenerate</span>
-<a name="l-40"></a>
-<a name="l-41"></a><span class="k">endmodule</span>
+<a name="l-13"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-14"></a>
+<a name="l-15"></a><span class="k">module</span> <span class="n">bsg_lru_pseudo_tree_decode</span>
+<a name="l-16"></a>  <span class="p">#(</span><span class="k">parameter</span> <span class="n">ways_p</span>        <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-17"></a>    <span class="p">,</span><span class="k">localparam</span> <span class="n">lg_ways_lp</span> <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">ways_p</span><span class="p">)</span>
+<a name="l-18"></a>  <span class="p">)</span>
+<a name="l-19"></a>  <span class="p">(</span><span class="k">input</span> <span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">way_id_i</span>
+<a name="l-20"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
+<a name="l-21"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">mask_o</span>
+<a name="l-22"></a>  <span class="p">);</span>
+<a name="l-23"></a>
+<a name="l-24"></a>  <span class="k">genvar</span> <span class="n">i</span><span class="p">;</span>
+<a name="l-25"></a>  <span class="k">generate</span> 
+<a name="l-26"></a>    <span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">rof</span>
+<a name="l-27"></a>      <span class="c1">// Mask generation</span>
+<a name="l-28"></a>	  <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">fi</span>
+<a name="l-29"></a>	    <span class="k">assign</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-30"></a>	  <span class="k">end</span>
+<a name="l-31"></a>	  <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">fi</span>
+<a name="l-32"></a>	    <span class="k">assign</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_o</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">way_id_i</span><span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-33"></a>	  <span class="k">end</span>
+<a name="l-34"></a>	  <span class="k">else</span> <span class="k">begin</span><span class="o">:</span> <span class="n">fi</span>
+<a name="l-35"></a>	    <span class="k">assign</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_o</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">way_id_i</span><span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-36"></a>	  <span class="k">end</span>
+<a name="l-37"></a>	  
+<a name="l-38"></a>	  <span class="c1">// Data generation</span>
+<a name="l-39"></a>	  <span class="k">assign</span> <span class="n">data_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">way_id_i</span><span class="p">[</span><span class="n">lg_ways_lp</span><span class="o">-</span><span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">)];</span>
+<a name="l-40"></a>    <span class="k">end</span>
+<a name="l-41"></a>  <span class="k">endgenerate</span>
+<a name="l-42"></a>
+<a name="l-43"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

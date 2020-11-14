@@ -117,118 +117,122 @@
 <a href="#l-109">109</a>
 <a href="#l-110">110</a>
 <a href="#l-111">111</a>
-<a href="#l-112">112</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
+<a href="#l-112">112</a>
+<a href="#l-113">113</a>
+<a href="#l-114">114</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
 <a name="l-2"></a><span class="cm"> *  bsg_parallel_in_serial_out_dynamic.v</span>
 <a name="l-3"></a><span class="cm"> *</span>
 <a name="l-4"></a><span class="cm"> *  Paul Gao        06/2019</span>
 <a name="l-5"></a><span class="cm"> *</span>
 <a name="l-6"></a><span class="cm"> */</span>
 <a name="l-7"></a>
-<a name="l-8"></a><span class="k">module</span> <span class="n">bsg_parallel_in_serial_out_dynamic</span>
-<a name="l-9"></a>                               
-<a name="l-10"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>          <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-11"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">max_els_p</span>        <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-12"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">lg_max_els_lp</span>    <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">max_els_p</span><span class="p">)</span>
-<a name="l-13"></a>  <span class="p">)</span>
-<a name="l-14"></a>  
-<a name="l-15"></a>  <span class="p">(</span><span class="k">input</span> <span class="n">clk_i</span>
-<a name="l-16"></a>  <span class="p">,</span><span class="k">input</span> <span class="n">reset_i</span>
-<a name="l-17"></a>  
-<a name="l-18"></a>  <span class="c1">// Input side</span>
-<a name="l-19"></a>  <span class="p">,</span><span class="k">input</span>                               <span class="n">v_i</span>
-<a name="l-20"></a>  <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">lg_max_els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">len_i</span>
-<a name="l-21"></a>  <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">max_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
-<a name="l-22"></a>  <span class="p">,</span><span class="k">output</span>                              <span class="n">ready_o</span>
-<a name="l-23"></a>  
-<a name="l-24"></a>  <span class="c1">// Output side</span>
-<a name="l-25"></a>  <span class="p">,</span><span class="k">output</span>                              <span class="n">v_o</span>
-<a name="l-26"></a>  <span class="p">,</span><span class="k">output</span>                              <span class="n">len_v_o</span>
-<a name="l-27"></a>  <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                <span class="n">data_o</span>
-<a name="l-28"></a>  <span class="p">,</span><span class="k">input</span>                               <span class="n">yumi_i</span>
-<a name="l-29"></a>  <span class="p">);</span>
-<a name="l-30"></a>
-<a name="l-31"></a>  <span class="kt">logic</span>                              <span class="n">go_fifo_yumi_li</span><span class="p">;</span>
-<a name="l-32"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">lg_max_els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">len_lo</span><span class="p">;</span>
-<a name="l-33"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">max_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_data_lo</span><span class="p">;</span>
-<a name="l-34"></a>  
-<a name="l-35"></a>  <span class="c1">// Go fifo and data fifo share the same control logic</span>
-<a name="l-36"></a>  <span class="c1">// They always contain same number of elements in memory</span>
-<a name="l-37"></a>  
-<a name="l-38"></a>  <span class="c1">// Go fifo</span>
-<a name="l-39"></a>  <span class="n">bsg_two_fifo</span>
-<a name="l-40"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">lg_max_els_lp</span>  <span class="p">)</span>
-<a name="l-41"></a>  <span class="p">)</span> <span class="n">go_fifo</span>
-<a name="l-42"></a>  <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span>          <span class="p">)</span>
-<a name="l-43"></a>  <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span>        <span class="p">)</span>
-<a name="l-44"></a>  
-<a name="l-45"></a>  <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">ready_o</span>        <span class="p">)</span>
-<a name="l-46"></a>  <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">len_i</span>          <span class="p">)</span>
-<a name="l-47"></a>  <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">v_i</span>            <span class="p">)</span>
-<a name="l-48"></a>  
-<a name="l-49"></a>  <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">v_o</span>            <span class="p">)</span>
-<a name="l-50"></a>  <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">len_lo</span>         <span class="p">)</span>
-<a name="l-51"></a>  <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">go_fifo_yumi_li</span><span class="p">)</span>
-<a name="l-52"></a>  <span class="p">);</span>
-<a name="l-53"></a>
-<a name="l-54"></a>  <span class="c1">// Data fifo</span>
-<a name="l-55"></a>  <span class="n">bsg_two_fifo</span>
-<a name="l-56"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">max_els_p</span><span class="o">*</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-57"></a>  <span class="p">)</span> <span class="n">data_fifo</span>
-<a name="l-58"></a>  <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span>            <span class="p">)</span>
-<a name="l-59"></a>  <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span>          <span class="p">)</span>
-<a name="l-60"></a>                             
-<a name="l-61"></a>  <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span>                 <span class="p">)</span>
-<a name="l-62"></a>  <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span>           <span class="p">)</span>
-<a name="l-63"></a>  <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">v_i</span>              <span class="p">)</span>
-<a name="l-64"></a>                             
-<a name="l-65"></a>  <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span>                 <span class="p">)</span>
-<a name="l-66"></a>  <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">fifo_data_lo</span>     <span class="p">)</span>
-<a name="l-67"></a>  <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">go_fifo_yumi_li</span>  <span class="p">)</span>
-<a name="l-68"></a>  <span class="p">);</span>
-<a name="l-69"></a>  
-<a name="l-70"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">lg_max_els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">count_r</span><span class="p">,</span> <span class="n">count_lo</span><span class="p">;</span>
-<a name="l-71"></a>  <span class="kt">logic</span> <span class="n">clear_li</span><span class="p">,</span> <span class="n">up_li</span><span class="p">;</span>
-<a name="l-72"></a>  <span class="kt">logic</span> <span class="n">count_r_is_zero</span><span class="p">,</span> <span class="n">count_r_is_last</span><span class="p">;</span>
-<a name="l-73"></a>  
-<a name="l-74"></a>  <span class="c1">// fix evaluate to Z problem in simulation</span>
-<a name="l-75"></a>  <span class="k">assign</span> <span class="n">count_lo</span> <span class="o">=</span> <span class="n">count_r</span><span class="p">;</span>
-<a name="l-76"></a>  
-<a name="l-77"></a>  <span class="k">assign</span> <span class="n">count_r_is_zero</span> <span class="o">=</span> <span class="p">(</span><span class="n">count_lo</span> <span class="o">==</span> <span class="n">lg_max_els_lp</span><span class="p">&#39;(</span><span class="mi">0</span><span class="p">));</span>
-<a name="l-78"></a>  <span class="k">assign</span> <span class="n">count_r_is_last</span> <span class="o">=</span> <span class="p">(</span><span class="n">count_lo</span> <span class="o">==</span> <span class="n">len_lo</span>           <span class="p">);</span>
-<a name="l-79"></a>  
-<a name="l-80"></a>  <span class="c1">// Indicate if output word is first word of packet</span>
-<a name="l-81"></a>  <span class="k">assign</span> <span class="n">len_v_o</span> <span class="o">=</span> <span class="n">count_r_is_zero</span><span class="p">;</span>
-<a name="l-82"></a>  
-<a name="l-83"></a>  <span class="c1">// Count up if current word is not last word of packet.</span>
-<a name="l-84"></a>  <span class="k">assign</span> <span class="n">up_li</span> <span class="o">=</span> <span class="n">yumi_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">count_r_is_last</span><span class="p">;</span>
-<a name="l-85"></a>  
-<a name="l-86"></a>  <span class="c1">// Clear counter when whole packet finish sending</span>
-<a name="l-87"></a>  <span class="k">assign</span> <span class="n">clear_li</span> <span class="o">=</span> <span class="n">yumi_i</span> <span class="o">&amp;</span> <span class="n">count_r_is_last</span><span class="p">;</span>
-<a name="l-88"></a>  <span class="k">assign</span> <span class="n">go_fifo_yumi_li</span> <span class="o">=</span> <span class="n">clear_li</span><span class="p">;</span>
-<a name="l-89"></a>  
-<a name="l-90"></a>  <span class="c1">// Length counter</span>
-<a name="l-91"></a>  <span class="n">bsg_counter_clear_up</span>
-<a name="l-92"></a> <span class="p">#(.</span><span class="n">max_val_p</span> <span class="p">(</span><span class="n">max_els_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-93"></a>  <span class="p">,.</span><span class="n">init_val_p</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a name="l-94"></a>  <span class="p">)</span> <span class="n">ctr</span>
-<a name="l-95"></a>  <span class="p">(.</span><span class="n">clk_i</span>     <span class="p">(</span><span class="n">clk_i</span>   <span class="p">)</span>
-<a name="l-96"></a>  <span class="p">,.</span><span class="n">reset_i</span>   <span class="p">(</span><span class="n">reset_i</span> <span class="p">)</span>
-<a name="l-97"></a>  <span class="p">,.</span><span class="n">clear_i</span>   <span class="p">(</span><span class="n">clear_li</span><span class="p">)</span>
-<a name="l-98"></a>  <span class="p">,.</span><span class="n">up_i</span>      <span class="p">(</span><span class="n">up_li</span>   <span class="p">)</span>
-<a name="l-99"></a>  <span class="p">,.</span><span class="n">count_o</span>   <span class="p">(</span><span class="n">count_r</span> <span class="p">)</span>
-<a name="l-100"></a>  <span class="p">);</span>
-<a name="l-101"></a>  
-<a name="l-102"></a>  <span class="c1">// Output mux</span>
-<a name="l-103"></a>  <span class="n">bsg_mux</span>
-<a name="l-104"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span>     <span class="p">)</span>
-<a name="l-105"></a>  <span class="p">,.</span><span class="n">els_p</span>  <span class="p">(</span><span class="n">max_els_p</span>   <span class="p">)</span>
-<a name="l-106"></a>  <span class="p">)</span> <span class="n">data_mux</span>
-<a name="l-107"></a>  <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">fifo_data_lo</span><span class="p">)</span>
-<a name="l-108"></a>  <span class="p">,.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">count_lo</span>    <span class="p">)</span>
-<a name="l-109"></a>  <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_o</span>      <span class="p">)</span>
-<a name="l-110"></a>  <span class="p">);</span>
-<a name="l-111"></a>
-<a name="l-112"></a><span class="k">endmodule</span>
+<a name="l-8"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-9"></a>
+<a name="l-10"></a><span class="k">module</span> <span class="n">bsg_parallel_in_serial_out_dynamic</span>
+<a name="l-11"></a>                               
+<a name="l-12"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span>          <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-13"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">max_els_p</span>        <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-14"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="n">lg_max_els_lp</span>    <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">max_els_p</span><span class="p">)</span>
+<a name="l-15"></a>  <span class="p">)</span>
+<a name="l-16"></a>  
+<a name="l-17"></a>  <span class="p">(</span><span class="k">input</span> <span class="n">clk_i</span>
+<a name="l-18"></a>  <span class="p">,</span><span class="k">input</span> <span class="n">reset_i</span>
+<a name="l-19"></a>  
+<a name="l-20"></a>  <span class="c1">// Input side</span>
+<a name="l-21"></a>  <span class="p">,</span><span class="k">input</span>                               <span class="n">v_i</span>
+<a name="l-22"></a>  <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">lg_max_els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">len_i</span>
+<a name="l-23"></a>  <span class="p">,</span><span class="k">input</span>  <span class="p">[</span><span class="n">max_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
+<a name="l-24"></a>  <span class="p">,</span><span class="k">output</span>                              <span class="n">ready_o</span>
+<a name="l-25"></a>  
+<a name="l-26"></a>  <span class="c1">// Output side</span>
+<a name="l-27"></a>  <span class="p">,</span><span class="k">output</span>                              <span class="n">v_o</span>
+<a name="l-28"></a>  <span class="p">,</span><span class="k">output</span>                              <span class="n">len_v_o</span>
+<a name="l-29"></a>  <span class="p">,</span><span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                <span class="n">data_o</span>
+<a name="l-30"></a>  <span class="p">,</span><span class="k">input</span>                               <span class="n">yumi_i</span>
+<a name="l-31"></a>  <span class="p">);</span>
+<a name="l-32"></a>
+<a name="l-33"></a>  <span class="kt">logic</span>                              <span class="n">go_fifo_yumi_li</span><span class="p">;</span>
+<a name="l-34"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">lg_max_els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">len_lo</span><span class="p">;</span>
+<a name="l-35"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">max_els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">fifo_data_lo</span><span class="p">;</span>
+<a name="l-36"></a>  
+<a name="l-37"></a>  <span class="c1">// Go fifo and data fifo share the same control logic</span>
+<a name="l-38"></a>  <span class="c1">// They always contain same number of elements in memory</span>
+<a name="l-39"></a>  
+<a name="l-40"></a>  <span class="c1">// Go fifo</span>
+<a name="l-41"></a>  <span class="n">bsg_two_fifo</span>
+<a name="l-42"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">lg_max_els_lp</span>  <span class="p">)</span>
+<a name="l-43"></a>  <span class="p">)</span> <span class="n">go_fifo</span>
+<a name="l-44"></a>  <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span>          <span class="p">)</span>
+<a name="l-45"></a>  <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span>        <span class="p">)</span>
+<a name="l-46"></a>  
+<a name="l-47"></a>  <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span><span class="n">ready_o</span>        <span class="p">)</span>
+<a name="l-48"></a>  <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">len_i</span>          <span class="p">)</span>
+<a name="l-49"></a>  <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">v_i</span>            <span class="p">)</span>
+<a name="l-50"></a>  
+<a name="l-51"></a>  <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span><span class="n">v_o</span>            <span class="p">)</span>
+<a name="l-52"></a>  <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">len_lo</span>         <span class="p">)</span>
+<a name="l-53"></a>  <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">go_fifo_yumi_li</span><span class="p">)</span>
+<a name="l-54"></a>  <span class="p">);</span>
+<a name="l-55"></a>
+<a name="l-56"></a>  <span class="c1">// Data fifo</span>
+<a name="l-57"></a>  <span class="n">bsg_two_fifo</span>
+<a name="l-58"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">max_els_p</span><span class="o">*</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-59"></a>  <span class="p">)</span> <span class="n">data_fifo</span>
+<a name="l-60"></a>  <span class="p">(.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_i</span>            <span class="p">)</span>
+<a name="l-61"></a>  <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span>          <span class="p">)</span>
+<a name="l-62"></a>                             
+<a name="l-63"></a>  <span class="p">,.</span><span class="n">ready_o</span><span class="p">(</span>                 <span class="p">)</span>
+<a name="l-64"></a>  <span class="p">,.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">data_i</span>           <span class="p">)</span>
+<a name="l-65"></a>  <span class="p">,.</span><span class="n">v_i</span>    <span class="p">(</span><span class="n">v_i</span>              <span class="p">)</span>
+<a name="l-66"></a>                             
+<a name="l-67"></a>  <span class="p">,.</span><span class="n">v_o</span>    <span class="p">(</span>                 <span class="p">)</span>
+<a name="l-68"></a>  <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">fifo_data_lo</span>     <span class="p">)</span>
+<a name="l-69"></a>  <span class="p">,.</span><span class="n">yumi_i</span> <span class="p">(</span><span class="n">go_fifo_yumi_li</span>  <span class="p">)</span>
+<a name="l-70"></a>  <span class="p">);</span>
+<a name="l-71"></a>  
+<a name="l-72"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">lg_max_els_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">count_r</span><span class="p">,</span> <span class="n">count_lo</span><span class="p">;</span>
+<a name="l-73"></a>  <span class="kt">logic</span> <span class="n">clear_li</span><span class="p">,</span> <span class="n">up_li</span><span class="p">;</span>
+<a name="l-74"></a>  <span class="kt">logic</span> <span class="n">count_r_is_zero</span><span class="p">,</span> <span class="n">count_r_is_last</span><span class="p">;</span>
+<a name="l-75"></a>  
+<a name="l-76"></a>  <span class="c1">// fix evaluate to Z problem in simulation</span>
+<a name="l-77"></a>  <span class="k">assign</span> <span class="n">count_lo</span> <span class="o">=</span> <span class="n">count_r</span><span class="p">;</span>
+<a name="l-78"></a>  
+<a name="l-79"></a>  <span class="k">assign</span> <span class="n">count_r_is_zero</span> <span class="o">=</span> <span class="p">(</span><span class="n">count_lo</span> <span class="o">==</span> <span class="n">lg_max_els_lp</span><span class="p">&#39;(</span><span class="mi">0</span><span class="p">));</span>
+<a name="l-80"></a>  <span class="k">assign</span> <span class="n">count_r_is_last</span> <span class="o">=</span> <span class="p">(</span><span class="n">count_lo</span> <span class="o">==</span> <span class="n">len_lo</span>           <span class="p">);</span>
+<a name="l-81"></a>  
+<a name="l-82"></a>  <span class="c1">// Indicate if output word is first word of packet</span>
+<a name="l-83"></a>  <span class="k">assign</span> <span class="n">len_v_o</span> <span class="o">=</span> <span class="n">count_r_is_zero</span><span class="p">;</span>
+<a name="l-84"></a>  
+<a name="l-85"></a>  <span class="c1">// Count up if current word is not last word of packet.</span>
+<a name="l-86"></a>  <span class="k">assign</span> <span class="n">up_li</span> <span class="o">=</span> <span class="n">yumi_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">count_r_is_last</span><span class="p">;</span>
+<a name="l-87"></a>  
+<a name="l-88"></a>  <span class="c1">// Clear counter when whole packet finish sending</span>
+<a name="l-89"></a>  <span class="k">assign</span> <span class="n">clear_li</span> <span class="o">=</span> <span class="n">yumi_i</span> <span class="o">&amp;</span> <span class="n">count_r_is_last</span><span class="p">;</span>
+<a name="l-90"></a>  <span class="k">assign</span> <span class="n">go_fifo_yumi_li</span> <span class="o">=</span> <span class="n">clear_li</span><span class="p">;</span>
+<a name="l-91"></a>  
+<a name="l-92"></a>  <span class="c1">// Length counter</span>
+<a name="l-93"></a>  <span class="n">bsg_counter_clear_up</span>
+<a name="l-94"></a> <span class="p">#(.</span><span class="n">max_val_p</span> <span class="p">(</span><span class="n">max_els_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-95"></a>  <span class="p">,.</span><span class="n">init_val_p</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-96"></a>  <span class="p">)</span> <span class="n">ctr</span>
+<a name="l-97"></a>  <span class="p">(.</span><span class="n">clk_i</span>     <span class="p">(</span><span class="n">clk_i</span>   <span class="p">)</span>
+<a name="l-98"></a>  <span class="p">,.</span><span class="n">reset_i</span>   <span class="p">(</span><span class="n">reset_i</span> <span class="p">)</span>
+<a name="l-99"></a>  <span class="p">,.</span><span class="n">clear_i</span>   <span class="p">(</span><span class="n">clear_li</span><span class="p">)</span>
+<a name="l-100"></a>  <span class="p">,.</span><span class="n">up_i</span>      <span class="p">(</span><span class="n">up_li</span>   <span class="p">)</span>
+<a name="l-101"></a>  <span class="p">,.</span><span class="n">count_o</span>   <span class="p">(</span><span class="n">count_r</span> <span class="p">)</span>
+<a name="l-102"></a>  <span class="p">);</span>
+<a name="l-103"></a>  
+<a name="l-104"></a>  <span class="c1">// Output mux</span>
+<a name="l-105"></a>  <span class="n">bsg_mux</span>
+<a name="l-106"></a> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span>     <span class="p">)</span>
+<a name="l-107"></a>  <span class="p">,.</span><span class="n">els_p</span>  <span class="p">(</span><span class="n">max_els_p</span>   <span class="p">)</span>
+<a name="l-108"></a>  <span class="p">)</span> <span class="n">data_mux</span>
+<a name="l-109"></a>  <span class="p">(.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">fifo_data_lo</span><span class="p">)</span>
+<a name="l-110"></a>  <span class="p">,.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">count_lo</span>    <span class="p">)</span>
+<a name="l-111"></a>  <span class="p">,.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">data_o</span>      <span class="p">)</span>
+<a name="l-112"></a>  <span class="p">);</span>
+<a name="l-113"></a>
+<a name="l-114"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

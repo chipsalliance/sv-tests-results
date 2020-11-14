@@ -36,37 +36,41 @@
 <a href="#l-28">28</a>
 <a href="#l-29">29</a>
 <a href="#l-30">30</a>
-<a href="#l-31">31</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 10-29-14</span>
+<a href="#l-31">31</a>
+<a href="#l-32">32</a>
+<a href="#l-33">33</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 10-29-14</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">// implements a shift register of fixed latency</span>
 <a name="l-4"></a><span class="c1">//</span>
 <a name="l-5"></a><span class="c1">//</span>
 <a name="l-6"></a>
-<a name="l-7"></a><span class="k">module</span> <span class="n">bsg_shift_reg</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-8"></a>                       <span class="p">,</span> <span class="k">parameter</span> <span class="n">stages_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-9"></a>                       <span class="p">)</span>
-<a name="l-10"></a>   <span class="p">(</span><span class="k">input</span> <span class="n">clk</span>
-<a name="l-11"></a>    <span class="p">,</span> <span class="k">input</span> <span class="n">reset_i</span>
-<a name="l-12"></a>    <span class="p">,</span> <span class="k">input</span> <span class="n">valid_i</span>
-<a name="l-13"></a>    <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
-<a name="l-14"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">valid_o</span>
-<a name="l-15"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
-<a name="l-16"></a>    <span class="p">);</span>
-<a name="l-17"></a>
-<a name="l-18"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shift_r</span><span class="p">;</span>
+<a name="l-7"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-8"></a>
+<a name="l-9"></a><span class="k">module</span> <span class="n">bsg_shift_reg</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-10"></a>                       <span class="p">,</span> <span class="k">parameter</span> <span class="n">stages_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-11"></a>                       <span class="p">)</span>
+<a name="l-12"></a>   <span class="p">(</span><span class="k">input</span> <span class="n">clk</span>
+<a name="l-13"></a>    <span class="p">,</span> <span class="k">input</span> <span class="n">reset_i</span>
+<a name="l-14"></a>    <span class="p">,</span> <span class="k">input</span> <span class="n">valid_i</span>
+<a name="l-15"></a>    <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
+<a name="l-16"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">valid_o</span>
+<a name="l-17"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span>
+<a name="l-18"></a>    <span class="p">);</span>
 <a name="l-19"></a>
-<a name="l-20"></a>   <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span>
-<a name="l-21"></a>     <span class="k">if</span> <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-22"></a>       <span class="n">shift_r</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-23"></a>     <span class="k">else</span>
-<a name="l-24"></a>       <span class="k">begin</span>
-<a name="l-25"></a>	  <span class="c1">// maxes and mins are for handling stages_p=1</span>
-<a name="l-26"></a>	  <span class="n">shift_r</span><span class="p">[</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="no">`BSG_MIN</span><span class="p">(</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span> <span class="o">&lt;=</span> <span class="n">shift_r</span><span class="p">[</span><span class="no">`BSG_MAX</span><span class="p">(</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-27"></a>	  <span class="n">shift_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">{</span> <span class="n">valid_i</span><span class="p">,</span> <span class="n">data_i</span> <span class="p">};</span>
-<a name="l-28"></a>       <span class="k">end</span>
-<a name="l-29"></a>   <span class="k">assign</span> <span class="p">{</span> <span class="n">valid_o</span><span class="p">,</span> <span class="n">data_o</span> <span class="p">}</span> <span class="o">=</span> <span class="n">shift_r</span><span class="p">[</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
-<a name="l-30"></a>
-<a name="l-31"></a><span class="k">endmodule</span>
+<a name="l-20"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shift_r</span><span class="p">;</span>
+<a name="l-21"></a>
+<a name="l-22"></a>   <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span>
+<a name="l-23"></a>     <span class="k">if</span> <span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-24"></a>       <span class="n">shift_r</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-25"></a>     <span class="k">else</span>
+<a name="l-26"></a>       <span class="k">begin</span>
+<a name="l-27"></a>	  <span class="c1">// maxes and mins are for handling stages_p=1</span>
+<a name="l-28"></a>	  <span class="n">shift_r</span><span class="p">[</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="no">`BSG_MIN</span><span class="p">(</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span> <span class="o">&lt;=</span> <span class="n">shift_r</span><span class="p">[</span><span class="no">`BSG_MAX</span><span class="p">(</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-29"></a>	  <span class="n">shift_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">{</span> <span class="n">valid_i</span><span class="p">,</span> <span class="n">data_i</span> <span class="p">};</span>
+<a name="l-30"></a>       <span class="k">end</span>
+<a name="l-31"></a>   <span class="k">assign</span> <span class="p">{</span> <span class="n">valid_o</span><span class="p">,</span> <span class="n">data_o</span> <span class="p">}</span> <span class="o">=</span> <span class="n">shift_r</span><span class="p">[</span><span class="n">stages_p</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-32"></a>
+<a name="l-33"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

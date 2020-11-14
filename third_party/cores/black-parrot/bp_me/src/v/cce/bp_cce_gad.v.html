@@ -155,7 +155,10 @@
 <a href="#l-147">147</a>
 <a href="#l-148">148</a>
 <a href="#l-149">149</a>
-<a href="#l-150">150</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
+<a href="#l-150">150</a>
+<a href="#l-151">151</a>
+<a href="#l-152">152</a>
+<a href="#l-153">153</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
 <a name="l-2"></a><span class="cm"> *</span>
 <a name="l-3"></a><span class="cm"> * Name:</span>
 <a name="l-4"></a><span class="cm"> *   bp_cce_gad.v</span>
@@ -176,7 +179,7 @@
 <a name="l-19"></a>  <span class="kn">import</span> <span class="nn">bp_common_pkg::*</span><span class="p">;</span>
 <a name="l-20"></a>  <span class="kn">import</span> <span class="nn">bp_common_aviary_pkg::*</span><span class="p">;</span>
 <a name="l-21"></a>  <span class="kn">import</span> <span class="nn">bp_cce_pkg::*</span><span class="p">;</span>
-<a name="l-22"></a>  <span class="p">#(</span><span class="k">parameter</span> <span class="n">bp_params_e</span> <span class="n">bp_params_p</span> <span class="o">=</span> <span class="n">e_bp_inv_cfg</span>
+<a name="l-22"></a>  <span class="p">#(</span><span class="k">parameter</span> <span class="n">bp_params_e</span> <span class="n">bp_params_p</span> <span class="o">=</span> <span class="n">e_bp_default_cfg</span>
 <a name="l-23"></a>    <span class="no">`declare_bp_proc_params</span><span class="p">(</span><span class="n">bp_params_p</span><span class="p">)</span>
 <a name="l-24"></a>
 <a name="l-25"></a>    <span class="c1">// Derived parameters</span>
@@ -204,107 +207,110 @@
 <a name="l-47"></a>
 <a name="l-48"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">lce_id_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                     <span class="n">owner_lce_o</span>
 <a name="l-49"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">lce_assoc_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                  <span class="n">owner_way_o</span>
-<a name="l-50"></a>
-<a name="l-51"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">replacement_flag_o</span>
-<a name="l-52"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">upgrade_flag_o</span>
-<a name="l-53"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_shared_flag_o</span>
-<a name="l-54"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_exclusive_flag_o</span>
-<a name="l-55"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_modified_flag_o</span>
-<a name="l-56"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_owned_flag_o</span>
-<a name="l-57"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_forward_flag_o</span>
-<a name="l-58"></a>  <span class="p">);</span>
-<a name="l-59"></a>
-<a name="l-60"></a>  <span class="c1">// Suppress unused signal warnings</span>
-<a name="l-61"></a>  <span class="kt">wire</span> <span class="n">unused</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">{</span><span class="n">clk_i</span><span class="p">,</span> <span class="n">reset_i</span><span class="p">,</span> <span class="n">sharers_v_i</span><span class="p">};</span>
-<a name="l-62"></a>
-<a name="l-63"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="n">lg_num_lce_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">req_lce_id</span> <span class="o">=</span> <span class="n">req_lce_i</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_num_lce_lp</span><span class="p">];</span>
-<a name="l-64"></a>
-<a name="l-65"></a>  <span class="c1">// one hot decoding of request LCE ID</span>
-<a name="l-66"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_id_one_hot</span><span class="p">;</span>
-<a name="l-67"></a>  <span class="n">bsg_decode</span>
-<a name="l-68"></a>    <span class="p">#(.</span><span class="n">num_out_p</span><span class="p">(</span><span class="n">num_lce_p</span><span class="p">)</span>
-<a name="l-69"></a>     <span class="p">)</span>
-<a name="l-70"></a>     <span class="n">lce_id_to_one_hot</span>
-<a name="l-71"></a>     <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">req_lce_id</span><span class="p">)</span>
-<a name="l-72"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">lce_id_one_hot</span><span class="p">)</span>
-<a name="l-73"></a>     <span class="p">);</span>
-<a name="l-74"></a>
-<a name="l-75"></a>  <span class="c1">// Cache hit per LCE</span>
-<a name="l-76"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached</span><span class="p">;</span>
-<a name="l-77"></a>  <span class="k">assign</span> <span class="n">lce_cached</span> <span class="o">=</span> <span class="n">sharers_hits_i</span><span class="p">;</span>
-<a name="l-78"></a>
-<a name="l-79"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_S</span><span class="p">;</span>
-<a name="l-80"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_E</span><span class="p">;</span>
-<a name="l-81"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_M</span><span class="p">;</span>
-<a name="l-82"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_O</span><span class="p">;</span>
-<a name="l-83"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_F</span><span class="p">;</span>
-<a name="l-84"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_lce_p</span><span class="p">;</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">lce_cached_flags</span>
-<a name="l-85"></a>    <span class="k">assign</span> <span class="n">lce_cached_S</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_S</span><span class="p">);</span>
-<a name="l-86"></a>    <span class="k">assign</span> <span class="n">lce_cached_E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_E</span><span class="p">);</span>
-<a name="l-87"></a>    <span class="k">assign</span> <span class="n">lce_cached_M</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_M</span><span class="p">);</span>
-<a name="l-88"></a>    <span class="k">assign</span> <span class="n">lce_cached_O</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_O</span><span class="p">);</span>
-<a name="l-89"></a>    <span class="k">assign</span> <span class="n">lce_cached_F</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_F</span><span class="p">);</span>
-<a name="l-90"></a>  <span class="k">end</span>
-<a name="l-91"></a>
-<a name="l-92"></a>  <span class="c1">// Block cached in some state in LCE other than requestor</span>
-<a name="l-93"></a>  <span class="k">assign</span> <span class="n">cached_shared_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_S</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
-<a name="l-94"></a>  <span class="k">assign</span> <span class="n">cached_exclusive_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_E</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
-<a name="l-95"></a>  <span class="k">assign</span> <span class="n">cached_modified_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_M</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
-<a name="l-96"></a>  <span class="k">assign</span> <span class="n">cached_owned_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_O</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
-<a name="l-97"></a>  <span class="k">assign</span> <span class="n">cached_forward_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_F</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
-<a name="l-98"></a>
-<a name="l-99"></a>  <span class="c1">// hit in requesting LCE</span>
-<a name="l-100"></a>  <span class="kt">logic</span> <span class="n">req_lce_cached</span><span class="p">;</span>
-<a name="l-101"></a>  <span class="k">assign</span> <span class="n">req_lce_cached</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">];</span>
-<a name="l-102"></a>  <span class="c1">// read-only permissions in requesting LCE (block in S, F, or O)</span>
-<a name="l-103"></a>  <span class="kt">logic</span> <span class="n">req_lce_ro</span><span class="p">;</span>
-<a name="l-104"></a>  <span class="k">assign</span> <span class="n">req_lce_ro</span> <span class="o">=</span> <span class="n">req_lce_cached</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_S</span><span class="p">)</span>
-<a name="l-105"></a>                                        <span class="o">|</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_F</span><span class="p">)</span>
-<a name="l-106"></a>                                        <span class="o">|</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_O</span><span class="p">));</span>
-<a name="l-107"></a>
-<a name="l-108"></a>  <span class="k">assign</span> <span class="n">req_addr_way_o</span> <span class="o">=</span> <span class="n">req_lce_cached</span>
-<a name="l-109"></a>    <span class="o">?</span> <span class="n">sharers_ways_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span>
-<a name="l-110"></a>    <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-111"></a>
-<a name="l-112"></a>  <span class="c1">// Flag outputs</span>
-<a name="l-113"></a>
-<a name="l-114"></a>  <span class="c1">// Upgrade from read-only to read-write</span>
-<a name="l-115"></a>  <span class="c1">// Requesting LCE has block cached in read-only state and request is a store-miss</span>
-<a name="l-116"></a>  <span class="k">assign</span> <span class="n">upgrade_flag_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">req_type_flag_i</span> <span class="o">&amp;</span> <span class="n">req_lce_ro</span><span class="p">);</span>
-<a name="l-117"></a>
-<a name="l-118"></a>  <span class="c1">// Replace the LRU block if not doing an upgrade and the lru block might be dirty</span>
-<a name="l-119"></a>  <span class="k">assign</span> <span class="n">replacement_flag_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">upgrade_flag_o</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">lru_coh_state_i</span> <span class="o">==</span> <span class="n">e_COH_E</span><span class="p">)</span>
-<a name="l-120"></a>                                                 <span class="o">|</span> <span class="p">(</span><span class="n">lru_coh_state_i</span> <span class="o">==</span> <span class="n">e_COH_M</span><span class="p">)</span>
-<a name="l-121"></a>                                                 <span class="o">|</span> <span class="p">(</span><span class="n">lru_coh_state_i</span> <span class="o">==</span> <span class="n">e_COH_O</span><span class="p">));</span>
-<a name="l-122"></a>
-<a name="l-123"></a>  <span class="c1">// Owner LCE</span>
-<a name="l-124"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">owner_lce_one_hot</span><span class="p">;</span>
-<a name="l-125"></a>  <span class="c1">// output owner even if it is same as requestor</span>
-<a name="l-126"></a>  <span class="c1">// Owner will be in one of states: E, M, O, or F; and only one LCE may be in those states</span>
-<a name="l-127"></a>  <span class="c1">// It is an error if more than one LCE is in one of these states (or the two LCE&#39;s are in some</span>
-<a name="l-128"></a>  <span class="c1">// pair of these states) for a given cache block.</span>
-<a name="l-129"></a>  <span class="k">assign</span> <span class="n">owner_lce_one_hot</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span><span class="p">)</span>
-<a name="l-130"></a>                             <span class="o">?</span> <span class="p">(</span><span class="n">lce_cached_E</span> <span class="o">|</span> <span class="n">lce_cached_M</span> <span class="o">|</span> <span class="n">lce_cached_O</span> <span class="o">|</span> <span class="n">lce_cached_F</span><span class="p">)</span>
-<a name="l-131"></a>                             <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-132"></a>
-<a name="l-133"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">lg_num_lce_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">owner_lce_lo</span><span class="p">;</span>
-<a name="l-134"></a>  <span class="kt">logic</span> <span class="n">owner_lce_v</span><span class="p">;</span>
-<a name="l-135"></a>  <span class="n">bsg_encode_one_hot</span>
-<a name="l-136"></a>    <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">num_lce_p</span><span class="p">)</span>
-<a name="l-137"></a>      <span class="p">,.</span><span class="n">lo_to_hi_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-138"></a>      <span class="p">)</span>
-<a name="l-139"></a>    <span class="n">lce_cached_to_lce_id</span>
-<a name="l-140"></a>     <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">owner_lce_one_hot</span><span class="p">)</span>
-<a name="l-141"></a>      <span class="p">,.</span><span class="n">addr_o</span><span class="p">(</span><span class="n">owner_lce_lo</span><span class="p">)</span>
-<a name="l-142"></a>      <span class="p">,.</span><span class="n">v_o</span><span class="p">(</span><span class="n">owner_lce_v</span><span class="p">)</span>
-<a name="l-143"></a>      <span class="p">);</span>
-<a name="l-144"></a>
-<a name="l-145"></a>  <span class="k">assign</span> <span class="n">owner_lce_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span> <span class="o">&amp;</span> <span class="n">owner_lce_v</span><span class="p">)</span>
-<a name="l-146"></a>                          <span class="o">?</span> <span class="p">{</span><span class="m">&#39;0</span><span class="p">,</span> <span class="n">owner_lce_lo</span><span class="p">}</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-147"></a>  <span class="k">assign</span> <span class="n">owner_way_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span> <span class="o">&amp;</span> <span class="n">owner_lce_v</span><span class="p">)</span>
-<a name="l-148"></a>                          <span class="o">?</span> <span class="p">{</span><span class="m">&#39;0</span><span class="p">,</span> <span class="n">sharers_ways_i</span><span class="p">[</span><span class="n">owner_lce_lo</span><span class="p">]}</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-149"></a>
-<a name="l-150"></a><span class="k">endmodule</span>
+<a name="l-50"></a>   <span class="p">,</span> <span class="k">output</span> <span class="n">bp_coh_states_e</span>                                <span class="n">owner_coh_state_o</span>
+<a name="l-51"></a>
+<a name="l-52"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">replacement_flag_o</span>
+<a name="l-53"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">upgrade_flag_o</span>
+<a name="l-54"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_shared_flag_o</span>
+<a name="l-55"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_exclusive_flag_o</span>
+<a name="l-56"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_modified_flag_o</span>
+<a name="l-57"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_owned_flag_o</span>
+<a name="l-58"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                          <span class="n">cached_forward_flag_o</span>
+<a name="l-59"></a>  <span class="p">);</span>
+<a name="l-60"></a>
+<a name="l-61"></a>  <span class="c1">// Suppress unused signal warnings</span>
+<a name="l-62"></a>  <span class="kt">wire</span> <span class="n">unused</span> <span class="o">=</span> <span class="o">&amp;</span><span class="p">{</span><span class="n">clk_i</span><span class="p">,</span> <span class="n">reset_i</span><span class="p">,</span> <span class="n">sharers_v_i</span><span class="p">};</span>
+<a name="l-63"></a>
+<a name="l-64"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="n">lg_num_lce_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">req_lce_id</span> <span class="o">=</span> <span class="n">req_lce_i</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_num_lce_lp</span><span class="p">];</span>
+<a name="l-65"></a>
+<a name="l-66"></a>  <span class="c1">// one hot decoding of request LCE ID</span>
+<a name="l-67"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_id_one_hot</span><span class="p">;</span>
+<a name="l-68"></a>  <span class="n">bsg_decode</span>
+<a name="l-69"></a>    <span class="p">#(.</span><span class="n">num_out_p</span><span class="p">(</span><span class="n">num_lce_p</span><span class="p">)</span>
+<a name="l-70"></a>     <span class="p">)</span>
+<a name="l-71"></a>     <span class="n">lce_id_to_one_hot</span>
+<a name="l-72"></a>     <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">req_lce_id</span><span class="p">)</span>
+<a name="l-73"></a>      <span class="p">,.</span><span class="n">o</span><span class="p">(</span><span class="n">lce_id_one_hot</span><span class="p">)</span>
+<a name="l-74"></a>     <span class="p">);</span>
+<a name="l-75"></a>
+<a name="l-76"></a>  <span class="c1">// Cache hit per LCE</span>
+<a name="l-77"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached</span><span class="p">;</span>
+<a name="l-78"></a>  <span class="k">assign</span> <span class="n">lce_cached</span> <span class="o">=</span> <span class="n">sharers_hits_i</span><span class="p">;</span>
+<a name="l-79"></a>
+<a name="l-80"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_S</span><span class="p">;</span>
+<a name="l-81"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_E</span><span class="p">;</span>
+<a name="l-82"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_M</span><span class="p">;</span>
+<a name="l-83"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_O</span><span class="p">;</span>
+<a name="l-84"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lce_cached_F</span><span class="p">;</span>
+<a name="l-85"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">num_lce_p</span><span class="p">;</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">lce_cached_flags</span>
+<a name="l-86"></a>    <span class="k">assign</span> <span class="n">lce_cached_S</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_S</span><span class="p">);</span>
+<a name="l-87"></a>    <span class="k">assign</span> <span class="n">lce_cached_E</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_E</span><span class="p">);</span>
+<a name="l-88"></a>    <span class="k">assign</span> <span class="n">lce_cached_M</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_M</span><span class="p">);</span>
+<a name="l-89"></a>    <span class="k">assign</span> <span class="n">lce_cached_O</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_O</span><span class="p">);</span>
+<a name="l-90"></a>    <span class="k">assign</span> <span class="n">lce_cached_F</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_F</span><span class="p">);</span>
+<a name="l-91"></a>  <span class="k">end</span>
+<a name="l-92"></a>
+<a name="l-93"></a>  <span class="c1">// Block cached in some state in LCE other than requestor</span>
+<a name="l-94"></a>  <span class="k">assign</span> <span class="n">cached_shared_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_S</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
+<a name="l-95"></a>  <span class="k">assign</span> <span class="n">cached_exclusive_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_E</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
+<a name="l-96"></a>  <span class="k">assign</span> <span class="n">cached_modified_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_M</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
+<a name="l-97"></a>  <span class="k">assign</span> <span class="n">cached_owned_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_O</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
+<a name="l-98"></a>  <span class="k">assign</span> <span class="n">cached_forward_flag_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">lce_cached_F</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lce_id_one_hot</span><span class="p">);</span>
+<a name="l-99"></a>
+<a name="l-100"></a>  <span class="c1">// hit in requesting LCE</span>
+<a name="l-101"></a>  <span class="kt">logic</span> <span class="n">req_lce_cached</span><span class="p">;</span>
+<a name="l-102"></a>  <span class="k">assign</span> <span class="n">req_lce_cached</span> <span class="o">=</span> <span class="n">lce_cached</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">];</span>
+<a name="l-103"></a>  <span class="c1">// read-only permissions in requesting LCE (block in S, F, or O)</span>
+<a name="l-104"></a>  <span class="kt">logic</span> <span class="n">req_lce_ro</span><span class="p">;</span>
+<a name="l-105"></a>  <span class="k">assign</span> <span class="n">req_lce_ro</span> <span class="o">=</span> <span class="n">req_lce_cached</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_S</span><span class="p">)</span>
+<a name="l-106"></a>                                        <span class="o">|</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_F</span><span class="p">)</span>
+<a name="l-107"></a>                                        <span class="o">|</span> <span class="p">(</span><span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">e_COH_O</span><span class="p">));</span>
+<a name="l-108"></a>
+<a name="l-109"></a>  <span class="k">assign</span> <span class="n">req_addr_way_o</span> <span class="o">=</span> <span class="n">req_lce_cached</span>
+<a name="l-110"></a>    <span class="o">?</span> <span class="n">sharers_ways_i</span><span class="p">[</span><span class="n">req_lce_id</span><span class="p">]</span>
+<a name="l-111"></a>    <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-112"></a>
+<a name="l-113"></a>  <span class="c1">// Flag outputs</span>
+<a name="l-114"></a>
+<a name="l-115"></a>  <span class="c1">// Upgrade from read-only to read-write</span>
+<a name="l-116"></a>  <span class="c1">// Requesting LCE has block cached in read-only state and request is a store-miss</span>
+<a name="l-117"></a>  <span class="k">assign</span> <span class="n">upgrade_flag_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">req_type_flag_i</span> <span class="o">&amp;</span> <span class="n">req_lce_ro</span><span class="p">);</span>
+<a name="l-118"></a>
+<a name="l-119"></a>  <span class="c1">// Replace the LRU block if not doing an upgrade and the lru block might be dirty</span>
+<a name="l-120"></a>  <span class="k">assign</span> <span class="n">replacement_flag_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">upgrade_flag_o</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">lru_coh_state_i</span> <span class="o">==</span> <span class="n">e_COH_E</span><span class="p">)</span>
+<a name="l-121"></a>                                                 <span class="o">|</span> <span class="p">(</span><span class="n">lru_coh_state_i</span> <span class="o">==</span> <span class="n">e_COH_M</span><span class="p">)</span>
+<a name="l-122"></a>                                                 <span class="o">|</span> <span class="p">(</span><span class="n">lru_coh_state_i</span> <span class="o">==</span> <span class="n">e_COH_O</span><span class="p">));</span>
+<a name="l-123"></a>
+<a name="l-124"></a>  <span class="c1">// Owner LCE</span>
+<a name="l-125"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">num_lce_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">owner_lce_one_hot</span><span class="p">;</span>
+<a name="l-126"></a>  <span class="c1">// output owner even if it is same as requestor</span>
+<a name="l-127"></a>  <span class="c1">// Owner will be in one of states: E, M, O, or F; and only one LCE may be in those states</span>
+<a name="l-128"></a>  <span class="c1">// It is an error if more than one LCE is in one of these states (or the two LCE&#39;s are in some</span>
+<a name="l-129"></a>  <span class="c1">// pair of these states) for a given cache block.</span>
+<a name="l-130"></a>  <span class="k">assign</span> <span class="n">owner_lce_one_hot</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span><span class="p">)</span>
+<a name="l-131"></a>                             <span class="o">?</span> <span class="p">(</span><span class="n">lce_cached_E</span> <span class="o">|</span> <span class="n">lce_cached_M</span> <span class="o">|</span> <span class="n">lce_cached_O</span> <span class="o">|</span> <span class="n">lce_cached_F</span><span class="p">)</span>
+<a name="l-132"></a>                             <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-133"></a>
+<a name="l-134"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">lg_num_lce_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">owner_lce_lo</span><span class="p">;</span>
+<a name="l-135"></a>  <span class="kt">logic</span> <span class="n">owner_lce_v</span><span class="p">;</span>
+<a name="l-136"></a>  <span class="n">bsg_encode_one_hot</span>
+<a name="l-137"></a>    <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">num_lce_p</span><span class="p">)</span>
+<a name="l-138"></a>      <span class="p">,.</span><span class="n">lo_to_hi_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-139"></a>      <span class="p">)</span>
+<a name="l-140"></a>    <span class="n">lce_cached_to_lce_id</span>
+<a name="l-141"></a>     <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">owner_lce_one_hot</span><span class="p">)</span>
+<a name="l-142"></a>      <span class="p">,.</span><span class="n">addr_o</span><span class="p">(</span><span class="n">owner_lce_lo</span><span class="p">)</span>
+<a name="l-143"></a>      <span class="p">,.</span><span class="n">v_o</span><span class="p">(</span><span class="n">owner_lce_v</span><span class="p">)</span>
+<a name="l-144"></a>      <span class="p">);</span>
+<a name="l-145"></a>
+<a name="l-146"></a>  <span class="k">assign</span> <span class="n">owner_lce_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span> <span class="o">&amp;</span> <span class="n">owner_lce_v</span><span class="p">)</span>
+<a name="l-147"></a>                       <span class="o">?</span> <span class="p">{</span><span class="m">&#39;0</span><span class="p">,</span> <span class="n">owner_lce_lo</span><span class="p">}</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-148"></a>  <span class="k">assign</span> <span class="n">owner_way_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span> <span class="o">&amp;</span> <span class="n">owner_lce_v</span><span class="p">)</span>
+<a name="l-149"></a>                       <span class="o">?</span> <span class="n">sharers_ways_i</span><span class="p">[</span><span class="n">owner_lce_lo</span><span class="p">]</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-150"></a>  <span class="k">assign</span> <span class="n">owner_coh_state_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">gad_v_i</span> <span class="o">&amp;</span> <span class="n">owner_lce_v</span><span class="p">)</span>
+<a name="l-151"></a>                             <span class="o">?</span> <span class="n">sharers_coh_states_i</span><span class="p">[</span><span class="n">owner_lce_lo</span><span class="p">]</span> <span class="o">:</span> <span class="n">e_COH_I</span><span class="p">;</span>
+<a name="l-152"></a>
+<a name="l-153"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

@@ -107,7 +107,9 @@
 <a href="#l-99"> 99</a>
 <a href="#l-100">100</a>
 <a href="#l-101">101</a>
-<a href="#l-102">102</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 11/10/14</span>
+<a href="#l-102">102</a>
+<a href="#l-103">103</a>
+<a href="#l-104">104</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 11/10/14</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">// bsg_round_robin_n_to_1</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -122,93 +124,95 @@
 <a name="l-13"></a><span class="c1">//</span>
 <a name="l-14"></a><span class="c1">//</span>
 <a name="l-15"></a>
-<a name="l-16"></a><span class="k">module</span> <span class="n">bsg_round_robin_n_to_1</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-17"></a>                                <span class="p">,</span><span class="k">parameter</span> <span class="n">num_in_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-18"></a>                                <span class="p">,</span><span class="k">parameter</span> <span class="n">strict_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span> 
-<a name="l-19"></a>                                <span class="p">,</span><span class="k">parameter</span> <span class="n">tag_width_lp</span> <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span>
-<a name="l-20"></a>                                <span class="p">)</span>
-<a name="l-21"></a>   <span class="p">(</span><span class="k">input</span>  <span class="n">clk_i</span>
-<a name="l-22"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">reset_i</span>
-<a name="l-23"></a>
-<a name="l-24"></a>    <span class="c1">// to fifos</span>
-<a name="l-25"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
-<a name="l-26"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">v_i</span>
-<a name="l-27"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">yumi_o</span>
-<a name="l-28"></a>
-<a name="l-29"></a>    <span class="c1">// to downstream</span>
-<a name="l-30"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">v_o</span>
-<a name="l-31"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">data_o</span>
-<a name="l-32"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">tag_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_o</span>
-<a name="l-33"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">yumi_i</span>
-<a name="l-34"></a>    <span class="p">);</span>
-<a name="l-35"></a>
-<a name="l-36"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">strict_p</span><span class="p">)</span>
-<a name="l-37"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">strict</span>
-<a name="l-38"></a>        <span class="kt">wire</span> <span class="p">[</span><span class="n">tag_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">ptr_r</span><span class="p">;</span>
-<a name="l-39"></a>
-<a name="l-40"></a>        <span class="n">bsg_circular_ptr</span> <span class="p">#(.</span><span class="n">slots_p</span><span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span>
-<a name="l-41"></a>                           <span class="p">,.</span><span class="n">max_add_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-42"></a>                           <span class="p">)</span> <span class="n">circular_ptr</span>
-<a name="l-43"></a>          <span class="p">(.</span><span class="n">clk</span>     <span class="p">(</span><span class="n">clk_i</span>  <span class="p">)</span>
-<a name="l-44"></a>           <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-45"></a>           <span class="p">,.</span><span class="n">add_i</span>  <span class="p">(</span><span class="n">yumi_i</span> <span class="p">)</span>
-<a name="l-46"></a>           <span class="p">,.</span><span class="n">o</span>      <span class="p">(</span><span class="n">ptr_r</span>  <span class="p">)</span>
-<a name="l-47"></a>           <span class="p">,.</span><span class="n">n_o</span>    <span class="p">()</span>
-<a name="l-48"></a>           <span class="p">);</span>
-<a name="l-49"></a>
-<a name="l-50"></a>        <span class="k">assign</span> <span class="n">v_o</span> <span class="o">=</span> <span class="n">v_i</span> <span class="p">[</span><span class="n">ptr_r</span><span class="p">];</span>
-<a name="l-51"></a>        <span class="k">assign</span> <span class="n">data_o</span>  <span class="o">=</span> <span class="n">data_i</span>  <span class="p">[</span><span class="n">ptr_r</span><span class="p">];</span>
-<a name="l-52"></a>
-<a name="l-53"></a>        <span class="k">assign</span> <span class="n">tag_o</span> <span class="o">=</span> <span class="n">ptr_r</span><span class="p">;</span>
+<a name="l-16"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-17"></a>
+<a name="l-18"></a><span class="k">module</span> <span class="n">bsg_round_robin_n_to_1</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-19"></a>                                <span class="p">,</span><span class="k">parameter</span> <span class="n">num_in_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-20"></a>                                <span class="p">,</span><span class="k">parameter</span> <span class="n">strict_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span> 
+<a name="l-21"></a>                                <span class="p">,</span><span class="k">parameter</span> <span class="n">tag_width_lp</span> <span class="o">=</span> <span class="no">`BSG_SAFE_CLOG2</span><span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span>
+<a name="l-22"></a>                                <span class="p">)</span>
+<a name="l-23"></a>   <span class="p">(</span><span class="k">input</span>  <span class="n">clk_i</span>
+<a name="l-24"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">reset_i</span>
+<a name="l-25"></a>
+<a name="l-26"></a>    <span class="c1">// to fifos</span>
+<a name="l-27"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span>
+<a name="l-28"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">v_i</span>
+<a name="l-29"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">yumi_o</span>
+<a name="l-30"></a>
+<a name="l-31"></a>    <span class="c1">// to downstream</span>
+<a name="l-32"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">v_o</span>
+<a name="l-33"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">data_o</span>
+<a name="l-34"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">tag_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_o</span>
+<a name="l-35"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">yumi_i</span>
+<a name="l-36"></a>    <span class="p">);</span>
+<a name="l-37"></a>
+<a name="l-38"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">strict_p</span><span class="p">)</span>
+<a name="l-39"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">strict</span>
+<a name="l-40"></a>        <span class="kt">wire</span> <span class="p">[</span><span class="n">tag_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">ptr_r</span><span class="p">;</span>
+<a name="l-41"></a>
+<a name="l-42"></a>        <span class="n">bsg_circular_ptr</span> <span class="p">#(.</span><span class="n">slots_p</span><span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span>
+<a name="l-43"></a>                           <span class="p">,.</span><span class="n">max_add_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-44"></a>                           <span class="p">)</span> <span class="n">circular_ptr</span>
+<a name="l-45"></a>          <span class="p">(.</span><span class="n">clk</span>     <span class="p">(</span><span class="n">clk_i</span>  <span class="p">)</span>
+<a name="l-46"></a>           <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-47"></a>           <span class="p">,.</span><span class="n">add_i</span>  <span class="p">(</span><span class="n">yumi_i</span> <span class="p">)</span>
+<a name="l-48"></a>           <span class="p">,.</span><span class="n">o</span>      <span class="p">(</span><span class="n">ptr_r</span>  <span class="p">)</span>
+<a name="l-49"></a>           <span class="p">,.</span><span class="n">n_o</span>    <span class="p">()</span>
+<a name="l-50"></a>           <span class="p">);</span>
+<a name="l-51"></a>
+<a name="l-52"></a>        <span class="k">assign</span> <span class="n">v_o</span> <span class="o">=</span> <span class="n">v_i</span> <span class="p">[</span><span class="n">ptr_r</span><span class="p">];</span>
+<a name="l-53"></a>        <span class="k">assign</span> <span class="n">data_o</span>  <span class="o">=</span> <span class="n">data_i</span>  <span class="p">[</span><span class="n">ptr_r</span><span class="p">];</span>
 <a name="l-54"></a>
-<a name="l-55"></a>        <span class="c1">// binary to one hot</span>
-<a name="l-56"></a>        <span class="k">assign</span> <span class="n">yumi_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span> <span class="p">&#39;</span> <span class="p">(</span><span class="n">yumi_i</span> <span class="o">&lt;&lt;</span> <span class="n">tag_o</span><span class="p">);</span>
-<a name="l-57"></a>
-<a name="l-58"></a>     <span class="k">end</span>
-<a name="l-59"></a>   <span class="k">else</span>
-<a name="l-60"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">greedy</span>
-<a name="l-61"></a>
-<a name="l-62"></a>        <span class="kt">wire</span> <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">grants_lo</span><span class="p">;</span>
+<a name="l-55"></a>        <span class="k">assign</span> <span class="n">tag_o</span> <span class="o">=</span> <span class="n">ptr_r</span><span class="p">;</span>
+<a name="l-56"></a>
+<a name="l-57"></a>        <span class="c1">// binary to one hot</span>
+<a name="l-58"></a>        <span class="k">assign</span> <span class="n">yumi_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span> <span class="p">&#39;</span> <span class="p">(</span><span class="n">yumi_i</span> <span class="o">&lt;&lt;</span> <span class="n">tag_o</span><span class="p">);</span>
+<a name="l-59"></a>
+<a name="l-60"></a>     <span class="k">end</span>
+<a name="l-61"></a>   <span class="k">else</span>
+<a name="l-62"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">greedy</span>
 <a name="l-63"></a>
-<a name="l-64"></a>        <span class="c1">// we have valid output if any input is valid</span>
-<a name="l-65"></a>        <span class="c1">// we do not need the arb to determine this</span>
-<a name="l-66"></a>        <span class="c1">// the signal yumi_i is computed from this</span>
-<a name="l-67"></a>
-<a name="l-68"></a>        <span class="c1">// assign v_o = | v_i;</span>
+<a name="l-64"></a>        <span class="kt">wire</span> <span class="p">[</span><span class="n">num_in_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">grants_lo</span><span class="p">;</span>
+<a name="l-65"></a>
+<a name="l-66"></a>        <span class="c1">// we have valid output if any input is valid</span>
+<a name="l-67"></a>        <span class="c1">// we do not need the arb to determine this</span>
+<a name="l-68"></a>        <span class="c1">// the signal yumi_i is computed from this</span>
 <a name="l-69"></a>
-<a name="l-70"></a>        <span class="n">bsg_round_robin_arb</span> <span class="p">#(.</span><span class="n">inputs_p</span><span class="p">(</span><span class="n">num_in_p</span><span class="p">))</span>
-<a name="l-71"></a>        <span class="n">rr_arb_ctrl</span>
-<a name="l-72"></a>          <span class="p">(.</span><span class="n">clk_i</span>
-<a name="l-73"></a>           <span class="p">,.</span><span class="n">reset_i</span>
-<a name="l-74"></a>           <span class="p">,.</span><span class="n">grants_en_i</span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a name="l-75"></a>
-<a name="l-76"></a>	   <span class="c1">// &quot;data plane&quot;</span>
-<a name="l-77"></a>           <span class="p">,.</span><span class="n">reqs_i</span>   <span class="p">(</span><span class="n">v_i</span>  <span class="p">)</span> <span class="c1">// from each of the nodes</span>
-<a name="l-78"></a>           <span class="p">,.</span><span class="n">grants_o</span> <span class="p">(</span><span class="n">grants_lo</span><span class="p">)</span>
-<a name="l-79"></a>           <span class="p">,.</span><span class="n">sel_one_hot_o</span><span class="p">()</span>
-<a name="l-80"></a>
-<a name="l-81"></a>           <span class="p">,.</span><span class="n">v_o</span>     <span class="p">(</span> <span class="n">v_o</span>  <span class="p">)</span>
-<a name="l-82"></a>           <span class="p">,.</span><span class="n">tag_o</span>   <span class="p">(</span><span class="n">tag_o</span>    <span class="p">)</span>
-<a name="l-83"></a>           <span class="p">,.</span><span class="n">yumi_i</span>  <span class="p">(</span><span class="n">yumi_i</span> <span class="o">&amp;</span> <span class="n">v_o</span> <span class="p">)</span>  <span class="c1">// based on v_o, downstream</span>
-<a name="l-84"></a>                                  <span class="c1">// node decides if it will accept</span>
-<a name="l-85"></a>           <span class="p">);</span>
-<a name="l-86"></a>
-<a name="l-87"></a>        <span class="n">bsg_crossbar_o_by_i</span> <span class="p">#(.</span><span class="n">i_els_p</span> <span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span>
-<a name="l-88"></a>                              <span class="p">,.</span><span class="n">o_els_p</span><span class="p">(</span><span class="mi">1</span>       <span class="p">)</span>
-<a name="l-89"></a>                              <span class="p">,.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-90"></a>                              <span class="p">)</span> <span class="n">xbar</span>
-<a name="l-91"></a>          <span class="p">(.</span><span class="n">i</span>                <span class="p">(</span><span class="n">data_i</span>   <span class="p">)</span>
-<a name="l-92"></a>           <span class="p">,.</span><span class="n">sel_oi_one_hot_i</span><span class="p">(</span><span class="n">grants_lo</span><span class="p">)</span>
-<a name="l-93"></a>           <span class="p">,.</span><span class="n">o</span>               <span class="p">(</span><span class="n">data_o</span>   <span class="p">)</span>
-<a name="l-94"></a>           <span class="p">);</span>
-<a name="l-95"></a>
-<a name="l-96"></a>        <span class="c1">// mask grants with yumi signal</span>
-<a name="l-97"></a>        <span class="k">assign</span> <span class="n">yumi_o</span> <span class="o">=</span> <span class="n">grants_lo</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="n">num_in_p</span> <span class="p">{</span> <span class="n">yumi_i</span> <span class="p">}};</span>
-<a name="l-98"></a>
-<a name="l-99"></a>     <span class="k">end</span>
+<a name="l-70"></a>        <span class="c1">// assign v_o = | v_i;</span>
+<a name="l-71"></a>
+<a name="l-72"></a>        <span class="n">bsg_round_robin_arb</span> <span class="p">#(.</span><span class="n">inputs_p</span><span class="p">(</span><span class="n">num_in_p</span><span class="p">))</span>
+<a name="l-73"></a>        <span class="n">rr_arb_ctrl</span>
+<a name="l-74"></a>          <span class="p">(.</span><span class="n">clk_i</span>
+<a name="l-75"></a>           <span class="p">,.</span><span class="n">reset_i</span>
+<a name="l-76"></a>           <span class="p">,.</span><span class="n">grants_en_i</span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a name="l-77"></a>
+<a name="l-78"></a>	   <span class="c1">// &quot;data plane&quot;</span>
+<a name="l-79"></a>           <span class="p">,.</span><span class="n">reqs_i</span>   <span class="p">(</span><span class="n">v_i</span>  <span class="p">)</span> <span class="c1">// from each of the nodes</span>
+<a name="l-80"></a>           <span class="p">,.</span><span class="n">grants_o</span> <span class="p">(</span><span class="n">grants_lo</span><span class="p">)</span>
+<a name="l-81"></a>           <span class="p">,.</span><span class="n">sel_one_hot_o</span><span class="p">()</span>
+<a name="l-82"></a>
+<a name="l-83"></a>           <span class="p">,.</span><span class="n">v_o</span>     <span class="p">(</span> <span class="n">v_o</span>  <span class="p">)</span>
+<a name="l-84"></a>           <span class="p">,.</span><span class="n">tag_o</span>   <span class="p">(</span><span class="n">tag_o</span>    <span class="p">)</span>
+<a name="l-85"></a>           <span class="p">,.</span><span class="n">yumi_i</span>  <span class="p">(</span><span class="n">yumi_i</span> <span class="o">&amp;</span> <span class="n">v_o</span> <span class="p">)</span>  <span class="c1">// based on v_o, downstream</span>
+<a name="l-86"></a>                                  <span class="c1">// node decides if it will accept</span>
+<a name="l-87"></a>           <span class="p">);</span>
+<a name="l-88"></a>
+<a name="l-89"></a>        <span class="n">bsg_crossbar_o_by_i</span> <span class="p">#(.</span><span class="n">i_els_p</span> <span class="p">(</span><span class="n">num_in_p</span><span class="p">)</span>
+<a name="l-90"></a>                              <span class="p">,.</span><span class="n">o_els_p</span><span class="p">(</span><span class="mi">1</span>       <span class="p">)</span>
+<a name="l-91"></a>                              <span class="p">,.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-92"></a>                              <span class="p">)</span> <span class="n">xbar</span>
+<a name="l-93"></a>          <span class="p">(.</span><span class="n">i</span>                <span class="p">(</span><span class="n">data_i</span>   <span class="p">)</span>
+<a name="l-94"></a>           <span class="p">,.</span><span class="n">sel_oi_one_hot_i</span><span class="p">(</span><span class="n">grants_lo</span><span class="p">)</span>
+<a name="l-95"></a>           <span class="p">,.</span><span class="n">o</span>               <span class="p">(</span><span class="n">data_o</span>   <span class="p">)</span>
+<a name="l-96"></a>           <span class="p">);</span>
+<a name="l-97"></a>
+<a name="l-98"></a>        <span class="c1">// mask grants with yumi signal</span>
+<a name="l-99"></a>        <span class="k">assign</span> <span class="n">yumi_o</span> <span class="o">=</span> <span class="n">grants_lo</span> <span class="o">&amp;</span> <span class="p">{</span> <span class="n">num_in_p</span> <span class="p">{</span> <span class="n">yumi_i</span> <span class="p">}};</span>
 <a name="l-100"></a>
-<a name="l-101"></a>
-<a name="l-102"></a><span class="k">endmodule</span>
+<a name="l-101"></a>     <span class="k">end</span>
+<a name="l-102"></a>
+<a name="l-103"></a>
+<a name="l-104"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

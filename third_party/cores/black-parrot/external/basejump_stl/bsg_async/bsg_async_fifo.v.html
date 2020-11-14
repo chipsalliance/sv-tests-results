@@ -131,7 +131,9 @@
 <a href="#l-123">123</a>
 <a href="#l-124">124</a>
 <a href="#l-125">125</a>
-<a href="#l-126">126</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 7/24/2014</span>
+<a href="#l-126">126</a>
+<a href="#l-127">127</a>
+<a href="#l-128">128</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 7/24/2014</span>
 <a name="l-2"></a><span class="c1">// async fifo</span>
 <a name="l-3"></a><span class="c1">// uses synchronous reset for both sides</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -144,119 +146,121 @@
 <a name="l-11"></a><span class="c1">// clock domains.</span>
 <a name="l-12"></a><span class="c1">//</span>
 <a name="l-13"></a>
-<a name="l-14"></a><span class="k">module</span> <span class="n">bsg_async_fifo</span> <span class="p">#(</span><span class="k">parameter</span>   <span class="n">lg_size_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-15"></a>                        <span class="p">,</span> <span class="k">parameter</span>   <span class="n">width_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-16"></a>                        <span class="c1">// we allow the control bits to be separated from</span>
-<a name="l-17"></a>                        <span class="c1">// the data bits to allow for better control optimization.</span>
-<a name="l-18"></a>                        <span class="c1">// control_width_p is how many of the width_p bits are control bits;</span>
-<a name="l-19"></a>                        <span class="c1">// these bits should be at the top of the array</span>
-<a name="l-20"></a>                        <span class="p">,</span> <span class="k">parameter</span>   <span class="n">control_width_p</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
-<a name="l-21"></a>   <span class="p">(</span>
-<a name="l-22"></a>    <span class="k">input</span>    <span class="n">w_clk_i</span>
-<a name="l-23"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">w_reset_i</span>
-<a name="l-24"></a>    <span class="c1">// not legal to w_enq_i if w_full_o is not low.</span>
-<a name="l-25"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">w_enq_i</span>
-<a name="l-26"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">w_data_i</span>
-<a name="l-27"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">w_full_o</span>
-<a name="l-28"></a>
-<a name="l-29"></a>    <span class="c1">// not legal to r_deq_i if r_valid_o is not high.</span>
-<a name="l-30"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">r_clk_i</span>
-<a name="l-31"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">r_reset_i</span>
-<a name="l-32"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">r_deq_i</span>
-<a name="l-33"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">r_data_o</span>
-<a name="l-34"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">r_valid_o</span>
-<a name="l-35"></a>    <span class="p">);</span>
-<a name="l-36"></a>
-<a name="l-37"></a>   <span class="k">localparam</span> <span class="n">size_lp</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">lg_size_p</span><span class="p">;</span>
+<a name="l-14"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-15"></a>
+<a name="l-16"></a><span class="k">module</span> <span class="n">bsg_async_fifo</span> <span class="p">#(</span><span class="k">parameter</span>   <span class="n">lg_size_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-17"></a>                        <span class="p">,</span> <span class="k">parameter</span>   <span class="n">width_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-18"></a>                        <span class="c1">// we allow the control bits to be separated from</span>
+<a name="l-19"></a>                        <span class="c1">// the data bits to allow for better control optimization.</span>
+<a name="l-20"></a>                        <span class="c1">// control_width_p is how many of the width_p bits are control bits;</span>
+<a name="l-21"></a>                        <span class="c1">// these bits should be at the top of the array</span>
+<a name="l-22"></a>                        <span class="p">,</span> <span class="k">parameter</span>   <span class="n">control_width_p</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-23"></a>   <span class="p">(</span>
+<a name="l-24"></a>    <span class="k">input</span>    <span class="n">w_clk_i</span>
+<a name="l-25"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">w_reset_i</span>
+<a name="l-26"></a>    <span class="c1">// not legal to w_enq_i if w_full_o is not low.</span>
+<a name="l-27"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">w_enq_i</span>
+<a name="l-28"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">w_data_i</span>
+<a name="l-29"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">w_full_o</span>
+<a name="l-30"></a>
+<a name="l-31"></a>    <span class="c1">// not legal to r_deq_i if r_valid_o is not high.</span>
+<a name="l-32"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">r_clk_i</span>
+<a name="l-33"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">r_reset_i</span>
+<a name="l-34"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="n">r_deq_i</span>
+<a name="l-35"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">r_data_o</span>
+<a name="l-36"></a>    <span class="p">,</span> <span class="k">output</span> <span class="n">r_valid_o</span>
+<a name="l-37"></a>    <span class="p">);</span>
 <a name="l-38"></a>
-<a name="l-39"></a>   <span class="c1">// we use an extra bit for the pointers to detect wraparound</span>
-<a name="l-40"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="nl">lg_size_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">r_ptr_gray_r</span><span class="p">;</span>
-<a name="l-41"></a>
-<a name="l-42"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="nl">lg_size_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">w_ptr_gray_r</span><span class="p">;</span>
-<a name="l-43"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="nl">lg_size_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">w_ptr_gray_r_rsync</span><span class="p">,</span> <span class="n">r_ptr_gray_r_wsync</span><span class="p">,</span> <span class="n">r_ptr_binary_r</span><span class="p">,</span> <span class="n">w_ptr_binary_r</span><span class="p">;</span>
-<a name="l-44"></a>
-<a name="l-45"></a>   <span class="kt">wire</span>               <span class="n">r_valid_o_tmp</span><span class="p">;</span> <span class="c1">// remove inout warning from Lint</span>
-<a name="l-46"></a>   <span class="k">assign</span> <span class="n">r_valid_o</span> <span class="o">=</span> <span class="n">r_valid_o_tmp</span><span class="p">;</span>
-<a name="l-47"></a>
-<a name="l-48"></a>   <span class="n">bsg_mem_1r1w</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="n">control_width_p</span><span class="p">)</span>
-<a name="l-49"></a>                  <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">size_lp</span><span class="p">)</span>
-<a name="l-50"></a>		  <span class="p">,.</span><span class="n">read_write_same_addr_p</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a name="l-51"></a>                  <span class="p">)</span> <span class="n">MSYNC_1r1w</span>
-<a name="l-52"></a>     <span class="p">(.</span><span class="n">w_clk_i</span>    <span class="p">(</span><span class="n">w_clk_i</span>  <span class="p">)</span>
-<a name="l-53"></a>      <span class="p">,.</span><span class="n">w_reset_i</span> <span class="p">(</span><span class="n">w_reset_i</span><span class="p">)</span>
-<a name="l-54"></a>
-<a name="l-55"></a>      <span class="p">,.</span><span class="n">w_v_i</span>   <span class="p">(</span><span class="n">w_enq_i</span>                                  <span class="p">)</span>
-<a name="l-56"></a>      <span class="p">,.</span><span class="n">w_addr_i</span><span class="p">(</span><span class="n">w_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>             <span class="p">)</span>
-<a name="l-57"></a>      <span class="p">,.</span><span class="n">w_data_i</span><span class="p">(</span><span class="n">w_data_i</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">width_p</span> <span class="o">-</span> <span class="n">control_width_p</span><span class="p">)]</span> <span class="p">)</span>
-<a name="l-58"></a>
-<a name="l-59"></a>      <span class="p">,.</span><span class="n">r_v_i</span>   <span class="p">(</span><span class="n">r_valid_o_tmp</span>                            <span class="p">)</span>
-<a name="l-60"></a>      <span class="p">,.</span><span class="n">r_addr_i</span><span class="p">(</span><span class="n">r_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>             <span class="p">)</span>
-<a name="l-61"></a>      <span class="p">,.</span><span class="n">r_data_o</span><span class="p">(</span><span class="n">r_data_o</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">width_p</span> <span class="o">-</span> <span class="n">control_width_p</span><span class="p">)]</span> <span class="p">)</span>
-<a name="l-62"></a>      <span class="p">);</span>
-<a name="l-63"></a>
-<a name="l-64"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">control_width_p</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-<a name="l-65"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">ctrl</span>
-<a name="l-66"></a>        <span class="n">bsg_mem_1r1w</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">control_width_p</span><span class="p">)</span>
-<a name="l-67"></a>                       <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">size_lp</span><span class="p">)</span>
-<a name="l-68"></a>		       <span class="p">,.</span><span class="n">read_write_same_addr_p</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a name="l-69"></a>                       <span class="p">)</span> <span class="n">MSYNC_1r1w</span>
-<a name="l-70"></a>          <span class="p">(.</span><span class="n">w_clk_i</span>   <span class="p">(</span><span class="n">w_clk_i</span>  <span class="p">)</span>
-<a name="l-71"></a>           <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">w_reset_i</span><span class="p">)</span>
-<a name="l-72"></a>
-<a name="l-73"></a>           <span class="p">,.</span><span class="n">w_v_i</span>    <span class="p">(</span><span class="n">w_enq_i</span>                           <span class="p">)</span>
-<a name="l-74"></a>           <span class="p">,.</span><span class="n">w_addr_i</span> <span class="p">(</span><span class="n">w_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>      <span class="p">)</span>
-<a name="l-75"></a>           <span class="p">,.</span><span class="n">w_data_i</span> <span class="p">(</span><span class="n">w_data_i</span><span class="p">[(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-:</span><span class="n">control_width_p</span><span class="p">])</span>
-<a name="l-76"></a>
-<a name="l-77"></a>           <span class="p">,.</span><span class="n">r_v_i</span>    <span class="p">(</span><span class="n">r_valid_o_tmp</span>                     <span class="p">)</span>
-<a name="l-78"></a>           <span class="p">,.</span><span class="n">r_addr_i</span> <span class="p">(</span><span class="n">r_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>      <span class="p">)</span>
-<a name="l-79"></a>           <span class="p">,.</span><span class="n">r_data_o</span> <span class="p">(</span><span class="n">r_data_o</span><span class="p">[(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-:</span><span class="n">control_width_p</span><span class="p">])</span>
-<a name="l-80"></a>           <span class="p">);</span>
-<a name="l-81"></a>     <span class="k">end</span>
-<a name="l-82"></a>
-<a name="l-83"></a>   <span class="c1">// pointer from writer to reader (input to output of FIFO)</span>
-<a name="l-84"></a>   <span class="n">bsg_async_ptr_gray</span> <span class="p">#(.</span><span class="n">lg_size_p</span><span class="p">(</span><span class="n">lg_size_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">bapg_wr</span>
-<a name="l-85"></a>   <span class="p">(.</span><span class="n">w_clk_i</span><span class="p">(</span><span class="n">w_clk_i</span><span class="p">)</span>
-<a name="l-86"></a>    <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">w_reset_i</span><span class="p">)</span>
-<a name="l-87"></a>    <span class="p">,.</span><span class="n">w_inc_i</span><span class="p">(</span><span class="n">w_enq_i</span><span class="p">)</span>
-<a name="l-88"></a>    <span class="p">,.</span><span class="n">r_clk_i</span><span class="p">(</span><span class="n">r_clk_i</span><span class="p">)</span>
-<a name="l-89"></a>    <span class="p">,.</span><span class="n">w_ptr_binary_r_o</span><span class="p">(</span><span class="n">w_ptr_binary_r</span><span class="p">)</span>
-<a name="l-90"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_o</span><span class="p">(</span><span class="n">w_ptr_gray_r</span><span class="p">)</span>
-<a name="l-91"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_rsync_o</span><span class="p">(</span><span class="n">w_ptr_gray_r_rsync</span><span class="p">)</span>
-<a name="l-92"></a>    <span class="p">);</span>
-<a name="l-93"></a>
-<a name="l-94"></a>   <span class="c1">// pointer from reader to writer (output to input of FIFO)</span>
-<a name="l-95"></a>   <span class="c1">// note this pointer travels backwards so the order is reverse</span>
-<a name="l-96"></a>
-<a name="l-97"></a>   <span class="n">bsg_async_ptr_gray</span> <span class="p">#(.</span><span class="n">lg_size_p</span><span class="p">(</span><span class="n">lg_size_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">bapg_rd</span>
-<a name="l-98"></a>   <span class="p">(.</span><span class="n">w_clk_i</span><span class="p">(</span><span class="n">r_clk_i</span><span class="p">)</span>
-<a name="l-99"></a>    <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">r_reset_i</span><span class="p">)</span>
-<a name="l-100"></a>    <span class="p">,.</span><span class="n">w_inc_i</span><span class="p">(</span><span class="n">r_deq_i</span><span class="p">)</span>
-<a name="l-101"></a>    <span class="p">,.</span><span class="n">r_clk_i</span><span class="p">(</span><span class="n">w_clk_i</span><span class="p">)</span>
-<a name="l-102"></a>    <span class="p">,.</span><span class="n">w_ptr_binary_r_o</span><span class="p">(</span><span class="n">r_ptr_binary_r</span><span class="p">)</span>
-<a name="l-103"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_o</span><span class="p">(</span><span class="n">r_ptr_gray_r</span><span class="p">)</span>  <span class="c1">// after launch flop</span>
-<a name="l-104"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_rsync_o</span><span class="p">(</span><span class="n">r_ptr_gray_r_wsync</span><span class="p">)</span> <span class="c1">// after sync flops</span>
-<a name="l-105"></a>    <span class="p">);</span>
-<a name="l-106"></a>
-<a name="l-107"></a>   <span class="c1">// data is available if the two pointers are not equal</span>
-<a name="l-108"></a>   <span class="k">assign</span> <span class="n">r_valid_o_tmp</span> <span class="o">=</span> <span class="p">(</span><span class="n">r_ptr_gray_r</span> <span class="o">!=</span> <span class="n">w_ptr_gray_r_rsync</span><span class="p">);</span>
-<a name="l-109"></a>
-<a name="l-110"></a>   <span class="c1">// compare two gray code values whose binaries values differ</span>
-<a name="l-111"></a>   <span class="c1">// by top bit; this corresponds to the full conditions</span>
-<a name="l-112"></a>
-<a name="l-113"></a>   <span class="k">assign</span> <span class="n">w_full_o</span>  <span class="o">=</span> <span class="p">(</span><span class="n">w_ptr_gray_r</span> <span class="o">==</span> <span class="p">{</span> <span class="o">~</span><span class="n">r_ptr_gray_r_wsync</span><span class="p">[</span><span class="n">lg_size_p</span><span class="o">-:</span><span class="mi">2</span><span class="p">]</span>
-<a name="l-114"></a>                                         <span class="p">,</span> <span class="n">r_ptr_gray_r_wsync</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">});</span>
-<a name="l-115"></a>
-<a name="l-116"></a>
-<a name="l-117"></a>   <span class="c1">// synopsys translate_off</span>
-<a name="l-118"></a>   <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">w_clk_i</span><span class="p">)</span>
-<a name="l-119"></a>     <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">w_full_o</span><span class="o">===</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">w_enq_i</span><span class="o">===</span><span class="mi">1</span><span class="p">))</span>   <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;enqueing data on bsg_async_fifo when full&quot;</span><span class="p">);</span>
-<a name="l-120"></a>
-<a name="l-121"></a>   <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">r_clk_i</span><span class="p">)</span>
-<a name="l-122"></a>     <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">r_valid_o_tmp</span><span class="o">===</span><span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">r_deq_i</span><span class="o">===</span><span class="mi">1</span><span class="p">))</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;dequeing data on bsg_async_fifo when empty&quot;</span><span class="p">);</span>
-<a name="l-123"></a>
-<a name="l-124"></a>   <span class="c1">// synopsys translate_on</span>
+<a name="l-39"></a>   <span class="k">localparam</span> <span class="n">size_lp</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">lg_size_p</span><span class="p">;</span>
+<a name="l-40"></a>
+<a name="l-41"></a>   <span class="c1">// we use an extra bit for the pointers to detect wraparound</span>
+<a name="l-42"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="nl">lg_size_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">r_ptr_gray_r</span><span class="p">;</span>
+<a name="l-43"></a>
+<a name="l-44"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="nl">lg_size_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">w_ptr_gray_r</span><span class="p">;</span>
+<a name="l-45"></a>   <span class="kt">logic</span> <span class="p">[</span><span class="nl">lg_size_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">w_ptr_gray_r_rsync</span><span class="p">,</span> <span class="n">r_ptr_gray_r_wsync</span><span class="p">,</span> <span class="n">r_ptr_binary_r</span><span class="p">,</span> <span class="n">w_ptr_binary_r</span><span class="p">;</span>
+<a name="l-46"></a>
+<a name="l-47"></a>   <span class="kt">wire</span>               <span class="n">r_valid_o_tmp</span><span class="p">;</span> <span class="c1">// remove inout warning from Lint</span>
+<a name="l-48"></a>   <span class="k">assign</span> <span class="n">r_valid_o</span> <span class="o">=</span> <span class="n">r_valid_o_tmp</span><span class="p">;</span>
+<a name="l-49"></a>
+<a name="l-50"></a>   <span class="n">bsg_mem_1r1w</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">-</span><span class="n">control_width_p</span><span class="p">)</span>
+<a name="l-51"></a>                  <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">size_lp</span><span class="p">)</span>
+<a name="l-52"></a>		  <span class="p">,.</span><span class="n">read_write_same_addr_p</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-53"></a>                  <span class="p">)</span> <span class="n">MSYNC_1r1w</span>
+<a name="l-54"></a>     <span class="p">(.</span><span class="n">w_clk_i</span>    <span class="p">(</span><span class="n">w_clk_i</span>  <span class="p">)</span>
+<a name="l-55"></a>      <span class="p">,.</span><span class="n">w_reset_i</span> <span class="p">(</span><span class="n">w_reset_i</span><span class="p">)</span>
+<a name="l-56"></a>
+<a name="l-57"></a>      <span class="p">,.</span><span class="n">w_v_i</span>   <span class="p">(</span><span class="n">w_enq_i</span>                                  <span class="p">)</span>
+<a name="l-58"></a>      <span class="p">,.</span><span class="n">w_addr_i</span><span class="p">(</span><span class="n">w_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>             <span class="p">)</span>
+<a name="l-59"></a>      <span class="p">,.</span><span class="n">w_data_i</span><span class="p">(</span><span class="n">w_data_i</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">width_p</span> <span class="o">-</span> <span class="n">control_width_p</span><span class="p">)]</span> <span class="p">)</span>
+<a name="l-60"></a>
+<a name="l-61"></a>      <span class="p">,.</span><span class="n">r_v_i</span>   <span class="p">(</span><span class="n">r_valid_o_tmp</span>                            <span class="p">)</span>
+<a name="l-62"></a>      <span class="p">,.</span><span class="n">r_addr_i</span><span class="p">(</span><span class="n">r_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>             <span class="p">)</span>
+<a name="l-63"></a>      <span class="p">,.</span><span class="n">r_data_o</span><span class="p">(</span><span class="n">r_data_o</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">width_p</span> <span class="o">-</span> <span class="n">control_width_p</span><span class="p">)]</span> <span class="p">)</span>
+<a name="l-64"></a>      <span class="p">);</span>
+<a name="l-65"></a>
+<a name="l-66"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">control_width_p</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-67"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">ctrl</span>
+<a name="l-68"></a>        <span class="n">bsg_mem_1r1w</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">control_width_p</span><span class="p">)</span>
+<a name="l-69"></a>                       <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">size_lp</span><span class="p">)</span>
+<a name="l-70"></a>		       <span class="p">,.</span><span class="n">read_write_same_addr_p</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-71"></a>                       <span class="p">)</span> <span class="n">MSYNC_1r1w</span>
+<a name="l-72"></a>          <span class="p">(.</span><span class="n">w_clk_i</span>   <span class="p">(</span><span class="n">w_clk_i</span>  <span class="p">)</span>
+<a name="l-73"></a>           <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">w_reset_i</span><span class="p">)</span>
+<a name="l-74"></a>
+<a name="l-75"></a>           <span class="p">,.</span><span class="n">w_v_i</span>    <span class="p">(</span><span class="n">w_enq_i</span>                           <span class="p">)</span>
+<a name="l-76"></a>           <span class="p">,.</span><span class="n">w_addr_i</span> <span class="p">(</span><span class="n">w_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>      <span class="p">)</span>
+<a name="l-77"></a>           <span class="p">,.</span><span class="n">w_data_i</span> <span class="p">(</span><span class="n">w_data_i</span><span class="p">[(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-:</span><span class="n">control_width_p</span><span class="p">])</span>
+<a name="l-78"></a>
+<a name="l-79"></a>           <span class="p">,.</span><span class="n">r_v_i</span>    <span class="p">(</span><span class="n">r_valid_o_tmp</span>                     <span class="p">)</span>
+<a name="l-80"></a>           <span class="p">,.</span><span class="n">r_addr_i</span> <span class="p">(</span><span class="n">r_ptr_binary_r</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="p">]</span>      <span class="p">)</span>
+<a name="l-81"></a>           <span class="p">,.</span><span class="n">r_data_o</span> <span class="p">(</span><span class="n">r_data_o</span><span class="p">[(</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">-:</span><span class="n">control_width_p</span><span class="p">])</span>
+<a name="l-82"></a>           <span class="p">);</span>
+<a name="l-83"></a>     <span class="k">end</span>
+<a name="l-84"></a>
+<a name="l-85"></a>   <span class="c1">// pointer from writer to reader (input to output of FIFO)</span>
+<a name="l-86"></a>   <span class="n">bsg_async_ptr_gray</span> <span class="p">#(.</span><span class="n">lg_size_p</span><span class="p">(</span><span class="n">lg_size_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">bapg_wr</span>
+<a name="l-87"></a>   <span class="p">(.</span><span class="n">w_clk_i</span><span class="p">(</span><span class="n">w_clk_i</span><span class="p">)</span>
+<a name="l-88"></a>    <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">w_reset_i</span><span class="p">)</span>
+<a name="l-89"></a>    <span class="p">,.</span><span class="n">w_inc_i</span><span class="p">(</span><span class="n">w_enq_i</span><span class="p">)</span>
+<a name="l-90"></a>    <span class="p">,.</span><span class="n">r_clk_i</span><span class="p">(</span><span class="n">r_clk_i</span><span class="p">)</span>
+<a name="l-91"></a>    <span class="p">,.</span><span class="n">w_ptr_binary_r_o</span><span class="p">(</span><span class="n">w_ptr_binary_r</span><span class="p">)</span>
+<a name="l-92"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_o</span><span class="p">(</span><span class="n">w_ptr_gray_r</span><span class="p">)</span>
+<a name="l-93"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_rsync_o</span><span class="p">(</span><span class="n">w_ptr_gray_r_rsync</span><span class="p">)</span>
+<a name="l-94"></a>    <span class="p">);</span>
+<a name="l-95"></a>
+<a name="l-96"></a>   <span class="c1">// pointer from reader to writer (output to input of FIFO)</span>
+<a name="l-97"></a>   <span class="c1">// note this pointer travels backwards so the order is reverse</span>
+<a name="l-98"></a>
+<a name="l-99"></a>   <span class="n">bsg_async_ptr_gray</span> <span class="p">#(.</span><span class="n">lg_size_p</span><span class="p">(</span><span class="n">lg_size_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">bapg_rd</span>
+<a name="l-100"></a>   <span class="p">(.</span><span class="n">w_clk_i</span><span class="p">(</span><span class="n">r_clk_i</span><span class="p">)</span>
+<a name="l-101"></a>    <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">r_reset_i</span><span class="p">)</span>
+<a name="l-102"></a>    <span class="p">,.</span><span class="n">w_inc_i</span><span class="p">(</span><span class="n">r_deq_i</span><span class="p">)</span>
+<a name="l-103"></a>    <span class="p">,.</span><span class="n">r_clk_i</span><span class="p">(</span><span class="n">w_clk_i</span><span class="p">)</span>
+<a name="l-104"></a>    <span class="p">,.</span><span class="n">w_ptr_binary_r_o</span><span class="p">(</span><span class="n">r_ptr_binary_r</span><span class="p">)</span>
+<a name="l-105"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_o</span><span class="p">(</span><span class="n">r_ptr_gray_r</span><span class="p">)</span>  <span class="c1">// after launch flop</span>
+<a name="l-106"></a>    <span class="p">,.</span><span class="n">w_ptr_gray_r_rsync_o</span><span class="p">(</span><span class="n">r_ptr_gray_r_wsync</span><span class="p">)</span> <span class="c1">// after sync flops</span>
+<a name="l-107"></a>    <span class="p">);</span>
+<a name="l-108"></a>
+<a name="l-109"></a>   <span class="c1">// data is available if the two pointers are not equal</span>
+<a name="l-110"></a>   <span class="k">assign</span> <span class="n">r_valid_o_tmp</span> <span class="o">=</span> <span class="p">(</span><span class="n">r_ptr_gray_r</span> <span class="o">!=</span> <span class="n">w_ptr_gray_r_rsync</span><span class="p">);</span>
+<a name="l-111"></a>
+<a name="l-112"></a>   <span class="c1">// compare two gray code values whose binaries values differ</span>
+<a name="l-113"></a>   <span class="c1">// by top bit; this corresponds to the full conditions</span>
+<a name="l-114"></a>
+<a name="l-115"></a>   <span class="k">assign</span> <span class="n">w_full_o</span>  <span class="o">=</span> <span class="p">(</span><span class="n">w_ptr_gray_r</span> <span class="o">==</span> <span class="p">{</span> <span class="o">~</span><span class="n">r_ptr_gray_r_wsync</span><span class="p">[</span><span class="n">lg_size_p</span><span class="o">-:</span><span class="mi">2</span><span class="p">]</span>
+<a name="l-116"></a>                                         <span class="p">,</span> <span class="n">r_ptr_gray_r_wsync</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">lg_size_p</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">});</span>
+<a name="l-117"></a>
+<a name="l-118"></a>
+<a name="l-119"></a>   <span class="c1">// synopsys translate_off</span>
+<a name="l-120"></a>   <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">w_clk_i</span><span class="p">)</span>
+<a name="l-121"></a>     <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">w_full_o</span><span class="o">===</span><span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="n">w_enq_i</span><span class="o">===</span><span class="mi">1</span><span class="p">))</span>   <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;enqueing data on bsg_async_fifo when full&quot;</span><span class="p">);</span>
+<a name="l-122"></a>
+<a name="l-123"></a>   <span class="k">always</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">r_clk_i</span><span class="p">)</span>
+<a name="l-124"></a>     <span class="k">assert</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">r_valid_o_tmp</span><span class="o">===</span><span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">r_deq_i</span><span class="o">===</span><span class="mi">1</span><span class="p">))</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;dequeing data on bsg_async_fifo when empty&quot;</span><span class="p">);</span>
 <a name="l-125"></a>
-<a name="l-126"></a><span class="k">endmodule</span> <span class="c1">// bsg_async_fifo</span>
+<a name="l-126"></a>   <span class="c1">// synopsys translate_on</span>
+<a name="l-127"></a>
+<a name="l-128"></a><span class="k">endmodule</span> <span class="c1">// bsg_async_fifo</span>
 </pre></div>
 </td></tr></table>
   </body>

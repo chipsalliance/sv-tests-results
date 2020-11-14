@@ -57,7 +57,9 @@
 <a href="#l-49">49</a>
 <a href="#l-50">50</a>
 <a href="#l-51">51</a>
-<a href="#l-52">52</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// bsg_adder_one_hot</span>
+<a href="#l-52">52</a>
+<a href="#l-53">53</a>
+<a href="#l-54">54</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// bsg_adder_one_hot</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">// adder whose inputs and outputs are all one hot signals</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -67,48 +69,50 @@
 <a name="l-8"></a><span class="c1">// if you don&#39;t want modulo, then make the output signal wide enough; i.e. set output_width_p&gt;=2*width_p-1</span>
 <a name="l-9"></a><span class="c1">//</span>
 <a name="l-10"></a>
-<a name="l-11"></a><span class="k">module</span> <span class="n">bsg_adder_one_hot</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="k">parameter</span> <span class="n">output_width_p</span><span class="o">=</span><span class="n">width_p</span><span class="p">)</span>
-<a name="l-12"></a>   <span class="p">(</span><span class="k">input</span>    <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">a_i</span>
-<a name="l-13"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">b_i</span>
-<a name="l-14"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">output_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
-<a name="l-15"></a>    <span class="p">);</span>
-<a name="l-16"></a>
-<a name="l-17"></a>   <span class="k">genvar</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">;</span>
+<a name="l-11"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-12"></a>
+<a name="l-13"></a><span class="k">module</span> <span class="n">bsg_adder_one_hot</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="k">parameter</span> <span class="n">output_width_p</span><span class="o">=</span><span class="n">width_p</span><span class="p">)</span>
+<a name="l-14"></a>   <span class="p">(</span><span class="k">input</span>    <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">a_i</span>
+<a name="l-15"></a>    <span class="p">,</span> <span class="k">input</span>  <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">b_i</span>
+<a name="l-16"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">output_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
+<a name="l-17"></a>    <span class="p">);</span>
 <a name="l-18"></a>
-<a name="l-19"></a>   <span class="k">initial</span> <span class="k">assert</span> <span class="p">(</span><span class="n">output_width_p</span> <span class="o">&gt;=</span> <span class="n">width_p</span><span class="p">)</span>
-<a name="l-20"></a>     <span class="k">else</span> <span class="k">begin</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%m: unsupported output_width_p &lt; width_p&quot;</span><span class="p">);</span>
-<a name="l-21"></a>	<span class="p">$</span><span class="n">finish</span><span class="p">();</span>
-<a name="l-22"></a>     <span class="k">end</span>
-<a name="l-23"></a>
-<a name="l-24"></a>   <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">output_width_p</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="c1">// for each output wire</span>
-<a name="l-25"></a>     <span class="k">begin</span><span class="o">:</span> <span class="n">rof</span>
-<a name="l-26"></a>	<span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">aggregate</span><span class="p">;</span>
-<a name="l-27"></a>
-<a name="l-28"></a>	<span class="c1">// for each input a_i</span>
-<a name="l-29"></a>	<span class="c1">// compute what bit is necessary to make it total to i</span>
-<a name="l-30"></a>	<span class="c1">// including wrap around in the modulo case</span>
-<a name="l-31"></a>	
-<a name="l-32"></a>	<span class="k">for</span> <span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">;</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-33"></a>	  <span class="k">begin</span><span class="o">:</span> <span class="n">rof2</span>
-<a name="l-34"></a>	     <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">)</span>
-<a name="l-35"></a>	       <span class="k">begin</span><span class="o">:</span> <span class="n">rof3</span>
-<a name="l-36"></a>		  <span class="k">if</span> <span class="p">(</span><span class="n">output_width_p</span><span class="o">+</span><span class="n">i</span><span class="o">-</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">)</span>
-<a name="l-37"></a>		    <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">b_i</span><span class="p">[</span><span class="n">output_width_p</span><span class="o">+</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">];</span>
-<a name="l-38"></a>		  <span class="k">else</span>
-<a name="l-39"></a>		    <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-40"></a>	       <span class="k">end</span>
-<a name="l-41"></a>	     <span class="k">else</span>
-<a name="l-42"></a>	       <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">)</span>
-<a name="l-43"></a>		 <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">b_i</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">];</span>
-<a name="l-44"></a>	       <span class="k">else</span>
-<a name="l-45"></a>		 <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-46"></a>	  <span class="k">end</span> <span class="c1">// block: rof2</span>
-<a name="l-47"></a>
-<a name="l-48"></a>	<span class="k">assign</span> <span class="n">o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">|</span> <span class="n">aggregate</span><span class="p">;</span>
+<a name="l-19"></a>   <span class="k">genvar</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">;</span>
+<a name="l-20"></a>
+<a name="l-21"></a>   <span class="k">initial</span> <span class="k">assert</span> <span class="p">(</span><span class="n">output_width_p</span> <span class="o">&gt;=</span> <span class="n">width_p</span><span class="p">)</span>
+<a name="l-22"></a>     <span class="k">else</span> <span class="k">begin</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;%m: unsupported output_width_p &lt; width_p&quot;</span><span class="p">);</span>
+<a name="l-23"></a>	<span class="p">$</span><span class="n">finish</span><span class="p">();</span>
+<a name="l-24"></a>     <span class="k">end</span>
+<a name="l-25"></a>
+<a name="l-26"></a>   <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">output_width_p</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="c1">// for each output wire</span>
+<a name="l-27"></a>     <span class="k">begin</span><span class="o">:</span> <span class="n">rof</span>
+<a name="l-28"></a>	<span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">aggregate</span><span class="p">;</span>
+<a name="l-29"></a>
+<a name="l-30"></a>	<span class="c1">// for each input a_i</span>
+<a name="l-31"></a>	<span class="c1">// compute what bit is necessary to make it total to i</span>
+<a name="l-32"></a>	<span class="c1">// including wrap around in the modulo case</span>
+<a name="l-33"></a>	
+<a name="l-34"></a>	<span class="k">for</span> <span class="p">(</span><span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">;</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-35"></a>	  <span class="k">begin</span><span class="o">:</span> <span class="n">rof2</span>
+<a name="l-36"></a>	     <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">)</span>
+<a name="l-37"></a>	       <span class="k">begin</span><span class="o">:</span> <span class="n">rof3</span>
+<a name="l-38"></a>		  <span class="k">if</span> <span class="p">(</span><span class="n">output_width_p</span><span class="o">+</span><span class="n">i</span><span class="o">-</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">)</span>
+<a name="l-39"></a>		    <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">b_i</span><span class="p">[</span><span class="n">output_width_p</span><span class="o">+</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">];</span>
+<a name="l-40"></a>		  <span class="k">else</span>
+<a name="l-41"></a>		    <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-42"></a>	       <span class="k">end</span>
+<a name="l-43"></a>	     <span class="k">else</span>
+<a name="l-44"></a>	       <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">)</span>
+<a name="l-45"></a>		 <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">b_i</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">];</span>
+<a name="l-46"></a>	       <span class="k">else</span>
+<a name="l-47"></a>		 <span class="k">assign</span> <span class="n">aggregate</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-48"></a>	  <span class="k">end</span> <span class="c1">// block: rof2</span>
 <a name="l-49"></a>
-<a name="l-50"></a>     <span class="k">end</span> <span class="c1">// block: rof</span>
+<a name="l-50"></a>	<span class="k">assign</span> <span class="n">o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">|</span> <span class="n">aggregate</span><span class="p">;</span>
 <a name="l-51"></a>
-<a name="l-52"></a><span class="k">endmodule</span>
+<a name="l-52"></a>     <span class="k">end</span> <span class="c1">// block: rof</span>
+<a name="l-53"></a>
+<a name="l-54"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

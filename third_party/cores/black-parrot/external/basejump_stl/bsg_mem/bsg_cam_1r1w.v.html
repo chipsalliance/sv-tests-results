@@ -107,7 +107,9 @@
 <a href="#l-99"> 99</a>
 <a href="#l-100">100</a>
 <a href="#l-101">101</a>
-<a href="#l-102">102</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/*</span>
+<a href="#l-102">102</a>
+<a href="#l-103">103</a>
+<a href="#l-104">104</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/*</span>
 <a name="l-2"></a><span class="cm"> * Asynchronous read 1r1w content addressable memory module.</span>
 <a name="l-3"></a><span class="cm"> * Each entry has a tag and a data associated with it, and can be</span>
 <a name="l-4"></a><span class="cm"> *   independently cleared and set</span>
@@ -124,91 +126,93 @@
 <a name="l-15"></a><span class="cm"> *     of the data. If you find that functionality useful, let us know =)</span>
 <a name="l-16"></a><span class="cm"> */</span>
 <a name="l-17"></a>
-<a name="l-18"></a><span class="k">module</span> <span class="n">bsg_cam_1r1w</span>
-<a name="l-19"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">els_p</span>                <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-20"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">tag_width_p</span>        <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-21"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">data_width_p</span>       <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a name="l-22"></a>
-<a name="l-23"></a>   <span class="c1">// The replacement scheme for the CAM</span>
-<a name="l-24"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">repl_scheme_p</span> <span class="o">=</span> <span class="s">&quot;lru&quot;</span>
-<a name="l-25"></a>   <span class="p">)</span>
-<a name="l-26"></a>  <span class="p">(</span><span class="k">input</span>                             <span class="n">clk_i</span>
-<a name="l-27"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">reset_i</span>
-<a name="l-28"></a>
-<a name="l-29"></a>   <span class="c1">// Synchronous write/invalidate of a tag</span>
-<a name="l-30"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">w_v_i</span>
-<a name="l-31"></a>   <span class="c1">// When w_v_i &amp; w_nuke_i, the whole cam array is invalidated</span>
-<a name="l-32"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">w_nuke_i</span>
-<a name="l-33"></a>   <span class="c1">// Tag/data to set on write</span>
-<a name="l-34"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">tag_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">w_tag_i</span>
-<a name="l-35"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">data_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">w_data_i</span>
-<a name="l-36"></a>   
-<a name="l-37"></a>   <span class="c1">// Asynchronous read of a tag, if exists</span>
-<a name="l-38"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">r_v_i</span>
-<a name="l-39"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">tag_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">r_tag_i</span>
-<a name="l-40"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">data_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">r_data_o</span>
-<a name="l-41"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                    <span class="n">r_v_o</span>
-<a name="l-42"></a>  <span class="p">);</span>
-<a name="l-43"></a>
-<a name="l-44"></a>  <span class="c1">// The tag storage for the CAM</span>
-<a name="l-45"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_r_match_lo</span><span class="p">;</span>
-<a name="l-46"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_empty_lo</span><span class="p">;</span>
-<a name="l-47"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">repl_way_lo</span><span class="p">;</span>
-<a name="l-48"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_w_v_li</span> <span class="o">=</span> <span class="n">repl_way_lo</span> <span class="o">|</span> <span class="p">{</span><span class="n">els_p</span><span class="p">{</span><span class="n">w_nuke_i</span><span class="p">}};</span>
-<a name="l-49"></a>  <span class="n">bsg_cam_1r1w_tag_array</span>
-<a name="l-50"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">tag_width_p</span><span class="p">)</span>
-<a name="l-51"></a>     <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
-<a name="l-52"></a>     <span class="p">)</span>
-<a name="l-53"></a>   <span class="n">cam_tag_array</span>
-<a name="l-54"></a>    <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-55"></a>     <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-56"></a>
-<a name="l-57"></a>     <span class="p">,.</span><span class="n">w_v_i</span><span class="p">(</span><span class="n">tag_w_v_li</span><span class="p">)</span>
-<a name="l-58"></a>     <span class="p">,.</span><span class="n">w_set_not_clear_i</span><span class="p">(</span><span class="n">w_v_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">w_nuke_i</span><span class="p">)</span>
-<a name="l-59"></a>     <span class="p">,.</span><span class="n">w_tag_i</span><span class="p">(</span><span class="n">w_tag_i</span><span class="p">)</span>
-<a name="l-60"></a>     <span class="p">,.</span><span class="n">w_empty_o</span><span class="p">(</span><span class="n">tag_empty_lo</span><span class="p">)</span>
-<a name="l-61"></a>
-<a name="l-62"></a>     <span class="p">,.</span><span class="n">r_v_i</span><span class="p">(</span><span class="n">r_v_i</span><span class="p">)</span>
-<a name="l-63"></a>     <span class="p">,.</span><span class="n">r_tag_i</span><span class="p">(</span><span class="n">r_tag_i</span><span class="p">)</span>
-<a name="l-64"></a>     <span class="p">,.</span><span class="n">r_match_o</span><span class="p">(</span><span class="n">tag_r_match_lo</span><span class="p">)</span>
-<a name="l-65"></a>     <span class="p">);</span>
-<a name="l-66"></a>
-<a name="l-67"></a>  <span class="c1">// The replacement scheme for the CAM</span>
-<a name="l-68"></a>  <span class="n">bsg_cam_1r1w_replacement</span>
-<a name="l-69"></a>   <span class="p">#(.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
-<a name="l-70"></a>     <span class="p">,.</span><span class="n">scheme_p</span><span class="p">(</span><span class="n">repl_scheme_p</span><span class="p">)</span>
-<a name="l-71"></a>     <span class="p">)</span>
-<a name="l-72"></a>   <span class="n">replacement</span>
-<a name="l-73"></a>    <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-74"></a>     <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-75"></a>
-<a name="l-76"></a>     <span class="p">,.</span><span class="n">read_v_i</span><span class="p">(</span><span class="n">tag_r_match_lo</span><span class="p">)</span>
+<a name="l-18"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-19"></a>
+<a name="l-20"></a><span class="k">module</span> <span class="n">bsg_cam_1r1w</span>
+<a name="l-21"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">els_p</span>                <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-22"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">tag_width_p</span>        <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-23"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">data_width_p</span>       <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
+<a name="l-24"></a>
+<a name="l-25"></a>   <span class="c1">// The replacement scheme for the CAM</span>
+<a name="l-26"></a>   <span class="p">,</span> <span class="k">parameter</span> <span class="n">repl_scheme_p</span> <span class="o">=</span> <span class="s">&quot;lru&quot;</span>
+<a name="l-27"></a>   <span class="p">)</span>
+<a name="l-28"></a>  <span class="p">(</span><span class="k">input</span>                             <span class="n">clk_i</span>
+<a name="l-29"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">reset_i</span>
+<a name="l-30"></a>
+<a name="l-31"></a>   <span class="c1">// Synchronous write/invalidate of a tag</span>
+<a name="l-32"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">w_v_i</span>
+<a name="l-33"></a>   <span class="c1">// When w_v_i &amp; w_nuke_i, the whole cam array is invalidated</span>
+<a name="l-34"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">w_nuke_i</span>
+<a name="l-35"></a>   <span class="c1">// Tag/data to set on write</span>
+<a name="l-36"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">tag_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">w_tag_i</span>
+<a name="l-37"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">data_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">w_data_i</span>
+<a name="l-38"></a>   
+<a name="l-39"></a>   <span class="c1">// Asynchronous read of a tag, if exists</span>
+<a name="l-40"></a>   <span class="p">,</span> <span class="k">input</span>                           <span class="n">r_v_i</span>
+<a name="l-41"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">tag_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">r_tag_i</span>
+<a name="l-42"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">data_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">r_data_o</span>
+<a name="l-43"></a>   <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                    <span class="n">r_v_o</span>
+<a name="l-44"></a>  <span class="p">);</span>
+<a name="l-45"></a>
+<a name="l-46"></a>  <span class="c1">// The tag storage for the CAM</span>
+<a name="l-47"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_r_match_lo</span><span class="p">;</span>
+<a name="l-48"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_empty_lo</span><span class="p">;</span>
+<a name="l-49"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">repl_way_lo</span><span class="p">;</span>
+<a name="l-50"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tag_w_v_li</span> <span class="o">=</span> <span class="n">repl_way_lo</span> <span class="o">|</span> <span class="p">{</span><span class="n">els_p</span><span class="p">{</span><span class="n">w_nuke_i</span><span class="p">}};</span>
+<a name="l-51"></a>  <span class="n">bsg_cam_1r1w_tag_array</span>
+<a name="l-52"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">tag_width_p</span><span class="p">)</span>
+<a name="l-53"></a>     <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-54"></a>     <span class="p">)</span>
+<a name="l-55"></a>   <span class="n">cam_tag_array</span>
+<a name="l-56"></a>    <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-57"></a>     <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-58"></a>
+<a name="l-59"></a>     <span class="p">,.</span><span class="n">w_v_i</span><span class="p">(</span><span class="n">tag_w_v_li</span><span class="p">)</span>
+<a name="l-60"></a>     <span class="p">,.</span><span class="n">w_set_not_clear_i</span><span class="p">(</span><span class="n">w_v_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">w_nuke_i</span><span class="p">)</span>
+<a name="l-61"></a>     <span class="p">,.</span><span class="n">w_tag_i</span><span class="p">(</span><span class="n">w_tag_i</span><span class="p">)</span>
+<a name="l-62"></a>     <span class="p">,.</span><span class="n">w_empty_o</span><span class="p">(</span><span class="n">tag_empty_lo</span><span class="p">)</span>
+<a name="l-63"></a>
+<a name="l-64"></a>     <span class="p">,.</span><span class="n">r_v_i</span><span class="p">(</span><span class="n">r_v_i</span><span class="p">)</span>
+<a name="l-65"></a>     <span class="p">,.</span><span class="n">r_tag_i</span><span class="p">(</span><span class="n">r_tag_i</span><span class="p">)</span>
+<a name="l-66"></a>     <span class="p">,.</span><span class="n">r_match_o</span><span class="p">(</span><span class="n">tag_r_match_lo</span><span class="p">)</span>
+<a name="l-67"></a>     <span class="p">);</span>
+<a name="l-68"></a>
+<a name="l-69"></a>  <span class="c1">// The replacement scheme for the CAM</span>
+<a name="l-70"></a>  <span class="n">bsg_cam_1r1w_replacement</span>
+<a name="l-71"></a>   <span class="p">#(.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-72"></a>     <span class="p">,.</span><span class="n">scheme_p</span><span class="p">(</span><span class="n">repl_scheme_p</span><span class="p">)</span>
+<a name="l-73"></a>     <span class="p">)</span>
+<a name="l-74"></a>   <span class="n">replacement</span>
+<a name="l-75"></a>    <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-76"></a>     <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
 <a name="l-77"></a>
-<a name="l-78"></a>     <span class="p">,.</span><span class="n">alloc_v_i</span><span class="p">(</span><span class="n">w_v_i</span><span class="p">)</span>
-<a name="l-79"></a>     <span class="p">,.</span><span class="n">alloc_empty_i</span><span class="p">(</span><span class="n">tag_empty_lo</span><span class="p">)</span>
-<a name="l-80"></a>     <span class="p">,.</span><span class="n">alloc_v_o</span><span class="p">(</span><span class="n">repl_way_lo</span><span class="p">)</span>
-<a name="l-81"></a>     <span class="p">);</span>
-<a name="l-82"></a>
-<a name="l-83"></a>  <span class="c1">// The data storage for the CAM</span>
-<a name="l-84"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">mem_w_v_li</span> <span class="o">=</span> <span class="n">repl_way_lo</span><span class="p">;</span>
-<a name="l-85"></a>  <span class="n">bsg_mem_1r1w_one_hot</span>
-<a name="l-86"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">data_width_p</span><span class="p">)</span>
-<a name="l-87"></a>     <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
-<a name="l-88"></a>     <span class="p">)</span>
-<a name="l-89"></a>   <span class="n">one_hot_mem</span>
-<a name="l-90"></a>    <span class="p">(.</span><span class="n">w_clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
-<a name="l-91"></a>     <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a name="l-92"></a>
-<a name="l-93"></a>     <span class="p">,.</span><span class="n">w_v_i</span><span class="p">(</span><span class="n">mem_w_v_li</span><span class="p">)</span>
-<a name="l-94"></a>     <span class="p">,.</span><span class="n">w_data_i</span><span class="p">(</span><span class="n">w_data_i</span><span class="p">)</span>
-<a name="l-95"></a>
-<a name="l-96"></a>     <span class="p">,.</span><span class="n">r_v_i</span><span class="p">(</span><span class="n">tag_r_match_lo</span><span class="p">)</span>
-<a name="l-97"></a>     <span class="p">,.</span><span class="n">r_data_o</span><span class="p">(</span><span class="n">r_data_o</span><span class="p">)</span>
-<a name="l-98"></a>     <span class="p">);</span>
-<a name="l-99"></a>
-<a name="l-100"></a>  <span class="k">assign</span> <span class="n">r_v_o</span> <span class="o">=</span> <span class="o">|</span><span class="n">tag_r_match_lo</span><span class="p">;</span>
+<a name="l-78"></a>     <span class="p">,.</span><span class="n">read_v_i</span><span class="p">(</span><span class="n">tag_r_match_lo</span><span class="p">)</span>
+<a name="l-79"></a>
+<a name="l-80"></a>     <span class="p">,.</span><span class="n">alloc_v_i</span><span class="p">(</span><span class="n">w_v_i</span><span class="p">)</span>
+<a name="l-81"></a>     <span class="p">,.</span><span class="n">alloc_empty_i</span><span class="p">(</span><span class="n">tag_empty_lo</span><span class="p">)</span>
+<a name="l-82"></a>     <span class="p">,.</span><span class="n">alloc_v_o</span><span class="p">(</span><span class="n">repl_way_lo</span><span class="p">)</span>
+<a name="l-83"></a>     <span class="p">);</span>
+<a name="l-84"></a>
+<a name="l-85"></a>  <span class="c1">// The data storage for the CAM</span>
+<a name="l-86"></a>  <span class="kt">wire</span> <span class="p">[</span><span class="n">els_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">mem_w_v_li</span> <span class="o">=</span> <span class="n">repl_way_lo</span><span class="p">;</span>
+<a name="l-87"></a>  <span class="n">bsg_mem_1r1w_one_hot</span>
+<a name="l-88"></a>   <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">data_width_p</span><span class="p">)</span>
+<a name="l-89"></a>     <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="n">els_p</span><span class="p">)</span>
+<a name="l-90"></a>     <span class="p">)</span>
+<a name="l-91"></a>   <span class="n">one_hot_mem</span>
+<a name="l-92"></a>    <span class="p">(.</span><span class="n">w_clk_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">)</span>
+<a name="l-93"></a>     <span class="p">,.</span><span class="n">w_reset_i</span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a name="l-94"></a>
+<a name="l-95"></a>     <span class="p">,.</span><span class="n">w_v_i</span><span class="p">(</span><span class="n">mem_w_v_li</span><span class="p">)</span>
+<a name="l-96"></a>     <span class="p">,.</span><span class="n">w_data_i</span><span class="p">(</span><span class="n">w_data_i</span><span class="p">)</span>
+<a name="l-97"></a>
+<a name="l-98"></a>     <span class="p">,.</span><span class="n">r_v_i</span><span class="p">(</span><span class="n">tag_r_match_lo</span><span class="p">)</span>
+<a name="l-99"></a>     <span class="p">,.</span><span class="n">r_data_o</span><span class="p">(</span><span class="n">r_data_o</span><span class="p">)</span>
+<a name="l-100"></a>     <span class="p">);</span>
 <a name="l-101"></a>
-<a name="l-102"></a><span class="k">endmodule</span>
+<a name="l-102"></a>  <span class="k">assign</span> <span class="n">r_v_o</span> <span class="o">=</span> <span class="o">|</span><span class="n">tag_r_match_lo</span><span class="p">;</span>
+<a name="l-103"></a>
+<a name="l-104"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

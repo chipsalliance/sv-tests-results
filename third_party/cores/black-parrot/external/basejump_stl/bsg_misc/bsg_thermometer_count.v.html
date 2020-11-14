@@ -69,70 +69,74 @@
 <a href="#l-61">61</a>
 <a href="#l-62">62</a>
 <a href="#l-63">63</a>
-<a href="#l-64">64</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 10-26-14</span>
+<a href="#l-64">64</a>
+<a href="#l-65">65</a>
+<a href="#l-66">66</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 10-26-14</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">//</span>
 <a name="l-4"></a><span class="c1">// Counts the number of set bits in a thermometer code.</span>
 <a name="l-5"></a><span class="c1">// A thermometer code is of the form 0*1*.</span>
 <a name="l-6"></a><span class="c1">//</span>
 <a name="l-7"></a>
-<a name="l-8"></a><span class="k">module</span> <span class="n">bsg_thermometer_count</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-9"></a>   <span class="p">(</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">i</span>
-<a name="l-10"></a>    <span class="c1">// we need to represent width_p+1 values (0..width_p), so</span>
-<a name="l-11"></a>    <span class="c1">// we need the +1.</span>
-<a name="l-12"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
-<a name="l-13"></a>    <span class="p">);</span>
-<a name="l-14"></a>
-<a name="l-15"></a>   <span class="c1">// parallel prefix is a bit slow for these cases</span>
+<a name="l-8"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-9"></a>
+<a name="l-10"></a><span class="k">module</span> <span class="n">bsg_thermometer_count</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-11"></a>   <span class="p">(</span><span class="k">input</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">i</span>
+<a name="l-12"></a>    <span class="c1">// we need to represent width_p+1 values (0..width_p), so</span>
+<a name="l-13"></a>    <span class="c1">// we need the +1.</span>
+<a name="l-14"></a>    <span class="p">,</span> <span class="k">output</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
+<a name="l-15"></a>    <span class="p">);</span>
 <a name="l-16"></a>
-<a name="l-17"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-<a name="l-18"></a>     <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
-<a name="l-19"></a>   <span class="k">else</span>
-<a name="l-20"></a>     <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
-<a name="l-21"></a>       <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">};</span>
-<a name="l-22"></a>     <span class="k">else</span>
-<a name="l-23"></a>       <span class="c1">// 000  0     0</span>
-<a name="l-24"></a>       <span class="c1">// 001  0     1</span>
-<a name="l-25"></a>       <span class="c1">// 011  1     0</span>
-<a name="l-26"></a>       <span class="c1">// 111  1     1</span>
-<a name="l-27"></a>
-<a name="l-28"></a>       <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
-<a name="l-29"></a>         <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">|</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="p">};</span>
-<a name="l-30"></a>       <span class="k">else</span>
-<a name="l-31"></a>       <span class="c1">// 3210</span>
-<a name="l-32"></a>       <span class="c1">// 0000  0     0     0</span>
-<a name="l-33"></a>       <span class="c1">// 0001  0     0     1</span>
-<a name="l-34"></a>       <span class="c1">// 0011  0     1     0</span>
-<a name="l-35"></a>       <span class="c1">// 0111  0     1     1</span>
-<a name="l-36"></a>       <span class="c1">// 1111  1     0     0</span>
-<a name="l-37"></a>
-<a name="l-38"></a>         <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
-<a name="l-39"></a>	   <span class="c1">//           assign o = {i[3], ~i[3] &amp; i[1], (~i[3] &amp; i[0]) &amp; ~(i[2]^i[1]) };</span>
-<a name="l-40"></a>	   <span class="c1">// DC likes the xor&#39;s</span>
-<a name="l-41"></a>           <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">~</span><span class="n">i</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">^</span><span class="n">i</span> <span class="p">};</span>
-<a name="l-42"></a>         <span class="k">else</span>
-<a name="l-43"></a>
-<a name="l-44"></a>           <span class="c1">// this converts from a thermometer code (01111)</span>
-<a name="l-45"></a>           <span class="c1">// to a one hot code                     (10000)</span>
-<a name="l-46"></a>           <span class="c1">// basically by edge-detecting it.</span>
-<a name="l-47"></a>           <span class="c1">//</span>
-<a name="l-48"></a>           <span class="c1">// the important parts are the corner cases:</span>
-<a name="l-49"></a>           <span class="c1">// 0000 --&gt; ~(0_0000) &amp; (0000_1) --&gt; 0000_1 (0)</span>
-<a name="l-50"></a>           <span class="c1">// 1111 --&gt; ~(0_1111) &amp; (1111_0) --&gt; 1_0000 (4)</span>
-<a name="l-51"></a>           <span class="c1">//</span>
-<a name="l-52"></a>
-<a name="l-53"></a>           <span class="k">begin</span> <span class="o">:</span> <span class="n">big</span>
-<a name="l-54"></a>              <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">one_hot</span> <span class="o">=</span>   <span class="p">(</span>  <span class="o">~</span><span class="p">{</span> <span class="mb">1&#39;b0</span><span class="p">,</span>      <span class="n">i</span> <span class="p">}</span> <span class="p">)</span>
-<a name="l-55"></a>                <span class="o">&amp;</span> <span class="p">(</span>   <span class="p">{</span> <span class="n">i</span>   <span class="p">,</span>   <span class="mb">1&#39;b1</span> <span class="p">}</span> <span class="p">);</span>
-<a name="l-56"></a>
-<a name="l-57"></a>              <span class="n">bsg_encode_one_hot</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">encode_one_hot</span>
-<a name="l-58"></a>                <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">one_hot</span><span class="p">)</span>
-<a name="l-59"></a>                 <span class="p">,.</span><span class="n">addr_o</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
-<a name="l-60"></a>                 <span class="p">,.</span><span class="n">v_o</span><span class="p">()</span>
-<a name="l-61"></a>                 <span class="p">);</span>
-<a name="l-62"></a>           <span class="k">end</span>
-<a name="l-63"></a>
-<a name="l-64"></a><span class="k">endmodule</span>
+<a name="l-17"></a>   <span class="c1">// parallel prefix is a bit slow for these cases</span>
+<a name="l-18"></a>
+<a name="l-19"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<a name="l-20"></a>     <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+<a name="l-21"></a>   <span class="k">else</span>
+<a name="l-22"></a>     <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span>
+<a name="l-23"></a>       <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">};</span>
+<a name="l-24"></a>     <span class="k">else</span>
+<a name="l-25"></a>       <span class="c1">// 000  0     0</span>
+<a name="l-26"></a>       <span class="c1">// 001  0     1</span>
+<a name="l-27"></a>       <span class="c1">// 011  1     0</span>
+<a name="l-28"></a>       <span class="c1">// 111  1     1</span>
+<a name="l-29"></a>
+<a name="l-30"></a>       <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span>
+<a name="l-31"></a>         <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">|</span> <span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="p">};</span>
+<a name="l-32"></a>       <span class="k">else</span>
+<a name="l-33"></a>       <span class="c1">// 3210</span>
+<a name="l-34"></a>       <span class="c1">// 0000  0     0     0</span>
+<a name="l-35"></a>       <span class="c1">// 0001  0     0     1</span>
+<a name="l-36"></a>       <span class="c1">// 0011  0     1     0</span>
+<a name="l-37"></a>       <span class="c1">// 0111  0     1     1</span>
+<a name="l-38"></a>       <span class="c1">// 1111  1     0     0</span>
+<a name="l-39"></a>
+<a name="l-40"></a>         <span class="k">if</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span>
+<a name="l-41"></a>	   <span class="c1">//           assign o = {i[3], ~i[3] &amp; i[1], (~i[3] &amp; i[0]) &amp; ~(i[2]^i[1]) };</span>
+<a name="l-42"></a>	   <span class="c1">// DC likes the xor&#39;s</span>
+<a name="l-43"></a>           <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">~</span><span class="n">i</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">^</span><span class="n">i</span> <span class="p">};</span>
+<a name="l-44"></a>         <span class="k">else</span>
+<a name="l-45"></a>
+<a name="l-46"></a>           <span class="c1">// this converts from a thermometer code (01111)</span>
+<a name="l-47"></a>           <span class="c1">// to a one hot code                     (10000)</span>
+<a name="l-48"></a>           <span class="c1">// basically by edge-detecting it.</span>
+<a name="l-49"></a>           <span class="c1">//</span>
+<a name="l-50"></a>           <span class="c1">// the important parts are the corner cases:</span>
+<a name="l-51"></a>           <span class="c1">// 0000 --&gt; ~(0_0000) &amp; (0000_1) --&gt; 0000_1 (0)</span>
+<a name="l-52"></a>           <span class="c1">// 1111 --&gt; ~(0_1111) &amp; (1111_0) --&gt; 1_0000 (4)</span>
+<a name="l-53"></a>           <span class="c1">//</span>
+<a name="l-54"></a>
+<a name="l-55"></a>           <span class="k">begin</span> <span class="o">:</span> <span class="n">big</span>
+<a name="l-56"></a>              <span class="kt">wire</span> <span class="p">[</span><span class="nl">width_p:</span><span class="mi">0</span><span class="p">]</span> <span class="n">one_hot</span> <span class="o">=</span>   <span class="p">(</span>  <span class="o">~</span><span class="p">{</span> <span class="mb">1&#39;b0</span><span class="p">,</span>      <span class="n">i</span> <span class="p">}</span> <span class="p">)</span>
+<a name="l-57"></a>                <span class="o">&amp;</span> <span class="p">(</span>   <span class="p">{</span> <span class="n">i</span>   <span class="p">,</span>   <span class="mb">1&#39;b1</span> <span class="p">}</span> <span class="p">);</span>
+<a name="l-58"></a>
+<a name="l-59"></a>              <span class="n">bsg_encode_one_hot</span> <span class="p">#(.</span><span class="n">width_p</span><span class="p">(</span><span class="n">width_p</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="n">encode_one_hot</span>
+<a name="l-60"></a>                <span class="p">(.</span><span class="n">i</span><span class="p">(</span><span class="n">one_hot</span><span class="p">)</span>
+<a name="l-61"></a>                 <span class="p">,.</span><span class="n">addr_o</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+<a name="l-62"></a>                 <span class="p">,.</span><span class="n">v_o</span><span class="p">()</span>
+<a name="l-63"></a>                 <span class="p">);</span>
+<a name="l-64"></a>           <span class="k">end</span>
+<a name="l-65"></a>
+<a name="l-66"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

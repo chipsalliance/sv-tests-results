@@ -132,7 +132,9 @@
 <a href="#l-124">124</a>
 <a href="#l-125">125</a>
 <a href="#l-126">126</a>
-<a href="#l-127">127</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 10/16/14</span>
+<a href="#l-127">127</a>
+<a href="#l-128">128</a>
+<a href="#l-129">129</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 10/16/14</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">// note: this does a scan from hi bit to lo</span>
 <a name="l-4"></a><span class="c1">// so the high bit is always unchanged</span>
@@ -141,124 +143,126 @@
 <a name="l-7"></a><span class="c1">//       which may have excessive wiring as width_p grows</span>
 <a name="l-8"></a><span class="c1">//</span>
 <a name="l-9"></a>
-<a name="l-10"></a><span class="k">module</span> <span class="n">bsg_scan</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-<a name="l-11"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">xor_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-12"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">and_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-13"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">or_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-14"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">lo_to_hi_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-15"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">debug_p</span> <span class="o">=</span> <span class="mi">0</span>
-<a name="l-16"></a>		 <span class="p">)</span>
-<a name="l-17"></a>   <span class="p">(</span><span class="k">input</span>    <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">i</span>
-<a name="l-18"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
-<a name="l-19"></a>    <span class="p">);</span>
-<a name="l-20"></a>
-<a name="l-21"></a>   <span class="c1">// derivation of the scan code (xor case):</span>
+<a name="l-10"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a name="l-11"></a>
+<a name="l-12"></a><span class="k">module</span> <span class="n">bsg_scan</span> <span class="p">#(</span><span class="k">parameter</span> <span class="n">width_p</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<a name="l-13"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">xor_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-14"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">and_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-15"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">or_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-16"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">lo_to_hi_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-17"></a>                  <span class="p">,</span> <span class="k">parameter</span> <span class="n">debug_p</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="l-18"></a>		 <span class="p">)</span>
+<a name="l-19"></a>   <span class="p">(</span><span class="k">input</span>    <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">i</span>
+<a name="l-20"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">o</span>
+<a name="l-21"></a>    <span class="p">);</span>
 <a name="l-22"></a>
-<a name="l-23"></a>   <span class="c1">// width_p = 1           1</span>
-<a name="l-24"></a>   <span class="c1">// t1 = i</span>
-<a name="l-25"></a>   <span class="c1">//</span>
-<a name="l-26"></a>   <span class="c1">// width_p = 4           1111</span>
-<a name="l-27"></a>   <span class="c1">// t1 = i ^ (i &gt;&gt; 1)     1111 ^ 0111 --&gt; 1000</span>
-<a name="l-28"></a>   <span class="c1">// t2 = t1 ^ (t1 &gt;&gt; 2)   1000 ^ 0010 --&gt; 1010</span>
-<a name="l-29"></a>   <span class="c1">// t4 = t2 ^ (t2 &gt;&gt; 4)   1010 ^ 0000 --&gt; 1010  (not needed)</span>
-<a name="l-30"></a>
-<a name="l-31"></a>   <span class="c1">// width_p = 5           11111</span>
-<a name="l-32"></a>   <span class="c1">// t1 = i ^ (i &gt;&gt; 1)     11111 ^ 01111 --&gt; 10000</span>
-<a name="l-33"></a>   <span class="c1">// t2 = t1 ^ (t1 &gt;&gt; 2)   10000 ^ 00100 --&gt; 10100</span>
-<a name="l-34"></a>   <span class="c1">// t4 = t2 ^ (t2 &gt;&gt; 4)   10100 ^ 00001 --&gt; 10101 (needed)</span>
-<a name="l-35"></a>
-<a name="l-36"></a>   <span class="c1">// width_p = 8           1111_1111</span>
-<a name="l-37"></a>   <span class="c1">// t1 = i ^ (i &gt;&gt; 1)     1111_1111 ^ 0111_1111 --&gt; 1000_0000</span>
-<a name="l-38"></a>   <span class="c1">// t2 = t1 ^ (t1 &gt;&gt; 2)   1000_0000 ^ 0010_0000 --&gt; 1010_0000</span>
-<a name="l-39"></a>   <span class="c1">// t4 = t2 ^ (t2 &gt;&gt; 4)   1010_0000 ^ 0000_1010 --&gt; 1010_1010 (needed)</span>
-<a name="l-40"></a>
-<a name="l-41"></a>   <span class="c1">//</span>
-<a name="l-42"></a>   <span class="c1">//        1 2 3 4 5 6 7 8 9</span>
-<a name="l-43"></a>   <span class="c1">// clog2  0 1 2 2 3 3 3 3 4</span>
-<a name="l-44"></a>
-<a name="l-45"></a>   <span class="k">genvar</span> <span class="n">j</span><span class="p">;</span>
+<a name="l-23"></a>   <span class="c1">// derivation of the scan code (xor case):</span>
+<a name="l-24"></a>
+<a name="l-25"></a>   <span class="c1">// width_p = 1           1</span>
+<a name="l-26"></a>   <span class="c1">// t1 = i</span>
+<a name="l-27"></a>   <span class="c1">//</span>
+<a name="l-28"></a>   <span class="c1">// width_p = 4           1111</span>
+<a name="l-29"></a>   <span class="c1">// t1 = i ^ (i &gt;&gt; 1)     1111 ^ 0111 --&gt; 1000</span>
+<a name="l-30"></a>   <span class="c1">// t2 = t1 ^ (t1 &gt;&gt; 2)   1000 ^ 0010 --&gt; 1010</span>
+<a name="l-31"></a>   <span class="c1">// t4 = t2 ^ (t2 &gt;&gt; 4)   1010 ^ 0000 --&gt; 1010  (not needed)</span>
+<a name="l-32"></a>
+<a name="l-33"></a>   <span class="c1">// width_p = 5           11111</span>
+<a name="l-34"></a>   <span class="c1">// t1 = i ^ (i &gt;&gt; 1)     11111 ^ 01111 --&gt; 10000</span>
+<a name="l-35"></a>   <span class="c1">// t2 = t1 ^ (t1 &gt;&gt; 2)   10000 ^ 00100 --&gt; 10100</span>
+<a name="l-36"></a>   <span class="c1">// t4 = t2 ^ (t2 &gt;&gt; 4)   10100 ^ 00001 --&gt; 10101 (needed)</span>
+<a name="l-37"></a>
+<a name="l-38"></a>   <span class="c1">// width_p = 8           1111_1111</span>
+<a name="l-39"></a>   <span class="c1">// t1 = i ^ (i &gt;&gt; 1)     1111_1111 ^ 0111_1111 --&gt; 1000_0000</span>
+<a name="l-40"></a>   <span class="c1">// t2 = t1 ^ (t1 &gt;&gt; 2)   1000_0000 ^ 0010_0000 --&gt; 1010_0000</span>
+<a name="l-41"></a>   <span class="c1">// t4 = t2 ^ (t2 &gt;&gt; 4)   1010_0000 ^ 0000_1010 --&gt; 1010_1010 (needed)</span>
+<a name="l-42"></a>
+<a name="l-43"></a>   <span class="c1">//</span>
+<a name="l-44"></a>   <span class="c1">//        1 2 3 4 5 6 7 8 9</span>
+<a name="l-45"></a>   <span class="c1">// clog2  0 1 2 2 3 3 3 3 4</span>
 <a name="l-46"></a>
-<a name="l-47"></a>   <span class="kt">wire</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">t</span><span class="p">;</span>
+<a name="l-47"></a>   <span class="k">genvar</span> <span class="n">j</span><span class="p">;</span>
 <a name="l-48"></a>
-<a name="l-49"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                      <span class="n">fill</span><span class="p">;</span>
-<a name="l-50"></a>	
-<a name="l-51"></a>   <span class="c1">// synopsys translate_off</span>
-<a name="l-52"></a>   <span class="k">initial</span>
-<a name="l-53"></a>      <span class="k">assert</span><span class="p">(</span> <span class="p">$</span><span class="n">countones</span><span class="p">({</span><span class="n">xor_p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">and_p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">or_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]})</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
-<a name="l-54"></a>        <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;bsg_scan: only one function may be selected</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
-<a name="l-55"></a>	
-<a name="l-56"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">debug_p</span><span class="p">)</span>
-<a name="l-57"></a>    <span class="k">always</span> <span class="p">@(</span><span class="n">o</span><span class="p">)</span>
-<a name="l-58"></a>      <span class="k">begin</span>
-<a name="l-59"></a>        <span class="no">`BSG_HIDE_FROM_VERILATOR</span><span class="p">(#</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-60"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">integer</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">);</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-61"></a>          <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;%b&quot;</span><span class="p">,</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">]);</span>
-<a name="l-62"></a>        <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;i=%b, o=%b&quot;</span><span class="p">,</span><span class="n">i</span><span class="p">,</span> <span class="n">o</span><span class="p">);</span>
-<a name="l-63"></a>      <span class="k">end</span>
-<a name="l-64"></a>	
-<a name="l-65"></a>   <span class="c1">// synopsys translate_on</span>
-<a name="l-66"></a>
-<a name="l-67"></a>   <span class="c1">// streaming operation; reverses bits</span>
-<a name="l-68"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">lo_to_hi_p</span><span class="p">)</span>
-<a name="l-69"></a>     <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">&lt;&lt;</span> <span class="p">{</span><span class="n">i</span><span class="p">}};</span>
-<a name="l-70"></a>   <span class="k">else</span>
-<a name="l-71"></a>     <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
-<a name="l-72"></a>
-<a name="l-73"></a>   <span class="c1">// we optimize for the common case of small and-scans</span>
-<a name="l-74"></a>   <span class="c1">// used in round_robin_fifo_to_fifo</span>
-<a name="l-75"></a>   <span class="c1">// we could generalize for OR/XORs as well.</span>
-<a name="l-76"></a>   <span class="c1">// fixme style: use a loop instead</span>
-<a name="l-77"></a>
-<a name="l-78"></a>   <span class="k">if</span> <span class="p">((</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">and_p</span><span class="p">)</span>
-<a name="l-79"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">scand4</span>
-<a name="l-80"></a>	<span class="k">assign</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">:</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">:</span><span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">};</span>
-<a name="l-81"></a>     <span class="k">end</span>
-<a name="l-82"></a>   <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">and_p</span><span class="p">)</span>
-<a name="l-83"></a>     <span class="k">begin</span><span class="o">:</span> <span class="n">scand3</span>
-<a name="l-84"></a>	<span class="k">assign</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="o">:</span><span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">};</span>
-<a name="l-85"></a>     <span class="k">end</span>
-<a name="l-86"></a>   <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">and_p</span><span class="p">)</span>
-<a name="l-87"></a>     <span class="k">begin</span><span class="o">:</span> <span class="n">scand3</span>
-<a name="l-88"></a>	<span class="k">assign</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">};</span>
-<a name="l-89"></a>     <span class="k">end</span>
-<a name="l-90"></a>   <span class="k">else</span>
-<a name="l-91"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">scanN</span>
-<a name="l-92"></a>	<span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">);</span> <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-<a name="l-93"></a>	  <span class="k">begin</span> <span class="o">:</span> <span class="n">row</span>
-<a name="l-94"></a>             <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shifted</span> <span class="o">=</span> <span class="n">width_p</span> <span class="p">&#39;</span> <span class="p">({</span><span class="n">fill</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]}</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">));</span>
-<a name="l-95"></a>
-<a name="l-96"></a>             <span class="k">if</span> <span class="p">(</span><span class="n">xor_p</span><span class="p">)</span>
-<a name="l-97"></a>               <span class="k">begin</span>
-<a name="l-98"></a>		  <span class="k">assign</span> <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span> <span class="n">width_p</span> <span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}</span> <span class="p">};</span>
-<a name="l-99"></a>		  <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">^</span> <span class="n">shifted</span><span class="p">;</span>
-<a name="l-100"></a>               <span class="k">end</span>
-<a name="l-101"></a>             <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">and_p</span><span class="p">)</span>
-<a name="l-102"></a>               <span class="k">begin</span>
-<a name="l-103"></a>		  <span class="k">assign</span> <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span> <span class="n">width_p</span> <span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}</span> <span class="p">};</span>
-<a name="l-104"></a>		  <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">shifted</span><span class="p">;</span>
-<a name="l-105"></a>               <span class="k">end</span>
-<a name="l-106"></a>             <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">or_p</span><span class="p">)</span>
-<a name="l-107"></a>               <span class="k">begin</span>
-<a name="l-108"></a>		  <span class="k">assign</span> <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span> <span class="n">width_p</span> <span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}</span> <span class="p">};</span>
-<a name="l-109"></a>		  <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">|</span> <span class="n">shifted</span><span class="p">;</span>
-<a name="l-110"></a>               <span class="k">end</span>
-<a name="l-111"></a>	  <span class="k">end</span>
-<a name="l-112"></a>     <span class="k">end</span> <span class="c1">// block: scanN</span>
-<a name="l-113"></a>   
-<a name="l-114"></a>   <span class="c1">// reverse bits</span>
-<a name="l-115"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">lo_to_hi_p</span><span class="p">)</span>
-<a name="l-116"></a>     <span class="c1">//assign o = {&lt;&lt; {t[$clog2(width_p)]}};</span>
-<a name="l-117"></a><span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-118"></a>      <span class="k">assign</span> <span class="n">o</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">j</span><span class="p">];</span>
-<a name="l-119"></a>    <span class="k">end</span>
-<a name="l-120"></a>
-<a name="l-121"></a>   <span class="k">else</span>
-<a name="l-122"></a>     <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)];</span>
-<a name="l-123"></a>
-<a name="l-124"></a>   <span class="c1">// always @(o)</span>
-<a name="l-125"></a>   <span class="c1">//  $display(&quot;bsg_scan (xor_p %b and_p %b  or_p %b) %b = %b&quot;,xor_p[0],and_p[0],or_p[0],i,o);</span>
-<a name="l-126"></a>
-<a name="l-127"></a><span class="k">endmodule</span>
+<a name="l-49"></a>   <span class="kt">wire</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">t</span><span class="p">;</span>
+<a name="l-50"></a>
+<a name="l-51"></a>   <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                      <span class="n">fill</span><span class="p">;</span>
+<a name="l-52"></a>	
+<a name="l-53"></a>   <span class="c1">// synopsys translate_off</span>
+<a name="l-54"></a>   <span class="k">initial</span>
+<a name="l-55"></a>      <span class="k">assert</span><span class="p">(</span> <span class="p">$</span><span class="n">countones</span><span class="p">({</span><span class="n">xor_p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">and_p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">or_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]})</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<a name="l-56"></a>        <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;bsg_scan: only one function may be selected</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<a name="l-57"></a>	
+<a name="l-58"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">debug_p</span><span class="p">)</span>
+<a name="l-59"></a>    <span class="k">always</span> <span class="p">@(</span><span class="n">o</span><span class="p">)</span>
+<a name="l-60"></a>      <span class="k">begin</span>
+<a name="l-61"></a>        <span class="no">`BSG_HIDE_FROM_VERILATOR</span><span class="p">(#</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-62"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">integer</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">);</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-63"></a>          <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;%b&quot;</span><span class="p">,</span><span class="n">t</span><span class="p">[</span><span class="n">k</span><span class="p">]);</span>
+<a name="l-64"></a>        <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;i=%b, o=%b&quot;</span><span class="p">,</span><span class="n">i</span><span class="p">,</span> <span class="n">o</span><span class="p">);</span>
+<a name="l-65"></a>      <span class="k">end</span>
+<a name="l-66"></a>	
+<a name="l-67"></a>   <span class="c1">// synopsys translate_on</span>
+<a name="l-68"></a>
+<a name="l-69"></a>   <span class="c1">// streaming operation; reverses bits</span>
+<a name="l-70"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">lo_to_hi_p</span><span class="p">)</span>
+<a name="l-71"></a>     <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">&lt;&lt;</span> <span class="p">{</span><span class="n">i</span><span class="p">}};</span>
+<a name="l-72"></a>   <span class="k">else</span>
+<a name="l-73"></a>     <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+<a name="l-74"></a>
+<a name="l-75"></a>   <span class="c1">// we optimize for the common case of small and-scans</span>
+<a name="l-76"></a>   <span class="c1">// used in round_robin_fifo_to_fifo</span>
+<a name="l-77"></a>   <span class="c1">// we could generalize for OR/XORs as well.</span>
+<a name="l-78"></a>   <span class="c1">// fixme style: use a loop instead</span>
+<a name="l-79"></a>
+<a name="l-80"></a>   <span class="k">if</span> <span class="p">((</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">and_p</span><span class="p">)</span>
+<a name="l-81"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">scand4</span>
+<a name="l-82"></a>	<span class="k">assign</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">:</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">:</span><span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">};</span>
+<a name="l-83"></a>     <span class="k">end</span>
+<a name="l-84"></a>   <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">and_p</span><span class="p">)</span>
+<a name="l-85"></a>     <span class="k">begin</span><span class="o">:</span> <span class="n">scand3</span>
+<a name="l-86"></a>	<span class="k">assign</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="o">:</span><span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">};</span>
+<a name="l-87"></a>     <span class="k">end</span>
+<a name="l-88"></a>   <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">width_p</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">and_p</span><span class="p">)</span>
+<a name="l-89"></a>     <span class="k">begin</span><span class="o">:</span> <span class="n">scand3</span>
+<a name="l-90"></a>	<span class="k">assign</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">};</span>
+<a name="l-91"></a>     <span class="k">end</span>
+<a name="l-92"></a>   <span class="k">else</span>
+<a name="l-93"></a>     <span class="k">begin</span> <span class="o">:</span> <span class="n">scanN</span>
+<a name="l-94"></a>	<span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">);</span> <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<a name="l-95"></a>	  <span class="k">begin</span> <span class="o">:</span> <span class="n">row</span>
+<a name="l-96"></a>             <span class="kt">wire</span> <span class="p">[</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shifted</span> <span class="o">=</span> <span class="n">width_p</span> <span class="p">&#39;</span> <span class="p">({</span><span class="n">fill</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]}</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">));</span>
+<a name="l-97"></a>
+<a name="l-98"></a>             <span class="k">if</span> <span class="p">(</span><span class="n">xor_p</span><span class="p">)</span>
+<a name="l-99"></a>               <span class="k">begin</span>
+<a name="l-100"></a>		  <span class="k">assign</span> <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span> <span class="n">width_p</span> <span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}</span> <span class="p">};</span>
+<a name="l-101"></a>		  <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">^</span> <span class="n">shifted</span><span class="p">;</span>
+<a name="l-102"></a>               <span class="k">end</span>
+<a name="l-103"></a>             <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">and_p</span><span class="p">)</span>
+<a name="l-104"></a>               <span class="k">begin</span>
+<a name="l-105"></a>		  <span class="k">assign</span> <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span> <span class="n">width_p</span> <span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}</span> <span class="p">};</span>
+<a name="l-106"></a>		  <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">shifted</span><span class="p">;</span>
+<a name="l-107"></a>               <span class="k">end</span>
+<a name="l-108"></a>             <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">or_p</span><span class="p">)</span>
+<a name="l-109"></a>               <span class="k">begin</span>
+<a name="l-110"></a>		  <span class="k">assign</span> <span class="n">fill</span> <span class="o">=</span> <span class="p">{</span> <span class="n">width_p</span> <span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}</span> <span class="p">};</span>
+<a name="l-111"></a>		  <span class="k">assign</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">|</span> <span class="n">shifted</span><span class="p">;</span>
+<a name="l-112"></a>               <span class="k">end</span>
+<a name="l-113"></a>	  <span class="k">end</span>
+<a name="l-114"></a>     <span class="k">end</span> <span class="c1">// block: scanN</span>
+<a name="l-115"></a>   
+<a name="l-116"></a>   <span class="c1">// reverse bits</span>
+<a name="l-117"></a>   <span class="k">if</span> <span class="p">(</span><span class="n">lo_to_hi_p</span><span class="p">)</span>
+<a name="l-118"></a>     <span class="c1">//assign o = {&lt;&lt; {t[$clog2(width_p)]}};</span>
+<a name="l-119"></a><span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">width_p</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-120"></a>      <span class="k">assign</span> <span class="n">o</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)][</span><span class="n">width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">j</span><span class="p">];</span>
+<a name="l-121"></a>    <span class="k">end</span>
+<a name="l-122"></a>
+<a name="l-123"></a>   <span class="k">else</span>
+<a name="l-124"></a>     <span class="k">assign</span> <span class="n">o</span> <span class="o">=</span> <span class="n">t</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">width_p</span><span class="p">)];</span>
+<a name="l-125"></a>
+<a name="l-126"></a>   <span class="c1">// always @(o)</span>
+<a name="l-127"></a>   <span class="c1">//  $display(&quot;bsg_scan (xor_p %b and_p %b  or_p %b) %b = %b&quot;,xor_p[0],and_p[0],or_p[0],i,o);</span>
+<a name="l-128"></a>
+<a name="l-129"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>
