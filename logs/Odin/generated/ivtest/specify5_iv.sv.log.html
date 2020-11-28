@@ -18,7 +18,7 @@ mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/specify5.v.html" target="file-frame">third_party/tests/ivtest/ivltests/specify5.v</a>
 defines: 
 time_elapsed: 0.004s
-ram usage: 9168 KB
+ram usage: 9328 KB
 </pre>
 <pre class="log">
 
@@ -26,10 +26,10 @@ odin_II --permissive -o odin.blif -V <a href="../../../../third_party/tests/ivte
 =======================================================================
  Odin II - Verilog synthesis tools targetting VPR FPGAs
 -----------------------------------------------------------------------
-	Version: 8.1.0-dev+22e69b13a
-	Revision: v8.0.0-2253-g22e69b13a
-	Compiled: 2020-07-29T16:22:29
-	Compiler: GNU 7.5.0 on Linux-4.15.0-1077-gcp x86_64
+	Version: 8.1.0-dev+18b7ca64d
+	Revision: v8.0.0-3014-g18b7ca64d
+	Compiled: 2020-11-20T18:11:56
+	Compiler: GNU 9.3.0 on Linux-4.15.0-1077-gcp x86_64
 	Build Info: Release VTR_ASSERT_LEVEL=2
 
 University of New Brunswick
@@ -41,7 +41,7 @@ For question:
 This is free open source code under MIT license.
 =======================================================================
 
-Warning::PARSE_ARGS Permissive flag is ON. Undefined behaviour may occur
+warning[PARSE_ARGS]:  Permissive flag is ON. Undefined behaviour may occur
 
 Using Lut input width of: -1
 Verilog: specify5.v
@@ -49,20 +49,41 @@ Verilog: specify5.v
 High-level synthesis Begin
 Parser starting - we&#39;ll create an abstract syntax tree. Note this tree can be viewed using Grap Viz (see documentation)
 Adding file <a href="../../../../third_party/tests/ivtest/ivltests/specify5.v.html" target="file-frame">third_party/tests/ivtest/ivltests/specify5.v</a> to parse list
-Warning::PARSE_TO_AST specify5.v:9 error in parsing: (syntax error, unexpected vCFUNC)
-9:     $monitor(&#34;%t - cdn=%b, cp=%b, d=%b, qr=%b, qp=%b&#34;,$time,cdn,cp,d,qr,qp);
-    ^~~~
-Warning::AST specify5.v:24 there are no ports for the module (test)
+
+<a href="../../../../third_party/tests/ivtest/ivltests/specify5.v.html#l-9" target="file-frame">third_party/tests/ivtest/ivltests/specify5.v:9</a>:1: warning[PARSE_TO_AST]:  error in parsing: (syntax error, unexpected vsFUNCTION)
+     7 |   initial begin
+     8 |     $timeformat(-9, 2, &#34; ns&#34;, 9);
+     9 |     $monitor(&#34;%t - cdn=%b, cp=%b, d=%b, qr=%b, qp=%b&#34;,$time,cdn,cp,d,qr,qp);
+          ^~~~
+    10 |     // Reset the FF.
+    11 |     cp = 0; d = 1;
+
+<a href="../../../../third_party/tests/ivtest/ivltests/specify5.v.html#l-24" target="file-frame">third_party/tests/ivtest/ivltests/specify5.v:24</a>:1: warning[AST]:  there are no ports for the module (test)
 	all logic will be dropped since it is not driving an output
-24: endmodule
-     ^~~~
-Warning::PARSE_TO_AST specify5.v:47 error in parsing: (syntax error, unexpected vIF, expecting vENDSPECIFY or vSPECPARAM or &#39;(&#39;)
-47:     if (cdn) (posedge cp =&gt; (q +: d)) = (tpd_cp_q_lh, tpd_cp_q_hl);
-        ^~~~
-Error::AST specify5.v:54 Module already has output with this name q
-54:   output q;
-     ^~~~
-/tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/odin_ii_1596039504073/work/ODIN_II/SRC/parse_making_ast.cpp:463: ast_node_t* markAndProcessPortWith(ids, ids, ids, ast_node_t*, bool): Fatal error
+    22 |   dff_rtl dutr(qr, d, cp, cdn);  // This one works fine.
+    23 |   dff_prm dutp(qp, d, cp, cdn);  // This one has no delay.
+    24 | endmodule
+         ^~~~
+    25 | 
+    26 | // The RTL version appears to work fine.
+
+<a href="../../../../third_party/tests/ivtest/ivltests/specify5.v.html#l-47" target="file-frame">third_party/tests/ivtest/ivltests/specify5.v:47</a>:4: warning[PARSE_TO_AST]:  error in parsing: (syntax error, unexpected vIF, expecting vSPECPARAM or vENDSPECIFY or &#39;(&#39;)
+    45 |     specparam tpd_cdn_q_hl = 3;
+    46 | 
+    47 |     if (cdn) (posedge cp =&gt; (q +: d)) = (tpd_cp_q_lh, tpd_cp_q_hl);
+             ^~~~
+    48 |     (negedge cdn =&gt; (q +: 1&#39;b0)) = (tpd_cdn_q_lh, tpd_cdn_q_hl);
+    49 |   endspecify
+
+<a href="../../../../third_party/tests/ivtest/ivltests/specify5.v.html#l-54" target="file-frame">third_party/tests/ivtest/ivltests/specify5.v:54</a>:1: error[AST]:  Module already has output with this name q
+    52 | // The primitive version has no delay.
+    53 | module dff_prm (q, d, cp, cdn);
+    54 |   output q;
+          ^~~~
+    55 |   input d, cp, cdn;
+    56 | 
+
+/tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/odin_ii_1605895584720/work/ODIN_II/SRC/parse_making_ast.cpp:464: ast_node_t* markAndProcessPortWith(ids, ids, ids, ast_node_t*, operation_list): Fatal error
 
 </pre>
 </body>
