@@ -17,8 +17,8 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_mem/bsg_mem_1rw_sync_mask_write_byte_synth.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_mem/bsg_mem_1rw_sync_mask_write_byte_synth.v</a>
 defines: 
-time_elapsed: 0.190s
-ram usage: 13552 KB
+time_elapsed: 0.240s
+ram usage: 13740 KB
 </pre>
 <pre class="log">
 
@@ -43,26 +43,32 @@ module bsg_mem_1rw_sync_mask_write_byte_synth (
 	input v_i;
 	input w_i;
 	input [addr_width_lp - 1:0] addr_i;
-	input [data_width_p - 1:0] data_i;
-	input [write_mask_width_lp - 1:0] write_mask_i;
-	output [data_width_p - 1:0] data_o;
+	input [((data_width_p - 1) &lt; 0 ? 0 : data_width_p - 1):0] data_i;
+	input [((write_mask_width_lp - 1) &lt; 0 ? 0 : write_mask_width_lp - 1):0] write_mask_i;
+	output [((data_width_p - 1) &lt; 0 ? 0 : data_width_p - 1):0] data_o;
 	genvar i;
 	generate
-		for (i = 0; i &lt; write_mask_width_lp; i = i + 1) begin : bk
-			bsg_mem_1rw_sync #(
-				.width_p(8),
-				.els_p(els_p),
-				.addr_width_lp(addr_width_lp),
-				.latch_last_read_p(latch_last_read_p)
-			) mem_1rw_sync(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.data_i(data_i[i * 8+:8]),
-				.addr_i(addr_i),
-				.v_i(v_i &amp; (w_i ? write_mask_i[i] : 1&#39;b1)),
-				.w_i(w_i &amp; write_mask_i[i]),
-				.data_o(data_o[i * 8+:8])
-			);
+		if (data_width_p == 0) begin : z
+			wire unused0 = &amp;{clk_i, reset_i, v_i, w_i, addr_i, data_i, write_mask_i};
+			assign data_o = {(((data_width_p - 1) &lt; 0 ? 0 : data_width_p - 1) &gt;= 0 ? ((data_width_p - 1) &lt; 0 ? 0 : data_width_p - 1) + 1 : 1 - ((data_width_p - 1) &lt; 0 ? 0 : data_width_p - 1)) {1&#39;sb0}};
+		end
+		else begin : nz
+			for (i = 0; i &lt; write_mask_width_lp; i = i + 1) begin : bk
+				bsg_mem_1rw_sync #(
+					.width_p(8),
+					.els_p(els_p),
+					.addr_width_lp(addr_width_lp),
+					.latch_last_read_p(latch_last_read_p)
+				) mem_1rw_sync(
+					.clk_i(clk_i),
+					.reset_i(reset_i),
+					.data_i(data_i[i * 8+:8]),
+					.addr_i(addr_i),
+					.v_i(v_i &amp; (w_i ? write_mask_i[i] : 1&#39;b1)),
+					.w_i(w_i &amp; write_mask_i[i]),
+					.data_o(data_o[i * 8+:8])
+				);
+			end
 		end
 	endgenerate
 endmodule

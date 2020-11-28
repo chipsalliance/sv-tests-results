@@ -79,7 +79,13 @@
 <a href="#l-71">71</a>
 <a href="#l-72">72</a>
 <a href="#l-73">73</a>
-<a href="#l-74">74</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
+<a href="#l-74">74</a>
+<a href="#l-75">75</a>
+<a href="#l-76">76</a>
+<a href="#l-77">77</a>
+<a href="#l-78">78</a>
+<a href="#l-79">79</a>
+<a href="#l-80">80</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/**</span>
 <a name="l-2"></a><span class="cm"> *    bsg_lru_pseudo_tree_backup.v</span>
 <a name="l-3"></a><span class="cm"> *</span>
 <a name="l-4"></a><span class="cm"> *    tree pseudo LRU backup finder.</span>
@@ -130,29 +136,35 @@
 <a name="l-49"></a>  <span class="p">)</span>
 <a name="l-50"></a>  <span class="p">(</span>
 <a name="l-51"></a>    <span class="k">input</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">disabled_ways_i</span>
-<a name="l-52"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">modify_mask_o</span>
-<a name="l-53"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">ways_p</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">modify_data_o</span>
+<a name="l-52"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="no">`BSG_SAFE_MINUS</span><span class="p">(</span><span class="n">ways_p</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">modify_mask_o</span>
+<a name="l-53"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="no">`BSG_SAFE_MINUS</span><span class="p">(</span><span class="n">ways_p</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">modify_data_o</span>
 <a name="l-54"></a>  <span class="p">);</span>
 <a name="l-55"></a>
-<a name="l-56"></a>
-<a name="l-57"></a>  <span class="c1">// backup LRU logic</span>
-<a name="l-58"></a>  <span class="c1">// i = rank</span>
-<a name="l-59"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">lg_ways_lp</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-60"></a>
-<a name="l-61"></a>    <span class="kt">logic</span> <span class="p">[(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">and_reduce</span><span class="p">;</span>
-<a name="l-62"></a>    
-<a name="l-63"></a>    <span class="c1">// j = bucket</span>
-<a name="l-64"></a>    <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
-<a name="l-65"></a>      <span class="k">assign</span> <span class="n">and_reduce</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">disabled_ways_i</span><span class="p">[(</span><span class="n">ways_p</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span><span class="o">*</span><span class="n">j</span><span class="o">+:</span><span class="p">(</span><span class="n">ways_p</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))];</span>
-<a name="l-66"></a>  
-<a name="l-67"></a>    <span class="c1">// k = start index in LRU bits</span>
-<a name="l-68"></a>    <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-69"></a>      <span class="k">assign</span> <span class="n">modify_data_o</span><span class="p">[(</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">and_reduce</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">k</span><span class="p">];</span>
-<a name="l-70"></a>      <span class="k">assign</span> <span class="n">modify_mask_o</span><span class="p">[(</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">|</span><span class="n">and_reduce</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">k</span><span class="o">+:</span><span class="mi">2</span><span class="p">];</span>
-<a name="l-71"></a>    <span class="k">end</span>
-<a name="l-72"></a>  <span class="k">end</span>
-<a name="l-73"></a>
-<a name="l-74"></a><span class="k">endmodule</span>
+<a name="l-56"></a>  <span class="c1">// If direct-mapped there is no meaning to backup LRU</span>
+<a name="l-57"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">ways_p</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">no_lru</span>
+<a name="l-58"></a>    <span class="k">assign</span> <span class="n">modify_mask_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-59"></a>    <span class="k">assign</span> <span class="n">modify_data_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-60"></a>  <span class="k">end</span>
+<a name="l-61"></a>  <span class="k">else</span> <span class="k">begin</span><span class="o">:</span> <span class="n">lru</span>
+<a name="l-62"></a>  <span class="c1">// backup LRU logic</span>
+<a name="l-63"></a>  <span class="c1">// i = rank</span>
+<a name="l-64"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">lg_ways_lp</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-65"></a>
+<a name="l-66"></a>    <span class="kt">logic</span> <span class="p">[(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">and_reduce</span><span class="p">;</span>
+<a name="l-67"></a>    
+<a name="l-68"></a>    <span class="c1">// j = bucket</span>
+<a name="l-69"></a>    <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+<a name="l-70"></a>      <span class="k">assign</span> <span class="n">and_reduce</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">disabled_ways_i</span><span class="p">[(</span><span class="n">ways_p</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span><span class="o">*</span><span class="n">j</span><span class="o">+:</span><span class="p">(</span><span class="n">ways_p</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))];</span>
+<a name="l-71"></a>  
+<a name="l-72"></a>    <span class="c1">// k = start index in LRU bits</span>
+<a name="l-73"></a>    <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-74"></a>      <span class="k">assign</span> <span class="n">modify_data_o</span><span class="p">[(</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">and_reduce</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">k</span><span class="p">];</span>
+<a name="l-75"></a>      <span class="k">assign</span> <span class="n">modify_mask_o</span><span class="p">[(</span><span class="mi">2</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">|</span><span class="n">and_reduce</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">k</span><span class="o">+:</span><span class="mi">2</span><span class="p">];</span>
+<a name="l-76"></a>    <span class="k">end</span>
+<a name="l-77"></a>  <span class="k">end</span>
+<a name="l-78"></a>  <span class="k">end</span>
+<a name="l-79"></a>
+<a name="l-80"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

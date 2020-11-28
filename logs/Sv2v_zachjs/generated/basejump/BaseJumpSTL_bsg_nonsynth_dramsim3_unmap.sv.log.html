@@ -17,8 +17,8 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_nonsynth_dramsim3_unmap.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_nonsynth_dramsim3_unmap.v</a>
 defines: 
-time_elapsed: 0.387s
-ram usage: 13624 KB
+time_elapsed: 0.217s
+ram usage: 13640 KB
 </pre>
 <pre class="log">
 
@@ -36,21 +36,42 @@ module bsg_nonsynth_dramsim3_unmap (
 	parameter [_sv2v_width_num_channels_p - 1:0] num_channels_p = &#34;inv&#34;;
 	parameter _sv2v_width_num_columns_p = 24;
 	parameter [_sv2v_width_num_columns_p - 1:0] num_columns_p = &#34;inv&#34;;
+	parameter _sv2v_width_num_rows_p = 24;
+	parameter [_sv2v_width_num_rows_p - 1:0] num_rows_p = &#34;inv&#34;;
+	parameter _sv2v_width_num_ba_p = 24;
+	parameter [_sv2v_width_num_ba_p - 1:0] num_ba_p = &#34;inv&#34;;
+	parameter _sv2v_width_num_bg_p = 24;
+	parameter [_sv2v_width_num_bg_p - 1:0] num_bg_p = &#34;inv&#34;;
+	parameter _sv2v_width_num_ranks_p = 24;
+	parameter [_sv2v_width_num_ranks_p - 1:0] num_ranks_p = &#34;inv&#34;;
 	parameter _sv2v_width_address_mapping_p = 24;
 	parameter [_sv2v_width_address_mapping_p - 1:0] address_mapping_p = &#34;inv&#34;;
 	parameter _sv2v_width_channel_select_p = 24;
 	parameter [_sv2v_width_channel_select_p - 1:0] channel_select_p = &#34;inv&#34;;
 	parameter debug_p = 0;
-	parameter lg_num_channels_lp = (num_channels_p == 1 ? 1 : $clog2(num_channels_p));
-	parameter lg_num_columns_lp = (num_columns_p == 1 ? 1 : $clog2(num_columns_p));
+	parameter lg_num_channels_lp = $clog2(num_channels_p);
+	parameter lg_num_columns_lp = $clog2(num_columns_p);
+	parameter lg_num_rows_lp = $clog2(num_rows_p);
+	parameter lg_num_ba_lp = $clog2(num_ba_p);
+	parameter lg_num_bg_lp = $clog2(num_bg_p);
+	parameter lg_num_ranks_lp = $clog2(num_ranks_p);
 	parameter data_mask_width_lp = data_width_p &gt;&gt; 3;
 	parameter byte_offset_width_lp = ((data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(data_width_p &gt;&gt; 3));
 	parameter addr_width_lp = lg_num_channels_lp + channel_addr_width_p;
 	input wire [addr_width_lp - 1:0] mem_addr_i;
 	output wire [channel_addr_width_p - 1:0] ch_addr_o;
 	generate
-		if (address_mapping_p == e_ro_ra_bg_ba_co_ch) assign ch_addr_o = {mem_addr_i[(channel_addr_width_p + lg_num_channels_lp) - 1:byte_offset_width_lp + lg_num_channels_lp], {byte_offset_width_lp {1&#39;b0}}};
+		if (address_mapping_p == e_ro_ra_bg_ba_co_ch) assign ch_addr_o = {mem_addr_i[addr_width_lp - 1:byte_offset_width_lp + lg_num_channels_lp], {byte_offset_width_lp {1&#39;b0}}};
 		else if (address_mapping_p == e_ro_ra_bg_ba_ch_co) assign ch_addr_o = {mem_addr_i[addr_width_lp - 1:(lg_num_channels_lp + lg_num_columns_lp) + byte_offset_width_lp], mem_addr_i[(lg_num_columns_lp + byte_offset_width_lp) - 1:byte_offset_width_lp], {byte_offset_width_lp {1&#39;b0}}};
+		else if (address_mapping_p == e_ro_ch_ra_ba_bg_co) begin
+			localparam mem_co_pos_lp = byte_offset_width_lp;
+			localparam mem_bg_pos_lp = mem_co_pos_lp + lg_num_columns_lp;
+			localparam mem_ba_pos_lp = mem_bg_pos_lp + lg_num_bg_lp;
+			localparam mem_ra_pos_lp = mem_ba_pos_lp + lg_num_ba_lp;
+			localparam mem_ch_pos_lp = mem_ra_pos_lp + lg_num_ranks_lp;
+			localparam mem_ro_pos_lp = mem_ch_pos_lp + lg_num_channels_lp;
+			assign ch_addr_o = {mem_addr_i[mem_ro_pos_lp+:lg_num_rows_lp], {lg_num_ranks_lp != 0 {mem_addr_i[mem_ra_pos_lp+:(lg_num_ranks_lp &gt; 1 ? lg_num_ranks_lp : 1)]}}, {lg_num_bg_lp != 0 {mem_addr_i[mem_bg_pos_lp+:(lg_num_bg_lp &gt; 1 ? lg_num_bg_lp : 1)]}}, {lg_num_ba_lp != 0 {mem_addr_i[mem_ba_pos_lp+:(lg_num_ba_lp &gt; 1 ? lg_num_ba_lp : 1)]}}, mem_addr_i[mem_co_pos_lp+:lg_num_columns_lp], {byte_offset_width_lp {1&#39;b0}}};
+		end
 	endgenerate
 endmodule
 

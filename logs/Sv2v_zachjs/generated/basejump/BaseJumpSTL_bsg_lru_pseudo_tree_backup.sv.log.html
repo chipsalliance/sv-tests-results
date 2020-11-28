@@ -17,8 +17,8 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_lru_pseudo_tree_backup.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_lru_pseudo_tree_backup.v</a>
 defines: 
-time_elapsed: 0.301s
-ram usage: 13076 KB
+time_elapsed: 0.384s
+ram usage: 13432 KB
 </pre>
 <pre class="log">
 
@@ -32,18 +32,24 @@ module bsg_lru_pseudo_tree_backup (
 	parameter [_sv2v_width_ways_p - 1:0] ways_p = &#34;inv&#34;;
 	parameter lg_ways_lp = (ways_p == 1 ? 1 : $clog2(ways_p));
 	input [ways_p - 1:0] disabled_ways_i;
-	output wire [ways_p - 2:0] modify_mask_o;
-	output wire [ways_p - 2:0] modify_data_o;
+	output wire [((ways_p - 2) &lt; 0 ? 0 : ways_p - 2):0] modify_mask_o;
+	output wire [((ways_p - 2) &lt; 0 ? 0 : ways_p - 2):0] modify_data_o;
 	generate
-		genvar i;
-		for (i = 0; i &lt; lg_ways_lp; i = i + 1) begin
-			wire [(2 ** (i + 1)) - 1:0] and_reduce;
-			genvar j;
-			for (j = 0; j &lt; (2 ** (i + 1)); j = j + 1) assign and_reduce[j] = &amp;disabled_ways_i[(ways_p / (2 ** (i + 1))) * j+:ways_p / (2 ** (i + 1))];
-			genvar k;
-			for (k = 0; k &lt; ((2 ** (i + 1)) / 2); k = k + 1) begin
-				assign modify_data_o[((2 ** i) - 1) + k] = and_reduce[2 * k];
-				assign modify_mask_o[((2 ** i) - 1) + k] = |and_reduce[2 * k+:2];
+		if (ways_p == 1) begin : no_lru
+			assign modify_mask_o = 1&#39;b1;
+			assign modify_data_o = 1&#39;b0;
+		end
+		else begin : lru
+			genvar i;
+			for (i = 0; i &lt; lg_ways_lp; i = i + 1) begin
+				wire [(2 ** (i + 1)) - 1:0] and_reduce;
+				genvar j;
+				for (j = 0; j &lt; (2 ** (i + 1)); j = j + 1) assign and_reduce[j] = &amp;disabled_ways_i[(ways_p / (2 ** (i + 1))) * j+:ways_p / (2 ** (i + 1))];
+				genvar k;
+				for (k = 0; k &lt; ((2 ** (i + 1)) / 2); k = k + 1) begin
+					assign modify_data_o[((2 ** i) - 1) + k] = and_reduce[2 * k];
+					assign modify_mask_o[((2 ** i) - 1) + k] = |and_reduce[2 * k+:2];
+				end
 			end
 		end
 	endgenerate

@@ -17,8 +17,8 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_mem/bsg_mem_1r1w_sync_synth.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_mem/bsg_mem_1r1w_sync_synth.v</a>
 defines: 
-time_elapsed: 0.303s
-ram usage: 13512 KB
+time_elapsed: 0.198s
+ram usage: 13400 KB
 </pre>
 <pre class="log">
 
@@ -42,22 +42,30 @@ module bsg_mem_1r1w_sync_synth (
 	input reset_i;
 	input w_v_i;
 	input [addr_width_lp - 1:0] w_addr_i;
-	input [width_p - 1:0] w_data_i;
+	input [((width_p - 1) &lt; 0 ? 0 : width_p - 1):0] w_data_i;
 	input r_v_i;
 	input [addr_width_lp - 1:0] r_addr_i;
-	output wire [width_p - 1:0] r_data_o;
-	reg [width_p - 1:0] mem [els_p - 1:0];
+	output wire [((width_p - 1) &lt; 0 ? 0 : width_p - 1):0] r_data_o;
 	wire unused = reset_i;
-	reg [addr_width_lp - 1:0] r_addr_r;
-	always @(posedge clk_i)
-		if (r_v_i)
-			r_addr_r &lt;= r_addr_i;
-		else
-			r_addr_r &lt;= {addr_width_lp {1&#39;sbx}};
-	assign r_data_o = mem[r_addr_r];
-	always @(posedge clk_i)
-		if (w_v_i)
-			mem[w_addr_i] &lt;= w_data_i;
+	generate
+		if (width_p == 0) begin : z
+			wire unused0 = &amp;{clk_i, w_v_i, w_addr_i, r_v_i, r_addr_i};
+			assign r_data_o = {(((width_p - 1) &lt; 0 ? 0 : width_p - 1) &gt;= 0 ? ((width_p - 1) &lt; 0 ? 0 : width_p - 1) + 1 : 1 - ((width_p - 1) &lt; 0 ? 0 : width_p - 1)) {1&#39;sb0}};
+		end
+		else begin : nz
+			reg [width_p - 1:0] mem [els_p - 1:0];
+			reg [addr_width_lp - 1:0] r_addr_r;
+			always @(posedge clk_i)
+				if (r_v_i)
+					r_addr_r &lt;= r_addr_i;
+				else
+					r_addr_r &lt;= {addr_width_lp {1&#39;sbx}};
+			assign r_data_o = mem[r_addr_r];
+			always @(posedge clk_i)
+				if (w_v_i)
+					mem[w_addr_i] &lt;= w_data_i;
+		end
+	endgenerate
 endmodule
 
 </pre>
