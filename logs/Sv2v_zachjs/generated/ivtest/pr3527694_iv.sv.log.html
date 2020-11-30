@@ -1,0 +1,147 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr3527694.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr3527694.v</a>
+defines: 
+time_elapsed: 0.067s
+ram usage: 10456 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr3527694.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr3527694.v</a>
+module top;
+	reg sys_clk;
+	reg sys_reset;
+	integer cnt;
+	integer lastcnt;
+	initial begin
+		sys_clk = 1&#39;b1;
+		sys_reset = 1&#39;b1;
+		cnt = 0;
+		lastcnt = 100;
+		while (cnt &lt; lastcnt) begin
+			#(5)
+				;
+			sys_clk = 1&#39;b0;
+			#(5)
+				;
+			sys_clk = 1&#39;b1;
+			if (cnt &gt; 10)
+				sys_reset = 1&#39;b0;
+			cnt = cnt + 1;
+		end
+		#(20)
+			;
+		$dumpflush;
+		$finish(2);
+		$stop(2);
+	end
+	test1 #(
+		.WIDTH1(18),
+		.WIDTH2(18)
+	) test1(
+		.sys_clk(sys_clk),
+		.sys_rst(sys_reset)
+	);
+	test2 #(
+		.WIDTH1(18),
+		.WIDTH2(18)
+	) test2_top(
+		.sys_clk(sys_clk),
+		.sys_rst(sys_reset)
+	);
+endmodule
+module test1 (
+	sys_clk,
+	sys_rst
+);
+	parameter WIDTH1 = 1;
+	parameter WIDTH2 = 2;
+	input sys_clk;
+	input sys_rst;
+	wire [15:0] w1 = WIDTH1;
+	wire [15:0] w2 = WIDTH2;
+	generate
+		if (WIDTH1 != 1) begin : not1
+			test2 #(
+				.WIDTH1(18),
+				.WIDTH2(18)
+			) test2_0(
+				.sys_clk(sys_clk),
+				.sys_rst(sys_rst)
+			);
+			test2 #(
+				.WIDTH1(18),
+				.WIDTH2(18)
+			) test2_1(
+				.sys_clk(sys_clk),
+				.sys_rst(sys_rst)
+			);
+		end
+	endgenerate
+	initial begin
+		#(40)
+			;
+		$finish;
+	end
+endmodule
+module test2 (
+	sys_clk,
+	sys_rst
+);
+	parameter WIDTH1 = 3;
+	parameter WIDTH2 = 4;
+	input sys_clk;
+	input sys_rst;
+	localparam big_width = (WIDTH1 &gt;= WIDTH2 ? WIDTH1 : WIDTH2);
+	initial $display(&#34;%m big_width: %h&#34;, big_width);
+	wire [15:0] w1 = WIDTH1;
+	wire [15:0] w2 = WIDTH2;
+	wire [15:0] bigw = big_width;
+	wire [31:0] out_data_a;
+	wire [31:0] out_data_b;
+	test3 #(
+		.WIDTH1(WIDTH1),
+		.WIDTH2(WIDTH2)
+	) test3_0(
+		.sys_clk(sys_clk),
+		.sys_rst(sys_rst)
+	);
+	test3 test3_1(
+		.sys_clk(sys_clk),
+		.sys_rst(sys_rst)
+	);
+	defparam test3_1.WIDTH1 = WIDTH1;
+	defparam test3_1.WIDTH2 = WIDTH2;
+endmodule
+module test3 (
+	sys_clk,
+	sys_rst
+);
+	input sys_clk;
+	input sys_rst;
+	parameter WIDTH1 = 0;
+	parameter WIDTH2 = 0;
+	localparam big_width = (WIDTH1 &gt;= WIDTH2 ? WIDTH1 : WIDTH2);
+	wire [31:0] wide = big_width;
+	wire [31:0] width1 = WIDTH1;
+	wire [31:0] width2 = WIDTH2;
+	initial $strobe(&#34;%m wide: %h, width1:%h, width2:%h&#34;, wide, width1, width2);
+endmodule
+
+</pre>
+</body>
