@@ -11,18 +11,18 @@
 description: Tests imported from hdlconv
 rc: 0 (means success: 1)
 tags: hdlconv
-incdirs: /tmpfs/src/github/sv-tests/third_party/tests/hdlconvertor/tests/verilog
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/hdlconvertor/tests/verilog/expected
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../third_party/tests/hdlconvertor/tests/verilog/aes.v.html" target="file-frame">third_party/tests/hdlconvertor/tests/verilog/aes.v</a>
+files: <a href="../../../../tests/generated/hdlconv/hdlconvertor_aes.sv.html" target="file-frame">tests/generated/hdlconv/hdlconvertor_aes.sv</a> <a href="../../../../third_party/tests/hdlconvertor/tests/verilog/expected/aes.v.html" target="file-frame">third_party/tests/hdlconvertor/tests/verilog/expected/aes.v</a>
 defines: 
-time_elapsed: 0.518s
-ram usage: 12664 KB
+time_elapsed: 0.172s
+ram usage: 13596 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/hdlconvertor/tests/verilog <a href="../../../../third_party/tests/hdlconvertor/tests/verilog/aes.v.html" target="file-frame">third_party/tests/hdlconvertor/tests/verilog/aes.v</a>
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/hdlconvertor/tests/verilog/expected <a href="../../../../tests/generated/hdlconv/hdlconvertor_aes.sv.html" target="file-frame">tests/generated/hdlconv/hdlconvertor_aes.sv</a> <a href="../../../../third_party/tests/hdlconvertor/tests/verilog/expected/aes.v.html" target="file-frame">third_party/tests/hdlconvertor/tests/verilog/expected/aes.v</a>
 module aes_cipher_top (
 	clk,
 	rst,
@@ -32,13 +32,13 @@ module aes_cipher_top (
 	text_in,
 	text_out
 );
-	input clk;
-	input rst;
-	input ld;
-	output done;
-	input [127:0] key;
-	input [127:0] text_in;
-	output [127:0] text_out;
+	input wire clk;
+	input wire rst;
+	input wire ld;
+	output reg done;
+	input wire [127:0] key;
+	input wire [127:0] text_in;
+	output reg [127:0] text_out;
 	wire [31:0] w0;
 	wire [31:0] w1;
 	wire [31:0] w2;
@@ -170,15 +170,15 @@ module aes_cipher_top (
 	assign sa31_sr = sa30_sub;
 	assign sa32_sr = sa31_sub;
 	assign sa33_sr = sa32_sub;
-	function [7:0] xtime;
-		input reg [7:0] b;
+	function wire [7:0] xtime;
+		input wire [7:0] b;
 		xtime = {b[6:0], 1&#39;b0} ^ (8&#39;h1b &amp; {8 {b[7]}});
 	endfunction
-	function [31:0] mix_col;
-		input reg [7:0] s0;
-		input reg [7:0] s1;
-		input reg [7:0] s2;
-		input reg [7:0] s3;
+	function wire [31:0] mix_col;
+		input wire [7:0] s0;
+		input wire [7:0] s1;
+		input wire [7:0] s2;
+		input wire [7:0] s3;
 		reg [7:0] s0_o;
 		reg [7:0] s1_o;
 		reg [7:0] s2_o;
@@ -190,10 +190,10 @@ module aes_cipher_top (
 			mix_col[7:0] = (((xtime(s0) ^ s0) ^ s1) ^ s2) ^ xtime(s3);
 		end
 	endfunction
-	assign {sa00_mc, sa10_mc, sa20_mc, sa30_mc} = mix_col(sa00_sr, sa10_sr, sa20_sr, sa30_sr);
-	assign {sa01_mc, sa11_mc, sa21_mc, sa31_mc} = mix_col(sa01_sr, sa11_sr, sa21_sr, sa31_sr);
-	assign {sa02_mc, sa12_mc, sa22_mc, sa32_mc} = mix_col(sa02_sr, sa12_sr, sa22_sr, sa32_sr);
-	assign {sa03_mc, sa13_mc, sa23_mc, sa33_mc} = mix_col(sa03_sr, sa13_sr, sa23_sr, sa33_sr);
+	assign {{{sa00_mc, sa10_mc}, sa20_mc}, sa30_mc} = mix_col(sa00_sr, sa10_sr, sa20_sr, sa30_sr);
+	assign {{{sa01_mc, sa11_mc}, sa21_mc}, sa31_mc} = mix_col(sa01_sr, sa11_sr, sa21_sr, sa31_sr);
+	assign {{{sa02_mc, sa12_mc}, sa22_mc}, sa32_mc} = mix_col(sa02_sr, sa12_sr, sa22_sr, sa32_sr);
+	assign {{{sa03_mc, sa13_mc}, sa23_mc}, sa33_mc} = mix_col(sa03_sr, sa13_sr, sa23_sr, sa33_sr);
 	assign sa00_next = sa00_mc ^ w0[31:24];
 	assign sa01_next = sa01_mc ^ w1[31:24];
 	assign sa02_next = sa02_mc ^ w2[31:24];
