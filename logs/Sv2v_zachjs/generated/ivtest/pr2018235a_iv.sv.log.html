@@ -1,0 +1,56 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2018235a.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2018235a.v</a>
+defines: 
+time_elapsed: 0.089s
+ram usage: 10180 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2018235a.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2018235a.v</a>
+module test;
+	parameter N_CH = 1;
+	reg pass = 1&#39;b1;
+	reg clk;
+	reg [31:0] data [0:N_CH - 1];
+	generate
+		genvar i;
+		for (i = 0; i &lt; N_CH; i = i + 1) begin : sdac
+			always @(posedge clk) data[i] &lt;= 32&#39;h00000000;
+		end
+	endgenerate
+	initial begin
+		clk = 0;
+		if (data[0] != 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx) begin
+			$display(&#34;FAILED: initial value, expected 32&#39;bx, got %b&#34;, data[0]);
+			pass = 1&#39;b0;
+		end
+		#(26)
+			if (data[0] != 32&#39;b00000000000000000000000000000000) begin
+				$display(&#34;FAILED: final value, expected 32&#39;b0, got %b&#34;, data[0]);
+				pass = 1&#39;b0;
+			end
+		if (pass)
+			$display(&#34;PASSED&#34;);
+		$finish;
+	end
+	always #(25) clk = ~clk;
+endmodule
+
+</pre>
+</body>

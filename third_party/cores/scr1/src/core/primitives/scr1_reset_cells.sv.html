@@ -171,172 +171,300 @@
 <a href="#l-163">163</a>
 <a href="#l-164">164</a>
 <a href="#l-165">165</a>
-<a href="#l-166">166</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2019. See LICENSE for details</span>
+<a href="#l-166">166</a>
+<a href="#l-167">167</a>
+<a href="#l-168">168</a>
+<a href="#l-169">169</a>
+<a href="#l-170">170</a>
+<a href="#l-171">171</a>
+<a href="#l-172">172</a>
+<a href="#l-173">173</a>
+<a href="#l-174">174</a>
+<a href="#l-175">175</a>
+<a href="#l-176">176</a>
+<a href="#l-177">177</a>
+<a href="#l-178">178</a>
+<a href="#l-179">179</a>
+<a href="#l-180">180</a>
+<a href="#l-181">181</a>
+<a href="#l-182">182</a>
+<a href="#l-183">183</a>
+<a href="#l-184">184</a>
+<a href="#l-185">185</a>
+<a href="#l-186">186</a>
+<a href="#l-187">187</a>
+<a href="#l-188">188</a>
+<a href="#l-189">189</a>
+<a href="#l-190">190</a>
+<a href="#l-191">191</a>
+<a href="#l-192">192</a>
+<a href="#l-193">193</a>
+<a href="#l-194">194</a>
+<a href="#l-195">195</a>
+<a href="#l-196">196</a>
+<a href="#l-197">197</a>
+<a href="#l-198">198</a>
+<a href="#l-199">199</a>
+<a href="#l-200">200</a>
+<a href="#l-201">201</a>
+<a href="#l-202">202</a>
+<a href="#l-203">203</a>
+<a href="#l-204">204</a>
+<a href="#l-205">205</a>
+<a href="#l-206">206</a>
+<a href="#l-207">207</a>
+<a href="#l-208">208</a>
+<a href="#l-209">209</a>
+<a href="#l-210">210</a>
+<a href="#l-211">211</a>
+<a href="#l-212">212</a>
+<a href="#l-213">213</a>
+<a href="#l-214">214</a>
+<a href="#l-215">215</a>
+<a href="#l-216">216</a>
+<a href="#l-217">217</a>
+<a href="#l-218">218</a>
+<a href="#l-219">219</a>
+<a href="#l-220">220</a>
+<a href="#l-221">221</a>
+<a href="#l-222">222</a>
+<a href="#l-223">223</a>
+<a href="#l-224">224</a>
+<a href="#l-225">225</a>
+<a href="#l-226">226</a>
+<a href="#l-227">227</a>
+<a href="#l-228">228</a>
+<a href="#l-229">229</a>
+<a href="#l-230">230</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
 <a name="l-2"></a><span class="c1">/// @file       &lt;scr1_sync_rstn.sv&gt;</span>
 <a name="l-3"></a><span class="c1">/// @brief      Cells for reset handling</span>
 <a name="l-4"></a><span class="c1">///</span>
 <a name="l-5"></a>
-<a name="l-6"></a><span class="k">module</span> <span class="n">scr1_reset_buf_cell</span> <span class="p">(</span>
-<a name="l-7"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
-<a name="l-8"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
-<a name="l-9"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-10"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
-<a name="l-11"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">reset_n_in</span><span class="p">,</span>
-<a name="l-12"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_out</span><span class="p">,</span>
-<a name="l-13"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_status</span>
-<a name="l-14"></a><span class="p">);</span>
-<a name="l-15"></a>
-<a name="l-16"></a><span class="kt">logic</span>       <span class="n">reset_n_ff</span><span class="p">;</span>
-<a name="l-17"></a><span class="kt">logic</span>       <span class="n">reset_n_status_ff</span><span class="p">;</span>
-<a name="l-18"></a><span class="kt">logic</span>       <span class="n">rst_n_mux</span><span class="p">;</span>
-<a name="l-19"></a>
-<a name="l-20"></a><span class="k">assign</span> <span class="n">rst_n_mux</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
-<a name="l-21"></a>
-<a name="l-22"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-23"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-24"></a>        <span class="n">reset_n_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-25"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-26"></a>        <span class="n">reset_n_ff</span> <span class="o">&lt;=</span> <span class="n">reset_n_in</span><span class="p">;</span>
-<a name="l-27"></a>    <span class="k">end</span>
-<a name="l-28"></a><span class="k">end</span>
-<a name="l-29"></a>
-<a name="l-30"></a><span class="k">assign</span> <span class="n">reset_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">reset_n_ff</span><span class="p">;</span>
-<a name="l-31"></a>
-<a name="l-32"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-33"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-34"></a>        <span class="n">reset_n_status_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-35"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-36"></a>        <span class="n">reset_n_status_ff</span> <span class="o">&lt;=</span> <span class="n">reset_n_in</span><span class="p">;</span>
-<a name="l-37"></a>    <span class="k">end</span>
-<a name="l-38"></a><span class="k">end</span>
-<a name="l-39"></a><span class="k">assign</span> <span class="n">reset_n_status</span> <span class="o">=</span> <span class="n">reset_n_status_ff</span><span class="p">;</span>
-<a name="l-40"></a>
-<a name="l-41"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_buf_cell</span>
-<a name="l-42"></a>
+<a name="l-6"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-7"></a><span class="c1">// Reset Buffer Cell</span>
+<a name="l-8"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-9"></a><span class="k">module</span> <span class="n">scr1_reset_buf_cell</span> <span class="p">(</span>
+<a name="l-10"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
+<a name="l-11"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
+<a name="l-12"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
+<a name="l-13"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
+<a name="l-14"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">reset_n_in</span><span class="p">,</span>
+<a name="l-15"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_out</span><span class="p">,</span>
+<a name="l-16"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_status</span>
+<a name="l-17"></a><span class="p">);</span>
+<a name="l-18"></a>
+<a name="l-19"></a><span class="kt">logic</span>       <span class="n">reset_n_ff</span><span class="p">;</span>
+<a name="l-20"></a><span class="kt">logic</span>       <span class="n">reset_n_status_ff</span><span class="p">;</span>
+<a name="l-21"></a><span class="kt">logic</span>       <span class="n">rst_n_mux</span><span class="p">;</span>
+<a name="l-22"></a>
+<a name="l-23"></a><span class="k">assign</span> <span class="n">rst_n_mux</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
+<a name="l-24"></a>
+<a name="l-25"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-26"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-27"></a>        <span class="n">reset_n_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-28"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-29"></a>        <span class="n">reset_n_ff</span> <span class="o">&lt;=</span> <span class="n">reset_n_in</span><span class="p">;</span>
+<a name="l-30"></a>    <span class="k">end</span>
+<a name="l-31"></a><span class="k">end</span>
+<a name="l-32"></a>
+<a name="l-33"></a><span class="k">assign</span> <span class="n">reset_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">reset_n_ff</span><span class="p">;</span>
+<a name="l-34"></a>
+<a name="l-35"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-36"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-37"></a>        <span class="n">reset_n_status_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-38"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-39"></a>        <span class="n">reset_n_status_ff</span> <span class="o">&lt;=</span> <span class="n">reset_n_in</span><span class="p">;</span>
+<a name="l-40"></a>    <span class="k">end</span>
+<a name="l-41"></a><span class="k">end</span>
+<a name="l-42"></a><span class="k">assign</span> <span class="n">reset_n_status</span> <span class="o">=</span> <span class="n">reset_n_status_ff</span><span class="p">;</span>
 <a name="l-43"></a>
-<a name="l-44"></a><span class="k">module</span> <span class="n">scr1_reset_sync_cell</span> <span class="p">(</span>
-<a name="l-45"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
-<a name="l-46"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
-<a name="l-47"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
-<a name="l-48"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-49"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
-<a name="l-50"></a><span class="p">);</span>
-<a name="l-51"></a>
-<a name="l-52"></a><span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rst_n_dff</span><span class="p">;</span>
-<a name="l-53"></a><span class="kt">logic</span>       <span class="n">local_rst_n_in</span><span class="p">;</span>
-<a name="l-54"></a>
-<a name="l-55"></a><span class="k">assign</span> <span class="n">local_rst_n_in</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
-<a name="l-56"></a>
-<a name="l-57"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">local_rst_n_in</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-58"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">local_rst_n_in</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-59"></a>        <span class="n">rst_n_dff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-60"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-61"></a>        <span class="n">rst_n_dff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-62"></a>        <span class="n">rst_n_dff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rst_n_dff</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-63"></a>    <span class="k">end</span>
-<a name="l-64"></a><span class="k">end</span>
+<a name="l-44"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_buf_cell</span>
+<a name="l-45"></a>
+<a name="l-46"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-47"></a><span class="c1">// Reset CDC Synchronization Cell</span>
+<a name="l-48"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-49"></a><span class="k">module</span> <span class="n">scr1_reset_sync_cell</span> <span class="p">#(</span>
+<a name="l-50"></a>    <span class="k">parameter</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">STAGES_AMOUNT</span> <span class="o">=</span> <span class="mi">2</span>
+<a name="l-51"></a><span class="p">)</span> <span class="p">(</span>
+<a name="l-52"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
+<a name="l-53"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
+<a name="l-54"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
+<a name="l-55"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
+<a name="l-56"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
+<a name="l-57"></a><span class="p">);</span>
+<a name="l-58"></a>
+<a name="l-59"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">STAGES_AMOUNT</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>   <span class="n">rst_n_dff</span><span class="p">;</span>
+<a name="l-60"></a><span class="kt">logic</span>                       <span class="n">local_rst_n_in</span><span class="p">;</span>
+<a name="l-61"></a>
+<a name="l-62"></a><span class="k">assign</span> <span class="n">local_rst_n_in</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
+<a name="l-63"></a>
+<a name="l-64"></a><span class="k">generate</span>
 <a name="l-65"></a>
-<a name="l-66"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n_dff</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-66"></a><span class="k">if</span> <span class="p">(</span><span class="n">STAGES_AMOUNT</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
 <a name="l-67"></a>
-<a name="l-68"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_sync_cell</span>
-<a name="l-69"></a>
-<a name="l-70"></a>
-<a name="l-71"></a><span class="k">module</span> <span class="n">scr1_reset_buf_qlfy_cell</span> <span class="p">(</span>
-<a name="l-72"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
-<a name="l-73"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
-<a name="l-74"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
-<a name="l-75"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-76"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">reset_n_in</span><span class="p">,</span>
-<a name="l-77"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_out_qlfy</span><span class="p">,</span>
-<a name="l-78"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_out</span><span class="p">,</span>
-<a name="l-79"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_status</span>
-<a name="l-80"></a><span class="p">);</span>
-<a name="l-81"></a>
-<a name="l-82"></a><span class="kt">logic</span> <span class="n">rst_n_mux</span><span class="p">;</span>
-<a name="l-83"></a><span class="kt">logic</span> <span class="n">reset_n_in_mux</span><span class="p">;</span>
-<a name="l-84"></a><span class="kt">logic</span> <span class="n">reset_n_front_ff</span><span class="p">;</span>
-<a name="l-85"></a><span class="kt">logic</span> <span class="n">reset_n_victim_ff</span><span class="p">;</span>
-<a name="l-86"></a><span class="kt">logic</span> <span class="n">reset_n_qualifier_ff</span><span class="p">;</span>
-<a name="l-87"></a><span class="kt">logic</span> <span class="n">reset_n_lucky_ff</span><span class="p">;</span>
-<a name="l-88"></a><span class="kt">logic</span> <span class="n">reset_n_status_ff</span><span class="p">;</span>
-<a name="l-89"></a>
-<a name="l-90"></a><span class="c1">// Front async stage</span>
-<a name="l-91"></a><span class="k">assign</span> <span class="n">reset_n_in_mux</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="p">(</span><span class="n">rst_n</span> <span class="o">&amp;</span> <span class="n">reset_n_in</span><span class="p">);</span>
+<a name="l-68"></a><span class="k">begin</span> <span class="o">:</span> <span class="n">gen_reset_sync_cell_single</span>
+<a name="l-69"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">local_rst_n_in</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-70"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">local_rst_n_in</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-71"></a>            <span class="n">rst_n_dff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-72"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-73"></a>            <span class="n">rst_n_dff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-74"></a>        <span class="k">end</span>
+<a name="l-75"></a>    <span class="k">end</span>
+<a name="l-76"></a><span class="k">end</span> <span class="o">:</span> <span class="n">gen_reset_sync_cell_single</span>
+<a name="l-77"></a>
+<a name="l-78"></a><span class="k">else</span> <span class="c1">// STAGES_AMOUNT &gt; 1</span>
+<a name="l-79"></a>
+<a name="l-80"></a><span class="k">begin</span> <span class="o">:</span> <span class="n">gen_reset_sync_cell_multi</span>
+<a name="l-81"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">local_rst_n_in</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span>
+<a name="l-82"></a>    <span class="k">begin</span>
+<a name="l-83"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">local_rst_n_in</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-84"></a>            <span class="n">rst_n_dff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-85"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-86"></a>            <span class="n">rst_n_dff</span> <span class="o">&lt;=</span> <span class="p">{</span><span class="n">rst_n_dff</span><span class="p">[</span><span class="n">STAGES_AMOUNT</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-87"></a>        <span class="k">end</span>
+<a name="l-88"></a>    <span class="k">end</span>
+<a name="l-89"></a><span class="k">end</span> <span class="o">:</span> <span class="n">gen_reset_sync_cell_multi</span>
+<a name="l-90"></a>
+<a name="l-91"></a><span class="k">endgenerate</span>
 <a name="l-92"></a>
-<a name="l-93"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">reset_n_in_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-94"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">reset_n_in_mux</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-95"></a>        <span class="n">reset_n_front_ff</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-96"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-97"></a>        <span class="n">reset_n_front_ff</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-98"></a>    <span class="k">end</span>
-<a name="l-99"></a><span class="k">end</span>
-<a name="l-100"></a>
-<a name="l-101"></a><span class="c1">// Core sync stages</span>
-<a name="l-102"></a><span class="k">assign</span> <span class="n">rst_n_mux</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
-<a name="l-103"></a>
-<a name="l-104"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-105"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-106"></a>        <span class="n">reset_n_victim_ff</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-107"></a>        <span class="n">reset_n_qualifier_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-108"></a>        <span class="n">reset_n_lucky_ff</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-109"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-110"></a>        <span class="n">reset_n_victim_ff</span>    <span class="o">&lt;=</span> <span class="n">reset_n_front_ff</span><span class="p">;</span>
-<a name="l-111"></a>        <span class="n">reset_n_qualifier_ff</span> <span class="o">&lt;=</span> <span class="n">reset_n_victim_ff</span><span class="p">;</span>
-<a name="l-112"></a>        <span class="n">reset_n_lucky_ff</span>     <span class="o">&lt;=</span> <span class="n">reset_n_qualifier_ff</span><span class="p">;</span>
-<a name="l-113"></a>    <span class="k">end</span>
-<a name="l-114"></a><span class="k">end</span>
-<a name="l-115"></a>
-<a name="l-116"></a><span class="k">assign</span> <span class="n">reset_n_out_qlfy</span> <span class="o">=</span> <span class="n">reset_n_qualifier_ff</span><span class="p">;</span>
-<a name="l-117"></a><span class="k">assign</span> <span class="n">reset_n_out</span>      <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">reset_n_lucky_ff</span><span class="p">;</span>
-<a name="l-118"></a>
-<a name="l-119"></a><span class="c1">// Reset status stage</span>
-<a name="l-120"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-121"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-122"></a>        <span class="n">reset_n_status_ff</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-123"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-124"></a>        <span class="n">reset_n_status_ff</span>    <span class="o">&lt;=</span> <span class="n">reset_n_qualifier_ff</span><span class="p">;</span>
-<a name="l-125"></a>    <span class="k">end</span>
-<a name="l-126"></a><span class="k">end</span>
-<a name="l-127"></a><span class="k">assign</span> <span class="n">reset_n_status</span> <span class="o">=</span> <span class="n">reset_n_status_ff</span><span class="p">;</span>
-<a name="l-128"></a>
-<a name="l-129"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_buf_qlfy_cell</span>
-<a name="l-130"></a>
-<a name="l-131"></a>
-<a name="l-132"></a><span class="k">module</span> <span class="n">scr1_reset_and2_cell</span> <span class="p">(</span>
-<a name="l-133"></a>    <span class="k">input</span>   <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rst_n_in</span><span class="p">,</span>
-<a name="l-134"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
-<a name="l-135"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-136"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
-<a name="l-137"></a><span class="p">);</span>
+<a name="l-93"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n_dff</span><span class="p">[</span><span class="n">STAGES_AMOUNT</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-94"></a>
+<a name="l-95"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_sync_cell</span>
+<a name="l-96"></a>
+<a name="l-97"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-98"></a><span class="c1">// Data CDC/RDC Synchronization Cell</span>
+<a name="l-99"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-100"></a><span class="k">module</span> <span class="n">scr1_data_sync_cell</span> <span class="p">#(</span>
+<a name="l-101"></a>    <span class="k">parameter</span> <span class="kt">int</span> <span class="kt">unsigned</span>  <span class="n">STAGES_AMOUNT</span> <span class="o">=</span> <span class="mi">1</span>
+<a name="l-102"></a><span class="p">)</span> <span class="p">(</span>
+<a name="l-103"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
+<a name="l-104"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
+<a name="l-105"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">data_in</span><span class="p">,</span>
+<a name="l-106"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">data_out</span>
+<a name="l-107"></a><span class="p">);</span>
+<a name="l-108"></a>
+<a name="l-109"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">STAGES_AMOUNT</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_dff</span><span class="p">;</span>
+<a name="l-110"></a>
+<a name="l-111"></a><span class="k">generate</span>
+<a name="l-112"></a>
+<a name="l-113"></a><span class="k">if</span> <span class="p">(</span><span class="n">STAGES_AMOUNT</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<a name="l-114"></a>
+<a name="l-115"></a><span class="k">begin</span> <span class="o">:</span> <span class="n">gen_data_sync_cell_single</span>
+<a name="l-116"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span>
+<a name="l-117"></a>    <span class="k">begin</span>
+<a name="l-118"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-119"></a>            <span class="n">data_dff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-120"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-121"></a>            <span class="n">data_dff</span> <span class="o">&lt;=</span> <span class="n">data_in</span><span class="p">;</span>
+<a name="l-122"></a>        <span class="k">end</span>
+<a name="l-123"></a>    <span class="k">end</span>
+<a name="l-124"></a><span class="k">end</span> <span class="o">:</span> <span class="n">gen_data_sync_cell_single</span>
+<a name="l-125"></a>
+<a name="l-126"></a><span class="k">else</span> <span class="c1">// STAGES_AMOUNT &gt; 1</span>
+<a name="l-127"></a>
+<a name="l-128"></a><span class="k">begin</span> <span class="o">:</span> <span class="n">gen_data_sync_cell_multi</span>
+<a name="l-129"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span>
+<a name="l-130"></a>    <span class="k">begin</span>
+<a name="l-131"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-132"></a>            <span class="n">data_dff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-133"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-134"></a>            <span class="n">data_dff</span> <span class="o">&lt;=</span> <span class="p">{</span><span class="n">data_dff</span><span class="p">[</span><span class="n">STAGES_AMOUNT</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_in</span><span class="p">};</span>
+<a name="l-135"></a>        <span class="k">end</span>
+<a name="l-136"></a>    <span class="k">end</span>
+<a name="l-137"></a><span class="k">end</span> <span class="o">:</span> <span class="n">gen_data_sync_cell_multi</span>
 <a name="l-138"></a>
-<a name="l-139"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">rst_n_in</span><span class="p">);</span>
+<a name="l-139"></a><span class="k">endgenerate</span>
 <a name="l-140"></a>
-<a name="l-141"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_and2_cell</span>
+<a name="l-141"></a><span class="k">assign</span> <span class="n">data_out</span> <span class="o">=</span> <span class="n">data_dff</span><span class="p">[</span><span class="n">STAGES_AMOUNT</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
 <a name="l-142"></a>
-<a name="l-143"></a>
-<a name="l-144"></a><span class="k">module</span> <span class="n">scr1_reset_and3_cell</span> <span class="p">(</span>
-<a name="l-145"></a>    <span class="k">input</span>   <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rst_n_in</span><span class="p">,</span>
-<a name="l-146"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
-<a name="l-147"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-148"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
-<a name="l-149"></a><span class="p">);</span>
-<a name="l-150"></a>
-<a name="l-151"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">rst_n_in</span><span class="p">);</span>
-<a name="l-152"></a>
-<a name="l-153"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_and3_cell</span>
-<a name="l-154"></a>
-<a name="l-155"></a>
-<a name="l-156"></a><span class="k">module</span> <span class="n">scr1_reset_mux2_cell</span> <span class="p">(</span>
-<a name="l-157"></a>    <span class="k">input</span>   <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rst_n_in</span><span class="p">,</span>
-<a name="l-158"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">select</span><span class="p">,</span>
-<a name="l-159"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
-<a name="l-160"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-161"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
+<a name="l-143"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_data_sync_cell</span>
+<a name="l-144"></a>
+<a name="l-145"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-146"></a><span class="c1">// Reset / RDC Qualifyer Adapter Cell</span>
+<a name="l-147"></a><span class="c1">//   (Reset Generation Cell w/ RDC Qualifyer Adaptation circuitry)</span>
+<a name="l-148"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-149"></a><span class="c1">// Total stages amount =</span>
+<a name="l-150"></a><span class="c1">//    1 Front Sync stage \</span>
+<a name="l-151"></a><span class="c1">//  + 1 (delay introduced by the reset output buffer register)</span>
+<a name="l-152"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-153"></a><span class="k">module</span> <span class="n">scr1_reset_qlfy_adapter_cell_sync</span> <span class="p">(</span>
+<a name="l-154"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">rst_n</span><span class="p">,</span>
+<a name="l-155"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">clk</span><span class="p">,</span>
+<a name="l-156"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
+<a name="l-157"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
+<a name="l-158"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">reset_n_in_sync</span><span class="p">,</span>
+<a name="l-159"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_out_qlfy</span><span class="p">,</span>
+<a name="l-160"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_out</span><span class="p">,</span>
+<a name="l-161"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">reset_n_status</span>
 <a name="l-162"></a><span class="p">);</span>
 <a name="l-163"></a>
-<a name="l-164"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n_in</span><span class="p">[</span><span class="n">select</span><span class="p">];</span>
-<a name="l-165"></a>
-<a name="l-166"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_mux2_cell</span>
+<a name="l-164"></a><span class="kt">logic</span> <span class="n">rst_n_mux</span><span class="p">;</span>
+<a name="l-165"></a><span class="kt">logic</span> <span class="n">reset_n_front_ff</span><span class="p">;</span>
+<a name="l-166"></a>
+<a name="l-167"></a><span class="c1">// Front sync stage</span>
+<a name="l-168"></a><span class="k">assign</span> <span class="n">rst_n_mux</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
+<a name="l-169"></a>
+<a name="l-170"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n_mux</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-171"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n_mux</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-172"></a>        <span class="n">reset_n_front_ff</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-173"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-174"></a>        <span class="n">reset_n_front_ff</span>    <span class="o">&lt;=</span> <span class="n">reset_n_in_sync</span><span class="p">;</span>
+<a name="l-175"></a>    <span class="k">end</span>
+<a name="l-176"></a><span class="k">end</span>
+<a name="l-177"></a>
+<a name="l-178"></a><span class="c1">//   Sync reset output for all reset qualifier chains targeting this reset domain</span>
+<a name="l-179"></a><span class="c1">// (for reset-domain-crossings with the given reset domain as a destination).</span>
+<a name="l-180"></a><span class="k">assign</span> <span class="n">reset_n_out_qlfy</span> <span class="o">=</span> <span class="n">reset_n_front_ff</span><span class="p">;</span>
+<a name="l-181"></a>
+<a name="l-182"></a><span class="c1">// Reset output buffer</span>
+<a name="l-183"></a><span class="n">scr1_reset_buf_cell</span>
+<a name="l-184"></a><span class="n">i_reset_ouput_buf</span> <span class="p">(</span>
+<a name="l-185"></a>    <span class="p">.</span><span class="n">rst_n</span>              <span class="p">(</span><span class="n">rst_n</span><span class="p">),</span>
+<a name="l-186"></a>    <span class="p">.</span><span class="n">clk</span>                <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<a name="l-187"></a>    <span class="p">.</span><span class="n">test_mode</span>          <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
+<a name="l-188"></a>    <span class="p">.</span><span class="n">test_rst_n</span>         <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
+<a name="l-189"></a>    <span class="p">.</span><span class="n">reset_n_in</span>         <span class="p">(</span><span class="n">reset_n_front_ff</span><span class="p">),</span>
+<a name="l-190"></a>    <span class="p">.</span><span class="n">reset_n_out</span>        <span class="p">(</span><span class="n">reset_n_out</span><span class="p">),</span>
+<a name="l-191"></a>    <span class="p">.</span><span class="n">reset_n_status</span>     <span class="p">(</span><span class="n">reset_n_status</span><span class="p">)</span>
+<a name="l-192"></a><span class="p">);</span>
+<a name="l-193"></a>
+<a name="l-194"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_qlfy_adapter_cell_sync</span>
+<a name="l-195"></a>
+<a name="l-196"></a><span class="k">module</span> <span class="n">scr1_reset_and2_cell</span> <span class="p">(</span>
+<a name="l-197"></a>    <span class="k">input</span>   <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rst_n_in</span><span class="p">,</span>
+<a name="l-198"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
+<a name="l-199"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
+<a name="l-200"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
+<a name="l-201"></a><span class="p">);</span>
+<a name="l-202"></a>
+<a name="l-203"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">rst_n_in</span><span class="p">);</span>
+<a name="l-204"></a>
+<a name="l-205"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_and2_cell</span>
+<a name="l-206"></a>
+<a name="l-207"></a>
+<a name="l-208"></a><span class="k">module</span> <span class="n">scr1_reset_and3_cell</span> <span class="p">(</span>
+<a name="l-209"></a>    <span class="k">input</span>   <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rst_n_in</span><span class="p">,</span>
+<a name="l-210"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
+<a name="l-211"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
+<a name="l-212"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
+<a name="l-213"></a><span class="p">);</span>
+<a name="l-214"></a>
+<a name="l-215"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">rst_n_in</span><span class="p">);</span>
+<a name="l-216"></a>
+<a name="l-217"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_and3_cell</span>
+<a name="l-218"></a>
+<a name="l-219"></a>
+<a name="l-220"></a><span class="k">module</span> <span class="n">scr1_reset_mux2_cell</span> <span class="p">(</span>
+<a name="l-221"></a>    <span class="k">input</span>   <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rst_n_in</span><span class="p">,</span>
+<a name="l-222"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">select</span><span class="p">,</span>
+<a name="l-223"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_rst_n</span><span class="p">,</span>
+<a name="l-224"></a>    <span class="k">input</span>   <span class="kt">logic</span>           <span class="n">test_mode</span><span class="p">,</span>
+<a name="l-225"></a>    <span class="k">output</span>  <span class="kt">logic</span>           <span class="n">rst_n_out</span>
+<a name="l-226"></a><span class="p">);</span>
+<a name="l-227"></a>
+<a name="l-228"></a><span class="k">assign</span> <span class="n">rst_n_out</span> <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n_in</span><span class="p">[</span><span class="n">select</span><span class="p">];</span>
+<a name="l-229"></a>
+<a name="l-230"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_reset_mux2_cell</span>
 </pre></div>
 </td></tr></table>
   </body>

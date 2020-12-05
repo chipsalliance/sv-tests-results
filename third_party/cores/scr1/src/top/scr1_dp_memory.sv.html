@@ -109,7 +109,14 @@
 <a href="#l-101">101</a>
 <a href="#l-102">102</a>
 <a href="#l-103">103</a>
-<a href="#l-104">104</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2018. See LICENSE for details</span>
+<a href="#l-104">104</a>
+<a href="#l-105">105</a>
+<a href="#l-106">106</a>
+<a href="#l-107">107</a>
+<a href="#l-108">108</a>
+<a href="#l-109">109</a>
+<a href="#l-110">110</a>
+<a href="#l-111">111</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
 <a name="l-2"></a><span class="c1">/// @file       &lt;scr1_dp_memory.sv&gt;</span>
 <a name="l-3"></a><span class="c1">/// @brief      Dual-port synchronous memory with byte enable inputs</span>
 <a name="l-4"></a><span class="c1">///</span>
@@ -138,81 +145,88 @@
 <a name="l-27"></a>    <span class="k">output</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">qb</span>
 <a name="l-28"></a><span class="p">);</span>
 <a name="l-29"></a>
-<a name="l-30"></a><span class="no">`ifdef</span> <span class="n">SCR1_TARGET_FPGA_INTEL</span>
+<a name="l-30"></a><span class="no">`ifdef</span> <span class="n">SCR1_TRGT_FPGA_INTEL</span>
 <a name="l-31"></a><span class="c1">//-------------------------------------------------------------------------------</span>
 <a name="l-32"></a><span class="c1">// Local signal declaration</span>
 <a name="l-33"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-34"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_NBYTES</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">memory_array</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="p">(</span><span class="n">SCR1_SIZE</span><span class="o">/</span><span class="n">SCR1_NBYTES</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
-<a name="l-35"></a><span class="kt">logic</span> <span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">wenbb</span><span class="p">;</span>
-<a name="l-36"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-37"></a><span class="c1">// Port B memory behavioral description</span>
-<a name="l-38"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-39"></a><span class="k">assign</span> <span class="n">wenbb</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">{</span><span class="n">wenb</span><span class="p">}}</span> <span class="o">&amp;</span> <span class="n">webb</span><span class="p">;</span>
-<a name="l-40"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-41"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">wenb</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-42"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">begin</span>
-<a name="l-43"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
-<a name="l-44"></a>        <span class="k">end</span>
-<a name="l-45"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">begin</span>
-<a name="l-46"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">8</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
-<a name="l-47"></a>        <span class="k">end</span>
-<a name="l-48"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">begin</span>
-<a name="l-49"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">16</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
-<a name="l-50"></a>        <span class="k">end</span>
-<a name="l-51"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="k">begin</span>
-<a name="l-52"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">24</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
-<a name="l-53"></a>        <span class="k">end</span>
-<a name="l-54"></a>    <span class="k">end</span>
-<a name="l-55"></a>    <span class="n">qb</span> <span class="o">&lt;=</span> <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">];</span>
-<a name="l-56"></a><span class="k">end</span>
-<a name="l-57"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-58"></a><span class="c1">// Port A memory behavioral description</span>
-<a name="l-59"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-60"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-61"></a>    <span class="n">qa</span> <span class="o">&lt;=</span> <span class="n">memory_array</span><span class="p">[</span><span class="n">addra</span><span class="p">];</span>
-<a name="l-62"></a><span class="k">end</span>
-<a name="l-63"></a>
-<a name="l-64"></a><span class="no">`else</span> <span class="c1">// SCR1_TARGET_FPGA_INTEL</span>
-<a name="l-65"></a>
-<a name="l-66"></a><span class="c1">// CASE: OTHERS - SCR1_TARGET_FPGA_XILINX, SIMULATION, ASIC etc</span>
+<a name="l-34"></a> <span class="no">`ifdef</span> <span class="n">SCR1_TRGT_FPGA_INTEL_MAX10</span>
+<a name="l-35"></a><span class="p">(</span><span class="o">*</span> <span class="n">ramstyle</span> <span class="o">=</span> <span class="s">&quot;M9K&quot;</span> <span class="o">*</span><span class="p">)</span>    <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_NBYTES</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">memory_array</span>  <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="p">(</span><span class="n">SCR1_SIZE</span><span class="o">/</span><span class="n">SCR1_NBYTES</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-36"></a> <span class="no">`elsif</span> <span class="n">SCR1_TRGT_FPGA_INTEL_ARRIAV</span>
+<a name="l-37"></a><span class="p">(</span><span class="o">*</span> <span class="n">ramstyle</span> <span class="o">=</span> <span class="s">&quot;M10K&quot;</span> <span class="o">*</span><span class="p">)</span>   <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_NBYTES</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">memory_array</span>  <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="p">(</span><span class="n">SCR1_SIZE</span><span class="o">/</span><span class="n">SCR1_NBYTES</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a name="l-38"></a> <span class="no">`endif</span>
+<a name="l-39"></a><span class="kt">logic</span> <span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">wenbb</span><span class="p">;</span>
+<a name="l-40"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-41"></a><span class="c1">// Port B memory behavioral description</span>
+<a name="l-42"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-43"></a><span class="k">assign</span> <span class="n">wenbb</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">{</span><span class="n">wenb</span><span class="p">}}</span> <span class="o">&amp;</span> <span class="n">webb</span><span class="p">;</span>
+<a name="l-44"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-45"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">wenb</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-46"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">begin</span>
+<a name="l-47"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
+<a name="l-48"></a>        <span class="k">end</span>
+<a name="l-49"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">begin</span>
+<a name="l-50"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">8</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
+<a name="l-51"></a>        <span class="k">end</span>
+<a name="l-52"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">begin</span>
+<a name="l-53"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">16</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
+<a name="l-54"></a>        <span class="k">end</span>
+<a name="l-55"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">wenbb</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="k">begin</span>
+<a name="l-56"></a>            <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="mi">24</span><span class="o">+:</span><span class="mi">8</span><span class="p">];</span>
+<a name="l-57"></a>        <span class="k">end</span>
+<a name="l-58"></a>    <span class="k">end</span>
+<a name="l-59"></a>    <span class="n">qb</span> <span class="o">&lt;=</span> <span class="n">memory_array</span><span class="p">[</span><span class="n">addrb</span><span class="p">];</span>
+<a name="l-60"></a><span class="k">end</span>
+<a name="l-61"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-62"></a><span class="c1">// Port A memory behavioral description</span>
+<a name="l-63"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-64"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-65"></a>    <span class="n">qa</span> <span class="o">&lt;=</span> <span class="n">memory_array</span><span class="p">[</span><span class="n">addra</span><span class="p">];</span>
+<a name="l-66"></a><span class="k">end</span>
 <a name="l-67"></a>
-<a name="l-68"></a><span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">RAM_SIZE_WORDS</span> <span class="o">=</span> <span class="n">SCR1_SIZE</span><span class="o">/</span><span class="n">SCR1_NBYTES</span><span class="p">;</span>
+<a name="l-68"></a><span class="no">`else</span> <span class="c1">// SCR1_TRGT_FPGA_INTEL</span>
 <a name="l-69"></a>
-<a name="l-70"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-71"></a><span class="c1">// Local signal declaration</span>
-<a name="l-72"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-73"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                  <span class="n">ram_block</span> <span class="p">[</span><span class="n">RAM_SIZE_WORDS</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-74"></a>
-<a name="l-75"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-76"></a><span class="c1">// Port A memory behavioral description</span>
-<a name="l-77"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-78"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-79"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">rena</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-80"></a>        <span class="n">qa</span> <span class="o">&lt;=</span> <span class="n">ram_block</span><span class="p">[</span><span class="n">addra</span><span class="p">];</span>
-<a name="l-81"></a>    <span class="k">end</span>
-<a name="l-82"></a><span class="k">end</span>
-<a name="l-83"></a>
+<a name="l-70"></a><span class="c1">// CASE: OTHERS - SCR1_TRGT_FPGA_XILINX, SIMULATION, ASIC etc</span>
+<a name="l-71"></a>
+<a name="l-72"></a><span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">RAM_SIZE_WORDS</span> <span class="o">=</span> <span class="n">SCR1_SIZE</span><span class="o">/</span><span class="n">SCR1_NBYTES</span><span class="p">;</span>
+<a name="l-73"></a>
+<a name="l-74"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-75"></a><span class="c1">// Local signal declaration</span>
+<a name="l-76"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-77"></a> <span class="no">`ifdef</span> <span class="n">SCR1_TRGT_FPGA_XILINX</span>
+<a name="l-78"></a><span class="p">(</span><span class="o">*</span> <span class="n">ram_style</span> <span class="o">=</span> <span class="s">&quot;block&quot;</span> <span class="o">*</span><span class="p">)</span>  <span class="kt">logic</span>  <span class="p">[</span><span class="n">SCR1_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">ram_block</span>  <span class="p">[</span><span class="n">RAM_SIZE_WORDS</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-79"></a> <span class="no">`else</span>  <span class="c1">// ASIC or SIMULATION</span>
+<a name="l-80"></a><span class="kt">logic</span>  <span class="p">[</span><span class="n">SCR1_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">ram_block</span>  <span class="p">[</span><span class="n">RAM_SIZE_WORDS</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-81"></a> <span class="no">`endif</span>
+<a name="l-82"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-83"></a><span class="c1">// Port A memory behavioral description</span>
 <a name="l-84"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-85"></a><span class="c1">// Port B memory behavioral description</span>
-<a name="l-86"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a name="l-87"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-88"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">wenb</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-89"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">SCR1_NBYTES</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-90"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">webb</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">begin</span>
-<a name="l-91"></a>                <span class="n">ram_block</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="n">i</span><span class="o">*</span><span class="mi">8</span> <span class="o">+:</span> <span class="mi">8</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">8</span> <span class="o">+:</span> <span class="mi">8</span><span class="p">];</span>
-<a name="l-92"></a>            <span class="k">end</span>
-<a name="l-93"></a>        <span class="k">end</span>
-<a name="l-94"></a>    <span class="k">end</span>
-<a name="l-95"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">renb</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-96"></a>        <span class="n">qb</span> <span class="o">&lt;=</span> <span class="n">ram_block</span><span class="p">[</span><span class="n">addrb</span><span class="p">];</span>
-<a name="l-97"></a>    <span class="k">end</span>
-<a name="l-98"></a><span class="k">end</span>
-<a name="l-99"></a>
-<a name="l-100"></a><span class="no">`endif</span> <span class="c1">// SCR1_TARGET_FPGA_INTEL</span>
-<a name="l-101"></a>
-<a name="l-102"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_dp_memory</span>
-<a name="l-103"></a>
-<a name="l-104"></a><span class="no">`endif</span> <span class="c1">// SCR1_TCM_EN</span>
+<a name="l-85"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-86"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">rena</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-87"></a>        <span class="n">qa</span> <span class="o">&lt;=</span> <span class="n">ram_block</span><span class="p">[</span><span class="n">addra</span><span class="p">];</span>
+<a name="l-88"></a>    <span class="k">end</span>
+<a name="l-89"></a><span class="k">end</span>
+<a name="l-90"></a>
+<a name="l-91"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-92"></a><span class="c1">// Port B memory behavioral description</span>
+<a name="l-93"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a name="l-94"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-95"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">wenb</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-96"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">SCR1_NBYTES</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-97"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">webb</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">begin</span>
+<a name="l-98"></a>                <span class="n">ram_block</span><span class="p">[</span><span class="n">addrb</span><span class="p">][</span><span class="n">i</span><span class="o">*</span><span class="mi">8</span> <span class="o">+:</span> <span class="mi">8</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">datab</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">8</span> <span class="o">+:</span> <span class="mi">8</span><span class="p">];</span>
+<a name="l-99"></a>            <span class="k">end</span>
+<a name="l-100"></a>        <span class="k">end</span>
+<a name="l-101"></a>    <span class="k">end</span>
+<a name="l-102"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">renb</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-103"></a>        <span class="n">qb</span> <span class="o">&lt;=</span> <span class="n">ram_block</span><span class="p">[</span><span class="n">addrb</span><span class="p">];</span>
+<a name="l-104"></a>    <span class="k">end</span>
+<a name="l-105"></a><span class="k">end</span>
+<a name="l-106"></a>
+<a name="l-107"></a><span class="no">`endif</span> <span class="c1">// SCR1_TRGT_FPGA_INTEL</span>
+<a name="l-108"></a>
+<a name="l-109"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_dp_memory</span>
+<a name="l-110"></a>
+<a name="l-111"></a><span class="no">`endif</span> <span class="c1">// SCR1_TCM_EN</span>
 </pre></div>
 </td></tr></table>
   </body>

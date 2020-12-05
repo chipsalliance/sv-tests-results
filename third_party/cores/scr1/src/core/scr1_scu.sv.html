@@ -422,423 +422,619 @@
 <a href="#l-414">414</a>
 <a href="#l-415">415</a>
 <a href="#l-416">416</a>
-<a href="#l-417">417</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2019. See LICENSE for details</span>
+<a href="#l-417">417</a>
+<a href="#l-418">418</a>
+<a href="#l-419">419</a>
+<a href="#l-420">420</a>
+<a href="#l-421">421</a>
+<a href="#l-422">422</a>
+<a href="#l-423">423</a>
+<a href="#l-424">424</a>
+<a href="#l-425">425</a>
+<a href="#l-426">426</a>
+<a href="#l-427">427</a>
+<a href="#l-428">428</a>
+<a href="#l-429">429</a>
+<a href="#l-430">430</a>
+<a href="#l-431">431</a>
+<a href="#l-432">432</a>
+<a href="#l-433">433</a>
+<a href="#l-434">434</a>
+<a href="#l-435">435</a>
+<a href="#l-436">436</a>
+<a href="#l-437">437</a>
+<a href="#l-438">438</a>
+<a href="#l-439">439</a>
+<a href="#l-440">440</a>
+<a href="#l-441">441</a>
+<a href="#l-442">442</a>
+<a href="#l-443">443</a>
+<a href="#l-444">444</a>
+<a href="#l-445">445</a>
+<a href="#l-446">446</a>
+<a href="#l-447">447</a>
+<a href="#l-448">448</a>
+<a href="#l-449">449</a>
+<a href="#l-450">450</a>
+<a href="#l-451">451</a>
+<a href="#l-452">452</a>
+<a href="#l-453">453</a>
+<a href="#l-454">454</a>
+<a href="#l-455">455</a>
+<a href="#l-456">456</a>
+<a href="#l-457">457</a>
+<a href="#l-458">458</a>
+<a href="#l-459">459</a>
+<a href="#l-460">460</a>
+<a href="#l-461">461</a>
+<a href="#l-462">462</a>
+<a href="#l-463">463</a>
+<a href="#l-464">464</a>
+<a href="#l-465">465</a>
+<a href="#l-466">466</a>
+<a href="#l-467">467</a>
+<a href="#l-468">468</a>
+<a href="#l-469">469</a>
+<a href="#l-470">470</a>
+<a href="#l-471">471</a>
+<a href="#l-472">472</a>
+<a href="#l-473">473</a>
+<a href="#l-474">474</a>
+<a href="#l-475">475</a>
+<a href="#l-476">476</a>
+<a href="#l-477">477</a>
+<a href="#l-478">478</a>
+<a href="#l-479">479</a>
+<a href="#l-480">480</a>
+<a href="#l-481">481</a>
+<a href="#l-482">482</a>
+<a href="#l-483">483</a>
+<a href="#l-484">484</a>
+<a href="#l-485">485</a>
+<a href="#l-486">486</a>
+<a href="#l-487">487</a>
+<a href="#l-488">488</a>
+<a href="#l-489">489</a>
+<a href="#l-490">490</a>
+<a href="#l-491">491</a>
+<a href="#l-492">492</a>
+<a href="#l-493">493</a>
+<a href="#l-494">494</a>
+<a href="#l-495">495</a>
+<a href="#l-496">496</a>
+<a href="#l-497">497</a>
+<a href="#l-498">498</a>
+<a href="#l-499">499</a>
+<a href="#l-500">500</a>
+<a href="#l-501">501</a>
+<a href="#l-502">502</a>
+<a href="#l-503">503</a>
+<a href="#l-504">504</a>
+<a href="#l-505">505</a>
+<a href="#l-506">506</a>
+<a href="#l-507">507</a>
+<a href="#l-508">508</a>
+<a href="#l-509">509</a>
+<a href="#l-510">510</a>
+<a href="#l-511">511</a>
+<a href="#l-512">512</a>
+<a href="#l-513">513</a>
+<a href="#l-514">514</a>
+<a href="#l-515">515</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
 <a name="l-2"></a><span class="c1">/// @file &lt;scr1_scu.sv&gt;</span>
 <a name="l-3"></a><span class="c1">/// @brief System Control Unit (SCU)</span>
 <a name="l-4"></a><span class="c1">///</span>
 <a name="l-5"></a>
-<a name="l-6"></a><span class="no">`include</span> <span class="s">&quot;scr1_arch_description.svh&quot;</span>
-<a name="l-7"></a>
-<a name="l-8"></a><span class="no">`ifdef</span> <span class="n">SCR1_DBGC_EN</span>
-<a name="l-9"></a>
-<a name="l-10"></a><span class="k">module</span> <span class="n">scr1_scu</span> <span class="p">#(</span>
-<a name="l-11"></a>    <span class="k">parameter</span> <span class="kt">bit</span> <span class="n">SCR1_SCU_CFG_RESET_INPUTS_SYNC</span>    <span class="o">=</span> <span class="mi">1</span> <span class="c1">// Reset inputs are: 1 - synchronous, 0 -asynchronous</span>
-<a name="l-12"></a><span class="p">)</span> <span class="p">(</span>
-<a name="l-13"></a>    <span class="c1">// Global signals</span>
-<a name="l-14"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">pwrup_rst_n</span><span class="p">,</span>      <span class="c1">// Power-Up Reset</span>
-<a name="l-15"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">rst_n</span><span class="p">,</span>            <span class="c1">// Regular Reset</span>
-<a name="l-16"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">cpu_rst_n</span><span class="p">,</span>        <span class="c1">// CPU Reset</span>
-<a name="l-17"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">test_mode</span><span class="p">,</span>        <span class="c1">// DFT Test Mode</span>
-<a name="l-18"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">test_rst_n</span><span class="p">,</span>       <span class="c1">// DFT Test Reset</span>
-<a name="l-19"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">clk</span><span class="p">,</span>              <span class="c1">// SCU clock</span>
-<a name="l-20"></a>    <span class="c1">// TAPC scan-chains</span>
-<a name="l-21"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">tapc_ch_sel</span><span class="p">,</span>      <span class="c1">// TAPC Chain Select</span>
-<a name="l-22"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">tapc_ch_id</span><span class="p">,</span>       <span class="c1">// TAPC Chain ID</span>
-<a name="l-23"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">tapc_ch_capture</span><span class="p">,</span>  <span class="c1">// TAPC Chain Capture</span>
-<a name="l-24"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">tapc_ch_shift</span><span class="p">,</span>    <span class="c1">// TAPC Chain Shift</span>
-<a name="l-25"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">tapc_ch_update</span><span class="p">,</span>   <span class="c1">// TAPC Chain Update</span>
-<a name="l-26"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">tapc_ch_tdi</span><span class="p">,</span>      <span class="c1">// TAPC Chain TDI</span>
-<a name="l-27"></a>    <span class="k">output</span> <span class="kt">logic</span>                                      <span class="n">tapc_ch_tdo</span><span class="p">,</span>      <span class="c1">// TAPC Chain TDO</span>
-<a name="l-28"></a>    <span class="c1">// Input sync resets:</span>
-<a name="l-29"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">ndm_rst_n</span><span class="p">,</span>        <span class="c1">// Non-DM Reset input from DM</span>
-<a name="l-30"></a>    <span class="k">input</span>  <span class="kt">logic</span>                                      <span class="n">hart_rst_n</span><span class="p">,</span>       <span class="c1">// HART Reset from DM</span>
-<a name="l-31"></a>    <span class="c1">// Generated resets and their attributes (qualifiers etc):</span>
-<a name="l-32"></a>    <span class="k">output</span> <span class="kt">logic</span>                                      <span class="n">core_rst_n</span><span class="p">,</span>       <span class="c1">// Core Reset</span>
-<a name="l-33"></a>    <span class="k">output</span> <span class="kt">logic</span>                                      <span class="n">core_rst_n_qlfy</span><span class="p">,</span>  <span class="c1">// Core Reset Qualifier</span>
-<a name="l-34"></a>    <span class="k">output</span> <span class="kt">logic</span>                                      <span class="n">dm_rst_n</span><span class="p">,</span>         <span class="c1">// Debug Module Reset</span>
-<a name="l-35"></a>    <span class="k">output</span> <span class="kt">logic</span>                                      <span class="n">hdu_rst_n</span><span class="p">,</span>        <span class="c1">// HART Debug Unit Reset</span>
-<a name="l-36"></a>    <span class="k">output</span> <span class="kt">logic</span>                                      <span class="n">hdu_rst_n_qlfy</span>    <span class="c1">// HDU Reset Qualifier</span>
-<a name="l-37"></a><span class="p">);</span>
-<a name="l-38"></a>
-<a name="l-39"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-40"></a><span class="c1">// Local Parameters</span>
-<a name="l-41"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-42"></a><span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">SCR1_SCU_DR_SYSCTRL_OP_WIDTH</span>    <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-<a name="l-43"></a><span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">SCR1_SCU_DR_SYSCTRL_ADDR_WIDTH</span>  <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-<a name="l-44"></a><span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">SCR1_SCU_DR_SYSCTRL_DATA_WIDTH</span>  <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
-<a name="l-45"></a>
-<a name="l-46"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-47"></a><span class="c1">// Local Types</span>
-<a name="l-48"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-49"></a><span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_OP_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-50"></a>    <span class="n">SCR1_SCU_SYSCTRL_OP_WRITE</span>       <span class="o">=</span> <span class="mh">2&#39;h0</span><span class="p">,</span>
-<a name="l-51"></a>    <span class="n">SCR1_SCU_SYSCTRL_OP_READ</span>        <span class="o">=</span> <span class="mh">2&#39;h1</span><span class="p">,</span>
-<a name="l-52"></a>    <span class="n">SCR1_SCU_SYSCTRL_OP_SETBITS</span>     <span class="o">=</span> <span class="mh">2&#39;h2</span><span class="p">,</span>
-<a name="l-53"></a>    <span class="n">SCR1_SCU_SYSCTRL_OP_CLRBITS</span>     <span class="o">=</span> <span class="mh">2&#39;h3</span><span class="p">,</span>
-<a name="l-54"></a>    <span class="n">SCR1_SCU_SYSCTRL_OP_XXX</span>         <span class="o">=</span> <span class="m">&#39;X</span>
-<a name="l-55"></a><span class="p">}</span> <span class="n">type_scr1_scu_sysctrl_op_e</span><span class="p">;</span>
-<a name="l-56"></a>
-<a name="l-57"></a><span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_ADDR_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-58"></a>    <span class="n">SCR1_SCU_SYSCTRL_ADDR_CONTROL</span>   <span class="o">=</span> <span class="mh">2&#39;h0</span><span class="p">,</span>
-<a name="l-59"></a>    <span class="n">SCR1_SCU_SYSCTRL_ADDR_MODE</span>      <span class="o">=</span> <span class="mh">2&#39;h1</span><span class="p">,</span>
-<a name="l-60"></a>    <span class="n">SCR1_SCU_SYSCTRL_ADDR_STATUS</span>    <span class="o">=</span> <span class="mh">2&#39;h2</span><span class="p">,</span>
-<a name="l-61"></a>    <span class="n">SCR1_SCU_SYSCTRL_ADDR_STICKY</span>    <span class="o">=</span> <span class="mh">2&#39;h3</span><span class="p">,</span>
-<a name="l-62"></a>    <span class="n">SCR1_SCU_SYSCTRL_ADDR_XXX</span>       <span class="o">=</span> <span class="m">&#39;X</span>
-<a name="l-63"></a><span class="p">}</span> <span class="n">type_scr1_scu_sysctrl_addr_e</span><span class="p">;</span>
-<a name="l-64"></a>
-<a name="l-65"></a><span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-66"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">data</span><span class="p">;</span>
-<a name="l-67"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_ADDR_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">addr</span><span class="p">;</span>
-<a name="l-68"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_OP_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">op</span><span class="p">;</span>
-<a name="l-69"></a><span class="p">}</span> <span class="n">type_scr1_scu_sysctrl_dr_s</span><span class="p">;</span>
-<a name="l-70"></a>
-<a name="l-71"></a><span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-72"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                                     <span class="n">rsrv</span><span class="p">;</span>
-<a name="l-73"></a>    <span class="kt">logic</span>                                           <span class="n">sys_reset</span><span class="p">;</span>
-<a name="l-74"></a><span class="p">}</span> <span class="n">type_scr1_scu_sysctrl_control_reg_s</span><span class="p">;</span>
-<a name="l-75"></a>
-<a name="l-76"></a><span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-77"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>                                     <span class="n">rsrv</span><span class="p">;</span>
-<a name="l-78"></a>    <span class="kt">logic</span>                                           <span class="n">hdu_rst_mux</span><span class="p">;</span>
-<a name="l-79"></a>    <span class="kt">logic</span>                                           <span class="n">dm_rst_mux</span><span class="p">;</span>
-<a name="l-80"></a><span class="p">}</span> <span class="n">type_scr1_scu_sysctrl_mode_reg_s</span><span class="p">;</span>
-<a name="l-81"></a>
-<a name="l-82"></a><span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-83"></a>    <span class="kt">logic</span>                                           <span class="n">hdu_reset</span><span class="p">;</span>
-<a name="l-84"></a>    <span class="kt">logic</span>                                           <span class="n">dm_reset</span><span class="p">;</span>
-<a name="l-85"></a>    <span class="kt">logic</span>                                           <span class="n">core_reset</span><span class="p">;</span>
-<a name="l-86"></a>    <span class="kt">logic</span>                                           <span class="n">sys_reset</span><span class="p">;</span>
-<a name="l-87"></a><span class="p">}</span> <span class="n">type_scr1_scu_sysctrl_status_reg_s</span><span class="p">;</span>
-<a name="l-88"></a>
-<a name="l-89"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-90"></a><span class="c1">// Local Signals</span>
-<a name="l-91"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-92"></a>
-<a name="l-93"></a><span class="n">type_scr1_scu_sysctrl_dr_s</span>                          <span class="n">shift_reg</span><span class="p">;</span>
-<a name="l-94"></a><span class="n">type_scr1_scu_sysctrl_dr_s</span>                          <span class="n">shadow_reg</span><span class="p">;</span>
-<a name="l-95"></a><span class="kt">logic</span>                                               <span class="n">dr_capture</span><span class="p">;</span>
-<a name="l-96"></a><span class="kt">logic</span>                                               <span class="n">dr_shift</span><span class="p">;</span>
-<a name="l-97"></a><span class="kt">logic</span>                                               <span class="n">dr_update</span><span class="p">;</span>
-<a name="l-98"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">cmd_data</span><span class="p">;</span>
-<a name="l-99"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">reg_data</span><span class="p">;</span>
-<a name="l-100"></a><span class="c1">//</span>
-<a name="l-101"></a><span class="n">type_scr1_scu_sysctrl_control_reg_s</span>                 <span class="n">control_reg</span><span class="p">;</span>
-<a name="l-102"></a><span class="kt">logic</span>                                               <span class="n">control_reg_wr</span><span class="p">;</span>
-<a name="l-103"></a><span class="n">type_scr1_scu_sysctrl_mode_reg_s</span>                    <span class="n">mode_reg</span><span class="p">;</span>
-<a name="l-104"></a><span class="n">type_scr1_scu_sysctrl_mode_reg_s</span>                    <span class="n">mode_reg_r</span><span class="p">;</span>
-<a name="l-105"></a><span class="kt">logic</span>                                               <span class="n">mode_reg_wr</span><span class="p">;</span>
-<a name="l-106"></a><span class="kt">logic</span>                                               <span class="n">mode_reg_wr_r</span><span class="p">;</span>
-<a name="l-107"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>                  <span class="n">status_reg_data</span><span class="p">;</span>
-<a name="l-108"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>                  <span class="n">status_reg_data_dly</span><span class="p">;</span>
-<a name="l-109"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>                  <span class="n">status_reg_data_posedge</span><span class="p">;</span>
-<a name="l-110"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>                  <span class="n">sticky_sts_reg</span><span class="p">;</span>
-<a name="l-111"></a><span class="kt">logic</span>                                               <span class="n">sticky_sts_reg_wr</span><span class="p">;</span>
-<a name="l-112"></a><span class="c1">//</span>
-<a name="l-113"></a><span class="kt">logic</span>                                               <span class="n">pwrup_rst_n_sync</span><span class="p">;</span>
-<a name="l-114"></a><span class="kt">logic</span>                                               <span class="n">rst_n_sync</span><span class="p">;</span>
-<a name="l-115"></a><span class="kt">logic</span>                                               <span class="n">cpu_rst_n_sync</span><span class="p">;</span>
-<a name="l-116"></a><span class="c1">//</span>
-<a name="l-117"></a><span class="kt">logic</span>                                               <span class="n">sys_rst_n</span><span class="p">;</span>
-<a name="l-118"></a><span class="kt">logic</span>                                               <span class="n">sys_rst_n_sync</span><span class="p">;</span>
-<a name="l-119"></a><span class="kt">logic</span>                                               <span class="n">sys_rst_n_qlfy</span><span class="p">;</span>
-<a name="l-120"></a><span class="kt">logic</span>                                               <span class="n">sys_rst_n_status</span><span class="p">;</span>
-<a name="l-121"></a><span class="c1">//</span>
-<a name="l-122"></a><span class="kt">logic</span>                                               <span class="n">dm_rst_n_sync</span><span class="p">;</span>
-<a name="l-123"></a><span class="kt">logic</span>                                               <span class="n">dm_rst_n_qlfy</span><span class="p">;</span>
-<a name="l-124"></a><span class="kt">logic</span>                                               <span class="n">dm_rst_n_status</span><span class="p">;</span>
-<a name="l-125"></a><span class="c1">//</span>
-<a name="l-126"></a><span class="kt">logic</span>                                               <span class="n">core_rst_n_sync</span><span class="p">;</span>
-<a name="l-127"></a><span class="kt">logic</span>                                               <span class="n">core_rst_n_qlfy_sync</span><span class="p">;</span>
-<a name="l-128"></a><span class="kt">logic</span>                                               <span class="n">core_rst_n_status</span><span class="p">;</span>
-<a name="l-129"></a><span class="c1">//</span>
-<a name="l-130"></a><span class="kt">logic</span>                                               <span class="n">hdu_rst_n_sync</span><span class="p">;</span>
-<a name="l-131"></a><span class="kt">logic</span>                                               <span class="n">hdu_rst_n_status</span><span class="p">;</span>
-<a name="l-132"></a>
+<a name="l-6"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-7"></a> <span class="c1">//</span>
+<a name="l-8"></a> <span class="c1">// Functionality:</span>
+<a name="l-9"></a> <span class="c1">// - Generates System, Core, HDU and DM resets and their qualifier signals</span>
+<a name="l-10"></a> <span class="c1">// - Provides debugger with software System and Core resets generation functionality</span>
+<a name="l-11"></a> <span class="c1">// - Allows to set the behavior of DM and HDU resets</span>
+<a name="l-12"></a> <span class="c1">// - Shows resets Statuses and Sticky Statuses</span>
+<a name="l-13"></a>
+<a name="l-14"></a> <span class="c1">// Structure:</span>
+<a name="l-15"></a> <span class="c1">// - TAPC scan-chain interface</span>
+<a name="l-16"></a> <span class="c1">// - SCU CSRs write/read interface</span>
+<a name="l-17"></a> <span class="c1">// - SCU CSRS:</span>
+<a name="l-18"></a> <span class="c1">//   - CONTROL register</span>
+<a name="l-19"></a> <span class="c1">//   - MODE register</span>
+<a name="l-20"></a> <span class="c1">//   - STATUS register</span>
+<a name="l-21"></a> <span class="c1">//   - STICKY_STATUS register</span>
+<a name="l-22"></a> <span class="c1">// - Reset logic</span>
+<a name="l-23"></a> <span class="c1">//   - System Reset</span>
+<a name="l-24"></a> <span class="c1">//   - Core Reset</span>
+<a name="l-25"></a> <span class="c1">//   - DM Reset</span>
+<a name="l-26"></a> <span class="c1">//   - HDU Reset</span>
+<a name="l-27"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-28"></a>
+<a name="l-29"></a><span class="no">`include</span> <span class="s">&quot;scr1_arch_description.svh&quot;</span>
+<a name="l-30"></a><span class="no">`include</span> <span class="s">&quot;scr1_scu.svh&quot;</span>
+<a name="l-31"></a>
+<a name="l-32"></a><span class="no">`ifdef</span> <span class="n">SCR1_DBG_EN</span>
+<a name="l-33"></a>
+<a name="l-34"></a><span class="k">module</span> <span class="n">scr1_scu</span> <span class="p">(</span>
+<a name="l-35"></a>    <span class="c1">// Global signals</span>
+<a name="l-36"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">pwrup_rst_n</span><span class="p">,</span>                  <span class="c1">// Power-Up Reset</span>
+<a name="l-37"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">rst_n</span><span class="p">,</span>                        <span class="c1">// Regular Reset</span>
+<a name="l-38"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">cpu_rst_n</span><span class="p">,</span>                    <span class="c1">// CPU Reset</span>
+<a name="l-39"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">test_mode</span><span class="p">,</span>                    <span class="c1">// DFT Test Mode</span>
+<a name="l-40"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">test_rst_n</span><span class="p">,</span>                   <span class="c1">// DFT Test Reset</span>
+<a name="l-41"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">clk</span><span class="p">,</span>                          <span class="c1">// SCU clock</span>
+<a name="l-42"></a>
+<a name="l-43"></a>    <span class="c1">// TAPC scan-chains</span>
+<a name="l-44"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">tapcsync2scu_ch_sel_i</span><span class="p">,</span>        <span class="c1">// TAPC Chain Select</span>
+<a name="l-45"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">tapcsync2scu_ch_id_i</span><span class="p">,</span>         <span class="c1">// TAPC Chain ID</span>
+<a name="l-46"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">tapcsync2scu_ch_capture_i</span><span class="p">,</span>    <span class="c1">// TAPC Chain Capture</span>
+<a name="l-47"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">tapcsync2scu_ch_shift_i</span><span class="p">,</span>      <span class="c1">// TAPC Chain Shift</span>
+<a name="l-48"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">tapcsync2scu_ch_update_i</span><span class="p">,</span>     <span class="c1">// TAPC Chain Update</span>
+<a name="l-49"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">tapcsync2scu_ch_tdi_i</span><span class="p">,</span>        <span class="c1">// TAPC Chain TDI</span>
+<a name="l-50"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">scu2tapcsync_ch_tdo_o</span><span class="p">,</span>        <span class="c1">// TAPC Chain TDO</span>
+<a name="l-51"></a>
+<a name="l-52"></a>    <span class="c1">// Input sync resets:</span>
+<a name="l-53"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">ndm_rst_n_i</span><span class="p">,</span>                  <span class="c1">// Non-DM Reset input from DM</span>
+<a name="l-54"></a>    <span class="k">input</span>  <span class="kt">logic</span>        <span class="n">hart_rst_n_i</span><span class="p">,</span>                 <span class="c1">// HART Reset from DM</span>
+<a name="l-55"></a>
+<a name="l-56"></a>    <span class="c1">// Generated resets</span>
+<a name="l-57"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">sys_rst_n_o</span><span class="p">,</span>                  <span class="c1">// System/Cluster Reset</span>
+<a name="l-58"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">core_rst_n_o</span><span class="p">,</span>                 <span class="c1">// Core Reset</span>
+<a name="l-59"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">dm_rst_n_o</span><span class="p">,</span>                   <span class="c1">// Debug Module Reset</span>
+<a name="l-60"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">hdu_rst_n_o</span><span class="p">,</span>                  <span class="c1">// HART Debug Unit Reset</span>
+<a name="l-61"></a>
+<a name="l-62"></a>    <span class="c1">// Resets statuses</span>
+<a name="l-63"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">sys_rst_status_o</span><span class="p">,</span>             <span class="c1">// System Reset Status (sync&#39;ed to POR reset domain)</span>
+<a name="l-64"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">core_rst_status_o</span><span class="p">,</span>            <span class="c1">// Core Reset Status (sync&#39;ed to POR reset domain)</span>
+<a name="l-65"></a>
+<a name="l-66"></a>    <span class="c1">// Reset Domain Crossing (RDC) qualifiers</span>
+<a name="l-67"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">sys_rdc_qlfy_o</span><span class="p">,</span>               <span class="c1">// System/Cluster-to-ExternalSOC Reset Domain Crossing Qualifier</span>
+<a name="l-68"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">core_rdc_qlfy_o</span><span class="p">,</span>              <span class="c1">// Core-to-ExternalSOC Reset Domain Crossing Qualifier</span>
+<a name="l-69"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">core2hdu_rdc_qlfy_o</span><span class="p">,</span>          <span class="c1">// Core-to-HDU Reset Domain Crossing Qualifier</span>
+<a name="l-70"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">core2dm_rdc_qlfy_o</span><span class="p">,</span>           <span class="c1">// Core-to-DM Reset Domain Crossing Qualifier</span>
+<a name="l-71"></a>    <span class="k">output</span> <span class="kt">logic</span>        <span class="n">hdu2dm_rdc_qlfy_o</span>             <span class="c1">// HDU-to-DM Reset Domain Crossing Qualifier</span>
+<a name="l-72"></a><span class="p">);</span>
+<a name="l-73"></a>
+<a name="l-74"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-75"></a><span class="c1">// Local Parameters</span>
+<a name="l-76"></a><span class="c1">//======================================================================================================================</span>
+<a name="l-77"></a><span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">SCR1_SCU_RST_SYNC_STAGES_NUM</span>        <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<a name="l-78"></a>
+<a name="l-79"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-80"></a><span class="c1">// Local Signals</span>
+<a name="l-81"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-82"></a>
+<a name="l-83"></a><span class="c1">// SCU CSR write/read i/f</span>
+<a name="l-84"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-85"></a>
+<a name="l-86"></a><span class="c1">// TAPC scan-chain control logic</span>
+<a name="l-87"></a><span class="kt">logic</span>                                       <span class="n">scu_csr_req</span><span class="p">;</span>
+<a name="l-88"></a><span class="kt">logic</span>                                       <span class="n">tapc_dr_cap_req</span><span class="p">;</span>
+<a name="l-89"></a><span class="kt">logic</span>                                       <span class="n">tapc_dr_shft_req</span><span class="p">;</span>
+<a name="l-90"></a><span class="kt">logic</span>                                       <span class="n">tapc_dr_upd_req</span><span class="p">;</span>
+<a name="l-91"></a>
+<a name="l-92"></a><span class="c1">// TAPC shift register signals</span>
+<a name="l-93"></a><span class="kt">logic</span>                                       <span class="n">tapc_shift_upd</span><span class="p">;</span>
+<a name="l-94"></a><span class="n">type_scr1_scu_sysctrl_dr_s</span>                  <span class="n">tapc_shift_ff</span><span class="p">;</span>
+<a name="l-95"></a><span class="n">type_scr1_scu_sysctrl_dr_s</span>                  <span class="n">tapc_shift_next</span><span class="p">;</span>
+<a name="l-96"></a>
+<a name="l-97"></a><span class="c1">// TAPC shadow register signals</span>
+<a name="l-98"></a><span class="n">type_scr1_scu_sysctrl_dr_s</span>                  <span class="n">tapc_shadow_ff</span><span class="p">;</span>
+<a name="l-99"></a>
+<a name="l-100"></a><span class="c1">// SCU CSR write/read i/f</span>
+<a name="l-101"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-102"></a>
+<a name="l-103"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">scu_csr_wdata</span><span class="p">;</span>
+<a name="l-104"></a><span class="kt">logic</span> <span class="p">[</span><span class="n">SCR1_SCU_DR_SYSCTRL_DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">scu_csr_rdata</span><span class="p">;</span>
+<a name="l-105"></a>
+<a name="l-106"></a><span class="c1">// SCU CSRs signals</span>
+<a name="l-107"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-108"></a>
+<a name="l-109"></a><span class="c1">// Control register</span>
+<a name="l-110"></a><span class="n">type_scr1_scu_sysctrl_control_reg_s</span>         <span class="n">scu_control_ff</span><span class="p">;</span>
+<a name="l-111"></a><span class="kt">logic</span>                                       <span class="n">scu_control_wr_req</span><span class="p">;</span>
+<a name="l-112"></a>
+<a name="l-113"></a><span class="c1">// Mode register</span>
+<a name="l-114"></a><span class="n">type_scr1_scu_sysctrl_mode_reg_s</span>            <span class="n">scu_mode_ff</span><span class="p">;</span>
+<a name="l-115"></a><span class="kt">logic</span>                                       <span class="n">scu_mode_wr_req</span><span class="p">;</span>
+<a name="l-116"></a>
+<a name="l-117"></a><span class="c1">// Status register</span>
+<a name="l-118"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>          <span class="n">scu_status_ff</span><span class="p">;</span>
+<a name="l-119"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>          <span class="n">scu_status_ff_dly</span><span class="p">;</span>
+<a name="l-120"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>          <span class="n">scu_status_ff_posedge</span><span class="p">;</span>
+<a name="l-121"></a>
+<a name="l-122"></a><span class="c1">// Sticky Status register</span>
+<a name="l-123"></a><span class="n">type_scr1_scu_sysctrl_status_reg_s</span>          <span class="n">scu_sticky_sts_ff</span><span class="p">;</span>
+<a name="l-124"></a><span class="kt">logic</span>                                       <span class="n">scu_sticky_sts_wr_req</span><span class="p">;</span>
+<a name="l-125"></a>
+<a name="l-126"></a><span class="c1">// Reset logic signals</span>
+<a name="l-127"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-128"></a>
+<a name="l-129"></a><span class="c1">// Input resets synchronization signals</span>
+<a name="l-130"></a><span class="kt">logic</span>                                       <span class="n">pwrup_rst_n_sync</span><span class="p">;</span>
+<a name="l-131"></a><span class="kt">logic</span>                                       <span class="n">rst_n_sync</span><span class="p">;</span>
+<a name="l-132"></a><span class="kt">logic</span>                                       <span class="n">cpu_rst_n_sync</span><span class="p">;</span>
 <a name="l-133"></a>
-<a name="l-134"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-135"></a><span class="c1">// Logic</span>
-<a name="l-136"></a><span class="c1">//======================================================================================================================</span>
-<a name="l-137"></a>
-<a name="l-138"></a><span class="c1">// -----------------------------------------------------------------------------</span>
-<a name="l-139"></a><span class="c1">// Scan-chain i/f</span>
-<a name="l-140"></a><span class="c1">// -----------------------------------------------------------------------------</span>
-<a name="l-141"></a><span class="k">assign</span> <span class="n">dr_capture</span> <span class="o">=</span> <span class="n">tapc_ch_sel</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tapc_ch_id</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">tapc_ch_capture</span><span class="p">;</span>
-<a name="l-142"></a><span class="k">assign</span> <span class="n">dr_shift</span>   <span class="o">=</span> <span class="n">tapc_ch_sel</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tapc_ch_id</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">tapc_ch_shift</span><span class="p">;</span>
-<a name="l-143"></a><span class="k">assign</span> <span class="n">dr_update</span>  <span class="o">=</span> <span class="n">tapc_ch_sel</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tapc_ch_id</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">tapc_ch_update</span><span class="p">;</span>
-<a name="l-144"></a>
-<a name="l-145"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-146"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-147"></a>        <span class="n">shift_reg</span>   <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-148"></a>    <span class="k">end</span>
-<a name="l-149"></a>    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-150"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">dr_capture</span><span class="p">)</span>
-<a name="l-151"></a>            <span class="n">shift_reg</span> <span class="o">&lt;=</span> <span class="n">shadow_reg</span><span class="p">;</span>
-<a name="l-152"></a>        <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">dr_shift</span><span class="p">)</span>
-<a name="l-153"></a>            <span class="n">shift_reg</span> <span class="o">&lt;=</span> <span class="p">{</span><span class="n">tapc_ch_tdi</span><span class="p">,</span> <span class="n">shift_reg</span><span class="p">[$</span><span class="n">bits</span><span class="p">(</span><span class="n">type_scr1_scu_sysctrl_dr_s</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">1</span><span class="p">]};</span>
-<a name="l-154"></a>    <span class="k">end</span>
-<a name="l-155"></a><span class="k">end</span>
-<a name="l-156"></a>
-<a name="l-157"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-158"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-159"></a>        <span class="n">shadow_reg</span>   <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-160"></a>    <span class="k">end</span>
-<a name="l-161"></a>    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-162"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">dr_update</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-163"></a>            <span class="n">shadow_reg</span><span class="p">.</span><span class="n">op</span>   <span class="o">&lt;=</span> <span class="n">shift_reg</span><span class="p">.</span><span class="n">op</span><span class="p">;</span>
-<a name="l-164"></a>            <span class="n">shadow_reg</span><span class="p">.</span><span class="n">addr</span> <span class="o">&lt;=</span> <span class="n">shift_reg</span><span class="p">.</span><span class="n">addr</span><span class="p">;</span>
-<a name="l-165"></a>            <span class="n">shadow_reg</span><span class="p">.</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="n">cmd_data</span><span class="p">;</span>
-<a name="l-166"></a>        <span class="k">end</span>
-<a name="l-167"></a>    <span class="k">end</span>
-<a name="l-168"></a><span class="k">end</span>
-<a name="l-169"></a>
-<a name="l-170"></a><span class="k">always_comb</span>
-<a name="l-171"></a><span class="k">begin</span>
-<a name="l-172"></a>    <span class="n">cmd_data</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-173"></a>
-<a name="l-174"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">dr_update</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-175"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">shift_reg</span><span class="p">.</span><span class="n">op</span><span class="p">)</span>
-<a name="l-176"></a>            <span class="n">SCR1_SCU_SYSCTRL_OP_WRITE</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-177"></a>                <span class="n">cmd_data</span> <span class="o">=</span> <span class="n">shift_reg</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
-<a name="l-178"></a>            <span class="k">end</span>
-<a name="l-179"></a>            <span class="n">SCR1_SCU_SYSCTRL_OP_READ</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-180"></a>                <span class="n">cmd_data</span> <span class="o">=</span> <span class="n">reg_data</span><span class="p">;</span>
-<a name="l-181"></a>            <span class="k">end</span>
-<a name="l-182"></a>            <span class="n">SCR1_SCU_SYSCTRL_OP_SETBITS</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-183"></a>                <span class="n">cmd_data</span> <span class="o">=</span> <span class="n">reg_data</span> <span class="o">|</span>   <span class="n">shift_reg</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
-<a name="l-184"></a>            <span class="k">end</span>
-<a name="l-185"></a>            <span class="n">SCR1_SCU_SYSCTRL_OP_CLRBITS</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-186"></a>                <span class="n">cmd_data</span> <span class="o">=</span> <span class="n">reg_data</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">shift_reg</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
-<a name="l-187"></a>            <span class="k">end</span>
-<a name="l-188"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-189"></a>            <span class="k">end</span>
-<a name="l-190"></a>        <span class="k">endcase</span>
-<a name="l-191"></a>    <span class="k">end</span>
-<a name="l-192"></a><span class="k">end</span>
-<a name="l-193"></a>
-<a name="l-194"></a><span class="k">assign</span> <span class="n">tapc_ch_tdo</span> <span class="o">=</span> <span class="n">shift_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-134"></a><span class="c1">// System Reset signals</span>
+<a name="l-135"></a><span class="kt">logic</span>                                       <span class="n">sys_rst_n_in</span><span class="p">;</span>
+<a name="l-136"></a><span class="kt">logic</span>                                       <span class="n">sys_rst_n_status</span><span class="p">;</span>
+<a name="l-137"></a><span class="kt">logic</span>                                       <span class="n">sys_rst_n_status_sync</span><span class="p">;</span>
+<a name="l-138"></a><span class="kt">logic</span>                                       <span class="n">sys_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-139"></a><span class="kt">logic</span>                                       <span class="n">sys_reset_n</span><span class="p">;</span>
+<a name="l-140"></a>
+<a name="l-141"></a><span class="c1">// Core Reset signals</span>
+<a name="l-142"></a><span class="kt">logic</span>                                       <span class="n">core_rst_n_in_sync</span><span class="p">;</span>
+<a name="l-143"></a><span class="kt">logic</span>                                       <span class="n">core_rst_n_status</span><span class="p">;</span>
+<a name="l-144"></a><span class="kt">logic</span>                                       <span class="n">core_rst_n_status_sync</span><span class="p">;</span>
+<a name="l-145"></a><span class="kt">logic</span>                                       <span class="n">core_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-146"></a><span class="kt">logic</span>                                       <span class="n">core_reset_n</span><span class="p">;</span>
+<a name="l-147"></a>
+<a name="l-148"></a><span class="c1">// HDU Reset signals</span>
+<a name="l-149"></a><span class="kt">logic</span>                                       <span class="n">hdu_rst_n_in_sync</span><span class="p">;</span>
+<a name="l-150"></a><span class="kt">logic</span>                                       <span class="n">hdu_rst_n_status</span><span class="p">;</span>
+<a name="l-151"></a><span class="kt">logic</span>                                       <span class="n">hdu_rst_n_status_sync</span><span class="p">;</span>
+<a name="l-152"></a><span class="kt">logic</span>                                       <span class="n">hdu_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-153"></a>
+<a name="l-154"></a><span class="c1">// DM Reset signals</span>
+<a name="l-155"></a><span class="kt">logic</span>                                       <span class="n">dm_rst_n_in</span><span class="p">;</span>
+<a name="l-156"></a><span class="kt">logic</span>                                       <span class="n">dm_rst_n_status</span><span class="p">;</span>
+<a name="l-157"></a>
+<a name="l-158"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-159"></a><span class="c1">// TAPC scan-chain i/f</span>
+<a name="l-160"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-161"></a><span class="c1">//</span>
+<a name="l-162"></a> <span class="c1">// Consists of the following functional units:</span>
+<a name="l-163"></a> <span class="c1">// - TAPC scan-chain control logic</span>
+<a name="l-164"></a> <span class="c1">// - TAPC shift register</span>
+<a name="l-165"></a> <span class="c1">// - TAPC shadow register</span>
+<a name="l-166"></a><span class="c1">//</span>
+<a name="l-167"></a>
+<a name="l-168"></a><span class="c1">// TAPC scan-chain control logic</span>
+<a name="l-169"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-170"></a>
+<a name="l-171"></a><span class="k">assign</span> <span class="n">scu_csr_req</span>      <span class="o">=</span> <span class="n">tapcsync2scu_ch_sel_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tapcsync2scu_ch_id_i</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">);</span>
+<a name="l-172"></a><span class="k">assign</span> <span class="n">tapc_dr_cap_req</span>  <span class="o">=</span> <span class="n">scu_csr_req</span> <span class="o">&amp;</span> <span class="n">tapcsync2scu_ch_capture_i</span><span class="p">;</span>
+<a name="l-173"></a><span class="k">assign</span> <span class="n">tapc_dr_shft_req</span> <span class="o">=</span> <span class="n">scu_csr_req</span> <span class="o">&amp;</span> <span class="n">tapcsync2scu_ch_shift_i</span><span class="p">;</span>
+<a name="l-174"></a><span class="k">assign</span> <span class="n">tapc_dr_upd_req</span>  <span class="o">=</span> <span class="n">scu_csr_req</span> <span class="o">&amp;</span> <span class="n">tapcsync2scu_ch_update_i</span><span class="p">;</span>
+<a name="l-175"></a>
+<a name="l-176"></a><span class="c1">// TAPC shift register</span>
+<a name="l-177"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-178"></a>
+<a name="l-179"></a><span class="k">assign</span> <span class="n">tapc_shift_upd</span> <span class="o">=</span> <span class="n">tapc_dr_cap_req</span> <span class="o">|</span> <span class="n">tapc_dr_shft_req</span><span class="p">;</span>
+<a name="l-180"></a>
+<a name="l-181"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-182"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-183"></a>        <span class="n">tapc_shift_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-184"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tapc_shift_upd</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-185"></a>        <span class="n">tapc_shift_ff</span> <span class="o">&lt;=</span> <span class="n">tapc_shift_next</span><span class="p">;</span>
+<a name="l-186"></a>    <span class="k">end</span>
+<a name="l-187"></a><span class="k">end</span>
+<a name="l-188"></a>
+<a name="l-189"></a><span class="k">assign</span> <span class="n">tapc_shift_next</span> <span class="o">=</span> <span class="n">tapc_dr_cap_req</span>  <span class="o">?</span> <span class="n">tapc_shadow_ff</span>
+<a name="l-190"></a>                       <span class="o">:</span> <span class="n">tapc_dr_shft_req</span> <span class="o">?</span> <span class="p">{</span><span class="n">tapcsync2scu_ch_tdi_i</span><span class="p">,</span> <span class="n">tapc_shift_ff</span><span class="p">[$</span><span class="n">bits</span><span class="p">(</span><span class="n">type_scr1_scu_sysctrl_dr_s</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">1</span><span class="p">]}</span>
+<a name="l-191"></a>                                          <span class="o">:</span> <span class="n">tapc_shift_ff</span><span class="p">;</span>
+<a name="l-192"></a>
+<a name="l-193"></a><span class="c1">// TAPC shadow register</span>
+<a name="l-194"></a><span class="c1">//------------------------------------------------------------------------------</span>
 <a name="l-195"></a>
-<a name="l-196"></a><span class="c1">// -----------------------------------------------------------------------------</span>
-<a name="l-197"></a><span class="c1">// Registers</span>
-<a name="l-198"></a><span class="c1">// -----------------------------------------------------------------------------</span>
-<a name="l-199"></a><span class="k">always_comb</span>
-<a name="l-200"></a><span class="k">begin</span>
-<a name="l-201"></a>    <span class="n">control_reg_wr</span>      <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-202"></a>    <span class="n">mode_reg_wr</span>         <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-203"></a>    <span class="n">sticky_sts_reg_wr</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-204"></a>
-<a name="l-205"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">dr_update</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">shift_reg</span><span class="p">.</span><span class="n">op</span> <span class="o">!=</span> <span class="n">SCR1_SCU_SYSCTRL_OP_READ</span><span class="p">))</span> <span class="k">begin</span>
-<a name="l-206"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">shift_reg</span><span class="p">.</span><span class="n">addr</span><span class="p">)</span>
-<a name="l-207"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_CONTROL</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-208"></a>                <span class="n">control_reg_wr</span>      <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-209"></a>            <span class="k">end</span>
-<a name="l-210"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_MODE</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-211"></a>                <span class="n">mode_reg_wr</span>         <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-212"></a>            <span class="k">end</span>
-<a name="l-213"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_STICKY</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-214"></a>                <span class="n">sticky_sts_reg_wr</span>   <span class="o">=</span> <span class="p">(</span><span class="n">shift_reg</span><span class="p">.</span><span class="n">op</span> <span class="o">==</span> <span class="n">SCR1_SCU_SYSCTRL_OP_CLRBITS</span><span class="p">)</span> <span class="o">?</span> <span class="mb">1&#39;b1</span> <span class="o">:</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-215"></a>            <span class="k">end</span>
-<a name="l-216"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-217"></a>            <span class="k">end</span>
-<a name="l-218"></a>        <span class="k">endcase</span>
-<a name="l-219"></a>    <span class="k">end</span>
-<a name="l-220"></a><span class="k">end</span>
-<a name="l-221"></a>
-<a name="l-222"></a><span class="k">always_comb</span>
-<a name="l-223"></a><span class="k">begin</span>
-<a name="l-224"></a>    <span class="n">reg_data</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-225"></a>
-<a name="l-226"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">dr_update</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-227"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">shift_reg</span><span class="p">.</span><span class="n">addr</span><span class="p">)</span>
-<a name="l-228"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_CONTROL</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-229"></a>                <span class="n">reg_data</span> <span class="o">=</span> <span class="n">control_reg</span><span class="p">;</span>
-<a name="l-230"></a>            <span class="k">end</span>
-<a name="l-231"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_MODE</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-232"></a>                <span class="n">reg_data</span> <span class="o">=</span> <span class="n">mode_reg</span><span class="p">;</span>
-<a name="l-233"></a>            <span class="k">end</span>
-<a name="l-234"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_STATUS</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-235"></a>                <span class="n">reg_data</span> <span class="o">=</span> <span class="n">status_reg_data</span><span class="p">;</span>
-<a name="l-236"></a>            <span class="k">end</span>
-<a name="l-237"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_STICKY</span> <span class="o">:</span> <span class="k">begin</span>
-<a name="l-238"></a>                <span class="n">reg_data</span> <span class="o">=</span> <span class="n">sticky_sts_reg</span><span class="p">;</span>
-<a name="l-239"></a>            <span class="k">end</span>
-<a name="l-240"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-241"></a>                <span class="n">reg_data</span> <span class="o">=</span> <span class="m">&#39;x</span><span class="p">;</span>
-<a name="l-242"></a>            <span class="k">end</span>
-<a name="l-243"></a>        <span class="k">endcase</span>
-<a name="l-244"></a>    <span class="k">end</span>
-<a name="l-245"></a><span class="k">end</span>
-<a name="l-246"></a>
-<a name="l-247"></a><span class="c1">// Control Register</span>
-<a name="l-248"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-249"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-250"></a>        <span class="n">control_reg</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-251"></a>    <span class="k">end</span>
-<a name="l-252"></a>    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-253"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">control_reg_wr</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-254"></a>            <span class="n">control_reg</span> <span class="o">&lt;=</span> <span class="n">cmd_data</span><span class="p">;</span>
-<a name="l-255"></a>        <span class="k">end</span>
-<a name="l-256"></a>    <span class="k">end</span>
-<a name="l-257"></a><span class="k">end</span>
-<a name="l-258"></a>
-<a name="l-259"></a><span class="c1">// Mode Register</span>
-<a name="l-260"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-261"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-262"></a>        <span class="n">mode_reg</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-263"></a>        <span class="n">mode_reg_r</span>    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-264"></a>        <span class="n">mode_reg_wr_r</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-265"></a>    <span class="k">end</span>
-<a name="l-266"></a>    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-267"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">mode_reg_wr</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-268"></a>            <span class="n">mode_reg</span> <span class="o">&lt;=</span> <span class="n">cmd_data</span><span class="p">;</span>
-<a name="l-269"></a>        <span class="k">end</span>
-<a name="l-270"></a>        <span class="n">mode_reg_wr_r</span> <span class="o">&lt;=</span> <span class="n">mode_reg_wr</span><span class="p">;</span>
-<a name="l-271"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">mode_reg_wr_r</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-272"></a>            <span class="n">mode_reg_r</span> <span class="o">&lt;=</span> <span class="n">mode_reg</span><span class="p">;</span>
-<a name="l-273"></a>        <span class="k">end</span>
-<a name="l-274"></a>    <span class="k">end</span>
-<a name="l-275"></a><span class="k">end</span>
-<a name="l-276"></a>
-<a name="l-277"></a><span class="c1">// Status Register</span>
-<a name="l-278"></a><span class="k">assign</span> <span class="n">status_reg_data</span><span class="p">.</span><span class="n">sys_reset</span>    <span class="o">=</span> <span class="o">~</span><span class="n">sys_rst_n_status</span> <span class="p">;</span>
-<a name="l-279"></a><span class="k">assign</span> <span class="n">status_reg_data</span><span class="p">.</span><span class="n">core_reset</span>   <span class="o">=</span> <span class="o">~</span><span class="n">core_rst_n_status</span><span class="p">;</span>
-<a name="l-280"></a><span class="k">assign</span> <span class="n">status_reg_data</span><span class="p">.</span><span class="n">dm_reset</span>     <span class="o">=</span> <span class="o">~</span><span class="n">dm_rst_n_status</span>  <span class="p">;</span>
-<a name="l-281"></a><span class="k">assign</span> <span class="n">status_reg_data</span><span class="p">.</span><span class="n">hdu_reset</span>    <span class="o">=</span> <span class="o">~</span><span class="n">hdu_rst_n_status</span> <span class="p">;</span>
-<a name="l-282"></a>
-<a name="l-283"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-284"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-285"></a>        <span class="n">status_reg_data_dly</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-286"></a>    <span class="k">end</span>
-<a name="l-287"></a>    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-288"></a>        <span class="n">status_reg_data_dly</span> <span class="o">&lt;=</span> <span class="n">status_reg_data</span><span class="p">;</span>
-<a name="l-289"></a>    <span class="k">end</span>
-<a name="l-290"></a><span class="k">end</span>
-<a name="l-291"></a>
-<a name="l-292"></a><span class="k">assign</span> <span class="n">status_reg_data_posedge</span> <span class="o">=</span> <span class="n">status_reg_data</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">status_reg_data_dly</span><span class="p">);</span>
-<a name="l-293"></a>
-<a name="l-294"></a><span class="c1">// Sticky Status Register</span>
-<a name="l-295"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-296"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-297"></a>        <span class="n">sticky_sts_reg</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-298"></a>    <span class="k">end</span>
-<a name="l-299"></a>    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-300"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">$</span><span class="n">bits</span><span class="p">(</span><span class="n">type_scr1_scu_sysctrl_status_reg_s</span><span class="p">);</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-301"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">status_reg_data_posedge</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">begin</span>
-<a name="l-302"></a>                <span class="n">sticky_sts_reg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-303"></a>            <span class="k">end</span>
-<a name="l-304"></a>            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sticky_sts_reg_wr</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-305"></a>                <span class="n">sticky_sts_reg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">cmd_data</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-<a name="l-306"></a>            <span class="k">end</span>
-<a name="l-307"></a>        <span class="k">end</span>
-<a name="l-308"></a>    <span class="k">end</span>
-<a name="l-309"></a><span class="k">end</span>
-<a name="l-310"></a>
-<a name="l-311"></a><span class="c1">// -----------------------------------------------------------------------------</span>
-<a name="l-312"></a><span class="c1">// Reset logic</span>
-<a name="l-313"></a><span class="c1">// -----------------------------------------------------------------------------</span>
-<a name="l-314"></a><span class="k">generate</span>
-<a name="l-315"></a>
-<a name="l-316"></a><span class="k">if</span> <span class="p">(</span><span class="n">SCR1_SCU_CFG_RESET_INPUTS_SYNC</span><span class="p">)</span>
-<a name="l-317"></a><span class="c1">// reset inputs are synchronous</span>
+<a name="l-196"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-197"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-198"></a>        <span class="n">tapc_shadow_ff</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-199"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tapc_dr_upd_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-200"></a>        <span class="n">tapc_shadow_ff</span><span class="p">.</span><span class="n">op</span>   <span class="o">&lt;=</span> <span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">op</span><span class="p">;</span>
+<a name="l-201"></a>        <span class="n">tapc_shadow_ff</span><span class="p">.</span><span class="n">addr</span> <span class="o">&lt;=</span> <span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">addr</span><span class="p">;</span>
+<a name="l-202"></a>        <span class="n">tapc_shadow_ff</span><span class="p">.</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="n">scu_csr_wdata</span><span class="p">;</span>
+<a name="l-203"></a>    <span class="k">end</span>
+<a name="l-204"></a><span class="k">end</span>
+<a name="l-205"></a>
+<a name="l-206"></a><span class="k">assign</span> <span class="n">scu2tapcsync_ch_tdo_o</span> <span class="o">=</span> <span class="n">tapc_shift_ff</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-207"></a>
+<a name="l-208"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-209"></a><span class="c1">// SCU CSRs write/read interface</span>
+<a name="l-210"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-211"></a>
+<a name="l-212"></a><span class="c1">// Write interface</span>
+<a name="l-213"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-214"></a>
+<a name="l-215"></a><span class="c1">// Register selection logic</span>
+<a name="l-216"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-217"></a>    <span class="n">scu_control_wr_req</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-218"></a>    <span class="n">scu_mode_wr_req</span>       <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-219"></a>    <span class="n">scu_sticky_sts_wr_req</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-220"></a>
+<a name="l-221"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tapc_dr_upd_req</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">op</span> <span class="o">!=</span> <span class="n">SCR1_SCU_SYSCTRL_OP_READ</span><span class="p">))</span> <span class="k">begin</span>
+<a name="l-222"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">addr</span><span class="p">)</span>
+<a name="l-223"></a>            <span class="nl">SCR1_SCU_SYSCTRL_ADDR_CONTROL:</span> <span class="n">scu_control_wr_req</span>    <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-224"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_MODE</span>   <span class="o">:</span> <span class="n">scu_mode_wr_req</span>       <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-225"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_STICKY</span> <span class="o">:</span> <span class="n">scu_sticky_sts_wr_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">op</span> <span class="o">==</span> <span class="n">SCR1_SCU_SYSCTRL_OP_CLRBITS</span><span class="p">);</span>
+<a name="l-226"></a>            <span class="k">default</span>                      <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a name="l-227"></a>        <span class="k">endcase</span>
+<a name="l-228"></a>    <span class="k">end</span>
+<a name="l-229"></a><span class="k">end</span>
+<a name="l-230"></a>
+<a name="l-231"></a><span class="c1">// Write data construction</span>
+<a name="l-232"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-233"></a>    <span class="n">scu_csr_wdata</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-234"></a>
+<a name="l-235"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tapc_dr_upd_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-236"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">op</span><span class="p">)</span>
+<a name="l-237"></a>            <span class="n">SCR1_SCU_SYSCTRL_OP_WRITE</span>  <span class="o">:</span> <span class="n">scu_csr_wdata</span> <span class="o">=</span> <span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+<a name="l-238"></a>            <span class="n">SCR1_SCU_SYSCTRL_OP_READ</span>   <span class="o">:</span> <span class="n">scu_csr_wdata</span> <span class="o">=</span> <span class="n">scu_csr_rdata</span><span class="p">;</span>
+<a name="l-239"></a>            <span class="nl">SCR1_SCU_SYSCTRL_OP_SETBITS:</span> <span class="n">scu_csr_wdata</span> <span class="o">=</span> <span class="n">scu_csr_rdata</span> <span class="o">|</span>   <span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
+<a name="l-240"></a>            <span class="nl">SCR1_SCU_SYSCTRL_OP_CLRBITS:</span> <span class="n">scu_csr_wdata</span> <span class="o">=</span> <span class="n">scu_csr_rdata</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">data</span><span class="p">);</span>
+<a name="l-241"></a>            <span class="k">default</span>                    <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a name="l-242"></a>        <span class="k">endcase</span>
+<a name="l-243"></a>    <span class="k">end</span>
+<a name="l-244"></a><span class="k">end</span>
+<a name="l-245"></a>
+<a name="l-246"></a><span class="c1">// Read interface</span>
+<a name="l-247"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-248"></a>
+<a name="l-249"></a><span class="c1">// Read data multiplexer</span>
+<a name="l-250"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-251"></a>    <span class="n">scu_csr_rdata</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-252"></a>
+<a name="l-253"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tapc_dr_upd_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-254"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">tapc_shift_ff</span><span class="p">.</span><span class="n">addr</span><span class="p">)</span>
+<a name="l-255"></a>            <span class="nl">SCR1_SCU_SYSCTRL_ADDR_CONTROL:</span> <span class="n">scu_csr_rdata</span> <span class="o">=</span> <span class="n">scu_control_ff</span><span class="p">;</span>
+<a name="l-256"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_MODE</span>   <span class="o">:</span> <span class="n">scu_csr_rdata</span> <span class="o">=</span> <span class="n">scu_mode_ff</span><span class="p">;</span>
+<a name="l-257"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_STATUS</span> <span class="o">:</span> <span class="n">scu_csr_rdata</span> <span class="o">=</span> <span class="n">scu_status_ff</span><span class="p">;</span>
+<a name="l-258"></a>            <span class="n">SCR1_SCU_SYSCTRL_ADDR_STICKY</span> <span class="o">:</span> <span class="n">scu_csr_rdata</span> <span class="o">=</span> <span class="n">scu_sticky_sts_ff</span><span class="p">;</span>
+<a name="l-259"></a>            <span class="k">default</span>                      <span class="o">:</span> <span class="n">scu_csr_rdata</span> <span class="o">=</span> <span class="m">&#39;x</span><span class="p">;</span>
+<a name="l-260"></a>        <span class="k">endcase</span>
+<a name="l-261"></a>    <span class="k">end</span>
+<a name="l-262"></a><span class="k">end</span>
+<a name="l-263"></a>
+<a name="l-264"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-265"></a><span class="c1">// SCU CSRs</span>
+<a name="l-266"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-267"></a><span class="c1">//</span>
+<a name="l-268"></a> <span class="c1">// Registers:</span>
+<a name="l-269"></a> <span class="c1">// - CONTROL register</span>
+<a name="l-270"></a> <span class="c1">// - MODE register</span>
+<a name="l-271"></a> <span class="c1">// - STATUS register</span>
+<a name="l-272"></a> <span class="c1">// - STICKY_STATUS register</span>
+<a name="l-273"></a><span class="c1">//</span>
+<a name="l-274"></a>
+<a name="l-275"></a><span class="c1">// CONTROL register</span>
+<a name="l-276"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-277"></a><span class="c1">// Allows debugger to generate System and Core resets</span>
+<a name="l-278"></a>
+<a name="l-279"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-280"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-281"></a>        <span class="n">scu_control_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-282"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">scu_control_wr_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-283"></a>        <span class="n">scu_control_ff</span> <span class="o">&lt;=</span> <span class="n">scu_csr_wdata</span><span class="p">;</span>
+<a name="l-284"></a>    <span class="k">end</span>
+<a name="l-285"></a><span class="k">end</span>
+<a name="l-286"></a>
+<a name="l-287"></a><span class="c1">// MODE register</span>
+<a name="l-288"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-289"></a><span class="c1">// Sets reset behavior for DM Reset and HDU Reset signals</span>
+<a name="l-290"></a>
+<a name="l-291"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-292"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-293"></a>        <span class="n">scu_mode_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-294"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">scu_mode_wr_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-295"></a>        <span class="n">scu_mode_ff</span> <span class="o">&lt;=</span> <span class="n">scu_csr_wdata</span><span class="p">;</span>
+<a name="l-296"></a>    <span class="k">end</span>
+<a name="l-297"></a><span class="k">end</span>
+<a name="l-298"></a>
+<a name="l-299"></a><span class="c1">// STATUS register</span>
+<a name="l-300"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-301"></a><span class="c1">// Holds the status of every output reset signal (System, Core, DM and HDU)</span>
+<a name="l-302"></a>
+<a name="l-303"></a><span class="k">assign</span> <span class="n">scu_status_ff</span><span class="p">.</span><span class="n">sys_reset</span>  <span class="o">=</span> <span class="n">sys_rst_status_o</span> <span class="p">;</span>
+<a name="l-304"></a><span class="k">assign</span> <span class="n">scu_status_ff</span><span class="p">.</span><span class="n">core_reset</span> <span class="o">=</span> <span class="n">core_rst_status_o</span><span class="p">;</span>
+<a name="l-305"></a><span class="k">assign</span> <span class="n">scu_status_ff</span><span class="p">.</span><span class="n">dm_reset</span>   <span class="o">=</span> <span class="o">~</span><span class="n">dm_rst_n_status</span><span class="p">;</span>
+<a name="l-306"></a><span class="k">assign</span> <span class="n">scu_status_ff</span><span class="p">.</span><span class="n">hdu_reset</span>  <span class="o">=</span> <span class="o">~</span><span class="n">hdu_rst_n_status_sync</span><span class="p">;</span>
+<a name="l-307"></a>
+<a name="l-308"></a><span class="c1">// Status Register positive edge detection logic</span>
+<a name="l-309"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-310"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-311"></a>        <span class="n">scu_status_ff_dly</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-312"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-313"></a>        <span class="n">scu_status_ff_dly</span> <span class="o">&lt;=</span> <span class="n">scu_status_ff</span><span class="p">;</span>
+<a name="l-314"></a>    <span class="k">end</span>
+<a name="l-315"></a><span class="k">end</span>
+<a name="l-316"></a>
+<a name="l-317"></a><span class="k">assign</span> <span class="n">scu_status_ff_posedge</span> <span class="o">=</span> <span class="n">scu_status_ff</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">scu_status_ff_dly</span><span class="p">;</span>
 <a name="l-318"></a>
-<a name="l-319"></a><span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rst_inputs_sync</span>
-<a name="l-320"></a>    <span class="k">assign</span> <span class="n">pwrup_rst_n_sync</span>     <span class="o">=</span> <span class="n">pwrup_rst_n</span><span class="p">;</span>
-<a name="l-321"></a>    <span class="k">assign</span> <span class="n">rst_n_sync</span>           <span class="o">=</span> <span class="n">rst_n</span><span class="p">;</span>
-<a name="l-322"></a>    <span class="k">assign</span> <span class="n">cpu_rst_n_sync</span>       <span class="o">=</span> <span class="n">cpu_rst_n</span><span class="p">;</span>
-<a name="l-323"></a><span class="k">end</span> <span class="o">:</span> <span class="n">gen_rst_inputs_sync</span>
-<a name="l-324"></a>
-<a name="l-325"></a><span class="k">else</span> <span class="c1">// SCR1_SCU_CFG_RESET_INPUTS_SYNC == 0, - reset inputs are asynchronous</span>
-<a name="l-326"></a>
-<a name="l-327"></a><span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rst_inputs_async</span>
-<a name="l-328"></a><span class="c1">// Power-Up Reset synchronizer</span>
-<a name="l-329"></a><span class="n">scr1_reset_sync_cell</span> <span class="n">i_pwrup_rstn_reset_sync</span> <span class="p">(</span>
-<a name="l-330"></a>    <span class="p">.</span><span class="n">rst_n</span>          <span class="p">(</span><span class="n">pwrup_rst_n</span><span class="p">),</span>
-<a name="l-331"></a>    <span class="p">.</span><span class="n">clk</span>            <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-332"></a>    <span class="p">.</span><span class="n">test_rst_n</span>     <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-333"></a>    <span class="p">.</span><span class="n">test_mode</span>      <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-334"></a>    <span class="p">.</span><span class="n">rst_n_out</span>      <span class="p">(</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span>
-<a name="l-335"></a><span class="p">);</span>
+<a name="l-319"></a><span class="c1">// STICKY_STATUS register</span>
+<a name="l-320"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-321"></a><span class="c1">// For every output reset signal shows if it was asserted since the last bit clearing</span>
+<a name="l-322"></a>
+<a name="l-323"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-324"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n_sync</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-325"></a>        <span class="n">scu_sticky_sts_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-326"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-327"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">$</span><span class="n">bits</span><span class="p">(</span><span class="n">type_scr1_scu_sysctrl_status_reg_s</span><span class="p">);</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-328"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">scu_status_ff_posedge</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">begin</span>
+<a name="l-329"></a>                <span class="n">scu_sticky_sts_ff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-330"></a>            <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">scu_sticky_sts_wr_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-331"></a>                <span class="n">scu_sticky_sts_ff</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">scu_csr_wdata</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a name="l-332"></a>            <span class="k">end</span>
+<a name="l-333"></a>        <span class="k">end</span>
+<a name="l-334"></a>    <span class="k">end</span>
+<a name="l-335"></a><span class="k">end</span>
 <a name="l-336"></a>
-<a name="l-337"></a><span class="c1">// Regular Reset synchronizer</span>
-<a name="l-338"></a><span class="n">scr1_reset_sync_cell</span> <span class="n">i_rstn_reset_sync</span> <span class="p">(</span>
-<a name="l-339"></a>    <span class="p">.</span><span class="n">rst_n</span>          <span class="p">(</span><span class="n">rst_n</span><span class="p">),</span>
-<a name="l-340"></a>    <span class="p">.</span><span class="n">clk</span>            <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-341"></a>    <span class="p">.</span><span class="n">test_rst_n</span>     <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-342"></a>    <span class="p">.</span><span class="n">test_mode</span>      <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-343"></a>    <span class="p">.</span><span class="n">rst_n_out</span>      <span class="p">(</span><span class="n">rst_n_sync</span><span class="p">)</span>
-<a name="l-344"></a><span class="p">);</span>
-<a name="l-345"></a>
-<a name="l-346"></a><span class="c1">// CPU Reset synchronizer</span>
-<a name="l-347"></a><span class="n">scr1_reset_sync_cell</span> <span class="n">i_cpu_rstn_reset_sync</span> <span class="p">(</span>
-<a name="l-348"></a>    <span class="p">.</span><span class="n">rst_n</span>          <span class="p">(</span><span class="n">cpu_rst_n</span><span class="p">),</span>
-<a name="l-349"></a>    <span class="p">.</span><span class="n">clk</span>            <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-350"></a>    <span class="p">.</span><span class="n">test_rst_n</span>     <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-351"></a>    <span class="p">.</span><span class="n">test_mode</span>      <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-352"></a>    <span class="p">.</span><span class="n">rst_n_out</span>      <span class="p">(</span><span class="n">cpu_rst_n_sync</span><span class="p">)</span>
-<a name="l-353"></a><span class="p">);</span>
-<a name="l-354"></a><span class="k">end</span> <span class="o">:</span> <span class="n">gen_rst_inputs_async</span>
-<a name="l-355"></a>
-<a name="l-356"></a><span class="c1">// end of SCR1_SCU_CFG_RESET_INPUTS_SYNC</span>
-<a name="l-357"></a>
-<a name="l-358"></a><span class="k">endgenerate</span>
+<a name="l-337"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-338"></a><span class="c1">// Reset logic</span>
+<a name="l-339"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-340"></a><span class="c1">//</span>
+<a name="l-341"></a> <span class="c1">// Consists of the following functional units:</span>
+<a name="l-342"></a> <span class="c1">// - System Reset logic</span>
+<a name="l-343"></a> <span class="c1">// - Core Reset logic</span>
+<a name="l-344"></a> <span class="c1">// - Hart Debug Unit Reset logic</span>
+<a name="l-345"></a> <span class="c1">// - Debug Module Reset logic</span>
+<a name="l-346"></a><span class="c1">//</span>
+<a name="l-347"></a>
+<a name="l-348"></a><span class="c1">// Reset inputs are assumed synchronous</span>
+<a name="l-349"></a><span class="k">assign</span> <span class="n">pwrup_rst_n_sync</span> <span class="o">=</span> <span class="n">pwrup_rst_n</span><span class="p">;</span>
+<a name="l-350"></a><span class="k">assign</span> <span class="n">rst_n_sync</span>       <span class="o">=</span> <span class="n">rst_n</span><span class="p">;</span>
+<a name="l-351"></a><span class="k">assign</span> <span class="n">cpu_rst_n_sync</span>   <span class="o">=</span> <span class="n">cpu_rst_n</span><span class="p">;</span>
+<a name="l-352"></a>
+<a name="l-353"></a><span class="c1">// Intermediate resets:</span>
+<a name="l-354"></a><span class="k">assign</span> <span class="n">sys_reset_n</span>  <span class="o">=</span> <span class="o">~</span><span class="n">scu_control_ff</span><span class="p">.</span><span class="n">sys_reset</span><span class="p">;</span>
+<a name="l-355"></a><span class="k">assign</span> <span class="n">core_reset_n</span> <span class="o">=</span> <span class="o">~</span><span class="n">scu_control_ff</span><span class="p">.</span><span class="n">core_reset</span><span class="p">;</span>
+<a name="l-356"></a>
+<a name="l-357"></a><span class="c1">// System/Cluster Reset: sys_rst_n_o</span>
+<a name="l-358"></a><span class="c1">//------------------------------------------------------------------------------</span>
 <a name="l-359"></a>
-<a name="l-360"></a><span class="c1">// System Reset: sys_rst_n</span>
-<a name="l-361"></a><span class="n">scr1_reset_buf_qlfy_cell</span> <span class="n">i_sys_rstn_buf_qlfy_cell</span> <span class="p">(</span>
-<a name="l-362"></a>    <span class="p">.</span><span class="n">rst_n</span>              <span class="p">(</span><span class="n">pwrup_rst_n_sync</span><span class="p">),</span>
-<a name="l-363"></a>    <span class="p">.</span><span class="n">clk</span>                <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-364"></a>    <span class="p">.</span><span class="n">test_rst_n</span>         <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-365"></a>    <span class="p">.</span><span class="n">test_mode</span>          <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-366"></a>    <span class="p">.</span><span class="n">reset_n_in</span>         <span class="p">(</span><span class="n">sys_rst_n_sync</span><span class="p">),</span>
-<a name="l-367"></a>    <span class="p">.</span><span class="n">reset_n_out_qlfy</span>   <span class="p">(</span><span class="n">sys_rst_n_qlfy</span><span class="p">),</span>
-<a name="l-368"></a>    <span class="p">.</span><span class="n">reset_n_out</span>        <span class="p">(</span><span class="n">sys_rst_n</span><span class="p">),</span>
-<a name="l-369"></a>    <span class="p">.</span><span class="n">reset_n_status</span>     <span class="p">(</span><span class="n">sys_rst_n_status</span><span class="p">)</span>
-<a name="l-370"></a><span class="p">);</span>
-<a name="l-371"></a><span class="k">assign</span> <span class="n">sys_rst_n_sync</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">control_reg</span><span class="p">.</span><span class="n">sys_reset</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">rst_n_sync</span><span class="p">;</span>
+<a name="l-360"></a><span class="n">scr1_reset_qlfy_adapter_cell_sync</span>   <span class="n">i_sys_rstn_qlfy_adapter_cell_sync</span> <span class="p">(</span>
+<a name="l-361"></a>    <span class="p">.</span><span class="n">rst_n</span>                          <span class="p">(</span><span class="n">pwrup_rst_n_sync</span><span class="p">),</span>
+<a name="l-362"></a>    <span class="p">.</span><span class="n">clk</span>                            <span class="p">(</span><span class="n">clk</span>             <span class="p">),</span>
+<a name="l-363"></a>    <span class="p">.</span><span class="n">test_rst_n</span>                     <span class="p">(</span><span class="n">test_rst_n</span>      <span class="p">),</span>
+<a name="l-364"></a>    <span class="p">.</span><span class="n">test_mode</span>                      <span class="p">(</span><span class="n">test_mode</span>       <span class="p">),</span>
+<a name="l-365"></a>    <span class="p">.</span><span class="n">reset_n_in_sync</span>                <span class="p">(</span><span class="n">sys_rst_n_in</span>    <span class="p">),</span>
+<a name="l-366"></a>    <span class="p">.</span><span class="n">reset_n_out_qlfy</span>               <span class="p">(</span><span class="n">sys_rst_n_qlfy</span>  <span class="p">),</span>
+<a name="l-367"></a>    <span class="p">.</span><span class="n">reset_n_out</span>                    <span class="p">(</span><span class="n">sys_rst_n_o</span>     <span class="p">),</span>
+<a name="l-368"></a>    <span class="p">.</span><span class="n">reset_n_status</span>                 <span class="p">(</span><span class="n">sys_rst_n_status</span><span class="p">)</span>
+<a name="l-369"></a><span class="p">);</span>
+<a name="l-370"></a>
+<a name="l-371"></a><span class="k">assign</span> <span class="n">sys_rst_n_in</span> <span class="o">=</span> <span class="n">sys_reset_n</span> <span class="o">&amp;</span> <span class="n">ndm_rst_n_i</span> <span class="o">&amp;</span> <span class="n">rst_n_sync</span><span class="p">;</span>
 <a name="l-372"></a>
-<a name="l-373"></a><span class="c1">// Debug Module Reset: dm_rst_n</span>
-<a name="l-374"></a><span class="n">scr1_reset_buf_cell</span> <span class="n">i_dm_rstn_buf_cell</span> <span class="p">(</span>
-<a name="l-375"></a>    <span class="p">.</span><span class="n">rst_n</span>              <span class="p">(</span><span class="n">dm_rst_n_sync</span><span class="p">),</span>
-<a name="l-376"></a>    <span class="p">.</span><span class="n">clk</span>                <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-377"></a>    <span class="p">.</span><span class="n">test_mode</span>          <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-378"></a>    <span class="p">.</span><span class="n">test_rst_n</span>         <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-379"></a>    <span class="p">.</span><span class="n">reset_n_in</span>         <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span>
-<a name="l-380"></a>    <span class="p">.</span><span class="n">reset_n_out</span>        <span class="p">(</span><span class="n">dm_rst_n</span><span class="p">),</span>
-<a name="l-381"></a>    <span class="p">.</span><span class="n">reset_n_status</span>     <span class="p">(</span><span class="n">dm_rst_n_status</span><span class="p">)</span>
-<a name="l-382"></a><span class="p">);</span>
-<a name="l-383"></a><span class="k">assign</span> <span class="n">dm_rst_n_sync</span> <span class="o">=</span> <span class="n">mode_reg_r</span><span class="p">.</span><span class="n">dm_rst_mux</span> <span class="o">?</span> <span class="n">sys_rst_n</span>      <span class="o">:</span> <span class="n">pwrup_rst_n_sync</span><span class="p">;</span>
-<a name="l-384"></a><span class="k">assign</span> <span class="n">dm_rst_n_qlfy</span> <span class="o">=</span> <span class="n">mode_reg</span><span class="p">.</span><span class="n">dm_rst_mux</span>   <span class="o">?</span> <span class="n">sys_rst_n_qlfy</span> <span class="o">:</span> <span class="mb">1&#39;b1</span> <span class="p">;</span>
-<a name="l-385"></a>
-<a name="l-386"></a><span class="c1">// Core Reset: core_rst_n</span>
-<a name="l-387"></a><span class="n">scr1_reset_buf_qlfy_cell</span> <span class="n">i_core_rstn_buf_qlfy_cell</span> <span class="p">(</span>
-<a name="l-388"></a>    <span class="p">.</span><span class="n">rst_n</span>              <span class="p">(</span><span class="n">sys_rst_n</span><span class="p">),</span>
-<a name="l-389"></a>    <span class="p">.</span><span class="n">clk</span>                <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-390"></a>    <span class="p">.</span><span class="n">test_rst_n</span>         <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-391"></a>    <span class="p">.</span><span class="n">test_mode</span>          <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-392"></a>    <span class="p">.</span><span class="n">reset_n_in</span>         <span class="p">(</span><span class="n">core_rst_n_sync</span><span class="p">),</span>
-<a name="l-393"></a>    <span class="p">.</span><span class="n">reset_n_out_qlfy</span>   <span class="p">(</span><span class="n">core_rst_n_qlfy_sync</span><span class="p">),</span>
-<a name="l-394"></a>    <span class="p">.</span><span class="n">reset_n_out</span>        <span class="p">(</span><span class="n">core_rst_n</span><span class="p">),</span>
-<a name="l-395"></a>    <span class="p">.</span><span class="n">reset_n_status</span>     <span class="p">(</span><span class="n">core_rst_n_status</span><span class="p">)</span>
-<a name="l-396"></a><span class="p">);</span>
-<a name="l-397"></a><span class="k">assign</span> <span class="n">core_rst_n_sync</span>      <span class="o">=</span> <span class="n">ndm_rst_n</span> <span class="o">&amp;</span> <span class="n">hart_rst_n</span> <span class="o">&amp;</span> <span class="n">cpu_rst_n_sync</span><span class="p">;</span>
-<a name="l-398"></a><span class="c1">// Reset qualifier - become active before reset is asserted</span>
-<a name="l-399"></a><span class="k">assign</span> <span class="n">core_rst_n_qlfy</span> <span class="o">=</span> <span class="n">sys_rst_n_qlfy</span> <span class="o">&amp;</span> <span class="n">core_rst_n_qlfy_sync</span><span class="p">;</span>
+<a name="l-373"></a><span class="n">scr1_data_sync_cell</span> <span class="p">#(</span>
+<a name="l-374"></a>    <span class="p">.</span><span class="n">STAGES_AMOUNT</span>       <span class="p">(</span><span class="n">SCR1_SCU_RST_SYNC_STAGES_NUM</span><span class="p">)</span>
+<a name="l-375"></a><span class="p">)</span> <span class="n">i_sys_rstn_status_sync</span> <span class="p">(</span>
+<a name="l-376"></a>    <span class="p">.</span><span class="n">rst_n</span>               <span class="p">(</span><span class="n">pwrup_rst_n_sync</span>     <span class="p">),</span>
+<a name="l-377"></a>    <span class="p">.</span><span class="n">clk</span>                 <span class="p">(</span><span class="n">clk</span>                  <span class="p">),</span>
+<a name="l-378"></a>    <span class="p">.</span><span class="n">data_in</span>             <span class="p">(</span><span class="n">sys_rst_n_status</span>     <span class="p">),</span>
+<a name="l-379"></a>    <span class="p">.</span><span class="n">data_out</span>            <span class="p">(</span><span class="n">sys_rst_n_status_sync</span><span class="p">)</span>
+<a name="l-380"></a><span class="p">);</span>
+<a name="l-381"></a>
+<a name="l-382"></a><span class="k">assign</span> <span class="n">sys_rst_status_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">sys_rst_n_status_sync</span><span class="p">;</span>
+<a name="l-383"></a>
+<a name="l-384"></a><span class="c1">// System/Cluster-to-ExternalSOC RDC qualifier</span>
+<a name="l-385"></a><span class="k">assign</span> <span class="n">sys_rdc_qlfy_o</span> <span class="o">=</span> <span class="n">sys_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-386"></a>
+<a name="l-387"></a><span class="c1">// Core Reset: core_rst_n_o</span>
+<a name="l-388"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-389"></a>
+<a name="l-390"></a><span class="n">scr1_reset_qlfy_adapter_cell_sync</span>   <span class="n">i_core_rstn_qlfy_adapter_cell_sync</span> <span class="p">(</span>
+<a name="l-391"></a>    <span class="p">.</span><span class="n">rst_n</span>                          <span class="p">(</span><span class="n">pwrup_rst_n_sync</span>  <span class="p">),</span>
+<a name="l-392"></a>    <span class="p">.</span><span class="n">clk</span>                            <span class="p">(</span><span class="n">clk</span>               <span class="p">),</span>
+<a name="l-393"></a>    <span class="p">.</span><span class="n">test_rst_n</span>                     <span class="p">(</span><span class="n">test_rst_n</span>        <span class="p">),</span>
+<a name="l-394"></a>    <span class="p">.</span><span class="n">test_mode</span>                      <span class="p">(</span><span class="n">test_mode</span>         <span class="p">),</span>
+<a name="l-395"></a>    <span class="p">.</span><span class="n">reset_n_in_sync</span>                <span class="p">(</span><span class="n">core_rst_n_in_sync</span><span class="p">),</span>
+<a name="l-396"></a>    <span class="p">.</span><span class="n">reset_n_out_qlfy</span>               <span class="p">(</span><span class="n">core_rst_n_qlfy</span>   <span class="p">),</span>
+<a name="l-397"></a>    <span class="p">.</span><span class="n">reset_n_out</span>                    <span class="p">(</span><span class="n">core_rst_n_o</span>      <span class="p">),</span>
+<a name="l-398"></a>    <span class="p">.</span><span class="n">reset_n_status</span>                 <span class="p">(</span><span class="n">core_rst_n_status</span> <span class="p">)</span>
+<a name="l-399"></a><span class="p">);</span>
 <a name="l-400"></a>
-<a name="l-401"></a>
-<a name="l-402"></a><span class="c1">// Hart Debug Unit Reset: hdu_rst_n</span>
-<a name="l-403"></a><span class="n">scr1_reset_buf_cell</span> <span class="n">i_hdu_rstn_buf_cell</span> <span class="p">(</span>
-<a name="l-404"></a>    <span class="p">.</span><span class="n">rst_n</span>              <span class="p">(</span><span class="n">hdu_rst_n_sync</span><span class="p">),</span>
-<a name="l-405"></a>    <span class="p">.</span><span class="n">clk</span>                <span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<a name="l-406"></a>    <span class="p">.</span><span class="n">test_mode</span>          <span class="p">(</span><span class="n">test_mode</span><span class="p">),</span>
-<a name="l-407"></a>    <span class="p">.</span><span class="n">test_rst_n</span>         <span class="p">(</span><span class="n">test_rst_n</span><span class="p">),</span>
-<a name="l-408"></a>    <span class="p">.</span><span class="n">reset_n_in</span>         <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span>
-<a name="l-409"></a>    <span class="p">.</span><span class="n">reset_n_out</span>        <span class="p">(</span><span class="n">hdu_rst_n</span><span class="p">),</span>
-<a name="l-410"></a>    <span class="p">.</span><span class="n">reset_n_status</span>     <span class="p">(</span><span class="n">hdu_rst_n_status</span><span class="p">)</span>
-<a name="l-411"></a><span class="p">);</span>
-<a name="l-412"></a><span class="k">assign</span> <span class="n">hdu_rst_n_sync</span> <span class="o">=</span> <span class="n">mode_reg_r</span><span class="p">.</span><span class="n">hdu_rst_mux</span> <span class="o">?</span> <span class="n">pwrup_rst_n_sync</span> <span class="o">:</span> <span class="n">core_rst_n</span><span class="p">;</span>
-<a name="l-413"></a><span class="k">assign</span> <span class="n">hdu_rst_n_qlfy</span> <span class="o">=</span> <span class="n">mode_reg</span><span class="p">.</span><span class="n">hdu_rst_mux</span>   <span class="o">?</span> <span class="mb">1&#39;b1</span>             <span class="o">:</span> <span class="n">core_rst_n_qlfy</span><span class="p">;</span>
-<a name="l-414"></a>
-<a name="l-415"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_scu</span>
-<a name="l-416"></a>
-<a name="l-417"></a><span class="no">`endif</span> <span class="c1">// SCR1_DBGC_EN</span>
+<a name="l-401"></a><span class="k">assign</span> <span class="n">core_rst_n_in_sync</span>   <span class="o">=</span> <span class="n">sys_rst_n_in</span> <span class="o">&amp;</span> <span class="n">hart_rst_n_i</span> <span class="o">&amp;</span> <span class="n">core_reset_n</span> <span class="o">&amp;</span> <span class="n">cpu_rst_n_sync</span><span class="p">;</span>
+<a name="l-402"></a>
+<a name="l-403"></a><span class="n">scr1_data_sync_cell</span> <span class="p">#(</span>
+<a name="l-404"></a>    <span class="p">.</span><span class="n">STAGES_AMOUNT</span>        <span class="p">(</span><span class="n">SCR1_SCU_RST_SYNC_STAGES_NUM</span><span class="p">)</span>
+<a name="l-405"></a><span class="p">)</span> <span class="n">i_core_rstn_status_sync</span> <span class="p">(</span>
+<a name="l-406"></a>    <span class="p">.</span><span class="n">rst_n</span>                <span class="p">(</span><span class="n">pwrup_rst_n_sync</span>      <span class="p">),</span>
+<a name="l-407"></a>    <span class="p">.</span><span class="n">clk</span>                  <span class="p">(</span><span class="n">clk</span>                   <span class="p">),</span>
+<a name="l-408"></a>    <span class="p">.</span><span class="n">data_in</span>              <span class="p">(</span><span class="n">core_rst_n_status</span>     <span class="p">),</span>
+<a name="l-409"></a>    <span class="p">.</span><span class="n">data_out</span>             <span class="p">(</span><span class="n">core_rst_n_status_sync</span><span class="p">)</span>
+<a name="l-410"></a><span class="p">);</span>
+<a name="l-411"></a>
+<a name="l-412"></a><span class="k">assign</span> <span class="n">core_rst_status_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">core_rst_n_status_sync</span><span class="p">;</span>
+<a name="l-413"></a>
+<a name="l-414"></a><span class="c1">// Core Reset RDC Qualifiers:</span>
+<a name="l-415"></a><span class="c1">//  - Core-to-ExternalSOC RDC Qlfy</span>
+<a name="l-416"></a><span class="k">assign</span> <span class="n">core_rdc_qlfy_o</span> <span class="o">=</span> <span class="n">core_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-417"></a><span class="c1">//  - Core-to-HDU RDC Qlfy</span>
+<a name="l-418"></a><span class="k">assign</span> <span class="n">core2hdu_rdc_qlfy_o</span> <span class="o">=</span> <span class="n">core_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-419"></a><span class="c1">//  - Core-to-DebugModule RDC Qlfy</span>
+<a name="l-420"></a><span class="k">assign</span> <span class="n">core2dm_rdc_qlfy_o</span>  <span class="o">=</span> <span class="n">core_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-421"></a>
+<a name="l-422"></a><span class="c1">// Hart Debug Unit Reset: hdu_rst_n_o</span>
+<a name="l-423"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-424"></a>
+<a name="l-425"></a><span class="n">scr1_reset_qlfy_adapter_cell_sync</span>   <span class="n">i_hdu_rstn_qlfy_adapter_cell_sync</span> <span class="p">(</span>
+<a name="l-426"></a>    <span class="p">.</span><span class="n">rst_n</span>                          <span class="p">(</span><span class="n">pwrup_rst_n_sync</span> <span class="p">),</span>
+<a name="l-427"></a>    <span class="p">.</span><span class="n">clk</span>                            <span class="p">(</span><span class="n">clk</span>              <span class="p">),</span>
+<a name="l-428"></a>    <span class="p">.</span><span class="n">test_rst_n</span>                     <span class="p">(</span><span class="n">test_rst_n</span>       <span class="p">),</span>
+<a name="l-429"></a>    <span class="p">.</span><span class="n">test_mode</span>                      <span class="p">(</span><span class="n">test_mode</span>        <span class="p">),</span>
+<a name="l-430"></a>    <span class="p">.</span><span class="n">reset_n_in_sync</span>                <span class="p">(</span><span class="n">hdu_rst_n_in_sync</span><span class="p">),</span>
+<a name="l-431"></a>    <span class="p">.</span><span class="n">reset_n_out_qlfy</span>               <span class="p">(</span><span class="n">hdu_rst_n_qlfy</span>   <span class="p">),</span>
+<a name="l-432"></a>    <span class="p">.</span><span class="n">reset_n_out</span>                    <span class="p">(</span><span class="n">hdu_rst_n_o</span>      <span class="p">),</span>
+<a name="l-433"></a>    <span class="p">.</span><span class="n">reset_n_status</span>                 <span class="p">(</span><span class="n">hdu_rst_n_status</span> <span class="p">)</span>
+<a name="l-434"></a><span class="p">);</span>
+<a name="l-435"></a>
+<a name="l-436"></a><span class="k">assign</span> <span class="n">hdu_rst_n_in_sync</span> <span class="o">=</span> <span class="n">scu_mode_ff</span><span class="p">.</span><span class="n">hdu_rst_bhv</span> <span class="o">|</span> <span class="n">core_rst_n_in_sync</span><span class="p">;</span>
+<a name="l-437"></a>
+<a name="l-438"></a><span class="n">scr1_data_sync_cell</span> <span class="p">#(</span>
+<a name="l-439"></a>    <span class="p">.</span><span class="n">STAGES_AMOUNT</span>       <span class="p">(</span><span class="n">SCR1_SCU_RST_SYNC_STAGES_NUM</span><span class="p">)</span>
+<a name="l-440"></a><span class="p">)</span> <span class="n">i_hdu_rstn_status_sync</span> <span class="p">(</span>
+<a name="l-441"></a>    <span class="p">.</span><span class="n">rst_n</span>               <span class="p">(</span><span class="n">pwrup_rst_n_sync</span>     <span class="p">),</span>
+<a name="l-442"></a>    <span class="p">.</span><span class="n">clk</span>                 <span class="p">(</span><span class="n">clk</span>                  <span class="p">),</span>
+<a name="l-443"></a>    <span class="p">.</span><span class="n">data_in</span>             <span class="p">(</span><span class="n">hdu_rst_n_status</span>     <span class="p">),</span>
+<a name="l-444"></a>    <span class="p">.</span><span class="n">data_out</span>            <span class="p">(</span><span class="n">hdu_rst_n_status_sync</span><span class="p">)</span>
+<a name="l-445"></a><span class="p">);</span>
+<a name="l-446"></a>
+<a name="l-447"></a><span class="c1">// Hart Debug Unit Reset RDC Qualifiers:</span>
+<a name="l-448"></a><span class="c1">//  - HDU-to-DebugModule RDC Qlfy</span>
+<a name="l-449"></a><span class="k">assign</span> <span class="n">hdu2dm_rdc_qlfy_o</span> <span class="o">=</span> <span class="n">hdu_rst_n_qlfy</span><span class="p">;</span>
+<a name="l-450"></a>
+<a name="l-451"></a><span class="c1">// Debug Module Reset: dm_rst_n_o</span>
+<a name="l-452"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a name="l-453"></a>
+<a name="l-454"></a><span class="n">scr1_reset_buf_cell</span> <span class="n">i_dm_rstn_buf_cell</span> <span class="p">(</span>
+<a name="l-455"></a>    <span class="p">.</span><span class="n">rst_n</span>              <span class="p">(</span><span class="n">pwrup_rst_n_sync</span><span class="p">),</span>
+<a name="l-456"></a>    <span class="p">.</span><span class="n">clk</span>                <span class="p">(</span><span class="n">clk</span>             <span class="p">),</span>
+<a name="l-457"></a>    <span class="p">.</span><span class="n">test_mode</span>          <span class="p">(</span><span class="n">test_mode</span>       <span class="p">),</span>
+<a name="l-458"></a>    <span class="p">.</span><span class="n">test_rst_n</span>         <span class="p">(</span><span class="n">test_rst_n</span>      <span class="p">),</span>
+<a name="l-459"></a>    <span class="p">.</span><span class="n">reset_n_in</span>         <span class="p">(</span><span class="n">dm_rst_n_in</span>     <span class="p">),</span>
+<a name="l-460"></a>    <span class="p">.</span><span class="n">reset_n_out</span>        <span class="p">(</span><span class="n">dm_rst_n_o</span>      <span class="p">),</span>
+<a name="l-461"></a>    <span class="p">.</span><span class="n">reset_n_status</span>     <span class="p">(</span><span class="n">dm_rst_n_status</span> <span class="p">)</span>
+<a name="l-462"></a><span class="p">);</span>
+<a name="l-463"></a>
+<a name="l-464"></a><span class="k">assign</span> <span class="n">dm_rst_n_in</span>  <span class="o">=</span> <span class="o">~</span><span class="n">scu_mode_ff</span><span class="p">.</span><span class="n">dm_rst_bhv</span> <span class="o">|</span> <span class="n">sys_reset_n</span><span class="p">;</span>
+<a name="l-465"></a>
+<a name="l-466"></a><span class="no">`ifdef</span> <span class="n">SCR1_TRGT_SIMULATION</span>
+<a name="l-467"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-468"></a><span class="c1">// Assertions</span>
+<a name="l-469"></a><span class="c1">//--------------------------------------------------------------------</span>
+<a name="l-470"></a>
+<a name="l-471"></a><span class="no">`ifndef</span> <span class="n">VERILATOR</span>
+<a name="l-472"></a><span class="c1">// Preventing some assertions to be raised at 0 sim time or in the first cycle</span>
+<a name="l-473"></a><span class="k">initial</span> <span class="k">begin</span>
+<a name="l-474"></a><span class="p">$</span><span class="n">assertoff</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">scr1_scu</span><span class="p">);</span>
+<a name="l-475"></a><span class="k">repeat</span> <span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">);</span>
+<a name="l-476"></a><span class="p">$</span><span class="n">asserton</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">scr1_scu</span><span class="p">);</span>
+<a name="l-477"></a><span class="k">end</span>
+<a name="l-478"></a><span class="no">`endif</span> <span class="c1">// VERILATOR</span>
+<a name="l-479"></a>
+<a name="l-480"></a><span class="c1">// X checks</span>
+<a name="l-481"></a><span class="n">SCR1_SVA_SCU_RESETS_XCHECK</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-482"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span>
+<a name="l-483"></a>    <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">pwrup_rst_n</span><span class="p">,</span> <span class="n">rst_n</span><span class="p">,</span> <span class="n">cpu_rst_n</span><span class="p">,</span> <span class="n">ndm_rst_n_i</span><span class="p">,</span> <span class="n">hart_rst_n_i</span><span class="p">})</span>
+<a name="l-484"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;SCU resets error: unknown values of input resets&quot;</span><span class="p">);</span>
+<a name="l-485"></a>
+<a name="l-486"></a><span class="c1">// Qualifiers checks</span>
+<a name="l-487"></a><span class="n">SCR1_SVA_SCU_SYS2SOC_QLFY_CHECK</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-488"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n</span><span class="p">)</span>
+<a name="l-489"></a>    <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">sys_rst_n_o</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">fell</span><span class="p">($</span><span class="n">past</span><span class="p">(</span><span class="n">sys_rdc_qlfy_o</span><span class="p">))</span>
+<a name="l-490"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;SCU sys2soc qlfy error: qlfy wasn&#39;t raised prior to reset&quot;</span><span class="p">);</span>
+<a name="l-491"></a>
+<a name="l-492"></a><span class="n">SCR1_SVA_SCU_CORE2SOC_QLFY_CHECK</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-493"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n</span><span class="p">)</span>
+<a name="l-494"></a>    <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">core_rst_n_o</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">fell</span><span class="p">($</span><span class="n">past</span><span class="p">(</span><span class="n">core_rdc_qlfy_o</span><span class="p">))</span>
+<a name="l-495"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;SCU core2soc qlfy error: qlfy wasn&#39;t raised prior to reset&quot;</span><span class="p">);</span>
+<a name="l-496"></a>
+<a name="l-497"></a><span class="n">SCR1_SVA_SCU_CORE2HDU_QLFY_CHECK</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-498"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n</span><span class="p">)</span>
+<a name="l-499"></a>    <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">core_rst_n_o</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">fell</span><span class="p">($</span><span class="n">past</span><span class="p">(</span><span class="n">core2hdu_rdc_qlfy_o</span><span class="p">))</span>
+<a name="l-500"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;SCU core2hdu qlfy error: qlfy wasn&#39;t raised prior to reset&quot;</span><span class="p">);</span>
+<a name="l-501"></a>
+<a name="l-502"></a><span class="n">SCR1_SVA_SCU_CORE2DM_QLFY_CHECK</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-503"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n</span><span class="p">)</span>
+<a name="l-504"></a>    <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">core_rst_n_o</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">fell</span><span class="p">($</span><span class="n">past</span><span class="p">(</span><span class="n">core2dm_rdc_qlfy_o</span><span class="p">))</span>
+<a name="l-505"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;SCU core2dm qlfy error: qlfy wasn&#39;t raised prior to reset&quot;</span><span class="p">);</span>
+<a name="l-506"></a>
+<a name="l-507"></a><span class="n">SCR1_SVA_SCU_HDU2DM_QLFY_CHECK</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-508"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">pwrup_rst_n</span><span class="p">)</span>
+<a name="l-509"></a>    <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">hdu_rst_n_o</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">fell</span><span class="p">($</span><span class="n">past</span><span class="p">(</span><span class="n">hdu2dm_rdc_qlfy_o</span><span class="p">))</span>
+<a name="l-510"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;SCU hdu2dm qlfy error: qlfy wasn&#39;t raised prior to reset&quot;</span><span class="p">);</span>
+<a name="l-511"></a>
+<a name="l-512"></a><span class="no">`endif</span> <span class="c1">// SCR1_TRGT_SIMULATION</span>
+<a name="l-513"></a>
+<a name="l-514"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_scu</span>
+<a name="l-515"></a><span class="no">`endif</span> <span class="c1">// SCR1_DBG_EN</span>
 </pre></div>
 </td></tr></table>
   </body>

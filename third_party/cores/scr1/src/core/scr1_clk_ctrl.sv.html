@@ -56,7 +56,11 @@
 <a href="#l-48">48</a>
 <a href="#l-49">49</a>
 <a href="#l-50">50</a>
-<a href="#l-51">51</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2018. See LICENSE for details</span>
+<a href="#l-51">51</a>
+<a href="#l-52">52</a>
+<a href="#l-53">53</a>
+<a href="#l-54">54</a>
+<a href="#l-55">55</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
 <a name="l-2"></a><span class="c1">/// @file       &lt;scr1_clk_ctrl.sv&gt;</span>
 <a name="l-3"></a><span class="c1">/// @brief      SCR1 clock control</span>
 <a name="l-4"></a><span class="c1">///</span>
@@ -65,48 +69,52 @@
 <a name="l-7"></a>
 <a name="l-8"></a><span class="no">`ifdef</span> <span class="n">SCR1_CLKCTRL_EN</span>
 <a name="l-9"></a><span class="k">module</span> <span class="n">scr1_clk_ctrl</span> <span class="p">(</span>
-<a name="l-10"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">clk</span><span class="p">,</span>
-<a name="l-11"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">rst_n</span><span class="p">,</span>
-<a name="l-12"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">test_mode</span><span class="p">,</span>
-<a name="l-13"></a>
-<a name="l-14"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">sleep_pipe</span><span class="p">,</span>
-<a name="l-15"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">wake_pipe</span><span class="p">,</span>
-<a name="l-16"></a>
-<a name="l-17"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkout</span><span class="p">,</span>         <span class="c1">// always on</span>
-<a name="l-18"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkout_pipe</span><span class="p">,</span>
-<a name="l-19"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clk_pipe_en</span><span class="p">,</span>
-<a name="l-20"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkout_dbgc</span>     <span class="c1">// always on (for now)</span>
-<a name="l-21"></a><span class="p">);</span>
-<a name="l-22"></a>
-<a name="l-23"></a><span class="k">assign</span> <span class="n">clkout</span>       <span class="o">=</span> <span class="n">clk</span><span class="p">;</span>
-<a name="l-24"></a><span class="k">assign</span> <span class="n">clkout_dbgc</span>  <span class="o">=</span> <span class="n">clk</span><span class="p">;</span>
+<a name="l-10"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">clk</span><span class="p">,</span>                            <span class="c1">// Clock control module clock</span>
+<a name="l-11"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">rst_n</span><span class="p">,</span>                          <span class="c1">// Clock control module reset</span>
+<a name="l-12"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">test_mode</span><span class="p">,</span>                      <span class="c1">// DFT Test Mode</span>
+<a name="l-13"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">test_rst_n</span><span class="p">,</span>                     <span class="c1">// DFT Test reset</span>
+<a name="l-14"></a>
+<a name="l-15"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">pipe2clkctl_sleep_req_i</span><span class="p">,</span>        <span class="c1">// CLK disable request from pipe</span>
+<a name="l-16"></a>    <span class="k">input</span>   <span class="kt">logic</span>   <span class="n">pipe2clkctl_wake_req_i</span><span class="p">,</span>         <span class="c1">// CLK enable request from pipe</span>
+<a name="l-17"></a>
+<a name="l-18"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkctl2pipe_clk_alw_on_o</span><span class="p">,</span>       <span class="c1">// Not gated pipe CLK</span>
+<a name="l-19"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkctl2pipe_clk_o</span><span class="p">,</span>              <span class="c1">// Gated pipe</span>
+<a name="l-20"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkctl2pipe_clk_en_o</span><span class="p">,</span>           <span class="c1">// CLK enabled flag</span>
+<a name="l-21"></a>    <span class="k">output</span>  <span class="kt">logic</span>   <span class="n">clkctl2pipe_clk_dbgc_o</span>          <span class="c1">// CLK for pipe debug subsystem</span>
+<a name="l-22"></a><span class="p">);</span>
+<a name="l-23"></a>
+<a name="l-24"></a><span class="kt">logic</span> <span class="n">ctrl_rst_n</span><span class="p">;</span>
 <a name="l-25"></a>
-<a name="l-26"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-27"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-28"></a>        <span class="n">clk_pipe_en</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-29"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-30"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">clk_pipe_en</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-31"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">sleep_pipe</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">wake_pipe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-32"></a>                <span class="n">clk_pipe_en</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-33"></a>            <span class="k">end</span>
-<a name="l-34"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="c1">// ~clk_pipe_en</span>
-<a name="l-35"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">wake_pipe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-36"></a>                <span class="n">clk_pipe_en</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-26"></a><span class="k">assign</span> <span class="n">clkctl2pipe_clk_alw_on_o</span> <span class="o">=</span> <span class="n">clk</span><span class="p">;</span>
+<a name="l-27"></a><span class="k">assign</span> <span class="n">clkctl2pipe_clk_dbgc_o</span>   <span class="o">=</span> <span class="n">clk</span><span class="p">;</span>
+<a name="l-28"></a><span class="k">assign</span> <span class="n">ctrl_rst_n</span>   <span class="o">=</span> <span class="p">(</span><span class="n">test_mode</span><span class="p">)</span> <span class="o">?</span> <span class="n">test_rst_n</span> <span class="o">:</span> <span class="n">rst_n</span><span class="p">;</span>
+<a name="l-29"></a>
+<a name="l-30"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">ctrl_rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-31"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">ctrl_rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-32"></a>        <span class="n">clkctl2pipe_clk_en_o</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-33"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-34"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">clkctl2pipe_clk_en_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-35"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">pipe2clkctl_sleep_req_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2clkctl_wake_req_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-36"></a>                <span class="n">clkctl2pipe_clk_en_o</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
 <a name="l-37"></a>            <span class="k">end</span>
-<a name="l-38"></a>        <span class="k">end</span> <span class="c1">// pipeline</span>
-<a name="l-39"></a>    <span class="k">end</span>
-<a name="l-40"></a><span class="k">end</span>
-<a name="l-41"></a>
-<a name="l-42"></a><span class="n">scr1_cg</span> <span class="n">i_scr1_cg_pipe</span> <span class="p">(</span>
-<a name="l-43"></a>    <span class="p">.</span><span class="n">clk</span>        <span class="p">(</span><span class="n">clk</span>        <span class="p">),</span>
-<a name="l-44"></a>    <span class="p">.</span><span class="n">clk_en</span>     <span class="p">(</span><span class="n">clk_pipe_en</span><span class="p">),</span>
-<a name="l-45"></a>    <span class="p">.</span><span class="n">test_mode</span>  <span class="p">(</span><span class="n">test_mode</span>  <span class="p">),</span>
-<a name="l-46"></a>    <span class="p">.</span><span class="n">clk_out</span>    <span class="p">(</span><span class="n">clkout_pipe</span><span class="p">)</span>
-<a name="l-47"></a><span class="p">);</span>
-<a name="l-48"></a>
-<a name="l-49"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_clk_ctrl</span>
-<a name="l-50"></a>
-<a name="l-51"></a><span class="no">`endif</span> <span class="c1">// SCR1_CLKCTRL_EN</span>
+<a name="l-38"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="c1">// ~clkctl2pipe_clk_en_o</span>
+<a name="l-39"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">pipe2clkctl_wake_req_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-40"></a>                <span class="n">clkctl2pipe_clk_en_o</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-41"></a>            <span class="k">end</span>
+<a name="l-42"></a>        <span class="k">end</span> <span class="c1">// pipeline</span>
+<a name="l-43"></a>    <span class="k">end</span>
+<a name="l-44"></a><span class="k">end</span>
+<a name="l-45"></a>
+<a name="l-46"></a><span class="n">scr1_cg</span> <span class="n">i_scr1_cg_pipe</span> <span class="p">(</span>
+<a name="l-47"></a>    <span class="p">.</span><span class="n">clk</span>        <span class="p">(</span><span class="n">clk</span>                 <span class="p">),</span>
+<a name="l-48"></a>    <span class="p">.</span><span class="n">clk_en</span>     <span class="p">(</span><span class="n">clkctl2pipe_clk_en_o</span><span class="p">),</span>
+<a name="l-49"></a>    <span class="p">.</span><span class="n">test_mode</span>  <span class="p">(</span><span class="n">test_mode</span>           <span class="p">),</span>
+<a name="l-50"></a>    <span class="p">.</span><span class="n">clk_out</span>    <span class="p">(</span><span class="n">clkctl2pipe_clk_o</span>   <span class="p">)</span>
+<a name="l-51"></a><span class="p">);</span>
+<a name="l-52"></a>
+<a name="l-53"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_clk_ctrl</span>
+<a name="l-54"></a>
+<a name="l-55"></a><span class="no">`endif</span> <span class="c1">// SCR1_CLKCTRL_EN</span>
 </pre></div>
 </td></tr></table>
   </body>
