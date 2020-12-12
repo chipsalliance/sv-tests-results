@@ -316,7 +316,26 @@
 <a href="#l-308">308</a>
 <a href="#l-309">309</a>
 <a href="#l-310">310</a>
-<a href="#l-311">311</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-311">311</a>
+<a href="#l-312">312</a>
+<a href="#l-313">313</a>
+<a href="#l-314">314</a>
+<a href="#l-315">315</a>
+<a href="#l-316">316</a>
+<a href="#l-317">317</a>
+<a href="#l-318">318</a>
+<a href="#l-319">319</a>
+<a href="#l-320">320</a>
+<a href="#l-321">321</a>
+<a href="#l-322">322</a>
+<a href="#l-323">323</a>
+<a href="#l-324">324</a>
+<a href="#l-325">325</a>
+<a href="#l-326">326</a>
+<a href="#l-327">327</a>
+<a href="#l-328">328</a>
+<a href="#l-329">329</a>
+<a href="#l-330">330</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -328,305 +347,324 @@
 <a name="l-10"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">rst_ni</span><span class="p">,</span>
 <a name="l-11"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">us_tick_i</span><span class="p">,</span>
 <a name="l-12"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">usb_sense_i</span><span class="p">,</span>
-<a name="l-13"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">rx_se0_det_i</span><span class="p">,</span>
-<a name="l-14"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">rx_jjj_det_i</span><span class="p">,</span>
-<a name="l-15"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">sof_valid_i</span><span class="p">,</span>
-<a name="l-16"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_disconnect_o</span><span class="p">,</span>  <span class="c1">// level</span>
-<a name="l-17"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_connect_o</span><span class="p">,</span>     <span class="c1">// level</span>
-<a name="l-18"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_reset_o</span><span class="p">,</span>       <span class="c1">// level</span>
-<a name="l-19"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_active_o</span><span class="p">,</span>      <span class="c1">// level</span>
-<a name="l-20"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_suspend_o</span><span class="p">,</span>     <span class="c1">// level</span>
-<a name="l-21"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_resume_o</span><span class="p">,</span>      <span class="c1">// pulse</span>
-<a name="l-22"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">host_lost_o</span><span class="p">,</span>        <span class="c1">// level</span>
-<a name="l-23"></a>
-<a name="l-24"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">link_state_o</span>
-<a name="l-25"></a><span class="p">);</span>
-<a name="l-26"></a>
-<a name="l-27"></a>  <span class="k">localparam</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">SUSPEND_TIMEOUT</span> <span class="o">=</span> <span class="mi">12&#39;d3000</span><span class="p">;</span> <span class="c1">// 3ms by spec</span>
-<a name="l-28"></a>  <span class="k">localparam</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">RESET_TIMEOUT</span>   <span class="o">=</span> <span class="mi">3&#39;d3</span><span class="p">;</span>     <span class="c1">// 3us. Can be 2.5us - 10ms by spec</span>
-<a name="l-29"></a>
-<a name="l-30"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-31"></a>    <span class="c1">// Unpowered state</span>
-<a name="l-32"></a>    <span class="n">LinkDisconnect</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<a name="l-33"></a>    <span class="c1">// Powered states</span>
-<a name="l-34"></a>    <span class="n">LinkPowered</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<a name="l-35"></a>    <span class="n">LinkPoweredSuspend</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<a name="l-36"></a>    <span class="c1">// Active states</span>
-<a name="l-37"></a>    <span class="n">LinkActive</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-<a name="l-38"></a>    <span class="n">LinkActiveNoSOF</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-<a name="l-39"></a>    <span class="n">LinkSuspend</span> <span class="o">=</span> <span class="mi">4</span>
-<a name="l-40"></a>  <span class="p">}</span> <span class="n">link_state_e</span><span class="p">;</span>
-<a name="l-41"></a>
-<a name="l-42"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-43"></a>    <span class="n">NoRst</span><span class="p">,</span>
-<a name="l-44"></a>    <span class="n">RstCnt</span><span class="p">,</span>
-<a name="l-45"></a>    <span class="n">RstPend</span>
-<a name="l-46"></a>  <span class="p">}</span> <span class="n">link_rst_state_e</span><span class="p">;</span>
-<a name="l-47"></a>
-<a name="l-48"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-49"></a>    <span class="n">Active</span><span class="p">,</span>
-<a name="l-50"></a>    <span class="n">InactCnt</span><span class="p">,</span>
-<a name="l-51"></a>    <span class="n">InactPend</span>
-<a name="l-52"></a>  <span class="p">}</span> <span class="n">link_inac_state_e</span><span class="p">;</span>
-<a name="l-53"></a>
-<a name="l-54"></a>  <span class="n">link_state_e</span>  <span class="n">link_state_d</span><span class="p">,</span> <span class="n">link_state_q</span><span class="p">;</span>
-<a name="l-55"></a>  <span class="kt">logic</span>         <span class="n">see_pwr_sense</span><span class="p">;</span>
-<a name="l-56"></a>
-<a name="l-57"></a>  <span class="c1">// Reset FSM</span>
-<a name="l-58"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">link_rst_timer_d</span><span class="p">,</span> <span class="n">link_rst_timer_q</span><span class="p">;</span>
-<a name="l-59"></a>  <span class="n">link_rst_state_e</span> <span class="n">link_rst_state_d</span><span class="p">,</span> <span class="n">link_rst_state_q</span><span class="p">;</span>
-<a name="l-60"></a>  <span class="kt">logic</span>            <span class="n">link_reset</span><span class="p">;</span> <span class="c1">// reset detected (level)</span>
-<a name="l-61"></a>
-<a name="l-62"></a>  <span class="c1">// Link inactivity detection</span>
-<a name="l-63"></a>  <span class="kt">logic</span>              <span class="n">monitor_inac</span><span class="p">;</span> <span class="c1">// monitor link inactivity</span>
-<a name="l-64"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>       <span class="n">link_inac_timer_d</span><span class="p">,</span> <span class="n">link_inac_timer_q</span><span class="p">;</span>
-<a name="l-65"></a>  <span class="n">link_inac_state_e</span>  <span class="n">link_inac_state_d</span><span class="p">,</span> <span class="n">link_inac_state_q</span><span class="p">;</span>
-<a name="l-66"></a>
-<a name="l-67"></a>
-<a name="l-68"></a>  <span class="c1">// Events that are not triggered by a timeout</span>
-<a name="l-69"></a>  <span class="kt">logic</span> <span class="n">ev_bus_active</span><span class="p">;</span>
-<a name="l-70"></a>
-<a name="l-71"></a>  <span class="c1">// Events that are triggered by timeout</span>
-<a name="l-72"></a>  <span class="kt">logic</span> <span class="n">ev_bus_inactive</span><span class="p">,</span> <span class="n">ev_reset</span><span class="p">;</span>
-<a name="l-73"></a>
-<a name="l-74"></a>  <span class="k">assign</span> <span class="n">link_disconnect_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkDisconnect</span><span class="p">);</span>
-<a name="l-75"></a>  <span class="k">assign</span> <span class="n">link_connect_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">!=</span> <span class="n">LinkDisconnect</span><span class="p">);</span>
-<a name="l-76"></a>  <span class="k">assign</span> <span class="n">link_suspend_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkSuspend</span> <span class="o">||</span>
-<a name="l-77"></a>    <span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkPoweredSuspend</span><span class="p">);</span>
-<a name="l-78"></a>  <span class="k">assign</span> <span class="n">link_active_o</span>     <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkActive</span><span class="p">)</span> <span class="o">||</span>
-<a name="l-79"></a>    <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkActiveNoSOF</span><span class="p">);</span>
-<a name="l-80"></a>  <span class="c1">// Link state is stable, so we can output it to the register</span>
-<a name="l-81"></a>  <span class="k">assign</span> <span class="n">link_state_o</span>      <span class="o">=</span>  <span class="n">link_state_q</span><span class="p">;</span>
-<a name="l-82"></a>
-<a name="l-83"></a>  <span class="n">prim_filter</span> <span class="p">#(.</span><span class="n">Cycles</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span> <span class="n">filter_pwr_sense</span> <span class="p">(</span>
-<a name="l-84"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_48mhz_i</span><span class="p">),</span>
-<a name="l-85"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-86"></a>    <span class="p">.</span><span class="n">enable_i</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span>
-<a name="l-87"></a>    <span class="p">.</span><span class="n">filter_i</span> <span class="p">(</span><span class="n">usb_sense_i</span><span class="p">),</span>
-<a name="l-88"></a>    <span class="p">.</span><span class="n">filter_o</span> <span class="p">(</span><span class="n">see_pwr_sense</span><span class="p">)</span>
-<a name="l-89"></a>  <span class="p">);</span>
+<a name="l-13"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">usb_dp_i</span><span class="p">,</span>
+<a name="l-14"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">usb_dn_i</span><span class="p">,</span>
+<a name="l-15"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">usb_oe_i</span><span class="p">,</span>
+<a name="l-16"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">rx_jjj_det_i</span><span class="p">,</span>
+<a name="l-17"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">sof_valid_i</span><span class="p">,</span>
+<a name="l-18"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_disconnect_o</span><span class="p">,</span>  <span class="c1">// level</span>
+<a name="l-19"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_connect_o</span><span class="p">,</span>     <span class="c1">// level</span>
+<a name="l-20"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_reset_o</span><span class="p">,</span>       <span class="c1">// level</span>
+<a name="l-21"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_active_o</span><span class="p">,</span>      <span class="c1">// level</span>
+<a name="l-22"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_suspend_o</span><span class="p">,</span>     <span class="c1">// level</span>
+<a name="l-23"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">link_resume_o</span><span class="p">,</span>      <span class="c1">// pulse</span>
+<a name="l-24"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">host_lost_o</span><span class="p">,</span>        <span class="c1">// level</span>
+<a name="l-25"></a>
+<a name="l-26"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">link_state_o</span>
+<a name="l-27"></a><span class="p">);</span>
+<a name="l-28"></a>
+<a name="l-29"></a>  <span class="k">localparam</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">SUSPEND_TIMEOUT</span> <span class="o">=</span> <span class="mi">12&#39;d3000</span><span class="p">;</span> <span class="c1">// 3ms by spec</span>
+<a name="l-30"></a>  <span class="k">localparam</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">RESET_TIMEOUT</span>   <span class="o">=</span> <span class="mi">3&#39;d3</span><span class="p">;</span>     <span class="c1">// 3us. Can be 2.5us - 10ms by spec</span>
+<a name="l-31"></a>
+<a name="l-32"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a name="l-33"></a>    <span class="c1">// Unpowered state</span>
+<a name="l-34"></a>    <span class="n">LinkDisconnect</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<a name="l-35"></a>    <span class="c1">// Powered states</span>
+<a name="l-36"></a>    <span class="n">LinkPowered</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<a name="l-37"></a>    <span class="n">LinkPoweredSuspend</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<a name="l-38"></a>    <span class="c1">// Active states</span>
+<a name="l-39"></a>    <span class="n">LinkActive</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+<a name="l-40"></a>    <span class="n">LinkActiveNoSOF</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+<a name="l-41"></a>    <span class="n">LinkSuspend</span> <span class="o">=</span> <span class="mi">4</span>
+<a name="l-42"></a>  <span class="p">}</span> <span class="n">link_state_e</span><span class="p">;</span>
+<a name="l-43"></a>
+<a name="l-44"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a name="l-45"></a>    <span class="n">NoRst</span><span class="p">,</span>
+<a name="l-46"></a>    <span class="n">RstCnt</span><span class="p">,</span>
+<a name="l-47"></a>    <span class="n">RstPend</span>
+<a name="l-48"></a>  <span class="p">}</span> <span class="n">link_rst_state_e</span><span class="p">;</span>
+<a name="l-49"></a>
+<a name="l-50"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a name="l-51"></a>    <span class="n">Active</span><span class="p">,</span>
+<a name="l-52"></a>    <span class="n">InactCnt</span><span class="p">,</span>
+<a name="l-53"></a>    <span class="n">InactPend</span>
+<a name="l-54"></a>  <span class="p">}</span> <span class="n">link_inac_state_e</span><span class="p">;</span>
+<a name="l-55"></a>
+<a name="l-56"></a>  <span class="n">link_state_e</span>  <span class="n">link_state_d</span><span class="p">,</span> <span class="n">link_state_q</span><span class="p">;</span>
+<a name="l-57"></a>  <span class="kt">logic</span>         <span class="n">see_pwr_sense</span><span class="p">;</span>
+<a name="l-58"></a>
+<a name="l-59"></a>  <span class="c1">// Reset FSM</span>
+<a name="l-60"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">link_rst_timer_d</span><span class="p">,</span> <span class="n">link_rst_timer_q</span><span class="p">;</span>
+<a name="l-61"></a>  <span class="n">link_rst_state_e</span> <span class="n">link_rst_state_d</span><span class="p">,</span> <span class="n">link_rst_state_q</span><span class="p">;</span>
+<a name="l-62"></a>  <span class="kt">logic</span>            <span class="n">link_reset</span><span class="p">;</span> <span class="c1">// reset detected (level)</span>
+<a name="l-63"></a>
+<a name="l-64"></a>  <span class="c1">// Link inactivity detection</span>
+<a name="l-65"></a>  <span class="kt">logic</span>              <span class="n">monitor_inac</span><span class="p">;</span> <span class="c1">// monitor link inactivity</span>
+<a name="l-66"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>       <span class="n">link_inac_timer_d</span><span class="p">,</span> <span class="n">link_inac_timer_q</span><span class="p">;</span>
+<a name="l-67"></a>  <span class="n">link_inac_state_e</span>  <span class="n">link_inac_state_d</span><span class="p">,</span> <span class="n">link_inac_state_q</span><span class="p">;</span>
+<a name="l-68"></a>
+<a name="l-69"></a>
+<a name="l-70"></a>  <span class="c1">// Events that are not triggered by a timeout</span>
+<a name="l-71"></a>  <span class="kt">logic</span> <span class="n">ev_bus_active</span><span class="p">;</span>
+<a name="l-72"></a>
+<a name="l-73"></a>  <span class="c1">// Events that are triggered by timeout</span>
+<a name="l-74"></a>  <span class="kt">logic</span> <span class="n">ev_bus_inactive</span><span class="p">,</span> <span class="n">ev_reset</span><span class="p">;</span>
+<a name="l-75"></a>
+<a name="l-76"></a>  <span class="k">assign</span> <span class="n">link_disconnect_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkDisconnect</span><span class="p">);</span>
+<a name="l-77"></a>  <span class="k">assign</span> <span class="n">link_connect_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">!=</span> <span class="n">LinkDisconnect</span><span class="p">);</span>
+<a name="l-78"></a>  <span class="k">assign</span> <span class="n">link_suspend_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkSuspend</span> <span class="o">||</span>
+<a name="l-79"></a>    <span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkPoweredSuspend</span><span class="p">);</span>
+<a name="l-80"></a>  <span class="k">assign</span> <span class="n">link_active_o</span>     <span class="o">=</span> <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkActive</span><span class="p">)</span> <span class="o">||</span>
+<a name="l-81"></a>    <span class="p">(</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkActiveNoSOF</span><span class="p">);</span>
+<a name="l-82"></a>  <span class="c1">// Link state is stable, so we can output it to the register</span>
+<a name="l-83"></a>  <span class="k">assign</span> <span class="n">link_state_o</span>      <span class="o">=</span>  <span class="n">link_state_q</span><span class="p">;</span>
+<a name="l-84"></a>
+<a name="l-85"></a>  <span class="c1">// If the PHY reflects the line state on rx pins when the device is driving</span>
+<a name="l-86"></a>  <span class="c1">// then the usb_oe_i check isn&#39;t needed here. But it seems best to do the check</span>
+<a name="l-87"></a>  <span class="c1">// to be robust in the face of different PHY designs.</span>
+<a name="l-88"></a>  <span class="kt">logic</span> <span class="n">see_se0</span><span class="p">,</span> <span class="n">line_se0_raw</span><span class="p">;</span>
+<a name="l-89"></a>  <span class="k">assign</span> <span class="n">line_se0_raw</span> <span class="o">=</span> <span class="p">(</span><span class="n">usb_dn_i</span> <span class="o">==</span> <span class="mb">1&#39;b0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">usb_dp_i</span> <span class="o">==</span> <span class="mb">1&#39;b0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">usb_oe_i</span> <span class="o">==</span> <span class="mb">1&#39;b0</span><span class="p">);</span>
 <a name="l-90"></a>
-<a name="l-91"></a>  <span class="c1">// Simple events</span>
-<a name="l-92"></a>  <span class="k">assign</span> <span class="n">ev_bus_active</span> <span class="o">=</span> <span class="o">!</span><span class="n">rx_jjj_det_i</span><span class="p">;</span>
-<a name="l-93"></a>
-<a name="l-94"></a>  <span class="k">assign</span> <span class="n">monitor_inac</span> <span class="o">=</span> <span class="n">see_pwr_sense</span> <span class="o">?</span> <span class="p">((</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkPowered</span><span class="p">)</span> <span class="o">|</span> <span class="n">link_active_o</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-95"></a>                        <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-96"></a>
-<a name="l-97"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-98"></a>    <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">link_state_q</span><span class="p">;</span>
-<a name="l-99"></a>    <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-100"></a>
-<a name="l-101"></a>    <span class="c1">// If VBUS ever goes away the link has disconnected</span>
-<a name="l-102"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">see_pwr_sense</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-103"></a>      <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkDisconnect</span><span class="p">;</span>
-<a name="l-104"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-105"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">link_state_q</span><span class="p">)</span>
-<a name="l-106"></a>        <span class="c1">// No USB supply detected (USB spec: Attached)</span>
-<a name="l-107"></a>        <span class="nl">LinkDisconnect:</span> <span class="k">begin</span>
-<a name="l-108"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">see_pwr_sense</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-109"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkPowered</span><span class="p">;</span>
-<a name="l-110"></a>          <span class="k">end</span>
-<a name="l-111"></a>        <span class="k">end</span>
+<a name="l-91"></a>  <span class="c1">// four ticks is a bit time</span>
+<a name="l-92"></a>  <span class="c1">// Could completely filter out 2-cycle EOP SE0 here but</span>
+<a name="l-93"></a>  <span class="c1">// does not seem needed</span>
+<a name="l-94"></a>  <span class="n">prim_filter</span> <span class="p">#(.</span><span class="n">Cycles</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span> <span class="n">filter_se0</span> <span class="p">(</span>
+<a name="l-95"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_48mhz_i</span><span class="p">),</span>
+<a name="l-96"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-97"></a>    <span class="p">.</span><span class="n">enable_i</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span>
+<a name="l-98"></a>    <span class="p">.</span><span class="n">filter_i</span> <span class="p">(</span><span class="n">line_se0_raw</span><span class="p">),</span>
+<a name="l-99"></a>    <span class="p">.</span><span class="n">filter_o</span> <span class="p">(</span><span class="n">see_se0</span><span class="p">)</span>
+<a name="l-100"></a>  <span class="p">);</span>
+<a name="l-101"></a>
+<a name="l-102"></a>  <span class="n">prim_filter</span> <span class="p">#(.</span><span class="n">Cycles</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span> <span class="n">filter_pwr_sense</span> <span class="p">(</span>
+<a name="l-103"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_48mhz_i</span><span class="p">),</span>
+<a name="l-104"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-105"></a>    <span class="p">.</span><span class="n">enable_i</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span>
+<a name="l-106"></a>    <span class="p">.</span><span class="n">filter_i</span> <span class="p">(</span><span class="n">usb_sense_i</span><span class="p">),</span>
+<a name="l-107"></a>    <span class="p">.</span><span class="n">filter_o</span> <span class="p">(</span><span class="n">see_pwr_sense</span><span class="p">)</span>
+<a name="l-108"></a>  <span class="p">);</span>
+<a name="l-109"></a>
+<a name="l-110"></a>  <span class="c1">// Simple events</span>
+<a name="l-111"></a>  <span class="k">assign</span> <span class="n">ev_bus_active</span> <span class="o">=</span> <span class="o">!</span><span class="n">rx_jjj_det_i</span><span class="p">;</span>
 <a name="l-112"></a>
-<a name="l-113"></a>        <span class="nl">LinkPowered:</span> <span class="k">begin</span>
-<a name="l-114"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-115"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
-<a name="l-116"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_inactive</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-117"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkPoweredSuspend</span><span class="p">;</span>
-<a name="l-118"></a>          <span class="k">end</span>
-<a name="l-119"></a>        <span class="k">end</span>
-<a name="l-120"></a>
-<a name="l-121"></a>        <span class="nl">LinkPoweredSuspend:</span> <span class="k">begin</span>
-<a name="l-122"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-123"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
-<a name="l-124"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-125"></a>            <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-126"></a>            <span class="n">link_state_d</span>  <span class="o">=</span> <span class="n">LinkPowered</span><span class="p">;</span>
-<a name="l-127"></a>          <span class="k">end</span>
-<a name="l-128"></a>        <span class="k">end</span>
-<a name="l-129"></a>
-<a name="l-130"></a>        <span class="c1">// Active but not yet seen a frame</span>
-<a name="l-131"></a>        <span class="c1">// One reason for getting stuck here is the host thinks it is a LS link</span>
-<a name="l-132"></a>        <span class="c1">// which could happen if the flipped bit does not match the actual pins</span>
-<a name="l-133"></a>        <span class="c1">// Annother is the SI is bad so good data is not recovered from the link</span>
-<a name="l-134"></a>        <span class="nl">LinkActiveNoSOF:</span> <span class="k">begin</span>
-<a name="l-135"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_inactive</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-136"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkSuspend</span><span class="p">;</span>
-<a name="l-137"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sof_valid_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-138"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActive</span><span class="p">;</span>
-<a name="l-139"></a>          <span class="k">end</span>
-<a name="l-140"></a>        <span class="k">end</span>
-<a name="l-141"></a>
-<a name="l-142"></a>        <span class="c1">// Active (USB spec: Default / Address / Configured)</span>
-<a name="l-143"></a>        <span class="nl">LinkActive:</span> <span class="k">begin</span>
-<a name="l-144"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_inactive</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-145"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkSuspend</span><span class="p">;</span>
-<a name="l-146"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-147"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
-<a name="l-148"></a>          <span class="k">end</span>
-<a name="l-149"></a>        <span class="k">end</span>
-<a name="l-150"></a>
-<a name="l-151"></a>        <span class="nl">LinkSuspend:</span> <span class="k">begin</span>
-<a name="l-152"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-153"></a>            <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-154"></a>            <span class="n">link_state_d</span>  <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
-<a name="l-155"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-156"></a>            <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-157"></a>            <span class="n">link_state_d</span>  <span class="o">=</span> <span class="n">LinkActive</span><span class="p">;</span>
+<a name="l-113"></a>  <span class="k">assign</span> <span class="n">monitor_inac</span> <span class="o">=</span> <span class="n">see_pwr_sense</span> <span class="o">?</span> <span class="p">((</span><span class="n">link_state_q</span> <span class="o">==</span> <span class="n">LinkPowered</span><span class="p">)</span> <span class="o">|</span> <span class="n">link_active_o</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-114"></a>                        <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-115"></a>
+<a name="l-116"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-117"></a>    <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">link_state_q</span><span class="p">;</span>
+<a name="l-118"></a>    <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-119"></a>
+<a name="l-120"></a>    <span class="c1">// If VBUS ever goes away the link has disconnected</span>
+<a name="l-121"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">see_pwr_sense</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-122"></a>      <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkDisconnect</span><span class="p">;</span>
+<a name="l-123"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-124"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">link_state_q</span><span class="p">)</span>
+<a name="l-125"></a>        <span class="c1">// No USB supply detected (USB spec: Attached)</span>
+<a name="l-126"></a>        <span class="nl">LinkDisconnect:</span> <span class="k">begin</span>
+<a name="l-127"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">see_pwr_sense</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-128"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkPowered</span><span class="p">;</span>
+<a name="l-129"></a>          <span class="k">end</span>
+<a name="l-130"></a>        <span class="k">end</span>
+<a name="l-131"></a>
+<a name="l-132"></a>        <span class="nl">LinkPowered:</span> <span class="k">begin</span>
+<a name="l-133"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-134"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
+<a name="l-135"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_inactive</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-136"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkPoweredSuspend</span><span class="p">;</span>
+<a name="l-137"></a>          <span class="k">end</span>
+<a name="l-138"></a>        <span class="k">end</span>
+<a name="l-139"></a>
+<a name="l-140"></a>        <span class="nl">LinkPoweredSuspend:</span> <span class="k">begin</span>
+<a name="l-141"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-142"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
+<a name="l-143"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-144"></a>            <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-145"></a>            <span class="n">link_state_d</span>  <span class="o">=</span> <span class="n">LinkPowered</span><span class="p">;</span>
+<a name="l-146"></a>          <span class="k">end</span>
+<a name="l-147"></a>        <span class="k">end</span>
+<a name="l-148"></a>
+<a name="l-149"></a>        <span class="c1">// Active but not yet seen a frame</span>
+<a name="l-150"></a>        <span class="c1">// One reason for getting stuck here is the host thinks it is a LS link</span>
+<a name="l-151"></a>        <span class="c1">// which could happen if the flipped bit does not match the actual pins</span>
+<a name="l-152"></a>        <span class="c1">// Annother is the SI is bad so good data is not recovered from the link</span>
+<a name="l-153"></a>        <span class="nl">LinkActiveNoSOF:</span> <span class="k">begin</span>
+<a name="l-154"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_inactive</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-155"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkSuspend</span><span class="p">;</span>
+<a name="l-156"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sof_valid_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-157"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActive</span><span class="p">;</span>
 <a name="l-158"></a>          <span class="k">end</span>
 <a name="l-159"></a>        <span class="k">end</span>
 <a name="l-160"></a>
-<a name="l-161"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-162"></a>          <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkDisconnect</span><span class="p">;</span>
-<a name="l-163"></a>        <span class="k">end</span>
-<a name="l-164"></a>      <span class="k">endcase</span> <span class="c1">// case (link_state_q)</span>
-<a name="l-165"></a>    <span class="k">end</span>
-<a name="l-166"></a>  <span class="k">end</span>
-<a name="l-167"></a>
-<a name="l-168"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-169"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-170"></a>      <span class="n">link_state_q</span> <span class="o">&lt;=</span> <span class="n">LinkDisconnect</span><span class="p">;</span>
-<a name="l-171"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-172"></a>      <span class="n">link_state_q</span> <span class="o">&lt;=</span> <span class="n">link_state_d</span><span class="p">;</span>
-<a name="l-173"></a>    <span class="k">end</span>
-<a name="l-174"></a>  <span class="k">end</span>
-<a name="l-175"></a>
-<a name="l-176"></a>  <span class="c1">/////////////////////</span>
-<a name="l-177"></a>  <span class="c1">// Reset detection //</span>
-<a name="l-178"></a>  <span class="c1">/////////////////////</span>
-<a name="l-179"></a>  <span class="c1">//  Here we clean up the SE0 signal and generate a signle ev_reset at</span>
-<a name="l-180"></a>  <span class="c1">//  the end of a valid reset</span>
-<a name="l-181"></a>
-<a name="l-182"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_rst_fsm</span>
-<a name="l-183"></a>    <span class="n">link_rst_state_d</span>  <span class="o">=</span> <span class="n">link_rst_state_q</span><span class="p">;</span>
-<a name="l-184"></a>    <span class="n">link_rst_timer_d</span>  <span class="o">=</span> <span class="n">link_rst_timer_q</span><span class="p">;</span>
-<a name="l-185"></a>    <span class="n">ev_reset</span>          <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-186"></a>    <span class="n">link_reset</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-187"></a>
-<a name="l-188"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">link_rst_state_q</span><span class="p">)</span>
-<a name="l-189"></a>      <span class="c1">// No reset signal detected</span>
-<a name="l-190"></a>      <span class="nl">NoRst:</span> <span class="k">begin</span>
-<a name="l-191"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">rx_se0_det_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-192"></a>          <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">RstCnt</span><span class="p">;</span>
-<a name="l-193"></a>          <span class="n">link_rst_timer_d</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-194"></a>        <span class="k">end</span>
-<a name="l-195"></a>      <span class="k">end</span>
-<a name="l-196"></a>
-<a name="l-197"></a>      <span class="c1">// Reset signal detected -&gt; counting</span>
-<a name="l-198"></a>      <span class="nl">RstCnt:</span> <span class="k">begin</span>
-<a name="l-199"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rx_se0_det_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-200"></a>          <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">NoRst</span><span class="p">;</span>
-<a name="l-201"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-202"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">us_tick_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-203"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">link_rst_timer_q</span> <span class="o">==</span> <span class="n">RESET_TIMEOUT</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-204"></a>              <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">RstPend</span><span class="p">;</span>
-<a name="l-205"></a>            <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-206"></a>              <span class="n">link_rst_timer_d</span> <span class="o">=</span> <span class="n">link_rst_timer_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-207"></a>            <span class="k">end</span>
-<a name="l-208"></a>          <span class="k">end</span>
-<a name="l-209"></a>        <span class="k">end</span>
-<a name="l-210"></a>      <span class="k">end</span>
-<a name="l-211"></a>
-<a name="l-212"></a>      <span class="c1">// Detected reset -&gt; wait for falling edge</span>
-<a name="l-213"></a>      <span class="nl">RstPend:</span> <span class="k">begin</span>
-<a name="l-214"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rx_se0_det_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-215"></a>          <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">NoRst</span><span class="p">;</span>
-<a name="l-216"></a>          <span class="n">ev_reset</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-217"></a>        <span class="k">end</span>
-<a name="l-218"></a>        <span class="n">link_reset</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-219"></a>      <span class="k">end</span>
-<a name="l-220"></a>
-<a name="l-221"></a>      <span class="k">default</span> <span class="o">:</span> <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">NoRst</span><span class="p">;</span>
-<a name="l-222"></a>    <span class="k">endcase</span>
-<a name="l-223"></a>  <span class="k">end</span>
-<a name="l-224"></a>
-<a name="l-225"></a>  <span class="k">assign</span> <span class="n">link_reset_o</span> <span class="o">=</span> <span class="n">link_reset</span><span class="p">;</span>
-<a name="l-226"></a>
-<a name="l-227"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_reg_rst</span>
-<a name="l-228"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-229"></a>      <span class="n">link_rst_state_q</span> <span class="o">&lt;=</span> <span class="n">NoRst</span><span class="p">;</span>
-<a name="l-230"></a>      <span class="n">link_rst_timer_q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-231"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-232"></a>      <span class="n">link_rst_state_q</span> <span class="o">&lt;=</span> <span class="n">link_rst_state_d</span><span class="p">;</span>
-<a name="l-233"></a>      <span class="n">link_rst_timer_q</span> <span class="o">&lt;=</span> <span class="n">link_rst_timer_d</span><span class="p">;</span>
-<a name="l-234"></a>    <span class="k">end</span>
-<a name="l-235"></a>  <span class="k">end</span>
-<a name="l-236"></a>
-<a name="l-237"></a>  <span class="c1">////////////////////</span>
-<a name="l-238"></a>  <span class="c1">// Idle detection //</span>
-<a name="l-239"></a>  <span class="c1">////////////////////</span>
-<a name="l-240"></a>  <span class="c1">//  Here we clean up the idle signal and generate a signle ev_bus_inactive</span>
-<a name="l-241"></a>  <span class="c1">//  after the timer expires</span>
-<a name="l-242"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_idle_det</span>
-<a name="l-243"></a>    <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">link_inac_state_q</span><span class="p">;</span>
-<a name="l-244"></a>    <span class="n">link_inac_timer_d</span> <span class="o">=</span> <span class="n">link_inac_timer_q</span><span class="p">;</span>
-<a name="l-245"></a>    <span class="n">ev_bus_inactive</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-246"></a>
-<a name="l-247"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">link_inac_state_q</span><span class="p">)</span>
-<a name="l-248"></a>      <span class="c1">// Active or disabled</span>
-<a name="l-249"></a>      <span class="nl">Active:</span> <span class="k">begin</span>
-<a name="l-250"></a>        <span class="n">link_inac_timer_d</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-251"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ev_bus_active</span> <span class="o">&amp;&amp;</span> <span class="n">monitor_inac</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-252"></a>          <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">InactCnt</span><span class="p">;</span>
-<a name="l-253"></a>        <span class="k">end</span>
-<a name="l-254"></a>      <span class="k">end</span>
+<a name="l-161"></a>        <span class="c1">// Active (USB spec: Default / Address / Configured)</span>
+<a name="l-162"></a>        <span class="nl">LinkActive:</span> <span class="k">begin</span>
+<a name="l-163"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_inactive</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-164"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkSuspend</span><span class="p">;</span>
+<a name="l-165"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-166"></a>            <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
+<a name="l-167"></a>          <span class="k">end</span>
+<a name="l-168"></a>        <span class="k">end</span>
+<a name="l-169"></a>
+<a name="l-170"></a>        <span class="nl">LinkSuspend:</span> <span class="k">begin</span>
+<a name="l-171"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">ev_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-172"></a>            <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-173"></a>            <span class="n">link_state_d</span>  <span class="o">=</span> <span class="n">LinkActiveNoSOF</span><span class="p">;</span>
+<a name="l-174"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-175"></a>            <span class="n">link_resume_o</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-176"></a>            <span class="n">link_state_d</span>  <span class="o">=</span> <span class="n">LinkActive</span><span class="p">;</span>
+<a name="l-177"></a>          <span class="k">end</span>
+<a name="l-178"></a>        <span class="k">end</span>
+<a name="l-179"></a>
+<a name="l-180"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-181"></a>          <span class="n">link_state_d</span> <span class="o">=</span> <span class="n">LinkDisconnect</span><span class="p">;</span>
+<a name="l-182"></a>        <span class="k">end</span>
+<a name="l-183"></a>      <span class="k">endcase</span> <span class="c1">// case (link_state_q)</span>
+<a name="l-184"></a>    <span class="k">end</span>
+<a name="l-185"></a>  <span class="k">end</span>
+<a name="l-186"></a>
+<a name="l-187"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-188"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-189"></a>      <span class="n">link_state_q</span> <span class="o">&lt;=</span> <span class="n">LinkDisconnect</span><span class="p">;</span>
+<a name="l-190"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-191"></a>      <span class="n">link_state_q</span> <span class="o">&lt;=</span> <span class="n">link_state_d</span><span class="p">;</span>
+<a name="l-192"></a>    <span class="k">end</span>
+<a name="l-193"></a>  <span class="k">end</span>
+<a name="l-194"></a>
+<a name="l-195"></a>  <span class="c1">/////////////////////</span>
+<a name="l-196"></a>  <span class="c1">// Reset detection //</span>
+<a name="l-197"></a>  <span class="c1">/////////////////////</span>
+<a name="l-198"></a>  <span class="c1">//  Here we clean up the SE0 signal and generate a signle ev_reset at</span>
+<a name="l-199"></a>  <span class="c1">//  the end of a valid reset</span>
+<a name="l-200"></a>
+<a name="l-201"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_rst_fsm</span>
+<a name="l-202"></a>    <span class="n">link_rst_state_d</span>  <span class="o">=</span> <span class="n">link_rst_state_q</span><span class="p">;</span>
+<a name="l-203"></a>    <span class="n">link_rst_timer_d</span>  <span class="o">=</span> <span class="n">link_rst_timer_q</span><span class="p">;</span>
+<a name="l-204"></a>    <span class="n">ev_reset</span>          <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-205"></a>    <span class="n">link_reset</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-206"></a>
+<a name="l-207"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">link_rst_state_q</span><span class="p">)</span>
+<a name="l-208"></a>      <span class="c1">// No reset signal detected</span>
+<a name="l-209"></a>      <span class="nl">NoRst:</span> <span class="k">begin</span>
+<a name="l-210"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">see_se0</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-211"></a>          <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">RstCnt</span><span class="p">;</span>
+<a name="l-212"></a>          <span class="n">link_rst_timer_d</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-213"></a>        <span class="k">end</span>
+<a name="l-214"></a>      <span class="k">end</span>
+<a name="l-215"></a>
+<a name="l-216"></a>      <span class="c1">// Reset signal detected -&gt; counting</span>
+<a name="l-217"></a>      <span class="nl">RstCnt:</span> <span class="k">begin</span>
+<a name="l-218"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">see_se0</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-219"></a>          <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">NoRst</span><span class="p">;</span>
+<a name="l-220"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-221"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">us_tick_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-222"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">link_rst_timer_q</span> <span class="o">==</span> <span class="n">RESET_TIMEOUT</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-223"></a>              <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">RstPend</span><span class="p">;</span>
+<a name="l-224"></a>            <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-225"></a>              <span class="n">link_rst_timer_d</span> <span class="o">=</span> <span class="n">link_rst_timer_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-226"></a>            <span class="k">end</span>
+<a name="l-227"></a>          <span class="k">end</span>
+<a name="l-228"></a>        <span class="k">end</span>
+<a name="l-229"></a>      <span class="k">end</span>
+<a name="l-230"></a>
+<a name="l-231"></a>      <span class="c1">// Detected reset -&gt; wait for falling edge</span>
+<a name="l-232"></a>      <span class="nl">RstPend:</span> <span class="k">begin</span>
+<a name="l-233"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">see_se0</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-234"></a>          <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">NoRst</span><span class="p">;</span>
+<a name="l-235"></a>          <span class="n">ev_reset</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-236"></a>        <span class="k">end</span>
+<a name="l-237"></a>        <span class="n">link_reset</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-238"></a>      <span class="k">end</span>
+<a name="l-239"></a>
+<a name="l-240"></a>      <span class="k">default</span> <span class="o">:</span> <span class="n">link_rst_state_d</span> <span class="o">=</span> <span class="n">NoRst</span><span class="p">;</span>
+<a name="l-241"></a>    <span class="k">endcase</span>
+<a name="l-242"></a>  <span class="k">end</span>
+<a name="l-243"></a>
+<a name="l-244"></a>  <span class="k">assign</span> <span class="n">link_reset_o</span> <span class="o">=</span> <span class="n">link_reset</span><span class="p">;</span>
+<a name="l-245"></a>
+<a name="l-246"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_reg_rst</span>
+<a name="l-247"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-248"></a>      <span class="n">link_rst_state_q</span> <span class="o">&lt;=</span> <span class="n">NoRst</span><span class="p">;</span>
+<a name="l-249"></a>      <span class="n">link_rst_timer_q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-250"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-251"></a>      <span class="n">link_rst_state_q</span> <span class="o">&lt;=</span> <span class="n">link_rst_state_d</span><span class="p">;</span>
+<a name="l-252"></a>      <span class="n">link_rst_timer_q</span> <span class="o">&lt;=</span> <span class="n">link_rst_timer_d</span><span class="p">;</span>
+<a name="l-253"></a>    <span class="k">end</span>
+<a name="l-254"></a>  <span class="k">end</span>
 <a name="l-255"></a>
-<a name="l-256"></a>      <span class="c1">// Got an inactivity signal -&gt; count duration</span>
-<a name="l-257"></a>      <span class="nl">InactCnt:</span> <span class="k">begin</span>
-<a name="l-258"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span> <span class="o">||</span> <span class="o">!</span><span class="n">monitor_inac</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-259"></a>          <span class="n">link_inac_state_d</span>  <span class="o">=</span> <span class="n">Active</span><span class="p">;</span>
-<a name="l-260"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">us_tick_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-261"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">link_inac_timer_q</span> <span class="o">==</span> <span class="n">SUSPEND_TIMEOUT</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-262"></a>            <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">InactPend</span><span class="p">;</span>
-<a name="l-263"></a>            <span class="n">ev_bus_inactive</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-264"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-265"></a>            <span class="n">link_inac_timer_d</span> <span class="o">=</span> <span class="n">link_inac_timer_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-266"></a>          <span class="k">end</span>
-<a name="l-267"></a>        <span class="k">end</span>
-<a name="l-268"></a>      <span class="k">end</span>
-<a name="l-269"></a>
-<a name="l-270"></a>      <span class="c1">// Counter expired &amp; event sent, wait here</span>
-<a name="l-271"></a>      <span class="nl">InactPend:</span> <span class="k">begin</span>
-<a name="l-272"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span> <span class="o">||</span> <span class="o">!</span><span class="n">monitor_inac</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-273"></a>          <span class="n">link_inac_state_d</span>  <span class="o">=</span> <span class="n">Active</span><span class="p">;</span>
-<a name="l-274"></a>        <span class="k">end</span>
-<a name="l-275"></a>      <span class="k">end</span>
-<a name="l-276"></a>
-<a name="l-277"></a>      <span class="k">default</span> <span class="o">:</span> <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">Active</span><span class="p">;</span>
-<a name="l-278"></a>    <span class="k">endcase</span>
-<a name="l-279"></a>  <span class="k">end</span>
-<a name="l-280"></a>
-<a name="l-281"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_reg_idle_det</span>
-<a name="l-282"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-283"></a>      <span class="n">link_inac_state_q</span> <span class="o">&lt;=</span> <span class="n">Active</span><span class="p">;</span>
-<a name="l-284"></a>      <span class="n">link_inac_timer_q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-285"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-286"></a>      <span class="n">link_inac_state_q</span> <span class="o">&lt;=</span> <span class="n">link_inac_state_d</span><span class="p">;</span>
-<a name="l-287"></a>      <span class="n">link_inac_timer_q</span> <span class="o">&lt;=</span> <span class="n">link_inac_timer_d</span><span class="p">;</span>
-<a name="l-288"></a>    <span class="k">end</span>
-<a name="l-289"></a>  <span class="k">end</span>
-<a name="l-290"></a>
-<a name="l-291"></a>  <span class="c1">/////////////////////////</span>
-<a name="l-292"></a>  <span class="c1">// Host loss detection //</span>
-<a name="l-293"></a>  <span class="c1">/////////////////////////</span>
-<a name="l-294"></a>  <span class="c1">// host_lost if no sof in 4.096ms (supposed to be every 1ms)</span>
-<a name="l-295"></a>  <span class="c1">// and the link is active</span>
-<a name="l-296"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">12</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">host_presence_timer</span><span class="p">;</span>
-<a name="l-297"></a>
-<a name="l-298"></a>  <span class="k">assign</span> <span class="n">host_lost_o</span> <span class="o">=</span> <span class="n">host_presence_timer</span><span class="p">[</span><span class="mi">12</span><span class="p">];</span>
-<a name="l-299"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-300"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-301"></a>      <span class="n">host_presence_timer</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-302"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-303"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">sof_valid_i</span> <span class="o">||</span> <span class="o">!</span><span class="n">link_active_o</span> <span class="o">||</span> <span class="n">link_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-304"></a>        <span class="n">host_presence_timer</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-305"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">us_tick_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">host_lost_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-306"></a>        <span class="n">host_presence_timer</span> <span class="o">&lt;=</span> <span class="n">host_presence_timer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-307"></a>      <span class="k">end</span>
-<a name="l-308"></a>    <span class="k">end</span>
-<a name="l-309"></a>  <span class="k">end</span>
-<a name="l-310"></a>
-<a name="l-311"></a><span class="k">endmodule</span>
+<a name="l-256"></a>  <span class="c1">////////////////////</span>
+<a name="l-257"></a>  <span class="c1">// Idle detection //</span>
+<a name="l-258"></a>  <span class="c1">////////////////////</span>
+<a name="l-259"></a>  <span class="c1">//  Here we clean up the idle signal and generate a signle ev_bus_inactive</span>
+<a name="l-260"></a>  <span class="c1">//  after the timer expires</span>
+<a name="l-261"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_idle_det</span>
+<a name="l-262"></a>    <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">link_inac_state_q</span><span class="p">;</span>
+<a name="l-263"></a>    <span class="n">link_inac_timer_d</span> <span class="o">=</span> <span class="n">link_inac_timer_q</span><span class="p">;</span>
+<a name="l-264"></a>    <span class="n">ev_bus_inactive</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-265"></a>
+<a name="l-266"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">link_inac_state_q</span><span class="p">)</span>
+<a name="l-267"></a>      <span class="c1">// Active or disabled</span>
+<a name="l-268"></a>      <span class="nl">Active:</span> <span class="k">begin</span>
+<a name="l-269"></a>        <span class="n">link_inac_timer_d</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-270"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ev_bus_active</span> <span class="o">&amp;&amp;</span> <span class="n">monitor_inac</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-271"></a>          <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">InactCnt</span><span class="p">;</span>
+<a name="l-272"></a>        <span class="k">end</span>
+<a name="l-273"></a>      <span class="k">end</span>
+<a name="l-274"></a>
+<a name="l-275"></a>      <span class="c1">// Got an inactivity signal -&gt; count duration</span>
+<a name="l-276"></a>      <span class="nl">InactCnt:</span> <span class="k">begin</span>
+<a name="l-277"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span> <span class="o">||</span> <span class="o">!</span><span class="n">monitor_inac</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-278"></a>          <span class="n">link_inac_state_d</span>  <span class="o">=</span> <span class="n">Active</span><span class="p">;</span>
+<a name="l-279"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">us_tick_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-280"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">link_inac_timer_q</span> <span class="o">==</span> <span class="n">SUSPEND_TIMEOUT</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-281"></a>            <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">InactPend</span><span class="p">;</span>
+<a name="l-282"></a>            <span class="n">ev_bus_inactive</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-283"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-284"></a>            <span class="n">link_inac_timer_d</span> <span class="o">=</span> <span class="n">link_inac_timer_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-285"></a>          <span class="k">end</span>
+<a name="l-286"></a>        <span class="k">end</span>
+<a name="l-287"></a>      <span class="k">end</span>
+<a name="l-288"></a>
+<a name="l-289"></a>      <span class="c1">// Counter expired &amp; event sent, wait here</span>
+<a name="l-290"></a>      <span class="nl">InactPend:</span> <span class="k">begin</span>
+<a name="l-291"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ev_bus_active</span> <span class="o">||</span> <span class="o">!</span><span class="n">monitor_inac</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-292"></a>          <span class="n">link_inac_state_d</span>  <span class="o">=</span> <span class="n">Active</span><span class="p">;</span>
+<a name="l-293"></a>        <span class="k">end</span>
+<a name="l-294"></a>      <span class="k">end</span>
+<a name="l-295"></a>
+<a name="l-296"></a>      <span class="k">default</span> <span class="o">:</span> <span class="n">link_inac_state_d</span> <span class="o">=</span> <span class="n">Active</span><span class="p">;</span>
+<a name="l-297"></a>    <span class="k">endcase</span>
+<a name="l-298"></a>  <span class="k">end</span>
+<a name="l-299"></a>
+<a name="l-300"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">proc_reg_idle_det</span>
+<a name="l-301"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-302"></a>      <span class="n">link_inac_state_q</span> <span class="o">&lt;=</span> <span class="n">Active</span><span class="p">;</span>
+<a name="l-303"></a>      <span class="n">link_inac_timer_q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-304"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-305"></a>      <span class="n">link_inac_state_q</span> <span class="o">&lt;=</span> <span class="n">link_inac_state_d</span><span class="p">;</span>
+<a name="l-306"></a>      <span class="n">link_inac_timer_q</span> <span class="o">&lt;=</span> <span class="n">link_inac_timer_d</span><span class="p">;</span>
+<a name="l-307"></a>    <span class="k">end</span>
+<a name="l-308"></a>  <span class="k">end</span>
+<a name="l-309"></a>
+<a name="l-310"></a>  <span class="c1">/////////////////////////</span>
+<a name="l-311"></a>  <span class="c1">// Host loss detection //</span>
+<a name="l-312"></a>  <span class="c1">/////////////////////////</span>
+<a name="l-313"></a>  <span class="c1">// host_lost if no sof in 4.096ms (supposed to be every 1ms)</span>
+<a name="l-314"></a>  <span class="c1">// and the link is active</span>
+<a name="l-315"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">12</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">host_presence_timer</span><span class="p">;</span>
+<a name="l-316"></a>
+<a name="l-317"></a>  <span class="k">assign</span> <span class="n">host_lost_o</span> <span class="o">=</span> <span class="n">host_presence_timer</span><span class="p">[</span><span class="mi">12</span><span class="p">];</span>
+<a name="l-318"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_48mhz_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-319"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-320"></a>      <span class="n">host_presence_timer</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-321"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-322"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">sof_valid_i</span> <span class="o">||</span> <span class="o">!</span><span class="n">link_active_o</span> <span class="o">||</span> <span class="n">link_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-323"></a>        <span class="n">host_presence_timer</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-324"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">us_tick_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">host_lost_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-325"></a>        <span class="n">host_presence_timer</span> <span class="o">&lt;=</span> <span class="n">host_presence_timer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-326"></a>      <span class="k">end</span>
+<a name="l-327"></a>    <span class="k">end</span>
+<a name="l-328"></a>  <span class="k">end</span>
+<a name="l-329"></a>
+<a name="l-330"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

@@ -1,0 +1,62 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/sv_unpacked_wire2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sv_unpacked_wire2.v</a>
+defines: 
+time_elapsed: 0.095s
+ram usage: 10088 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/sv_unpacked_wire2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sv_unpacked_wire2.v</a>
+module TEST (
+	OE,
+	Q
+);
+	parameter ME = 0;
+	input OE;
+	output wire [3:0] Q;
+	assign Q = (OE ? ME : 4&#39;d0);
+endmodule
+module main;
+	reg OE;
+	wire [3:0] Q [0:3];
+	genvar gidx;
+	generate
+		for (gidx = 0; gidx &lt; 4; gidx = gidx + 1) begin : DRV
+			TEST #(.ME(gidx)) dut(
+				.OE(OE),
+				.Q(Q[gidx])
+			);
+		end
+	endgenerate
+	reg signed [31:0] idx;
+	initial begin
+		OE = 1;
+		#(1)
+			;
+		for (idx = 0; idx &lt; 4; idx = idx + 1)
+			if (Q[idx] !== idx[3:0]) begin
+				$display(&#34;FAILED -- Q[%0d] === %b&#34;, idx, Q[idx]);
+				$finish;
+			end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>

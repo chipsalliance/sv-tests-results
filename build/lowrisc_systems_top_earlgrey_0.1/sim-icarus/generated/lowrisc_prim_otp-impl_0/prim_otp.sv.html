@@ -77,9 +77,7 @@
 <a href="#l-69">69</a>
 <a href="#l-70">70</a>
 <a href="#l-71">71</a>
-<a href="#l-72">72</a>
-<a href="#l-73">73</a>
-<a href="#l-74">74</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-72">72</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a>
@@ -102,57 +100,55 @@
 <a name="l-21"></a>  <span class="c1">// This determines the maximum number of native words that</span>
 <a name="l-22"></a>  <span class="c1">// can be transferred accross the interface in one cycle.</span>
 <a name="l-23"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">SizeWidth</span>   <span class="o">=</span> <span class="n">otp_ctrl_pkg</span><span class="o">::</span><span class="n">OtpSizeWidth</span><span class="p">,</span>
-<a name="l-24"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">ErrWidth</span>    <span class="o">=</span> <span class="n">otp_ctrl_pkg</span><span class="o">::</span><span class="n">OtpErrWidth</span><span class="p">,</span>
-<a name="l-25"></a>  <span class="c1">// Width of the power sequencing signal.</span>
-<a name="l-26"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">PwrSeqWidth</span> <span class="o">=</span> <span class="n">otp_ctrl_pkg</span><span class="o">::</span><span class="n">OtpPwrSeqWidth</span><span class="p">,</span>
-<a name="l-27"></a>  <span class="c1">// Number of Test TL-UL words</span>
-<a name="l-28"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">TlDepth</span>     <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
-<a name="l-29"></a>  <span class="c1">// Derived parameters</span>
-<a name="l-30"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">AddrWidth</span>   <span class="o">=</span> <span class="n">prim_util_pkg</span><span class="o">::</span><span class="n">vbits</span><span class="p">(</span><span class="n">Depth</span><span class="p">),</span>
-<a name="l-31"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">IfWidth</span>     <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">SizeWidth</span><span class="o">*</span><span class="n">Width</span><span class="p">,</span>
-<a name="l-32"></a>  <span class="c1">// VMEM file to initialize the memory with</span>
-<a name="l-33"></a>  <span class="k">parameter</span>      <span class="n">MemInitFile</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
-<a name="l-34"></a>
-<a name="l-35"></a><span class="p">)</span> <span class="p">(</span>
-<a name="l-36"></a>  <span class="k">input</span>                          <span class="n">clk_i</span><span class="p">,</span>
-<a name="l-37"></a>  <span class="k">input</span>                          <span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-38"></a>  <span class="c1">// Macro-specific power sequencing signals to/from AST</span>
-<a name="l-39"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">PwrSeqWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">pwr_seq_o</span><span class="p">,</span>
-<a name="l-40"></a>  <span class="k">input</span>        <span class="p">[</span><span class="n">PwrSeqWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">pwr_seq_h_i</span><span class="p">,</span>
-<a name="l-41"></a>  <span class="c1">// Test interface</span>
-<a name="l-42"></a>  <span class="k">input</span>  <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_h2d_t</span>      <span class="n">test_tl_i</span><span class="p">,</span>
-<a name="l-43"></a>  <span class="k">output</span> <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_d2h_t</span>      <span class="n">test_tl_o</span><span class="p">,</span>
-<a name="l-44"></a>  <span class="c1">// Ready valid handshake for read/write command</span>
-<a name="l-45"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">ready_o</span><span class="p">,</span>
-<a name="l-46"></a>  <span class="k">input</span>                          <span class="n">valid_i</span><span class="p">,</span>
-<a name="l-47"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">SizeWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">size_i</span><span class="p">,</span> <span class="c1">// #(Native words)-1, e.g. size == 0 for 1 native word.</span>
-<a name="l-48"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">CmdWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>           <span class="n">cmd_i</span><span class="p">,</span>  <span class="c1">// 00: read command, 01: write command, 11: init command</span>
-<a name="l-49"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">AddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">addr_i</span><span class="p">,</span>
-<a name="l-50"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">IfWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>            <span class="n">wdata_i</span><span class="p">,</span>
-<a name="l-51"></a>  <span class="c1">// Response channel</span>
-<a name="l-52"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">valid_o</span><span class="p">,</span>
-<a name="l-53"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">IfWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rdata_o</span><span class="p">,</span>
-<a name="l-54"></a>  <span class="k">output</span> <span class="n">otp_ctrl_pkg</span><span class="o">::</span><span class="n">otp_err_e</span> <span class="n">err_o</span>
-<a name="l-55"></a><span class="p">);</span>
-<a name="l-56"></a>
-<a name="l-57"></a>  <span class="k">if</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_generic</span>
-<a name="l-58"></a>    <span class="n">prim_generic_otp</span> <span class="p">#(</span>
-<a name="l-59"></a>      <span class="p">.</span><span class="n">TlDepth</span><span class="p">(</span><span class="n">TlDepth</span><span class="p">),</span>
-<a name="l-60"></a>      <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">Depth</span><span class="p">),</span>
-<a name="l-61"></a>      <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">Width</span><span class="p">),</span>
-<a name="l-62"></a>      <span class="p">.</span><span class="n">MemInitFile</span><span class="p">(</span><span class="n">MemInitFile</span><span class="p">),</span>
-<a name="l-63"></a>      <span class="p">.</span><span class="n">CmdWidth</span><span class="p">(</span><span class="n">CmdWidth</span><span class="p">),</span>
-<a name="l-64"></a>      <span class="p">.</span><span class="n">ErrWidth</span><span class="p">(</span><span class="n">ErrWidth</span><span class="p">),</span>
-<a name="l-65"></a>      <span class="p">.</span><span class="n">SizeWidth</span><span class="p">(</span><span class="n">SizeWidth</span><span class="p">),</span>
-<a name="l-66"></a>      <span class="p">.</span><span class="n">PwrSeqWidth</span><span class="p">(</span><span class="n">PwrSeqWidth</span><span class="p">)</span>
-<a name="l-67"></a>    <span class="p">)</span> <span class="n">u_impl_generic</span> <span class="p">(</span>
-<a name="l-68"></a>      <span class="p">.</span><span class="o">*</span>
-<a name="l-69"></a>    <span class="p">);</span>
+<a name="l-24"></a>  <span class="c1">// Width of the power sequencing signal.</span>
+<a name="l-25"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">PwrSeqWidth</span> <span class="o">=</span> <span class="n">otp_ctrl_pkg</span><span class="o">::</span><span class="n">OtpPwrSeqWidth</span><span class="p">,</span>
+<a name="l-26"></a>  <span class="c1">// Number of Test TL-UL words</span>
+<a name="l-27"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">TlDepth</span>     <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+<a name="l-28"></a>  <span class="c1">// Derived parameters</span>
+<a name="l-29"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">AddrWidth</span>   <span class="o">=</span> <span class="n">prim_util_pkg</span><span class="o">::</span><span class="n">vbits</span><span class="p">(</span><span class="n">Depth</span><span class="p">),</span>
+<a name="l-30"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">IfWidth</span>     <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">SizeWidth</span><span class="o">*</span><span class="n">Width</span><span class="p">,</span>
+<a name="l-31"></a>  <span class="c1">// VMEM file to initialize the memory with</span>
+<a name="l-32"></a>  <span class="k">parameter</span>      <span class="n">MemInitFile</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+<a name="l-33"></a>
+<a name="l-34"></a><span class="p">)</span> <span class="p">(</span>
+<a name="l-35"></a>  <span class="k">input</span>                          <span class="n">clk_i</span><span class="p">,</span>
+<a name="l-36"></a>  <span class="k">input</span>                          <span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-37"></a>  <span class="c1">// Macro-specific power sequencing signals to/from AST</span>
+<a name="l-38"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">PwrSeqWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">pwr_seq_o</span><span class="p">,</span>
+<a name="l-39"></a>  <span class="k">input</span>        <span class="p">[</span><span class="n">PwrSeqWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">pwr_seq_h_i</span><span class="p">,</span>
+<a name="l-40"></a>  <span class="c1">// Test interface</span>
+<a name="l-41"></a>  <span class="k">input</span>  <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_h2d_t</span>      <span class="n">test_tl_i</span><span class="p">,</span>
+<a name="l-42"></a>  <span class="k">output</span> <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_d2h_t</span>      <span class="n">test_tl_o</span><span class="p">,</span>
+<a name="l-43"></a>  <span class="c1">// Ready valid handshake for read/write command</span>
+<a name="l-44"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">ready_o</span><span class="p">,</span>
+<a name="l-45"></a>  <span class="k">input</span>                          <span class="n">valid_i</span><span class="p">,</span>
+<a name="l-46"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">SizeWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">size_i</span><span class="p">,</span> <span class="c1">// #(Native words)-1, e.g. size == 0 for 1 native word.</span>
+<a name="l-47"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">CmdWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>           <span class="n">cmd_i</span><span class="p">,</span>  <span class="c1">// 00: read command, 01: write command, 11: init command</span>
+<a name="l-48"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">AddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">addr_i</span><span class="p">,</span>
+<a name="l-49"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">IfWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>            <span class="n">wdata_i</span><span class="p">,</span>
+<a name="l-50"></a>  <span class="c1">// Response channel</span>
+<a name="l-51"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">valid_o</span><span class="p">,</span>
+<a name="l-52"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">IfWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>     <span class="n">rdata_o</span><span class="p">,</span>
+<a name="l-53"></a>  <span class="k">output</span> <span class="n">otp_ctrl_pkg</span><span class="o">::</span><span class="n">otp_err_e</span> <span class="n">err_o</span>
+<a name="l-54"></a><span class="p">);</span>
+<a name="l-55"></a>
+<a name="l-56"></a>  <span class="k">if</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_generic</span>
+<a name="l-57"></a>    <span class="n">prim_generic_otp</span> <span class="p">#(</span>
+<a name="l-58"></a>      <span class="p">.</span><span class="n">PwrSeqWidth</span><span class="p">(</span><span class="n">PwrSeqWidth</span><span class="p">),</span>
+<a name="l-59"></a>      <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">Width</span><span class="p">),</span>
+<a name="l-60"></a>      <span class="p">.</span><span class="n">MemInitFile</span><span class="p">(</span><span class="n">MemInitFile</span><span class="p">),</span>
+<a name="l-61"></a>      <span class="p">.</span><span class="n">CmdWidth</span><span class="p">(</span><span class="n">CmdWidth</span><span class="p">),</span>
+<a name="l-62"></a>      <span class="p">.</span><span class="n">SizeWidth</span><span class="p">(</span><span class="n">SizeWidth</span><span class="p">),</span>
+<a name="l-63"></a>      <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">Depth</span><span class="p">),</span>
+<a name="l-64"></a>      <span class="p">.</span><span class="n">TlDepth</span><span class="p">(</span><span class="n">TlDepth</span><span class="p">)</span>
+<a name="l-65"></a>    <span class="p">)</span> <span class="n">u_impl_generic</span> <span class="p">(</span>
+<a name="l-66"></a>      <span class="p">.</span><span class="o">*</span>
+<a name="l-67"></a>    <span class="p">);</span>
+<a name="l-68"></a>
+<a name="l-69"></a>  <span class="k">end</span>
 <a name="l-70"></a>
-<a name="l-71"></a>  <span class="k">end</span>
-<a name="l-72"></a>
-<a name="l-73"></a><span class="k">endmodule</span>
-<a name="l-74"></a><span class="c1">//ri lint_check_on OUTPUT_NOT_DRIVEN INPUT_NOT_READ</span>
+<a name="l-71"></a><span class="k">endmodule</span>
+<a name="l-72"></a><span class="c1">//ri lint_check_on OUTPUT_NOT_DRIVEN INPUT_NOT_READ</span>
 </pre></div>
 </td></tr></table>
   </body>
