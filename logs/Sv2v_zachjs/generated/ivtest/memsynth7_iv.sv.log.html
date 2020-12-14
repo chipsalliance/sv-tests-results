@@ -1,0 +1,96 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/memsynth7.v.html" target="file-frame">third_party/tests/ivtest/ivltests/memsynth7.v</a>
+defines: 
+time_elapsed: 0.149s
+ram usage: 10368 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/memsynth7.v.html" target="file-frame">third_party/tests/ivtest/ivltests/memsynth7.v</a>
+module main;
+	reg [7:0] a;
+	reg [2:0] adr;
+	reg [2:0] w_adr;
+	reg rst;
+	reg clk;
+	reg ae;
+	reg wr;
+	(* ivl_synthesis_on *) always @(posedge clk)
+		if (rst) begin
+			a &lt;= 8&#39;b00000000;
+			adr &lt;= 3&#39;b000;
+		end
+		else if (ae)
+			adr &lt;= w_adr;
+		else if (wr) begin
+			adr &lt;= adr + 1;
+			a[adr] &lt;= 1;
+		end
+	(* ivl_synthesis_off *) initial begin
+		clk = 0;
+		wr = 0;
+		ae = 0;
+		rst = 1;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((a !== 8&#39;b00000000) || (adr !== 3&#39;b000)) begin
+			$display(&#34;FAILED - reset - a=%b, adr=%b&#34;, a, adr);
+			$finish;
+		end
+		rst = 0;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((a !== 8&#39;b00000000) || (adr !== 3&#39;b000)) begin
+			$display(&#34;FAILED - pause - a=%b, adr=%b&#34;, a, adr);
+			$finish;
+		end
+		wr = 1;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((a !== 8&#39;b00000001) || (adr !== 3&#39;b001)) begin
+			$display(&#34;FAILED - wr 1 - a=%b, adr=%b&#34;, a, adr);
+			$finish;
+		end
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((a !== 8&#39;b00000011) || (adr !== 3&#39;b010)) begin
+			$display(&#34;FAILED - wr 2 - a=%b, adr=%b&#34;, a, adr);
+			$finish;
+		end
+		ae = 1;
+		w_adr = 4;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((a !== 8&#39;b00000011) || (adr !== 3&#39;b100)) begin
+			$display(&#34;FAILED - ae - a=%b, adr=%b&#34;, a, adr);
+			$finish;
+		end
+		ae = 0;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((a !== 8&#39;b00010011) || (adr !== 3&#39;b101)) begin
+			$display(&#34;FAILED - ae - a=%b, adr=%b&#34;, a, adr);
+			$finish;
+		end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>

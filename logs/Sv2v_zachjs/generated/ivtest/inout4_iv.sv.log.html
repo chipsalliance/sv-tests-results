@@ -1,0 +1,84 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/inout4.v.html" target="file-frame">third_party/tests/ivtest/ivltests/inout4.v</a>
+defines: 
+time_elapsed: 0.123s
+ram usage: 10076 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/inout4.v.html" target="file-frame">third_party/tests/ivtest/ivltests/inout4.v</a>
+module main;
+	wire [31:0] DB;
+	reg E;
+	X2 U(
+		.DB(DB[31:8]),
+		.E(E)
+	);
+	Y1 V(
+		.DB(DB[7:0]),
+		.E(E)
+	);
+	initial begin
+		E = 0;
+		#(1)
+			if (DB !== 32&#39;hzzzzzzzz) begin
+				$display(&#34;FAILED -- DB=%b&#34;, DB);
+				$finish;
+			end
+		E = 1;
+		#(1)
+			if (DB !== 32&#39;h9zzzzz87) begin
+				$display(&#34;FAILED -- DB=%b&#34;, DB);
+				$finish;
+			end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
+module X2 (
+	DB,
+	E
+);
+	inout wire [31:8] DB;
+	input wire E;
+	X1 uu(
+		.DB(DB[31:28]),
+		.E(E)
+	);
+endmodule
+module X1 (
+	DB,
+	E
+);
+	inout wire [31:28] DB;
+	input wire E;
+	wire foo = DB[31:28];
+	assign DB[31:28] = (E ? 4&#39;b1001 : 4&#39;bzzzz);
+endmodule
+module Y1 (
+	DB,
+	E
+);
+	inout wire [7:0] DB;
+	input wire E;
+	wire foo = DB[7:0];
+	assign DB[7:0] = (E ? 8&#39;h87 : 8&#39;hzz);
+endmodule
+
+</pre>
+</body>
