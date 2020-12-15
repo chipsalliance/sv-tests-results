@@ -1,0 +1,112 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/automatic_events3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/automatic_events3.v</a>
+defines: 
+completed: 2020-12-15 11:11:31
+time_elapsed: 0.249s
+ram usage: 11188 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/automatic_events3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/automatic_events3.v</a>
+module automatic_events3;
+	reg [1:0] Source;
+	initial begin
+		Source[0] = 1&#39;b0;
+		forever begin
+			#(20) Source[0] = 1&#39;b1;
+			#(20) Source[0] = 1&#39;b0;
+		end
+	end
+	initial begin
+		Source[1] = 1&#39;b0;
+		#(15)
+			;
+		forever begin
+			#(10) Source[1] = 1&#39;bx;
+			#(10) Source[1] = 1&#39;b1;
+			#(10) Source[1] = 1&#39;bx;
+			#(10) Source[1] = 1&#39;b0;
+		end
+	end
+	task automatic ReportPosEdge0;
+		
+		begin
+			@(posedge Source[0])
+				;
+			$display(&#34;Time %t : Source[0] rise&#34;, $time);
+		end
+	endtask
+	task automatic ReportNegEdge0;
+		
+		begin
+			@(negedge Source[0])
+				;
+			$display(&#34;Time %t : Source[0] fall&#34;, $time);
+		end
+	endtask
+	task automatic ReportAnyEdge0;
+		time t;
+		begin
+			@(Source[0]) t = $time;
+			#(1)
+				$display(&#34;Time %t : Source[0] edge&#34;, t);
+		end
+	endtask
+	task automatic ReportPosEdge1;
+		
+		begin
+			@(posedge Source[1])
+				;
+			$display(&#34;Time %t : Source[1] rise&#34;, $time);
+		end
+	endtask
+	task automatic ReportNegEdge1;
+		
+		begin
+			@(negedge Source[1])
+				;
+			$display(&#34;Time %t : Source[1] fall&#34;, $time);
+		end
+	endtask
+	task automatic ReportAnyEdge1;
+		time t;
+		begin
+			@(Source[1]) t = $time;
+			#(1)
+				$display(&#34;Time %t : Source[1] edge&#34;, t);
+		end
+	endtask
+	initial begin
+		#(1)
+			;
+		fork
+			;
+			repeat (2) ReportPosEdge0;
+			repeat (2) ReportNegEdge0;
+			repeat (4) ReportAnyEdge0;
+			repeat (4) ReportPosEdge1;
+			repeat (4) ReportNegEdge1;
+			repeat (8) ReportAnyEdge1;
+		join
+		$finish;
+	end
+endmodule
+
+</pre>
+</body>
