@@ -1,0 +1,60 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/sv_unpacked_wire.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sv_unpacked_wire.v</a>
+defines: 
+completed: 2020-12-15 02:41:44
+time_elapsed: 0.059s
+ram usage: 10152 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/sv_unpacked_wire.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sv_unpacked_wire.v</a>
+module main;
+	localparam width = 8;
+	reg clk;
+	reg [1:0] addr;
+	reg [(4 * width) - 1:0] data;
+	reg [width - 1:0] Q;
+	wire [(4 * width) - 1:0] data_x;
+	assign data_x = data;
+	always @(posedge clk) Q &lt;= data_x[(3 - addr) * width+:width];
+	reg [2:0] idx;
+	initial begin
+		clk = 0;
+		data[3 * width+:width] = 0;
+		data[2 * width+:width] = 1;
+		data[width+:width] = 2;
+		data[0+:width] = 3;
+		addr = 0;
+		for (idx = 0; idx &lt; 4; idx = idx + 1)
+			begin
+				clk = 0;
+				#(1) addr = idx[1:0];
+				#(1) clk = 1;
+				#(1)
+					if (Q !== data[(3 - addr) * width+:width]) begin
+						$display(&#34;FAILED -- data[%0d]==%h, Q==%h&#34;, addr, data[(3 - addr) * width+:width], Q);
+						$finish;
+					end
+			end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>
