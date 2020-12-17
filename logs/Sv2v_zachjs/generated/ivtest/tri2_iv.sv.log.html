@@ -1,0 +1,89 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/tri2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/tri2.v</a>
+defines: 
+completed: 2020-12-17 05:27:49
+time_elapsed: 0.101s
+ram usage: 9992 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/tri2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/tri2.v</a>
+module short (
+	p,
+	en
+);
+	inout [7:0] p;
+	input en;
+	assign p = (en ? 8&#39;h55 : 8&#39;hzz);
+endmodule
+module long (
+	p,
+	en
+);
+	inout [15:0] p;
+	input en;
+	assign p = (en ? 16&#39;haaaa : 16&#39;hzzzz);
+endmodule
+module main;
+	wire [15:0] bus;
+	reg l_en;
+	reg s_en;
+	integer fails = 0;
+	long l(
+		.p(bus),
+		.en(l_en)
+	);
+	short s(
+		.p(bus[7:0]),
+		.en(s_en)
+	);
+	initial begin
+		l_en = 0;
+		s_en = 0;
+		#(10)
+			;
+		l_en = 1;
+		#(10)
+			;
+		$display(&#34;s.p = %4x&#34;, s.p);
+		if (s.p !== 8&#39;haa)
+			fails = 1;
+		#(10)
+			;
+		l_en = 0;
+		s_en = 1;
+		#(10)
+			;
+		$display(&#34;l.p = %4x&#34;, l.p);
+		if (l.p !== 16&#39;hzz55)
+			fails = 2;
+		#(10)
+			;
+		s_en = 0;
+		#(10)
+			;
+		if (fails == 0)
+			$display(&#34;PASSED&#34;);
+		else
+			$display(&#34;FAILED &#34;, fails);
+	end
+endmodule
+
+</pre>
+</body>

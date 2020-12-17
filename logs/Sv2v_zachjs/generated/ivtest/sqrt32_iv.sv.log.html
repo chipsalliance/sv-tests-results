@@ -1,0 +1,172 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/sqrt32.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sqrt32.v</a>
+defines: 
+completed: 2020-12-17 05:26:58
+time_elapsed: 0.143s
+ram usage: 11348 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/sqrt32.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sqrt32.v</a>
+module sqrt (
+	clk,
+	rdy,
+	reset,
+	x,
+	acc
+);
+	input clk;
+	output wire rdy;
+	input reset;
+	input [31:0] x;
+	output reg [15:0] acc;
+	parameter ss = 5;
+	localparam w = 1 &lt;&lt; ss;
+	reg [w - 1:0] acc2;
+	reg [ss - 1:0] bitl;
+	wire [(w / 2) - 1:0] _bit = 1 &lt;&lt; bitl;
+	wire [w - 1:0] bit2 = 1 &lt;&lt; (bitl &lt;&lt; 1);
+	assign rdy = bitl[ss - 1];
+	wire [(w / 2) - 1:0] guess = acc | _bit;
+	wire [w - 1:0] guess2 = (acc2 + bit2) + ((acc &lt;&lt; bitl) &lt;&lt; 1);
+	(* ivl_synthesis_on *) always @(posedge clk or posedge reset)
+		if (reset) begin
+			acc = 0;
+			acc2 = 0;
+			bitl = (w / 2) - 1;
+		end
+		else begin
+			if (guess2 &lt;= x) begin
+				acc &lt;= guess;
+				acc2 &lt;= guess2;
+			end
+			bitl &lt;= bitl - 1;
+		end
+endmodule
+module testBench;
+	parameter ss = 5;
+	parameter w = 1 &lt;&lt; ss;
+	parameter Amax = 10001;
+	reg [w - 1:0] A;
+	reg clk;
+	reg reset;
+	wire [(w / 2) - 1:0] Z;
+	wire done;
+	sqrt dut(
+		.clk(clk),
+		.rdy(done),
+		.reset(reset),
+		.x(A),
+		.acc(Z)
+	);
+	(* ivl_synthesis_off *) always #(5) clk = !clk;
+	task reset_dut;
+		
+		begin
+			reset = 1;
+			@(posedge clk)
+				;
+			#(1) reset = 0;
+			@(negedge clk)
+				;
+		end
+	endtask
+	task run_dut;
+		
+		while (done == 0) @(posedge clk)
+			;
+	endtask
+	integer idx;
+	integer a;
+	integer z;
+	integer errCnt;
+	(* ivl_synthesis_off *) initial begin
+		reset = 0;
+		clk = 0;
+		$display(&#34;ss=%d, width=%d, Amax=%d&#34;, ss, w, Amax);
+		errCnt = 0;
+		A = 4;
+		reset_dut;
+		run_dut;
+		$display(&#34;test=0 x=%d, y=%d&#34;, A, Z);
+		A = Amax / 10;
+		reset_dut;
+		run_dut;
+		$display(&#34;test=0 x=%d, y=%d&#34;, A, Z);
+		A = Amax - 1;
+		reset_dut;
+		run_dut;
+		$display(&#34;test=0 x=%d, y=%d&#34;, A, Z);
+		for (idx = 1; idx &lt; Amax; idx = 2 * idx)
+			begin
+				A = idx;
+				reset_dut;
+				run_dut;
+				$display(&#34;%d: x=%d, y=%d&#34;, idx, A, Z);
+				a = A;
+				z = Z;
+				if (a &lt; (z * z)) begin
+					$display(&#34;test=%d x=%d, y=%d ERROR:y is too big&#34;, idx, A, Z);
+					$display(&#34;FAILED&#34;);
+					$finish;
+				end
+				if (z &lt; 65535) begin
+					if (a &gt;= ((z + 1) * (z + 1))) begin
+						$display(&#34;test=%d x=%d, y=%d ERROR: y is too small&#34;, idx, A, Z);
+						$display(&#34;FAILED&#34;);
+						$finish;
+					end
+				end
+				else
+					$display(&#34;Could not verify above number&#34;);
+			end
+		$display(&#34;Running  tests Amax=%d random input numbers&#34;, Amax);
+		for (idx = 0; idx &lt; Amax; idx = 1 + idx)
+			begin
+				A = $random;
+				if (A &lt; (1 &lt;&lt; (w - 1))) begin
+					reset_dut;
+					run_dut;
+					a = A;
+					z = Z;
+					if (a &lt; (z * z)) begin
+						$display(&#34;test=%d x=%d, y=%d ERROR:y is too big&#34;, idx, A, Z);
+						$display(&#34;FAILED&#34;);
+						$finish;
+					end
+					if (z &lt; 65535) begin
+						if (a &gt;= ((z + 1) * (z + 1))) begin
+							$display(&#34;test=%d x=%d, y=%d ERROR: y is too small&#34;, idx, A, Z);
+							$display(&#34;FAILED&#34;);
+							$finish;
+						end
+					end
+					else
+						$display(&#34;Could not verify above number&#34;);
+					if ((idx % 1000) == 0)
+						$display(&#34;Finished %d tests&#34;, idx);
+				end
+			end
+		$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+
+</pre>
+</body>
