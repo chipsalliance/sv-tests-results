@@ -17,118 +17,15 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_mesh_router.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_mesh_router.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router.v</a>
 defines: 
-completed: 2020-12-19 00:03:40
-time_elapsed: 0.458s
-ram usage: 18744 KB
+completed: 2020-12-19 02:53:27
+time_elapsed: 0.310s
+ram usage: 15520 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_mesh_router.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_mesh_router.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router.v</a>
 module top;
 	
-endmodule
-module bsg_mesh_router_dor_decoder (
-	clk_i,
-	reset_i,
-	v_i,
-	x_dirs_i,
-	y_dirs_i,
-	my_x_i,
-	my_y_i,
-	req_o
-);
-	import bsg_noc_pkg::Dirs;
-	import bsg_noc_pkg::P;
-	import bsg_noc_pkg::W;
-	import bsg_noc_pkg::E;
-	import bsg_noc_pkg::N;
-	import bsg_noc_pkg::S;
-	parameter x_cord_width_p = -1;
-	parameter y_cord_width_p = -1;
-	parameter dirs_lp = 5;
-	parameter stub_p = {dirs_lp {1&#39;b0}};
-	parameter XY_order_p = 1;
-	input clk_i;
-	input reset_i;
-	input [dirs_lp - 1:0] v_i;
-	input [(dirs_lp * x_cord_width_p) - 1:0] x_dirs_i;
-	input [(dirs_lp * y_cord_width_p) - 1:0] y_dirs_i;
-	input [x_cord_width_p - 1:0] my_x_i;
-	input [y_cord_width_p - 1:0] my_y_i;
-	output [(dirs_lp * dirs_lp) - 1:0] req_o;
-	wire [dirs_lp - 1:0] x_eq;
-	wire [dirs_lp - 1:0] x_gt;
-	wire [dirs_lp - 1:0] x_lt;
-	wire [dirs_lp - 1:0] y_eq;
-	wire [dirs_lp - 1:0] y_gt;
-	wire [dirs_lp - 1:0] y_lt;
-	wire [dirs_lp - 1:0] v_i_stub = v_i &amp; ~stub_p;
-	genvar i;
-	genvar j;
-	generate
-		for (i = 0; i &lt; dirs_lp; i = i + 1) begin : comps
-			assign x_eq[i] = x_dirs_i[i * x_cord_width_p+:x_cord_width_p] == my_x_i;
-			assign y_eq[i] = y_dirs_i[i * y_cord_width_p+:y_cord_width_p] == my_y_i;
-			assign x_gt[i] = x_dirs_i[i * x_cord_width_p+:x_cord_width_p] &gt; my_x_i;
-			assign y_gt[i] = y_dirs_i[i * y_cord_width_p+:y_cord_width_p] &gt; my_y_i;
-			assign x_lt[i] = ~x_gt[i] &amp; ~x_eq[i];
-			assign y_lt[i] = ~y_gt[i] &amp; ~y_eq[i];
-		end
-	endgenerate
-	generate
-		if (XY_order_p == 1) begin : XY_dor
-			for (i = W; i &lt;= E; i = i + 1) begin : x2y
-				assign req_o[(i * dirs_lp) + N] = (v_i_stub[i] &amp; x_eq[i]) &amp; y_lt[i];
-				assign req_o[(i * dirs_lp) + S] = (v_i_stub[i] &amp; x_eq[i]) &amp; y_gt[i];
-			end
-			for (i = N; i &lt;= S; i = i + 1) begin : y2x
-				assign req_o[(i * dirs_lp) + W] = 1&#39;b0;
-				assign req_o[(i * dirs_lp) + E] = 1&#39;b0;
-			end
-			for (i = W; i &lt;= E; i = i + 1) begin
-				assign req_o[(i * dirs_lp) + W] = (i == W ? 1&#39;b0 : v_i_stub[i] &amp; x_lt[i]);
-				assign req_o[(i * dirs_lp) + E] = (i == E ? 1&#39;b0 : v_i_stub[i] &amp; x_gt[i]);
-			end
-			for (i = N; i &lt;= S; i = i + 1) begin
-				assign req_o[(i * dirs_lp) + N] = (i == N ? 1&#39;b0 : (v_i_stub[i] &amp; x_eq[i]) &amp; y_lt[i]);
-				assign req_o[(i * dirs_lp) + S] = (i == S ? 1&#39;b0 : (v_i_stub[i] &amp; x_eq[i]) &amp; y_gt[i]);
-			end
-			assign req_o[(P * dirs_lp) + E] = v_i_stub[P] &amp; x_gt[P];
-			assign req_o[(P * dirs_lp) + W] = v_i_stub[P] &amp; x_lt[P];
-			assign req_o[(P * dirs_lp) + P] = (v_i_stub[P] &amp; x_eq[P]) &amp; y_eq[P];
-			assign req_o[(P * dirs_lp) + S] = (v_i_stub[P] &amp; x_eq[P]) &amp; y_gt[P];
-			assign req_o[(P * dirs_lp) + N] = (v_i_stub[P] &amp; x_eq[P]) &amp; y_lt[P];
-			for (i = W; i &lt;= S; i = i + 1) assign req_o[(i * dirs_lp) + P] = (v_i_stub[i] &amp; x_eq[i]) &amp; y_eq[i];
-			always @(negedge clk_i)
-				;
-		end
-		else begin : YX_dor
-			for (i = W; i &lt;= E; i = i + 1) begin : x2y
-				assign req_o[(i * dirs_lp) + N] = 1&#39;b0;
-				assign req_o[(i * dirs_lp) + S] = 1&#39;b0;
-			end
-			for (i = N; i &lt;= S; i = i + 1) begin : y2x
-				assign req_o[(i * dirs_lp) + W] = (v_i_stub[i] &amp; y_eq[i]) &amp; x_lt[i];
-				assign req_o[(i * dirs_lp) + E] = (v_i_stub[i] &amp; y_eq[i]) &amp; x_gt[i];
-			end
-			for (i = N; i &lt;= S; i = i + 1) begin
-				assign req_o[(i * dirs_lp) + N] = (i == N ? 1&#39;b0 : v_i_stub[i] &amp; y_lt[i]);
-				assign req_o[(i * dirs_lp) + S] = (i == S ? 1&#39;b0 : v_i_stub[i] &amp; y_gt[i]);
-			end
-			for (i = W; i &lt;= E; i = i + 1) begin
-				assign req_o[(i * dirs_lp) + W] = (i == W ? 1&#39;b0 : (v_i_stub[i] &amp; y_eq[i]) &amp; x_lt[i]);
-				assign req_o[(i * dirs_lp) + E] = (i == E ? 1&#39;b0 : (v_i_stub[i] &amp; y_eq[i]) &amp; x_gt[i]);
-			end
-			assign req_o[(P * dirs_lp) + S] = v_i_stub[P] &amp; y_gt[P];
-			assign req_o[(P * dirs_lp) + N] = v_i_stub[P] &amp; y_lt[P];
-			assign req_o[(P * dirs_lp) + P] = (v_i_stub[P] &amp; x_eq[P]) &amp; y_eq[P];
-			assign req_o[(P * dirs_lp) + E] = (v_i_stub[P] &amp; y_eq[P]) &amp; x_gt[P];
-			assign req_o[(P * dirs_lp) + W] = (v_i_stub[P] &amp; y_eq[P]) &amp; x_lt[P];
-			for (i = W; i &lt;= S; i = i + 1) assign req_o[(i * dirs_lp) + P] = (v_i_stub[i] &amp; x_eq[i]) &amp; y_eq[i];
-			always @(negedge clk_i)
-				;
-		end
-	endgenerate
 endmodule
 module bsg_mesh_router (
 	clk_i,
@@ -142,19 +39,18 @@ module bsg_mesh_router (
 	my_x_i,
 	my_y_i
 );
-	import bsg_noc_pkg::Dirs;
-	import bsg_noc_pkg::P;
-	import bsg_noc_pkg::W;
-	import bsg_noc_pkg::E;
-	import bsg_noc_pkg::N;
-	import bsg_noc_pkg::S;
+	import bsg_noc_pkg::*;
+	import bsg_mesh_router_pkg::*;
 	parameter width_p = -1;
 	parameter x_cord_width_p = -1;
 	parameter y_cord_width_p = -1;
-	parameter debug_p = 0;
-	parameter dirs_lp = 5;
-	parameter stub_p = {dirs_lp {1&#39;b0}};
+	parameter ruche_factor_X_p = 0;
+	parameter ruche_factor_Y_p = 0;
+	parameter dims_p = 2;
+	parameter dirs_lp = (2 * dims_p) + 1;
 	parameter XY_order_p = 1;
+	parameter [(dirs_lp * dirs_lp) - 1:0] routing_matrix_p = (dims_p == 2 ? (XY_order_p ? StrictXY : StrictYX) : (dims_p == 3 ? (XY_order_p ? HalfRucheX_StrictXY : HalfRucheX_StrictYX) : (dims_p == 4 ? (XY_order_p ? FullRuche_StrictXY : FullRuche_StrictYX) : &#34;inv&#34;)));
+	parameter debug_p = 0;
 	input clk_i;
 	input reset_i;
 	input [(dirs_lp * width_p) - 1:0] data_i;
@@ -167,301 +63,110 @@ module bsg_mesh_router (
 	input [y_cord_width_p - 1:0] my_y_i;
 	wire [(dirs_lp * x_cord_width_p) - 1:0] x_dirs;
 	wire [(dirs_lp * y_cord_width_p) - 1:0] y_dirs;
-	wire [dirs_lp - 1:0] ready_i_stub = ready_i | stub_p;
-	wire [dirs_lp - 1:0] v_i_stub = v_i &amp; ~stub_p;
-	genvar i;
 	generate
-		for (i = 0; i &lt; dirs_lp; i = i + 1) begin : reshape
+		genvar i;
+		for (i = 0; i &lt; dirs_lp; i = i + 1) begin
 			assign x_dirs[i * x_cord_width_p+:x_cord_width_p] = data_i[i * width_p+:x_cord_width_p];
 			assign y_dirs[i * y_cord_width_p+:y_cord_width_p] = data_i[(i * width_p) + x_cord_width_p+:y_cord_width_p];
 		end
 	endgenerate
 	wire [(dirs_lp * dirs_lp) - 1:0] req;
-	bsg_mesh_router_dor_decoder #(
-		.x_cord_width_p(x_cord_width_p),
-		.y_cord_width_p(y_cord_width_p),
-		.dirs_lp(dirs_lp),
-		.XY_order_p(XY_order_p)
-	) dor_decoder(
-		.clk_i(clk_i),
-		.reset_i(reset_i),
-		.v_i(v_i_stub),
-		.my_x_i(my_x_i),
-		.my_y_i(my_y_i),
-		.x_dirs_i(x_dirs),
-		.y_dirs_i(y_dirs),
-		.req_o(req)
+	wire [(dirs_lp * dirs_lp) - 1:0] req_t;
+	generate
+		for (i = 0; i &lt; dirs_lp; i = i + 1) begin : dor
+			function automatic [dirs_lp - 1:0] sv2v_cast_2997C;
+				input reg [dirs_lp - 1:0] inp;
+				sv2v_cast_2997C = inp;
+			endfunction
+			bsg_mesh_router_decoder_dor #(
+				.x_cord_width_p(x_cord_width_p),
+				.y_cord_width_p(y_cord_width_p),
+				.ruche_factor_X_p(ruche_factor_X_p),
+				.ruche_factor_Y_p(ruche_factor_Y_p),
+				.dims_p(dims_p),
+				.XY_order_p(XY_order_p),
+				.from_p(sv2v_cast_2997C(1 &lt;&lt; i)),
+				.debug_p(debug_p)
+			) dor_decoder(
+				.clk_i(clk_i),
+				.reset_i(reset_i),
+				.v_i(v_i[i]),
+				.x_dirs_i(x_dirs[i * x_cord_width_p+:x_cord_width_p]),
+				.y_dirs_i(y_dirs[i * y_cord_width_p+:y_cord_width_p]),
+				.my_x_i(my_x_i),
+				.my_y_i(my_y_i),
+				.req_o(req[i * dirs_lp+:dirs_lp])
+			);
+		end
+	endgenerate
+	bsg_transpose #(
+		.width_p(dirs_lp),
+		.els_p(dirs_lp)
+	) req_tp(
+		.i(req),
+		.o(req_t)
 	);
-	wire P_gnt_p;
-	wire P_gnt_e;
-	wire P_gnt_s;
-	wire P_gnt_n;
-	wire P_gnt_w;
-	wire W_gnt_e;
-	wire W_gnt_p;
-	wire E_gnt_w;
-	wire E_gnt_p;
-	wire N_gnt_s;
-	wire N_gnt_p;
-	wire S_gnt_n;
-	wire S_gnt_p;
-	wire N_gnt_e;
-	wire N_gnt_w;
-	wire S_gnt_e;
-	wire S_gnt_w;
-	wire W_gnt_n;
-	wire W_gnt_s;
-	wire E_gnt_n;
-	wire E_gnt_s;
-	wire P_sel_p;
-	wire P_sel_e;
-	wire P_sel_s;
-	wire P_sel_n;
-	wire P_sel_w;
-	wire W_sel_e;
-	wire W_sel_p;
-	wire E_sel_w;
-	wire E_sel_p;
-	wire N_sel_s;
-	wire N_sel_p;
-	wire S_sel_n;
-	wire S_sel_p;
-	wire N_sel_e;
-	wire N_sel_w;
-	wire S_sel_e;
-	wire S_sel_w;
-	wire W_sel_n;
-	wire W_sel_s;
-	wire E_sel_n;
-	wire E_sel_s;
+	wire [(dirs_lp * dirs_lp) - 1:0] yumi_lo;
+	wire [(dirs_lp * dirs_lp) - 1:0] yumi_lo_t;
 	generate
-		if (XY_order_p == 1) begin
-			bsg_round_robin_arb #(.inputs_p(2)) west_rr_arb(
+		for (i = 0; i &lt; dirs_lp; i = i + 1) begin : xbar
+			localparam input_els_lp = (dirs_lp &lt; 65 ? 1&#39;b0 : {dirs_lp {1&#39;sbx}}) + (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 0) &amp; 1&#39;b1) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 1) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 2) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 3) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 4) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 5) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 6) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 7) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 8) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 9) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 10) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 11) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 12) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 13) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 14) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 15) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 16) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 17) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 18) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 19) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 20) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 21) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 22) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 23) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 24) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 25) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 26) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 27) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 28) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 29) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 30) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 31) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 32) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 33) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 34) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 35) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 36) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 37) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 38) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 39) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 40) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 41) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 42) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 43) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 44) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 45) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 46) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 47) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 48) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 49) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 50) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 51) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 52) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 53) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 54) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 55) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 56) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 57) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 58) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 59) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 60) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 61) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 62) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 63) &amp; 1&#39;b1));
+			wire [(input_els_lp * width_p) - 1:0] conc_data;
+			wire [input_els_lp - 1:0] conc_req;
+			wire [input_els_lp - 1:0] grants;
+			bsg_array_concentrate_static #(
+				.pattern_els_p(routing_matrix_p[i * dirs_lp+:dirs_lp]),
+				.width_p(width_p)
+			) conc0(
+				.i(data_i),
+				.o(conc_data)
+			);
+			bsg_concentrate_static #(.pattern_els_p(routing_matrix_p[i * dirs_lp+:dirs_lp])) conc1(
+				.i(req_t[i * dirs_lp+:dirs_lp]),
+				.o(conc_req)
+			);
+			assign v_o[i] = |conc_req;
+			bsg_arb_round_robin #(.width_p(input_els_lp)) rr(
 				.clk_i(clk_i),
 				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[W]),
-				.reqs_i({req[(E * dirs_lp) + W], req[(P * dirs_lp) + W]}),
-				.grants_o({W_gnt_e, W_gnt_p}),
-				.sel_one_hot_o({W_sel_e, W_sel_p}),
-				.v_o(v_o[W]),
-				.tag_o(),
-				.yumi_i(v_o[W] &amp; ready_i_stub[W])
+				.reqs_i(conc_req),
+				.grants_o(grants),
+				.yumi_i(v_o[i] &amp; ready_i[i])
 			);
 			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(2)
-			) mux_data_west(
-				.data_i({data_i[P * width_p+:width_p], data_i[E * width_p+:width_p]}),
-				.sel_one_hot_i({W_sel_p, W_sel_e}),
-				.data_o(data_o[W * width_p+:width_p])
+				.els_p(input_els_lp),
+				.width_p(width_p)
+			) data_mux(
+				.data_i(conc_data),
+				.sel_one_hot_i(grants),
+				.data_o(data_o[i * width_p+:width_p])
 			);
-			assign W_gnt_n = 1&#39;b0;
-			assign W_gnt_s = 1&#39;b0;
-		end
-		else begin
-			bsg_round_robin_arb #(.inputs_p(4)) west_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[W]),
-				.reqs_i({req[(E * dirs_lp) + W], req[(P * dirs_lp) + W], req[(N * dirs_lp) + W], req[(S * dirs_lp) + W]}),
-				.grants_o({W_gnt_e, W_gnt_p, W_gnt_n, W_gnt_s}),
-				.sel_one_hot_o({W_sel_e, W_sel_p, W_sel_n, W_sel_s}),
-				.v_o(v_o[W]),
-				.tag_o(),
-				.yumi_i(v_o[W] &amp; ready_i_stub[W])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(4)
-			) mux_data_west(
-				.data_i({data_i[P * width_p+:width_p], data_i[E * width_p+:width_p], data_i[N * width_p+:width_p], data_i[S * width_p+:width_p]}),
-				.sel_one_hot_i({W_sel_p, W_sel_e, W_sel_n, W_sel_s}),
-				.data_o(data_o[W * width_p+:width_p])
+			bsg_unconcentrate_static #(
+				.pattern_els_p(routing_matrix_p[i * dirs_lp+:dirs_lp]),
+				.unconnected_val_p(1&#39;b0)
+			) unconc0(
+				.i(grants &amp; {input_els_lp {ready_i[i]}}),
+				.o(yumi_lo[i * dirs_lp+:dirs_lp])
 			);
 		end
 	endgenerate
-	generate
-		if (XY_order_p == 1) begin
-			bsg_round_robin_arb #(.inputs_p(2)) east_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[E]),
-				.reqs_i({req[(W * dirs_lp) + E], req[(P * dirs_lp) + E]}),
-				.grants_o({E_gnt_w, E_gnt_p}),
-				.sel_one_hot_o({E_sel_w, E_sel_p}),
-				.v_o(v_o[E]),
-				.tag_o(),
-				.yumi_i(v_o[E] &amp; ready_i_stub[E])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(2)
-			) mux_data_east(
-				.data_i({data_i[P * width_p+:width_p], data_i[W * width_p+:width_p]}),
-				.sel_one_hot_i({E_sel_p, E_sel_w}),
-				.data_o(data_o[E * width_p+:width_p])
-			);
-			assign E_gnt_n = 1&#39;b0;
-			assign E_gnt_s = 1&#39;b0;
-		end
-		else begin
-			bsg_round_robin_arb #(.inputs_p(4)) east_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[E]),
-				.reqs_i({req[(W * dirs_lp) + E], req[(P * dirs_lp) + E], req[(N * dirs_lp) + E], req[(S * dirs_lp) + E]}),
-				.grants_o({E_gnt_w, E_gnt_p, E_gnt_n, E_gnt_s}),
-				.sel_one_hot_o({E_sel_w, E_sel_p, E_sel_n, E_sel_s}),
-				.v_o(v_o[E]),
-				.tag_o(),
-				.yumi_i(v_o[E] &amp; ready_i_stub[E])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(4)
-			) mux_data_east(
-				.data_i({data_i[P * width_p+:width_p], data_i[W * width_p+:width_p], data_i[N * width_p+:width_p], data_i[S * width_p+:width_p]}),
-				.sel_one_hot_i({E_sel_p, E_sel_w, E_sel_n, E_sel_s}),
-				.data_o(data_o[E * width_p+:width_p])
-			);
-		end
-	endgenerate
-	generate
-		if (XY_order_p == 1) begin
-			bsg_round_robin_arb #(.inputs_p(4)) north_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[N]),
-				.reqs_i({req[(S * dirs_lp) + N], req[(E * dirs_lp) + N], req[(W * dirs_lp) + N], req[(P * dirs_lp) + N]}),
-				.grants_o({N_gnt_s, N_gnt_e, N_gnt_w, N_gnt_p}),
-				.sel_one_hot_o({N_sel_s, N_sel_e, N_sel_w, N_sel_p}),
-				.v_o(v_o[N]),
-				.tag_o(),
-				.yumi_i(v_o[N] &amp; ready_i_stub[N])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(4)
-			) mux_data_north(
-				.data_i({data_i[P * width_p+:width_p], data_i[E * width_p+:width_p], data_i[S * width_p+:width_p], data_i[W * width_p+:width_p]}),
-				.sel_one_hot_i({N_sel_p, N_sel_e, N_sel_s, N_sel_w}),
-				.data_o(data_o[N * width_p+:width_p])
-			);
-		end
-		else begin
-			assign N_gnt_e = 1&#39;b0;
-			assign N_gnt_w = 1&#39;b0;
-			bsg_round_robin_arb #(.inputs_p(2)) north_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[N]),
-				.reqs_i({req[(S * dirs_lp) + N], req[(P * dirs_lp) + N]}),
-				.grants_o({N_gnt_s, N_gnt_p}),
-				.sel_one_hot_o({N_sel_s, N_sel_p}),
-				.v_o(v_o[N]),
-				.tag_o(),
-				.yumi_i(v_o[N] &amp; ready_i_stub[N])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(2)
-			) mux_data_north(
-				.data_i({data_i[P * width_p+:width_p], data_i[S * width_p+:width_p]}),
-				.sel_one_hot_i({N_sel_p, N_sel_s}),
-				.data_o(data_o[N * width_p+:width_p])
-			);
-		end
-	endgenerate
-	generate
-		if (XY_order_p == 1) begin
-			bsg_round_robin_arb #(.inputs_p(4)) south_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[S]),
-				.reqs_i({req[(N * dirs_lp) + S], req[(E * dirs_lp) + S], req[(W * dirs_lp) + S], req[(P * dirs_lp) + S]}),
-				.grants_o({S_gnt_n, S_gnt_e, S_gnt_w, S_gnt_p}),
-				.sel_one_hot_o({S_sel_n, S_sel_e, S_sel_w, S_sel_p}),
-				.v_o(v_o[S]),
-				.tag_o(),
-				.yumi_i(v_o[S] &amp; ready_i_stub[S])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(4)
-			) mux_data_south(
-				.data_i({data_i[P * width_p+:width_p], data_i[E * width_p+:width_p], data_i[N * width_p+:width_p], data_i[W * width_p+:width_p]}),
-				.sel_one_hot_i({S_sel_p, S_sel_e, S_sel_n, S_sel_w}),
-				.data_o(data_o[S * width_p+:width_p])
-			);
-		end
-		else begin
-			assign S_gnt_e = 1&#39;b0;
-			assign S_gnt_w = 1&#39;b0;
-			bsg_round_robin_arb #(.inputs_p(2)) south_rr_arb(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(ready_i_stub[S]),
-				.reqs_i({req[(N * dirs_lp) + S], req[(P * dirs_lp) + S]}),
-				.grants_o({S_gnt_n, S_gnt_p}),
-				.sel_one_hot_o({S_sel_n, S_sel_p}),
-				.v_o(v_o[S]),
-				.tag_o(),
-				.yumi_i(v_o[S] &amp; ready_i_stub[S])
-			);
-			bsg_mux_one_hot #(
-				.width_p(width_p),
-				.els_p(2)
-			) mux_data_south(
-				.data_i({data_i[P * width_p+:width_p], data_i[N * width_p+:width_p]}),
-				.sel_one_hot_i({S_sel_p, S_sel_n}),
-				.data_o(data_o[S * width_p+:width_p])
-			);
-		end
-	endgenerate
-	bsg_round_robin_arb #(.inputs_p(5)) proc_rr_arb(
-		.clk_i(clk_i),
-		.reset_i(reset_i),
-		.grants_en_i(ready_i_stub[P]),
-		.reqs_i({req[(S * dirs_lp) + P], req[(N * dirs_lp) + P], req[(E * dirs_lp) + P], req[(W * dirs_lp) + P], req[(P * dirs_lp) + P]}),
-		.grants_o({P_gnt_s, P_gnt_n, P_gnt_e, P_gnt_w, P_gnt_p}),
-		.sel_one_hot_o({P_sel_s, P_sel_n, P_sel_e, P_sel_w, P_sel_p}),
-		.v_o(v_o[P]),
-		.tag_o(),
-		.yumi_i(v_o[P] &amp; ready_i_stub[P])
+	bsg_transpose #(
+		.width_p(dirs_lp),
+		.els_p(dirs_lp)
+	) yumi_tp(
+		.i(yumi_lo),
+		.o(yumi_lo_t)
 	);
-	bsg_mux_one_hot #(
-		.width_p(width_p),
-		.els_p(5)
-	) mux_data_proc(
-		.data_i({data_i[P * width_p+:width_p], data_i[E * width_p+:width_p], data_i[S * width_p+:width_p], data_i[W * width_p+:width_p], data_i[N * width_p+:width_p]}),
-		.sel_one_hot_i({P_sel_p, P_sel_e, P_sel_s, P_sel_w, P_sel_n}),
-		.data_o(data_o[P * width_p+:width_p])
-	);
-	assign yumi_o[P] = (((E_gnt_p | N_gnt_p) | S_gnt_p) | P_gnt_p) | W_gnt_p;
 	generate
-		if (XY_order_p == 1) begin
-			assign yumi_o[W] = ((E_gnt_w | N_gnt_w) | S_gnt_w) | P_gnt_w;
-			assign yumi_o[E] = ((W_gnt_e | N_gnt_e) | S_gnt_e) | P_gnt_e;
-			assign yumi_o[N] = S_gnt_n | P_gnt_n;
-			assign yumi_o[S] = N_gnt_s | P_gnt_s;
-		end
-		else begin
-			assign yumi_o[W] = E_gnt_w | P_gnt_w;
-			assign yumi_o[E] = W_gnt_e | P_gnt_e;
-			assign yumi_o[N] = ((S_gnt_n | W_gnt_n) | E_gnt_n) | P_gnt_n;
-			assign yumi_o[S] = ((N_gnt_s | W_gnt_s) | E_gnt_s) | P_gnt_s;
-		end
+		for (i = 0; i &lt; dirs_lp; i = i + 1) assign yumi_o[i] = |yumi_lo_t[i * dirs_lp+:dirs_lp];
 	endgenerate
 	generate
-		if (debug_p) for (i = P; i &lt;= S; i = i + 1) begin : rof
-			Dirs dir = Dirs&#39;(i);
-			always @(negedge clk_i) begin
-				if (v_i_stub[i])
-					$display(&#34;%m wants to send %x to {x,y}={%x,%x} from dir %s, req[SNEWP] = %b, ready_i[SNEWP] = %b&#34;, data_i[i * width_p+:width_p], x_dirs[i * x_cord_width_p+:x_cord_width_p], y_dirs[i * y_cord_width_p+:y_cord_width_p], dir.name(), req[i * dirs_lp+:dirs_lp], ready_i_stub);
-				if (v_o[i])
-					$display(&#34;%m sending %x in dir %s&#34;, data_o[i * width_p+:width_p], dir.name());
+		if (debug_p) always @(negedge clk_i)
+			if (~reset_i) begin : sv2v_autoblock_1
+				integer i;
+				for (i = 0; i &lt; dirs_lp; i = i + 1)
+					;
 			end
-		end
 	endgenerate
 endmodule
 
