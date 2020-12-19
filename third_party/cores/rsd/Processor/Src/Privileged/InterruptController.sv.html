@@ -58,7 +58,32 @@
 <a href="#l-50">50</a>
 <a href="#l-51">51</a>
 <a href="#l-52">52</a>
-<a href="#l-53">53</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
+<a href="#l-53">53</a>
+<a href="#l-54">54</a>
+<a href="#l-55">55</a>
+<a href="#l-56">56</a>
+<a href="#l-57">57</a>
+<a href="#l-58">58</a>
+<a href="#l-59">59</a>
+<a href="#l-60">60</a>
+<a href="#l-61">61</a>
+<a href="#l-62">62</a>
+<a href="#l-63">63</a>
+<a href="#l-64">64</a>
+<a href="#l-65">65</a>
+<a href="#l-66">66</a>
+<a href="#l-67">67</a>
+<a href="#l-68">68</a>
+<a href="#l-69">69</a>
+<a href="#l-70">70</a>
+<a href="#l-71">71</a>
+<a href="#l-72">72</a>
+<a href="#l-73">73</a>
+<a href="#l-74">74</a>
+<a href="#l-75">75</a>
+<a href="#l-76">76</a>
+<a href="#l-77">77</a>
+<a href="#l-78">78</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a>
 <a name="l-4"></a>
@@ -70,47 +95,72 @@
 <a name="l-10"></a>
 <a name="l-11"></a><span class="kn">import</span> <span class="nn">BasicTypes::*</span><span class="p">;</span>
 <a name="l-12"></a><span class="kn">import</span> <span class="nn">CSR_UnitTypes::*</span><span class="p">;</span>
-<a name="l-13"></a>
-<a name="l-14"></a><span class="k">module</span> <span class="n">InterruptController</span><span class="p">(</span>
-<a name="l-15"></a>    <span class="n">CSR_UnitIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">csrUnit</span><span class="p">,</span>
-<a name="l-16"></a>    <span class="n">ControllerIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">ctrl</span><span class="p">,</span>
-<a name="l-17"></a>    <span class="n">NextPCStageIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">fetchStage</span><span class="p">,</span>
-<a name="l-18"></a>    <span class="n">RecoveryManagerIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">recoveryManager</span>
-<a name="l-19"></a><span class="p">);</span>
-<a name="l-20"></a>    <span class="kt">logic</span> <span class="n">reqInterrupt</span><span class="p">,</span> <span class="n">triggerInterrupt</span><span class="p">;</span>
-<a name="l-21"></a>    <span class="n">CSR_BodyPath</span> <span class="n">csrReg</span><span class="p">;</span>
-<a name="l-22"></a>    <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-23"></a>        <span class="n">csrReg</span> <span class="o">=</span> <span class="n">csrUnit</span><span class="p">.</span><span class="n">csrWholeOut</span><span class="p">;</span>
-<a name="l-24"></a>
-<a name="l-25"></a>        <span class="c1">// いまのところタイマ割り込みのみ</span>
-<a name="l-26"></a>        <span class="n">reqInterrupt</span> <span class="o">=</span> 
-<a name="l-27"></a>            <span class="n">csrReg</span><span class="p">.</span><span class="n">mstatus</span><span class="p">.</span><span class="n">MIE</span> <span class="o">&amp;&amp;</span>
-<a name="l-28"></a>            <span class="n">csrReg</span><span class="p">.</span><span class="n">mie</span><span class="p">.</span><span class="n">MTIE</span> <span class="o">&amp;&amp;</span>
-<a name="l-29"></a>            <span class="n">csrReg</span><span class="p">.</span><span class="n">mip</span><span class="p">.</span><span class="n">MTIP</span><span class="p">;</span>
-<a name="l-30"></a>
-<a name="l-31"></a>        <span class="c1">// パイプライン全体が空になるまでフェッチをとめる        </span>
-<a name="l-32"></a>        <span class="n">ctrl</span><span class="p">.</span><span class="n">npStageSendBubbleLowerForInterrupt</span> <span class="o">=</span>
-<a name="l-33"></a>            <span class="n">reqInterrupt</span><span class="p">;</span>
-<a name="l-34"></a>        
-<a name="l-35"></a>        <span class="c1">// * パイプライン全体が空になったら割り込みをかける</span>
-<a name="l-36"></a>        <span class="c1">// * パイプラインが空でもリカバリマネージャが PC を書き換えている途中の</span>
-<a name="l-37"></a>        <span class="c1">//   可能性があるため，きちんと待つ必要がある</span>
-<a name="l-38"></a>        <span class="c1">// * reqInterrupt は csrReg のみをみて決定しているので，</span>
-<a name="l-39"></a>        <span class="c1">//   要求を出したことによって，CSR 内で MIE が落とされてループするということは</span>
-<a name="l-40"></a>        <span class="c1">//   ないはず</span>
-<a name="l-41"></a>        <span class="n">triggerInterrupt</span> <span class="o">=</span> 
-<a name="l-42"></a>            <span class="n">ctrl</span><span class="p">.</span><span class="n">wholePipelineEmpty</span> <span class="o">&amp;&amp;</span> 
-<a name="l-43"></a>            <span class="o">!</span><span class="n">recoveryManager</span><span class="p">.</span><span class="n">unableToStartRecovery</span> <span class="o">&amp;&amp;</span> 
-<a name="l-44"></a>            <span class="n">reqInterrupt</span><span class="p">;</span>
-<a name="l-45"></a>
-<a name="l-46"></a>        <span class="n">csrUnit</span><span class="p">.</span><span class="n">triggerInterrupt</span> <span class="o">=</span> <span class="n">triggerInterrupt</span><span class="p">;</span>
-<a name="l-47"></a>        <span class="n">csrUnit</span><span class="p">.</span><span class="n">interruptRetAddr</span> <span class="o">=</span> <span class="n">fetchStage</span><span class="p">.</span><span class="n">pcOut</span><span class="p">;</span>
+<a name="l-13"></a><span class="kn">import</span> <span class="nn">MemoryMapTypes::*</span><span class="p">;</span>
+<a name="l-14"></a>
+<a name="l-15"></a><span class="k">module</span> <span class="n">InterruptController</span><span class="p">(</span>
+<a name="l-16"></a>    <span class="n">CSR_UnitIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">csrUnit</span><span class="p">,</span>
+<a name="l-17"></a>    <span class="n">ControllerIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">ctrl</span><span class="p">,</span>
+<a name="l-18"></a>    <span class="n">NextPCStageIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">fetchStage</span><span class="p">,</span>
+<a name="l-19"></a>    <span class="n">RecoveryManagerIF</span><span class="p">.</span><span class="n">InterruptController</span> <span class="n">recoveryManager</span>
+<a name="l-20"></a><span class="p">);</span>
+<a name="l-21"></a>    <span class="kt">logic</span> <span class="n">reqInterrupt</span><span class="p">,</span> <span class="n">triggerInterrupt</span><span class="p">;</span>
+<a name="l-22"></a>    <span class="kt">logic</span> <span class="n">reqTimerInterrupt</span><span class="p">,</span> <span class="n">reqExternalInterrupt</span><span class="p">;</span>
+<a name="l-23"></a>    <span class="n">CSR_CAUSE_InterruptCodePath</span> <span class="n">interruptCode</span><span class="p">;</span>
+<a name="l-24"></a>    <span class="n">PC_Path</span> <span class="n">interruptTargetAddr</span><span class="p">;</span>
+<a name="l-25"></a>    <span class="n">CSR_BodyPath</span> <span class="n">csrReg</span><span class="p">;</span>
+<a name="l-26"></a>    <span class="n">InterruptCodeConvPath</span> <span class="n">interruptCodeConv</span><span class="p">;</span>
+<a name="l-27"></a>
+<a name="l-28"></a>    <span class="no">`RSD_STATIC_ASSERT</span><span class="p">(</span>
+<a name="l-29"></a>        <span class="n">RSD_EXTERNAL_INTERRUPT_CODE_WIDTH</span> <span class="o">==</span> <span class="n">CSR_CAUSE_INTERRUPT_CODE_WIDTH</span><span class="p">,</span>
+<a name="l-30"></a>        <span class="s">&quot;The width of an external interrupt code and the code in the CSR do not match&quot;</span>
+<a name="l-31"></a>    <span class="p">);</span>
+<a name="l-32"></a>
+<a name="l-33"></a>    <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-34"></a>        <span class="n">csrReg</span> <span class="o">=</span> <span class="n">csrUnit</span><span class="p">.</span><span class="n">csrWholeOut</span><span class="p">;</span>
+<a name="l-35"></a>
+<a name="l-36"></a>        <span class="n">reqTimerInterrupt</span> <span class="o">=</span>     <span class="n">csrReg</span><span class="p">.</span><span class="n">mie</span><span class="p">.</span><span class="n">MTIE</span> <span class="o">&amp;&amp;</span> <span class="n">csrReg</span><span class="p">.</span><span class="n">mip</span><span class="p">.</span><span class="n">MTIP</span><span class="p">;</span>
+<a name="l-37"></a>        <span class="n">reqExternalInterrupt</span> <span class="o">=</span>  <span class="n">csrReg</span><span class="p">.</span><span class="n">mie</span><span class="p">.</span><span class="n">MEIE</span> <span class="o">&amp;&amp;</span> <span class="n">csrReg</span><span class="p">.</span><span class="n">mip</span><span class="p">.</span><span class="n">MEIP</span><span class="p">;</span>
+<a name="l-38"></a>
+<a name="l-39"></a>        <span class="n">reqInterrupt</span> <span class="o">=</span> <span class="n">csrReg</span><span class="p">.</span><span class="n">mstatus</span><span class="p">.</span><span class="n">MIE</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">reqTimerInterrupt</span> <span class="o">||</span> <span class="n">reqExternalInterrupt</span><span class="p">);</span>
+<a name="l-40"></a>        <span class="n">interruptCodeConv</span><span class="p">.</span><span class="n">exCode</span> <span class="o">=</span> <span class="n">csrUnit</span><span class="p">.</span><span class="n">externalInterruptCodeInCSR</span><span class="p">;</span> <span class="c1">// Type conversion through union</span>
+<a name="l-41"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reqTimerInterrupt</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-42"></a>            <span class="c1">// Timer has higher priority.</span>
+<a name="l-43"></a>            <span class="n">interruptCode</span> <span class="o">=</span> <span class="n">CSR_CAUSE_INTERRUPT_CODE_TIMER</span><span class="p">;</span>
+<a name="l-44"></a>        <span class="k">end</span>
+<a name="l-45"></a>        <span class="k">else</span> <span class="k">begin</span>
+<a name="l-46"></a>            <span class="n">interruptCode</span> <span class="o">=</span> <span class="n">interruptCodeConv</span><span class="p">.</span><span class="n">csrCode</span><span class="p">;</span>
+<a name="l-47"></a>        <span class="k">end</span>
 <a name="l-48"></a>
-<a name="l-49"></a>        <span class="n">fetchStage</span><span class="p">.</span><span class="n">interruptAddrWE</span> <span class="o">=</span> <span class="n">triggerInterrupt</span><span class="p">;</span>
-<a name="l-50"></a>        <span class="n">fetchStage</span><span class="p">.</span><span class="n">interruptAddrIn</span> <span class="o">=</span> <span class="n">csrUnit</span><span class="p">.</span><span class="n">interruptTargetAddr</span><span class="p">;</span>
-<a name="l-51"></a>    <span class="k">end</span>
-<a name="l-52"></a>
-<a name="l-53"></a><span class="k">endmodule</span>
+<a name="l-49"></a>        <span class="c1">// パイプライン全体が空になるまでフェッチをとめる        </span>
+<a name="l-50"></a>        <span class="n">ctrl</span><span class="p">.</span><span class="n">npStageSendBubbleLowerForInterrupt</span> <span class="o">=</span>
+<a name="l-51"></a>            <span class="n">reqInterrupt</span><span class="p">;</span>
+<a name="l-52"></a>        
+<a name="l-53"></a>        <span class="c1">// * パイプライン全体が空になったら割り込みをかける</span>
+<a name="l-54"></a>        <span class="c1">// * パイプラインが空でもリカバリマネージャが PC を書き換えている途中の</span>
+<a name="l-55"></a>        <span class="c1">//   可能性があるため，きちんと待つ必要がある</span>
+<a name="l-56"></a>        <span class="c1">// * reqInterrupt は csrReg のみをみて決定しているので，</span>
+<a name="l-57"></a>        <span class="c1">//   要求を出したことによって，CSR 内で MIE が落とされてループするということは</span>
+<a name="l-58"></a>        <span class="c1">//   ないはず</span>
+<a name="l-59"></a>        <span class="n">triggerInterrupt</span> <span class="o">=</span> 
+<a name="l-60"></a>            <span class="n">ctrl</span><span class="p">.</span><span class="n">wholePipelineEmpty</span> <span class="o">&amp;&amp;</span> 
+<a name="l-61"></a>            <span class="o">!</span><span class="n">recoveryManager</span><span class="p">.</span><span class="n">unableToStartRecovery</span> <span class="o">&amp;&amp;</span> 
+<a name="l-62"></a>            <span class="n">reqInterrupt</span><span class="p">;</span>
+<a name="l-63"></a>
+<a name="l-64"></a>        <span class="n">csrUnit</span><span class="p">.</span><span class="n">triggerInterrupt</span> <span class="o">=</span> <span class="n">triggerInterrupt</span><span class="p">;</span>
+<a name="l-65"></a>        <span class="n">csrUnit</span><span class="p">.</span><span class="n">interruptRetAddr</span> <span class="o">=</span> <span class="n">fetchStage</span><span class="p">.</span><span class="n">pcOut</span><span class="p">;</span>
+<a name="l-66"></a>        <span class="n">csrUnit</span><span class="p">.</span><span class="n">interruptCode</span> <span class="o">=</span> <span class="n">interruptCode</span><span class="p">;</span>
+<a name="l-67"></a>
+<a name="l-68"></a>        <span class="n">interruptTargetAddr</span> <span class="o">=</span> <span class="n">ToPC_FromAddr</span><span class="p">({</span>
+<a name="l-69"></a>            <span class="p">(</span><span class="n">csrReg</span><span class="p">.</span><span class="n">mtvec</span><span class="p">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">CSR_MTVEC_MODE_VECTORED</span><span class="p">)</span> <span class="o">?</span> 
+<a name="l-70"></a>                <span class="p">(</span><span class="n">csrReg</span><span class="p">.</span><span class="n">mtvec</span><span class="p">.</span><span class="n">base</span> <span class="o">+</span> <span class="n">interruptCode</span><span class="p">)</span> <span class="o">:</span> <span class="n">csrReg</span><span class="p">.</span><span class="n">mtvec</span><span class="p">.</span><span class="n">base</span><span class="p">,</span> 
+<a name="l-71"></a>            <span class="n">CSR_MTVEC_BASE_PADDING</span>
+<a name="l-72"></a>        <span class="p">});</span>
+<a name="l-73"></a>
+<a name="l-74"></a>        <span class="n">fetchStage</span><span class="p">.</span><span class="n">interruptAddrWE</span> <span class="o">=</span> <span class="n">triggerInterrupt</span><span class="p">;</span>
+<a name="l-75"></a>        <span class="n">fetchStage</span><span class="p">.</span><span class="n">interruptAddrIn</span> <span class="o">=</span> <span class="n">interruptTargetAddr</span><span class="p">;</span>
+<a name="l-76"></a>    <span class="k">end</span>
+<a name="l-77"></a>
+<a name="l-78"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

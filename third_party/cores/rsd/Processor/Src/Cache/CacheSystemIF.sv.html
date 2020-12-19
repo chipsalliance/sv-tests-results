@@ -66,7 +66,36 @@
 <a href="#l-58">58</a>
 <a href="#l-59">59</a>
 <a href="#l-60">60</a>
-<a href="#l-61">61</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
+<a href="#l-61">61</a>
+<a href="#l-62">62</a>
+<a href="#l-63">63</a>
+<a href="#l-64">64</a>
+<a href="#l-65">65</a>
+<a href="#l-66">66</a>
+<a href="#l-67">67</a>
+<a href="#l-68">68</a>
+<a href="#l-69">69</a>
+<a href="#l-70">70</a>
+<a href="#l-71">71</a>
+<a href="#l-72">72</a>
+<a href="#l-73">73</a>
+<a href="#l-74">74</a>
+<a href="#l-75">75</a>
+<a href="#l-76">76</a>
+<a href="#l-77">77</a>
+<a href="#l-78">78</a>
+<a href="#l-79">79</a>
+<a href="#l-80">80</a>
+<a href="#l-81">81</a>
+<a href="#l-82">82</a>
+<a href="#l-83">83</a>
+<a href="#l-84">84</a>
+<a href="#l-85">85</a>
+<a href="#l-86">86</a>
+<a href="#l-87">87</a>
+<a href="#l-88">88</a>
+<a href="#l-89">89</a>
+<a href="#l-90">90</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a>
 <a name="l-4"></a>
@@ -89,44 +118,73 @@
 <a name="l-21"></a>    <span class="n">MemAccessReqAck</span> <span class="n">dcMemAccessReqAck</span><span class="p">;</span>
 <a name="l-22"></a>    <span class="n">MemAccessResult</span> <span class="n">dcMemAccessResult</span><span class="p">;</span>
 <a name="l-23"></a>    <span class="n">MemAccessResponse</span> <span class="n">dcMemAccessResponse</span><span class="p">;</span>
-<a name="l-24"></a>    
-<a name="l-25"></a>    
-<a name="l-26"></a>    <span class="k">modport</span> <span class="n">ICache</span><span class="p">(</span>
-<a name="l-27"></a>    <span class="k">input</span>
-<a name="l-28"></a>        <span class="n">clk</span><span class="p">,</span>
-<a name="l-29"></a>        <span class="n">rst</span><span class="p">,</span>
-<a name="l-30"></a>        <span class="n">icMemAccessResult</span><span class="p">,</span>
-<a name="l-31"></a>        <span class="n">icMemAccessReqAck</span><span class="p">,</span>
-<a name="l-32"></a>    <span class="k">output</span>
-<a name="l-33"></a>        <span class="n">icMemAccessReq</span>
-<a name="l-34"></a>    <span class="p">);</span>
-<a name="l-35"></a>    
-<a name="l-36"></a>    <span class="k">modport</span> <span class="n">DCache</span><span class="p">(</span>
-<a name="l-37"></a>    <span class="k">input</span>
-<a name="l-38"></a>        <span class="n">clk</span><span class="p">,</span>
-<a name="l-39"></a>        <span class="n">rst</span><span class="p">,</span>
-<a name="l-40"></a>        <span class="n">dcMemAccessResult</span><span class="p">,</span>
-<a name="l-41"></a>        <span class="n">dcMemAccessReqAck</span><span class="p">,</span>
-<a name="l-42"></a>        <span class="n">dcMemAccessResponse</span><span class="p">,</span>
+<a name="l-24"></a>
+<a name="l-25"></a>    <span class="c1">// CacheFlushManager</span>
+<a name="l-26"></a>    <span class="kt">logic</span> <span class="n">icFlushReqAck</span><span class="p">;</span>
+<a name="l-27"></a>    <span class="kt">logic</span> <span class="n">icFlushComplete</span><span class="p">;</span>
+<a name="l-28"></a>    <span class="kt">logic</span> <span class="n">icFlushReq</span><span class="p">;</span>
+<a name="l-29"></a>    <span class="kt">logic</span> <span class="n">dcFlushReqAck</span><span class="p">;</span>
+<a name="l-30"></a>    <span class="kt">logic</span> <span class="n">dcFlushComplete</span><span class="p">;</span>
+<a name="l-31"></a>    <span class="kt">logic</span> <span class="n">dcFlushReq</span><span class="p">;</span>
+<a name="l-32"></a>    <span class="kt">logic</span> <span class="n">flushComplete</span><span class="p">;</span>
+<a name="l-33"></a>    
+<a name="l-34"></a>    
+<a name="l-35"></a>    <span class="k">modport</span> <span class="n">ICache</span><span class="p">(</span>
+<a name="l-36"></a>    <span class="k">input</span>
+<a name="l-37"></a>        <span class="n">clk</span><span class="p">,</span>
+<a name="l-38"></a>        <span class="n">rst</span><span class="p">,</span>
+<a name="l-39"></a>        <span class="n">icMemAccessResult</span><span class="p">,</span>
+<a name="l-40"></a>        <span class="n">icMemAccessReqAck</span><span class="p">,</span>
+<a name="l-41"></a>        <span class="n">icFlushReq</span><span class="p">,</span>
+<a name="l-42"></a>        <span class="n">flushComplete</span><span class="p">,</span>
 <a name="l-43"></a>    <span class="k">output</span>
-<a name="l-44"></a>        <span class="n">dcMemAccessReq</span>
-<a name="l-45"></a>    <span class="p">);</span>
-<a name="l-46"></a>
-<a name="l-47"></a>    <span class="k">modport</span> <span class="n">MemoryAccessController</span><span class="p">(</span>
-<a name="l-48"></a>    <span class="k">input</span>
-<a name="l-49"></a>        <span class="n">clk</span><span class="p">,</span>
-<a name="l-50"></a>        <span class="n">rst</span><span class="p">,</span>
-<a name="l-51"></a>        <span class="n">icMemAccessReq</span><span class="p">,</span>
-<a name="l-52"></a>        <span class="n">dcMemAccessReq</span><span class="p">,</span>
-<a name="l-53"></a>    <span class="k">output</span>
-<a name="l-54"></a>        <span class="n">icMemAccessResult</span><span class="p">,</span>
-<a name="l-55"></a>        <span class="n">dcMemAccessResult</span><span class="p">,</span>
-<a name="l-56"></a>        <span class="n">icMemAccessReqAck</span><span class="p">,</span>
-<a name="l-57"></a>        <span class="n">dcMemAccessReqAck</span><span class="p">,</span>
-<a name="l-58"></a>        <span class="n">dcMemAccessResponse</span>
-<a name="l-59"></a>    <span class="p">);</span>
-<a name="l-60"></a>    
-<a name="l-61"></a><span class="k">endinterface</span> <span class="o">:</span> <span class="n">CacheSystemIF</span>
+<a name="l-44"></a>        <span class="n">icMemAccessReq</span><span class="p">,</span>
+<a name="l-45"></a>        <span class="n">icFlushReqAck</span><span class="p">,</span>
+<a name="l-46"></a>        <span class="n">icFlushComplete</span>
+<a name="l-47"></a>    <span class="p">);</span>
+<a name="l-48"></a>    
+<a name="l-49"></a>    <span class="k">modport</span> <span class="n">DCache</span><span class="p">(</span>
+<a name="l-50"></a>    <span class="k">input</span>
+<a name="l-51"></a>        <span class="n">clk</span><span class="p">,</span>
+<a name="l-52"></a>        <span class="n">rst</span><span class="p">,</span>
+<a name="l-53"></a>        <span class="n">dcMemAccessResult</span><span class="p">,</span>
+<a name="l-54"></a>        <span class="n">dcMemAccessReqAck</span><span class="p">,</span>
+<a name="l-55"></a>        <span class="n">dcMemAccessResponse</span><span class="p">,</span>
+<a name="l-56"></a>        <span class="n">dcFlushReq</span><span class="p">,</span>
+<a name="l-57"></a>        <span class="n">flushComplete</span><span class="p">,</span>
+<a name="l-58"></a>    <span class="k">output</span>
+<a name="l-59"></a>        <span class="n">dcMemAccessReq</span><span class="p">,</span>
+<a name="l-60"></a>        <span class="n">dcFlushReqAck</span><span class="p">,</span>
+<a name="l-61"></a>        <span class="n">dcFlushComplete</span>
+<a name="l-62"></a>    <span class="p">);</span>
+<a name="l-63"></a>
+<a name="l-64"></a>    <span class="k">modport</span> <span class="n">MemoryAccessController</span><span class="p">(</span>
+<a name="l-65"></a>    <span class="k">input</span>
+<a name="l-66"></a>        <span class="n">clk</span><span class="p">,</span>
+<a name="l-67"></a>        <span class="n">rst</span><span class="p">,</span>
+<a name="l-68"></a>        <span class="n">icMemAccessReq</span><span class="p">,</span>
+<a name="l-69"></a>        <span class="n">dcMemAccessReq</span><span class="p">,</span>
+<a name="l-70"></a>    <span class="k">output</span>
+<a name="l-71"></a>        <span class="n">icMemAccessResult</span><span class="p">,</span>
+<a name="l-72"></a>        <span class="n">dcMemAccessResult</span><span class="p">,</span>
+<a name="l-73"></a>        <span class="n">icMemAccessReqAck</span><span class="p">,</span>
+<a name="l-74"></a>        <span class="n">dcMemAccessReqAck</span><span class="p">,</span>
+<a name="l-75"></a>        <span class="n">dcMemAccessResponse</span>
+<a name="l-76"></a>    <span class="p">);</span>
+<a name="l-77"></a>
+<a name="l-78"></a>    <span class="k">modport</span> <span class="n">CacheFlushManager</span><span class="p">(</span>
+<a name="l-79"></a>    <span class="k">input</span>
+<a name="l-80"></a>        <span class="n">icFlushReqAck</span><span class="p">,</span>
+<a name="l-81"></a>        <span class="n">icFlushComplete</span><span class="p">,</span>
+<a name="l-82"></a>        <span class="n">dcFlushReqAck</span><span class="p">,</span>
+<a name="l-83"></a>        <span class="n">dcFlushComplete</span><span class="p">,</span>
+<a name="l-84"></a>    <span class="k">output</span>
+<a name="l-85"></a>        <span class="n">icFlushReq</span><span class="p">,</span>
+<a name="l-86"></a>        <span class="n">dcFlushReq</span><span class="p">,</span>
+<a name="l-87"></a>        <span class="n">flushComplete</span>
+<a name="l-88"></a>    <span class="p">);</span>
+<a name="l-89"></a>    
+<a name="l-90"></a><span class="k">endinterface</span> <span class="o">:</span> <span class="n">CacheSystemIF</span>
 </pre></div>
 </td></tr></table>
   </body>
