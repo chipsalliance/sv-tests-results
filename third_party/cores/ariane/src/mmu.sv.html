@@ -458,7 +458,8 @@
 <a href="#l-450">450</a>
 <a href="#l-451">451</a>
 <a href="#l-452">452</a>
-<a href="#l-453">453</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright 2018 ETH Zurich and University of Bologna.</span>
+<a href="#l-453">453</a>
+<a href="#l-454">454</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright 2018 ETH Zurich and University of Bologna.</span>
 <a name="l-2"></a><span class="c1">// Copyright and related rights are licensed under the Solderpad Hardware</span>
 <a name="l-3"></a><span class="c1">// License, Version 0.51 (the &quot;License&quot;); you may not use this file except in</span>
 <a name="l-4"></a><span class="c1">// compliance with the License.  You may obtain a copy of the License at</span>
@@ -762,155 +763,156 @@
 <a name="l-302"></a>    <span class="c1">// Wires to PMP checks</span>
 <a name="l-303"></a>    <span class="n">riscv</span><span class="o">::</span><span class="n">pmp_access_t</span> <span class="n">pmp_access_type</span><span class="p">;</span>
 <a name="l-304"></a>    <span class="kt">logic</span>        <span class="n">pmp_data_allow</span><span class="p">;</span>
-<a name="l-305"></a>    <span class="c1">// The data interface is simpler and only consists of a request/response interface</span>
-<a name="l-306"></a>    <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">data_interface</span>
-<a name="l-307"></a>        <span class="c1">// save request and DTLB response</span>
-<a name="l-308"></a>        <span class="n">lsu_vaddr_n</span>           <span class="o">=</span> <span class="n">lsu_vaddr_i</span><span class="p">;</span>
-<a name="l-309"></a>        <span class="n">lsu_req_n</span>             <span class="o">=</span> <span class="n">lsu_req_i</span><span class="p">;</span>
-<a name="l-310"></a>        <span class="n">misaligned_ex_n</span>       <span class="o">=</span> <span class="n">misaligned_ex_i</span><span class="p">;</span>
-<a name="l-311"></a>        <span class="n">dtlb_pte_n</span>            <span class="o">=</span> <span class="n">dtlb_content</span><span class="p">;</span>
-<a name="l-312"></a>        <span class="n">dtlb_hit_n</span>            <span class="o">=</span> <span class="n">dtlb_lu_hit</span><span class="p">;</span>
-<a name="l-313"></a>        <span class="n">lsu_is_store_n</span>        <span class="o">=</span> <span class="n">lsu_is_store_i</span><span class="p">;</span>
-<a name="l-314"></a>        <span class="n">dtlb_is_2M_n</span>          <span class="o">=</span> <span class="n">dtlb_is_2M</span><span class="p">;</span>
-<a name="l-315"></a>        <span class="n">dtlb_is_1G_n</span>          <span class="o">=</span> <span class="n">dtlb_is_1G</span><span class="p">;</span>
-<a name="l-316"></a>
-<a name="l-317"></a>        <span class="n">lsu_paddr_o</span>           <span class="o">=</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-318"></a>        <span class="n">lsu_dtlb_ppn_o</span>        <span class="o">=</span> <span class="n">lsu_vaddr_n</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
-<a name="l-319"></a>        <span class="n">lsu_valid_o</span>           <span class="o">=</span> <span class="n">lsu_req_q</span><span class="p">;</span>
-<a name="l-320"></a>        <span class="n">lsu_exception_o</span>       <span class="o">=</span> <span class="n">misaligned_ex_q</span><span class="p">;</span>
-<a name="l-321"></a>        <span class="n">pmp_access_type</span>       <span class="o">=</span> <span class="n">lsu_is_store_q</span> <span class="o">?</span> <span class="n">riscv</span><span class="o">::</span><span class="n">ACCESS_WRITE</span> <span class="o">:</span> <span class="n">riscv</span><span class="o">::</span><span class="n">ACCESS_READ</span><span class="p">;</span>
-<a name="l-322"></a>
-<a name="l-323"></a>        <span class="c1">// mute misaligned exceptions if there is no request otherwise they will throw accidental exceptions</span>
-<a name="l-324"></a>        <span class="n">misaligned_ex_n</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">misaligned_ex_i</span><span class="p">.</span><span class="n">valid</span> <span class="o">&amp;</span> <span class="n">lsu_req_i</span><span class="p">;</span>
-<a name="l-325"></a>
-<a name="l-326"></a>        <span class="c1">// Check if the User flag is set, then we may only access it in supervisor mode</span>
-<a name="l-327"></a>        <span class="c1">// if SUM is enabled</span>
-<a name="l-328"></a>        <span class="n">daccess_err</span> <span class="o">=</span> <span class="p">(</span><span class="n">ld_st_priv_lvl_i</span> <span class="o">==</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PRIV_LVL_S</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sum_i</span> <span class="o">&amp;&amp;</span> <span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">u</span><span class="p">)</span> <span class="o">||</span> <span class="c1">// SUM is not set and we are trying to access a user page in supervisor mode</span>
-<a name="l-329"></a>                      <span class="p">(</span><span class="n">ld_st_priv_lvl_i</span> <span class="o">==</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PRIV_LVL_U</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">u</span><span class="p">);</span>            <span class="c1">// this is not a user page but we are in user mode and trying to access it</span>
-<a name="l-330"></a>        <span class="c1">// translation is enabled and no misaligned exception occurred</span>
-<a name="l-331"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">en_ld_st_translation_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">misaligned_ex_q</span><span class="p">.</span><span class="n">valid</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-332"></a>            <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-333"></a>            <span class="c1">// 4K page</span>
-<a name="l-334"></a>            <span class="n">lsu_paddr_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">ppn</span><span class="p">,</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-335"></a>            <span class="n">lsu_dtlb_ppn_o</span> <span class="o">=</span> <span class="n">dtlb_content</span><span class="p">.</span><span class="n">ppn</span><span class="p">;</span>
-<a name="l-336"></a>            <span class="c1">// Mega page</span>
-<a name="l-337"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dtlb_is_2M_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-338"></a>              <span class="n">lsu_paddr_o</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
-<a name="l-339"></a>              <span class="n">lsu_dtlb_ppn_o</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_n</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
-<a name="l-340"></a>            <span class="k">end</span>
-<a name="l-341"></a>            <span class="c1">// Giga page</span>
-<a name="l-342"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dtlb_is_1G_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-343"></a>                <span class="n">lsu_paddr_o</span><span class="p">[</span><span class="mi">29</span><span class="o">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="mi">29</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
-<a name="l-344"></a>                <span class="n">lsu_dtlb_ppn_o</span><span class="p">[</span><span class="mi">29</span><span class="o">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_n</span><span class="p">[</span><span class="mi">29</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
-<a name="l-345"></a>            <span class="k">end</span>
-<a name="l-346"></a>            <span class="c1">// ---------</span>
-<a name="l-347"></a>            <span class="c1">// DTLB Hit</span>
-<a name="l-348"></a>            <span class="c1">// --------</span>
-<a name="l-349"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dtlb_hit_q</span> <span class="o">&amp;&amp;</span> <span class="n">lsu_req_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-350"></a>                <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-351"></a>                <span class="c1">// exception priority:</span>
-<a name="l-352"></a>                <span class="c1">// PAGE_FAULTS have higher priority than ACCESS_FAULTS</span>
-<a name="l-353"></a>                <span class="c1">// virtual memory based exceptions are PAGE_FAULTS</span>
-<a name="l-354"></a>                <span class="c1">// physical memory based exceptions are ACCESS_FAULTS (PMA/PMP)</span>
-<a name="l-355"></a>
-<a name="l-356"></a>                <span class="c1">// this is a store</span>
-<a name="l-357"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-358"></a>                    <span class="c1">// check if the page is write-able and we are not violating privileges</span>
-<a name="l-359"></a>                    <span class="c1">// also check if the dirty flag is set</span>
-<a name="l-360"></a>                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">w</span> <span class="o">||</span> <span class="n">daccess_err</span> <span class="o">||</span> <span class="o">!</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">d</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-361"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">STORE_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">lsu_vaddr_q</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-362"></a>                    <span class="c1">// Check if any PMPs are violated</span>
-<a name="l-363"></a>                    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pmp_data_allow</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-364"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">ST_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-365"></a>                    <span class="k">end</span>
-<a name="l-366"></a>
-<a name="l-367"></a>                <span class="c1">// this is a load</span>
-<a name="l-368"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-369"></a>                    <span class="c1">// check for sufficient access privileges - throw a page fault if necessary</span>
-<a name="l-370"></a>                    <span class="k">if</span> <span class="p">(</span><span class="n">daccess_err</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-371"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LOAD_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">lsu_vaddr_q</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-372"></a>                    <span class="c1">// Check if any PMPs are violated</span>
-<a name="l-373"></a>                    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pmp_data_allow</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-374"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LD_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-375"></a>                    <span class="k">end</span>
-<a name="l-376"></a>                <span class="k">end</span>
-<a name="l-377"></a>            <span class="k">end</span> <span class="k">else</span>
-<a name="l-378"></a>
-<a name="l-379"></a>            <span class="c1">// ---------</span>
-<a name="l-380"></a>            <span class="c1">// DTLB Miss</span>
-<a name="l-381"></a>            <span class="c1">// ---------</span>
-<a name="l-382"></a>            <span class="c1">// watch out for exceptions</span>
-<a name="l-383"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_active</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">walking_instr</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-384"></a>                <span class="c1">// page table walker threw an exception</span>
-<a name="l-385"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">ptw_error</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-386"></a>                    <span class="c1">// an error makes the translation valid</span>
-<a name="l-387"></a>                    <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-388"></a>                    <span class="c1">// the page table walker can only throw page faults</span>
-<a name="l-389"></a>                    <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-390"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">STORE_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">update_vaddr</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-391"></a>                    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-392"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LOAD_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">update_vaddr</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-393"></a>                    <span class="k">end</span>
-<a name="l-394"></a>                <span class="k">end</span>
-<a name="l-395"></a>
-<a name="l-396"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">ptw_access_exception</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-397"></a>                    <span class="c1">// an error makes the translation valid</span>
-<a name="l-398"></a>                    <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-399"></a>                    <span class="c1">// the page table walker can only throw page faults</span>
-<a name="l-400"></a>                    <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LD_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">ptw_bad_paddr</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-401"></a>                <span class="k">end</span>
-<a name="l-402"></a>            <span class="k">end</span>
-<a name="l-403"></a>        <span class="k">end</span>
-<a name="l-404"></a>        <span class="c1">// If translation is not enabled, check the paddr immediately against PMPs</span>
-<a name="l-405"></a>        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">lsu_req_q</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">misaligned_ex_q</span><span class="p">.</span><span class="n">valid</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">pmp_data_allow</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-406"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-407"></a>                <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">ST_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-408"></a>            <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-409"></a>                <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LD_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
-<a name="l-410"></a>            <span class="k">end</span>
-<a name="l-411"></a>        <span class="k">end</span>
-<a name="l-412"></a>    <span class="k">end</span>
-<a name="l-413"></a>
-<a name="l-414"></a>    <span class="c1">// Load/store PMP check</span>
-<a name="l-415"></a>    <span class="n">pmp</span> <span class="p">#(</span>
-<a name="l-416"></a>        <span class="p">.</span><span class="n">PLEN</span>       <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span>            <span class="p">),</span>
-<a name="l-417"></a>        <span class="p">.</span><span class="n">PMP_LEN</span>    <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span> <span class="o">-</span> <span class="mi">2</span>        <span class="p">),</span>
-<a name="l-418"></a>        <span class="p">.</span><span class="n">NR_ENTRIES</span> <span class="p">(</span> <span class="n">ArianeCfg</span><span class="p">.</span><span class="n">NrPMPEntries</span> <span class="p">)</span>
-<a name="l-419"></a>    <span class="p">)</span> <span class="n">i_pmp_data</span> <span class="p">(</span>
-<a name="l-420"></a>        <span class="p">.</span><span class="n">addr_i</span>        <span class="p">(</span> <span class="n">lsu_paddr_o</span>         <span class="p">),</span>
-<a name="l-421"></a>        <span class="p">.</span><span class="n">priv_lvl_i</span>    <span class="p">(</span> <span class="n">ld_st_priv_lvl_i</span>    <span class="p">),</span>
-<a name="l-422"></a>        <span class="p">.</span><span class="n">access_type_i</span> <span class="p">(</span> <span class="n">pmp_access_type</span>     <span class="p">),</span>
-<a name="l-423"></a>        <span class="c1">// Configuration</span>
-<a name="l-424"></a>        <span class="p">.</span><span class="n">conf_addr_i</span>   <span class="p">(</span> <span class="n">pmpaddr_i</span>           <span class="p">),</span>
-<a name="l-425"></a>        <span class="p">.</span><span class="n">conf_i</span>        <span class="p">(</span> <span class="n">pmpcfg_i</span>            <span class="p">),</span>
-<a name="l-426"></a>        <span class="p">.</span><span class="n">allow_o</span>       <span class="p">(</span> <span class="n">pmp_data_allow</span>      <span class="p">)</span>
-<a name="l-427"></a>    <span class="p">);</span>
-<a name="l-428"></a>
-<a name="l-429"></a>    <span class="c1">// ----------</span>
-<a name="l-430"></a>    <span class="c1">// Registers</span>
-<a name="l-431"></a>    <span class="c1">// ----------</span>
-<a name="l-432"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-433"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-434"></a>            <span class="n">lsu_vaddr_q</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-435"></a>            <span class="n">lsu_req_q</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-436"></a>            <span class="n">misaligned_ex_q</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-437"></a>            <span class="n">dtlb_pte_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-438"></a>            <span class="n">dtlb_hit_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-439"></a>            <span class="n">lsu_is_store_q</span>   <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-440"></a>            <span class="n">dtlb_is_2M_q</span>     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-441"></a>            <span class="n">dtlb_is_1G_q</span>     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-442"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-443"></a>            <span class="n">lsu_vaddr_q</span>      <span class="o">&lt;=</span>  <span class="n">lsu_vaddr_n</span><span class="p">;</span>
-<a name="l-444"></a>            <span class="n">lsu_req_q</span>        <span class="o">&lt;=</span>  <span class="n">lsu_req_n</span><span class="p">;</span>
-<a name="l-445"></a>            <span class="n">misaligned_ex_q</span>  <span class="o">&lt;=</span>  <span class="n">misaligned_ex_n</span><span class="p">;</span>
-<a name="l-446"></a>            <span class="n">dtlb_pte_q</span>       <span class="o">&lt;=</span>  <span class="n">dtlb_pte_n</span><span class="p">;</span>
-<a name="l-447"></a>            <span class="n">dtlb_hit_q</span>       <span class="o">&lt;=</span>  <span class="n">dtlb_hit_n</span><span class="p">;</span>
-<a name="l-448"></a>            <span class="n">lsu_is_store_q</span>   <span class="o">&lt;=</span>  <span class="n">lsu_is_store_n</span><span class="p">;</span>
-<a name="l-449"></a>            <span class="n">dtlb_is_2M_q</span>     <span class="o">&lt;=</span>  <span class="n">dtlb_is_2M_n</span><span class="p">;</span>
-<a name="l-450"></a>            <span class="n">dtlb_is_1G_q</span>     <span class="o">&lt;=</span>  <span class="n">dtlb_is_1G_n</span><span class="p">;</span>
-<a name="l-451"></a>        <span class="k">end</span>
-<a name="l-452"></a>    <span class="k">end</span>
-<a name="l-453"></a><span class="k">endmodule</span>
+<a name="l-305"></a>    <span class="k">localparam</span>   <span class="n">PPNWMin</span> <span class="o">=</span> <span class="p">(</span><span class="n">riscv</span><span class="o">::</span><span class="n">PPNW</span><span class="o">-</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">29</span><span class="p">)</span> <span class="o">?</span> <span class="mi">29</span> <span class="o">:</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PPNW</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+<a name="l-306"></a>    <span class="c1">// The data interface is simpler and only consists of a request/response interface</span>
+<a name="l-307"></a>    <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">data_interface</span>
+<a name="l-308"></a>        <span class="c1">// save request and DTLB response</span>
+<a name="l-309"></a>        <span class="n">lsu_vaddr_n</span>           <span class="o">=</span> <span class="n">lsu_vaddr_i</span><span class="p">;</span>
+<a name="l-310"></a>        <span class="n">lsu_req_n</span>             <span class="o">=</span> <span class="n">lsu_req_i</span><span class="p">;</span>
+<a name="l-311"></a>        <span class="n">misaligned_ex_n</span>       <span class="o">=</span> <span class="n">misaligned_ex_i</span><span class="p">;</span>
+<a name="l-312"></a>        <span class="n">dtlb_pte_n</span>            <span class="o">=</span> <span class="n">dtlb_content</span><span class="p">;</span>
+<a name="l-313"></a>        <span class="n">dtlb_hit_n</span>            <span class="o">=</span> <span class="n">dtlb_lu_hit</span><span class="p">;</span>
+<a name="l-314"></a>        <span class="n">lsu_is_store_n</span>        <span class="o">=</span> <span class="n">lsu_is_store_i</span><span class="p">;</span>
+<a name="l-315"></a>        <span class="n">dtlb_is_2M_n</span>          <span class="o">=</span> <span class="n">dtlb_is_2M</span><span class="p">;</span>
+<a name="l-316"></a>        <span class="n">dtlb_is_1G_n</span>          <span class="o">=</span> <span class="n">dtlb_is_1G</span><span class="p">;</span>
+<a name="l-317"></a>
+<a name="l-318"></a>        <span class="n">lsu_paddr_o</span>           <span class="o">=</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-319"></a>        <span class="n">lsu_dtlb_ppn_o</span>        <span class="o">=</span> <span class="n">lsu_vaddr_n</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
+<a name="l-320"></a>        <span class="n">lsu_valid_o</span>           <span class="o">=</span> <span class="n">lsu_req_q</span><span class="p">;</span>
+<a name="l-321"></a>        <span class="n">lsu_exception_o</span>       <span class="o">=</span> <span class="n">misaligned_ex_q</span><span class="p">;</span>
+<a name="l-322"></a>        <span class="n">pmp_access_type</span>       <span class="o">=</span> <span class="n">lsu_is_store_q</span> <span class="o">?</span> <span class="n">riscv</span><span class="o">::</span><span class="n">ACCESS_WRITE</span> <span class="o">:</span> <span class="n">riscv</span><span class="o">::</span><span class="n">ACCESS_READ</span><span class="p">;</span>
+<a name="l-323"></a>
+<a name="l-324"></a>        <span class="c1">// mute misaligned exceptions if there is no request otherwise they will throw accidental exceptions</span>
+<a name="l-325"></a>        <span class="n">misaligned_ex_n</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">misaligned_ex_i</span><span class="p">.</span><span class="n">valid</span> <span class="o">&amp;</span> <span class="n">lsu_req_i</span><span class="p">;</span>
+<a name="l-326"></a>
+<a name="l-327"></a>        <span class="c1">// Check if the User flag is set, then we may only access it in supervisor mode</span>
+<a name="l-328"></a>        <span class="c1">// if SUM is enabled</span>
+<a name="l-329"></a>        <span class="n">daccess_err</span> <span class="o">=</span> <span class="p">(</span><span class="n">ld_st_priv_lvl_i</span> <span class="o">==</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PRIV_LVL_S</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sum_i</span> <span class="o">&amp;&amp;</span> <span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">u</span><span class="p">)</span> <span class="o">||</span> <span class="c1">// SUM is not set and we are trying to access a user page in supervisor mode</span>
+<a name="l-330"></a>                      <span class="p">(</span><span class="n">ld_st_priv_lvl_i</span> <span class="o">==</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PRIV_LVL_U</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">u</span><span class="p">);</span>            <span class="c1">// this is not a user page but we are in user mode and trying to access it</span>
+<a name="l-331"></a>        <span class="c1">// translation is enabled and no misaligned exception occurred</span>
+<a name="l-332"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">en_ld_st_translation_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">misaligned_ex_q</span><span class="p">.</span><span class="n">valid</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-333"></a>            <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-334"></a>            <span class="c1">// 4K page</span>
+<a name="l-335"></a>            <span class="n">lsu_paddr_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">ppn</span><span class="p">,</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-336"></a>            <span class="n">lsu_dtlb_ppn_o</span> <span class="o">=</span> <span class="n">dtlb_content</span><span class="p">.</span><span class="n">ppn</span><span class="p">;</span>
+<a name="l-337"></a>            <span class="c1">// Mega page</span>
+<a name="l-338"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dtlb_is_2M_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-339"></a>              <span class="n">lsu_paddr_o</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
+<a name="l-340"></a>              <span class="n">lsu_dtlb_ppn_o</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_n</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">];</span>
+<a name="l-341"></a>            <span class="k">end</span>
+<a name="l-342"></a>            <span class="c1">// Giga page</span>
+<a name="l-343"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dtlb_is_1G_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-344"></a>                <span class="n">lsu_paddr_o</span><span class="p">[</span><span class="nl">PPNWMin:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="nl">PPNWMin:</span><span class="mi">12</span><span class="p">];</span>
+<a name="l-345"></a>                <span class="n">lsu_dtlb_ppn_o</span><span class="p">[</span><span class="nl">PPNWMin:</span><span class="mi">12</span><span class="p">]</span> <span class="o">=</span> <span class="n">lsu_vaddr_n</span><span class="p">[</span><span class="nl">PPNWMin:</span><span class="mi">12</span><span class="p">];</span>
+<a name="l-346"></a>            <span class="k">end</span>
+<a name="l-347"></a>            <span class="c1">// ---------</span>
+<a name="l-348"></a>            <span class="c1">// DTLB Hit</span>
+<a name="l-349"></a>            <span class="c1">// --------</span>
+<a name="l-350"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dtlb_hit_q</span> <span class="o">&amp;&amp;</span> <span class="n">lsu_req_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-351"></a>                <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-352"></a>                <span class="c1">// exception priority:</span>
+<a name="l-353"></a>                <span class="c1">// PAGE_FAULTS have higher priority than ACCESS_FAULTS</span>
+<a name="l-354"></a>                <span class="c1">// virtual memory based exceptions are PAGE_FAULTS</span>
+<a name="l-355"></a>                <span class="c1">// physical memory based exceptions are ACCESS_FAULTS (PMA/PMP)</span>
+<a name="l-356"></a>
+<a name="l-357"></a>                <span class="c1">// this is a store</span>
+<a name="l-358"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-359"></a>                    <span class="c1">// check if the page is write-able and we are not violating privileges</span>
+<a name="l-360"></a>                    <span class="c1">// also check if the dirty flag is set</span>
+<a name="l-361"></a>                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">w</span> <span class="o">||</span> <span class="n">daccess_err</span> <span class="o">||</span> <span class="o">!</span><span class="n">dtlb_pte_q</span><span class="p">.</span><span class="n">d</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-362"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">STORE_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">lsu_vaddr_q</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-363"></a>                    <span class="c1">// Check if any PMPs are violated</span>
+<a name="l-364"></a>                    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pmp_data_allow</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-365"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">ST_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-366"></a>                    <span class="k">end</span>
+<a name="l-367"></a>
+<a name="l-368"></a>                <span class="c1">// this is a load</span>
+<a name="l-369"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-370"></a>                    <span class="c1">// check for sufficient access privileges - throw a page fault if necessary</span>
+<a name="l-371"></a>                    <span class="k">if</span> <span class="p">(</span><span class="n">daccess_err</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-372"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LOAD_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">lsu_vaddr_q</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-373"></a>                    <span class="c1">// Check if any PMPs are violated</span>
+<a name="l-374"></a>                    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pmp_data_allow</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-375"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LD_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-376"></a>                    <span class="k">end</span>
+<a name="l-377"></a>                <span class="k">end</span>
+<a name="l-378"></a>            <span class="k">end</span> <span class="k">else</span>
+<a name="l-379"></a>
+<a name="l-380"></a>            <span class="c1">// ---------</span>
+<a name="l-381"></a>            <span class="c1">// DTLB Miss</span>
+<a name="l-382"></a>            <span class="c1">// ---------</span>
+<a name="l-383"></a>            <span class="c1">// watch out for exceptions</span>
+<a name="l-384"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_active</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">walking_instr</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-385"></a>                <span class="c1">// page table walker threw an exception</span>
+<a name="l-386"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">ptw_error</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-387"></a>                    <span class="c1">// an error makes the translation valid</span>
+<a name="l-388"></a>                    <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-389"></a>                    <span class="c1">// the page table walker can only throw page faults</span>
+<a name="l-390"></a>                    <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-391"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">STORE_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">update_vaddr</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-392"></a>                    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-393"></a>                        <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LOAD_PAGE_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="p">{</span><span class="n">lsu_vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="p">]}},</span><span class="n">update_vaddr</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-394"></a>                    <span class="k">end</span>
+<a name="l-395"></a>                <span class="k">end</span>
+<a name="l-396"></a>
+<a name="l-397"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">ptw_access_exception</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-398"></a>                    <span class="c1">// an error makes the translation valid</span>
+<a name="l-399"></a>                    <span class="n">lsu_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-400"></a>                    <span class="c1">// the page table walker can only throw page faults</span>
+<a name="l-401"></a>                    <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LD_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">ptw_bad_paddr</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-402"></a>                <span class="k">end</span>
+<a name="l-403"></a>            <span class="k">end</span>
+<a name="l-404"></a>        <span class="k">end</span>
+<a name="l-405"></a>        <span class="c1">// If translation is not enabled, check the paddr immediately against PMPs</span>
+<a name="l-406"></a>        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">lsu_req_q</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">misaligned_ex_q</span><span class="p">.</span><span class="n">valid</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">pmp_data_allow</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-407"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-408"></a>                <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">ST_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-409"></a>            <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-410"></a>                <span class="n">lsu_exception_o</span> <span class="o">=</span> <span class="p">{</span><span class="n">riscv</span><span class="o">::</span><span class="n">LD_ACCESS_FAULT</span><span class="p">,</span> <span class="p">{{</span><span class="n">riscv</span><span class="o">::</span><span class="n">XLEN</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">lsu_paddr_o</span><span class="p">},</span> <span class="mb">1&#39;b1</span><span class="p">};</span>
+<a name="l-411"></a>            <span class="k">end</span>
+<a name="l-412"></a>        <span class="k">end</span>
+<a name="l-413"></a>    <span class="k">end</span>
+<a name="l-414"></a>
+<a name="l-415"></a>    <span class="c1">// Load/store PMP check</span>
+<a name="l-416"></a>    <span class="n">pmp</span> <span class="p">#(</span>
+<a name="l-417"></a>        <span class="p">.</span><span class="n">PLEN</span>       <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span>            <span class="p">),</span>
+<a name="l-418"></a>        <span class="p">.</span><span class="n">PMP_LEN</span>    <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span> <span class="o">-</span> <span class="mi">2</span>        <span class="p">),</span>
+<a name="l-419"></a>        <span class="p">.</span><span class="n">NR_ENTRIES</span> <span class="p">(</span> <span class="n">ArianeCfg</span><span class="p">.</span><span class="n">NrPMPEntries</span> <span class="p">)</span>
+<a name="l-420"></a>    <span class="p">)</span> <span class="n">i_pmp_data</span> <span class="p">(</span>
+<a name="l-421"></a>        <span class="p">.</span><span class="n">addr_i</span>        <span class="p">(</span> <span class="n">lsu_paddr_o</span>         <span class="p">),</span>
+<a name="l-422"></a>        <span class="p">.</span><span class="n">priv_lvl_i</span>    <span class="p">(</span> <span class="n">ld_st_priv_lvl_i</span>    <span class="p">),</span>
+<a name="l-423"></a>        <span class="p">.</span><span class="n">access_type_i</span> <span class="p">(</span> <span class="n">pmp_access_type</span>     <span class="p">),</span>
+<a name="l-424"></a>        <span class="c1">// Configuration</span>
+<a name="l-425"></a>        <span class="p">.</span><span class="n">conf_addr_i</span>   <span class="p">(</span> <span class="n">pmpaddr_i</span>           <span class="p">),</span>
+<a name="l-426"></a>        <span class="p">.</span><span class="n">conf_i</span>        <span class="p">(</span> <span class="n">pmpcfg_i</span>            <span class="p">),</span>
+<a name="l-427"></a>        <span class="p">.</span><span class="n">allow_o</span>       <span class="p">(</span> <span class="n">pmp_data_allow</span>      <span class="p">)</span>
+<a name="l-428"></a>    <span class="p">);</span>
+<a name="l-429"></a>
+<a name="l-430"></a>    <span class="c1">// ----------</span>
+<a name="l-431"></a>    <span class="c1">// Registers</span>
+<a name="l-432"></a>    <span class="c1">// ----------</span>
+<a name="l-433"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-434"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-435"></a>            <span class="n">lsu_vaddr_q</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-436"></a>            <span class="n">lsu_req_q</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-437"></a>            <span class="n">misaligned_ex_q</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-438"></a>            <span class="n">dtlb_pte_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-439"></a>            <span class="n">dtlb_hit_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-440"></a>            <span class="n">lsu_is_store_q</span>   <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-441"></a>            <span class="n">dtlb_is_2M_q</span>     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-442"></a>            <span class="n">dtlb_is_1G_q</span>     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-443"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-444"></a>            <span class="n">lsu_vaddr_q</span>      <span class="o">&lt;=</span>  <span class="n">lsu_vaddr_n</span><span class="p">;</span>
+<a name="l-445"></a>            <span class="n">lsu_req_q</span>        <span class="o">&lt;=</span>  <span class="n">lsu_req_n</span><span class="p">;</span>
+<a name="l-446"></a>            <span class="n">misaligned_ex_q</span>  <span class="o">&lt;=</span>  <span class="n">misaligned_ex_n</span><span class="p">;</span>
+<a name="l-447"></a>            <span class="n">dtlb_pte_q</span>       <span class="o">&lt;=</span>  <span class="n">dtlb_pte_n</span><span class="p">;</span>
+<a name="l-448"></a>            <span class="n">dtlb_hit_q</span>       <span class="o">&lt;=</span>  <span class="n">dtlb_hit_n</span><span class="p">;</span>
+<a name="l-449"></a>            <span class="n">lsu_is_store_q</span>   <span class="o">&lt;=</span>  <span class="n">lsu_is_store_n</span><span class="p">;</span>
+<a name="l-450"></a>            <span class="n">dtlb_is_2M_q</span>     <span class="o">&lt;=</span>  <span class="n">dtlb_is_2M_n</span><span class="p">;</span>
+<a name="l-451"></a>            <span class="n">dtlb_is_1G_q</span>     <span class="o">&lt;=</span>  <span class="n">dtlb_is_1G_n</span><span class="p">;</span>
+<a name="l-452"></a>        <span class="k">end</span>
+<a name="l-453"></a>    <span class="k">end</span>
+<a name="l-454"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

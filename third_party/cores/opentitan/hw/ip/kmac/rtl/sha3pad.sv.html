@@ -832,7 +832,9 @@
 <a href="#l-824">824</a>
 <a href="#l-825">825</a>
 <a href="#l-826">826</a>
-<a href="#l-827">827</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-827">827</a>
+<a href="#l-828">828</a>
+<a href="#l-829">829</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -1156,509 +1158,511 @@
 <a name="l-322"></a>      <span class="k">end</span>
 <a name="l-323"></a>
 <a name="l-324"></a>      <span class="nl">StPrefixWait:</span> <span class="k">begin</span>
-<a name="l-325"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_complete_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-326"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
-<a name="l-327"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-328"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPrefixWait</span><span class="p">;</span>
-<a name="l-329"></a>        <span class="k">end</span>
-<a name="l-330"></a>      <span class="k">end</span>
-<a name="l-331"></a>
-<a name="l-332"></a>      <span class="c1">// Message state pushes the incoming message into keccak round logic.</span>
-<a name="l-333"></a>      <span class="c1">// It forwards the message while counting the data and if it reaches</span>
-<a name="l-334"></a>      <span class="c1">// the block size, it triggers the keccak round to run. If `process` is</span>
-<a name="l-335"></a>      <span class="c1">// set, it moves to Pad state.</span>
-<a name="l-336"></a>      <span class="nl">StMessage:</span> <span class="k">begin</span>
-<a name="l-337"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxFifo</span><span class="p">;</span>
-<a name="l-338"></a>
-<a name="l-339"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">msg_partial</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-340"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
-<a name="l-341"></a>
-<a name="l-342"></a>          <span class="n">en_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-343"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sent_blocksize</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-344"></a>          <span class="c1">// Check block completion first even process is set.</span>
-<a name="l-345"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessageWait</span><span class="p">;</span>
-<a name="l-346"></a>
-<a name="l-347"></a>          <span class="n">keccak_run_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-348"></a>          <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-349"></a>          <span class="n">hold_msg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-350"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">process_latched</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-351"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad</span><span class="p">;</span>
-<a name="l-352"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-353"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
-<a name="l-354"></a>
-<a name="l-355"></a>        <span class="k">end</span>
-<a name="l-356"></a>      <span class="k">end</span>
-<a name="l-357"></a>
-<a name="l-358"></a>      <span class="nl">StMessageWait:</span> <span class="k">begin</span>
-<a name="l-359"></a>        <span class="n">hold_msg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-360"></a>
-<a name="l-361"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_complete_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-362"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
-<a name="l-363"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-364"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessageWait</span><span class="p">;</span>
-<a name="l-365"></a>        <span class="k">end</span>
-<a name="l-366"></a>      <span class="k">end</span>
-<a name="l-367"></a>
-<a name="l-368"></a>      <span class="c1">// Pad state just pushes the ending suffix. Depending on the mode, the</span>
-<a name="l-369"></a>      <span class="c1">// padding value is unique. SHA3 adds 2&#39;b10, SHAKE adds 4&#39;b1111, and</span>
-<a name="l-370"></a>      <span class="c1">// cSHAKE adds 2&#39;b 00. Refer `function_pad`. The signal has one more bit</span>
-<a name="l-371"></a>      <span class="c1">// defined to accomodate first 1 bit of `pad10*1()` function.</span>
-<a name="l-372"></a>      <span class="nl">StPad:</span> <span class="k">begin</span>
-<a name="l-373"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxFuncPad</span><span class="p">;</span>
-<a name="l-374"></a>
-<a name="l-375"></a>        <span class="n">fsm_keccak_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-325"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxPrefix</span><span class="p">;</span>
+<a name="l-326"></a>
+<a name="l-327"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_complete_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-328"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
+<a name="l-329"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-330"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPrefixWait</span><span class="p">;</span>
+<a name="l-331"></a>        <span class="k">end</span>
+<a name="l-332"></a>      <span class="k">end</span>
+<a name="l-333"></a>
+<a name="l-334"></a>      <span class="c1">// Message state pushes the incoming message into keccak round logic.</span>
+<a name="l-335"></a>      <span class="c1">// It forwards the message while counting the data and if it reaches</span>
+<a name="l-336"></a>      <span class="c1">// the block size, it triggers the keccak round to run. If `process` is</span>
+<a name="l-337"></a>      <span class="c1">// set, it moves to Pad state.</span>
+<a name="l-338"></a>      <span class="nl">StMessage:</span> <span class="k">begin</span>
+<a name="l-339"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxFifo</span><span class="p">;</span>
+<a name="l-340"></a>
+<a name="l-341"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">msg_partial</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-342"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
+<a name="l-343"></a>
+<a name="l-344"></a>          <span class="n">en_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-345"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sent_blocksize</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-346"></a>          <span class="c1">// Check block completion first even process is set.</span>
+<a name="l-347"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessageWait</span><span class="p">;</span>
+<a name="l-348"></a>
+<a name="l-349"></a>          <span class="n">keccak_run_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-350"></a>          <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-351"></a>          <span class="n">hold_msg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-352"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">process_latched</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-353"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad</span><span class="p">;</span>
+<a name="l-354"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-355"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
+<a name="l-356"></a>
+<a name="l-357"></a>        <span class="k">end</span>
+<a name="l-358"></a>      <span class="k">end</span>
+<a name="l-359"></a>
+<a name="l-360"></a>      <span class="nl">StMessageWait:</span> <span class="k">begin</span>
+<a name="l-361"></a>        <span class="n">hold_msg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-362"></a>
+<a name="l-363"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_complete_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-364"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessage</span><span class="p">;</span>
+<a name="l-365"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-366"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StMessageWait</span><span class="p">;</span>
+<a name="l-367"></a>        <span class="k">end</span>
+<a name="l-368"></a>      <span class="k">end</span>
+<a name="l-369"></a>
+<a name="l-370"></a>      <span class="c1">// Pad state just pushes the ending suffix. Depending on the mode, the</span>
+<a name="l-371"></a>      <span class="c1">// padding value is unique. SHA3 adds 2&#39;b10, SHAKE adds 4&#39;b1111, and</span>
+<a name="l-372"></a>      <span class="c1">// cSHAKE adds 2&#39;b 00. Refer `function_pad`. The signal has one more bit</span>
+<a name="l-373"></a>      <span class="c1">// defined to accomodate first 1 bit of `pad10*1()` function.</span>
+<a name="l-374"></a>      <span class="nl">StPad:</span> <span class="k">begin</span>
+<a name="l-375"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxFuncPad</span><span class="p">;</span>
 <a name="l-376"></a>
-<a name="l-377"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_ack</span> <span class="o">&amp;&amp;</span> <span class="n">end_of_block</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-378"></a>          <span class="c1">// If padding is the last block, don&#39;t have to move to StPad01, just</span>
-<a name="l-379"></a>          <span class="c1">// run Keccak and complete</span>
-<a name="l-380"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadRun</span><span class="p">;</span>
-<a name="l-381"></a>
-<a name="l-382"></a>          <span class="c1">// always clear the latched msgbuf</span>
-<a name="l-383"></a>          <span class="n">clr_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-384"></a>          <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-385"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">keccak_ack</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-386"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad01</span><span class="p">;</span>
-<a name="l-387"></a>          <span class="n">clr_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-388"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-389"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad</span><span class="p">;</span>
-<a name="l-390"></a>        <span class="k">end</span>
-<a name="l-391"></a>      <span class="k">end</span>
-<a name="l-392"></a>
-<a name="l-393"></a>      <span class="nl">StPadRun:</span> <span class="k">begin</span>
-<a name="l-394"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadFlush</span><span class="p">;</span>
-<a name="l-395"></a>
-<a name="l-396"></a>        <span class="n">keccak_run_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-397"></a>        <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-398"></a>      <span class="k">end</span>
-<a name="l-399"></a>
-<a name="l-400"></a>      <span class="c1">// Pad01 pushes the end bit of pad10*1() function. As keccak accepts byte</span>
-<a name="l-401"></a>      <span class="c1">// size only, StPad always pushes partial (5bits). So at this state, it</span>
-<a name="l-402"></a>      <span class="c1">// pushes rest of 3bits. If the data pushed in StPad is the last byte of</span>
-<a name="l-403"></a>      <span class="c1">// the block, then Pad01 pushes to the same byte, if not, it first</span>
-<a name="l-404"></a>      <span class="c1">// zero-fill the block then pad 1 to the end.</span>
-<a name="l-405"></a>      <span class="nl">StPad01:</span> <span class="k">begin</span>
-<a name="l-406"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxZeroEnd</span><span class="p">;</span>
-<a name="l-407"></a>
-<a name="l-408"></a>        <span class="c1">// There&#39;s no chance StPad01 can be a start of the block. So can be</span>
-<a name="l-409"></a>        <span class="c1">// discard that the sent_blocksize is set at the beginning.</span>
-<a name="l-410"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sent_blocksize</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-411"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadFlush</span><span class="p">;</span>
-<a name="l-412"></a>
-<a name="l-413"></a>          <span class="n">fsm_keccak_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-414"></a>          <span class="c1">// TODO: Trigger keccak_round</span>
-<a name="l-415"></a>          <span class="n">keccak_run_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-416"></a>          <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-417"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-418"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad01</span><span class="p">;</span>
-<a name="l-419"></a>
-<a name="l-420"></a>          <span class="n">fsm_keccak_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-421"></a>        <span class="k">end</span>
-<a name="l-422"></a>      <span class="k">end</span>
-<a name="l-423"></a>
-<a name="l-424"></a>      <span class="nl">StPadFlush:</span> <span class="k">begin</span>
-<a name="l-425"></a>        <span class="c1">// Wait completion from keccak_round or wait SW indicator.</span>
-<a name="l-426"></a>        <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-427"></a>        <span class="n">clr_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-428"></a>
-<a name="l-429"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_complete_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-430"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadIdle</span><span class="p">;</span>
-<a name="l-431"></a>
-<a name="l-432"></a>          <span class="n">absorbed_d</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-433"></a>          <span class="c1">// TODO: Clear internal variables to fresh start</span>
-<a name="l-434"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-435"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadFlush</span><span class="p">;</span>
-<a name="l-436"></a>        <span class="k">end</span>
-<a name="l-437"></a>      <span class="k">end</span>
-<a name="l-438"></a>
-<a name="l-439"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-440"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadIdle</span><span class="p">;</span>
-<a name="l-441"></a>      <span class="k">end</span>
-<a name="l-442"></a>
-<a name="l-443"></a>    <span class="k">endcase</span>
-<a name="l-444"></a>  <span class="k">end</span>
-<a name="l-445"></a>
-<a name="l-446"></a>  <span class="c1">//////////////</span>
-<a name="l-447"></a>  <span class="c1">// Datapath //</span>
+<a name="l-377"></a>        <span class="n">fsm_keccak_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-378"></a>
+<a name="l-379"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_ack</span> <span class="o">&amp;&amp;</span> <span class="n">end_of_block</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-380"></a>          <span class="c1">// If padding is the last block, don&#39;t have to move to StPad01, just</span>
+<a name="l-381"></a>          <span class="c1">// run Keccak and complete</span>
+<a name="l-382"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadRun</span><span class="p">;</span>
+<a name="l-383"></a>
+<a name="l-384"></a>          <span class="c1">// always clear the latched msgbuf</span>
+<a name="l-385"></a>          <span class="n">clr_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-386"></a>          <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-387"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">keccak_ack</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-388"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad01</span><span class="p">;</span>
+<a name="l-389"></a>          <span class="n">clr_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-390"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-391"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad</span><span class="p">;</span>
+<a name="l-392"></a>        <span class="k">end</span>
+<a name="l-393"></a>      <span class="k">end</span>
+<a name="l-394"></a>
+<a name="l-395"></a>      <span class="nl">StPadRun:</span> <span class="k">begin</span>
+<a name="l-396"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadFlush</span><span class="p">;</span>
+<a name="l-397"></a>
+<a name="l-398"></a>        <span class="n">keccak_run_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-399"></a>        <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-400"></a>      <span class="k">end</span>
+<a name="l-401"></a>
+<a name="l-402"></a>      <span class="c1">// Pad01 pushes the end bit of pad10*1() function. As keccak accepts byte</span>
+<a name="l-403"></a>      <span class="c1">// size only, StPad always pushes partial (5bits). So at this state, it</span>
+<a name="l-404"></a>      <span class="c1">// pushes rest of 3bits. If the data pushed in StPad is the last byte of</span>
+<a name="l-405"></a>      <span class="c1">// the block, then Pad01 pushes to the same byte, if not, it first</span>
+<a name="l-406"></a>      <span class="c1">// zero-fill the block then pad 1 to the end.</span>
+<a name="l-407"></a>      <span class="nl">StPad01:</span> <span class="k">begin</span>
+<a name="l-408"></a>        <span class="n">sel_mux</span> <span class="o">=</span> <span class="n">MuxZeroEnd</span><span class="p">;</span>
+<a name="l-409"></a>
+<a name="l-410"></a>        <span class="c1">// There&#39;s no chance StPad01 can be a start of the block. So can be</span>
+<a name="l-411"></a>        <span class="c1">// discard that the sent_blocksize is set at the beginning.</span>
+<a name="l-412"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sent_blocksize</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-413"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadFlush</span><span class="p">;</span>
+<a name="l-414"></a>
+<a name="l-415"></a>          <span class="n">fsm_keccak_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-416"></a>          <span class="c1">// TODO: Trigger keccak_round</span>
+<a name="l-417"></a>          <span class="n">keccak_run_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-418"></a>          <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-419"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-420"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPad01</span><span class="p">;</span>
+<a name="l-421"></a>
+<a name="l-422"></a>          <span class="n">fsm_keccak_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-423"></a>        <span class="k">end</span>
+<a name="l-424"></a>      <span class="k">end</span>
+<a name="l-425"></a>
+<a name="l-426"></a>      <span class="nl">StPadFlush:</span> <span class="k">begin</span>
+<a name="l-427"></a>        <span class="c1">// Wait completion from keccak_round or wait SW indicator.</span>
+<a name="l-428"></a>        <span class="n">clr_sentmsg</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-429"></a>        <span class="n">clr_msgbuf</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-430"></a>
+<a name="l-431"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">keccak_complete_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-432"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadIdle</span><span class="p">;</span>
+<a name="l-433"></a>
+<a name="l-434"></a>          <span class="n">absorbed_d</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-435"></a>          <span class="c1">// TODO: Clear internal variables to fresh start</span>
+<a name="l-436"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-437"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadFlush</span><span class="p">;</span>
+<a name="l-438"></a>        <span class="k">end</span>
+<a name="l-439"></a>      <span class="k">end</span>
+<a name="l-440"></a>
+<a name="l-441"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-442"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StPadIdle</span><span class="p">;</span>
+<a name="l-443"></a>      <span class="k">end</span>
+<a name="l-444"></a>
+<a name="l-445"></a>    <span class="k">endcase</span>
+<a name="l-446"></a>  <span class="k">end</span>
+<a name="l-447"></a>
 <a name="l-448"></a>  <span class="c1">//////////////</span>
-<a name="l-449"></a>
-<a name="l-450"></a>  <span class="c1">// `encode_bytepad` represents the first two bytes of bytepad()</span>
-<a name="l-451"></a>  <span class="c1">// It depends on the block size. We can reuse KeccakRate</span>
-<a name="l-452"></a>  <span class="c1">// 10000000 || 00010101 // 168</span>
-<a name="l-453"></a>  <span class="c1">// 10000000 || 00010001 // 136</span>
-<a name="l-454"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">encode_bytepad</span><span class="p">;</span>
-<a name="l-455"></a>
-<a name="l-456"></a>  <span class="k">assign</span> <span class="n">encode_bytepad</span> <span class="o">=</span> <span class="n">encode_bytepad_len</span><span class="p">(</span><span class="n">strength_i</span><span class="p">);</span>
+<a name="l-449"></a>  <span class="c1">// Datapath //</span>
+<a name="l-450"></a>  <span class="c1">//////////////</span>
+<a name="l-451"></a>
+<a name="l-452"></a>  <span class="c1">// `encode_bytepad` represents the first two bytes of bytepad()</span>
+<a name="l-453"></a>  <span class="c1">// It depends on the block size. We can reuse KeccakRate</span>
+<a name="l-454"></a>  <span class="c1">// 10000000 || 00010101 // 168</span>
+<a name="l-455"></a>  <span class="c1">// 10000000 || 00010001 // 136</span>
+<a name="l-456"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">encode_bytepad</span><span class="p">;</span>
 <a name="l-457"></a>
-<a name="l-458"></a>  <span class="c1">// Prefix size ==============================================================</span>
-<a name="l-459"></a>  <span class="c1">// Prefix represents bytepad(encode_string(N) || encode_string(S), 168 or 136)</span>
-<a name="l-460"></a>  <span class="c1">// encode_string(N) || encode_string(S) is prepared by the software and given</span>
-<a name="l-461"></a>  <span class="c1">// through `ns_data_i`. The first part of bytepad is determined by the</span>
-<a name="l-462"></a>  <span class="c1">// `strength_i` and stored into `encode_bytepad`.</span>
-<a name="l-463"></a>
-<a name="l-464"></a>  <span class="c1">// It is assumed that the prefix always smaller than the block size.</span>
-<a name="l-465"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">PrefixSize</span><span class="o">*</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prefix</span><span class="p">;</span>
-<a name="l-466"></a>
-<a name="l-467"></a>  <span class="k">assign</span> <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="n">ns_data_i</span><span class="p">,</span> <span class="n">encode_bytepad</span><span class="p">};</span>
+<a name="l-458"></a>  <span class="k">assign</span> <span class="n">encode_bytepad</span> <span class="o">=</span> <span class="n">encode_bytepad_len</span><span class="p">(</span><span class="n">strength_i</span><span class="p">);</span>
+<a name="l-459"></a>
+<a name="l-460"></a>  <span class="c1">// Prefix size ==============================================================</span>
+<a name="l-461"></a>  <span class="c1">// Prefix represents bytepad(encode_string(N) || encode_string(S), 168 or 136)</span>
+<a name="l-462"></a>  <span class="c1">// encode_string(N) || encode_string(S) is prepared by the software and given</span>
+<a name="l-463"></a>  <span class="c1">// through `ns_data_i`. The first part of bytepad is determined by the</span>
+<a name="l-464"></a>  <span class="c1">// `strength_i` and stored into `encode_bytepad`.</span>
+<a name="l-465"></a>
+<a name="l-466"></a>  <span class="c1">// It is assumed that the prefix always smaller than the block size.</span>
+<a name="l-467"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">PrefixSize</span><span class="o">*</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prefix</span><span class="p">;</span>
 <a name="l-468"></a>
-<a name="l-469"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prefix_sliced</span><span class="p">;</span>
-<a name="l-470"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prefix_data</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
-<a name="l-471"></a>
-<a name="l-472"></a>  <span class="n">prim_slicer</span> <span class="p">#(</span>
-<a name="l-473"></a>    <span class="p">.</span><span class="n">InW</span> <span class="p">(</span><span class="n">PrefixSize</span><span class="o">*</span><span class="mi">8</span><span class="p">),</span>
-<a name="l-474"></a>    <span class="p">.</span><span class="n">IndexW</span><span class="p">(</span><span class="n">KeccakMsgAddrW</span><span class="p">),</span>
-<a name="l-475"></a>    <span class="p">.</span><span class="n">OutW</span><span class="p">(</span><span class="n">MsgWidth</span><span class="p">)</span>
-<a name="l-476"></a>  <span class="p">)</span> <span class="n">u_prefix_slicer</span> <span class="p">(</span>
-<a name="l-477"></a>    <span class="p">.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">prefix_index</span><span class="p">),</span>
-<a name="l-478"></a>    <span class="p">.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">prefix</span><span class="p">),</span>
-<a name="l-479"></a>    <span class="p">.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">prefix_sliced</span><span class="p">)</span>
-<a name="l-480"></a>  <span class="p">);</span>
-<a name="l-481"></a>
-<a name="l-482"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_prefix_masked</span>
-<a name="l-483"></a>    <span class="c1">// If Masking is enabled, prefix is two share.</span>
-<a name="l-484"></a>    <span class="k">assign</span> <span class="n">prefix_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-485"></a>    <span class="k">assign</span> <span class="n">prefix_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_sliced</span><span class="p">;</span>
-<a name="l-486"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_prefix_unmasked</span>
-<a name="l-487"></a>    <span class="c1">// If Unmasked, only one share exists.</span>
-<a name="l-488"></a>    <span class="k">assign</span> <span class="n">prefix_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_sliced</span><span class="p">;</span>
-<a name="l-489"></a>  <span class="k">end</span>
-<a name="l-490"></a>
-<a name="l-491"></a>  <span class="c1">// ==========================================================================</span>
-<a name="l-492"></a>  <span class="c1">// function_pad is the unique value padded at the end of the message based on</span>
-<a name="l-493"></a>  <span class="c1">// the function among SHA3, SHAKE, cSHAKE. The standard mentioned that SHA3</span>
-<a name="l-494"></a>  <span class="c1">// pads `01` , SHAKE pads `1111`, and cSHAKE pads `00`.</span>
-<a name="l-495"></a>  <span class="c1">//</span>
-<a name="l-496"></a>  <span class="c1">// Then pad10*1() function follows. It adds `1` first then fill 0 until it</span>
-<a name="l-497"></a>  <span class="c1">// reaches the block size -1, then adds `1`.</span>
-<a name="l-498"></a>  <span class="c1">//</span>
-<a name="l-499"></a>  <span class="c1">// It means always `1` is followed by the function pad.</span>
-<a name="l-500"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">funcpad</span><span class="p">;</span>
-<a name="l-501"></a>
-<a name="l-502"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">funcpad_merged</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
-<a name="l-503"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">funcpad_data</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
-<a name="l-504"></a>
-<a name="l-505"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-506"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">mode_i</span><span class="p">)</span>
-<a name="l-507"></a>      <span class="nl">Sha3:</span>   <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 00110</span><span class="p">;</span>
-<a name="l-508"></a>      <span class="nl">Shake:</span>  <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 11111</span><span class="p">;</span>
-<a name="l-509"></a>      <span class="nl">CShake:</span> <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 00100</span><span class="p">;</span>
-<a name="l-510"></a>
-<a name="l-511"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-512"></a>        <span class="c1">// Just create non-padding but pad10*1 only</span>
-<a name="l-513"></a>        <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 00001</span><span class="p">;</span>
-<a name="l-514"></a>      <span class="k">end</span>
-<a name="l-515"></a>    <span class="k">endcase</span>
-<a name="l-516"></a>  <span class="k">end</span>
-<a name="l-517"></a>
-<a name="l-518"></a>  <span class="c1">// ==========================================================================</span>
-<a name="l-519"></a>  <span class="c1">// `zero_with_endbit` contains all zero unless the message is for the last</span>
-<a name="l-520"></a>  <span class="c1">// MsgWidth beat in the block. If it is the end of the block, the last bit</span>
-<a name="l-521"></a>  <span class="c1">// will be set to complete pad10*1() functionality.</span>
-<a name="l-522"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">zero_with_endbit</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
-<a name="l-523"></a>
-<a name="l-524"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_zeroend_masked</span>
-<a name="l-525"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>               <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-526"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>   <span class="o">=</span> <span class="n">end_of_block</span><span class="p">;</span>
-<a name="l-527"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-528"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_zeroend_unmasked</span>
-<a name="l-529"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>   <span class="o">=</span> <span class="n">end_of_block</span><span class="p">;</span>
-<a name="l-530"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-531"></a>  <span class="k">end</span>
-<a name="l-532"></a>
-<a name="l-533"></a>  <span class="c1">// ==========================================================================</span>
-<a name="l-534"></a>  <span class="c1">// Data mux for output data</span>
-<a name="l-535"></a>
-<a name="l-536"></a>  <span class="k">assign</span> <span class="n">keccak_addr_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">sent_message</span> <span class="o">&lt;</span> <span class="n">block_addr_limit</span><span class="p">)</span> <span class="o">?</span> <span class="n">sent_message</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-469"></a>  <span class="k">assign</span> <span class="n">prefix</span> <span class="o">=</span> <span class="p">{</span><span class="n">ns_data_i</span><span class="p">,</span> <span class="n">encode_bytepad</span><span class="p">};</span>
+<a name="l-470"></a>
+<a name="l-471"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prefix_sliced</span><span class="p">;</span>
+<a name="l-472"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prefix_data</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
+<a name="l-473"></a>
+<a name="l-474"></a>  <span class="n">prim_slicer</span> <span class="p">#(</span>
+<a name="l-475"></a>    <span class="p">.</span><span class="n">InW</span> <span class="p">(</span><span class="n">PrefixSize</span><span class="o">*</span><span class="mi">8</span><span class="p">),</span>
+<a name="l-476"></a>    <span class="p">.</span><span class="n">IndexW</span><span class="p">(</span><span class="n">KeccakMsgAddrW</span><span class="p">),</span>
+<a name="l-477"></a>    <span class="p">.</span><span class="n">OutW</span><span class="p">(</span><span class="n">MsgWidth</span><span class="p">)</span>
+<a name="l-478"></a>  <span class="p">)</span> <span class="n">u_prefix_slicer</span> <span class="p">(</span>
+<a name="l-479"></a>    <span class="p">.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">prefix_index</span><span class="p">),</span>
+<a name="l-480"></a>    <span class="p">.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">prefix</span><span class="p">),</span>
+<a name="l-481"></a>    <span class="p">.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">prefix_sliced</span><span class="p">)</span>
+<a name="l-482"></a>  <span class="p">);</span>
+<a name="l-483"></a>
+<a name="l-484"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_prefix_masked</span>
+<a name="l-485"></a>    <span class="c1">// If Masking is enabled, prefix is two share.</span>
+<a name="l-486"></a>    <span class="k">assign</span> <span class="n">prefix_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-487"></a>    <span class="k">assign</span> <span class="n">prefix_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_sliced</span><span class="p">;</span>
+<a name="l-488"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_prefix_unmasked</span>
+<a name="l-489"></a>    <span class="c1">// If Unmasked, only one share exists.</span>
+<a name="l-490"></a>    <span class="k">assign</span> <span class="n">prefix_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix_sliced</span><span class="p">;</span>
+<a name="l-491"></a>  <span class="k">end</span>
+<a name="l-492"></a>
+<a name="l-493"></a>  <span class="c1">// ==========================================================================</span>
+<a name="l-494"></a>  <span class="c1">// function_pad is the unique value padded at the end of the message based on</span>
+<a name="l-495"></a>  <span class="c1">// the function among SHA3, SHAKE, cSHAKE. The standard mentioned that SHA3</span>
+<a name="l-496"></a>  <span class="c1">// pads `01` , SHAKE pads `1111`, and cSHAKE pads `00`.</span>
+<a name="l-497"></a>  <span class="c1">//</span>
+<a name="l-498"></a>  <span class="c1">// Then pad10*1() function follows. It adds `1` first then fill 0 until it</span>
+<a name="l-499"></a>  <span class="c1">// reaches the block size -1, then adds `1`.</span>
+<a name="l-500"></a>  <span class="c1">//</span>
+<a name="l-501"></a>  <span class="c1">// It means always `1` is followed by the function pad.</span>
+<a name="l-502"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">funcpad</span><span class="p">;</span>
+<a name="l-503"></a>
+<a name="l-504"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">funcpad_merged</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
+<a name="l-505"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">funcpad_data</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
+<a name="l-506"></a>
+<a name="l-507"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-508"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">mode_i</span><span class="p">)</span>
+<a name="l-509"></a>      <span class="nl">Sha3:</span>   <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 00110</span><span class="p">;</span>
+<a name="l-510"></a>      <span class="nl">Shake:</span>  <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 11111</span><span class="p">;</span>
+<a name="l-511"></a>      <span class="nl">CShake:</span> <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 00100</span><span class="p">;</span>
+<a name="l-512"></a>
+<a name="l-513"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-514"></a>        <span class="c1">// Just create non-padding but pad10*1 only</span>
+<a name="l-515"></a>        <span class="n">funcpad</span> <span class="o">=</span> <span class="mb">5&#39;b 00001</span><span class="p">;</span>
+<a name="l-516"></a>      <span class="k">end</span>
+<a name="l-517"></a>    <span class="k">endcase</span>
+<a name="l-518"></a>  <span class="k">end</span>
+<a name="l-519"></a>
+<a name="l-520"></a>  <span class="c1">// ==========================================================================</span>
+<a name="l-521"></a>  <span class="c1">// `zero_with_endbit` contains all zero unless the message is for the last</span>
+<a name="l-522"></a>  <span class="c1">// MsgWidth beat in the block. If it is the end of the block, the last bit</span>
+<a name="l-523"></a>  <span class="c1">// will be set to complete pad10*1() functionality.</span>
+<a name="l-524"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">zero_with_endbit</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
+<a name="l-525"></a>
+<a name="l-526"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_zeroend_masked</span>
+<a name="l-527"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>               <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-528"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>   <span class="o">=</span> <span class="n">end_of_block</span><span class="p">;</span>
+<a name="l-529"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-530"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_zeroend_unmasked</span>
+<a name="l-531"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>   <span class="o">=</span> <span class="n">end_of_block</span><span class="p">;</span>
+<a name="l-532"></a>    <span class="k">assign</span> <span class="n">zero_with_endbit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-533"></a>  <span class="k">end</span>
+<a name="l-534"></a>
+<a name="l-535"></a>  <span class="c1">// ==========================================================================</span>
+<a name="l-536"></a>  <span class="c1">// Data mux for output data</span>
 <a name="l-537"></a>
-<a name="l-538"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-539"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sel_mux</span><span class="p">)</span>
-<a name="l-540"></a>      <span class="nl">MuxFifo:</span>    <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">msg_data_i</span><span class="p">;</span>
-<a name="l-541"></a>      <span class="nl">MuxPrefix:</span>  <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">prefix_data</span><span class="p">;</span>
-<a name="l-542"></a>      <span class="nl">MuxFuncPad:</span> <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">funcpad_data</span><span class="p">;</span>
-<a name="l-543"></a>      <span class="nl">MuxZeroEnd:</span> <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">zero_with_endbit</span><span class="p">;</span>
-<a name="l-544"></a>
-<a name="l-545"></a>      <span class="c1">// MuxNone</span>
-<a name="l-546"></a>      <span class="k">default</span><span class="o">:</span>  <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
-<a name="l-547"></a>    <span class="k">endcase</span>
-<a name="l-548"></a>  <span class="k">end</span>
-<a name="l-549"></a>
-<a name="l-550"></a>  <span class="c1">// TODO: keccak_valid_o mux</span>
-<a name="l-551"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-552"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sel_mux</span><span class="p">)</span>
-<a name="l-553"></a>      <span class="nl">MuxFifo:</span>    <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">msg_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hold_msg</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">en_msgbuf</span><span class="p">;</span>
-<a name="l-554"></a>      <span class="nl">MuxPrefix:</span>  <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">fsm_keccak_valid</span><span class="p">;</span>
-<a name="l-555"></a>      <span class="nl">MuxFuncPad:</span> <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">fsm_keccak_valid</span><span class="p">;</span>
-<a name="l-556"></a>      <span class="nl">MuxZeroEnd:</span> <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">fsm_keccak_valid</span><span class="p">;</span>
-<a name="l-557"></a>
-<a name="l-558"></a>      <span class="c1">// MuxNone</span>
-<a name="l-559"></a>      <span class="k">default</span><span class="o">:</span>  <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-560"></a>    <span class="k">endcase</span>
-<a name="l-561"></a>  <span class="k">end</span>
-<a name="l-562"></a>
-<a name="l-563"></a>  <span class="c1">// TODO: msg_ready_o mux</span>
-<a name="l-564"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-565"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sel_mux</span><span class="p">)</span>
-<a name="l-566"></a>      <span class="nl">MuxFifo:</span>    <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="n">en_msgbuf</span> <span class="o">|</span> <span class="p">(</span><span class="n">keccak_ready_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hold_msg</span><span class="p">);</span>
-<a name="l-567"></a>      <span class="nl">MuxPrefix:</span>  <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-568"></a>      <span class="nl">MuxFuncPad:</span> <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-569"></a>      <span class="nl">MuxZeroEnd:</span> <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-570"></a>
-<a name="l-571"></a>      <span class="c1">// MuxNone</span>
-<a name="l-572"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-573"></a>    <span class="k">endcase</span>
-<a name="l-574"></a>  <span class="k">end</span>
-<a name="l-575"></a>
-<a name="l-576"></a>  <span class="c1">// prim_packer : packing to 64bit to update keccak storage</span>
-<a name="l-577"></a>  <span class="c1">// two prim_packer in this module are used to pack the data received from</span>
-<a name="l-578"></a>  <span class="c1">// upper layer (KMAC core) and also the 5bit padding bits.</span>
-<a name="l-579"></a>  <span class="c1">// It is assumed that the message from upper layer could be partial at the</span>
-<a name="l-580"></a>  <span class="c1">// end of the message. Then the 2 or 4bit padding is required. It can be</span>
-<a name="l-581"></a>  <span class="c1">// handled by some custom logic or could be done by prim_packer.</span>
-<a name="l-582"></a>  <span class="c1">// If packer is used, the MSG_FIFO doesn&#39;t have to have another prim_packer</span>
-<a name="l-583"></a>  <span class="c1">// in front of the FIFO. This logic can handle the partial writes from the</span>
-<a name="l-584"></a>  <span class="c1">// software.</span>
-<a name="l-585"></a>  <span class="c1">//</span>
-<a name="l-586"></a>  <span class="c1">// If a custom logic is implemented here, prim_packer is necessary in front</span>
-<a name="l-587"></a>  <span class="c1">// of the FIFO, as this logic only appends at the end of the message when</span>
-<a name="l-588"></a>  <span class="c1">// `process_i` is asserted. Also, in this case, even prim_packer is not</span>
-<a name="l-589"></a>  <span class="c1">// needed, still 64bit registers to latch the partial write is required.</span>
-<a name="l-590"></a>  <span class="c1">// If not, the logic has to delay the acceptance of the incoming write</span>
-<a name="l-591"></a>  <span class="c1">// accesses. It may trigger the back-pressuring in some case which may result</span>
-<a name="l-592"></a>  <span class="c1">// that the software(or upper layer) may not set process_i.</span>
-<a name="l-593"></a>  <span class="c1">//</span>
-<a name="l-594"></a>  <span class="c1">// For custom logic, it could be implemented by the 8 mux selection.</span>
-<a name="l-595"></a>  <span class="c1">// for instance: (subject to be changed)</span>
-<a name="l-596"></a>  <span class="c1">//   unique case (sent_byte[2:0]) // generated from msg_strb_i</span>
-<a name="l-597"></a>  <span class="c1">//     3&#39;b 000: funcpad_merged = {end_of_block, 63&#39;(function_pad)                  };</span>
-<a name="l-598"></a>  <span class="c1">//     3&#39;b 001: funcpad_merged = {end_of_block, 55&#39;(function_pad), msg_data_i[ 7:0]};</span>
-<a name="l-599"></a>  <span class="c1">//     3&#39;b 010: funcpad_merged = {end_of_block, 47&#39;(function_pad), msg_data_i[15:0]};</span>
-<a name="l-600"></a>  <span class="c1">//     3&#39;b 011: funcpad_merged = {end_of_block, 39&#39;(function_pad), msg_data_i[23:0]};</span>
-<a name="l-601"></a>  <span class="c1">//     3&#39;b 100: funcpad_merged = {end_of_block, 31&#39;(function_pad), msg_data_i[31:0]};</span>
-<a name="l-602"></a>  <span class="c1">//     3&#39;b 101: funcpad_merged = {end_of_block, 23&#39;(function_pad), msg_data_i[39:0]};</span>
-<a name="l-603"></a>  <span class="c1">//     3&#39;b 110: funcpad_merged = {end_of_block, 15&#39;(function_pad), msg_data_i[47:0]};</span>
-<a name="l-604"></a>  <span class="c1">//     3&#39;b 111: funcpad_merged = {end_of_block,  7&#39;(function_pad), msg_data_i[55:0]};</span>
-<a name="l-605"></a>  <span class="c1">//     default: funcpad_merged = &#39;0;</span>
-<a name="l-606"></a>  <span class="c1">//   endcase</span>
-<a name="l-607"></a>
-<a name="l-608"></a>  <span class="c1">// internal buffer to store partial write. It doesn&#39;t have to store last byte as it</span>
-<a name="l-609"></a>  <span class="c1">// stores only when partial write.</span>
-<a name="l-610"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">msg_buf</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
-<a name="l-611"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgStrbW</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">msg_strb</span><span class="p">;</span>
-<a name="l-612"></a>
-<a name="l-613"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-614"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-615"></a>      <span class="n">msg_buf</span>  <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
-<a name="l-616"></a>      <span class="n">msg_strb</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-617"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">en_msgbuf</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-618"></a>      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-619"></a>        <span class="n">msg_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">&lt;=</span> <span class="n">msg_data_i</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">8</span><span class="p">)];</span>
-<a name="l-620"></a>      <span class="k">end</span>
-<a name="l-621"></a>      <span class="n">msg_strb</span> <span class="o">&lt;=</span> <span class="n">msg_strb_i</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">MsgStrbW</span><span class="o">-</span><span class="mi">1</span><span class="p">)];</span>
-<a name="l-622"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clr_msgbuf</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-623"></a>      <span class="n">msg_buf</span>  <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
-<a name="l-624"></a>      <span class="n">msg_strb</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-625"></a>    <span class="k">end</span>
-<a name="l-626"></a>  <span class="k">end</span>
-<a name="l-627"></a>
-<a name="l-628"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_funcpad_data_masked</span>
-<a name="l-629"></a>    <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-630"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">msg_strb</span><span class="p">)</span>
-<a name="l-631"></a>        <span class="mb">7&#39;b 000_0000</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-632"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-633"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">63</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">)</span>                  <span class="p">};</span>
-<a name="l-634"></a>        <span class="k">end</span>
-<a name="l-635"></a>        <span class="mb">7&#39;b 000_0001</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-636"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">56&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span> <span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-637"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">55</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span> <span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-638"></a>        <span class="k">end</span>
-<a name="l-639"></a>        <span class="mb">7&#39;b 000_0011</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-640"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">48&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-641"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">47</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-642"></a>        <span class="k">end</span>
-<a name="l-643"></a>        <span class="mb">7&#39;b 000_0111</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-644"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">40&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">23</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-645"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">39</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">23</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-646"></a>        <span class="k">end</span>
-<a name="l-647"></a>        <span class="mb">7&#39;b 000_1111</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-648"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">32&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-649"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">31</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-650"></a>        <span class="k">end</span>
-<a name="l-651"></a>        <span class="mb">7&#39;b 001_1111</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-652"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">24&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">39</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-653"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">23</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">39</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-654"></a>        <span class="k">end</span>
-<a name="l-655"></a>        <span class="mb">7&#39;b 011_1111</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-656"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">16&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">47</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-657"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">15</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">47</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-658"></a>        <span class="k">end</span>
-<a name="l-659"></a>        <span class="mb">7&#39;b 111_1111</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-660"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">8&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">55</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-661"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span>  <span class="mi">7</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">55</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-662"></a>        <span class="k">end</span>
-<a name="l-663"></a>
-<a name="l-664"></a>        <span class="k">default</span><span class="o">:</span> <span class="n">funcpad_data</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
-<a name="l-665"></a>      <span class="k">endcase</span>
-<a name="l-666"></a>    <span class="k">end</span>
-<a name="l-667"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_funcpad_data_unmasked</span>
-<a name="l-668"></a>    <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-669"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">msg_strb</span><span class="p">)</span>
-<a name="l-670"></a>        <span class="mb">7&#39;b 000_0000</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">63</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">)</span>                  <span class="p">};</span>
-<a name="l-671"></a>        <span class="mb">7&#39;b 000_0001</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">55</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span> <span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-672"></a>        <span class="mb">7&#39;b 000_0011</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">47</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-673"></a>        <span class="mb">7&#39;b 000_0111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">39</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">23</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-674"></a>        <span class="mb">7&#39;b 000_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">31</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-675"></a>        <span class="mb">7&#39;b 001_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">23</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">39</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-676"></a>        <span class="mb">7&#39;b 011_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">15</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">47</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-677"></a>        <span class="mb">7&#39;b 111_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span>  <span class="mi">7</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">55</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
-<a name="l-678"></a>
-<a name="l-679"></a>        <span class="k">default</span><span class="o">:</span> <span class="n">funcpad_data</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
-<a name="l-680"></a>      <span class="k">endcase</span>
-<a name="l-681"></a>    <span class="k">end</span>
-<a name="l-682"></a>  <span class="k">end</span>
-<a name="l-683"></a>
-<a name="l-684"></a>  <span class="c1">////////////////</span>
-<a name="l-685"></a>  <span class="c1">// Assertions //</span>
+<a name="l-538"></a>  <span class="k">assign</span> <span class="n">keccak_addr_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">sent_message</span> <span class="o">&lt;</span> <span class="n">block_addr_limit</span><span class="p">)</span> <span class="o">?</span> <span class="n">sent_message</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-539"></a>
+<a name="l-540"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-541"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sel_mux</span><span class="p">)</span>
+<a name="l-542"></a>      <span class="nl">MuxFifo:</span>    <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">msg_data_i</span><span class="p">;</span>
+<a name="l-543"></a>      <span class="nl">MuxPrefix:</span>  <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">prefix_data</span><span class="p">;</span>
+<a name="l-544"></a>      <span class="nl">MuxFuncPad:</span> <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">funcpad_data</span><span class="p">;</span>
+<a name="l-545"></a>      <span class="nl">MuxZeroEnd:</span> <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="n">zero_with_endbit</span><span class="p">;</span>
+<a name="l-546"></a>
+<a name="l-547"></a>      <span class="c1">// MuxNone</span>
+<a name="l-548"></a>      <span class="k">default</span><span class="o">:</span>  <span class="n">keccak_data_o</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
+<a name="l-549"></a>    <span class="k">endcase</span>
+<a name="l-550"></a>  <span class="k">end</span>
+<a name="l-551"></a>
+<a name="l-552"></a>  <span class="c1">// TODO: keccak_valid_o mux</span>
+<a name="l-553"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-554"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sel_mux</span><span class="p">)</span>
+<a name="l-555"></a>      <span class="nl">MuxFifo:</span>    <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">msg_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hold_msg</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">en_msgbuf</span><span class="p">;</span>
+<a name="l-556"></a>      <span class="nl">MuxPrefix:</span>  <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">fsm_keccak_valid</span><span class="p">;</span>
+<a name="l-557"></a>      <span class="nl">MuxFuncPad:</span> <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">fsm_keccak_valid</span><span class="p">;</span>
+<a name="l-558"></a>      <span class="nl">MuxZeroEnd:</span> <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="n">fsm_keccak_valid</span><span class="p">;</span>
+<a name="l-559"></a>
+<a name="l-560"></a>      <span class="c1">// MuxNone</span>
+<a name="l-561"></a>      <span class="k">default</span><span class="o">:</span>  <span class="n">keccak_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-562"></a>    <span class="k">endcase</span>
+<a name="l-563"></a>  <span class="k">end</span>
+<a name="l-564"></a>
+<a name="l-565"></a>  <span class="c1">// TODO: msg_ready_o mux</span>
+<a name="l-566"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-567"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sel_mux</span><span class="p">)</span>
+<a name="l-568"></a>      <span class="nl">MuxFifo:</span>    <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="n">en_msgbuf</span> <span class="o">|</span> <span class="p">(</span><span class="n">keccak_ready_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hold_msg</span><span class="p">);</span>
+<a name="l-569"></a>      <span class="nl">MuxPrefix:</span>  <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-570"></a>      <span class="nl">MuxFuncPad:</span> <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-571"></a>      <span class="nl">MuxZeroEnd:</span> <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-572"></a>
+<a name="l-573"></a>      <span class="c1">// MuxNone</span>
+<a name="l-574"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">msg_ready_o</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-575"></a>    <span class="k">endcase</span>
+<a name="l-576"></a>  <span class="k">end</span>
+<a name="l-577"></a>
+<a name="l-578"></a>  <span class="c1">// prim_packer : packing to 64bit to update keccak storage</span>
+<a name="l-579"></a>  <span class="c1">// two prim_packer in this module are used to pack the data received from</span>
+<a name="l-580"></a>  <span class="c1">// upper layer (KMAC core) and also the 5bit padding bits.</span>
+<a name="l-581"></a>  <span class="c1">// It is assumed that the message from upper layer could be partial at the</span>
+<a name="l-582"></a>  <span class="c1">// end of the message. Then the 2 or 4bit padding is required. It can be</span>
+<a name="l-583"></a>  <span class="c1">// handled by some custom logic or could be done by prim_packer.</span>
+<a name="l-584"></a>  <span class="c1">// If packer is used, the MSG_FIFO doesn&#39;t have to have another prim_packer</span>
+<a name="l-585"></a>  <span class="c1">// in front of the FIFO. This logic can handle the partial writes from the</span>
+<a name="l-586"></a>  <span class="c1">// software.</span>
+<a name="l-587"></a>  <span class="c1">//</span>
+<a name="l-588"></a>  <span class="c1">// If a custom logic is implemented here, prim_packer is necessary in front</span>
+<a name="l-589"></a>  <span class="c1">// of the FIFO, as this logic only appends at the end of the message when</span>
+<a name="l-590"></a>  <span class="c1">// `process_i` is asserted. Also, in this case, even prim_packer is not</span>
+<a name="l-591"></a>  <span class="c1">// needed, still 64bit registers to latch the partial write is required.</span>
+<a name="l-592"></a>  <span class="c1">// If not, the logic has to delay the acceptance of the incoming write</span>
+<a name="l-593"></a>  <span class="c1">// accesses. It may trigger the back-pressuring in some case which may result</span>
+<a name="l-594"></a>  <span class="c1">// that the software(or upper layer) may not set process_i.</span>
+<a name="l-595"></a>  <span class="c1">//</span>
+<a name="l-596"></a>  <span class="c1">// For custom logic, it could be implemented by the 8 mux selection.</span>
+<a name="l-597"></a>  <span class="c1">// for instance: (subject to be changed)</span>
+<a name="l-598"></a>  <span class="c1">//   unique case (sent_byte[2:0]) // generated from msg_strb_i</span>
+<a name="l-599"></a>  <span class="c1">//     3&#39;b 000: funcpad_merged = {end_of_block, 63&#39;(function_pad)                  };</span>
+<a name="l-600"></a>  <span class="c1">//     3&#39;b 001: funcpad_merged = {end_of_block, 55&#39;(function_pad), msg_data_i[ 7:0]};</span>
+<a name="l-601"></a>  <span class="c1">//     3&#39;b 010: funcpad_merged = {end_of_block, 47&#39;(function_pad), msg_data_i[15:0]};</span>
+<a name="l-602"></a>  <span class="c1">//     3&#39;b 011: funcpad_merged = {end_of_block, 39&#39;(function_pad), msg_data_i[23:0]};</span>
+<a name="l-603"></a>  <span class="c1">//     3&#39;b 100: funcpad_merged = {end_of_block, 31&#39;(function_pad), msg_data_i[31:0]};</span>
+<a name="l-604"></a>  <span class="c1">//     3&#39;b 101: funcpad_merged = {end_of_block, 23&#39;(function_pad), msg_data_i[39:0]};</span>
+<a name="l-605"></a>  <span class="c1">//     3&#39;b 110: funcpad_merged = {end_of_block, 15&#39;(function_pad), msg_data_i[47:0]};</span>
+<a name="l-606"></a>  <span class="c1">//     3&#39;b 111: funcpad_merged = {end_of_block,  7&#39;(function_pad), msg_data_i[55:0]};</span>
+<a name="l-607"></a>  <span class="c1">//     default: funcpad_merged = &#39;0;</span>
+<a name="l-608"></a>  <span class="c1">//   endcase</span>
+<a name="l-609"></a>
+<a name="l-610"></a>  <span class="c1">// internal buffer to store partial write. It doesn&#39;t have to store last byte as it</span>
+<a name="l-611"></a>  <span class="c1">// stores only when partial write.</span>
+<a name="l-612"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">msg_buf</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
+<a name="l-613"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MsgStrbW</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">msg_strb</span><span class="p">;</span>
+<a name="l-614"></a>
+<a name="l-615"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-616"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-617"></a>      <span class="n">msg_buf</span>  <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
+<a name="l-618"></a>      <span class="n">msg_strb</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-619"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">en_msgbuf</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-620"></a>      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-621"></a>        <span class="n">msg_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">&lt;=</span> <span class="n">msg_data_i</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">MsgWidth</span><span class="o">-</span><span class="mi">8</span><span class="p">)];</span>
+<a name="l-622"></a>      <span class="k">end</span>
+<a name="l-623"></a>      <span class="n">msg_strb</span> <span class="o">&lt;=</span> <span class="n">msg_strb_i</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="p">(</span><span class="n">MsgStrbW</span><span class="o">-</span><span class="mi">1</span><span class="p">)];</span>
+<a name="l-624"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clr_msgbuf</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-625"></a>      <span class="n">msg_buf</span>  <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
+<a name="l-626"></a>      <span class="n">msg_strb</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-627"></a>    <span class="k">end</span>
+<a name="l-628"></a>  <span class="k">end</span>
+<a name="l-629"></a>
+<a name="l-630"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_funcpad_data_masked</span>
+<a name="l-631"></a>    <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-632"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">msg_strb</span><span class="p">)</span>
+<a name="l-633"></a>        <span class="mb">7&#39;b 000_0000</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-634"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-635"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">63</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">)</span>                  <span class="p">};</span>
+<a name="l-636"></a>        <span class="k">end</span>
+<a name="l-637"></a>        <span class="mb">7&#39;b 000_0001</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-638"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">56&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span> <span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-639"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">55</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span> <span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-640"></a>        <span class="k">end</span>
+<a name="l-641"></a>        <span class="mb">7&#39;b 000_0011</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-642"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">48&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-643"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">47</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-644"></a>        <span class="k">end</span>
+<a name="l-645"></a>        <span class="mb">7&#39;b 000_0111</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-646"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">40&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">23</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-647"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">39</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">23</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-648"></a>        <span class="k">end</span>
+<a name="l-649"></a>        <span class="mb">7&#39;b 000_1111</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-650"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">32&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-651"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">31</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-652"></a>        <span class="k">end</span>
+<a name="l-653"></a>        <span class="mb">7&#39;b 001_1111</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-654"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">24&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">39</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-655"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">23</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">39</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-656"></a>        <span class="k">end</span>
+<a name="l-657"></a>        <span class="mb">7&#39;b 011_1111</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-658"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mh">16&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">47</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-659"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">15</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">47</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-660"></a>        <span class="k">end</span>
+<a name="l-661"></a>        <span class="mb">7&#39;b 111_1111</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-662"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span> <span class="mh">8&#39;h0</span><span class="p">,</span>                      <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">55</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-663"></a>          <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span>  <span class="mi">7</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">55</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-664"></a>        <span class="k">end</span>
+<a name="l-665"></a>
+<a name="l-666"></a>        <span class="k">default</span><span class="o">:</span> <span class="n">funcpad_data</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
+<a name="l-667"></a>      <span class="k">endcase</span>
+<a name="l-668"></a>    <span class="k">end</span>
+<a name="l-669"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_funcpad_data_unmasked</span>
+<a name="l-670"></a>    <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-671"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">msg_strb</span><span class="p">)</span>
+<a name="l-672"></a>        <span class="mb">7&#39;b 000_0000</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">63</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">)</span>                  <span class="p">};</span>
+<a name="l-673"></a>        <span class="mb">7&#39;b 000_0001</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">55</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span> <span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-674"></a>        <span class="mb">7&#39;b 000_0011</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">47</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">15</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-675"></a>        <span class="mb">7&#39;b 000_0111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">39</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">23</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-676"></a>        <span class="mb">7&#39;b 000_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">31</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-677"></a>        <span class="mb">7&#39;b 001_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">23</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">39</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-678"></a>        <span class="mb">7&#39;b 011_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span> <span class="mi">15</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">47</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-679"></a>        <span class="mb">7&#39;b 111_1111</span><span class="o">:</span> <span class="n">funcpad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">end_of_block</span><span class="p">,</span>  <span class="mi">7</span><span class="p">&#39;(</span><span class="n">funcpad</span><span class="p">),</span> <span class="n">msg_buf</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">55</span><span class="o">:</span><span class="mi">0</span><span class="p">]};</span>
+<a name="l-680"></a>
+<a name="l-681"></a>        <span class="k">default</span><span class="o">:</span> <span class="n">funcpad_data</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
+<a name="l-682"></a>      <span class="k">endcase</span>
+<a name="l-683"></a>    <span class="k">end</span>
+<a name="l-684"></a>  <span class="k">end</span>
+<a name="l-685"></a>
 <a name="l-686"></a>  <span class="c1">////////////////</span>
-<a name="l-687"></a>
-<a name="l-688"></a>  <span class="c1">// Prefix size is smaller than the smallest Keccak Block Size, which is 72 bytes.</span>
-<a name="l-689"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">PrefixLessThanBlock_A</span><span class="p">,</span> <span class="n">PrefixSize</span><span class="o">/</span><span class="mi">8</span> <span class="o">&lt;</span> <span class="n">KeccakRate</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
-<a name="l-690"></a>
-<a name="l-691"></a>  <span class="c1">// Some part of datapath in sha3pad assumes Data width as 64bit.</span>
-<a name="l-692"></a>  <span class="c1">// If data width need to be changed, funcpad_data part should be changed too.</span>
-<a name="l-693"></a>  <span class="c1">// Also, The blocksize shall be divided by MsgWidth, which means, MsgWidth</span>
-<a name="l-694"></a>  <span class="c1">// can be {16, 32, 64} even funcpad_data mux is fully flexible.</span>
-<a name="l-695"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">MsgWidthidth_A</span><span class="p">,</span> <span class="n">MsgWidth</span> <span class="o">==</span> <span class="mi">64</span><span class="p">)</span>
-<a name="l-696"></a>
-<a name="l-697"></a>  <span class="c1">// Assume pulse signals: start, process, done</span>
-<a name="l-698"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StartPulse_A</span><span class="p">,</span> <span class="n">start_i</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">start_i</span><span class="p">)</span>
-<a name="l-699"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ProcessPulse_A</span><span class="p">,</span> <span class="n">process_i</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">process_i</span><span class="p">)</span>
-<a name="l-700"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">DonePulse_A</span><span class="p">,</span> <span class="n">done_i</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">done_i</span><span class="p">)</span>
-<a name="l-701"></a>
-<a name="l-702"></a>  <span class="c1">// ASSERT output pulse signals: absorbed_o, keccak_run_o</span>
-<a name="l-703"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">AbsorbedPulse_A</span><span class="p">,</span> <span class="n">absorbed_o</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">absorbed_o</span><span class="p">)</span>
-<a name="l-704"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">KeccakRunPulse_A</span><span class="p">,</span> <span class="n">keccak_run_o</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">keccak_run_o</span><span class="p">)</span>
-<a name="l-705"></a>
-<a name="l-706"></a>  <span class="c1">// start_i, done_i, process_i cannot set high at the same time</span>
-<a name="l-707"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StartProcessDoneMutex_a</span><span class="p">,</span> <span class="p">$</span><span class="n">onehot0</span><span class="p">({</span><span class="n">start_i</span><span class="p">,</span> <span class="n">process_i</span><span class="p">,</span> <span class="n">done_i</span><span class="p">}))</span>
-<a name="l-708"></a>
-<a name="l-709"></a>  <span class="c1">// Sequence, start_i --&gt; process_i --&gt; absorbed_o --&gt; done_i</span>
-<a name="l-710"></a>  <span class="c1">//`ASSUME(Sequence_a, start_i ##[1:$] process_i ##[1:$] ##[1:$] absorbed_o ##[1:$] done_i)</span>
-<a name="l-711"></a>
-<a name="l-712"></a><span class="no">`ifndef</span> <span class="n">SYNTHESIS</span>
-<a name="l-713"></a>  <span class="c1">// Process only asserts after start and all message are fed.</span>
-<a name="l-714"></a>  <span class="c1">// These valid signals are qualifier of FPV to trigger the control signal</span>
-<a name="l-715"></a>  <span class="c1">// It is a little bit hard to specify these criteria in SVA property so creating</span>
-<a name="l-716"></a>  <span class="c1">// qualifiers in RTL form is easier.</span>
-<a name="l-717"></a>  <span class="kt">logic</span> <span class="n">start_valid</span><span class="p">,</span> <span class="n">process_valid</span><span class="p">,</span> <span class="n">absorb_valid</span><span class="p">,</span> <span class="n">done_valid</span><span class="p">;</span>
-<a name="l-718"></a>
-<a name="l-719"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-720"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-721"></a>      <span class="n">start_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-722"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">start_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-723"></a>      <span class="n">start_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-724"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">done_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-725"></a>      <span class="n">start_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-726"></a>    <span class="k">end</span>
-<a name="l-727"></a>  <span class="k">end</span>
-<a name="l-728"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-729"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-730"></a>      <span class="n">process_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-731"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">start_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-732"></a>      <span class="n">process_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-733"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">process_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-734"></a>      <span class="n">process_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-735"></a>    <span class="k">end</span>
-<a name="l-736"></a>  <span class="k">end</span>
-<a name="l-737"></a>
-<a name="l-738"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-739"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-740"></a>      <span class="n">done_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-741"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">absorbed_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-742"></a>      <span class="n">done_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a name="l-743"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">done_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-744"></a>      <span class="n">done_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-745"></a>    <span class="k">end</span>
-<a name="l-746"></a>  <span class="k">end</span>
-<a name="l-747"></a>
-<a name="l-748"></a>  <span class="c1">// Message can be fed in between start_i and process_i.</span>
-<a name="l-749"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">MessageCondition_M</span><span class="p">,</span> <span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">msg_ready_o</span> <span class="o">|-&gt;</span> <span class="n">process_valid</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">process_i</span><span class="p">)</span>
-<a name="l-750"></a>
-<a name="l-751"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ProcessCondition_M</span><span class="p">,</span> <span class="n">process_i</span> <span class="o">|-&gt;</span> <span class="n">process_valid</span><span class="p">)</span>
-<a name="l-752"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StartCondition_M</span><span class="p">,</span> <span class="n">start_i</span> <span class="o">|-&gt;</span> <span class="n">start_valid</span><span class="p">)</span>
-<a name="l-753"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">DoneCondition_M</span><span class="p">,</span> <span class="n">done_i</span> <span class="o">|-&gt;</span> <span class="n">done_valid</span><span class="p">)</span>
-<a name="l-754"></a>
-<a name="l-755"></a>  <span class="c1">// Assume mode_i and strength_i are stable during the operation</span>
-<a name="l-756"></a>  <span class="c1">// This will be guarded at the kmac top level</span>
-<a name="l-757"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ModeStableDuringOp_M</span><span class="p">,</span>
-<a name="l-758"></a>    <span class="p">$</span><span class="n">changed</span><span class="p">(</span><span class="n">mode_i</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">start_valid</span><span class="p">)</span>
-<a name="l-759"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StrengthStableDuringOp_M</span><span class="p">,</span>
-<a name="l-760"></a>    <span class="p">$</span><span class="n">changed</span><span class="p">(</span><span class="n">strength_i</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">start_valid</span><span class="p">)</span>
-<a name="l-761"></a>
-<a name="l-762"></a><span class="no">`endif</span> <span class="c1">// SYNTHESIS</span>
+<a name="l-687"></a>  <span class="c1">// Assertions //</span>
+<a name="l-688"></a>  <span class="c1">////////////////</span>
+<a name="l-689"></a>
+<a name="l-690"></a>  <span class="c1">// Prefix size is smaller than the smallest Keccak Block Size, which is 72 bytes.</span>
+<a name="l-691"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">PrefixLessThanBlock_A</span><span class="p">,</span> <span class="n">PrefixSize</span><span class="o">/</span><span class="mi">8</span> <span class="o">&lt;</span> <span class="n">KeccakRate</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+<a name="l-692"></a>
+<a name="l-693"></a>  <span class="c1">// Some part of datapath in sha3pad assumes Data width as 64bit.</span>
+<a name="l-694"></a>  <span class="c1">// If data width need to be changed, funcpad_data part should be changed too.</span>
+<a name="l-695"></a>  <span class="c1">// Also, The blocksize shall be divided by MsgWidth, which means, MsgWidth</span>
+<a name="l-696"></a>  <span class="c1">// can be {16, 32, 64} even funcpad_data mux is fully flexible.</span>
+<a name="l-697"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">MsgWidthidth_A</span><span class="p">,</span> <span class="n">MsgWidth</span> <span class="o">==</span> <span class="mi">64</span><span class="p">)</span>
+<a name="l-698"></a>
+<a name="l-699"></a>  <span class="c1">// Assume pulse signals: start, process, done</span>
+<a name="l-700"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StartPulse_A</span><span class="p">,</span> <span class="n">start_i</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">start_i</span><span class="p">)</span>
+<a name="l-701"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ProcessPulse_A</span><span class="p">,</span> <span class="n">process_i</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">process_i</span><span class="p">)</span>
+<a name="l-702"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">DonePulse_A</span><span class="p">,</span> <span class="n">done_i</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">done_i</span><span class="p">)</span>
+<a name="l-703"></a>
+<a name="l-704"></a>  <span class="c1">// ASSERT output pulse signals: absorbed_o, keccak_run_o</span>
+<a name="l-705"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">AbsorbedPulse_A</span><span class="p">,</span> <span class="n">absorbed_o</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">absorbed_o</span><span class="p">)</span>
+<a name="l-706"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">KeccakRunPulse_A</span><span class="p">,</span> <span class="n">keccak_run_o</span> <span class="o">|=&gt;</span> <span class="o">!</span><span class="n">keccak_run_o</span><span class="p">)</span>
+<a name="l-707"></a>
+<a name="l-708"></a>  <span class="c1">// start_i, done_i, process_i cannot set high at the same time</span>
+<a name="l-709"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StartProcessDoneMutex_a</span><span class="p">,</span> <span class="p">$</span><span class="n">onehot0</span><span class="p">({</span><span class="n">start_i</span><span class="p">,</span> <span class="n">process_i</span><span class="p">,</span> <span class="n">done_i</span><span class="p">}))</span>
+<a name="l-710"></a>
+<a name="l-711"></a>  <span class="c1">// Sequence, start_i --&gt; process_i --&gt; absorbed_o --&gt; done_i</span>
+<a name="l-712"></a>  <span class="c1">//`ASSUME(Sequence_a, start_i ##[1:$] process_i ##[1:$] ##[1:$] absorbed_o ##[1:$] done_i)</span>
+<a name="l-713"></a>
+<a name="l-714"></a><span class="no">`ifndef</span> <span class="n">SYNTHESIS</span>
+<a name="l-715"></a>  <span class="c1">// Process only asserts after start and all message are fed.</span>
+<a name="l-716"></a>  <span class="c1">// These valid signals are qualifier of FPV to trigger the control signal</span>
+<a name="l-717"></a>  <span class="c1">// It is a little bit hard to specify these criteria in SVA property so creating</span>
+<a name="l-718"></a>  <span class="c1">// qualifiers in RTL form is easier.</span>
+<a name="l-719"></a>  <span class="kt">logic</span> <span class="n">start_valid</span><span class="p">,</span> <span class="n">process_valid</span><span class="p">,</span> <span class="n">absorb_valid</span><span class="p">,</span> <span class="n">done_valid</span><span class="p">;</span>
+<a name="l-720"></a>
+<a name="l-721"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-722"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-723"></a>      <span class="n">start_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-724"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">start_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-725"></a>      <span class="n">start_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-726"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">done_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-727"></a>      <span class="n">start_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-728"></a>    <span class="k">end</span>
+<a name="l-729"></a>  <span class="k">end</span>
+<a name="l-730"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-731"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-732"></a>      <span class="n">process_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-733"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">start_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-734"></a>      <span class="n">process_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-735"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">process_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-736"></a>      <span class="n">process_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-737"></a>    <span class="k">end</span>
+<a name="l-738"></a>  <span class="k">end</span>
+<a name="l-739"></a>
+<a name="l-740"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-741"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-742"></a>      <span class="n">done_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-743"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">absorbed_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-744"></a>      <span class="n">done_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a name="l-745"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">done_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-746"></a>      <span class="n">done_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-747"></a>    <span class="k">end</span>
+<a name="l-748"></a>  <span class="k">end</span>
+<a name="l-749"></a>
+<a name="l-750"></a>  <span class="c1">// Message can be fed in between start_i and process_i.</span>
+<a name="l-751"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">MessageCondition_M</span><span class="p">,</span> <span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">msg_ready_o</span> <span class="o">|-&gt;</span> <span class="n">process_valid</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">process_i</span><span class="p">)</span>
+<a name="l-752"></a>
+<a name="l-753"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ProcessCondition_M</span><span class="p">,</span> <span class="n">process_i</span> <span class="o">|-&gt;</span> <span class="n">process_valid</span><span class="p">)</span>
+<a name="l-754"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StartCondition_M</span><span class="p">,</span> <span class="n">start_i</span> <span class="o">|-&gt;</span> <span class="n">start_valid</span><span class="p">)</span>
+<a name="l-755"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">DoneCondition_M</span><span class="p">,</span> <span class="n">done_i</span> <span class="o">|-&gt;</span> <span class="n">done_valid</span><span class="p">)</span>
+<a name="l-756"></a>
+<a name="l-757"></a>  <span class="c1">// Assume mode_i and strength_i are stable during the operation</span>
+<a name="l-758"></a>  <span class="c1">// This will be guarded at the kmac top level</span>
+<a name="l-759"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ModeStableDuringOp_M</span><span class="p">,</span>
+<a name="l-760"></a>    <span class="p">$</span><span class="n">changed</span><span class="p">(</span><span class="n">mode_i</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">start_valid</span><span class="p">)</span>
+<a name="l-761"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">StrengthStableDuringOp_M</span><span class="p">,</span>
+<a name="l-762"></a>    <span class="p">$</span><span class="n">changed</span><span class="p">(</span><span class="n">strength_i</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">start_valid</span><span class="p">)</span>
 <a name="l-763"></a>
-<a name="l-764"></a>  <span class="c1">// If not full block is written, the pad shall send message to keccak_round</span>
-<a name="l-765"></a>  <span class="c1">// If it is end of the message, the state moves to StPad and send the request</span>
-<a name="l-766"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">CompleteBlockWhenProcess_A</span><span class="p">,</span>
-<a name="l-767"></a>    <span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">process_latched</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="n">end_of_block</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sent_blocksize</span> <span class="p">)</span>
-<a name="l-768"></a>    <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">st</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StPrefixWait</span><span class="p">,</span> <span class="n">StMessageWait</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="p">##[</span><span class="mi">1</span><span class="o">:</span><span class="mi">5</span><span class="p">]</span> <span class="n">keccak_valid_o</span><span class="p">)</span>
-<a name="l-769"></a>  <span class="c1">// If `process_i` is asserted, eventually sha3pad trigger run signal</span>
-<a name="l-770"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">ProcessToRun_A</span><span class="p">,</span> <span class="n">process_i</span> <span class="o">|-&gt;</span> <span class="k">strong</span><span class="p">(##[</span><span class="mi">2</span><span class="o">:</span><span class="p">$]</span> <span class="n">keccak_run_o</span><span class="p">))</span>
-<a name="l-771"></a>
-<a name="l-772"></a>  <span class="c1">// If process_i asserted, completion shall be asserted shall be asserted</span>
-<a name="l-773"></a>  <span class="c1">//`ASSERT(ProcessToAbsorbed_A, process_i |=&gt; strong(##[24*Share:$] absorbed_o))</span>
-<a name="l-774"></a>
-<a name="l-775"></a>
-<a name="l-776"></a>  <span class="c1">// Assumption of input mode_i and strength_i</span>
-<a name="l-777"></a>  <span class="c1">// SHA3 variants: SHA3-224, SHA3-256, SHA3-384, SHA3-512</span>
-<a name="l-778"></a>  <span class="c1">// SHAKE, cSHAKE variants: SHAKE128, SHAKE256, cSHAKE128, cSHAKE256</span>
-<a name="l-779"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ModeStrengthCombinations_M</span><span class="p">,</span>
-<a name="l-780"></a>    <span class="n">start_i</span> <span class="o">|-&gt;</span>
-<a name="l-781"></a>      <span class="p">(</span><span class="n">mode_i</span> <span class="o">==</span> <span class="n">Sha3</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">strength_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">L224</span><span class="p">,</span> <span class="n">L256</span><span class="p">,</span> <span class="n">L384</span><span class="p">,</span> <span class="n">L512</span><span class="p">}))</span> <span class="o">||</span>
-<a name="l-782"></a>      <span class="p">((</span><span class="n">mode_i</span> <span class="o">==</span> <span class="n">Shake</span> <span class="o">||</span> <span class="n">mode_i</span> <span class="o">==</span> <span class="n">CShake</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">strength_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">L128</span><span class="p">,</span> <span class="n">L256</span><span class="p">})),</span>
-<a name="l-783"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-784"></a>
-<a name="l-785"></a>  <span class="c1">// Keccak control interface</span>
-<a name="l-786"></a>  <span class="c1">// Keccak run triggered -&gt; completion should come</span>
-<a name="l-787"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">RunThenComplete_M</span><span class="p">,</span>
-<a name="l-788"></a>    <span class="n">keccak_run_o</span> <span class="o">|-&gt;</span> <span class="k">strong</span><span class="p">(##[</span><span class="mi">24</span><span class="o">*</span><span class="nl">Share:</span><span class="p">$]</span> <span class="n">keccak_complete_i</span><span class="p">))</span>
-<a name="l-789"></a>
-<a name="l-790"></a>  <span class="c1">// No partial write is allowed for Message FIFO interface</span>
-<a name="l-791"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">NoPartialMsgFifo_M</span><span class="p">,</span>
-<a name="l-792"></a>    <span class="n">keccak_valid_o</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">sel_mux</span> <span class="o">==</span> <span class="n">MuxFifo</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">msg_strb_i</span><span class="p">)</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">,</span>
-<a name="l-793"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-794"></a>
-<a name="l-795"></a>  <span class="c1">// When transaction is stored into msg_buf, it shall be partial write.</span>
-<a name="l-796"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">AlwaysPartialMsgBuf_M</span><span class="p">,</span>
-<a name="l-797"></a>    <span class="n">en_msgbuf</span> <span class="o">|-&gt;</span> <span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">msg_strb_i</span><span class="p">[</span><span class="n">MsgStrbW</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mb">1&#39;b0</span><span class="p">),</span>
-<a name="l-798"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-799"></a>
-<a name="l-800"></a>  <span class="c1">// if partial write comes and is acked, then no more msg_valid_i until</span>
-<a name="l-801"></a>  <span class="c1">// next message</span>
-<a name="l-802"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">PartialEndOfMsg_M</span><span class="p">,</span>
-<a name="l-803"></a>    <span class="n">keccak_ack</span> <span class="o">&amp;&amp;</span> <span class="n">msg_partial</span> <span class="o">|=&gt;</span>
-<a name="l-804"></a>      <span class="o">!</span><span class="n">msg_valid_i</span> <span class="p">##[</span><span class="mi">1</span><span class="o">:</span><span class="p">$]</span> <span class="p">$</span><span class="n">stable</span><span class="p">(</span><span class="n">msg_valid_i</span><span class="p">)</span> <span class="p">##</span><span class="mi">1</span> <span class="n">process_latched</span><span class="p">,</span>
-<a name="l-805"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-806"></a>
-<a name="l-807"></a>  <span class="c1">// At the first clock in StPad01 state, sent_blocksize shall not be set</span>
-<a name="l-808"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">Pad01NotAttheEndOfBlock_A</span><span class="p">,</span>
-<a name="l-809"></a>    <span class="p">(</span><span class="n">st</span> <span class="o">==</span> <span class="n">StPad</span> <span class="o">&amp;&amp;</span> <span class="n">st_d</span> <span class="o">==</span> <span class="n">StPad01</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="n">end_of_block</span><span class="p">,</span>
-<a name="l-810"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-811"></a>
-<a name="l-812"></a>  <span class="c1">// When data sent to the keccak_round, the address should be in the range</span>
-<a name="l-813"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">KeccakAddrInRange_A</span><span class="p">,</span>
-<a name="l-814"></a>    <span class="n">keccak_valid_o</span> <span class="o">|-&gt;</span> <span class="n">keccak_addr_o</span> <span class="o">&lt;</span> <span class="n">KeccakRate</span><span class="p">[</span><span class="n">strength_i</span><span class="p">],</span>
-<a name="l-815"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-816"></a>
-<a name="l-817"></a>  <span class="c1">// NS data shall be stable during the operation.</span>
-<a name="l-818"></a>  <span class="c1">//`ASSUME(NsStableInProcess_A,</span>
-<a name="l-819"></a>  <span class="c1">//  $stable(ns_data_i) throughout(start_i ##[1:$] process_i ##[1:$] absorbed_o),</span>
-<a name="l-820"></a>  <span class="c1">//  clk_i, !rst_ni)</span>
-<a name="l-821"></a>
-<a name="l-822"></a>  <span class="c1">// Functional Coverage</span>
-<a name="l-823"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StMessageFeed_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StMessage</span><span class="p">)</span>
-<a name="l-824"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StPad_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StPad01</span> <span class="o">&amp;&amp;</span> <span class="n">sent_blocksize</span><span class="p">)</span>
-<a name="l-825"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StPadSendMsg_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StPad01</span> <span class="o">&amp;&amp;</span> <span class="n">keccak_ack</span><span class="p">)</span>
-<a name="l-826"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StComplete_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StPadFlush</span><span class="p">)</span>
-<a name="l-827"></a><span class="k">endmodule</span>
+<a name="l-764"></a><span class="no">`endif</span> <span class="c1">// SYNTHESIS</span>
+<a name="l-765"></a>
+<a name="l-766"></a>  <span class="c1">// If not full block is written, the pad shall send message to keccak_round</span>
+<a name="l-767"></a>  <span class="c1">// If it is end of the message, the state moves to StPad and send the request</span>
+<a name="l-768"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">CompleteBlockWhenProcess_A</span><span class="p">,</span>
+<a name="l-769"></a>    <span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">process_latched</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="n">end_of_block</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sent_blocksize</span> <span class="p">)</span>
+<a name="l-770"></a>    <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">st</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StPrefixWait</span><span class="p">,</span> <span class="n">StMessageWait</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="p">##[</span><span class="mi">1</span><span class="o">:</span><span class="mi">5</span><span class="p">]</span> <span class="n">keccak_valid_o</span><span class="p">)</span>
+<a name="l-771"></a>  <span class="c1">// If `process_i` is asserted, eventually sha3pad trigger run signal</span>
+<a name="l-772"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">ProcessToRun_A</span><span class="p">,</span> <span class="n">process_i</span> <span class="o">|-&gt;</span> <span class="k">strong</span><span class="p">(##[</span><span class="mi">2</span><span class="o">:</span><span class="p">$]</span> <span class="n">keccak_run_o</span><span class="p">))</span>
+<a name="l-773"></a>
+<a name="l-774"></a>  <span class="c1">// If process_i asserted, completion shall be asserted shall be asserted</span>
+<a name="l-775"></a>  <span class="c1">//`ASSERT(ProcessToAbsorbed_A, process_i |=&gt; strong(##[24*Share:$] absorbed_o))</span>
+<a name="l-776"></a>
+<a name="l-777"></a>
+<a name="l-778"></a>  <span class="c1">// Assumption of input mode_i and strength_i</span>
+<a name="l-779"></a>  <span class="c1">// SHA3 variants: SHA3-224, SHA3-256, SHA3-384, SHA3-512</span>
+<a name="l-780"></a>  <span class="c1">// SHAKE, cSHAKE variants: SHAKE128, SHAKE256, cSHAKE128, cSHAKE256</span>
+<a name="l-781"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">ModeStrengthCombinations_M</span><span class="p">,</span>
+<a name="l-782"></a>    <span class="n">start_i</span> <span class="o">|-&gt;</span>
+<a name="l-783"></a>      <span class="p">(</span><span class="n">mode_i</span> <span class="o">==</span> <span class="n">Sha3</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">strength_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">L224</span><span class="p">,</span> <span class="n">L256</span><span class="p">,</span> <span class="n">L384</span><span class="p">,</span> <span class="n">L512</span><span class="p">}))</span> <span class="o">||</span>
+<a name="l-784"></a>      <span class="p">((</span><span class="n">mode_i</span> <span class="o">==</span> <span class="n">Shake</span> <span class="o">||</span> <span class="n">mode_i</span> <span class="o">==</span> <span class="n">CShake</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">strength_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">L128</span><span class="p">,</span> <span class="n">L256</span><span class="p">})),</span>
+<a name="l-785"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-786"></a>
+<a name="l-787"></a>  <span class="c1">// Keccak control interface</span>
+<a name="l-788"></a>  <span class="c1">// Keccak run triggered -&gt; completion should come</span>
+<a name="l-789"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">RunThenComplete_M</span><span class="p">,</span>
+<a name="l-790"></a>    <span class="n">keccak_run_o</span> <span class="o">|-&gt;</span> <span class="k">strong</span><span class="p">(##[</span><span class="mi">24</span><span class="o">*</span><span class="nl">Share:</span><span class="p">$]</span> <span class="n">keccak_complete_i</span><span class="p">))</span>
+<a name="l-791"></a>
+<a name="l-792"></a>  <span class="c1">// No partial write is allowed for Message FIFO interface</span>
+<a name="l-793"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">NoPartialMsgFifo_M</span><span class="p">,</span>
+<a name="l-794"></a>    <span class="n">keccak_valid_o</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">sel_mux</span> <span class="o">==</span> <span class="n">MuxFifo</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">msg_strb_i</span><span class="p">)</span> <span class="o">==</span> <span class="mb">1&#39;b1</span><span class="p">,</span>
+<a name="l-795"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-796"></a>
+<a name="l-797"></a>  <span class="c1">// When transaction is stored into msg_buf, it shall be partial write.</span>
+<a name="l-798"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">AlwaysPartialMsgBuf_M</span><span class="p">,</span>
+<a name="l-799"></a>    <span class="n">en_msgbuf</span> <span class="o">|-&gt;</span> <span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">msg_strb_i</span><span class="p">[</span><span class="n">MsgStrbW</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mb">1&#39;b0</span><span class="p">),</span>
+<a name="l-800"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-801"></a>
+<a name="l-802"></a>  <span class="c1">// if partial write comes and is acked, then no more msg_valid_i until</span>
+<a name="l-803"></a>  <span class="c1">// next message</span>
+<a name="l-804"></a>  <span class="no">`ASSUME</span><span class="p">(</span><span class="n">PartialEndOfMsg_M</span><span class="p">,</span>
+<a name="l-805"></a>    <span class="n">msg_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">msg_ready_o</span> <span class="o">&amp;&amp;</span> <span class="n">msg_partial</span> <span class="o">|=&gt;</span>
+<a name="l-806"></a>      <span class="o">!</span><span class="n">msg_valid_i</span> <span class="p">##[</span><span class="mi">1</span><span class="o">:</span><span class="p">$]</span> <span class="p">$</span><span class="n">stable</span><span class="p">(</span><span class="n">msg_valid_i</span><span class="p">)</span> <span class="p">##</span><span class="mi">1</span> <span class="n">process_latched</span><span class="p">,</span>
+<a name="l-807"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-808"></a>
+<a name="l-809"></a>  <span class="c1">// At the first clock in StPad01 state, sent_blocksize shall not be set</span>
+<a name="l-810"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">Pad01NotAttheEndOfBlock_A</span><span class="p">,</span>
+<a name="l-811"></a>    <span class="p">(</span><span class="n">st</span> <span class="o">==</span> <span class="n">StPad</span> <span class="o">&amp;&amp;</span> <span class="n">st_d</span> <span class="o">==</span> <span class="n">StPad01</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="n">end_of_block</span><span class="p">,</span>
+<a name="l-812"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-813"></a>
+<a name="l-814"></a>  <span class="c1">// When data sent to the keccak_round, the address should be in the range</span>
+<a name="l-815"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">KeccakAddrInRange_A</span><span class="p">,</span>
+<a name="l-816"></a>    <span class="n">keccak_valid_o</span> <span class="o">|-&gt;</span> <span class="n">keccak_addr_o</span> <span class="o">&lt;</span> <span class="n">KeccakRate</span><span class="p">[</span><span class="n">strength_i</span><span class="p">],</span>
+<a name="l-817"></a>    <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-818"></a>
+<a name="l-819"></a>  <span class="c1">// NS data shall be stable during the operation.</span>
+<a name="l-820"></a>  <span class="c1">//`ASSUME(NsStableInProcess_A,</span>
+<a name="l-821"></a>  <span class="c1">//  $stable(ns_data_i) throughout(start_i ##[1:$] process_i ##[1:$] absorbed_o),</span>
+<a name="l-822"></a>  <span class="c1">//  clk_i, !rst_ni)</span>
+<a name="l-823"></a>
+<a name="l-824"></a>  <span class="c1">// Functional Coverage</span>
+<a name="l-825"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StMessageFeed_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StMessage</span><span class="p">)</span>
+<a name="l-826"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StPad_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StPad01</span> <span class="o">&amp;&amp;</span> <span class="n">sent_blocksize</span><span class="p">)</span>
+<a name="l-827"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StPadSendMsg_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StPad01</span> <span class="o">&amp;&amp;</span> <span class="n">keccak_ack</span><span class="p">)</span>
+<a name="l-828"></a>  <span class="no">`COVER</span><span class="p">(</span><span class="n">StComplete_C</span><span class="p">,</span> <span class="n">st</span> <span class="o">==</span> <span class="n">StPadFlush</span><span class="p">)</span>
+<a name="l-829"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>
