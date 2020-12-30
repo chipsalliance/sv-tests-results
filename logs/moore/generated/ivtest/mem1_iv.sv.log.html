@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/mem1.v.html" target="file-frame">third_party/tests/ivtest/ivltests/mem1.v</a>
 defines: 
-completed: 2020-12-29 00:52:54
+completed: 2020-12-30 00:37:49
 time_elapsed: 0.009s
-ram usage: 11492 KB
+ram usage: 10968 KB
 </pre>
 <pre class="log">
 
@@ -42,18 +42,121 @@ error: unknown system task `$write`
    |             $write(&#34;%d %x\n&#34;, counter, data);
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-compiler bug: lowering of Expr #248 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/mem1.v.html#l-66" target="file-frame">third_party/tests/ivtest/ivltests/mem1.v:66</a>:17-24:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/mem1.v.html#l-66" target="file-frame">third_party/tests/ivtest/ivltests/mem1.v:66</a>:17-27:
    | 
-   |                 $finish;
-   |                 ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |                 $finish(0);
+   |                 ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+proc %main.initial.143.0 () -&gt; (i32$ %counter, i32$ %i, i1$ %clk, i1$ %write) {
+0:
+    %1 = prb i32$ %i
+    %i.shadow = var i32 %1
+    %2 = const i1 0
+    %3 = const time 0s 1e
+    drv i1$ %write, %2, %3
+    %4 = const i32 0
+    drv i32$ %counter, %4, %3
+    drv i1$ %clk, %2, %3
+    drv i32$ %i, %4, %3
+    st i32* %i.shadow, %4
+    br %loop_body
+loop_body:
+    %i.shadow.ld = ld i32* %i.shadow
+    %5 = const i32 16
+    %6 = slt i32 %i.shadow.ld, %5
+    br %6, %loop_exit, %loop_continue
+loop_exit:
+    halt
+loop_continue:
+    %i.shadow.ld1 = ld i32* %i.shadow
+    %7 = const i32 1
+    %8 = add i32 %i.shadow.ld1, %7
+    drv i32$ %i, %8, %3
+    st i32* %i.shadow, %8
+    br %loop_body
+}
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #248 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+proc %main.always.161.0 () -&gt; (i1$ %clk) {
+0:
+    %1 = prb i1$ %clk
+    %clk.shadow = var i1 %1
+    %2 = const i32 10
+    wait %3 for %2
+3:
+    %4 = prb i1$ %clk
+    st i1* %clk.shadow, %4
+    %clk.shadow.ld = ld i1* %clk.shadow
+    %5 = not i1 %clk.shadow.ld
+    %6 = const time 0s 1e
+    drv i1$ %clk, %5, %6
+    st i1* %clk.shadow, %5
+    br %0
+}
+
+proc %main.always.258.0 (i1$ %clk) -&gt; (i32$ %counter, i1$ %write) {
+0:
+    %1 = prb i32$ %counter
+    %counter.shadow = var i32 %1
+    br %init
+init:
+    %clk.prb = prb i1$ %clk
+    wait %check, %clk
+check:
+    %2 = prb i32$ %counter
+    st i32* %counter.shadow, %2
+    %clk.prb1 = prb i1$ %clk
+    %3 = const i1 0
+    %4 = eq i1 %clk.prb, %3
+    %5 = neq i1 %clk.prb1, %3
+    %posedge = and i1 %4, %5
+    br %posedge, %init, %event
+event:
+    %6 = const i1 1
+    %7 = const time 0s 1e
+    drv i1$ %write, %6, %7
+    %8 = const i32 1
+    wait %9 for %8
+9:
+    %10 = prb i32$ %counter
+    st i32* %counter.shadow, %10
+    %11 = const i1 0
+    %12 = const time 0s 1e
+    drv i1$ %write, %11, %12
+    %counter.shadow.ld = ld i32* %counter.shadow
+    %13 = const i32 1
+    %14 = add i32 %counter.shadow.ld, %13
+    drv i32$ %counter, %14, %12
+    st i32* %counter.shadow, %14
+    br %0
+}
+
+entity @main () -&gt; () {
+    %0 = const i32 0
+    %counter = sig i32 %0
+    %i = sig i32 %0
+    %1 = const i24 0
+    %2 = [i24 %1, %1, %1, %1, %1, %1, %1, %1, %1, %1, %1, %1, %1, %1, %1, %1]
+    %testvec = sig [16 x i24] %2
+    %3 = const i1 0
+    %clk = sig i1 %3
+    %data = sig i24 %1
+    %write = sig i1 %3
+    %4 = const time 0s 1e
+    %write.prb = prb i1$ %write
+    %5 = neq i1 %write.prb, %3
+    %testvec.prb = prb [16 x i24]$ %testvec
+    %counter.prb = prb i32$ %counter
+    %6 = [16 x i24 %1]
+    %7 = shr [16 x i24] %testvec.prb, [16 x i24] %6, i32 %counter.prb
+    %8 = extf i24, [16 x i24] %7, 0
+    %9 = [i24 %1, %8]
+    %10 = mux [2 x i24] %9, i1 %5
+    drv i24$ %data, %10, %4
+    inst %main.initial.143.0 () -&gt; (i32$ %counter, i32$ %i, i1$ %clk, i1$ %write)
+    inst %main.always.161.0 () -&gt; (i1$ %clk)
+    inst %main.always.258.0 (i1$ %clk) -&gt; (i32$ %counter, i1$ %write)
+}
 
 </pre>
 </body>

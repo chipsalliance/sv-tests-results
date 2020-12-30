@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,25 +17,113 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v</a>
 defines: 
-completed: 2020-12-29 00:53:10
-time_elapsed: 0.006s
-ram usage: 11072 KB
+completed: 2020-12-30 00:37:41
+time_elapsed: 0.009s
+ram usage: 10764 KB
 </pre>
 <pre class="log">
 
 moore -I /tmpfs/src/github/sv-tests/third_party/tests/ivtest -I /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests -e sensitivity_list <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v</a>
-compiler bug: lowering of Expr #51 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html#l-29" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v:29</a>:3-10:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html#l-29" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v:29</a>:3-13:
    | 
-   |   $finish;
-   |   ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |   $finish(0);
+   |   ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+warning: unsupported: system task `$display`; ignored
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html#l-38" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v:38</a>:3-19:
+   | 
+   |   $display ($time);
+   |   ^^^^^^^^^^^^^^^^ 
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #51 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: unsupported: system task `$display`; ignored
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html#l-43" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v:43</a>:5-59:
+   | 
+   |     $display (&#34;combinatorial process &#34;, A, &#34; time:&#34;,$time);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+warning: unsupported: system task `$display`; ignored
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/event_list3.v.html#l-45" target="file-frame">third_party/tests/ivtest/ivltests/event_list3.v:45</a>:5-59:
+   | 
+   |     $display (&#34;combinatorial process &#34;, A, &#34; time:&#34;,$time);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+proc %sensitivity_list.initial.58.0 () -&gt; (i4$ %C) {
+0:
+    %1 = const i32 30
+    wait %2 for %1
+2:
+    %3 = const time 0s 1d
+    %4 = const i4 0
+    drv i4$ %C, %4, %3
+    %5 = const i32 60
+    wait %6 for %5
+6:
+    halt
+}
+
+proc %sensitivity_list.always.94.0 () -&gt; (i1$ %CLK) {
+0:
+    %1 = const i1 0
+    %2 = const time 0s 1e
+    drv i1$ %CLK, %1, %2
+    %3 = const i32 10
+    wait %4 for %3
+4:
+    %5 = const i1 1
+    %6 = const time 0s 1e
+    drv i1$ %CLK, %5, %6
+    %7 = const i32 10
+    wait %8 for %7
+8:
+    br %0
+}
+
+proc %sensitivity_list.always.174.0 (i4$ %C) -&gt; (i1$ %A, i4$ %B) {
+0:
+    %1 = prb i1$ %A
+    %A.shadow = var i1 %1
+    br %init
+init:
+    %A.shadow.ld = ld i1* %A.shadow
+    %C.prb = prb i4$ %C
+    wait %check, %A, %C
+check:
+    %2 = prb i1$ %A
+    st i1* %A.shadow, %2
+    %A.shadow.ld1 = ld i1* %A.shadow
+    %impledge = neq i1 %A.shadow.ld, %A.shadow.ld1
+    %C.prb1 = prb i4$ %C
+    %impledge1 = neq i4 %C.prb, %C.prb1
+    %event_or = or i1 %impledge, %impledge1
+    br %event_or, %init, %event
+event:
+    %3 = const i1 0
+    %4 = const time 0s 1e
+    drv i1$ %A, %3, %4
+    st i1* %A.shadow, %3
+    %5 = const i1 1
+    drv i1$ %A, %5, %4
+    st i1* %A.shadow, %5
+    %6 = const i4 0
+    %A.shadow.ld2 = ld i1* %A.shadow
+    %zext = inss i4 %6, i1 %A.shadow.ld2, 0, 1
+    %7 = add i4 %zext, %C.prb1
+    drv i4$ %B, %7, %4
+    br %0
+}
+
+entity @sensitivity_list () -&gt; () {
+    %0 = const i1 0
+    %CLK = sig i1 %0
+    %A = sig i1 %0
+    %1 = const i4 0
+    %B = sig i4 %1
+    %C = sig i4 %1
+    inst %sensitivity_list.initial.58.0 () -&gt; (i4$ %C)
+    inst %sensitivity_list.always.94.0 () -&gt; (i1$ %CLK)
+    inst %sensitivity_list.always.174.0 (i4$ %C) -&gt; (i1$ %A, i4$ %B)
+}
 
 </pre>
 </body>

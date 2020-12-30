@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr1639971.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1639971.v</a>
 defines: 
-completed: 2020-12-29 00:53:12
+completed: 2020-12-30 00:38:30
 time_elapsed: 0.007s
-ram usage: 11208 KB
+ram usage: 10712 KB
 </pre>
 <pre class="log">
 
@@ -30,18 +30,57 @@ error: unknown system task `$monitor`
    |       $monitor($time,, &#34;rf and slice: %h %h&#34;, rf_0, rf_0_slice0);
    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-compiler bug: lowering of Expr #119 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr1639971.v.html#l-14" target="file-frame">third_party/tests/ivtest/ivltests/pr1639971.v:14</a>:11-18:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr1639971.v.html#l-14" target="file-frame">third_party/tests/ivtest/ivltests/pr1639971.v:14</a>:11-21:
    | 
-   |       #10 $finish;
-   |           ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |       #10 $finish(0);
+   |           ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+proc %RegisterArrayBug01.initial.127.0 () -&gt; ([8 x i16]$ %rf) {
+0:
+    %1 = extf i16$, [8 x i16]$ %rf, 0
+    %2 = const i16 65535
+    %3 = const time 0s 1e
+    drv i16$ %1, %2, %3
+    %4 = const i32 10
+    wait %5 for %4
+5:
+    %6 = extf i16$, [8 x i16]$ %rf, 0
+    %7 = const i16 0
+    %8 = const time 0s 1e
+    drv i16$ %6, %7, %8
+    %9 = const i32 10
+    wait %10 for %9
+10:
+    %11 = extf i16$, [8 x i16]$ %rf, 0
+    %12 = const i16 48879
+    %13 = const time 0s 1e
+    drv i16$ %11, %12, %13
+    %14 = const i32 10
+    wait %15 for %14
+15:
+    halt
+}
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #119 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+entity @RegisterArrayBug01 () -&gt; () {
+    %0 = const i16 0
+    %1 = [i16 %0, %0, %0, %0, %0, %0, %0, %0]
+    %rf = sig [8 x i16] %1
+    %2 = const i4 0
+    %rf_0_slice0 = sig i4 %2
+    %rf.prb = prb [8 x i16]$ %rf
+    %3 = extf i16, [8 x i16] %rf.prb, 0
+    %4 = exts i4, i16 %3, 0, 4
+    %5 = sig i4 %2
+    %6 = const time 0s 1d
+    drv i4$ %5, %4, %6
+    con i4$ %rf_0_slice0, %5
+    %rf_0 = sig i16 %0
+    %7 = sig i16 %0
+    drv i16$ %7, %3, %6
+    con i16$ %rf_0, %7
+    inst %RegisterArrayBug01.initial.127.0 () -&gt; ([8 x i16]$ %rf)
+}
 
 </pre>
 </body>

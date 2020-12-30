@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/case_priority.v.html" target="file-frame">third_party/tests/ivtest/ivltests/case_priority.v</a>
 defines: 
-completed: 2020-12-29 00:52:32
-time_elapsed: 0.007s
-ram usage: 11236 KB
+completed: 2020-12-30 00:37:20
+time_elapsed: 0.008s
+ram usage: 10908 KB
 </pre>
 <pre class="log">
 
@@ -48,18 +48,74 @@ warning: unsupported: system task `$display`; ignored
    |          $display(&#34;PASSED&#34;);
    |          ^^^^^^^^^^^^^^^^^^ 
 
-compiler bug: lowering of Expr #90 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/case_priority.v.html#l-20" target="file-frame">third_party/tests/ivtest/ivltests/case_priority.v:20</a>:10-17:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/case_priority.v.html#l-20" target="file-frame">third_party/tests/ivtest/ivltests/case_priority.v:20</a>:10-20:
    | 
-   |          $finish;
-   |          ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |          $finish(0);
+   |          ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+proc %main.initial.30.0 () -&gt; (i1$ %clk) {
+0:
+    %1 = prb i1$ %clk
+    %clk.shadow = var i1 %1
+    br %loop_body
+loop_body:
+    %2 = const i32 1
+    wait %3 for %2
+3:
+    %4 = prb i1$ %clk
+    st i1* %clk.shadow, %4
+    %5 = const time 0s 1d
+    %clk.shadow.ld = ld i1* %clk.shadow
+    %6 = not i1 %clk.shadow.ld
+    drv i1$ %clk, %6, %5
+    br %loop_body
+}
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #90 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+proc %main.always.100.0 (i1$ %clk) -&gt; (i2$ %counter) {
+0:
+    %1 = prb i2$ %counter
+    %counter.shadow = var i2 %1
+    br %init
+init:
+    %clk.prb = prb i1$ %clk
+    wait %check, %clk
+check:
+    %2 = prb i2$ %counter
+    st i2* %counter.shadow, %2
+    %clk.prb1 = prb i1$ %clk
+    %3 = const i1 0
+    %4 = eq i1 %clk.prb, %3
+    %5 = neq i1 %clk.prb1, %3
+    %posedge = and i1 %4, %5
+    br %posedge, %init, %event
+event:
+    %6 = const time 0s 1d
+    %counter.shadow.ld = ld i2* %counter.shadow
+    %7 = const i2 1
+    %8 = add i2 %counter.shadow.ld, %7
+    drv i2$ %counter, %8, %6
+    %counter.shadow.ld1 = ld i2* %counter.shadow
+    %9 = const i2 0
+    %10 = eq i2 %counter.shadow.ld1, %9
+    br %10, %11, %case_exit
+case_exit:
+    br %0
+11:
+    %12 = eq i2 %counter.shadow.ld1, %7
+    br %12, %13, %case_exit
+13:
+    br %case_exit
+}
+
+entity @main () -&gt; () {
+    %0 = const i2 0
+    %counter = sig i2 %0
+    %1 = const i1 0
+    %clk = sig i1 %1
+    inst %main.initial.30.0 () -&gt; (i1$ %clk)
+    inst %main.always.100.0 (i1$ %clk) -&gt; (i2$ %counter)
+}
 
 </pre>
 </body>

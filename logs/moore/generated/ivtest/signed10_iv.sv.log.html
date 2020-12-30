@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/signed10.v.html" target="file-frame">third_party/tests/ivtest/ivltests/signed10.v</a>
 defines: 
-completed: 2020-12-29 00:53:23
-time_elapsed: 0.005s
-ram usage: 11136 KB
+completed: 2020-12-30 00:38:09
+time_elapsed: 0.007s
+ram usage: 10876 KB
 </pre>
 <pre class="log">
 
@@ -30,18 +30,31 @@ warning: unsupported: system task `$display`; ignored
    |     $display(&#34;foo=%0d  bar=%0d  $signed(bar)=%0d&#34;,
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-compiler bug: lowering of Expr #67 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/signed10.v.html#l-32" target="file-frame">third_party/tests/ivtest/ivltests/signed10.v:32</a>:5-12:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/signed10.v.html#l-32" target="file-frame">third_party/tests/ivtest/ivltests/signed10.v:32</a>:5-15:
    | 
-   |     $finish;
-   |     ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |     $finish(0);
+   |     ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+proc %displaysigned.initial.74.0 () -&gt; (i8$ %foo, i8$ %bar) {
+0:
+    %1 = prb i8$ %foo
+    %foo.shadow = var i8 %1
+    %2 = const i8 254
+    %3 = const time 0s 1e
+    drv i8$ %foo, %2, %3
+    st i8* %foo.shadow, %2
+    %foo.shadow.ld = ld i8* %foo.shadow
+    drv i8$ %bar, %foo.shadow.ld, %3
+    halt
+}
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #67 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+entity @displaysigned () -&gt; () {
+    %0 = const i8 0
+    %foo = sig i8 %0
+    %bar = sig i8 %0
+    inst %displaysigned.initial.74.0 () -&gt; (i8$ %foo, i8$ %bar)
+}
 
 </pre>
 </body>

@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v</a>
 defines: 
-completed: 2020-12-29 00:52:50
-time_elapsed: 0.007s
-ram usage: 11320 KB
+completed: 2020-12-30 00:38:31
+time_elapsed: 0.008s
+ram usage: 10700 KB
 </pre>
 <pre class="log">
 
@@ -30,18 +30,53 @@ warning: unsupported: system task `$display`; ignored
    |       #5 $display(&#34;op1 = %h, op2 = %h, prod = %h&#34;, op1, op2, prod);
    |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-compiler bug: lowering of Expr #105 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html#l-19" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v:19</a>:10-17:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html#l-19" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v:19</a>:10-20:
    | 
-   |       #5 $finish;
-   |          ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |       #5 $finish(0);
+   |          ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+proc %mul_test.initial.52.0 () -&gt; (i16$ %prod, i8$ %op2, i16$ %op1) {
+0:
+    %1 = const i16 3488
+    %2 = const time 0s 1e
+    drv i16$ %op1, %1, %2
+    %3 = const i8 10
+    drv i8$ %op2, %3, %2
+    %4 = const i16 0
+    drv i16$ %prod, %4, %2
+    halt
+}
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #105 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+proc %mul_test.always.113.0 (i8$ %op2, i16$ %op1) -&gt; (i16$ %prod) {
+0:
+    %1 = const time 0s 1d
+    %2 = const i16 0
+    %op1.prb = prb i16$ %op1
+    %3 = exts i8, i16 %op1.prb, 0, 8
+    %zext = inss i16 %2, i8 %3, 0, 8
+    %op2.prb = prb i8$ %op2
+    %zext1 = inss i16 %2, i8 %op2.prb, 0, 8
+    %4 = umul i16 %zext, %zext1
+    drv i16$ %prod, %4, %1
+    %5 = const i32 5
+    wait %6 for %5
+6:
+    %7 = const i32 5
+    wait %8 for %7
+8:
+    br %0
+}
+
+entity @mul_test () -&gt; () {
+    %0 = const i16 0
+    %prod = sig i16 %0
+    %1 = const i8 0
+    %op2 = sig i8 %1
+    %op1 = sig i16 %0
+    inst %mul_test.initial.52.0 () -&gt; (i16$ %prod, i8$ %op2, i16$ %op1)
+    inst %mul_test.always.113.0 (i8$ %op2, i16$ %op1) -&gt; (i16$ %prod)
+}
 
 </pre>
 </body>

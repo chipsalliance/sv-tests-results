@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr542.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr542.v</a>
 defines: 
-completed: 2020-12-29 00:52:29
-time_elapsed: 0.007s
-ram usage: 11068 KB
+completed: 2020-12-30 00:38:00
+time_elapsed: 0.006s
+ram usage: 10632 KB
 </pre>
 <pre class="log">
 
@@ -36,18 +36,36 @@ warning: unsupported: system task `$display`; ignored
    |   $display(&#34;d_pm_in_dac_st = %0b&#34;,pm_next_st[DAC]);
    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-compiler bug: lowering of Expr #91 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr542.v.html#l-35" target="file-frame">third_party/tests/ivtest/ivltests/pr542.v:35</a>:3-10:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr542.v.html#l-35" target="file-frame">third_party/tests/ivtest/ivltests/pr542.v:35</a>:3-13:
    | 
-   |   $finish;
-   |   ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |   $finish(0);
+   |   ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+proc %top.initial.98.0 () -&gt; (i11$ %pm_next_st) {
+0:
+    %1 = const i11 256
+    %2 = const time 0s 1e
+    drv i11$ %pm_next_st, %1, %2
+    %3 = const i32 1
+    wait %4 for %3
+4:
+    halt
+}
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #91 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+entity @top () -&gt; () {
+    %0 = const i1 0
+    %d_pm_in_dac_st = sig i1 %0
+    %1 = const i11 0
+    %pm_next_st = sig i11 %1
+    %2 = const time 0s 1e
+    %pm_next_st.prb = prb i11$ %pm_next_st
+    %3 = exts i3, i11 %pm_next_st.prb, 8, 3
+    %4 = inss i11 %1, i3 %3, 0, 3
+    %5 = exts i1, i11 %4, 0, 1
+    drv i1$ %d_pm_in_dac_st, %5, %2
+    inst %top.initial.98.0 () -&gt; (i11$ %pm_next_st)
+}
 
 </pre>
 </body>

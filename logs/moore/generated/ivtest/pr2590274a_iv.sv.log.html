@@ -9,7 +9,7 @@
 <h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
 <pre class="test-failed">
 description: Test imported from ivtest
-rc: 101 (means success: 0)
+rc: 1 (means success: 0)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,25 +17,51 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2590274a.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2590274a.v</a>
 defines: 
-completed: 2020-12-29 00:52:18
-time_elapsed: 0.006s
-ram usage: 11280 KB
+completed: 2020-12-30 00:38:19
+time_elapsed: 0.007s
+ram usage: 10572 KB
 </pre>
 <pre class="log">
 
 moore -I /tmpfs/src/github/sv-tests/third_party/tests/ivtest -I /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests -e wo_time <a href="../../../../third_party/tests/ivtest/ivltests/pr2590274a.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2590274a.v</a>
-compiler bug: lowering of Expr #26 to hir not implemented
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr2590274a.v.html#l-11" target="file-frame">third_party/tests/ivtest/ivltests/pr2590274a.v:11</a>:8-15:
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr2590274a.v.html#l-11" target="file-frame">third_party/tests/ivtest/ivltests/pr2590274a.v:11</a>:8-18:
    | 
-   |     #2 $finish;
-   |        ^^^^^^^ 
-   = note: Encountered at src/svlog/hir/lowering.rs:1439
+   |     #2 $finish(0);
+   |        ^^^^^^^^^^ 
 
-You have encountered a compiler bug. Sorry about that! We would appreciate if you open an issue [1] and describe how you triggered the bug, together with a minimal snippet of code to reproduce it. Thanks!
-[1]: https://github.com/fabianschuiki/moore
+warning: unsupported: system task `$display`; ignored
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr2590274a.v.html#l-14" target="file-frame">third_party/tests/ivtest/ivltests/pr2590274a.v:14</a>:17-60:
+   | 
+   |   always @(out) $display(&#34;The time in %m is: %e&#34;, $abstime);
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 
-thread &#39;main&#39; panicked at &#39;lowering of Expr #26 to hir not implemented&#39;, /tmp/really-really-really-really-really-really-really-really-really-really-really-really-really-long-path/conda/conda-bld/moore_1605895364887/work/src/svlog/hir/lowering.rs:1439:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+proc %wo_time.initial.34.0 () -&gt; (i1$ %in) {
+0:
+    %1 = const i1 1
+    %2 = const time 0s 1e
+    drv i1$ %in, %1, %2
+    %3 = const i32 2
+    wait %4 for %3
+4:
+    halt
+}
+
+proc %wo_time.always.49.0 (i1$ %out) -&gt; () {
+init:
+    wait %check, %out
+check:
+    br %init
+}
+
+entity @wo_time () -&gt; () {
+    %0 = const i1 0
+    %in = sig i1 %0
+    %out = sig i1 %0
+    con i1$ %out, %in
+    inst %wo_time.initial.34.0 () -&gt; (i1$ %in)
+    inst %wo_time.always.49.0 (i1$ %out) -&gt; ()
+}
 
 </pre>
 </body>
