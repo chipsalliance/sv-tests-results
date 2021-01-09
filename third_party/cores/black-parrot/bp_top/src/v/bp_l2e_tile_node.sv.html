@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../code.css">
+  </head>
+  <body>
+    third_party/cores/black-parrot/bp_top/src/v/bp_l2e_tile_node.sv
+    <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><a href="#l-1">  1</a>
+<a href="#l-2">  2</a>
+<a href="#l-3">  3</a>
+<a href="#l-4">  4</a>
+<a href="#l-5">  5</a>
+<a href="#l-6">  6</a>
+<a href="#l-7">  7</a>
+<a href="#l-8">  8</a>
+<a href="#l-9">  9</a>
+<a href="#l-10"> 10</a>
+<a href="#l-11"> 11</a>
+<a href="#l-12"> 12</a>
+<a href="#l-13"> 13</a>
+<a href="#l-14"> 14</a>
+<a href="#l-15"> 15</a>
+<a href="#l-16"> 16</a>
+<a href="#l-17"> 17</a>
+<a href="#l-18"> 18</a>
+<a href="#l-19"> 19</a>
+<a href="#l-20"> 20</a>
+<a href="#l-21"> 21</a>
+<a href="#l-22"> 22</a>
+<a href="#l-23"> 23</a>
+<a href="#l-24"> 24</a>
+<a href="#l-25"> 25</a>
+<a href="#l-26"> 26</a>
+<a href="#l-27"> 27</a>
+<a href="#l-28"> 28</a>
+<a href="#l-29"> 29</a>
+<a href="#l-30"> 30</a>
+<a href="#l-31"> 31</a>
+<a href="#l-32"> 32</a>
+<a href="#l-33"> 33</a>
+<a href="#l-34"> 34</a>
+<a href="#l-35"> 35</a>
+<a href="#l-36"> 36</a>
+<a href="#l-37"> 37</a>
+<a href="#l-38"> 38</a>
+<a href="#l-39"> 39</a>
+<a href="#l-40"> 40</a>
+<a href="#l-41"> 41</a>
+<a href="#l-42"> 42</a>
+<a href="#l-43"> 43</a>
+<a href="#l-44"> 44</a>
+<a href="#l-45"> 45</a>
+<a href="#l-46"> 46</a>
+<a href="#l-47"> 47</a>
+<a href="#l-48"> 48</a>
+<a href="#l-49"> 49</a>
+<a href="#l-50"> 50</a>
+<a href="#l-51"> 51</a>
+<a href="#l-52"> 52</a>
+<a href="#l-53"> 53</a>
+<a href="#l-54"> 54</a>
+<a href="#l-55"> 55</a>
+<a href="#l-56"> 56</a>
+<a href="#l-57"> 57</a>
+<a href="#l-58"> 58</a>
+<a href="#l-59"> 59</a>
+<a href="#l-60"> 60</a>
+<a href="#l-61"> 61</a>
+<a href="#l-62"> 62</a>
+<a href="#l-63"> 63</a>
+<a href="#l-64"> 64</a>
+<a href="#l-65"> 65</a>
+<a href="#l-66"> 66</a>
+<a href="#l-67"> 67</a>
+<a href="#l-68"> 68</a>
+<a href="#l-69"> 69</a>
+<a href="#l-70"> 70</a>
+<a href="#l-71"> 71</a>
+<a href="#l-72"> 72</a>
+<a href="#l-73"> 73</a>
+<a href="#l-74"> 74</a>
+<a href="#l-75"> 75</a>
+<a href="#l-76"> 76</a>
+<a href="#l-77"> 77</a>
+<a href="#l-78"> 78</a>
+<a href="#l-79"> 79</a>
+<a href="#l-80"> 80</a>
+<a href="#l-81"> 81</a>
+<a href="#l-82"> 82</a>
+<a href="#l-83"> 83</a>
+<a href="#l-84"> 84</a>
+<a href="#l-85"> 85</a>
+<a href="#l-86"> 86</a>
+<a href="#l-87"> 87</a>
+<a href="#l-88"> 88</a>
+<a href="#l-89"> 89</a>
+<a href="#l-90"> 90</a>
+<a href="#l-91"> 91</a>
+<a href="#l-92"> 92</a>
+<a href="#l-93"> 93</a>
+<a href="#l-94"> 94</a>
+<a href="#l-95"> 95</a>
+<a href="#l-96"> 96</a>
+<a href="#l-97"> 97</a>
+<a href="#l-98"> 98</a>
+<a href="#l-99"> 99</a>
+<a href="#l-100">100</a>
+<a href="#l-101">101</a>
+<a href="#l-102">102</a>
+<a href="#l-103">103</a>
+<a href="#l-104">104</a>
+<a href="#l-105">105</a>
+<a href="#l-106">106</a>
+<a href="#l-107">107</a>
+<a href="#l-108">108</a>
+<a href="#l-109">109</a>
+<a href="#l-110">110</a>
+<a href="#l-111">111</a>
+<a href="#l-112">112</a>
+<a href="#l-113">113</a>
+<a href="#l-114">114</a>
+<a href="#l-115">115</a>
+<a href="#l-116">116</a>
+<a href="#l-117">117</a>
+<a href="#l-118">118</a>
+<a href="#l-119">119</a>
+<a href="#l-120">120</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="k">module</span> <span class="n">bp_l2e_tile_node</span>
+<a name="l-2"></a> <span class="kn">import</span> <span class="nn">bp_common_pkg::*</span><span class="p">;</span>
+<a name="l-3"></a> <span class="kn">import</span> <span class="nn">bp_common_aviary_pkg::*</span><span class="p">;</span>
+<a name="l-4"></a> <span class="kn">import</span> <span class="nn">bp_be_pkg::*</span><span class="p">;</span>
+<a name="l-5"></a> <span class="kn">import</span> <span class="nn">bsg_noc_pkg::*</span><span class="p">;</span>
+<a name="l-6"></a> <span class="kn">import</span> <span class="nn">bsg_wormhole_router_pkg::*</span><span class="p">;</span>
+<a name="l-7"></a> <span class="kn">import</span> <span class="nn">bp_me_pkg::*</span><span class="p">;</span>
+<a name="l-8"></a> <span class="p">#(</span><span class="k">parameter</span> <span class="n">bp_params_e</span> <span class="n">bp_params_p</span> <span class="o">=</span> <span class="n">e_bp_default_cfg</span>
+<a name="l-9"></a>   <span class="no">`declare_bp_proc_params</span><span class="p">(</span><span class="n">bp_params_p</span><span class="p">)</span>
+<a name="l-10"></a>
+<a name="l-11"></a>   <span class="p">,</span> <span class="k">localparam</span> <span class="n">coh_noc_ral_link_width_lp</span> <span class="o">=</span> <span class="no">`bsg_ready_and_link_sif_width</span><span class="p">(</span><span class="n">coh_noc_flit_width_p</span><span class="p">)</span>
+<a name="l-12"></a>   <span class="p">,</span> <span class="k">localparam</span> <span class="n">mem_noc_ral_link_width_lp</span> <span class="o">=</span> <span class="no">`bsg_ready_and_link_sif_width</span><span class="p">(</span><span class="n">mem_noc_flit_width_p</span><span class="p">)</span>
+<a name="l-13"></a>   <span class="p">)</span>
+<a name="l-14"></a>  <span class="p">(</span><span class="k">input</span>                                         <span class="n">core_clk_i</span>
+<a name="l-15"></a>   <span class="p">,</span> <span class="k">input</span>                                       <span class="n">core_reset_i</span>
+<a name="l-16"></a>
+<a name="l-17"></a>   <span class="p">,</span> <span class="k">input</span>                                       <span class="n">coh_clk_i</span>
+<a name="l-18"></a>   <span class="p">,</span> <span class="k">input</span>                                       <span class="n">coh_reset_i</span>
+<a name="l-19"></a>
+<a name="l-20"></a>   <span class="p">,</span> <span class="k">input</span>                                       <span class="n">mem_clk_i</span>
+<a name="l-21"></a>   <span class="p">,</span> <span class="k">input</span>                                       <span class="n">mem_reset_i</span>
+<a name="l-22"></a>
+<a name="l-23"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">io_noc_did_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">my_did_i</span>
+<a name="l-24"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">coh_noc_cord_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>            <span class="n">my_cord_i</span>
+<a name="l-25"></a>
+<a name="l-26"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="nl">S:</span><span class="n">W</span><span class="p">][</span><span class="n">coh_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">coh_lce_req_link_i</span>
+<a name="l-27"></a>   <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="nl">S:</span><span class="n">W</span><span class="p">][</span><span class="n">coh_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">coh_lce_req_link_o</span>
+<a name="l-28"></a>
+<a name="l-29"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="nl">S:</span><span class="n">W</span><span class="p">][</span><span class="n">coh_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">coh_lce_cmd_link_i</span>
+<a name="l-30"></a>   <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="nl">S:</span><span class="n">W</span><span class="p">][</span><span class="n">coh_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">coh_lce_cmd_link_o</span>
+<a name="l-31"></a>
+<a name="l-32"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="nl">S:</span><span class="n">W</span><span class="p">][</span><span class="n">coh_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">coh_lce_resp_link_i</span>
+<a name="l-33"></a>   <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="nl">S:</span><span class="n">W</span><span class="p">][</span><span class="n">coh_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">coh_lce_resp_link_o</span>
+<a name="l-34"></a>
+<a name="l-35"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">mem_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>       <span class="n">mem_cmd_link_i</span>
+<a name="l-36"></a>   <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">mem_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">mem_cmd_link_o</span>
+<a name="l-37"></a>
+<a name="l-38"></a>   <span class="p">,</span> <span class="k">input</span> <span class="p">[</span><span class="n">mem_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>       <span class="n">mem_resp_link_i</span>
+<a name="l-39"></a>   <span class="p">,</span> <span class="k">output</span> <span class="p">[</span><span class="n">mem_noc_ral_link_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">mem_resp_link_o</span>
+<a name="l-40"></a>   <span class="p">);</span>
+<a name="l-41"></a>
+<a name="l-42"></a>  <span class="c1">// Declare the routing links</span>
+<a name="l-43"></a>  <span class="no">`declare_bsg_ready_and_link_sif_s</span><span class="p">(</span><span class="n">coh_noc_flit_width_p</span><span class="p">,</span> <span class="n">bp_coh_ready_and_link_s</span><span class="p">);</span>
+<a name="l-44"></a>  <span class="no">`declare_bsg_ready_and_link_sif_s</span><span class="p">(</span><span class="n">mem_noc_flit_width_p</span><span class="p">,</span> <span class="n">bp_mem_ready_and_link_s</span><span class="p">);</span>
+<a name="l-45"></a>
+<a name="l-46"></a>  <span class="c1">// Tile-side coherence connections</span>
+<a name="l-47"></a>  <span class="n">bp_coh_ready_and_link_s</span> <span class="n">l2e_lce_req_link_li</span><span class="p">,</span> <span class="n">l2e_lce_req_link_lo</span><span class="p">;</span>
+<a name="l-48"></a>  <span class="n">bp_coh_ready_and_link_s</span> <span class="n">l2e_lce_cmd_link_li</span><span class="p">,</span> <span class="n">l2e_lce_cmd_link_lo</span><span class="p">;</span>
+<a name="l-49"></a>  <span class="n">bp_coh_ready_and_link_s</span> <span class="n">l2e_lce_resp_link_li</span><span class="p">,</span> <span class="n">l2e_lce_resp_link_lo</span><span class="p">;</span>
+<a name="l-50"></a>
+<a name="l-51"></a>  <span class="c1">// Tile side membus connections</span>
+<a name="l-52"></a>  <span class="n">bp_mem_ready_and_link_s</span> <span class="n">l2e_mem_cmd_link_lo</span><span class="p">,</span> <span class="n">l2e_mem_resp_link_li</span><span class="p">;</span>
+<a name="l-53"></a>
+<a name="l-54"></a>  <span class="n">bp_l2e_tile</span>
+<a name="l-55"></a>   <span class="p">#(.</span><span class="n">bp_params_p</span><span class="p">(</span><span class="n">bp_params_p</span><span class="p">))</span>
+<a name="l-56"></a>   <span class="n">l2e_tile</span>
+<a name="l-57"></a>    <span class="p">(.</span><span class="n">clk_i</span><span class="p">(</span><span class="n">core_clk_i</span><span class="p">)</span>
+<a name="l-58"></a>     <span class="p">,.</span><span class="n">reset_i</span><span class="p">(</span><span class="n">core_reset_i</span><span class="p">)</span>
+<a name="l-59"></a>
+<a name="l-60"></a>     <span class="p">,.</span><span class="n">my_did_i</span><span class="p">(</span><span class="n">my_did_i</span><span class="p">)</span>
+<a name="l-61"></a>     <span class="p">,.</span><span class="n">my_cord_i</span><span class="p">(</span><span class="n">my_cord_i</span><span class="p">)</span>
+<a name="l-62"></a>
+<a name="l-63"></a>     <span class="p">,.</span><span class="n">lce_req_link_i</span><span class="p">(</span><span class="n">l2e_lce_req_link_li</span><span class="p">)</span>
+<a name="l-64"></a>     <span class="p">,.</span><span class="n">lce_req_link_o</span><span class="p">(</span><span class="n">l2e_lce_req_link_lo</span><span class="p">)</span>
+<a name="l-65"></a>
+<a name="l-66"></a>     <span class="p">,.</span><span class="n">lce_cmd_link_i</span><span class="p">(</span><span class="n">l2e_lce_cmd_link_li</span><span class="p">)</span>
+<a name="l-67"></a>     <span class="p">,.</span><span class="n">lce_cmd_link_o</span><span class="p">(</span><span class="n">l2e_lce_cmd_link_lo</span><span class="p">)</span>
+<a name="l-68"></a>
+<a name="l-69"></a>     <span class="p">,.</span><span class="n">lce_resp_link_i</span><span class="p">(</span><span class="n">l2e_lce_resp_link_li</span><span class="p">)</span>
+<a name="l-70"></a>     <span class="p">,.</span><span class="n">lce_resp_link_o</span><span class="p">(</span><span class="n">l2e_lce_resp_link_lo</span><span class="p">)</span>
+<a name="l-71"></a>
+<a name="l-72"></a>     <span class="p">,.</span><span class="n">mem_cmd_link_o</span><span class="p">(</span><span class="n">l2e_mem_cmd_link_lo</span><span class="p">)</span>
+<a name="l-73"></a>     <span class="p">,.</span><span class="n">mem_resp_link_i</span><span class="p">(</span><span class="n">l2e_mem_resp_link_li</span><span class="p">)</span>
+<a name="l-74"></a>     <span class="p">);</span>
+<a name="l-75"></a>
+<a name="l-76"></a>  <span class="n">bp_nd_socket</span>
+<a name="l-77"></a>   <span class="p">#(.</span><span class="n">flit_width_p</span><span class="p">(</span><span class="n">coh_noc_flit_width_p</span><span class="p">)</span>
+<a name="l-78"></a>     <span class="p">,.</span><span class="n">dims_p</span><span class="p">(</span><span class="n">coh_noc_dims_p</span><span class="p">)</span>
+<a name="l-79"></a>     <span class="p">,.</span><span class="n">cord_dims_p</span><span class="p">(</span><span class="n">coh_noc_dims_p</span><span class="p">)</span>
+<a name="l-80"></a>     <span class="p">,.</span><span class="n">cord_markers_pos_p</span><span class="p">(</span><span class="n">coh_noc_cord_markers_pos_p</span><span class="p">)</span>
+<a name="l-81"></a>     <span class="p">,.</span><span class="n">len_width_p</span><span class="p">(</span><span class="n">coh_noc_len_width_p</span><span class="p">)</span>
+<a name="l-82"></a>     <span class="p">,.</span><span class="n">routing_matrix_p</span><span class="p">(</span><span class="n">StrictYX</span><span class="p">)</span>
+<a name="l-83"></a>     <span class="p">,.</span><span class="n">async_clk_p</span><span class="p">(</span><span class="n">async_coh_clk_p</span><span class="p">)</span>
+<a name="l-84"></a>     <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<a name="l-85"></a>     <span class="p">)</span>
+<a name="l-86"></a>   <span class="n">l2e_coh_socket</span>
+<a name="l-87"></a>    <span class="p">(.</span><span class="n">tile_clk_i</span><span class="p">(</span><span class="n">core_clk_i</span><span class="p">)</span>
+<a name="l-88"></a>     <span class="p">,.</span><span class="n">tile_reset_i</span><span class="p">(</span><span class="n">core_reset_i</span><span class="p">)</span>
+<a name="l-89"></a>     <span class="p">,.</span><span class="n">network_clk_i</span><span class="p">(</span><span class="n">coh_clk_i</span><span class="p">)</span>
+<a name="l-90"></a>     <span class="p">,.</span><span class="n">network_reset_i</span><span class="p">(</span><span class="n">coh_reset_i</span><span class="p">)</span>
+<a name="l-91"></a>     <span class="p">,.</span><span class="n">my_cord_i</span><span class="p">(</span><span class="n">my_cord_i</span><span class="p">)</span>
+<a name="l-92"></a>     <span class="p">,.</span><span class="n">network_link_i</span><span class="p">({</span><span class="n">coh_lce_req_link_i</span><span class="p">,</span> <span class="n">coh_lce_cmd_link_i</span><span class="p">,</span> <span class="n">coh_lce_resp_link_i</span><span class="p">})</span>
+<a name="l-93"></a>     <span class="p">,.</span><span class="n">network_link_o</span><span class="p">({</span><span class="n">coh_lce_req_link_o</span><span class="p">,</span> <span class="n">coh_lce_cmd_link_o</span><span class="p">,</span> <span class="n">coh_lce_resp_link_o</span><span class="p">})</span>
+<a name="l-94"></a>     <span class="p">,.</span><span class="n">tile_link_i</span><span class="p">({</span><span class="n">l2e_lce_req_link_lo</span><span class="p">,</span> <span class="n">l2e_lce_cmd_link_lo</span><span class="p">,</span> <span class="n">l2e_lce_resp_link_lo</span><span class="p">})</span>
+<a name="l-95"></a>     <span class="p">,.</span><span class="n">tile_link_o</span><span class="p">({</span><span class="n">l2e_lce_req_link_li</span><span class="p">,</span> <span class="n">l2e_lce_cmd_link_li</span><span class="p">,</span> <span class="n">l2e_lce_resp_link_li</span><span class="p">})</span>
+<a name="l-96"></a>     <span class="p">);</span>
+<a name="l-97"></a>
+<a name="l-98"></a> <span class="n">bp_nd_socket</span>
+<a name="l-99"></a>   <span class="p">#(.</span><span class="n">flit_width_p</span><span class="p">(</span><span class="n">mem_noc_flit_width_p</span><span class="p">)</span>
+<a name="l-100"></a>     <span class="p">,.</span><span class="n">dims_p</span><span class="p">(</span><span class="n">mem_noc_dims_p</span><span class="p">)</span>
+<a name="l-101"></a>     <span class="p">,.</span><span class="n">cord_dims_p</span><span class="p">(</span><span class="n">mem_noc_cord_dims_p</span><span class="p">)</span>
+<a name="l-102"></a>     <span class="p">,.</span><span class="n">cord_markers_pos_p</span><span class="p">(</span><span class="n">mem_noc_cord_markers_pos_p</span><span class="p">)</span>
+<a name="l-103"></a>     <span class="p">,.</span><span class="n">len_width_p</span><span class="p">(</span><span class="n">mem_noc_len_width_p</span><span class="p">)</span>
+<a name="l-104"></a>     <span class="p">,.</span><span class="n">routing_matrix_p</span><span class="p">(</span><span class="n">StrictX</span><span class="p">)</span>
+<a name="l-105"></a>     <span class="p">,.</span><span class="n">async_clk_p</span><span class="p">(</span><span class="n">async_mem_clk_p</span><span class="p">)</span>
+<a name="l-106"></a>     <span class="p">,.</span><span class="n">els_p</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-107"></a>     <span class="p">)</span>
+<a name="l-108"></a>   <span class="n">l2e_mem_socket</span>
+<a name="l-109"></a>    <span class="p">(.</span><span class="n">tile_clk_i</span><span class="p">(</span><span class="n">core_clk_i</span><span class="p">)</span>
+<a name="l-110"></a>     <span class="p">,.</span><span class="n">tile_reset_i</span><span class="p">(</span><span class="n">core_reset_i</span><span class="p">)</span>
+<a name="l-111"></a>     <span class="p">,.</span><span class="n">network_clk_i</span><span class="p">(</span><span class="n">mem_clk_i</span><span class="p">)</span>
+<a name="l-112"></a>     <span class="p">,.</span><span class="n">network_reset_i</span><span class="p">(</span><span class="n">mem_reset_i</span><span class="p">)</span>
+<a name="l-113"></a>     <span class="p">,.</span><span class="n">my_cord_i</span><span class="p">(</span><span class="n">my_cord_i</span><span class="p">[</span><span class="n">coh_noc_x_cord_width_p</span><span class="o">+:</span><span class="n">mem_noc_y_cord_width_p</span><span class="p">])</span>
+<a name="l-114"></a>     <span class="p">,.</span><span class="n">network_link_i</span><span class="p">({</span><span class="n">mem_resp_link_i</span><span class="p">,</span> <span class="n">mem_cmd_link_i</span><span class="p">})</span>
+<a name="l-115"></a>     <span class="p">,.</span><span class="n">network_link_o</span><span class="p">({</span><span class="n">mem_cmd_link_o</span><span class="p">,</span> <span class="n">mem_resp_link_o</span><span class="p">})</span>
+<a name="l-116"></a>     <span class="p">,.</span><span class="n">tile_link_i</span><span class="p">(</span><span class="n">l2e_mem_cmd_link_lo</span><span class="p">)</span>
+<a name="l-117"></a>     <span class="p">,.</span><span class="n">tile_link_o</span><span class="p">(</span><span class="n">l2e_mem_resp_link_li</span><span class="p">)</span>
+<a name="l-118"></a>     <span class="p">);</span>
+<a name="l-119"></a>
+<a name="l-120"></a><span class="k">endmodule</span>
+</pre></div>
+</td></tr></table>
+  </body>
+</html>
