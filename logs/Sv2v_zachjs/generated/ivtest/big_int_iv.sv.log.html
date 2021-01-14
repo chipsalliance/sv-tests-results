@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,16 +17,87 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/big_int.v.html" target="file-frame">third_party/tests/ivtest/ivltests/big_int.v</a>
 defines: 
-completed: 2021-01-14 11:23:29
-time_elapsed: 0.110s
-ram usage: 10388 KB
+completed: 2021-01-14 14:21:33
+time_elapsed: 0.039s
+ram usage: 10396 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/big_int.v.html" target="file-frame">third_party/tests/ivtest/ivltests/big_int.v</a>
-zachjs-sv2v: invalid based literal digits: (16,35,549755813887,0,10,9)
-CallStack (from HasCallStack):
-  error, called at src/Language/SystemVerilog/AST/Number.hs:234:9 in main:Language.SystemVerilog.AST.Number
+module main;
+	reg [34:0] my_reg;
+	reg error;
+	reg [34:0] ref_val;
+	reg [34:0] ref_val2;
+	reg [7:0] count;
+	initial begin
+		error = 0;
+		ref_val = 0;
+		ref_val[0] = 1;
+		ref_val[34] = 1;
+		$display(&#34;*:%d&#34;, ref_val);
+		ref_val2 = 35&#39;h7ffffffff;
+		$display(&#34;*:%d&#34;, ref_val2);
+		my_reg = 100;
+		if (my_reg != &#39;h64) begin
+			error = 1;
+			$display(&#34;Error: expected 100&#34;);
+		end
+		my_reg = &#39;sd17179869185;
+		$display(&#34;1:%d&#34;, my_reg);
+		if (my_reg != 1) begin
+			error = 1;
+			$display(&#34;Error: expected 1&#34;);
+		end
+		my_reg = &#39;d17179869184;
+		$display(&#34;2:%d&#34;, my_reg);
+		if (my_reg != 0) begin
+			error = 1;
+			$display(&#34;Error: expected 1&#34;);
+		end
+		my_reg = 35&#39;sd17179869185;
+		$display(&#34;3:%d&#34;, my_reg);
+		if (my_reg != ref_val) begin
+			error = 1;
+			$display(&#34;Error: expected 17179869185&#34;);
+		end
+		my_reg = 35&#39;d17179869185;
+		$display(&#34;4:%d&#34;, my_reg);
+		if (my_reg != ref_val) begin
+			error = 1;
+			$display(&#34;Error: expected 17179869185&#34;);
+		end
+		my_reg = 35&#39;d34359738369;
+		$display(&#34;5:%d&#34;, my_reg);
+		if (my_reg != 1) begin
+			error = 1;
+			$display(&#34;Error: expected 1&#34;);
+		end
+		my_reg = 35&#39;d34359738367;
+		$display(&#34;6:%d&#34;, my_reg);
+		if (my_reg != ref_val2) begin
+			error = 1;
+			$display(&#34;Error: expected 34359738367&#34;);
+		end
+		my_reg = &#39;sd17179869183;
+		$display(&#34;7:%d&#34;, my_reg);
+		if (my_reg != ref_val2) begin
+			error = 1;
+			$display(&#34;Error: expected 34359738367&#34;);
+		end
+		my_reg = &#39;d17179869183;
+		$display(&#34;8:%d&#34;, my_reg);
+		if (my_reg != &#39;d4294967295) begin
+			error = 1;
+			$display(&#34;Error: expected 4294967295&#34;);
+		end
+		if (error == 1)
+			$display(&#34;FAILED&#34;);
+		else
+			$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
 
 </pre>
 </body>
