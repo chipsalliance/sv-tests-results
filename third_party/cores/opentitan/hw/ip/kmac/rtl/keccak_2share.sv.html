@@ -484,7 +484,7 @@
 <a name="l-16"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">RndW</span>     <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">MaxRound</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="c1">// Representing up to MaxRound</span>
 <a name="l-17"></a>
 <a name="l-18"></a>  <span class="c1">// Control parameters</span>
-<a name="l-19"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">EnMasking</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>                <span class="c1">// Enable secure hardening</span>
+<a name="l-19"></a>  <span class="k">parameter</span>  <span class="kt">bit</span> <span class="n">EnMasking</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>                <span class="c1">// Enable secure hardening</span>
 <a name="l-20"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">Share</span>     <span class="o">=</span> <span class="n">EnMasking</span> <span class="o">?</span> <span class="mi">2</span> <span class="o">:</span> <span class="mi">1</span>
 <a name="l-21"></a><span class="p">)</span> <span class="p">(</span>
 <a name="l-22"></a>  <span class="k">input</span> <span class="n">clk_i</span><span class="p">,</span>
@@ -529,7 +529,7 @@
 <a name="l-61"></a>  <span class="c1">// Unused nets //</span>
 <a name="l-62"></a>  <span class="c1">/////////////////</span>
 <a name="l-63"></a>  <span class="c1">// clk_i, rst_ni, rand_valid_i are not used when EnMasking is 0. Tying them.</span>
-<a name="l-64"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_tie_unused</span>
+<a name="l-64"></a>  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_tie_unused</span>
 <a name="l-65"></a>    <span class="kt">logic</span> <span class="n">unused_clk</span><span class="p">,</span> <span class="n">unused_rst_n</span><span class="p">,</span> <span class="n">unused_rand_valid</span><span class="p">;</span>
 <a name="l-66"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">Width</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">unused_rand_data</span><span class="p">;</span>
 <a name="l-67"></a>    <span class="kt">logic</span> <span class="n">unused_sel</span><span class="p">;</span>
@@ -559,7 +559,7 @@
 <a name="l-91"></a>    <span class="k">assign</span> <span class="n">s_o</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>      <span class="o">=</span> <span class="n">box_to_bitarray</span><span class="p">(</span><span class="n">state_out</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
 <a name="l-92"></a>  <span class="k">end</span> <span class="o">:</span> <span class="n">g_state_inout</span>
 <a name="l-93"></a>
-<a name="l-94"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_2share_data</span>
+<a name="l-94"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_2share_data</span>
 <a name="l-95"></a>    <span class="k">assign</span> <span class="n">phase1_in</span> <span class="o">=</span> <span class="p">(</span><span class="n">sel_i</span> <span class="o">==</span> <span class="mb">1&#39;b 0</span><span class="p">)</span> <span class="o">?</span> <span class="n">state_in</span> <span class="o">:</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
 <a name="l-96"></a>    <span class="k">assign</span> <span class="n">phase2_in</span> <span class="o">=</span> <span class="p">(</span><span class="n">sel_i</span> <span class="o">==</span> <span class="mb">1&#39;b 1</span><span class="p">)</span> <span class="o">?</span> <span class="n">state_in</span> <span class="o">:</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span><span class="m">&#39;0</span><span class="p">};</span>
 <a name="l-97"></a>
@@ -596,14 +596,14 @@
 <a name="l-128"></a>  <span class="k">end</span> <span class="o">:</span> <span class="n">g_datapath</span>
 <a name="l-129"></a>
 <a name="l-130"></a>  <span class="c1">// Iota adds Round Constants(RC), so only one share should be XORed</span>
-<a name="l-131"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_2share_iota</span>
+<a name="l-131"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_2share_iota</span>
 <a name="l-132"></a>    <span class="k">assign</span> <span class="n">iota_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">=</span> <span class="n">iota</span><span class="p">(</span><span class="n">chi_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rnd_i</span><span class="p">);</span>
 <a name="l-133"></a>    <span class="k">assign</span> <span class="n">iota_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="o">=</span> <span class="n">chi_data</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
 <a name="l-134"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_single_iota</span>
 <a name="l-135"></a>    <span class="k">assign</span> <span class="n">iota_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="o">=</span> <span class="n">iota</span><span class="p">(</span><span class="n">chi_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rnd_i</span><span class="p">);</span>
 <a name="l-136"></a>  <span class="k">end</span>
 <a name="l-137"></a>
-<a name="l-138"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_2share_chi</span>
+<a name="l-138"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_2share_chi</span>
 <a name="l-139"></a>    <span class="c1">// Domain-Oriented Masking</span>
 <a name="l-140"></a>    <span class="c1">// reference: https://eprint.iacr.org/2017/395.pdf</span>
 <a name="l-141"></a>
@@ -722,7 +722,7 @@
 <a name="l-254"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">ValidRound_A</span><span class="p">,</span> <span class="n">MaxRound</span> <span class="o">&lt;=</span> <span class="mi">24</span><span class="p">)</span> <span class="c1">// Keccak-f only</span>
 <a name="l-255"></a>
 <a name="l-256"></a>  <span class="c1">// sel_i shall stay for two cycle after change to 1.</span>
-<a name="l-257"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_selperiod_chk</span>
+<a name="l-257"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">EnMasking</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_selperiod_chk</span>
 <a name="l-258"></a>    <span class="no">`ASSUME</span><span class="p">(</span><span class="n">SelStayTwoCycleIf1_A</span><span class="p">,</span> <span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">sel_i</span><span class="p">)</span> <span class="o">|=&gt;</span> <span class="n">sel_i</span><span class="p">,</span> <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
 <a name="l-259"></a>  <span class="k">end</span>
 <a name="l-260"></a>

@@ -163,7 +163,22 @@
 <a href="#l-155">155</a>
 <a href="#l-156">156</a>
 <a href="#l-157">157</a>
-<a href="#l-158">158</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-158">158</a>
+<a href="#l-159">159</a>
+<a href="#l-160">160</a>
+<a href="#l-161">161</a>
+<a href="#l-162">162</a>
+<a href="#l-163">163</a>
+<a href="#l-164">164</a>
+<a href="#l-165">165</a>
+<a href="#l-166">166</a>
+<a href="#l-167">167</a>
+<a href="#l-168">168</a>
+<a href="#l-169">169</a>
+<a href="#l-170">170</a>
+<a href="#l-171">171</a>
+<a href="#l-172">172</a>
+<a href="#l-173">173</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -173,154 +188,169 @@
 <a name="l-8"></a><span class="c1">// Both domains will see a handshake with the duration of one clock cycle.</span>
 <a name="l-9"></a><span class="c1">//</span>
 <a name="l-10"></a><span class="c1">// Notes:</span>
-<a name="l-11"></a><span class="c1">// - Once asserted, the source domain is not allowed to de-assert REQ without ACK.</span>
-<a name="l-12"></a><span class="c1">// - The destination domain is not allowed to send an ACK without a REQ.</span>
+<a name="l-11"></a><span class="c1">// - Once asserted, the source (SRC) domain is not allowed to de-assert REQ without ACK.</span>
+<a name="l-12"></a><span class="c1">// - The destination (DST) domain is not allowed to send an ACK without a REQ.</span>
 <a name="l-13"></a><span class="c1">// - This module works both when syncing from a faster to a slower clock domain and vice versa.</span>
-<a name="l-14"></a><span class="c1">// - Internally, this module uses a return-to-zero, four-phase handshake protocol. Assuming the</span>
-<a name="l-15"></a><span class="c1">//   destination side responds with an ACK immediately, the latency from asserting the REQ on the</span>
-<a name="l-16"></a><span class="c1">//   source side is:</span>
-<a name="l-17"></a><span class="c1">//   - 1 source + 2 destination clock cycles until the handshake is performed on the</span>
-<a name="l-18"></a><span class="c1">//     destination side,</span>
-<a name="l-19"></a><span class="c1">//   - 1 source + 2 destination + 1 destination + 2 source clock cycles until the handshake is</span>
-<a name="l-20"></a><span class="c1">//     performed on the source side.</span>
-<a name="l-21"></a><span class="c1">//   - It takes another round trip (3 source + 3 destination clock cycles) before the next</span>
-<a name="l-22"></a><span class="c1">//     REQ is starting to be propagated to the destination side. The module is thus not suitable</span>
-<a name="l-23"></a><span class="c1">//     for high-bandwidth communication.</span>
-<a name="l-24"></a>
-<a name="l-25"></a><span class="no">`include</span> <span class="s">&quot;prim_assert.sv&quot;</span>
-<a name="l-26"></a>
-<a name="l-27"></a><span class="k">module</span> <span class="n">prim_sync_reqack</span> <span class="p">(</span>
-<a name="l-28"></a>  <span class="k">input</span>  <span class="n">clk_src_i</span><span class="p">,</span>       <span class="c1">// REQ side, SRC domain</span>
-<a name="l-29"></a>  <span class="k">input</span>  <span class="n">rst_src_ni</span><span class="p">,</span>      <span class="c1">// REQ side, SRC domain</span>
-<a name="l-30"></a>  <span class="k">input</span>  <span class="n">clk_dst_i</span><span class="p">,</span>       <span class="c1">// ACK side, DST domain</span>
-<a name="l-31"></a>  <span class="k">input</span>  <span class="n">rst_dst_ni</span><span class="p">,</span>      <span class="c1">// ACK side, DST domain</span>
-<a name="l-32"></a>
-<a name="l-33"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">src_req_i</span><span class="p">,</span> <span class="c1">// REQ side, SRC domain</span>
-<a name="l-34"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">src_ack_o</span><span class="p">,</span> <span class="c1">// REQ side, SRC domain</span>
-<a name="l-35"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">dst_req_o</span><span class="p">,</span> <span class="c1">// ACK side, DST domain</span>
-<a name="l-36"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">dst_ack_i</span>  <span class="c1">// ACK side, DST domain</span>
-<a name="l-37"></a><span class="p">);</span>
-<a name="l-38"></a>
-<a name="l-39"></a>  <span class="c1">// Types</span>
-<a name="l-40"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
-<a name="l-41"></a>    <span class="n">HANDSHAKE</span><span class="p">,</span> <span class="n">SYNC</span>
-<a name="l-42"></a>  <span class="p">}</span> <span class="n">sync_reqack_fsm_e</span><span class="p">;</span>
-<a name="l-43"></a>
-<a name="l-44"></a>  <span class="c1">// Signals</span>
-<a name="l-45"></a>  <span class="n">sync_reqack_fsm_e</span> <span class="n">src_fsm_ns</span><span class="p">,</span> <span class="n">src_fsm_cs</span><span class="p">;</span>
-<a name="l-46"></a>  <span class="n">sync_reqack_fsm_e</span> <span class="n">dst_fsm_ns</span><span class="p">,</span> <span class="n">dst_fsm_cs</span><span class="p">;</span>
-<a name="l-47"></a>  <span class="kt">logic</span> <span class="n">src_req_d</span><span class="p">,</span> <span class="n">src_req_q</span><span class="p">,</span> <span class="n">src_ack</span><span class="p">;</span>
-<a name="l-48"></a>  <span class="kt">logic</span> <span class="n">dst_ack_d</span><span class="p">,</span> <span class="n">dst_ack_q</span><span class="p">,</span> <span class="n">dst_req</span><span class="p">;</span>
+<a name="l-14"></a><span class="c1">// - Internally, this module uses a non-return-to-zero, two-phase handshake protocol. Assuming the</span>
+<a name="l-15"></a><span class="c1">//   DST domain responds with an ACK immediately, the latency from asserting the REQ in the</span>
+<a name="l-16"></a><span class="c1">//   SRC domain is:</span>
+<a name="l-17"></a><span class="c1">//   - 1 source + 2 destination clock cycles until the handshake is performed in the DST domain,</span>
+<a name="l-18"></a><span class="c1">//   - 1 source + 2 destination + 1 destination + 2 source clock cycles until the handshake is</span>
+<a name="l-19"></a><span class="c1">//     performed in the SRC domain.</span>
+<a name="l-20"></a><span class="c1">//</span>
+<a name="l-21"></a><span class="c1">// For further information, see Section 8.2.4 in H. Kaeslin, &quot;Top-Down Digital VLSI Design: From</span>
+<a name="l-22"></a><span class="c1">// Architecture to Gate-Level Circuits and FPGAs&quot;, 2015.</span>
+<a name="l-23"></a>
+<a name="l-24"></a><span class="no">`include</span> <span class="s">&quot;prim_assert.sv&quot;</span>
+<a name="l-25"></a>
+<a name="l-26"></a><span class="k">module</span> <span class="n">prim_sync_reqack</span> <span class="p">(</span>
+<a name="l-27"></a>  <span class="k">input</span>  <span class="n">clk_src_i</span><span class="p">,</span>       <span class="c1">// REQ side, SRC domain</span>
+<a name="l-28"></a>  <span class="k">input</span>  <span class="n">rst_src_ni</span><span class="p">,</span>      <span class="c1">// REQ side, SRC domain</span>
+<a name="l-29"></a>  <span class="k">input</span>  <span class="n">clk_dst_i</span><span class="p">,</span>       <span class="c1">// ACK side, DST domain</span>
+<a name="l-30"></a>  <span class="k">input</span>  <span class="n">rst_dst_ni</span><span class="p">,</span>      <span class="c1">// ACK side, DST domain</span>
+<a name="l-31"></a>
+<a name="l-32"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">src_req_i</span><span class="p">,</span> <span class="c1">// REQ side, SRC domain</span>
+<a name="l-33"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">src_ack_o</span><span class="p">,</span> <span class="c1">// REQ side, SRC domain</span>
+<a name="l-34"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">dst_req_o</span><span class="p">,</span> <span class="c1">// ACK side, DST domain</span>
+<a name="l-35"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="n">dst_ack_i</span>  <span class="c1">// ACK side, DST domain</span>
+<a name="l-36"></a><span class="p">);</span>
+<a name="l-37"></a>
+<a name="l-38"></a>  <span class="c1">// Types</span>
+<a name="l-39"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
+<a name="l-40"></a>    <span class="n">EVEN</span><span class="p">,</span> <span class="n">ODD</span>
+<a name="l-41"></a>  <span class="p">}</span> <span class="n">sync_reqack_fsm_e</span><span class="p">;</span>
+<a name="l-42"></a>
+<a name="l-43"></a>  <span class="c1">// Signals</span>
+<a name="l-44"></a>  <span class="n">sync_reqack_fsm_e</span> <span class="n">src_fsm_ns</span><span class="p">,</span> <span class="n">src_fsm_cs</span><span class="p">;</span>
+<a name="l-45"></a>  <span class="n">sync_reqack_fsm_e</span> <span class="n">dst_fsm_ns</span><span class="p">,</span> <span class="n">dst_fsm_cs</span><span class="p">;</span>
+<a name="l-46"></a>  <span class="kt">logic</span> <span class="n">src_req_d</span><span class="p">,</span> <span class="n">src_req_q</span><span class="p">,</span> <span class="n">src_ack</span><span class="p">;</span>
+<a name="l-47"></a>  <span class="kt">logic</span> <span class="n">dst_ack_d</span><span class="p">,</span> <span class="n">dst_ack_q</span><span class="p">,</span> <span class="n">dst_req</span><span class="p">;</span>
+<a name="l-48"></a>  <span class="kt">logic</span> <span class="n">src_handshake</span><span class="p">,</span> <span class="n">dst_handshake</span><span class="p">;</span>
 <a name="l-49"></a>
-<a name="l-50"></a>  <span class="c1">// Move REQ over to ACK side.</span>
-<a name="l-51"></a>  <span class="n">prim_flop_2sync</span> <span class="p">#(</span>
-<a name="l-52"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-53"></a>  <span class="p">)</span> <span class="n">req_sync</span> <span class="p">(</span>
-<a name="l-54"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_dst_i</span><span class="p">),</span>
-<a name="l-55"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_dst_ni</span><span class="p">),</span>
-<a name="l-56"></a>    <span class="p">.</span><span class="n">d_i</span>    <span class="p">(</span><span class="n">src_req_q</span><span class="p">),</span>
-<a name="l-57"></a>    <span class="p">.</span><span class="n">q_o</span>    <span class="p">(</span><span class="n">dst_req</span><span class="p">)</span>
-<a name="l-58"></a>  <span class="p">);</span>
-<a name="l-59"></a>
-<a name="l-60"></a>  <span class="c1">// Move ACK over to REQ side.</span>
-<a name="l-61"></a>  <span class="n">prim_flop_2sync</span> <span class="p">#(</span>
-<a name="l-62"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-63"></a>  <span class="p">)</span> <span class="n">ack_sync</span> <span class="p">(</span>
-<a name="l-64"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_src_i</span><span class="p">),</span>
-<a name="l-65"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_src_ni</span><span class="p">),</span>
-<a name="l-66"></a>    <span class="p">.</span><span class="n">d_i</span>    <span class="p">(</span><span class="n">dst_ack_q</span><span class="p">),</span>
-<a name="l-67"></a>    <span class="p">.</span><span class="n">q_o</span>    <span class="p">(</span><span class="n">src_ack</span><span class="p">)</span>
-<a name="l-68"></a>  <span class="p">);</span>
-<a name="l-69"></a>
-<a name="l-70"></a>  <span class="c1">// REQ-side FSM (source domain)</span>
-<a name="l-71"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">src_fsm</span>
-<a name="l-72"></a>    <span class="n">src_fsm_ns</span> <span class="o">=</span> <span class="n">src_fsm_cs</span><span class="p">;</span>
-<a name="l-73"></a>
-<a name="l-74"></a>    <span class="c1">// By default, we forward the REQ and ACK.</span>
-<a name="l-75"></a>    <span class="n">src_req_d</span> <span class="o">=</span> <span class="n">src_req_i</span><span class="p">;</span>
-<a name="l-76"></a>    <span class="n">src_ack_o</span> <span class="o">=</span> <span class="n">src_ack</span><span class="p">;</span>
-<a name="l-77"></a>
-<a name="l-78"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">src_fsm_cs</span><span class="p">)</span>
-<a name="l-79"></a>
-<a name="l-80"></a>      <span class="nl">HANDSHAKE:</span> <span class="k">begin</span>
-<a name="l-81"></a>        <span class="c1">// The handshake on the REQ side is done for exactly 1 clock cycle.</span>
-<a name="l-82"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">src_req_i</span> <span class="o">&amp;&amp;</span> <span class="n">src_ack</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-83"></a>          <span class="n">src_fsm_ns</span> <span class="o">=</span> <span class="n">SYNC</span><span class="p">;</span>
-<a name="l-84"></a>          <span class="c1">// Tell ACK side that we are done.</span>
-<a name="l-85"></a>          <span class="n">src_req_d</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-86"></a>        <span class="k">end</span>
-<a name="l-87"></a>      <span class="k">end</span>
-<a name="l-88"></a>
-<a name="l-89"></a>      <span class="nl">SYNC:</span> <span class="k">begin</span>
-<a name="l-90"></a>        <span class="c1">// Make sure ACK side knows that we are done.</span>
-<a name="l-91"></a>        <span class="n">src_req_d</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-92"></a>        <span class="n">src_ack_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-93"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">src_ack</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-94"></a>          <span class="n">src_fsm_ns</span> <span class="o">=</span> <span class="n">HANDSHAKE</span><span class="p">;</span>
-<a name="l-95"></a>        <span class="k">end</span>
-<a name="l-96"></a>      <span class="k">end</span>
-<a name="l-97"></a>
-<a name="l-98"></a>      <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
-<a name="l-99"></a>    <span class="k">endcase</span>
-<a name="l-100"></a>  <span class="k">end</span>
-<a name="l-101"></a>
-<a name="l-102"></a>  <span class="c1">// ACK-side FSM (destination domain)</span>
-<a name="l-103"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">dst_fsm</span>
-<a name="l-104"></a>    <span class="n">dst_fsm_ns</span> <span class="o">=</span> <span class="n">dst_fsm_cs</span><span class="p">;</span>
+<a name="l-50"></a>  <span class="k">assign</span> <span class="n">src_handshake</span> <span class="o">=</span> <span class="n">src_req_i</span> <span class="o">&amp;</span> <span class="n">src_ack_o</span><span class="p">;</span>
+<a name="l-51"></a>  <span class="k">assign</span> <span class="n">dst_handshake</span> <span class="o">=</span> <span class="n">dst_req_o</span> <span class="o">&amp;</span> <span class="n">dst_ack_i</span><span class="p">;</span>
+<a name="l-52"></a>
+<a name="l-53"></a>  <span class="c1">// Move REQ over to DST domain.</span>
+<a name="l-54"></a>  <span class="n">prim_flop_2sync</span> <span class="p">#(</span>
+<a name="l-55"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-56"></a>  <span class="p">)</span> <span class="n">req_sync</span> <span class="p">(</span>
+<a name="l-57"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_dst_i</span><span class="p">),</span>
+<a name="l-58"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_dst_ni</span><span class="p">),</span>
+<a name="l-59"></a>    <span class="p">.</span><span class="n">d_i</span>    <span class="p">(</span><span class="n">src_req_q</span><span class="p">),</span>
+<a name="l-60"></a>    <span class="p">.</span><span class="n">q_o</span>    <span class="p">(</span><span class="n">dst_req</span><span class="p">)</span>
+<a name="l-61"></a>  <span class="p">);</span>
+<a name="l-62"></a>
+<a name="l-63"></a>  <span class="c1">// Move ACK over to SRC domain.</span>
+<a name="l-64"></a>  <span class="n">prim_flop_2sync</span> <span class="p">#(</span>
+<a name="l-65"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-66"></a>  <span class="p">)</span> <span class="n">ack_sync</span> <span class="p">(</span>
+<a name="l-67"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_src_i</span><span class="p">),</span>
+<a name="l-68"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_src_ni</span><span class="p">),</span>
+<a name="l-69"></a>    <span class="p">.</span><span class="n">d_i</span>    <span class="p">(</span><span class="n">dst_ack_q</span><span class="p">),</span>
+<a name="l-70"></a>    <span class="p">.</span><span class="n">q_o</span>    <span class="p">(</span><span class="n">src_ack</span><span class="p">)</span>
+<a name="l-71"></a>  <span class="p">);</span>
+<a name="l-72"></a>
+<a name="l-73"></a>  <span class="c1">// REQ-side FSM (SRC domain)</span>
+<a name="l-74"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">src_fsm</span>
+<a name="l-75"></a>    <span class="n">src_fsm_ns</span> <span class="o">=</span> <span class="n">src_fsm_cs</span><span class="p">;</span>
+<a name="l-76"></a>
+<a name="l-77"></a>    <span class="c1">// By default, we keep the internal REQ value and don&#39;t ACK.</span>
+<a name="l-78"></a>    <span class="n">src_req_d</span> <span class="o">=</span> <span class="n">src_req_q</span><span class="p">;</span>
+<a name="l-79"></a>    <span class="n">src_ack_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-80"></a>
+<a name="l-81"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">src_fsm_cs</span><span class="p">)</span>
+<a name="l-82"></a>
+<a name="l-83"></a>      <span class="nl">EVEN:</span> <span class="k">begin</span>
+<a name="l-84"></a>        <span class="c1">// Simply forward REQ and ACK.</span>
+<a name="l-85"></a>        <span class="n">src_req_d</span> <span class="o">=</span> <span class="n">src_req_i</span><span class="p">;</span>
+<a name="l-86"></a>        <span class="n">src_ack_o</span> <span class="o">=</span> <span class="n">src_ack</span><span class="p">;</span>
+<a name="l-87"></a>
+<a name="l-88"></a>        <span class="c1">// The handshake is done for exactly 1 clock cycle.</span>
+<a name="l-89"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">src_handshake</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-90"></a>          <span class="n">src_fsm_ns</span> <span class="o">=</span> <span class="n">ODD</span><span class="p">;</span>
+<a name="l-91"></a>        <span class="k">end</span>
+<a name="l-92"></a>      <span class="k">end</span>
+<a name="l-93"></a>
+<a name="l-94"></a>      <span class="nl">ODD:</span> <span class="k">begin</span>
+<a name="l-95"></a>        <span class="c1">// Internal REQ and ACK have inverted meaning now. If src_req_i is high again, this signals</span>
+<a name="l-96"></a>        <span class="c1">// a new transaction.</span>
+<a name="l-97"></a>        <span class="n">src_req_d</span> <span class="o">=</span> <span class="o">~</span><span class="n">src_req_i</span><span class="p">;</span>
+<a name="l-98"></a>        <span class="n">src_ack_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">src_ack</span><span class="p">;</span>
+<a name="l-99"></a>
+<a name="l-100"></a>        <span class="c1">// The handshake is done for exactly 1 clock cycle.</span>
+<a name="l-101"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">src_handshake</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-102"></a>          <span class="n">src_fsm_ns</span> <span class="o">=</span> <span class="n">EVEN</span><span class="p">;</span>
+<a name="l-103"></a>        <span class="k">end</span>
+<a name="l-104"></a>      <span class="k">end</span>
 <a name="l-105"></a>
-<a name="l-106"></a>    <span class="c1">// By default, we forward the REQ and ACK.</span>
-<a name="l-107"></a>    <span class="n">dst_req_o</span> <span class="o">=</span> <span class="n">dst_req</span><span class="p">;</span>
-<a name="l-108"></a>    <span class="n">dst_ack_d</span> <span class="o">=</span> <span class="n">dst_ack_i</span><span class="p">;</span>
+<a name="l-106"></a>      <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
+<a name="l-107"></a>    <span class="k">endcase</span>
+<a name="l-108"></a>  <span class="k">end</span>
 <a name="l-109"></a>
-<a name="l-110"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">dst_fsm_cs</span><span class="p">)</span>
-<a name="l-111"></a>
-<a name="l-112"></a>      <span class="nl">HANDSHAKE:</span> <span class="k">begin</span>
-<a name="l-113"></a>        <span class="c1">// The handshake on the ACK side is done for exactly 1 clock cycle.</span>
-<a name="l-114"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">dst_req</span> <span class="o">&amp;&amp;</span> <span class="n">dst_ack_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-115"></a>          <span class="n">dst_fsm_ns</span> <span class="o">=</span> <span class="n">SYNC</span><span class="p">;</span>
-<a name="l-116"></a>        <span class="k">end</span>
-<a name="l-117"></a>      <span class="k">end</span>
-<a name="l-118"></a>
-<a name="l-119"></a>      <span class="nl">SYNC:</span> <span class="k">begin</span>
-<a name="l-120"></a>        <span class="c1">// Don&#39;t forward REQ, hold ACK, wait for REQ side.</span>
-<a name="l-121"></a>        <span class="n">dst_req_o</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-122"></a>        <span class="n">dst_ack_d</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-123"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dst_req</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-124"></a>          <span class="n">dst_fsm_ns</span> <span class="o">=</span> <span class="n">HANDSHAKE</span><span class="p">;</span>
-<a name="l-125"></a>        <span class="k">end</span>
-<a name="l-126"></a>      <span class="k">end</span>
-<a name="l-127"></a>
-<a name="l-128"></a>      <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
-<a name="l-129"></a>    <span class="k">endcase</span>
-<a name="l-130"></a>  <span class="k">end</span>
-<a name="l-131"></a>
-<a name="l-132"></a>  <span class="c1">// Registers</span>
-<a name="l-133"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_src_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_src_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-134"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-135"></a>      <span class="n">src_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">HANDSHAKE</span><span class="p">;</span>
-<a name="l-136"></a>      <span class="n">src_req_q</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-137"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-138"></a>      <span class="n">src_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">src_fsm_ns</span><span class="p">;</span>
-<a name="l-139"></a>      <span class="n">src_req_q</span>  <span class="o">&lt;=</span> <span class="n">src_req_d</span><span class="p">;</span>
-<a name="l-140"></a>    <span class="k">end</span>
-<a name="l-141"></a>  <span class="k">end</span>
-<a name="l-142"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_dst_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_dst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-143"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_dst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-144"></a>      <span class="n">dst_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">HANDSHAKE</span><span class="p">;</span>
-<a name="l-145"></a>      <span class="n">dst_ack_q</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-146"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-147"></a>      <span class="n">dst_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">dst_fsm_ns</span><span class="p">;</span>
-<a name="l-148"></a>      <span class="n">dst_ack_q</span>  <span class="o">&lt;=</span> <span class="n">dst_ack_d</span><span class="p">;</span>
-<a name="l-149"></a>    <span class="k">end</span>
-<a name="l-150"></a>  <span class="k">end</span>
-<a name="l-151"></a>
-<a name="l-152"></a>  <span class="c1">// Source domain cannot de-assert REQ while waiting for ACK.</span>
-<a name="l-153"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">ReqAckSyncHoldReq</span><span class="p">,</span> <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">src_req_i</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">(</span><span class="n">src_fsm_cs</span> <span class="o">!=</span> <span class="n">HANDSHAKE</span><span class="p">),</span> <span class="n">clk_src_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span>
-<a name="l-154"></a>
-<a name="l-155"></a>  <span class="c1">// Destination domain cannot assert ACK without REQ.</span>
-<a name="l-156"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">ReqAckSyncAckNeedsReq</span><span class="p">,</span> <span class="n">dst_ack_i</span> <span class="o">|-&gt;</span> <span class="n">dst_req_o</span><span class="p">,</span> <span class="n">clk_dst_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_dst_ni</span><span class="p">)</span>
-<a name="l-157"></a>
-<a name="l-158"></a><span class="k">endmodule</span>
+<a name="l-110"></a>  <span class="c1">// ACK-side FSM (DST domain)</span>
+<a name="l-111"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">dst_fsm</span>
+<a name="l-112"></a>    <span class="n">dst_fsm_ns</span> <span class="o">=</span> <span class="n">dst_fsm_cs</span><span class="p">;</span>
+<a name="l-113"></a>
+<a name="l-114"></a>    <span class="c1">// By default, we don&#39;t REQ and keep the internal ACK.</span>
+<a name="l-115"></a>    <span class="n">dst_req_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-116"></a>    <span class="n">dst_ack_d</span> <span class="o">=</span> <span class="n">dst_ack_q</span><span class="p">;</span>
+<a name="l-117"></a>
+<a name="l-118"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">dst_fsm_cs</span><span class="p">)</span>
+<a name="l-119"></a>
+<a name="l-120"></a>      <span class="nl">EVEN:</span> <span class="k">begin</span>
+<a name="l-121"></a>        <span class="c1">// Simply forward REQ and ACK.</span>
+<a name="l-122"></a>        <span class="n">dst_req_o</span> <span class="o">=</span> <span class="n">dst_req</span><span class="p">;</span>
+<a name="l-123"></a>        <span class="n">dst_ack_d</span> <span class="o">=</span> <span class="n">dst_ack_i</span><span class="p">;</span>
+<a name="l-124"></a>
+<a name="l-125"></a>        <span class="c1">// The handshake is done for exactly 1 clock cycle.</span>
+<a name="l-126"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">dst_handshake</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-127"></a>          <span class="n">dst_fsm_ns</span> <span class="o">=</span> <span class="n">ODD</span><span class="p">;</span>
+<a name="l-128"></a>        <span class="k">end</span>
+<a name="l-129"></a>      <span class="k">end</span>
+<a name="l-130"></a>
+<a name="l-131"></a>      <span class="nl">ODD:</span> <span class="k">begin</span>
+<a name="l-132"></a>        <span class="c1">// Internal REQ and ACK have inverted meaning now. If dst_req goes low, this signals a new</span>
+<a name="l-133"></a>        <span class="c1">// transaction.</span>
+<a name="l-134"></a>        <span class="n">dst_req_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">dst_req</span><span class="p">;</span>
+<a name="l-135"></a>        <span class="n">dst_ack_d</span> <span class="o">=</span> <span class="o">~</span><span class="n">dst_ack_i</span><span class="p">;</span>
+<a name="l-136"></a>
+<a name="l-137"></a>        <span class="c1">// The handshake is done for exactly 1 clock cycle.</span>
+<a name="l-138"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">dst_handshake</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-139"></a>          <span class="n">dst_fsm_ns</span> <span class="o">=</span> <span class="n">EVEN</span><span class="p">;</span>
+<a name="l-140"></a>        <span class="k">end</span>
+<a name="l-141"></a>      <span class="k">end</span>
+<a name="l-142"></a>
+<a name="l-143"></a>      <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
+<a name="l-144"></a>    <span class="k">endcase</span>
+<a name="l-145"></a>  <span class="k">end</span>
+<a name="l-146"></a>
+<a name="l-147"></a>  <span class="c1">// Registers</span>
+<a name="l-148"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_src_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_src_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-149"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-150"></a>      <span class="n">src_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">EVEN</span><span class="p">;</span>
+<a name="l-151"></a>      <span class="n">src_req_q</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-152"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-153"></a>      <span class="n">src_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">src_fsm_ns</span><span class="p">;</span>
+<a name="l-154"></a>      <span class="n">src_req_q</span>  <span class="o">&lt;=</span> <span class="n">src_req_d</span><span class="p">;</span>
+<a name="l-155"></a>    <span class="k">end</span>
+<a name="l-156"></a>  <span class="k">end</span>
+<a name="l-157"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_dst_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_dst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-158"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_dst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-159"></a>      <span class="n">dst_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">EVEN</span><span class="p">;</span>
+<a name="l-160"></a>      <span class="n">dst_ack_q</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-161"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-162"></a>      <span class="n">dst_fsm_cs</span> <span class="o">&lt;=</span> <span class="n">dst_fsm_ns</span><span class="p">;</span>
+<a name="l-163"></a>      <span class="n">dst_ack_q</span>  <span class="o">&lt;=</span> <span class="n">dst_ack_d</span><span class="p">;</span>
+<a name="l-164"></a>    <span class="k">end</span>
+<a name="l-165"></a>  <span class="k">end</span>
+<a name="l-166"></a>
+<a name="l-167"></a>  <span class="c1">// SRC domain can only de-assert REQ after receiving ACK.</span>
+<a name="l-168"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SyncReqAckHoldReq</span><span class="p">,</span> <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">src_req_i</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">src_ack_o</span><span class="p">),</span> <span class="n">clk_src_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span>
+<a name="l-169"></a>
+<a name="l-170"></a>  <span class="c1">// DST domain cannot assert ACK without REQ.</span>
+<a name="l-171"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SyncReqAckAckNeedsReq</span><span class="p">,</span> <span class="n">dst_ack_i</span> <span class="o">|-&gt;</span> <span class="n">dst_req_o</span><span class="p">,</span> <span class="n">clk_dst_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_dst_ni</span><span class="p">)</span>
+<a name="l-172"></a>
+<a name="l-173"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

@@ -130,7 +130,8 @@
 <a href="#l-122">122</a>
 <a href="#l-123">123</a>
 <a href="#l-124">124</a>
-<a href="#l-125">125</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-125">125</a>
+<a href="#l-126">126</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a>
@@ -166,95 +167,96 @@
 <a name="l-34"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>   <span class="n">rd_addr_b_i</span><span class="p">,</span>
 <a name="l-35"></a>  <span class="k">input</span>  <span class="kt">logic</span>         <span class="n">rd_en_b_i</span><span class="p">,</span>
 <a name="l-36"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">rd_data_b_o</span><span class="p">,</span>
-<a name="l-37"></a>
-<a name="l-38"></a>  <span class="k">output</span> <span class="kt">logic</span>         <span class="n">call_stack_err_o</span>
-<a name="l-39"></a><span class="p">);</span>
-<a name="l-40"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">CallStackRegIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-41"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">CallStackDepth</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
-<a name="l-42"></a>
-<a name="l-43"></a>  <span class="c1">// The stack implementation is shared between FF and FPGA implementations,</span>
-<a name="l-44"></a>  <span class="c1">// actual register register file differs between FF and FPGA implementations.</span>
-<a name="l-45"></a>  <span class="c1">// Pass through signals to chosen register file, diverting any reads/writes to</span>
-<a name="l-46"></a>  <span class="c1">// register CallStatckRegIndex to the stack.</span>
-<a name="l-47"></a>
-<a name="l-48"></a>  <span class="kt">logic</span>        <span class="n">wr_en_masked</span><span class="p">;</span>
-<a name="l-49"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_a_raw</span><span class="p">;</span>
-<a name="l-50"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_b_raw</span><span class="p">;</span>
-<a name="l-51"></a>
-<a name="l-52"></a>  <span class="kt">logic</span> <span class="n">pop_stack_a</span><span class="p">;</span>
-<a name="l-53"></a>  <span class="kt">logic</span> <span class="n">pop_stack_b</span><span class="p">;</span>
-<a name="l-54"></a>  <span class="kt">logic</span> <span class="n">pop_stack</span><span class="p">;</span>
-<a name="l-55"></a>  <span class="kt">logic</span> <span class="n">push_stack</span><span class="p">;</span>
-<a name="l-56"></a>
-<a name="l-57"></a>  <span class="kt">logic</span>        <span class="n">stack_full</span><span class="p">;</span>
-<a name="l-58"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">stack_data</span><span class="p">;</span>
-<a name="l-59"></a>  <span class="kt">logic</span>        <span class="n">stack_data_valid</span><span class="p">;</span>
-<a name="l-60"></a>
-<a name="l-61"></a>  <span class="k">assign</span> <span class="n">pop_stack_a</span> <span class="o">=</span> <span class="n">rd_en_a_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_addr_a_i</span> <span class="o">==</span> <span class="n">CallStackRegIndex</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]);</span>
-<a name="l-62"></a>  <span class="k">assign</span> <span class="n">pop_stack_b</span> <span class="o">=</span> <span class="n">rd_en_b_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_addr_b_i</span> <span class="o">==</span> <span class="n">CallStackRegIndex</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]);</span>
-<a name="l-63"></a>  <span class="k">assign</span> <span class="n">pop_stack</span>   <span class="o">=</span> <span class="n">pop_stack_a</span> <span class="o">|</span> <span class="n">pop_stack_b</span><span class="p">;</span>
-<a name="l-64"></a>
-<a name="l-65"></a>  <span class="k">assign</span> <span class="n">push_stack</span> <span class="o">=</span> <span class="n">wr_en_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wr_addr_i</span> <span class="o">==</span> <span class="n">CallStackRegIndex</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]);</span>
-<a name="l-66"></a>
-<a name="l-67"></a>  <span class="k">assign</span> <span class="n">call_stack_err_o</span> <span class="o">=</span>
-<a name="l-68"></a>      <span class="p">(</span><span class="n">push_stack</span> <span class="o">&amp;</span> <span class="n">stack_full</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pop_stack</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pop_stack</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">stack_data_valid</span><span class="p">);</span>
-<a name="l-69"></a>
-<a name="l-70"></a>  <span class="c1">// Prevent any write to the stack register from going to the register file,</span>
-<a name="l-71"></a>  <span class="c1">// all other writes are passed straight through</span>
-<a name="l-72"></a>  <span class="k">assign</span> <span class="n">wr_en_masked</span> <span class="o">=</span> <span class="n">wr_en_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">push_stack</span><span class="p">;</span>
-<a name="l-73"></a>
-<a name="l-74"></a>  <span class="c1">// Ignore read data from the register file if reading from the stack register,</span>
-<a name="l-75"></a>  <span class="c1">// otherwise pass data through from register file.</span>
-<a name="l-76"></a>  <span class="k">assign</span> <span class="n">rd_data_a_o</span> <span class="o">=</span> <span class="n">pop_stack_a</span> <span class="o">?</span> <span class="n">stack_data</span> <span class="o">:</span> <span class="n">rd_data_a_raw</span><span class="p">;</span>
-<a name="l-77"></a>  <span class="k">assign</span> <span class="n">rd_data_b_o</span> <span class="o">=</span> <span class="n">pop_stack_b</span> <span class="o">?</span> <span class="n">stack_data</span> <span class="o">:</span> <span class="n">rd_data_b_raw</span><span class="p">;</span>
-<a name="l-78"></a>
-<a name="l-79"></a>  <span class="n">otbn_stack</span> <span class="p">#(</span>
-<a name="l-80"></a>    <span class="p">.</span><span class="n">StackWidth</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span>
-<a name="l-81"></a>    <span class="p">.</span><span class="n">StackDepth</span> <span class="p">(</span><span class="n">CallStackDepth</span><span class="p">)</span>
-<a name="l-82"></a>  <span class="p">)</span> <span class="n">u_call_stack</span> <span class="p">(</span>
-<a name="l-83"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-84"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-85"></a>
-<a name="l-86"></a>    <span class="p">.</span><span class="n">full_o</span>       <span class="p">(</span><span class="n">stack_full</span><span class="p">),</span>
-<a name="l-87"></a>
-<a name="l-88"></a>    <span class="p">.</span><span class="n">push_i</span>       <span class="p">(</span><span class="n">push_stack</span><span class="p">),</span>
-<a name="l-89"></a>    <span class="p">.</span><span class="n">push_data_i</span>  <span class="p">(</span><span class="n">wr_data_i</span><span class="p">),</span>
-<a name="l-90"></a>
-<a name="l-91"></a>    <span class="p">.</span><span class="n">pop_i</span>        <span class="p">(</span><span class="n">pop_stack</span><span class="p">),</span>
-<a name="l-92"></a>    <span class="p">.</span><span class="n">top_data_o</span>   <span class="p">(</span><span class="n">stack_data</span><span class="p">),</span>
-<a name="l-93"></a>    <span class="p">.</span><span class="n">top_valid_o</span>  <span class="p">(</span><span class="n">stack_data_valid</span><span class="p">)</span>
-<a name="l-94"></a>  <span class="p">);</span>
-<a name="l-95"></a>
-<a name="l-96"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">RegFile</span> <span class="o">==</span> <span class="n">RegFileFF</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rf_base_ff</span>
-<a name="l-97"></a>    <span class="n">otbn_rf_base_ff</span> <span class="n">u_otbn_rf_base_inner</span> <span class="p">(</span>
-<a name="l-98"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-99"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-100"></a>
-<a name="l-101"></a>      <span class="p">.</span><span class="n">wr_addr_i</span><span class="p">,</span>
-<a name="l-102"></a>      <span class="p">.</span><span class="n">wr_en_i</span>   <span class="p">(</span><span class="n">wr_en_masked</span><span class="p">),</span>
-<a name="l-103"></a>      <span class="p">.</span><span class="n">wr_data_i</span><span class="p">,</span>
-<a name="l-104"></a>
-<a name="l-105"></a>      <span class="p">.</span><span class="n">rd_addr_a_i</span><span class="p">,</span>
-<a name="l-106"></a>      <span class="p">.</span><span class="n">rd_data_a_o</span> <span class="p">(</span><span class="n">rd_data_a_raw</span><span class="p">),</span>
-<a name="l-107"></a>      <span class="p">.</span><span class="n">rd_addr_b_i</span><span class="p">,</span>
-<a name="l-108"></a>      <span class="p">.</span><span class="n">rd_data_b_o</span> <span class="p">(</span><span class="n">rd_data_b_raw</span><span class="p">)</span>
-<a name="l-109"></a>    <span class="p">);</span>
-<a name="l-110"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">RegFile</span> <span class="o">==</span> <span class="n">RegFileFPGA</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rf_base_fpga</span>
-<a name="l-111"></a>    <span class="n">otbn_rf_base_fpga</span> <span class="n">u_otbn_rf_base_inner</span> <span class="p">(</span>
-<a name="l-112"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-113"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-114"></a>
-<a name="l-115"></a>      <span class="p">.</span><span class="n">wr_addr_i</span><span class="p">,</span>
-<a name="l-116"></a>      <span class="p">.</span><span class="n">wr_en_i</span>   <span class="p">(</span><span class="n">wr_en_masked</span><span class="p">),</span>
-<a name="l-117"></a>      <span class="p">.</span><span class="n">wr_data_i</span><span class="p">,</span>
-<a name="l-118"></a>
-<a name="l-119"></a>      <span class="p">.</span><span class="n">rd_addr_a_i</span><span class="p">,</span>
-<a name="l-120"></a>      <span class="p">.</span><span class="n">rd_data_a_o</span> <span class="p">(</span><span class="n">rd_data_a_raw</span><span class="p">),</span>
-<a name="l-121"></a>      <span class="p">.</span><span class="n">rd_addr_b_i</span><span class="p">,</span>
-<a name="l-122"></a>      <span class="p">.</span><span class="n">rd_data_b_o</span> <span class="p">(</span><span class="n">rd_data_b_raw</span><span class="p">)</span>
-<a name="l-123"></a>    <span class="p">);</span>
-<a name="l-124"></a>  <span class="k">end</span>
-<a name="l-125"></a><span class="k">endmodule</span>
+<a name="l-37"></a>  <span class="k">input</span>  <span class="kt">logic</span>         <span class="n">rd_commit_i</span><span class="p">,</span>
+<a name="l-38"></a>
+<a name="l-39"></a>  <span class="k">output</span> <span class="kt">logic</span>         <span class="n">call_stack_err_o</span>
+<a name="l-40"></a><span class="p">);</span>
+<a name="l-41"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">CallStackRegIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-42"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">CallStackDepth</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+<a name="l-43"></a>
+<a name="l-44"></a>  <span class="c1">// The stack implementation is shared between FF and FPGA implementations,</span>
+<a name="l-45"></a>  <span class="c1">// actual register register file differs between FF and FPGA implementations.</span>
+<a name="l-46"></a>  <span class="c1">// Pass through signals to chosen register file, diverting any reads/writes to</span>
+<a name="l-47"></a>  <span class="c1">// register CallStatckRegIndex to the stack.</span>
+<a name="l-48"></a>
+<a name="l-49"></a>  <span class="kt">logic</span>        <span class="n">wr_en_masked</span><span class="p">;</span>
+<a name="l-50"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_a_raw</span><span class="p">;</span>
+<a name="l-51"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_b_raw</span><span class="p">;</span>
+<a name="l-52"></a>
+<a name="l-53"></a>  <span class="kt">logic</span> <span class="n">pop_stack_a</span><span class="p">;</span>
+<a name="l-54"></a>  <span class="kt">logic</span> <span class="n">pop_stack_b</span><span class="p">;</span>
+<a name="l-55"></a>  <span class="kt">logic</span> <span class="n">pop_stack</span><span class="p">;</span>
+<a name="l-56"></a>  <span class="kt">logic</span> <span class="n">push_stack</span><span class="p">;</span>
+<a name="l-57"></a>
+<a name="l-58"></a>  <span class="kt">logic</span>        <span class="n">stack_full</span><span class="p">;</span>
+<a name="l-59"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">stack_data</span><span class="p">;</span>
+<a name="l-60"></a>  <span class="kt">logic</span>        <span class="n">stack_data_valid</span><span class="p">;</span>
+<a name="l-61"></a>
+<a name="l-62"></a>  <span class="k">assign</span> <span class="n">pop_stack_a</span> <span class="o">=</span> <span class="n">rd_en_a_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_addr_a_i</span> <span class="o">==</span> <span class="n">CallStackRegIndex</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]);</span>
+<a name="l-63"></a>  <span class="k">assign</span> <span class="n">pop_stack_b</span> <span class="o">=</span> <span class="n">rd_en_b_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_addr_b_i</span> <span class="o">==</span> <span class="n">CallStackRegIndex</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]);</span>
+<a name="l-64"></a>  <span class="k">assign</span> <span class="n">pop_stack</span>   <span class="o">=</span> <span class="n">rd_commit_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">pop_stack_a</span> <span class="o">|</span> <span class="n">pop_stack_b</span><span class="p">);</span>
+<a name="l-65"></a>
+<a name="l-66"></a>  <span class="k">assign</span> <span class="n">push_stack</span> <span class="o">=</span> <span class="n">wr_en_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wr_addr_i</span> <span class="o">==</span> <span class="n">CallStackRegIndex</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]);</span>
+<a name="l-67"></a>
+<a name="l-68"></a>  <span class="k">assign</span> <span class="n">call_stack_err_o</span> <span class="o">=</span>
+<a name="l-69"></a>      <span class="p">(</span><span class="n">push_stack</span> <span class="o">&amp;</span> <span class="n">stack_full</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pop_stack</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">pop_stack</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">stack_data_valid</span><span class="p">);</span>
+<a name="l-70"></a>
+<a name="l-71"></a>  <span class="c1">// Prevent any write to the stack register from going to the register file,</span>
+<a name="l-72"></a>  <span class="c1">// all other writes are passed straight through</span>
+<a name="l-73"></a>  <span class="k">assign</span> <span class="n">wr_en_masked</span> <span class="o">=</span> <span class="n">wr_en_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">push_stack</span><span class="p">;</span>
+<a name="l-74"></a>
+<a name="l-75"></a>  <span class="c1">// Ignore read data from the register file if reading from the stack register,</span>
+<a name="l-76"></a>  <span class="c1">// otherwise pass data through from register file.</span>
+<a name="l-77"></a>  <span class="k">assign</span> <span class="n">rd_data_a_o</span> <span class="o">=</span> <span class="n">pop_stack_a</span> <span class="o">?</span> <span class="n">stack_data</span> <span class="o">:</span> <span class="n">rd_data_a_raw</span><span class="p">;</span>
+<a name="l-78"></a>  <span class="k">assign</span> <span class="n">rd_data_b_o</span> <span class="o">=</span> <span class="n">pop_stack_b</span> <span class="o">?</span> <span class="n">stack_data</span> <span class="o">:</span> <span class="n">rd_data_b_raw</span><span class="p">;</span>
+<a name="l-79"></a>
+<a name="l-80"></a>  <span class="n">otbn_stack</span> <span class="p">#(</span>
+<a name="l-81"></a>    <span class="p">.</span><span class="n">StackWidth</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+<a name="l-82"></a>    <span class="p">.</span><span class="n">StackDepth</span> <span class="p">(</span><span class="n">CallStackDepth</span><span class="p">)</span>
+<a name="l-83"></a>  <span class="p">)</span> <span class="n">u_call_stack</span> <span class="p">(</span>
+<a name="l-84"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-85"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-86"></a>
+<a name="l-87"></a>    <span class="p">.</span><span class="n">full_o</span>       <span class="p">(</span><span class="n">stack_full</span><span class="p">),</span>
+<a name="l-88"></a>
+<a name="l-89"></a>    <span class="p">.</span><span class="n">push_i</span>       <span class="p">(</span><span class="n">push_stack</span><span class="p">),</span>
+<a name="l-90"></a>    <span class="p">.</span><span class="n">push_data_i</span>  <span class="p">(</span><span class="n">wr_data_i</span><span class="p">),</span>
+<a name="l-91"></a>
+<a name="l-92"></a>    <span class="p">.</span><span class="n">pop_i</span>        <span class="p">(</span><span class="n">pop_stack</span><span class="p">),</span>
+<a name="l-93"></a>    <span class="p">.</span><span class="n">top_data_o</span>   <span class="p">(</span><span class="n">stack_data</span><span class="p">),</span>
+<a name="l-94"></a>    <span class="p">.</span><span class="n">top_valid_o</span>  <span class="p">(</span><span class="n">stack_data_valid</span><span class="p">)</span>
+<a name="l-95"></a>  <span class="p">);</span>
+<a name="l-96"></a>
+<a name="l-97"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">RegFile</span> <span class="o">==</span> <span class="n">RegFileFF</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rf_base_ff</span>
+<a name="l-98"></a>    <span class="n">otbn_rf_base_ff</span> <span class="n">u_otbn_rf_base_inner</span> <span class="p">(</span>
+<a name="l-99"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-100"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-101"></a>
+<a name="l-102"></a>      <span class="p">.</span><span class="n">wr_addr_i</span><span class="p">,</span>
+<a name="l-103"></a>      <span class="p">.</span><span class="n">wr_en_i</span>   <span class="p">(</span><span class="n">wr_en_masked</span><span class="p">),</span>
+<a name="l-104"></a>      <span class="p">.</span><span class="n">wr_data_i</span><span class="p">,</span>
+<a name="l-105"></a>
+<a name="l-106"></a>      <span class="p">.</span><span class="n">rd_addr_a_i</span><span class="p">,</span>
+<a name="l-107"></a>      <span class="p">.</span><span class="n">rd_data_a_o</span> <span class="p">(</span><span class="n">rd_data_a_raw</span><span class="p">),</span>
+<a name="l-108"></a>      <span class="p">.</span><span class="n">rd_addr_b_i</span><span class="p">,</span>
+<a name="l-109"></a>      <span class="p">.</span><span class="n">rd_data_b_o</span> <span class="p">(</span><span class="n">rd_data_b_raw</span><span class="p">)</span>
+<a name="l-110"></a>    <span class="p">);</span>
+<a name="l-111"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">RegFile</span> <span class="o">==</span> <span class="n">RegFileFPGA</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rf_base_fpga</span>
+<a name="l-112"></a>    <span class="n">otbn_rf_base_fpga</span> <span class="n">u_otbn_rf_base_inner</span> <span class="p">(</span>
+<a name="l-113"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-114"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-115"></a>
+<a name="l-116"></a>      <span class="p">.</span><span class="n">wr_addr_i</span><span class="p">,</span>
+<a name="l-117"></a>      <span class="p">.</span><span class="n">wr_en_i</span>   <span class="p">(</span><span class="n">wr_en_masked</span><span class="p">),</span>
+<a name="l-118"></a>      <span class="p">.</span><span class="n">wr_data_i</span><span class="p">,</span>
+<a name="l-119"></a>
+<a name="l-120"></a>      <span class="p">.</span><span class="n">rd_addr_a_i</span><span class="p">,</span>
+<a name="l-121"></a>      <span class="p">.</span><span class="n">rd_data_a_o</span> <span class="p">(</span><span class="n">rd_data_a_raw</span><span class="p">),</span>
+<a name="l-122"></a>      <span class="p">.</span><span class="n">rd_addr_b_i</span><span class="p">,</span>
+<a name="l-123"></a>      <span class="p">.</span><span class="n">rd_data_b_o</span> <span class="p">(</span><span class="n">rd_data_b_raw</span><span class="p">)</span>
+<a name="l-124"></a>    <span class="p">);</span>
+<a name="l-125"></a>  <span class="k">end</span>
+<a name="l-126"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>
