@@ -1,0 +1,158 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/fread.v.html" target="file-frame">third_party/tests/ivtest/ivltests/fread.v</a>
+defines: 
+completed: 2021-02-01 05:08:00
+time_elapsed: 0.161s
+ram usage: 11528 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/fread.v.html" target="file-frame">third_party/tests/ivtest/ivltests/fread.v</a>
+module top;
+	localparam _string = &#34;ab&#34;;
+	localparam rg_res = _string &amp; 9&#39;h1ff;
+	reg passed;
+	integer fd;
+	integer res;
+	reg [8:0] rg;
+	reg [7:0] mem [31:0];
+	initial begin
+		passed = 1&#39;b1;
+		fd = $fopen(&#34;ThisFileDoesNotExist.txt&#34;, &#34;r&#34;);
+		res = $fread(rg, fd);
+		if (res != 0) begin
+			$display(&#34;$fread (register fd) count is wrong, expected 0, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (rg !== 9&#39;bxxxxxxxxx) begin
+			$display(&#34;$fread (register fd) value is wrong, expected 9&#39;bx, got %b&#34;, rg);
+			passed = 1&#39;b0;
+		end
+		fd = $fopen(&#34;ivltests/fread.txt&#34;, &#34;r&#34;);
+		res = $fread(mem, fd, -1);
+		if (res != 0) begin
+			$display(&#34;$fread (mem. start) count is wrong, expected 0, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (mem[0] !== 8&#39;bxxxxxxxx) begin
+			$display(&#34;$fread (mem. start[0]) value is wrong, expected 8&#39;bx, got %b&#34;, mem[0]);
+			passed = 1&#39;b0;
+		end
+		if (mem[15] !== 8&#39;bxxxxxxxx) begin
+			$display(&#34;$fread (mem. start[15]) value is wrong, expected 8&#39;bx, got %b&#34;, mem[15]);
+			passed = 1&#39;b0;
+		end
+		if (mem[31] !== 8&#39;bxxxxxxxx) begin
+			$display(&#34;$fread (mem. start[31]) value is wrong, expected 8&#39;bx, got %b&#34;, mem[31]);
+			passed = 1&#39;b0;
+		end
+		res = $fread(rg, fd);
+		if (res != 2) begin
+			$display(&#34;$fread (register) count is wrong, expected 2, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (rg !== rg_res) begin
+			$display(&#34;$fread (register) value is wrong, expected %b, got %b&#34;, rg_res, rg);
+			passed = 1&#39;b0;
+		end
+		res = $fread(mem, fd, 0, 2);
+		if (res != 2) begin
+			$display(&#34;$fread (mem. 1) count is wrong, expected 2, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (mem[0] !== &#34;0&#34;) begin
+			$display(&#34;$fread (mem. 1[0]) value is wrong, expected %b, got %b&#34;, &#34;0&#34;, mem[0]);
+			passed = 1&#39;b0;
+		end
+		if (mem[1] !== &#34;1&#34;) begin
+			$display(&#34;$fread (mem. 1[1]) value is wrong, expected %b, got %b&#34;, &#34;1&#34;, mem[1]);
+			passed = 1&#39;b0;
+		end
+		res = $fread(mem, fd, 31);
+		if (res != 1) begin
+			$display(&#34;$fread (mem. 2) count is wrong, expected 1, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (mem[31] !== &#34;z&#34;) begin
+			$display(&#34;$fread (mem. 2[31]) value is wrong, expected %b, got %b&#34;, &#34;z&#34;, mem[31]);
+			passed = 1&#39;b0;
+		end
+		res = $fread(mem, fd, 31, 2);
+		if (res != 1) begin
+			$display(&#34;$fread (mem. 3) count is wrong, expected 1, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (mem[31] !== &#34;y&#34;) begin
+			$display(&#34;$fread (mem. 3[31]) value is wrong, expected %b, got %b&#34;, &#34;y&#34;, mem[31]);
+			passed = 1&#39;b0;
+		end
+		res = $fread(mem, fd);
+		if (res != 32) begin
+			$display(&#34;$fread (mem. 4) count is wrong, expected 32, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (mem[0] !== &#34;0&#34;) begin
+			$display(&#34;$fread (mem. 4[0]) value is wrong, expected %b, got %b&#34;, &#34;0&#34;, mem[0]);
+			passed = 1&#39;b0;
+		end
+		if (mem[15] !== &#34;5&#34;) begin
+			$display(&#34;$fread (mem. 4[15]) value is wrong, expected %b, got %b&#34;, &#34;5&#34;, mem[15]);
+			passed = 1&#39;b0;
+		end
+		if (mem[31] !== &#34;1&#34;) begin
+			$display(&#34;$fread (mem. 4[31]) value is wrong, expected %b, got %b&#34;, &#34;1&#34;, mem[31]);
+			passed = 1&#39;b0;
+		end
+		rg = 9&#39;bxxxxxxxxx;
+		res = $fread(rg, fd);
+		if (res != 1) begin
+			$display(&#34;$fread (EOL) count is wrong, expected 1, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (rg !== 9&#39;h0xx) begin
+			$display(&#34;$fread (EOL value is wrong, expected 9&#39;b0xx, got %b&#34;, rg);
+			passed = 1&#39;b0;
+		end
+		res = $fread(mem, fd);
+		if (res != 0) begin
+			$display(&#34;$fread (mem. EOL) count is wrong, expected 0, got %0d&#34;, res);
+			passed = 1&#39;b0;
+		end
+		if (mem[0] !== &#34;0&#34;) begin
+			$display(&#34;$fread (mem. EOL[0]) value is wrong, expected %b, got %b&#34;, &#34;0&#34;, mem[0]);
+			passed = 1&#39;b0;
+		end
+		if (mem[15] !== &#34;5&#34;) begin
+			$display(&#34;$fread (mem. EOL[15]) value is wrong, expected %b, got %b&#34;, &#34;5&#34;, mem[15]);
+			passed = 1&#39;b0;
+		end
+		if (mem[31] !== &#34;1&#34;) begin
+			$display(&#34;$fread (mem. EOL[31]) value is wrong, expected %b, got %b&#34;, &#34;1&#34;, mem[31]);
+			passed = 1&#39;b0;
+		end
+		$fclose(fd);
+		if (passed)
+			$display(&#34;PASSED&#34;);
+		else
+			$display(&#34;FAILED&#34;);
+	end
+endmodule
+
+</pre>
+</body>
