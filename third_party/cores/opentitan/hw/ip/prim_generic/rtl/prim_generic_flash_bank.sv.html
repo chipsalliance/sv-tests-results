@@ -452,7 +452,8 @@
 <a href="#l-444">444</a>
 <a href="#l-445">445</a>
 <a href="#l-446">446</a>
-<a href="#l-447">447</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-447">447</a>
+<a href="#l-448">448</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -593,312 +594,313 @@
 <a name="l-139"></a>    <span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">ack</span><span class="p">),</span>
 <a name="l-140"></a>    <span class="p">.</span><span class="n">wdata_i</span> <span class="p">(</span><span class="n">cmd_d</span><span class="p">),</span>
 <a name="l-141"></a>    <span class="p">.</span><span class="n">depth_o</span> <span class="p">(),</span>
-<a name="l-142"></a>    <span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span><span class="n">cmd_valid</span><span class="p">),</span>
-<a name="l-143"></a>    <span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">pop_cmd</span><span class="p">),</span>
-<a name="l-144"></a>    <span class="p">.</span><span class="n">rdata_o</span> <span class="p">(</span><span class="n">cmd_q</span><span class="p">)</span>
-<a name="l-145"></a>  <span class="p">);</span>
-<a name="l-146"></a>
-<a name="l-147"></a>  <span class="kt">logic</span> <span class="n">rd_req</span><span class="p">,</span> <span class="n">prog_req</span><span class="p">,</span> <span class="n">pg_erase_req</span><span class="p">,</span> <span class="n">bk_erase_req</span><span class="p">;</span>
-<a name="l-148"></a>  <span class="k">assign</span> <span class="n">rd_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">rd</span><span class="p">;</span>
-<a name="l-149"></a>  <span class="k">assign</span> <span class="n">prog_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog</span><span class="p">;</span>
-<a name="l-150"></a>  <span class="k">assign</span> <span class="n">pg_erase_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">pg_erase</span><span class="p">;</span>
-<a name="l-151"></a>  <span class="k">assign</span> <span class="n">bk_erase_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">bk_erase</span><span class="p">;</span>
-<a name="l-152"></a>
-<a name="l-153"></a>  <span class="c1">// for read / program operations, the index cnt should be 0</span>
-<a name="l-154"></a>  <span class="k">assign</span> <span class="n">mem_rd_d</span> <span class="o">=</span> <span class="n">mem_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">mem_wr</span><span class="p">;</span>
-<a name="l-155"></a>  <span class="k">assign</span> <span class="n">mem_addr</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">addr</span> <span class="o">+</span> <span class="n">index_cnt</span><span class="p">[</span><span class="n">AddrW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-156"></a>  <span class="k">assign</span> <span class="n">mem_part</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">part</span><span class="p">;</span>
-<a name="l-157"></a>  <span class="k">assign</span> <span class="n">mem_info_sel</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">info_sel</span><span class="p">;</span>
-<a name="l-158"></a>
-<a name="l-159"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-160"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="n">st_q</span> <span class="o">&lt;=</span> <span class="n">StReset</span><span class="p">;</span>
-<a name="l-161"></a>    <span class="k">else</span> <span class="n">st_q</span> <span class="o">&lt;=</span> <span class="n">st_d</span><span class="p">;</span>
-<a name="l-162"></a>  <span class="k">end</span>
-<a name="l-163"></a>
-<a name="l-164"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-165"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-166"></a>      <span class="n">time_limit_q</span>  <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
-<a name="l-167"></a>      <span class="n">index_limit_q</span> <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
-<a name="l-168"></a>      <span class="n">prog_pend_q</span>   <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
-<a name="l-169"></a>      <span class="n">mem_rd_q</span>      <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
-<a name="l-170"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-171"></a>      <span class="n">time_limit_q</span>  <span class="o">&lt;=</span> <span class="n">time_limit_d</span><span class="p">;</span>
-<a name="l-172"></a>      <span class="n">index_limit_q</span> <span class="o">&lt;=</span> <span class="n">index_limit_d</span><span class="p">;</span>
-<a name="l-173"></a>      <span class="n">prog_pend_q</span>   <span class="o">&lt;=</span> <span class="n">prog_pend_d</span><span class="p">;</span>
-<a name="l-174"></a>      <span class="n">mem_rd_q</span>      <span class="o">&lt;=</span> <span class="n">mem_rd_d</span><span class="p">;</span>
-<a name="l-175"></a>    <span class="k">end</span>
-<a name="l-176"></a>  <span class="k">end</span>
-<a name="l-177"></a>
-<a name="l-178"></a>  <span class="c1">// latch read data from emulated memories the cycle after a read</span>
-<a name="l-179"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">DataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_q</span><span class="p">,</span> <span class="n">rd_data_d</span><span class="p">;</span>
-<a name="l-180"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-181"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-182"></a>      <span class="n">rd_data_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-183"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">mem_rd_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-184"></a>      <span class="n">rd_data_q</span> <span class="o">&lt;=</span> <span class="n">rd_data_d</span><span class="p">;</span>
-<a name="l-185"></a>    <span class="k">end</span>
-<a name="l-186"></a>  <span class="k">end</span>
-<a name="l-187"></a>
-<a name="l-188"></a>  <span class="c1">// latch partiton being read since the command fifo is popped early</span>
-<a name="l-189"></a>  <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">flash_part_e</span> <span class="n">rd_part_q</span><span class="p">;</span>
-<a name="l-190"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">InfoTypesWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">info_sel_q</span><span class="p">;</span>
-<a name="l-191"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-192"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-193"></a>      <span class="n">rd_part_q</span> <span class="o">&lt;=</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span><span class="p">;</span>
-<a name="l-194"></a>      <span class="n">info_sel_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-195"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">mem_rd_d</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-196"></a>      <span class="n">rd_part_q</span> <span class="o">&lt;=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">part</span><span class="p">;</span>
-<a name="l-197"></a>      <span class="n">info_sel_q</span> <span class="o">&lt;=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">info_sel</span><span class="p">;</span>
-<a name="l-198"></a>    <span class="k">end</span>
-<a name="l-199"></a>  <span class="k">end</span>
-<a name="l-200"></a>
-<a name="l-201"></a>  <span class="c1">// if read cycle is only 1, we can expose the unlatched data directly</span>
-<a name="l-202"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">ReadCycles</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_fast_rd_data</span>
-<a name="l-203"></a>    <span class="k">assign</span> <span class="n">rd_data_o</span> <span class="o">=</span> <span class="n">rd_data_d</span><span class="p">;</span>
-<a name="l-204"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rd_data</span>
-<a name="l-205"></a>    <span class="k">assign</span> <span class="n">rd_data_o</span> <span class="o">=</span> <span class="n">rd_data_q</span><span class="p">;</span>
-<a name="l-206"></a>  <span class="k">end</span>
-<a name="l-207"></a>
-<a name="l-208"></a>  <span class="c1">// prog_pend_q is necessary to emulate flash behavior that a bit written to 0 cannot be written</span>
-<a name="l-209"></a>  <span class="c1">// back to 1 without an erase</span>
-<a name="l-210"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-211"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-212"></a>      <span class="n">time_cnt</span>  <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
-<a name="l-213"></a>      <span class="n">index_cnt</span> <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
-<a name="l-214"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-215"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt_inc</span><span class="p">)</span> <span class="n">time_cnt</span> <span class="o">&lt;=</span> <span class="n">time_cnt</span> <span class="o">+</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-216"></a>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt_set1</span><span class="p">)</span> <span class="n">time_cnt</span> <span class="o">&lt;=</span> <span class="mh">32&#39;h1</span><span class="p">;</span>
-<a name="l-217"></a>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt_clr</span><span class="p">)</span> <span class="n">time_cnt</span> <span class="o">&lt;=</span> <span class="mh">32&#39;h0</span><span class="p">;</span>
-<a name="l-218"></a>
-<a name="l-219"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt_inc</span><span class="p">)</span> <span class="n">index_cnt</span> <span class="o">&lt;=</span> <span class="n">index_cnt</span> <span class="o">+</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-220"></a>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt_clr</span><span class="p">)</span> <span class="n">index_cnt</span> <span class="o">&lt;=</span> <span class="mh">32&#39;h0</span><span class="p">;</span>
-<a name="l-221"></a>    <span class="k">end</span>
-<a name="l-222"></a>  <span class="k">end</span>
-<a name="l-223"></a>
+<a name="l-142"></a>    <span class="p">.</span><span class="n">full_o</span> <span class="p">(),</span>
+<a name="l-143"></a>    <span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span><span class="n">cmd_valid</span><span class="p">),</span>
+<a name="l-144"></a>    <span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">pop_cmd</span><span class="p">),</span>
+<a name="l-145"></a>    <span class="p">.</span><span class="n">rdata_o</span> <span class="p">(</span><span class="n">cmd_q</span><span class="p">)</span>
+<a name="l-146"></a>  <span class="p">);</span>
+<a name="l-147"></a>
+<a name="l-148"></a>  <span class="kt">logic</span> <span class="n">rd_req</span><span class="p">,</span> <span class="n">prog_req</span><span class="p">,</span> <span class="n">pg_erase_req</span><span class="p">,</span> <span class="n">bk_erase_req</span><span class="p">;</span>
+<a name="l-149"></a>  <span class="k">assign</span> <span class="n">rd_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">rd</span><span class="p">;</span>
+<a name="l-150"></a>  <span class="k">assign</span> <span class="n">prog_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog</span><span class="p">;</span>
+<a name="l-151"></a>  <span class="k">assign</span> <span class="n">pg_erase_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">pg_erase</span><span class="p">;</span>
+<a name="l-152"></a>  <span class="k">assign</span> <span class="n">bk_erase_req</span> <span class="o">=</span> <span class="n">cmd_valid</span> <span class="o">&amp;</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">bk_erase</span><span class="p">;</span>
+<a name="l-153"></a>
+<a name="l-154"></a>  <span class="c1">// for read / program operations, the index cnt should be 0</span>
+<a name="l-155"></a>  <span class="k">assign</span> <span class="n">mem_rd_d</span> <span class="o">=</span> <span class="n">mem_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">mem_wr</span><span class="p">;</span>
+<a name="l-156"></a>  <span class="k">assign</span> <span class="n">mem_addr</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">addr</span> <span class="o">+</span> <span class="n">index_cnt</span><span class="p">[</span><span class="n">AddrW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-157"></a>  <span class="k">assign</span> <span class="n">mem_part</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">part</span><span class="p">;</span>
+<a name="l-158"></a>  <span class="k">assign</span> <span class="n">mem_info_sel</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">info_sel</span><span class="p">;</span>
+<a name="l-159"></a>
+<a name="l-160"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-161"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="n">st_q</span> <span class="o">&lt;=</span> <span class="n">StReset</span><span class="p">;</span>
+<a name="l-162"></a>    <span class="k">else</span> <span class="n">st_q</span> <span class="o">&lt;=</span> <span class="n">st_d</span><span class="p">;</span>
+<a name="l-163"></a>  <span class="k">end</span>
+<a name="l-164"></a>
+<a name="l-165"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-166"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-167"></a>      <span class="n">time_limit_q</span>  <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
+<a name="l-168"></a>      <span class="n">index_limit_q</span> <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
+<a name="l-169"></a>      <span class="n">prog_pend_q</span>   <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
+<a name="l-170"></a>      <span class="n">mem_rd_q</span>      <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
+<a name="l-171"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-172"></a>      <span class="n">time_limit_q</span>  <span class="o">&lt;=</span> <span class="n">time_limit_d</span><span class="p">;</span>
+<a name="l-173"></a>      <span class="n">index_limit_q</span> <span class="o">&lt;=</span> <span class="n">index_limit_d</span><span class="p">;</span>
+<a name="l-174"></a>      <span class="n">prog_pend_q</span>   <span class="o">&lt;=</span> <span class="n">prog_pend_d</span><span class="p">;</span>
+<a name="l-175"></a>      <span class="n">mem_rd_q</span>      <span class="o">&lt;=</span> <span class="n">mem_rd_d</span><span class="p">;</span>
+<a name="l-176"></a>    <span class="k">end</span>
+<a name="l-177"></a>  <span class="k">end</span>
+<a name="l-178"></a>
+<a name="l-179"></a>  <span class="c1">// latch read data from emulated memories the cycle after a read</span>
+<a name="l-180"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">DataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_q</span><span class="p">,</span> <span class="n">rd_data_d</span><span class="p">;</span>
+<a name="l-181"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-182"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-183"></a>      <span class="n">rd_data_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-184"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">mem_rd_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-185"></a>      <span class="n">rd_data_q</span> <span class="o">&lt;=</span> <span class="n">rd_data_d</span><span class="p">;</span>
+<a name="l-186"></a>    <span class="k">end</span>
+<a name="l-187"></a>  <span class="k">end</span>
+<a name="l-188"></a>
+<a name="l-189"></a>  <span class="c1">// latch partiton being read since the command fifo is popped early</span>
+<a name="l-190"></a>  <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">flash_part_e</span> <span class="n">rd_part_q</span><span class="p">;</span>
+<a name="l-191"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">InfoTypesWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">info_sel_q</span><span class="p">;</span>
+<a name="l-192"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-193"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-194"></a>      <span class="n">rd_part_q</span> <span class="o">&lt;=</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span><span class="p">;</span>
+<a name="l-195"></a>      <span class="n">info_sel_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-196"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">mem_rd_d</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-197"></a>      <span class="n">rd_part_q</span> <span class="o">&lt;=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">part</span><span class="p">;</span>
+<a name="l-198"></a>      <span class="n">info_sel_q</span> <span class="o">&lt;=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">info_sel</span><span class="p">;</span>
+<a name="l-199"></a>    <span class="k">end</span>
+<a name="l-200"></a>  <span class="k">end</span>
+<a name="l-201"></a>
+<a name="l-202"></a>  <span class="c1">// if read cycle is only 1, we can expose the unlatched data directly</span>
+<a name="l-203"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">ReadCycles</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_fast_rd_data</span>
+<a name="l-204"></a>    <span class="k">assign</span> <span class="n">rd_data_o</span> <span class="o">=</span> <span class="n">rd_data_d</span><span class="p">;</span>
+<a name="l-205"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rd_data</span>
+<a name="l-206"></a>    <span class="k">assign</span> <span class="n">rd_data_o</span> <span class="o">=</span> <span class="n">rd_data_q</span><span class="p">;</span>
+<a name="l-207"></a>  <span class="k">end</span>
+<a name="l-208"></a>
+<a name="l-209"></a>  <span class="c1">// prog_pend_q is necessary to emulate flash behavior that a bit written to 0 cannot be written</span>
+<a name="l-210"></a>  <span class="c1">// back to 1 without an erase</span>
+<a name="l-211"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-212"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-213"></a>      <span class="n">time_cnt</span>  <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
+<a name="l-214"></a>      <span class="n">index_cnt</span> <span class="o">&lt;=</span> <span class="mh">&#39;h0</span><span class="p">;</span>
+<a name="l-215"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-216"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt_inc</span><span class="p">)</span> <span class="n">time_cnt</span> <span class="o">&lt;=</span> <span class="n">time_cnt</span> <span class="o">+</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-217"></a>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt_set1</span><span class="p">)</span> <span class="n">time_cnt</span> <span class="o">&lt;=</span> <span class="mh">32&#39;h1</span><span class="p">;</span>
+<a name="l-218"></a>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt_clr</span><span class="p">)</span> <span class="n">time_cnt</span> <span class="o">&lt;=</span> <span class="mh">32&#39;h0</span><span class="p">;</span>
+<a name="l-219"></a>
+<a name="l-220"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt_inc</span><span class="p">)</span> <span class="n">index_cnt</span> <span class="o">&lt;=</span> <span class="n">index_cnt</span> <span class="o">+</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-221"></a>      <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt_clr</span><span class="p">)</span> <span class="n">index_cnt</span> <span class="o">&lt;=</span> <span class="mh">32&#39;h0</span><span class="p">;</span>
+<a name="l-222"></a>    <span class="k">end</span>
+<a name="l-223"></a>  <span class="k">end</span>
 <a name="l-224"></a>
-<a name="l-225"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-226"></a>    <span class="c1">// state</span>
-<a name="l-227"></a>    <span class="n">st_d</span>             <span class="o">=</span> <span class="n">st_q</span><span class="p">;</span>
-<a name="l-228"></a>
-<a name="l-229"></a>    <span class="c1">// internally consumed signals</span>
-<a name="l-230"></a>    <span class="n">index_limit_d</span>    <span class="o">=</span> <span class="n">index_limit_q</span><span class="p">;</span>
-<a name="l-231"></a>    <span class="n">time_limit_d</span>     <span class="o">=</span> <span class="n">time_limit_q</span><span class="p">;</span>
-<a name="l-232"></a>    <span class="n">prog_pend_d</span>      <span class="o">=</span> <span class="n">prog_pend_q</span><span class="p">;</span>
-<a name="l-233"></a>    <span class="n">mem_req</span>          <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-234"></a>    <span class="n">mem_wr</span>           <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-235"></a>    <span class="n">mem_wdata</span>        <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-236"></a>    <span class="n">time_cnt_inc</span>     <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-237"></a>    <span class="n">time_cnt_clr</span>     <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-238"></a>    <span class="n">time_cnt_set1</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-239"></a>    <span class="n">index_cnt_inc</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-240"></a>    <span class="n">index_cnt_clr</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-241"></a>
-<a name="l-242"></a>    <span class="c1">// i/o</span>
-<a name="l-243"></a>    <span class="n">init_busy_o</span>      <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-244"></a>    <span class="n">pop_cmd</span>          <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-245"></a>    <span class="n">done_o</span>           <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-246"></a>
-<a name="l-247"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">st_q</span><span class="p">)</span>
-<a name="l-248"></a>      <span class="nl">StReset:</span> <span class="k">begin</span>
-<a name="l-249"></a>        <span class="n">init_busy_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-250"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">init_i</span> <span class="o">&amp;&amp;</span> <span class="n">flash_power_ready_h_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">flash_power_down_h_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-251"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StInit</span><span class="p">;</span>
-<a name="l-252"></a>        <span class="k">end</span>
-<a name="l-253"></a>      <span class="k">end</span>
-<a name="l-254"></a>
-<a name="l-255"></a>      <span class="c1">// Emulate flash initilaization with a wait timer</span>
-<a name="l-256"></a>      <span class="nl">StInit:</span> <span class="k">begin</span>
-<a name="l-257"></a>        <span class="n">init_busy_o</span> <span class="o">=</span> <span class="mh">1&#39;h1</span><span class="p">;</span>
-<a name="l-258"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt</span> <span class="o">&lt;</span> <span class="n">InitCycles</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-259"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StInit</span><span class="p">;</span>
-<a name="l-260"></a>          <span class="n">index_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-261"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-262"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a name="l-263"></a>          <span class="n">index_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-264"></a>        <span class="k">end</span>
-<a name="l-265"></a>      <span class="k">end</span>
-<a name="l-266"></a>
-<a name="l-267"></a>      <span class="nl">StIdle:</span> <span class="k">begin</span>
-<a name="l-268"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">rd_req</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-269"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-270"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-271"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-272"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRead</span><span class="p">;</span>
-<a name="l-273"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">prog_req</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-274"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-275"></a>          <span class="n">prog_pend_d</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-276"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRead</span><span class="p">;</span>
-<a name="l-277"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pg_erase_req</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-278"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StErase</span><span class="p">;</span>
-<a name="l-279"></a>          <span class="n">index_limit_d</span> <span class="o">=</span> <span class="n">WordsPerPage</span><span class="p">;</span>
-<a name="l-280"></a>          <span class="n">time_limit_d</span> <span class="o">=</span> <span class="n">PgEraseCycles</span><span class="p">;</span>
-<a name="l-281"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">bk_erase_req</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-282"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StErase</span><span class="p">;</span>
-<a name="l-283"></a>          <span class="n">index_limit_d</span> <span class="o">=</span> <span class="n">WordsPerBank</span><span class="p">;</span>
-<a name="l-284"></a>          <span class="n">time_limit_d</span> <span class="o">=</span> <span class="n">BkEraseCycles</span><span class="p">;</span>
-<a name="l-285"></a>        <span class="k">end</span>
-<a name="l-286"></a>      <span class="k">end</span>
-<a name="l-287"></a>
-<a name="l-288"></a>      <span class="nl">StRead:</span> <span class="k">begin</span>
-<a name="l-289"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">ReadCycles</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-290"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-291"></a>
-<a name="l-292"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">prog_pend_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-293"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-294"></a>
-<a name="l-295"></a>          <span class="c1">// if another request already pending</span>
-<a name="l-296"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">rd_req</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-297"></a>            <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-298"></a>            <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-299"></a>            <span class="n">time_cnt_set1</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-300"></a>            <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRead</span><span class="p">;</span>
-<a name="l-301"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-302"></a>            <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-303"></a>            <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a name="l-304"></a>          <span class="k">end</span>
-<a name="l-305"></a>
-<a name="l-306"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">prog_pend_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-307"></a>          <span class="c1">// this is the read performed before a program operation</span>
-<a name="l-308"></a>          <span class="n">prog_pend_d</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-309"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-310"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StProg</span><span class="p">;</span>
-<a name="l-311"></a>        <span class="k">end</span>
-<a name="l-312"></a>      <span class="k">end</span>
-<a name="l-313"></a>
-<a name="l-314"></a>      <span class="nl">StProg:</span> <span class="k">begin</span>
-<a name="l-315"></a>        <span class="c1">// if data is already 0, cannot program to 1 without erase</span>
-<a name="l-316"></a>        <span class="n">mem_wdata</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog_data</span> <span class="o">&amp;</span> <span class="n">rd_data_q</span><span class="p">;</span>
-<a name="l-317"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">ProgCycles</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-318"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-319"></a>          <span class="n">mem_wr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-320"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-321"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-322"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a name="l-323"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-324"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog_last</span><span class="p">;</span>
-<a name="l-325"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-326"></a>        <span class="k">end</span>
-<a name="l-327"></a>      <span class="k">end</span>
-<a name="l-328"></a>
-<a name="l-329"></a>      <span class="nl">StErase:</span> <span class="k">begin</span>
-<a name="l-330"></a>        <span class="c1">// Actual erasing of the page</span>
-<a name="l-331"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">erase_suspend_req_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-332"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a name="l-333"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-334"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-335"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-336"></a>          <span class="n">index_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-337"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt</span> <span class="o">&lt;</span> <span class="n">index_limit_q</span> <span class="o">||</span> <span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">time_limit_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-338"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-339"></a>          <span class="n">mem_wr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-340"></a>          <span class="n">mem_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">DataWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}};</span>
-<a name="l-341"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="p">(</span><span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">time_limit_q</span><span class="p">);</span>
-<a name="l-342"></a>          <span class="n">index_cnt_inc</span> <span class="o">=</span> <span class="p">(</span><span class="n">index_cnt</span> <span class="o">&lt;</span> <span class="n">index_limit_q</span><span class="p">);</span>
-<a name="l-343"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-344"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a name="l-345"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-346"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-347"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-348"></a>          <span class="n">index_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-349"></a>        <span class="k">end</span>
-<a name="l-350"></a>      <span class="k">end</span>
-<a name="l-351"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-352"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a name="l-353"></a>      <span class="k">end</span>
-<a name="l-354"></a>
-<a name="l-355"></a>    <span class="k">endcase</span> <span class="c1">// unique case (st_q)</span>
-<a name="l-356"></a>
-<a name="l-357"></a>    <span class="c1">// Emulate power down and power loss behavior</span>
-<a name="l-358"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">flash_power_ready_h_i</span> <span class="o">||</span> <span class="n">flash_power_down_h_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-359"></a>      <span class="n">st_d</span> <span class="o">=</span> <span class="n">StReset</span><span class="p">;</span>
-<a name="l-360"></a>    <span class="k">end</span>
-<a name="l-361"></a>
-<a name="l-362"></a>  <span class="k">end</span> <span class="c1">// always_comb</span>
-<a name="l-363"></a>
-<a name="l-364"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">MemWidth</span> <span class="o">=</span> <span class="n">DataWidth</span> <span class="o">-</span> <span class="n">MetaDataWidth</span><span class="p">;</span>
-<a name="l-365"></a>
-<a name="l-366"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">DataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_main</span><span class="p">,</span> <span class="n">rd_data_info</span><span class="p">;</span>
-<a name="l-367"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_nom_data_main</span><span class="p">;</span>
-<a name="l-368"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MetaDataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_meta_data_main</span><span class="p">;</span>
-<a name="l-369"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">InfoTypes</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_nom_data_info</span><span class="p">;</span>
-<a name="l-370"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">InfoTypes</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">MetaDataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_meta_data_info</span><span class="p">;</span>
-<a name="l-371"></a>
-<a name="l-372"></a>  <span class="n">prim_ram_1p</span> <span class="p">#(</span>
-<a name="l-373"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">),</span>
-<a name="l-374"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerBank</span><span class="p">),</span>
-<a name="l-375"></a>    <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">)</span>
-<a name="l-376"></a>  <span class="p">)</span> <span class="n">u_mem</span> <span class="p">(</span>
-<a name="l-377"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-378"></a>    <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">mem_req</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mem_part</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span><span class="p">)),</span>
-<a name="l-379"></a>    <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
-<a name="l-380"></a>    <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">),</span>
-<a name="l-381"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span>
-<a name="l-382"></a>    <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MemWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
-<a name="l-383"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_nom_data_main</span><span class="p">)</span>
-<a name="l-384"></a>  <span class="p">);</span>
-<a name="l-385"></a>
-<a name="l-386"></a>  <span class="n">prim_ram_1p</span> <span class="p">#(</span>
-<a name="l-387"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">),</span>
-<a name="l-388"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerBank</span><span class="p">),</span>
-<a name="l-389"></a>    <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">)</span>
-<a name="l-390"></a>  <span class="p">)</span> <span class="n">u_mem_meta</span> <span class="p">(</span>
-<a name="l-391"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-392"></a>    <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">mem_req</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mem_part</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span><span class="p">)),</span>
-<a name="l-393"></a>    <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
-<a name="l-394"></a>    <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">),</span>
-<a name="l-395"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span> <span class="o">+:</span> <span class="n">MetaDataWidth</span><span class="p">]),</span>
-<a name="l-396"></a>    <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MetaDataWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
-<a name="l-397"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_meta_data_main</span><span class="p">)</span>
-<a name="l-398"></a>  <span class="p">);</span>
-<a name="l-399"></a>
-<a name="l-400"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">info_type</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">info_type</span> <span class="o">&lt;</span> <span class="n">InfoTypes</span><span class="p">;</span> <span class="n">info_type</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_info_types</span>
-<a name="l-401"></a>
-<a name="l-402"></a>    <span class="kt">logic</span> <span class="n">info_mem_req</span><span class="p">;</span>
-<a name="l-403"></a>    <span class="k">assign</span> <span class="n">info_mem_req</span> <span class="o">=</span> <span class="n">mem_req</span> <span class="o">&amp;</span>
-<a name="l-404"></a>                          <span class="p">(</span><span class="n">mem_part</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartInfo</span><span class="p">)</span> <span class="o">&amp;</span>
-<a name="l-405"></a>                          <span class="p">(</span><span class="n">mem_info_sel</span> <span class="o">==</span> <span class="n">info_type</span><span class="p">);</span>
-<a name="l-406"></a>
-<a name="l-407"></a>    <span class="n">prim_ram_1p</span> <span class="p">#(</span>
-<a name="l-408"></a>      <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">),</span>
-<a name="l-409"></a>      <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerInfoBank</span><span class="p">),</span>
-<a name="l-410"></a>      <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">)</span>
-<a name="l-411"></a>    <span class="p">)</span> <span class="n">u_info_mem</span> <span class="p">(</span>
-<a name="l-412"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-413"></a>      <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">info_mem_req</span><span class="p">),</span>
-<a name="l-414"></a>      <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
-<a name="l-415"></a>      <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">InfoAddrW</span><span class="p">]),</span>
-<a name="l-416"></a>      <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span>
-<a name="l-417"></a>      <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MemWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
-<a name="l-418"></a>      <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_nom_data_info</span><span class="p">[</span><span class="n">info_type</span><span class="p">])</span>
-<a name="l-419"></a>    <span class="p">);</span>
-<a name="l-420"></a>
-<a name="l-421"></a>    <span class="n">prim_ram_1p</span> <span class="p">#(</span>
-<a name="l-422"></a>      <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">),</span>
-<a name="l-423"></a>      <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerInfoBank</span><span class="p">),</span>
-<a name="l-424"></a>      <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">)</span>
-<a name="l-425"></a>    <span class="p">)</span> <span class="n">u_info_mem_meta</span> <span class="p">(</span>
-<a name="l-426"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-427"></a>      <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">info_mem_req</span><span class="p">),</span>
-<a name="l-428"></a>      <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
-<a name="l-429"></a>      <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">InfoAddrW</span><span class="p">]),</span>
-<a name="l-430"></a>      <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span> <span class="o">+:</span> <span class="n">MetaDataWidth</span><span class="p">]),</span>
-<a name="l-431"></a>      <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MetaDataWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
-<a name="l-432"></a>      <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_meta_data_info</span><span class="p">[</span><span class="n">info_type</span><span class="p">])</span>
-<a name="l-433"></a>    <span class="p">);</span>
-<a name="l-434"></a>  <span class="k">end</span>
-<a name="l-435"></a>
+<a name="l-225"></a>
+<a name="l-226"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-227"></a>    <span class="c1">// state</span>
+<a name="l-228"></a>    <span class="n">st_d</span>             <span class="o">=</span> <span class="n">st_q</span><span class="p">;</span>
+<a name="l-229"></a>
+<a name="l-230"></a>    <span class="c1">// internally consumed signals</span>
+<a name="l-231"></a>    <span class="n">index_limit_d</span>    <span class="o">=</span> <span class="n">index_limit_q</span><span class="p">;</span>
+<a name="l-232"></a>    <span class="n">time_limit_d</span>     <span class="o">=</span> <span class="n">time_limit_q</span><span class="p">;</span>
+<a name="l-233"></a>    <span class="n">prog_pend_d</span>      <span class="o">=</span> <span class="n">prog_pend_q</span><span class="p">;</span>
+<a name="l-234"></a>    <span class="n">mem_req</span>          <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-235"></a>    <span class="n">mem_wr</span>           <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-236"></a>    <span class="n">mem_wdata</span>        <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-237"></a>    <span class="n">time_cnt_inc</span>     <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-238"></a>    <span class="n">time_cnt_clr</span>     <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-239"></a>    <span class="n">time_cnt_set1</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-240"></a>    <span class="n">index_cnt_inc</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-241"></a>    <span class="n">index_cnt_clr</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-242"></a>
+<a name="l-243"></a>    <span class="c1">// i/o</span>
+<a name="l-244"></a>    <span class="n">init_busy_o</span>      <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-245"></a>    <span class="n">pop_cmd</span>          <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-246"></a>    <span class="n">done_o</span>           <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-247"></a>
+<a name="l-248"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">st_q</span><span class="p">)</span>
+<a name="l-249"></a>      <span class="nl">StReset:</span> <span class="k">begin</span>
+<a name="l-250"></a>        <span class="n">init_busy_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-251"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">init_i</span> <span class="o">&amp;&amp;</span> <span class="n">flash_power_ready_h_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">flash_power_down_h_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-252"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StInit</span><span class="p">;</span>
+<a name="l-253"></a>        <span class="k">end</span>
+<a name="l-254"></a>      <span class="k">end</span>
+<a name="l-255"></a>
+<a name="l-256"></a>      <span class="c1">// Emulate flash initilaization with a wait timer</span>
+<a name="l-257"></a>      <span class="nl">StInit:</span> <span class="k">begin</span>
+<a name="l-258"></a>        <span class="n">init_busy_o</span> <span class="o">=</span> <span class="mh">1&#39;h1</span><span class="p">;</span>
+<a name="l-259"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt</span> <span class="o">&lt;</span> <span class="n">InitCycles</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-260"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StInit</span><span class="p">;</span>
+<a name="l-261"></a>          <span class="n">index_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-262"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-263"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a name="l-264"></a>          <span class="n">index_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-265"></a>        <span class="k">end</span>
+<a name="l-266"></a>      <span class="k">end</span>
+<a name="l-267"></a>
+<a name="l-268"></a>      <span class="nl">StIdle:</span> <span class="k">begin</span>
+<a name="l-269"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">rd_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-270"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-271"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-272"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-273"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRead</span><span class="p">;</span>
+<a name="l-274"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">prog_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-275"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-276"></a>          <span class="n">prog_pend_d</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-277"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRead</span><span class="p">;</span>
+<a name="l-278"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pg_erase_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-279"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StErase</span><span class="p">;</span>
+<a name="l-280"></a>          <span class="n">index_limit_d</span> <span class="o">=</span> <span class="n">WordsPerPage</span><span class="p">;</span>
+<a name="l-281"></a>          <span class="n">time_limit_d</span> <span class="o">=</span> <span class="n">PgEraseCycles</span><span class="p">;</span>
+<a name="l-282"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">bk_erase_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-283"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StErase</span><span class="p">;</span>
+<a name="l-284"></a>          <span class="n">index_limit_d</span> <span class="o">=</span> <span class="n">WordsPerBank</span><span class="p">;</span>
+<a name="l-285"></a>          <span class="n">time_limit_d</span> <span class="o">=</span> <span class="n">BkEraseCycles</span><span class="p">;</span>
+<a name="l-286"></a>        <span class="k">end</span>
+<a name="l-287"></a>      <span class="k">end</span>
+<a name="l-288"></a>
+<a name="l-289"></a>      <span class="nl">StRead:</span> <span class="k">begin</span>
+<a name="l-290"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">ReadCycles</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-291"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-292"></a>
+<a name="l-293"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">prog_pend_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-294"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-295"></a>
+<a name="l-296"></a>          <span class="c1">// if another request already pending</span>
+<a name="l-297"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">rd_req</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-298"></a>            <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-299"></a>            <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-300"></a>            <span class="n">time_cnt_set1</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-301"></a>            <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRead</span><span class="p">;</span>
+<a name="l-302"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-303"></a>            <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-304"></a>            <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a name="l-305"></a>          <span class="k">end</span>
+<a name="l-306"></a>
+<a name="l-307"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">prog_pend_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-308"></a>          <span class="c1">// this is the read performed before a program operation</span>
+<a name="l-309"></a>          <span class="n">prog_pend_d</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-310"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-311"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StProg</span><span class="p">;</span>
+<a name="l-312"></a>        <span class="k">end</span>
+<a name="l-313"></a>      <span class="k">end</span>
+<a name="l-314"></a>
+<a name="l-315"></a>      <span class="nl">StProg:</span> <span class="k">begin</span>
+<a name="l-316"></a>        <span class="c1">// if data is already 0, cannot program to 1 without erase</span>
+<a name="l-317"></a>        <span class="n">mem_wdata</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog_data</span> <span class="o">&amp;</span> <span class="n">rd_data_q</span><span class="p">;</span>
+<a name="l-318"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">ProgCycles</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-319"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-320"></a>          <span class="n">mem_wr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-321"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-322"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-323"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a name="l-324"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-325"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog_last</span><span class="p">;</span>
+<a name="l-326"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-327"></a>        <span class="k">end</span>
+<a name="l-328"></a>      <span class="k">end</span>
+<a name="l-329"></a>
+<a name="l-330"></a>      <span class="nl">StErase:</span> <span class="k">begin</span>
+<a name="l-331"></a>        <span class="c1">// Actual erasing of the page</span>
+<a name="l-332"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">erase_suspend_req_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-333"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a name="l-334"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-335"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-336"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-337"></a>          <span class="n">index_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-338"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">index_cnt</span> <span class="o">&lt;</span> <span class="n">index_limit_q</span> <span class="o">||</span> <span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">time_limit_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-339"></a>          <span class="n">mem_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-340"></a>          <span class="n">mem_wr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-341"></a>          <span class="n">mem_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">DataWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}};</span>
+<a name="l-342"></a>          <span class="n">time_cnt_inc</span> <span class="o">=</span> <span class="p">(</span><span class="n">time_cnt</span> <span class="o">&lt;</span> <span class="n">time_limit_q</span><span class="p">);</span>
+<a name="l-343"></a>          <span class="n">index_cnt_inc</span> <span class="o">=</span> <span class="p">(</span><span class="n">index_cnt</span> <span class="o">&lt;</span> <span class="n">index_limit_q</span><span class="p">);</span>
+<a name="l-344"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-345"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a name="l-346"></a>          <span class="n">pop_cmd</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-347"></a>          <span class="n">done_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-348"></a>          <span class="n">time_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-349"></a>          <span class="n">index_cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-350"></a>        <span class="k">end</span>
+<a name="l-351"></a>      <span class="k">end</span>
+<a name="l-352"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-353"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a name="l-354"></a>      <span class="k">end</span>
+<a name="l-355"></a>
+<a name="l-356"></a>    <span class="k">endcase</span> <span class="c1">// unique case (st_q)</span>
+<a name="l-357"></a>
+<a name="l-358"></a>    <span class="c1">// Emulate power down and power loss behavior</span>
+<a name="l-359"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">flash_power_ready_h_i</span> <span class="o">||</span> <span class="n">flash_power_down_h_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-360"></a>      <span class="n">st_d</span> <span class="o">=</span> <span class="n">StReset</span><span class="p">;</span>
+<a name="l-361"></a>    <span class="k">end</span>
+<a name="l-362"></a>
+<a name="l-363"></a>  <span class="k">end</span> <span class="c1">// always_comb</span>
+<a name="l-364"></a>
+<a name="l-365"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">MemWidth</span> <span class="o">=</span> <span class="n">DataWidth</span> <span class="o">-</span> <span class="n">MetaDataWidth</span><span class="p">;</span>
+<a name="l-366"></a>
+<a name="l-367"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">DataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_data_main</span><span class="p">,</span> <span class="n">rd_data_info</span><span class="p">;</span>
+<a name="l-368"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_nom_data_main</span><span class="p">;</span>
+<a name="l-369"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">MetaDataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_meta_data_main</span><span class="p">;</span>
+<a name="l-370"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">InfoTypes</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_nom_data_info</span><span class="p">;</span>
+<a name="l-371"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">InfoTypes</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">MetaDataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rd_meta_data_info</span><span class="p">;</span>
+<a name="l-372"></a>
+<a name="l-373"></a>  <span class="n">prim_ram_1p</span> <span class="p">#(</span>
+<a name="l-374"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">),</span>
+<a name="l-375"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerBank</span><span class="p">),</span>
+<a name="l-376"></a>    <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">)</span>
+<a name="l-377"></a>  <span class="p">)</span> <span class="n">u_mem</span> <span class="p">(</span>
+<a name="l-378"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-379"></a>    <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">mem_req</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mem_part</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span><span class="p">)),</span>
+<a name="l-380"></a>    <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
+<a name="l-381"></a>    <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">),</span>
+<a name="l-382"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span>
+<a name="l-383"></a>    <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MemWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
+<a name="l-384"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_nom_data_main</span><span class="p">)</span>
+<a name="l-385"></a>  <span class="p">);</span>
+<a name="l-386"></a>
+<a name="l-387"></a>  <span class="n">prim_ram_1p</span> <span class="p">#(</span>
+<a name="l-388"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">),</span>
+<a name="l-389"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerBank</span><span class="p">),</span>
+<a name="l-390"></a>    <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">)</span>
+<a name="l-391"></a>  <span class="p">)</span> <span class="n">u_mem_meta</span> <span class="p">(</span>
+<a name="l-392"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-393"></a>    <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">mem_req</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">mem_part</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span><span class="p">)),</span>
+<a name="l-394"></a>    <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
+<a name="l-395"></a>    <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">),</span>
+<a name="l-396"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span> <span class="o">+:</span> <span class="n">MetaDataWidth</span><span class="p">]),</span>
+<a name="l-397"></a>    <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MetaDataWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
+<a name="l-398"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_meta_data_main</span><span class="p">)</span>
+<a name="l-399"></a>  <span class="p">);</span>
+<a name="l-400"></a>
+<a name="l-401"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">info_type</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">info_type</span> <span class="o">&lt;</span> <span class="n">InfoTypes</span><span class="p">;</span> <span class="n">info_type</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_info_types</span>
+<a name="l-402"></a>
+<a name="l-403"></a>    <span class="kt">logic</span> <span class="n">info_mem_req</span><span class="p">;</span>
+<a name="l-404"></a>    <span class="k">assign</span> <span class="n">info_mem_req</span> <span class="o">=</span> <span class="n">mem_req</span> <span class="o">&amp;</span>
+<a name="l-405"></a>                          <span class="p">(</span><span class="n">mem_part</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartInfo</span><span class="p">)</span> <span class="o">&amp;</span>
+<a name="l-406"></a>                          <span class="p">(</span><span class="n">mem_info_sel</span> <span class="o">==</span> <span class="n">info_type</span><span class="p">);</span>
+<a name="l-407"></a>
+<a name="l-408"></a>    <span class="n">prim_ram_1p</span> <span class="p">#(</span>
+<a name="l-409"></a>      <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">),</span>
+<a name="l-410"></a>      <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerInfoBank</span><span class="p">),</span>
+<a name="l-411"></a>      <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MemWidth</span><span class="p">)</span>
+<a name="l-412"></a>    <span class="p">)</span> <span class="n">u_info_mem</span> <span class="p">(</span>
+<a name="l-413"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-414"></a>      <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">info_mem_req</span><span class="p">),</span>
+<a name="l-415"></a>      <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
+<a name="l-416"></a>      <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">InfoAddrW</span><span class="p">]),</span>
+<a name="l-417"></a>      <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span>
+<a name="l-418"></a>      <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MemWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
+<a name="l-419"></a>      <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_nom_data_info</span><span class="p">[</span><span class="n">info_type</span><span class="p">])</span>
+<a name="l-420"></a>    <span class="p">);</span>
+<a name="l-421"></a>
+<a name="l-422"></a>    <span class="n">prim_ram_1p</span> <span class="p">#(</span>
+<a name="l-423"></a>      <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">),</span>
+<a name="l-424"></a>      <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">WordsPerInfoBank</span><span class="p">),</span>
+<a name="l-425"></a>      <span class="p">.</span><span class="n">DataBitsPerMask</span><span class="p">(</span><span class="n">MetaDataWidth</span><span class="p">)</span>
+<a name="l-426"></a>    <span class="p">)</span> <span class="n">u_info_mem_meta</span> <span class="p">(</span>
+<a name="l-427"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-428"></a>      <span class="p">.</span><span class="n">req_i</span>    <span class="p">(</span><span class="n">info_mem_req</span><span class="p">),</span>
+<a name="l-429"></a>      <span class="p">.</span><span class="n">write_i</span>  <span class="p">(</span><span class="n">mem_wr</span><span class="p">),</span>
+<a name="l-430"></a>      <span class="p">.</span><span class="n">addr_i</span>   <span class="p">(</span><span class="n">mem_addr</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">InfoAddrW</span><span class="p">]),</span>
+<a name="l-431"></a>      <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">mem_wdata</span><span class="p">[</span><span class="n">MemWidth</span> <span class="o">+:</span> <span class="n">MetaDataWidth</span><span class="p">]),</span>
+<a name="l-432"></a>      <span class="p">.</span><span class="n">wmask_i</span>  <span class="p">({</span><span class="n">MetaDataWidth</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
+<a name="l-433"></a>      <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">rd_meta_data_info</span><span class="p">[</span><span class="n">info_type</span><span class="p">])</span>
+<a name="l-434"></a>    <span class="p">);</span>
+<a name="l-435"></a>  <span class="k">end</span>
 <a name="l-436"></a>
-<a name="l-437"></a>  <span class="k">assign</span> <span class="n">rd_data_main</span> <span class="o">=</span> <span class="p">{</span><span class="n">rd_meta_data_main</span><span class="p">,</span> <span class="n">rd_nom_data_main</span><span class="p">};</span>
-<a name="l-438"></a>  <span class="k">assign</span> <span class="n">rd_data_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">rd_meta_data_info</span><span class="p">[</span><span class="n">info_sel_q</span><span class="p">],</span> <span class="n">rd_nom_data_info</span><span class="p">[</span><span class="n">info_sel_q</span><span class="p">]};</span>
-<a name="l-439"></a>  <span class="k">assign</span> <span class="n">rd_data_d</span>    <span class="o">=</span> <span class="n">rd_part_q</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span> <span class="o">?</span> <span class="n">rd_data_main</span> <span class="o">:</span> <span class="n">rd_data_info</span><span class="p">;</span>
-<a name="l-440"></a>
-<a name="l-441"></a>  <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">flash_prog_e</span> <span class="n">unused_prog_type</span><span class="p">;</span>
-<a name="l-442"></a>  <span class="k">assign</span> <span class="n">unused_prog_type</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog_type</span><span class="p">;</span>
-<a name="l-443"></a>
-<a name="l-444"></a>  <span class="kt">logic</span> <span class="n">unused_he</span><span class="p">;</span>
-<a name="l-445"></a>  <span class="k">assign</span> <span class="n">unused_he</span> <span class="o">=</span> <span class="n">he_i</span><span class="p">;</span>
-<a name="l-446"></a>
-<a name="l-447"></a><span class="k">endmodule</span> <span class="c1">// prim_generic_flash</span>
+<a name="l-437"></a>
+<a name="l-438"></a>  <span class="k">assign</span> <span class="n">rd_data_main</span> <span class="o">=</span> <span class="p">{</span><span class="n">rd_meta_data_main</span><span class="p">,</span> <span class="n">rd_nom_data_main</span><span class="p">};</span>
+<a name="l-439"></a>  <span class="k">assign</span> <span class="n">rd_data_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">rd_meta_data_info</span><span class="p">[</span><span class="n">info_sel_q</span><span class="p">],</span> <span class="n">rd_nom_data_info</span><span class="p">[</span><span class="n">info_sel_q</span><span class="p">]};</span>
+<a name="l-440"></a>  <span class="k">assign</span> <span class="n">rd_data_d</span>    <span class="o">=</span> <span class="n">rd_part_q</span> <span class="o">==</span> <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">FlashPartData</span> <span class="o">?</span> <span class="n">rd_data_main</span> <span class="o">:</span> <span class="n">rd_data_info</span><span class="p">;</span>
+<a name="l-441"></a>
+<a name="l-442"></a>  <span class="n">flash_ctrl_pkg</span><span class="o">::</span><span class="n">flash_prog_e</span> <span class="n">unused_prog_type</span><span class="p">;</span>
+<a name="l-443"></a>  <span class="k">assign</span> <span class="n">unused_prog_type</span> <span class="o">=</span> <span class="n">cmd_q</span><span class="p">.</span><span class="n">prog_type</span><span class="p">;</span>
+<a name="l-444"></a>
+<a name="l-445"></a>  <span class="kt">logic</span> <span class="n">unused_he</span><span class="p">;</span>
+<a name="l-446"></a>  <span class="k">assign</span> <span class="n">unused_he</span> <span class="o">=</span> <span class="n">he_i</span><span class="p">;</span>
+<a name="l-447"></a>
+<a name="l-448"></a><span class="k">endmodule</span> <span class="c1">// prim_generic_flash</span>
 </pre></div>
 </td></tr></table>
   </body>

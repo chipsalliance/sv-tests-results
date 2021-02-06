@@ -297,7 +297,16 @@
 <a href="#l-289">289</a>
 <a href="#l-290">290</a>
 <a href="#l-291">291</a>
-<a href="#l-292">292</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-292">292</a>
+<a href="#l-293">293</a>
+<a href="#l-294">294</a>
+<a href="#l-295">295</a>
+<a href="#l-296">296</a>
+<a href="#l-297">297</a>
+<a href="#l-298">298</a>
+<a href="#l-299">299</a>
+<a href="#l-300">300</a>
+<a href="#l-301">301</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -545,50 +554,59 @@
 <a name="l-246"></a>
 <a name="l-247"></a><span class="k">module</span> <span class="n">aes_sbox_canright_masked_noreuse</span> <span class="p">(</span>
 <a name="l-248"></a>  <span class="k">input</span>  <span class="n">aes_pkg</span><span class="o">::</span><span class="n">ciph_op_e</span> <span class="n">op_i</span><span class="p">,</span>
-<a name="l-249"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">data_i</span><span class="p">,</span>        <span class="c1">// masked, the actual input data is data_i ^ in_mask_i</span>
-<a name="l-250"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">in_mask_i</span><span class="p">,</span>     <span class="c1">// input mask, independent from actual input data</span>
-<a name="l-251"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">out_mask_i</span><span class="p">,</span>    <span class="c1">// output mask, independent from input mask</span>
-<a name="l-252"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">9</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">prd_masking_i</span><span class="p">,</span> <span class="c1">// pseudo-random data, e.g. for intermediate masks</span>
-<a name="l-253"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">data_o</span>         <span class="c1">// masked, the actual output data is data_o ^ out_mask_i</span>
-<a name="l-254"></a><span class="p">);</span>
-<a name="l-255"></a>
-<a name="l-256"></a>  <span class="kn">import</span> <span class="nn">aes_pkg::*</span><span class="p">;</span>
-<a name="l-257"></a>  <span class="kn">import</span> <span class="nn">aes_sbox_canright_pkg::*</span><span class="p">;</span>
-<a name="l-258"></a>
-<a name="l-259"></a>  <span class="c1">//////////////////////////</span>
-<a name="l-260"></a>  <span class="c1">// Masked Canright SBox //</span>
-<a name="l-261"></a>  <span class="c1">//////////////////////////</span>
-<a name="l-262"></a>
-<a name="l-263"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">in_data_basis_x</span><span class="p">,</span> <span class="n">out_data_basis_x</span><span class="p">;</span>
-<a name="l-264"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">in_mask_basis_x</span><span class="p">,</span> <span class="n">out_mask_basis_x</span><span class="p">;</span>
-<a name="l-265"></a>
-<a name="l-266"></a>  <span class="c1">// Convert data to normal basis X.</span>
-<a name="l-267"></a>  <span class="k">assign</span> <span class="n">in_data_basis_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_FWD</span><span class="p">)</span> <span class="o">?</span> <span class="n">aes_mvm</span><span class="p">(</span><span class="n">data_i</span><span class="p">,</span> <span class="n">A2X</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-268"></a>                                                <span class="n">aes_mvm</span><span class="p">(</span><span class="n">data_i</span> <span class="o">^</span> <span class="mh">8&#39;h63</span><span class="p">,</span> <span class="n">S2X</span><span class="p">);</span>
-<a name="l-269"></a>
-<a name="l-270"></a>  <span class="c1">// Convert masks to normal basis X.</span>
-<a name="l-271"></a>  <span class="c1">// The addition of constant 8&#39;h63 following the affine transformation is skipped.</span>
-<a name="l-272"></a>  <span class="k">assign</span> <span class="n">in_mask_basis_x</span>  <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_FWD</span><span class="p">)</span> <span class="o">?</span> <span class="n">aes_mvm</span><span class="p">(</span><span class="n">in_mask_i</span><span class="p">,</span> <span class="n">A2X</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-273"></a>                                                 <span class="n">aes_mvm</span><span class="p">(</span><span class="n">in_mask_i</span><span class="p">,</span> <span class="n">S2X</span><span class="p">);</span>
+<a name="l-249"></a>  <span class="k">input</span>  <span class="kt">logic</span>        <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_i</span><span class="p">,</span> <span class="c1">// masked, the actual input data is data_i ^ mask_i</span>
+<a name="l-250"></a>  <span class="k">input</span>  <span class="kt">logic</span>        <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">mask_i</span><span class="p">,</span> <span class="c1">// input mask, independent from actual input data</span>
+<a name="l-251"></a>  <span class="k">input</span>  <span class="kt">logic</span>       <span class="p">[</span><span class="mi">17</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prd_i</span><span class="p">,</span>  <span class="c1">// pseudo-random data, for remasking and for intermediate</span>
+<a name="l-252"></a>                                    <span class="c1">// masks, must be independent of input mask</span>
+<a name="l-253"></a>  <span class="k">output</span> <span class="kt">logic</span>        <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span><span class="p">,</span> <span class="c1">// masked, the actual output data is data_o ^ mask_o</span>
+<a name="l-254"></a>  <span class="k">output</span> <span class="kt">logic</span>        <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">mask_o</span>  <span class="c1">// output mask</span>
+<a name="l-255"></a><span class="p">);</span>
+<a name="l-256"></a>
+<a name="l-257"></a>  <span class="kn">import</span> <span class="nn">aes_pkg::*</span><span class="p">;</span>
+<a name="l-258"></a>  <span class="kn">import</span> <span class="nn">aes_sbox_canright_pkg::*</span><span class="p">;</span>
+<a name="l-259"></a>
+<a name="l-260"></a>  <span class="c1">//////////////////////////</span>
+<a name="l-261"></a>  <span class="c1">// Masked Canright SBox //</span>
+<a name="l-262"></a>  <span class="c1">//////////////////////////</span>
+<a name="l-263"></a>
+<a name="l-264"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">in_data_basis_x</span><span class="p">,</span> <span class="n">out_data_basis_x</span><span class="p">;</span>
+<a name="l-265"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">in_mask_basis_x</span><span class="p">,</span> <span class="n">out_mask_basis_x</span><span class="p">;</span>
+<a name="l-266"></a>
+<a name="l-267"></a>  <span class="c1">// Convert data to normal basis X.</span>
+<a name="l-268"></a>  <span class="k">assign</span> <span class="n">in_data_basis_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_FWD</span><span class="p">)</span> <span class="o">?</span> <span class="n">aes_mvm</span><span class="p">(</span><span class="n">data_i</span><span class="p">,</span> <span class="n">A2X</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-269"></a>                                                <span class="n">aes_mvm</span><span class="p">(</span><span class="n">data_i</span> <span class="o">^</span> <span class="mh">8&#39;h63</span><span class="p">,</span> <span class="n">S2X</span><span class="p">);</span>
+<a name="l-270"></a>
+<a name="l-271"></a>  <span class="c1">// For the masked Canright SBox with no re-use, the output mask directly corresponds to the</span>
+<a name="l-272"></a>  <span class="c1">// LSBs of the pseduo-random data provided as input.</span>
+<a name="l-273"></a>  <span class="k">assign</span> <span class="n">mask_o</span> <span class="o">=</span> <span class="n">prd_i</span><span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
 <a name="l-274"></a>
-<a name="l-275"></a>  <span class="c1">// The output mask is converted in the opposite direction.</span>
-<a name="l-276"></a>  <span class="k">assign</span> <span class="n">out_mask_basis_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_INV</span><span class="p">)</span> <span class="o">?</span> <span class="n">aes_mvm</span><span class="p">(</span><span class="n">out_mask_i</span><span class="p">,</span> <span class="n">A2X</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-277"></a>                                                 <span class="n">aes_mvm</span><span class="p">(</span><span class="n">out_mask_i</span><span class="p">,</span> <span class="n">S2X</span><span class="p">);</span>
+<a name="l-275"></a>  <span class="c1">// The remaining bits are used for intermediate masks.</span>
+<a name="l-276"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">9</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">prd_masking</span><span class="p">;</span>
+<a name="l-277"></a>  <span class="k">assign</span> <span class="n">prd_masking</span> <span class="o">=</span> <span class="n">prd_i</span><span class="p">[</span><span class="mi">17</span><span class="o">:</span><span class="mi">8</span><span class="p">];</span>
 <a name="l-278"></a>
-<a name="l-279"></a>  <span class="c1">// Do the inversion in normal basis X.</span>
-<a name="l-280"></a>  <span class="n">aes_masked_inverse_gf2p8_noreuse</span> <span class="n">aes_masked_inverse_gf2p8</span> <span class="p">(</span>
-<a name="l-281"></a>    <span class="p">.</span><span class="n">a</span>     <span class="p">(</span> <span class="n">in_data_basis_x</span>  <span class="p">),</span> <span class="c1">// input</span>
-<a name="l-282"></a>    <span class="p">.</span><span class="n">m</span>     <span class="p">(</span> <span class="n">in_mask_basis_x</span>  <span class="p">),</span> <span class="c1">// input</span>
-<a name="l-283"></a>    <span class="p">.</span><span class="n">n</span>     <span class="p">(</span> <span class="n">out_mask_basis_x</span> <span class="p">),</span> <span class="c1">// input</span>
-<a name="l-284"></a>    <span class="p">.</span><span class="n">prd</span>   <span class="p">(</span> <span class="n">prd_masking_i</span>    <span class="p">),</span> <span class="c1">// input</span>
-<a name="l-285"></a>    <span class="p">.</span><span class="n">a_inv</span> <span class="p">(</span> <span class="n">out_data_basis_x</span> <span class="p">)</span>  <span class="c1">// output</span>
-<a name="l-286"></a>  <span class="p">);</span>
+<a name="l-279"></a>  <span class="c1">// Convert masks to normal basis X.</span>
+<a name="l-280"></a>  <span class="c1">// The addition of constant 8&#39;h63 following the affine transformation is skipped.</span>
+<a name="l-281"></a>  <span class="k">assign</span> <span class="n">in_mask_basis_x</span>  <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_FWD</span><span class="p">)</span> <span class="o">?</span> <span class="n">aes_mvm</span><span class="p">(</span><span class="n">mask_i</span><span class="p">,</span> <span class="n">A2X</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-282"></a>                                                 <span class="n">aes_mvm</span><span class="p">(</span><span class="n">mask_i</span><span class="p">,</span> <span class="n">S2X</span><span class="p">);</span>
+<a name="l-283"></a>
+<a name="l-284"></a>  <span class="c1">// The output mask is converted in the opposite direction.</span>
+<a name="l-285"></a>  <span class="k">assign</span> <span class="n">out_mask_basis_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_INV</span><span class="p">)</span> <span class="o">?</span> <span class="n">aes_mvm</span><span class="p">(</span><span class="n">mask_o</span><span class="p">,</span> <span class="n">A2X</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-286"></a>                                                 <span class="n">aes_mvm</span><span class="p">(</span><span class="n">mask_o</span><span class="p">,</span> <span class="n">S2X</span><span class="p">);</span>
 <a name="l-287"></a>
-<a name="l-288"></a>  <span class="c1">// Convert to basis S or A.</span>
-<a name="l-289"></a>  <span class="k">assign</span> <span class="n">data_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_FWD</span><span class="p">)</span> <span class="o">?</span> <span class="p">(</span><span class="n">aes_mvm</span><span class="p">(</span><span class="n">out_data_basis_x</span><span class="p">,</span> <span class="n">X2S</span><span class="p">)</span> <span class="o">^</span> <span class="mh">8&#39;h63</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-290"></a>                                       <span class="p">(</span><span class="n">aes_mvm</span><span class="p">(</span><span class="n">out_data_basis_x</span><span class="p">,</span> <span class="n">X2A</span><span class="p">));</span>
-<a name="l-291"></a>
-<a name="l-292"></a><span class="k">endmodule</span>
+<a name="l-288"></a>  <span class="c1">// Do the inversion in normal basis X.</span>
+<a name="l-289"></a>  <span class="n">aes_masked_inverse_gf2p8_noreuse</span> <span class="n">aes_masked_inverse_gf2p8</span> <span class="p">(</span>
+<a name="l-290"></a>    <span class="p">.</span><span class="n">a</span>     <span class="p">(</span> <span class="n">in_data_basis_x</span>  <span class="p">),</span> <span class="c1">// input</span>
+<a name="l-291"></a>    <span class="p">.</span><span class="n">m</span>     <span class="p">(</span> <span class="n">in_mask_basis_x</span>  <span class="p">),</span> <span class="c1">// input</span>
+<a name="l-292"></a>    <span class="p">.</span><span class="n">n</span>     <span class="p">(</span> <span class="n">out_mask_basis_x</span> <span class="p">),</span> <span class="c1">// input</span>
+<a name="l-293"></a>    <span class="p">.</span><span class="n">prd</span>   <span class="p">(</span> <span class="n">prd_masking</span>      <span class="p">),</span> <span class="c1">// input</span>
+<a name="l-294"></a>    <span class="p">.</span><span class="n">a_inv</span> <span class="p">(</span> <span class="n">out_data_basis_x</span> <span class="p">)</span>  <span class="c1">// output</span>
+<a name="l-295"></a>  <span class="p">);</span>
+<a name="l-296"></a>
+<a name="l-297"></a>  <span class="c1">// Convert to basis S or A.</span>
+<a name="l-298"></a>  <span class="k">assign</span> <span class="n">data_o</span> <span class="o">=</span> <span class="p">(</span><span class="n">op_i</span> <span class="o">==</span> <span class="n">CIPH_FWD</span><span class="p">)</span> <span class="o">?</span> <span class="p">(</span><span class="n">aes_mvm</span><span class="p">(</span><span class="n">out_data_basis_x</span><span class="p">,</span> <span class="n">X2S</span><span class="p">)</span> <span class="o">^</span> <span class="mh">8&#39;h63</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-299"></a>                                       <span class="p">(</span><span class="n">aes_mvm</span><span class="p">(</span><span class="n">out_data_basis_x</span><span class="p">,</span> <span class="n">X2A</span><span class="p">));</span>
+<a name="l-300"></a>
+<a name="l-301"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

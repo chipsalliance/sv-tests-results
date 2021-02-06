@@ -647,7 +647,8 @@
 <a href="#l-639">639</a>
 <a href="#l-640">640</a>
 <a href="#l-641">641</a>
-<a href="#l-642">642</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/* Copyright 2018 ETH Zurich and University of Bologna.</span>
+<a href="#l-642">642</a>
+<a href="#l-643">643</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/* Copyright 2018 ETH Zurich and University of Bologna.</span>
 <a name="l-2"></a><span class="cm"> * Copyright and related rights are licensed under the Solderpad Hardware</span>
 <a name="l-3"></a><span class="cm"> * License, Version 0.51 (the “License”); you may not use this file except in</span>
 <a name="l-4"></a><span class="cm"> * compliance with the License.  You may obtain a copy of the License at</span>
@@ -1213,82 +1214,83 @@
 <a name="l-564"></a>    <span class="p">.</span><span class="n">rdata_o</span> <span class="p">(</span> <span class="n">dmi_resp_o</span><span class="p">.</span><span class="n">data</span>      <span class="p">),</span>
 <a name="l-565"></a>    <span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span> <span class="n">dmi_resp_valid_o</span>     <span class="p">),</span>
 <a name="l-566"></a>    <span class="p">.</span><span class="n">rready_i</span><span class="p">(</span> <span class="n">dmi_resp_ready_i</span>     <span class="p">),</span>
-<a name="l-567"></a>    <span class="p">.</span><span class="n">depth_o</span> <span class="p">(</span>                      <span class="p">)</span>  <span class="c1">// Doesn&#39;t use</span>
-<a name="l-568"></a>  <span class="p">);</span>
-<a name="l-569"></a>
-<a name="l-570"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
-<a name="l-571"></a>    <span class="c1">// PoR</span>
-<a name="l-572"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-573"></a>      <span class="n">dmcontrol_q</span>    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-574"></a>      <span class="c1">// this is the only write-able bit during reset</span>
-<a name="l-575"></a>      <span class="n">cmderr_q</span>       <span class="o">&lt;=</span> <span class="n">dm</span><span class="o">::</span><span class="n">CmdErrNone</span><span class="p">;</span>
-<a name="l-576"></a>      <span class="n">command_q</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-577"></a>      <span class="n">cmd_valid_q</span>    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-578"></a>      <span class="n">abstractauto_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-579"></a>      <span class="n">progbuf_q</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-580"></a>      <span class="n">data_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-581"></a>      <span class="n">sbcs_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-582"></a>      <span class="n">sbaddr_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-583"></a>      <span class="n">sbdata_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-584"></a>      <span class="n">havereset_q</span>    <span class="o">&lt;=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a name="l-585"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-586"></a>      <span class="n">havereset_q</span>    <span class="o">&lt;=</span> <span class="n">SelectableHarts</span> <span class="o">&amp;</span> <span class="n">havereset_d</span><span class="p">;</span>
-<a name="l-587"></a>      <span class="c1">// synchronous re-set of debug module, active-low, except for dmactive</span>
-<a name="l-588"></a>      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">dmactive</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-589"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">haltreq</span>          <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-590"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">resumereq</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-591"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hartreset</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-592"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">ackhavereset</span>     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-593"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">zero1</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-594"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hasel</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-595"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hartsello</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-596"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hartselhi</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-597"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">zero0</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-598"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">setresethaltreq</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-599"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">clrresethaltreq</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-600"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">ndmreset</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-601"></a>        <span class="c1">// this is the only write-able bit during reset</span>
-<a name="l-602"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">dmactive</span>         <span class="o">&lt;=</span> <span class="n">dmcontrol_d</span><span class="p">.</span><span class="n">dmactive</span><span class="p">;</span>
-<a name="l-603"></a>        <span class="n">cmderr_q</span>                     <span class="o">&lt;=</span> <span class="n">dm</span><span class="o">::</span><span class="n">CmdErrNone</span><span class="p">;</span>
-<a name="l-604"></a>        <span class="n">command_q</span>                    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-605"></a>        <span class="n">cmd_valid_q</span>                  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-606"></a>        <span class="n">abstractauto_q</span>               <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-607"></a>        <span class="n">progbuf_q</span>                    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-608"></a>        <span class="n">data_q</span>                       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-609"></a>        <span class="n">sbcs_q</span>                       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-610"></a>        <span class="n">sbaddr_q</span>                     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-611"></a>        <span class="n">sbdata_q</span>                     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-612"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-613"></a>        <span class="n">dmcontrol_q</span>                  <span class="o">&lt;=</span> <span class="n">dmcontrol_d</span><span class="p">;</span>
-<a name="l-614"></a>        <span class="n">cmderr_q</span>                     <span class="o">&lt;=</span> <span class="n">cmderr_d</span><span class="p">;</span>
-<a name="l-615"></a>        <span class="n">command_q</span>                    <span class="o">&lt;=</span> <span class="n">command_d</span><span class="p">;</span>
-<a name="l-616"></a>        <span class="n">cmd_valid_q</span>                  <span class="o">&lt;=</span> <span class="n">cmd_valid_d</span><span class="p">;</span>
-<a name="l-617"></a>        <span class="n">abstractauto_q</span>               <span class="o">&lt;=</span> <span class="n">abstractauto_d</span><span class="p">;</span>
-<a name="l-618"></a>        <span class="n">progbuf_q</span>                    <span class="o">&lt;=</span> <span class="n">progbuf_d</span><span class="p">;</span>
-<a name="l-619"></a>        <span class="n">data_q</span>                       <span class="o">&lt;=</span> <span class="n">data_d</span><span class="p">;</span>
-<a name="l-620"></a>        <span class="n">sbcs_q</span>                       <span class="o">&lt;=</span> <span class="n">sbcs_d</span><span class="p">;</span>
-<a name="l-621"></a>        <span class="n">sbaddr_q</span>                     <span class="o">&lt;=</span> <span class="n">sbaddr_d</span><span class="p">;</span>
-<a name="l-622"></a>        <span class="n">sbdata_q</span>                     <span class="o">&lt;=</span> <span class="n">sbdata_d</span><span class="p">;</span>
-<a name="l-623"></a>      <span class="k">end</span>
-<a name="l-624"></a>    <span class="k">end</span>
-<a name="l-625"></a>  <span class="k">end</span>
-<a name="l-626"></a>
-<a name="l-627"></a>  <span class="c1">///////////////////////////////////////////////////////</span>
-<a name="l-628"></a>  <span class="c1">// assertions</span>
-<a name="l-629"></a>  <span class="c1">///////////////////////////////////////////////////////</span>
-<a name="l-630"></a>
-<a name="l-631"></a>  <span class="c1">//pragma translate_off</span>
-<a name="l-632"></a>  <span class="no">`ifndef</span> <span class="n">VERILATOR</span>
-<a name="l-633"></a>  <span class="nl">haltsum:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a name="l-634"></a>      <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
-<a name="l-635"></a>          <span class="p">(</span><span class="n">dmi_req_ready_o</span> <span class="o">&amp;&amp;</span> <span class="n">dmi_req_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">dtm_op</span> <span class="o">==</span> <span class="n">dm</span><span class="o">::</span><span class="n">DTM_READ</span><span class="p">)</span> <span class="o">|-&gt;</span>
-<a name="l-636"></a>              <span class="o">!</span><span class="p">({</span><span class="mb">1&#39;b0</span><span class="p">,</span> <span class="n">dmi_req_i</span><span class="p">.</span><span class="n">addr</span><span class="p">}</span> <span class="ow">inside</span>
-<a name="l-637"></a>                  <span class="p">{</span><span class="n">dm</span><span class="o">::</span><span class="n">HaltSum0</span><span class="p">,</span> <span class="n">dm</span><span class="o">::</span><span class="n">HaltSum1</span><span class="p">,</span> <span class="n">dm</span><span class="o">::</span><span class="n">HaltSum2</span><span class="p">,</span> <span class="n">dm</span><span class="o">::</span><span class="n">HaltSum3</span><span class="p">}))</span>
-<a name="l-638"></a>      <span class="k">else</span> <span class="p">$</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Haltsums have not been properly tested yet.&quot;</span><span class="p">);</span>
-<a name="l-639"></a>  <span class="no">`endif</span>
-<a name="l-640"></a>  <span class="c1">//pragma translate_on</span>
-<a name="l-641"></a>
-<a name="l-642"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">dm_csrs</span>
+<a name="l-567"></a>    <span class="p">.</span><span class="n">full_o</span>  <span class="p">(</span>                      <span class="p">),</span> <span class="c1">// Unused</span>
+<a name="l-568"></a>    <span class="p">.</span><span class="n">depth_o</span> <span class="p">(</span>                      <span class="p">)</span>  <span class="c1">// Unused</span>
+<a name="l-569"></a>  <span class="p">);</span>
+<a name="l-570"></a>
+<a name="l-571"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
+<a name="l-572"></a>    <span class="c1">// PoR</span>
+<a name="l-573"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-574"></a>      <span class="n">dmcontrol_q</span>    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-575"></a>      <span class="c1">// this is the only write-able bit during reset</span>
+<a name="l-576"></a>      <span class="n">cmderr_q</span>       <span class="o">&lt;=</span> <span class="n">dm</span><span class="o">::</span><span class="n">CmdErrNone</span><span class="p">;</span>
+<a name="l-577"></a>      <span class="n">command_q</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-578"></a>      <span class="n">cmd_valid_q</span>    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-579"></a>      <span class="n">abstractauto_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-580"></a>      <span class="n">progbuf_q</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-581"></a>      <span class="n">data_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-582"></a>      <span class="n">sbcs_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-583"></a>      <span class="n">sbaddr_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-584"></a>      <span class="n">sbdata_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-585"></a>      <span class="n">havereset_q</span>    <span class="o">&lt;=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-586"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-587"></a>      <span class="n">havereset_q</span>    <span class="o">&lt;=</span> <span class="n">SelectableHarts</span> <span class="o">&amp;</span> <span class="n">havereset_d</span><span class="p">;</span>
+<a name="l-588"></a>      <span class="c1">// synchronous re-set of debug module, active-low, except for dmactive</span>
+<a name="l-589"></a>      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">dmactive</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-590"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">haltreq</span>          <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-591"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">resumereq</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-592"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hartreset</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-593"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">ackhavereset</span>     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-594"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">zero1</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-595"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hasel</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-596"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hartsello</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-597"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">hartselhi</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-598"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">zero0</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-599"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">setresethaltreq</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-600"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">clrresethaltreq</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-601"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">ndmreset</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-602"></a>        <span class="c1">// this is the only write-able bit during reset</span>
+<a name="l-603"></a>        <span class="n">dmcontrol_q</span><span class="p">.</span><span class="n">dmactive</span>         <span class="o">&lt;=</span> <span class="n">dmcontrol_d</span><span class="p">.</span><span class="n">dmactive</span><span class="p">;</span>
+<a name="l-604"></a>        <span class="n">cmderr_q</span>                     <span class="o">&lt;=</span> <span class="n">dm</span><span class="o">::</span><span class="n">CmdErrNone</span><span class="p">;</span>
+<a name="l-605"></a>        <span class="n">command_q</span>                    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-606"></a>        <span class="n">cmd_valid_q</span>                  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-607"></a>        <span class="n">abstractauto_q</span>               <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-608"></a>        <span class="n">progbuf_q</span>                    <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-609"></a>        <span class="n">data_q</span>                       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-610"></a>        <span class="n">sbcs_q</span>                       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-611"></a>        <span class="n">sbaddr_q</span>                     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-612"></a>        <span class="n">sbdata_q</span>                     <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-613"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-614"></a>        <span class="n">dmcontrol_q</span>                  <span class="o">&lt;=</span> <span class="n">dmcontrol_d</span><span class="p">;</span>
+<a name="l-615"></a>        <span class="n">cmderr_q</span>                     <span class="o">&lt;=</span> <span class="n">cmderr_d</span><span class="p">;</span>
+<a name="l-616"></a>        <span class="n">command_q</span>                    <span class="o">&lt;=</span> <span class="n">command_d</span><span class="p">;</span>
+<a name="l-617"></a>        <span class="n">cmd_valid_q</span>                  <span class="o">&lt;=</span> <span class="n">cmd_valid_d</span><span class="p">;</span>
+<a name="l-618"></a>        <span class="n">abstractauto_q</span>               <span class="o">&lt;=</span> <span class="n">abstractauto_d</span><span class="p">;</span>
+<a name="l-619"></a>        <span class="n">progbuf_q</span>                    <span class="o">&lt;=</span> <span class="n">progbuf_d</span><span class="p">;</span>
+<a name="l-620"></a>        <span class="n">data_q</span>                       <span class="o">&lt;=</span> <span class="n">data_d</span><span class="p">;</span>
+<a name="l-621"></a>        <span class="n">sbcs_q</span>                       <span class="o">&lt;=</span> <span class="n">sbcs_d</span><span class="p">;</span>
+<a name="l-622"></a>        <span class="n">sbaddr_q</span>                     <span class="o">&lt;=</span> <span class="n">sbaddr_d</span><span class="p">;</span>
+<a name="l-623"></a>        <span class="n">sbdata_q</span>                     <span class="o">&lt;=</span> <span class="n">sbdata_d</span><span class="p">;</span>
+<a name="l-624"></a>      <span class="k">end</span>
+<a name="l-625"></a>    <span class="k">end</span>
+<a name="l-626"></a>  <span class="k">end</span>
+<a name="l-627"></a>
+<a name="l-628"></a>  <span class="c1">///////////////////////////////////////////////////////</span>
+<a name="l-629"></a>  <span class="c1">// assertions</span>
+<a name="l-630"></a>  <span class="c1">///////////////////////////////////////////////////////</span>
+<a name="l-631"></a>
+<a name="l-632"></a>  <span class="c1">//pragma translate_off</span>
+<a name="l-633"></a>  <span class="no">`ifndef</span> <span class="n">VERILATOR</span>
+<a name="l-634"></a>  <span class="nl">haltsum:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a name="l-635"></a>      <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span>
+<a name="l-636"></a>          <span class="p">(</span><span class="n">dmi_req_ready_o</span> <span class="o">&amp;&amp;</span> <span class="n">dmi_req_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">dtm_op</span> <span class="o">==</span> <span class="n">dm</span><span class="o">::</span><span class="n">DTM_READ</span><span class="p">)</span> <span class="o">|-&gt;</span>
+<a name="l-637"></a>              <span class="o">!</span><span class="p">({</span><span class="mb">1&#39;b0</span><span class="p">,</span> <span class="n">dmi_req_i</span><span class="p">.</span><span class="n">addr</span><span class="p">}</span> <span class="ow">inside</span>
+<a name="l-638"></a>                  <span class="p">{</span><span class="n">dm</span><span class="o">::</span><span class="n">HaltSum0</span><span class="p">,</span> <span class="n">dm</span><span class="o">::</span><span class="n">HaltSum1</span><span class="p">,</span> <span class="n">dm</span><span class="o">::</span><span class="n">HaltSum2</span><span class="p">,</span> <span class="n">dm</span><span class="o">::</span><span class="n">HaltSum3</span><span class="p">}))</span>
+<a name="l-639"></a>      <span class="k">else</span> <span class="p">$</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Haltsums have not been properly tested yet.&quot;</span><span class="p">);</span>
+<a name="l-640"></a>  <span class="no">`endif</span>
+<a name="l-641"></a>  <span class="c1">//pragma translate_on</span>
+<a name="l-642"></a>
+<a name="l-643"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">dm_csrs</span>
 </pre></div>
 </td></tr></table>
   </body>

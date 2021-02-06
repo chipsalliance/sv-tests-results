@@ -779,8 +779,7 @@
 <a href="#l-771">771</a>
 <a href="#l-772">772</a>
 <a href="#l-773">773</a>
-<a href="#l-774">774</a>
-<a href="#l-775">775</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-774">774</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -1461,100 +1460,99 @@
 <a name="l-679"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">PartInfo</span><span class="p">[</span><span class="n">part_idx</span><span class="p">].</span><span class="n">hw_digest</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">base_sel_q</span> <span class="o">==</span> <span class="n">PartOffset</span><span class="p">))</span> <span class="k">begin</span>
 <a name="l-680"></a>        <span class="n">otp_size_o</span> <span class="o">=</span> <span class="n">OtpSizeWidth</span><span class="p">&#39;(</span><span class="kt">unsigned</span><span class="p">&#39;(</span><span class="n">ScrmblBlockWidth</span> <span class="o">/</span> <span class="n">OtpWidth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
 <a name="l-681"></a>        <span class="n">addr_base</span> <span class="o">=</span> <span class="n">PartInfo</span><span class="p">[</span><span class="n">part_idx</span><span class="p">].</span><span class="n">offset</span><span class="p">;</span>
-<a name="l-682"></a>    <span class="c1">// 64bit transaction if this partition does not have a HW digest, and the DAI address points to</span>
-<a name="l-683"></a>    <span class="c1">// the digest offset.</span>
-<a name="l-684"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">PartInfo</span><span class="p">[</span><span class="n">part_idx</span><span class="p">].</span><span class="n">hw_digest</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">base_sel_q</span> <span class="o">==</span> <span class="n">DaiOffset</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-<a name="l-685"></a>        <span class="p">({</span><span class="n">dai_addr_i</span><span class="p">[</span><span class="n">OtpByteAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="p">],</span> <span class="mb">2&#39;b0</span><span class="p">}</span> <span class="o">==</span> <span class="n">digest_addr_lut</span><span class="p">[</span><span class="n">part_idx</span><span class="p">]))</span> <span class="k">begin</span>
-<a name="l-686"></a>      <span class="n">otp_size_o</span> <span class="o">=</span> <span class="n">OtpSizeWidth</span><span class="p">&#39;(</span><span class="kt">unsigned</span><span class="p">&#39;(</span><span class="n">ScrmblBlockWidth</span> <span class="o">/</span> <span class="n">OtpWidth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
-<a name="l-687"></a>      <span class="n">addr_base</span> <span class="o">=</span> <span class="p">{</span><span class="n">dai_addr_i</span><span class="p">[</span><span class="n">OtpByteAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="p">],</span> <span class="mh">3&#39;h0</span><span class="p">};</span>
-<a name="l-688"></a>    <span class="k">end</span>
-<a name="l-689"></a>  <span class="k">end</span>
-<a name="l-690"></a>
-<a name="l-691"></a>  <span class="c1">// Address counter - this is only used for computing a digest, hence the increment is</span>
-<a name="l-692"></a>  <span class="c1">// fixed to 8 byte.</span>
-<a name="l-693"></a>  <span class="k">assign</span> <span class="n">cnt_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">cnt_clr</span><span class="p">)</span> <span class="o">?</span> <span class="m">&#39;0</span>           <span class="o">:</span>
-<a name="l-694"></a>                 <span class="p">(</span><span class="n">cnt_en</span><span class="p">)</span>  <span class="o">?</span> <span class="n">cnt_q</span> <span class="o">+</span> <span class="mb">1&#39;b1</span> <span class="o">:</span> <span class="n">cnt_q</span><span class="p">;</span>
-<a name="l-695"></a>
-<a name="l-696"></a>  <span class="c1">// Note that OTP works on halfword (16bit) addresses, hence need to</span>
-<a name="l-697"></a>  <span class="c1">// shift the addresses appropriately.</span>
-<a name="l-698"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">OtpByteAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">addr_calc</span><span class="p">;</span>
-<a name="l-699"></a>  <span class="k">assign</span> <span class="n">addr_calc</span> <span class="o">=</span> <span class="p">{</span><span class="n">cnt_q</span><span class="p">,</span> <span class="p">{$</span><span class="n">clog2</span><span class="p">(</span><span class="n">ScrmblBlockWidth</span><span class="o">/</span><span class="mi">8</span><span class="p">){</span><span class="mb">1&#39;b0</span><span class="p">}}}</span> <span class="o">+</span> <span class="n">addr_base</span><span class="p">;</span>
-<a name="l-700"></a>  <span class="k">assign</span> <span class="n">otp_addr_o</span> <span class="o">=</span> <span class="n">addr_calc</span> <span class="o">&gt;&gt;</span> <span class="n">OtpAddrShift</span><span class="p">;</span>
-<a name="l-701"></a>
-<a name="l-702"></a>  <span class="c1">///////////////</span>
-<a name="l-703"></a>  <span class="c1">// Registers //</span>
-<a name="l-704"></a>  <span class="c1">///////////////</span>
-<a name="l-705"></a>
-<a name="l-706"></a>  <span class="c1">// This primitive is used to place a size-only constraint on the</span>
-<a name="l-707"></a>  <span class="c1">// flops in order to prevent FSM state encoding optimizations.</span>
-<a name="l-708"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">StateWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">state_raw_q</span><span class="p">;</span>
-<a name="l-709"></a>  <span class="k">assign</span> <span class="n">state_q</span> <span class="o">=</span> <span class="n">state_e</span><span class="p">&#39;(</span><span class="n">state_raw_q</span><span class="p">);</span>
-<a name="l-710"></a>  <span class="n">prim_flop</span> <span class="p">#(</span>
-<a name="l-711"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">),</span>
-<a name="l-712"></a>    <span class="p">.</span><span class="n">ResetValue</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">&#39;(</span><span class="n">ResetSt</span><span class="p">))</span>
-<a name="l-713"></a>  <span class="p">)</span> <span class="n">u_state_regs</span> <span class="p">(</span>
-<a name="l-714"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-715"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-716"></a>    <span class="p">.</span><span class="n">d_i</span> <span class="p">(</span> <span class="n">state_d</span>     <span class="p">),</span>
-<a name="l-717"></a>    <span class="p">.</span><span class="n">q_o</span> <span class="p">(</span> <span class="n">state_raw_q</span> <span class="p">)</span>
-<a name="l-718"></a>  <span class="p">);</span>
-<a name="l-719"></a>
-<a name="l-720"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
-<a name="l-721"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-722"></a>      <span class="n">error_q</span>        <span class="o">&lt;=</span> <span class="n">NoError</span><span class="p">;</span>
-<a name="l-723"></a>      <span class="n">cnt_q</span>          <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-724"></a>      <span class="n">data_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-725"></a>      <span class="n">base_sel_q</span>     <span class="o">&lt;=</span> <span class="n">DaiOffset</span><span class="p">;</span>
-<a name="l-726"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-727"></a>      <span class="n">error_q</span>        <span class="o">&lt;=</span> <span class="n">error_d</span><span class="p">;</span>
-<a name="l-728"></a>      <span class="n">cnt_q</span>          <span class="o">&lt;=</span> <span class="n">cnt_d</span><span class="p">;</span>
-<a name="l-729"></a>      <span class="n">base_sel_q</span>     <span class="o">&lt;=</span> <span class="n">base_sel_d</span><span class="p">;</span>
-<a name="l-730"></a>
-<a name="l-731"></a>      <span class="c1">// Working register</span>
-<a name="l-732"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">data_clr</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-733"></a>        <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-734"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">data_en</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-735"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">data_sel</span> <span class="o">==</span> <span class="n">ScrmblData</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-736"></a>          <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="n">scrmbl_data_i</span><span class="p">;</span>
-<a name="l-737"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">data_sel</span> <span class="o">==</span> <span class="n">DaiData</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-738"></a>          <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="n">dai_wdata_i</span><span class="p">;</span>
-<a name="l-739"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-740"></a>          <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="n">otp_rdata_i</span><span class="p">;</span>
-<a name="l-741"></a>        <span class="k">end</span>
-<a name="l-742"></a>      <span class="k">end</span>
-<a name="l-743"></a>    <span class="k">end</span>
-<a name="l-744"></a>  <span class="k">end</span>
-<a name="l-745"></a>
-<a name="l-746"></a>  <span class="c1">////////////////</span>
-<a name="l-747"></a>  <span class="c1">// Assertions //</span>
-<a name="l-748"></a>  <span class="c1">////////////////</span>
-<a name="l-749"></a>
-<a name="l-750"></a>  <span class="c1">// Known assertions</span>
-<a name="l-751"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">InitDoneKnown_A</span><span class="p">,</span>     <span class="n">init_done_o</span><span class="p">)</span>
-<a name="l-752"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">PartInitReqKnown_A</span><span class="p">,</span>  <span class="n">part_init_req_o</span><span class="p">)</span>
-<a name="l-753"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ErrorKnown_A</span><span class="p">,</span>        <span class="n">error_o</span><span class="p">)</span>
-<a name="l-754"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">DaiIdleKnown_A</span><span class="p">,</span>      <span class="n">dai_idle_o</span><span class="p">)</span>
-<a name="l-755"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">DaiRdataKnown_A</span><span class="p">,</span>     <span class="n">dai_rdata_o</span><span class="p">)</span>
-<a name="l-756"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpReqKnown_A</span><span class="p">,</span>       <span class="n">otp_req_o</span><span class="p">)</span>
-<a name="l-757"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpCmdKnown_A</span><span class="p">,</span>       <span class="n">otp_cmd_o</span><span class="p">)</span>
-<a name="l-758"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpSizeKnown_A</span><span class="p">,</span>      <span class="n">otp_size_o</span><span class="p">)</span>
-<a name="l-759"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpWdataKnown_A</span><span class="p">,</span>     <span class="n">otp_wdata_o</span><span class="p">)</span>
-<a name="l-760"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpAddrKnown_A</span><span class="p">,</span>      <span class="n">otp_addr_o</span><span class="p">)</span>
-<a name="l-761"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblMtxReqKnown_A</span><span class="p">,</span> <span class="n">scrmbl_mtx_req_o</span><span class="p">)</span>
-<a name="l-762"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblCmdKnown_A</span><span class="p">,</span>    <span class="n">scrmbl_cmd_o</span><span class="p">)</span>
-<a name="l-763"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblModeKnown_A</span><span class="p">,</span>   <span class="n">scrmbl_mode_o</span><span class="p">)</span>
-<a name="l-764"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblSelKnown_A</span><span class="p">,</span>    <span class="n">scrmbl_sel_o</span><span class="p">)</span>
-<a name="l-765"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblDataKnown_A</span><span class="p">,</span>   <span class="n">scrmbl_data_o</span><span class="p">)</span>
-<a name="l-766"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblValidKnown_A</span><span class="p">,</span>  <span class="n">scrmbl_valid_o</span><span class="p">)</span>
-<a name="l-767"></a>
-<a name="l-768"></a>  <span class="c1">// OTP error response</span>
-<a name="l-769"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">OtpErrorState_A</span><span class="p">,</span>
-<a name="l-770"></a>      <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">InitOtpSt</span><span class="p">,</span> <span class="n">ReadWaitSt</span><span class="p">,</span> <span class="n">WriteWaitSt</span><span class="p">,</span> <span class="n">DigReadWaitSt</span><span class="p">}</span> <span class="o">&amp;&amp;</span> <span class="n">otp_rvalid_i</span> <span class="o">&amp;&amp;</span>
-<a name="l-771"></a>      <span class="o">!</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">NoError</span><span class="p">,</span> <span class="n">MacroEccCorrError</span><span class="p">,</span> <span class="n">MacroWriteBlankError</span><span class="p">})</span>
-<a name="l-772"></a>      <span class="o">|=&gt;</span>
-<a name="l-773"></a>      <span class="n">state_q</span> <span class="o">==</span> <span class="n">ErrorSt</span> <span class="o">&amp;&amp;</span> <span class="n">error_o</span> <span class="o">==</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)))</span>
-<a name="l-774"></a>
-<a name="l-775"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">otp_ctrl_dai</span>
+<a name="l-682"></a>    <span class="c1">// 64bit transaction if the DAI address points to the partition&#39;s digest offset.</span>
+<a name="l-683"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">base_sel_q</span> <span class="o">==</span> <span class="n">DaiOffset</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+<a name="l-684"></a>        <span class="p">({</span><span class="n">dai_addr_i</span><span class="p">[</span><span class="n">OtpByteAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="p">],</span> <span class="mb">2&#39;b0</span><span class="p">}</span> <span class="o">==</span> <span class="n">digest_addr_lut</span><span class="p">[</span><span class="n">part_idx</span><span class="p">]))</span> <span class="k">begin</span>
+<a name="l-685"></a>      <span class="n">otp_size_o</span> <span class="o">=</span> <span class="n">OtpSizeWidth</span><span class="p">&#39;(</span><span class="kt">unsigned</span><span class="p">&#39;(</span><span class="n">ScrmblBlockWidth</span> <span class="o">/</span> <span class="n">OtpWidth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">));</span>
+<a name="l-686"></a>      <span class="n">addr_base</span> <span class="o">=</span> <span class="p">{</span><span class="n">dai_addr_i</span><span class="p">[</span><span class="n">OtpByteAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="p">],</span> <span class="mh">3&#39;h0</span><span class="p">};</span>
+<a name="l-687"></a>    <span class="k">end</span>
+<a name="l-688"></a>  <span class="k">end</span>
+<a name="l-689"></a>
+<a name="l-690"></a>  <span class="c1">// Address counter - this is only used for computing a digest, hence the increment is</span>
+<a name="l-691"></a>  <span class="c1">// fixed to 8 byte.</span>
+<a name="l-692"></a>  <span class="k">assign</span> <span class="n">cnt_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">cnt_clr</span><span class="p">)</span> <span class="o">?</span> <span class="m">&#39;0</span>           <span class="o">:</span>
+<a name="l-693"></a>                 <span class="p">(</span><span class="n">cnt_en</span><span class="p">)</span>  <span class="o">?</span> <span class="n">cnt_q</span> <span class="o">+</span> <span class="mb">1&#39;b1</span> <span class="o">:</span> <span class="n">cnt_q</span><span class="p">;</span>
+<a name="l-694"></a>
+<a name="l-695"></a>  <span class="c1">// Note that OTP works on halfword (16bit) addresses, hence need to</span>
+<a name="l-696"></a>  <span class="c1">// shift the addresses appropriately.</span>
+<a name="l-697"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">OtpByteAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">addr_calc</span><span class="p">;</span>
+<a name="l-698"></a>  <span class="k">assign</span> <span class="n">addr_calc</span> <span class="o">=</span> <span class="p">{</span><span class="n">cnt_q</span><span class="p">,</span> <span class="p">{$</span><span class="n">clog2</span><span class="p">(</span><span class="n">ScrmblBlockWidth</span><span class="o">/</span><span class="mi">8</span><span class="p">){</span><span class="mb">1&#39;b0</span><span class="p">}}}</span> <span class="o">+</span> <span class="n">addr_base</span><span class="p">;</span>
+<a name="l-699"></a>  <span class="k">assign</span> <span class="n">otp_addr_o</span> <span class="o">=</span> <span class="n">addr_calc</span> <span class="o">&gt;&gt;</span> <span class="n">OtpAddrShift</span><span class="p">;</span>
+<a name="l-700"></a>
+<a name="l-701"></a>  <span class="c1">///////////////</span>
+<a name="l-702"></a>  <span class="c1">// Registers //</span>
+<a name="l-703"></a>  <span class="c1">///////////////</span>
+<a name="l-704"></a>
+<a name="l-705"></a>  <span class="c1">// This primitive is used to place a size-only constraint on the</span>
+<a name="l-706"></a>  <span class="c1">// flops in order to prevent FSM state encoding optimizations.</span>
+<a name="l-707"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">StateWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">state_raw_q</span><span class="p">;</span>
+<a name="l-708"></a>  <span class="k">assign</span> <span class="n">state_q</span> <span class="o">=</span> <span class="n">state_e</span><span class="p">&#39;(</span><span class="n">state_raw_q</span><span class="p">);</span>
+<a name="l-709"></a>  <span class="n">prim_flop</span> <span class="p">#(</span>
+<a name="l-710"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">),</span>
+<a name="l-711"></a>    <span class="p">.</span><span class="n">ResetValue</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">&#39;(</span><span class="n">ResetSt</span><span class="p">))</span>
+<a name="l-712"></a>  <span class="p">)</span> <span class="n">u_state_regs</span> <span class="p">(</span>
+<a name="l-713"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-714"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-715"></a>    <span class="p">.</span><span class="n">d_i</span> <span class="p">(</span> <span class="n">state_d</span>     <span class="p">),</span>
+<a name="l-716"></a>    <span class="p">.</span><span class="n">q_o</span> <span class="p">(</span> <span class="n">state_raw_q</span> <span class="p">)</span>
+<a name="l-717"></a>  <span class="p">);</span>
+<a name="l-718"></a>
+<a name="l-719"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
+<a name="l-720"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-721"></a>      <span class="n">error_q</span>        <span class="o">&lt;=</span> <span class="n">NoError</span><span class="p">;</span>
+<a name="l-722"></a>      <span class="n">cnt_q</span>          <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-723"></a>      <span class="n">data_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-724"></a>      <span class="n">base_sel_q</span>     <span class="o">&lt;=</span> <span class="n">DaiOffset</span><span class="p">;</span>
+<a name="l-725"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-726"></a>      <span class="n">error_q</span>        <span class="o">&lt;=</span> <span class="n">error_d</span><span class="p">;</span>
+<a name="l-727"></a>      <span class="n">cnt_q</span>          <span class="o">&lt;=</span> <span class="n">cnt_d</span><span class="p">;</span>
+<a name="l-728"></a>      <span class="n">base_sel_q</span>     <span class="o">&lt;=</span> <span class="n">base_sel_d</span><span class="p">;</span>
+<a name="l-729"></a>
+<a name="l-730"></a>      <span class="c1">// Working register</span>
+<a name="l-731"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">data_clr</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-732"></a>        <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-733"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">data_en</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-734"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">data_sel</span> <span class="o">==</span> <span class="n">ScrmblData</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-735"></a>          <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="n">scrmbl_data_i</span><span class="p">;</span>
+<a name="l-736"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">data_sel</span> <span class="o">==</span> <span class="n">DaiData</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-737"></a>          <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="n">dai_wdata_i</span><span class="p">;</span>
+<a name="l-738"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-739"></a>          <span class="n">data_q</span> <span class="o">&lt;=</span> <span class="n">otp_rdata_i</span><span class="p">;</span>
+<a name="l-740"></a>        <span class="k">end</span>
+<a name="l-741"></a>      <span class="k">end</span>
+<a name="l-742"></a>    <span class="k">end</span>
+<a name="l-743"></a>  <span class="k">end</span>
+<a name="l-744"></a>
+<a name="l-745"></a>  <span class="c1">////////////////</span>
+<a name="l-746"></a>  <span class="c1">// Assertions //</span>
+<a name="l-747"></a>  <span class="c1">////////////////</span>
+<a name="l-748"></a>
+<a name="l-749"></a>  <span class="c1">// Known assertions</span>
+<a name="l-750"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">InitDoneKnown_A</span><span class="p">,</span>     <span class="n">init_done_o</span><span class="p">)</span>
+<a name="l-751"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">PartInitReqKnown_A</span><span class="p">,</span>  <span class="n">part_init_req_o</span><span class="p">)</span>
+<a name="l-752"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ErrorKnown_A</span><span class="p">,</span>        <span class="n">error_o</span><span class="p">)</span>
+<a name="l-753"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">DaiIdleKnown_A</span><span class="p">,</span>      <span class="n">dai_idle_o</span><span class="p">)</span>
+<a name="l-754"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">DaiRdataKnown_A</span><span class="p">,</span>     <span class="n">dai_rdata_o</span><span class="p">)</span>
+<a name="l-755"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpReqKnown_A</span><span class="p">,</span>       <span class="n">otp_req_o</span><span class="p">)</span>
+<a name="l-756"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpCmdKnown_A</span><span class="p">,</span>       <span class="n">otp_cmd_o</span><span class="p">)</span>
+<a name="l-757"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpSizeKnown_A</span><span class="p">,</span>      <span class="n">otp_size_o</span><span class="p">)</span>
+<a name="l-758"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpWdataKnown_A</span><span class="p">,</span>     <span class="n">otp_wdata_o</span><span class="p">)</span>
+<a name="l-759"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpAddrKnown_A</span><span class="p">,</span>      <span class="n">otp_addr_o</span><span class="p">)</span>
+<a name="l-760"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblMtxReqKnown_A</span><span class="p">,</span> <span class="n">scrmbl_mtx_req_o</span><span class="p">)</span>
+<a name="l-761"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblCmdKnown_A</span><span class="p">,</span>    <span class="n">scrmbl_cmd_o</span><span class="p">)</span>
+<a name="l-762"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblModeKnown_A</span><span class="p">,</span>   <span class="n">scrmbl_mode_o</span><span class="p">)</span>
+<a name="l-763"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblSelKnown_A</span><span class="p">,</span>    <span class="n">scrmbl_sel_o</span><span class="p">)</span>
+<a name="l-764"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblDataKnown_A</span><span class="p">,</span>   <span class="n">scrmbl_data_o</span><span class="p">)</span>
+<a name="l-765"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblValidKnown_A</span><span class="p">,</span>  <span class="n">scrmbl_valid_o</span><span class="p">)</span>
+<a name="l-766"></a>
+<a name="l-767"></a>  <span class="c1">// OTP error response</span>
+<a name="l-768"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">OtpErrorState_A</span><span class="p">,</span>
+<a name="l-769"></a>      <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">InitOtpSt</span><span class="p">,</span> <span class="n">ReadWaitSt</span><span class="p">,</span> <span class="n">WriteWaitSt</span><span class="p">,</span> <span class="n">DigReadWaitSt</span><span class="p">}</span> <span class="o">&amp;&amp;</span> <span class="n">otp_rvalid_i</span> <span class="o">&amp;&amp;</span>
+<a name="l-770"></a>      <span class="o">!</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">NoError</span><span class="p">,</span> <span class="n">MacroEccCorrError</span><span class="p">,</span> <span class="n">MacroWriteBlankError</span><span class="p">})</span>
+<a name="l-771"></a>      <span class="o">|=&gt;</span>
+<a name="l-772"></a>      <span class="n">state_q</span> <span class="o">==</span> <span class="n">ErrorSt</span> <span class="o">&amp;&amp;</span> <span class="n">error_o</span> <span class="o">==</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)))</span>
+<a name="l-773"></a>
+<a name="l-774"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">otp_ctrl_dai</span>
 </pre></div>
 </td></tr></table>
   </body>

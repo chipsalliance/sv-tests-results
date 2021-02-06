@@ -547,7 +547,12 @@
 <a href="#l-539">539</a>
 <a href="#l-540">540</a>
 <a href="#l-541">541</a>
-<a href="#l-542">542</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a href="#l-542">542</a>
+<a href="#l-543">543</a>
+<a href="#l-544">544</a>
+<a href="#l-545">545</a>
+<a href="#l-546">546</a>
+<a href="#l-547">547</a></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -809,286 +814,291 @@
 <a name="l-260"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_updreq_not_empty</span><span class="p">),</span>
 <a name="l-261"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_updreq_pop</span><span class="p">),</span>
 <a name="l-262"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_updreq_rdata</span><span class="p">),</span>
-<a name="l-263"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
-<a name="l-264"></a>  <span class="p">);</span>
-<a name="l-265"></a>
-<a name="l-266"></a>  <span class="k">assign</span> <span class="n">sfifo_updreq_push</span> <span class="o">=</span> <span class="n">sfifo_updreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="n">ctr_drbg_upd_req_i</span><span class="p">;</span>
-<a name="l-267"></a>  <span class="k">assign</span> <span class="n">sfifo_updreq_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">ctr_drbg_upd_key_i</span><span class="p">,</span><span class="n">ctr_drbg_upd_v_i</span><span class="p">,</span><span class="n">ctr_drbg_upd_pdata_i</span><span class="p">,</span>
-<a name="l-268"></a>                               <span class="n">ctr_drbg_upd_inst_id_i</span><span class="p">,</span><span class="n">ctr_drbg_upd_ccmd_i</span><span class="p">};</span>
-<a name="l-269"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_rdy_o</span> <span class="o">=</span> <span class="n">sfifo_updreq_not_full</span><span class="p">;</span>
-<a name="l-270"></a>
-<a name="l-271"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_updreq_key</span><span class="p">,</span><span class="n">sfifo_updreq_v</span><span class="p">,</span><span class="n">sfifo_updreq_pdata</span><span class="p">,</span>
-<a name="l-272"></a>          <span class="n">sfifo_updreq_inst_id</span><span class="p">,</span><span class="n">sfifo_updreq_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_updreq_rdata</span><span class="p">;</span>
-<a name="l-273"></a>
-<a name="l-274"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_updreq_err_o</span> <span class="o">=</span>
-<a name="l-275"></a>         <span class="p">{(</span><span class="n">sfifo_updreq_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_updreq_not_full</span><span class="p">),</span>
-<a name="l-276"></a>         <span class="p">(</span><span class="n">sfifo_updreq_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_updreq_not_empty</span><span class="p">),</span>
-<a name="l-277"></a>         <span class="p">(</span><span class="o">!</span><span class="n">sfifo_updreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_updreq_not_empty</span><span class="p">)};</span>
-<a name="l-278"></a>
-<a name="l-279"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-280"></a>  <span class="c1">// prepare value for block_encrypt step</span>
-<a name="l-281"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-282"></a>
-<a name="l-283"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">CtrLen</span> <span class="o">&lt;</span> <span class="n">BlkLen</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_ctrlen_sm</span>
-<a name="l-284"></a>    <span class="c1">// for ctr_len &lt; blocklen</span>
-<a name="l-285"></a>    <span class="k">assign</span> <span class="n">v_inc</span> <span class="o">=</span> <span class="n">sfifo_updreq_v</span><span class="p">[</span><span class="n">CtrLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-286"></a>    <span class="k">assign</span> <span class="n">v_first</span> <span class="o">=</span> <span class="p">{</span><span class="n">sfifo_updreq_v</span><span class="p">[</span><span class="n">BlkLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">CtrLen</span><span class="p">],</span><span class="n">v_inc</span><span class="p">};</span>
-<a name="l-287"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_ctrlen_lg</span>
-<a name="l-288"></a>    <span class="k">assign</span> <span class="n">v_first</span> <span class="o">=</span> <span class="n">sfifo_updreq_v</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-289"></a>  <span class="k">end</span>
-<a name="l-290"></a>
-<a name="l-291"></a>  <span class="k">assign</span> <span class="n">v_ctr_d</span> <span class="o">=</span> <span class="n">v_ctr_load</span> <span class="o">?</span> <span class="n">v_first</span><span class="p">[</span><span class="n">CtrLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span>
-<a name="l-292"></a>                   <span class="n">v_ctr_inc</span>  <span class="o">?</span> <span class="p">(</span><span class="n">v_ctr_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-293"></a>                   <span class="n">v_ctr_q</span><span class="p">;</span>
-<a name="l-294"></a>
-<a name="l-295"></a>  <span class="k">assign</span>     <span class="n">v_sized</span> <span class="o">=</span> <span class="p">{</span><span class="n">v_first</span><span class="p">[</span><span class="n">BlkLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">CtrLen</span><span class="p">],</span><span class="n">v_ctr_q</span><span class="p">};</span>
-<a name="l-296"></a>
-<a name="l-297"></a>  <span class="c1">// interation counter</span>
-<a name="l-298"></a>  <span class="k">assign</span>     <span class="n">interate_ctr_d</span> <span class="o">=</span>
-<a name="l-299"></a>             <span class="n">interate_ctr_done</span> <span class="o">?</span> <span class="m">&#39;0</span> <span class="o">:</span>
-<a name="l-300"></a>             <span class="n">interate_ctr_inc</span> <span class="o">?</span> <span class="p">(</span><span class="n">interate_ctr_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-301"></a>             <span class="n">interate_ctr_q</span><span class="p">;</span>
-<a name="l-302"></a>
-<a name="l-303"></a>  <span class="k">assign</span> <span class="n">interate_ctr_done</span> <span class="o">=</span> <span class="p">(</span><span class="n">interate_ctr_q</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">SeedLen</span><span class="o">/</span><span class="n">BlkLen</span><span class="p">));</span>
-<a name="l-304"></a>
-<a name="l-305"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-306"></a>  <span class="c1">// state machine to send values to block_encrypt</span>
-<a name="l-307"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-308"></a>
-<a name="l-309"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-310"></a>    <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">blk_enc_state_q</span><span class="p">;</span>
-<a name="l-311"></a>    <span class="n">v_ctr_load</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-312"></a>    <span class="n">v_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-313"></a>    <span class="n">interate_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-314"></a>    <span class="n">sfifo_pdata_push</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-315"></a>    <span class="n">sfifo_bencreq_push</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-316"></a>    <span class="n">sfifo_updreq_pop</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-317"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">blk_enc_state_q</span><span class="p">)</span>
-<a name="l-318"></a>      <span class="c1">// ReqIdle: increment v this cycle, push in next</span>
-<a name="l-319"></a>      <span class="nl">ReqIdle:</span>
-<a name="l-320"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_updreq_not_empty</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_bencreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_pdata_not_full</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-321"></a>          <span class="n">v_ctr_load</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-322"></a>          <span class="n">sfifo_pdata_push</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-323"></a>          <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">ReqSend</span><span class="p">;</span>
-<a name="l-324"></a>        <span class="k">end</span>
-<a name="l-325"></a>      <span class="nl">ReqSend:</span>
-<a name="l-326"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">interate_ctr_done</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-327"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_bencreq_not_full</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-328"></a>            <span class="n">v_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-329"></a>            <span class="n">interate_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-330"></a>            <span class="n">sfifo_bencreq_push</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-331"></a>          <span class="k">end</span>
-<a name="l-332"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-333"></a>          <span class="n">sfifo_updreq_pop</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-334"></a>          <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">ReqIdle</span><span class="p">;</span>
-<a name="l-335"></a>        <span class="k">end</span>
-<a name="l-336"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">ReqIdle</span><span class="p">;</span>
-<a name="l-337"></a>    <span class="k">endcase</span> <span class="c1">// case (blk_enc_state_q)</span>
-<a name="l-338"></a>  <span class="k">end</span>
-<a name="l-339"></a>
-<a name="l-340"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-341"></a>  <span class="c1">// block_encrypt request fifo for staging aes requests</span>
-<a name="l-342"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-343"></a>
-<a name="l-344"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
-<a name="l-345"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">BlkEncReqFifoWidth</span><span class="p">),</span>
-<a name="l-346"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<a name="l-347"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">BlkEncReqFifoDepth</span><span class="p">)</span>
-<a name="l-348"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_bencreq</span> <span class="p">(</span>
-<a name="l-349"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
-<a name="l-350"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-351"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
-<a name="l-352"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_bencreq_push</span><span class="p">),</span>
-<a name="l-353"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_bencreq_not_full</span><span class="p">),</span>
-<a name="l-354"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_bencreq_wdata</span><span class="p">),</span>
-<a name="l-355"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_bencreq_not_empty</span><span class="p">),</span>
-<a name="l-356"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_bencreq_pop</span><span class="p">),</span>
-<a name="l-357"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_bencreq_rdata</span><span class="p">),</span>
-<a name="l-358"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
-<a name="l-359"></a>  <span class="p">);</span>
-<a name="l-360"></a>
-<a name="l-361"></a>  <span class="k">assign</span> <span class="n">sfifo_bencreq_pop</span> <span class="o">=</span> <span class="n">block_encrypt_req_o</span> <span class="o">&amp;&amp;</span> <span class="n">block_encrypt_rdy_i</span><span class="p">;</span>
-<a name="l-362"></a>  <span class="k">assign</span> <span class="n">block_encrypt_req_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_not_empty</span><span class="p">;</span>
-<a name="l-363"></a>
-<a name="l-364"></a>  <span class="k">assign</span> <span class="n">sfifo_bencreq_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">sfifo_updreq_key</span><span class="p">,</span><span class="n">v_sized</span><span class="p">,</span><span class="n">sfifo_updreq_inst_id</span><span class="p">,</span><span class="n">sfifo_updreq_ccmd</span><span class="p">};</span>
+<a name="l-263"></a>    <span class="p">.</span><span class="n">full_o</span>   <span class="p">(),</span>
+<a name="l-264"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
+<a name="l-265"></a>  <span class="p">);</span>
+<a name="l-266"></a>
+<a name="l-267"></a>  <span class="k">assign</span> <span class="n">sfifo_updreq_push</span> <span class="o">=</span> <span class="n">sfifo_updreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="n">ctr_drbg_upd_req_i</span><span class="p">;</span>
+<a name="l-268"></a>  <span class="k">assign</span> <span class="n">sfifo_updreq_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">ctr_drbg_upd_key_i</span><span class="p">,</span><span class="n">ctr_drbg_upd_v_i</span><span class="p">,</span><span class="n">ctr_drbg_upd_pdata_i</span><span class="p">,</span>
+<a name="l-269"></a>                               <span class="n">ctr_drbg_upd_inst_id_i</span><span class="p">,</span><span class="n">ctr_drbg_upd_ccmd_i</span><span class="p">};</span>
+<a name="l-270"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_rdy_o</span> <span class="o">=</span> <span class="n">sfifo_updreq_not_full</span><span class="p">;</span>
+<a name="l-271"></a>
+<a name="l-272"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_updreq_key</span><span class="p">,</span><span class="n">sfifo_updreq_v</span><span class="p">,</span><span class="n">sfifo_updreq_pdata</span><span class="p">,</span>
+<a name="l-273"></a>          <span class="n">sfifo_updreq_inst_id</span><span class="p">,</span><span class="n">sfifo_updreq_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_updreq_rdata</span><span class="p">;</span>
+<a name="l-274"></a>
+<a name="l-275"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_updreq_err_o</span> <span class="o">=</span>
+<a name="l-276"></a>         <span class="p">{(</span><span class="n">sfifo_updreq_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_updreq_not_full</span><span class="p">),</span>
+<a name="l-277"></a>         <span class="p">(</span><span class="n">sfifo_updreq_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_updreq_not_empty</span><span class="p">),</span>
+<a name="l-278"></a>         <span class="p">(</span><span class="o">!</span><span class="n">sfifo_updreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_updreq_not_empty</span><span class="p">)};</span>
+<a name="l-279"></a>
+<a name="l-280"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-281"></a>  <span class="c1">// prepare value for block_encrypt step</span>
+<a name="l-282"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-283"></a>
+<a name="l-284"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">CtrLen</span> <span class="o">&lt;</span> <span class="n">BlkLen</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_ctrlen_sm</span>
+<a name="l-285"></a>    <span class="c1">// for ctr_len &lt; blocklen</span>
+<a name="l-286"></a>    <span class="k">assign</span> <span class="n">v_inc</span> <span class="o">=</span> <span class="n">sfifo_updreq_v</span><span class="p">[</span><span class="n">CtrLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-287"></a>    <span class="k">assign</span> <span class="n">v_first</span> <span class="o">=</span> <span class="p">{</span><span class="n">sfifo_updreq_v</span><span class="p">[</span><span class="n">BlkLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">CtrLen</span><span class="p">],</span><span class="n">v_inc</span><span class="p">};</span>
+<a name="l-288"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_ctrlen_lg</span>
+<a name="l-289"></a>    <span class="k">assign</span> <span class="n">v_first</span> <span class="o">=</span> <span class="n">sfifo_updreq_v</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-290"></a>  <span class="k">end</span>
+<a name="l-291"></a>
+<a name="l-292"></a>  <span class="k">assign</span> <span class="n">v_ctr_d</span> <span class="o">=</span> <span class="n">v_ctr_load</span> <span class="o">?</span> <span class="n">v_first</span><span class="p">[</span><span class="n">CtrLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span>
+<a name="l-293"></a>                   <span class="n">v_ctr_inc</span>  <span class="o">?</span> <span class="p">(</span><span class="n">v_ctr_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-294"></a>                   <span class="n">v_ctr_q</span><span class="p">;</span>
+<a name="l-295"></a>
+<a name="l-296"></a>  <span class="k">assign</span>     <span class="n">v_sized</span> <span class="o">=</span> <span class="p">{</span><span class="n">v_first</span><span class="p">[</span><span class="n">BlkLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">CtrLen</span><span class="p">],</span><span class="n">v_ctr_q</span><span class="p">};</span>
+<a name="l-297"></a>
+<a name="l-298"></a>  <span class="c1">// interation counter</span>
+<a name="l-299"></a>  <span class="k">assign</span>     <span class="n">interate_ctr_d</span> <span class="o">=</span>
+<a name="l-300"></a>             <span class="n">interate_ctr_done</span> <span class="o">?</span> <span class="m">&#39;0</span> <span class="o">:</span>
+<a name="l-301"></a>             <span class="n">interate_ctr_inc</span> <span class="o">?</span> <span class="p">(</span><span class="n">interate_ctr_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-302"></a>             <span class="n">interate_ctr_q</span><span class="p">;</span>
+<a name="l-303"></a>
+<a name="l-304"></a>  <span class="k">assign</span> <span class="n">interate_ctr_done</span> <span class="o">=</span> <span class="p">(</span><span class="n">interate_ctr_q</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">SeedLen</span><span class="o">/</span><span class="n">BlkLen</span><span class="p">));</span>
+<a name="l-305"></a>
+<a name="l-306"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-307"></a>  <span class="c1">// state machine to send values to block_encrypt</span>
+<a name="l-308"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-309"></a>
+<a name="l-310"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-311"></a>    <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">blk_enc_state_q</span><span class="p">;</span>
+<a name="l-312"></a>    <span class="n">v_ctr_load</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-313"></a>    <span class="n">v_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-314"></a>    <span class="n">interate_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-315"></a>    <span class="n">sfifo_pdata_push</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-316"></a>    <span class="n">sfifo_bencreq_push</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-317"></a>    <span class="n">sfifo_updreq_pop</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-318"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">blk_enc_state_q</span><span class="p">)</span>
+<a name="l-319"></a>      <span class="c1">// ReqIdle: increment v this cycle, push in next</span>
+<a name="l-320"></a>      <span class="nl">ReqIdle:</span>
+<a name="l-321"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_updreq_not_empty</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_bencreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_pdata_not_full</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-322"></a>          <span class="n">v_ctr_load</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-323"></a>          <span class="n">sfifo_pdata_push</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-324"></a>          <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">ReqSend</span><span class="p">;</span>
+<a name="l-325"></a>        <span class="k">end</span>
+<a name="l-326"></a>      <span class="nl">ReqSend:</span>
+<a name="l-327"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">interate_ctr_done</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-328"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_bencreq_not_full</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-329"></a>            <span class="n">v_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-330"></a>            <span class="n">interate_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-331"></a>            <span class="n">sfifo_bencreq_push</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-332"></a>          <span class="k">end</span>
+<a name="l-333"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-334"></a>          <span class="n">sfifo_updreq_pop</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-335"></a>          <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">ReqIdle</span><span class="p">;</span>
+<a name="l-336"></a>        <span class="k">end</span>
+<a name="l-337"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">blk_enc_state_d</span> <span class="o">=</span> <span class="n">ReqIdle</span><span class="p">;</span>
+<a name="l-338"></a>    <span class="k">endcase</span> <span class="c1">// case (blk_enc_state_q)</span>
+<a name="l-339"></a>  <span class="k">end</span>
+<a name="l-340"></a>
+<a name="l-341"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-342"></a>  <span class="c1">// block_encrypt request fifo for staging aes requests</span>
+<a name="l-343"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-344"></a>
+<a name="l-345"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
+<a name="l-346"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">BlkEncReqFifoWidth</span><span class="p">),</span>
+<a name="l-347"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<a name="l-348"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">BlkEncReqFifoDepth</span><span class="p">)</span>
+<a name="l-349"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_bencreq</span> <span class="p">(</span>
+<a name="l-350"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
+<a name="l-351"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-352"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
+<a name="l-353"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_bencreq_push</span><span class="p">),</span>
+<a name="l-354"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_bencreq_not_full</span><span class="p">),</span>
+<a name="l-355"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_bencreq_wdata</span><span class="p">),</span>
+<a name="l-356"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_bencreq_not_empty</span><span class="p">),</span>
+<a name="l-357"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_bencreq_pop</span><span class="p">),</span>
+<a name="l-358"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_bencreq_rdata</span><span class="p">),</span>
+<a name="l-359"></a>    <span class="p">.</span><span class="n">full_o</span>   <span class="p">(),</span>
+<a name="l-360"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
+<a name="l-361"></a>  <span class="p">);</span>
+<a name="l-362"></a>
+<a name="l-363"></a>  <span class="k">assign</span> <span class="n">sfifo_bencreq_pop</span> <span class="o">=</span> <span class="n">block_encrypt_req_o</span> <span class="o">&amp;&amp;</span> <span class="n">block_encrypt_rdy_i</span><span class="p">;</span>
+<a name="l-364"></a>  <span class="k">assign</span> <span class="n">block_encrypt_req_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_not_empty</span><span class="p">;</span>
 <a name="l-365"></a>
-<a name="l-366"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_bencreq_key</span><span class="p">,</span><span class="n">sfifo_bencreq_v</span><span class="p">,</span><span class="n">sfifo_bencreq_inst_id</span><span class="p">,</span>
-<a name="l-367"></a>          <span class="n">sfifo_bencreq_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_bencreq_rdata</span><span class="p">;</span>
-<a name="l-368"></a>
-<a name="l-369"></a>  <span class="c1">// set outputs</span>
-<a name="l-370"></a>  <span class="k">assign</span> <span class="n">block_encrypt_key_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_key</span><span class="p">;</span>
-<a name="l-371"></a>  <span class="k">assign</span> <span class="n">block_encrypt_v_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_v</span><span class="p">;</span>
-<a name="l-372"></a>  <span class="k">assign</span> <span class="n">block_encrypt_inst_id_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_inst_id</span><span class="p">;</span>
-<a name="l-373"></a>  <span class="k">assign</span> <span class="n">block_encrypt_ccmd_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_ccmd</span><span class="p">;</span>
-<a name="l-374"></a>
-<a name="l-375"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_bencreq_err_o</span> <span class="o">=</span>
-<a name="l-376"></a>         <span class="p">{(</span><span class="n">sfifo_bencreq_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencreq_not_full</span><span class="p">),</span>
-<a name="l-377"></a>          <span class="p">(</span><span class="n">sfifo_bencreq_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencreq_not_empty</span><span class="p">),</span>
-<a name="l-378"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_bencreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencreq_not_empty</span><span class="p">)};</span>
-<a name="l-379"></a>
-<a name="l-380"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-381"></a>  <span class="c1">// block_encrypt response fifo from block encrypt</span>
+<a name="l-366"></a>  <span class="k">assign</span> <span class="n">sfifo_bencreq_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">sfifo_updreq_key</span><span class="p">,</span><span class="n">v_sized</span><span class="p">,</span><span class="n">sfifo_updreq_inst_id</span><span class="p">,</span><span class="n">sfifo_updreq_ccmd</span><span class="p">};</span>
+<a name="l-367"></a>
+<a name="l-368"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_bencreq_key</span><span class="p">,</span><span class="n">sfifo_bencreq_v</span><span class="p">,</span><span class="n">sfifo_bencreq_inst_id</span><span class="p">,</span>
+<a name="l-369"></a>          <span class="n">sfifo_bencreq_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_bencreq_rdata</span><span class="p">;</span>
+<a name="l-370"></a>
+<a name="l-371"></a>  <span class="c1">// set outputs</span>
+<a name="l-372"></a>  <span class="k">assign</span> <span class="n">block_encrypt_key_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_key</span><span class="p">;</span>
+<a name="l-373"></a>  <span class="k">assign</span> <span class="n">block_encrypt_v_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_v</span><span class="p">;</span>
+<a name="l-374"></a>  <span class="k">assign</span> <span class="n">block_encrypt_inst_id_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_inst_id</span><span class="p">;</span>
+<a name="l-375"></a>  <span class="k">assign</span> <span class="n">block_encrypt_ccmd_o</span> <span class="o">=</span> <span class="n">sfifo_bencreq_ccmd</span><span class="p">;</span>
+<a name="l-376"></a>
+<a name="l-377"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_bencreq_err_o</span> <span class="o">=</span>
+<a name="l-378"></a>         <span class="p">{(</span><span class="n">sfifo_bencreq_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencreq_not_full</span><span class="p">),</span>
+<a name="l-379"></a>          <span class="p">(</span><span class="n">sfifo_bencreq_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencreq_not_empty</span><span class="p">),</span>
+<a name="l-380"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_bencreq_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencreq_not_empty</span><span class="p">)};</span>
+<a name="l-381"></a>
 <a name="l-382"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-383"></a>
-<a name="l-384"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
-<a name="l-385"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">BlkEncAckFifoWidth</span><span class="p">),</span>
-<a name="l-386"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<a name="l-387"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">BlkEncAckFifoDepth</span><span class="p">)</span>
-<a name="l-388"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_bencack</span> <span class="p">(</span>
-<a name="l-389"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
-<a name="l-390"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-391"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
-<a name="l-392"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_bencack_push</span><span class="p">),</span>
-<a name="l-393"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_bencack_not_full</span><span class="p">),</span>
-<a name="l-394"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_bencack_wdata</span><span class="p">),</span>
-<a name="l-395"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_bencack_not_empty</span><span class="p">),</span>
-<a name="l-396"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_bencack_pop</span><span class="p">),</span>
-<a name="l-397"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_bencack_rdata</span><span class="p">),</span>
-<a name="l-398"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
-<a name="l-399"></a>  <span class="p">);</span>
-<a name="l-400"></a>
-<a name="l-401"></a>  <span class="k">assign</span> <span class="n">sfifo_bencack_push</span> <span class="o">=</span> <span class="n">sfifo_bencack_not_full</span> <span class="o">&amp;&amp;</span> <span class="n">block_encrypt_ack_i</span><span class="p">;</span>
-<a name="l-402"></a>  <span class="k">assign</span> <span class="n">sfifo_bencack_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">block_encrypt_v_i</span><span class="p">,</span><span class="n">block_encrypt_inst_id_i</span><span class="p">,</span><span class="n">block_encrypt_ccmd_i</span><span class="p">};</span>
-<a name="l-403"></a>  <span class="k">assign</span> <span class="n">block_encrypt_rdy_o</span> <span class="o">=</span> <span class="n">sfifo_bencack_not_full</span><span class="p">;</span>
-<a name="l-404"></a>
-<a name="l-405"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_bencack_v</span><span class="p">,</span><span class="n">sfifo_bencack_inst_id</span><span class="p">,</span><span class="n">sfifo_bencack_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_bencack_rdata</span><span class="p">;</span>
-<a name="l-406"></a>
-<a name="l-407"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_bencack_err_o</span> <span class="o">=</span>
-<a name="l-408"></a>         <span class="p">{(</span><span class="n">sfifo_bencack_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencack_not_full</span><span class="p">),</span>
-<a name="l-409"></a>          <span class="p">(</span><span class="n">sfifo_bencack_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencack_not_empty</span><span class="p">),</span>
-<a name="l-410"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_bencack_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencack_not_empty</span><span class="p">)};</span>
-<a name="l-411"></a>
-<a name="l-412"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-413"></a>  <span class="c1">// fifo to stage provided_data, waiting for blk_encrypt to ack</span>
-<a name="l-414"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-415"></a>
-<a name="l-416"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
-<a name="l-417"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">PDataFifoWidth</span><span class="p">),</span>
-<a name="l-418"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<a name="l-419"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">PDataFifoDepth</span><span class="p">)</span>
-<a name="l-420"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_pdata</span> <span class="p">(</span>
-<a name="l-421"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
-<a name="l-422"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-423"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
-<a name="l-424"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_pdata_push</span><span class="p">),</span>
-<a name="l-425"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_pdata_not_full</span><span class="p">),</span>
-<a name="l-426"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_pdata_wdata</span><span class="p">),</span>
-<a name="l-427"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_pdata_not_empty</span><span class="p">),</span>
-<a name="l-428"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_pdata_pop</span><span class="p">),</span>
-<a name="l-429"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_pdata_rdata</span><span class="p">),</span>
-<a name="l-430"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
-<a name="l-431"></a>  <span class="p">);</span>
-<a name="l-432"></a>
-<a name="l-433"></a>  <span class="k">assign</span> <span class="n">sfifo_pdata_wdata</span> <span class="o">=</span> <span class="n">sfifo_updreq_pdata</span><span class="p">;</span>
-<a name="l-434"></a>
-<a name="l-435"></a>  <span class="k">assign</span> <span class="n">sfifo_pdata_v</span> <span class="o">=</span> <span class="n">sfifo_pdata_rdata</span><span class="p">;</span>
+<a name="l-383"></a>  <span class="c1">// block_encrypt response fifo from block encrypt</span>
+<a name="l-384"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-385"></a>
+<a name="l-386"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
+<a name="l-387"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">BlkEncAckFifoWidth</span><span class="p">),</span>
+<a name="l-388"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<a name="l-389"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">BlkEncAckFifoDepth</span><span class="p">)</span>
+<a name="l-390"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_bencack</span> <span class="p">(</span>
+<a name="l-391"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
+<a name="l-392"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-393"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
+<a name="l-394"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_bencack_push</span><span class="p">),</span>
+<a name="l-395"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_bencack_not_full</span><span class="p">),</span>
+<a name="l-396"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_bencack_wdata</span><span class="p">),</span>
+<a name="l-397"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_bencack_not_empty</span><span class="p">),</span>
+<a name="l-398"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_bencack_pop</span><span class="p">),</span>
+<a name="l-399"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_bencack_rdata</span><span class="p">),</span>
+<a name="l-400"></a>    <span class="p">.</span><span class="n">full_o</span>   <span class="p">(),</span>
+<a name="l-401"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
+<a name="l-402"></a>  <span class="p">);</span>
+<a name="l-403"></a>
+<a name="l-404"></a>  <span class="k">assign</span> <span class="n">sfifo_bencack_push</span> <span class="o">=</span> <span class="n">sfifo_bencack_not_full</span> <span class="o">&amp;&amp;</span> <span class="n">block_encrypt_ack_i</span><span class="p">;</span>
+<a name="l-405"></a>  <span class="k">assign</span> <span class="n">sfifo_bencack_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">block_encrypt_v_i</span><span class="p">,</span><span class="n">block_encrypt_inst_id_i</span><span class="p">,</span><span class="n">block_encrypt_ccmd_i</span><span class="p">};</span>
+<a name="l-406"></a>  <span class="k">assign</span> <span class="n">block_encrypt_rdy_o</span> <span class="o">=</span> <span class="n">sfifo_bencack_not_full</span><span class="p">;</span>
+<a name="l-407"></a>
+<a name="l-408"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_bencack_v</span><span class="p">,</span><span class="n">sfifo_bencack_inst_id</span><span class="p">,</span><span class="n">sfifo_bencack_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_bencack_rdata</span><span class="p">;</span>
+<a name="l-409"></a>
+<a name="l-410"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_bencack_err_o</span> <span class="o">=</span>
+<a name="l-411"></a>         <span class="p">{(</span><span class="n">sfifo_bencack_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencack_not_full</span><span class="p">),</span>
+<a name="l-412"></a>          <span class="p">(</span><span class="n">sfifo_bencack_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencack_not_empty</span><span class="p">),</span>
+<a name="l-413"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_bencack_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_bencack_not_empty</span><span class="p">)};</span>
+<a name="l-414"></a>
+<a name="l-415"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-416"></a>  <span class="c1">// fifo to stage provided_data, waiting for blk_encrypt to ack</span>
+<a name="l-417"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-418"></a>
+<a name="l-419"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
+<a name="l-420"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">PDataFifoWidth</span><span class="p">),</span>
+<a name="l-421"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<a name="l-422"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">PDataFifoDepth</span><span class="p">)</span>
+<a name="l-423"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_pdata</span> <span class="p">(</span>
+<a name="l-424"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
+<a name="l-425"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-426"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
+<a name="l-427"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_pdata_push</span><span class="p">),</span>
+<a name="l-428"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_pdata_not_full</span><span class="p">),</span>
+<a name="l-429"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_pdata_wdata</span><span class="p">),</span>
+<a name="l-430"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_pdata_not_empty</span><span class="p">),</span>
+<a name="l-431"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_pdata_pop</span><span class="p">),</span>
+<a name="l-432"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_pdata_rdata</span><span class="p">),</span>
+<a name="l-433"></a>    <span class="p">.</span><span class="n">full_o</span>   <span class="p">(),</span>
+<a name="l-434"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
+<a name="l-435"></a>  <span class="p">);</span>
 <a name="l-436"></a>
-<a name="l-437"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_pdata_err_o</span> <span class="o">=</span>
-<a name="l-438"></a>         <span class="p">{(</span><span class="n">sfifo_pdata_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_pdata_not_full</span><span class="p">),</span>
-<a name="l-439"></a>          <span class="p">(</span><span class="n">sfifo_pdata_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_pdata_not_empty</span><span class="p">),</span>
-<a name="l-440"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_pdata_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_pdata_not_empty</span><span class="p">)};</span>
-<a name="l-441"></a>
-<a name="l-442"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-443"></a>  <span class="c1">// shifting logic to receive values from block_encrypt</span>
-<a name="l-444"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-437"></a>  <span class="k">assign</span> <span class="n">sfifo_pdata_wdata</span> <span class="o">=</span> <span class="n">sfifo_updreq_pdata</span><span class="p">;</span>
+<a name="l-438"></a>
+<a name="l-439"></a>  <span class="k">assign</span> <span class="n">sfifo_pdata_v</span> <span class="o">=</span> <span class="n">sfifo_pdata_rdata</span><span class="p">;</span>
+<a name="l-440"></a>
+<a name="l-441"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_pdata_err_o</span> <span class="o">=</span>
+<a name="l-442"></a>         <span class="p">{(</span><span class="n">sfifo_pdata_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_pdata_not_full</span><span class="p">),</span>
+<a name="l-443"></a>          <span class="p">(</span><span class="n">sfifo_pdata_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_pdata_not_empty</span><span class="p">),</span>
+<a name="l-444"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_pdata_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_pdata_not_empty</span><span class="p">)};</span>
 <a name="l-445"></a>
-<a name="l-446"></a>  <span class="k">assign</span> <span class="n">concat_outblk_shifted_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">concat_outblk_q</span> <span class="o">&lt;&lt;</span> <span class="n">BlkLen</span><span class="p">);</span>
-<a name="l-447"></a>
-<a name="l-448"></a>  <span class="k">assign</span> <span class="n">concat_outblk_d</span> <span class="o">=</span>
-<a name="l-449"></a>         <span class="n">sfifo_bencack_pop</span> <span class="o">?</span> <span class="p">{</span><span class="n">concat_outblk_q</span><span class="p">[</span><span class="n">SeedLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">BlkLen</span><span class="p">],</span><span class="n">sfifo_bencack_v</span><span class="p">}</span> <span class="o">:</span>
-<a name="l-450"></a>         <span class="n">concat_outblk_shift</span> <span class="o">?</span> <span class="n">concat_outblk_shifted_value</span><span class="p">[</span><span class="n">SeedLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span>
-<a name="l-451"></a>         <span class="n">concat_outblk_q</span><span class="p">;</span>
-<a name="l-452"></a>
-<a name="l-453"></a>  <span class="c1">// concatination counter</span>
-<a name="l-454"></a>  <span class="k">assign</span> <span class="n">concat_ctr_d</span> <span class="o">=</span>
-<a name="l-455"></a>         <span class="n">concat_ctr_done</span> <span class="o">?</span> <span class="m">&#39;0</span> <span class="o">:</span>
-<a name="l-456"></a>         <span class="n">concat_ctr_inc</span> <span class="o">?</span> <span class="p">(</span><span class="n">concat_ctr_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span>
-<a name="l-457"></a>         <span class="n">concat_ctr_q</span><span class="p">;</span>
-<a name="l-458"></a>
-<a name="l-459"></a>  <span class="k">assign</span> <span class="n">concat_ctr_done</span> <span class="o">=</span> <span class="p">(</span><span class="n">concat_ctr_q</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">SeedLen</span><span class="o">/</span><span class="n">BlkLen</span><span class="p">));</span>
-<a name="l-460"></a>
-<a name="l-461"></a>  <span class="k">assign</span> <span class="n">concat_inst_id_d</span> <span class="o">=</span> <span class="n">sfifo_bencack_pop</span> <span class="o">?</span> <span class="n">sfifo_bencack_inst_id</span> <span class="o">:</span> <span class="n">concat_inst_id_q</span><span class="p">;</span>
-<a name="l-462"></a>  <span class="k">assign</span> <span class="n">concat_ccmd_d</span> <span class="o">=</span> <span class="n">sfifo_bencack_pop</span> <span class="o">?</span> <span class="n">sfifo_bencack_ccmd</span> <span class="o">:</span> <span class="n">concat_ccmd_q</span><span class="p">;</span>
-<a name="l-463"></a>
-<a name="l-464"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-465"></a>  <span class="c1">// state machine to receive values from block_encrypt</span>
-<a name="l-466"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-446"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-447"></a>  <span class="c1">// shifting logic to receive values from block_encrypt</span>
+<a name="l-448"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-449"></a>
+<a name="l-450"></a>  <span class="k">assign</span> <span class="n">concat_outblk_shifted_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">concat_outblk_q</span> <span class="o">&lt;&lt;</span> <span class="n">BlkLen</span><span class="p">);</span>
+<a name="l-451"></a>
+<a name="l-452"></a>  <span class="k">assign</span> <span class="n">concat_outblk_d</span> <span class="o">=</span>
+<a name="l-453"></a>         <span class="n">sfifo_bencack_pop</span> <span class="o">?</span> <span class="p">{</span><span class="n">concat_outblk_q</span><span class="p">[</span><span class="n">SeedLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">BlkLen</span><span class="p">],</span><span class="n">sfifo_bencack_v</span><span class="p">}</span> <span class="o">:</span>
+<a name="l-454"></a>         <span class="n">concat_outblk_shift</span> <span class="o">?</span> <span class="n">concat_outblk_shifted_value</span><span class="p">[</span><span class="n">SeedLen</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span>
+<a name="l-455"></a>         <span class="n">concat_outblk_q</span><span class="p">;</span>
+<a name="l-456"></a>
+<a name="l-457"></a>  <span class="c1">// concatination counter</span>
+<a name="l-458"></a>  <span class="k">assign</span> <span class="n">concat_ctr_d</span> <span class="o">=</span>
+<a name="l-459"></a>         <span class="n">concat_ctr_done</span> <span class="o">?</span> <span class="m">&#39;0</span> <span class="o">:</span>
+<a name="l-460"></a>         <span class="n">concat_ctr_inc</span> <span class="o">?</span> <span class="p">(</span><span class="n">concat_ctr_q</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">:</span>
+<a name="l-461"></a>         <span class="n">concat_ctr_q</span><span class="p">;</span>
+<a name="l-462"></a>
+<a name="l-463"></a>  <span class="k">assign</span> <span class="n">concat_ctr_done</span> <span class="o">=</span> <span class="p">(</span><span class="n">concat_ctr_q</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">SeedLen</span><span class="o">/</span><span class="n">BlkLen</span><span class="p">));</span>
+<a name="l-464"></a>
+<a name="l-465"></a>  <span class="k">assign</span> <span class="n">concat_inst_id_d</span> <span class="o">=</span> <span class="n">sfifo_bencack_pop</span> <span class="o">?</span> <span class="n">sfifo_bencack_inst_id</span> <span class="o">:</span> <span class="n">concat_inst_id_q</span><span class="p">;</span>
+<a name="l-466"></a>  <span class="k">assign</span> <span class="n">concat_ccmd_d</span> <span class="o">=</span> <span class="n">sfifo_bencack_pop</span> <span class="o">?</span> <span class="n">sfifo_bencack_ccmd</span> <span class="o">:</span> <span class="n">concat_ccmd_q</span><span class="p">;</span>
 <a name="l-467"></a>
-<a name="l-468"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-469"></a>    <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">outblk_state_q</span><span class="p">;</span>
-<a name="l-470"></a>    <span class="n">concat_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-471"></a>    <span class="n">concat_outblk_shift</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-472"></a>    <span class="n">sfifo_pdata_pop</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-473"></a>    <span class="n">sfifo_bencack_pop</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-474"></a>    <span class="n">sfifo_final_push</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-475"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">outblk_state_q</span><span class="p">)</span>
-<a name="l-476"></a>      <span class="c1">// AckIdle: increment v this cycle, push in next</span>
-<a name="l-477"></a>      <span class="nl">AckIdle:</span>
-<a name="l-478"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_bencack_not_empty</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_pdata_not_empty</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_final_not_full</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-479"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">Load</span><span class="p">;</span>
-<a name="l-480"></a>        <span class="k">end</span>
-<a name="l-481"></a>      <span class="nl">Load:</span>
-<a name="l-482"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_bencack_not_empty</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-483"></a>          <span class="n">concat_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-484"></a>          <span class="n">sfifo_bencack_pop</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-485"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">Shift</span><span class="p">;</span>
-<a name="l-486"></a>        <span class="k">end</span>
-<a name="l-487"></a>      <span class="nl">Shift:</span>
-<a name="l-488"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">concat_ctr_done</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-489"></a>          <span class="n">sfifo_pdata_pop</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-490"></a>          <span class="n">sfifo_final_push</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-491"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">AckIdle</span><span class="p">;</span>
-<a name="l-492"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-493"></a>          <span class="n">concat_outblk_shift</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-494"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">Load</span><span class="p">;</span>
-<a name="l-495"></a>        <span class="k">end</span>
-<a name="l-496"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">AckIdle</span><span class="p">;</span>
-<a name="l-497"></a>    <span class="k">endcase</span>
-<a name="l-498"></a>  <span class="k">end</span>
-<a name="l-499"></a>
-<a name="l-500"></a>
-<a name="l-501"></a>  <span class="c1">//--------------------------------------------</span>
-<a name="l-502"></a>  <span class="c1">// final update processing</span>
-<a name="l-503"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-468"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-469"></a>  <span class="c1">// state machine to receive values from block_encrypt</span>
+<a name="l-470"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-471"></a>
+<a name="l-472"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-473"></a>    <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">outblk_state_q</span><span class="p">;</span>
+<a name="l-474"></a>    <span class="n">concat_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-475"></a>    <span class="n">concat_outblk_shift</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-476"></a>    <span class="n">sfifo_pdata_pop</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-477"></a>    <span class="n">sfifo_bencack_pop</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-478"></a>    <span class="n">sfifo_final_push</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-479"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">outblk_state_q</span><span class="p">)</span>
+<a name="l-480"></a>      <span class="c1">// AckIdle: increment v this cycle, push in next</span>
+<a name="l-481"></a>      <span class="nl">AckIdle:</span>
+<a name="l-482"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_bencack_not_empty</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_pdata_not_empty</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_final_not_full</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-483"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">Load</span><span class="p">;</span>
+<a name="l-484"></a>        <span class="k">end</span>
+<a name="l-485"></a>      <span class="nl">Load:</span>
+<a name="l-486"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sfifo_bencack_not_empty</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-487"></a>          <span class="n">concat_ctr_inc</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-488"></a>          <span class="n">sfifo_bencack_pop</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-489"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">Shift</span><span class="p">;</span>
+<a name="l-490"></a>        <span class="k">end</span>
+<a name="l-491"></a>      <span class="nl">Shift:</span>
+<a name="l-492"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">concat_ctr_done</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-493"></a>          <span class="n">sfifo_pdata_pop</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-494"></a>          <span class="n">sfifo_final_push</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-495"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">AckIdle</span><span class="p">;</span>
+<a name="l-496"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-497"></a>          <span class="n">concat_outblk_shift</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-498"></a>          <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">Load</span><span class="p">;</span>
+<a name="l-499"></a>        <span class="k">end</span>
+<a name="l-500"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">outblk_state_d</span> <span class="o">=</span> <span class="n">AckIdle</span><span class="p">;</span>
+<a name="l-501"></a>    <span class="k">endcase</span>
+<a name="l-502"></a>  <span class="k">end</span>
+<a name="l-503"></a>
 <a name="l-504"></a>
-<a name="l-505"></a>  <span class="c1">// XOR the additional data with the new key and value from block encryption</span>
-<a name="l-506"></a>  <span class="k">assign</span> <span class="n">updated_key_and_v</span> <span class="o">=</span> <span class="n">concat_outblk_q</span> <span class="o">^</span> <span class="n">sfifo_pdata_v</span><span class="p">;</span>
-<a name="l-507"></a>
-<a name="l-508"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
-<a name="l-509"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">FinalFifoWidth</span><span class="p">),</span>
-<a name="l-510"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<a name="l-511"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">FinalFifoDepth</span><span class="p">)</span>
-<a name="l-512"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_final</span> <span class="p">(</span>
-<a name="l-513"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
-<a name="l-514"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-515"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
-<a name="l-516"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_final_push</span><span class="p">),</span>
-<a name="l-517"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_final_not_full</span><span class="p">),</span>
-<a name="l-518"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_final_wdata</span><span class="p">),</span>
-<a name="l-519"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_final_not_empty</span><span class="p">),</span>
-<a name="l-520"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_final_pop</span><span class="p">),</span>
-<a name="l-521"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_final_rdata</span><span class="p">),</span>
-<a name="l-522"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
-<a name="l-523"></a>  <span class="p">);</span>
-<a name="l-524"></a>
-<a name="l-525"></a>  <span class="k">assign</span> <span class="n">sfifo_final_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">updated_key_and_v</span><span class="p">,</span><span class="n">concat_inst_id_q</span><span class="p">,</span><span class="n">concat_ccmd_q</span><span class="p">};</span>
-<a name="l-526"></a>
-<a name="l-527"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_final_key</span><span class="p">,</span><span class="n">sfifo_final_v</span><span class="p">,</span><span class="n">sfifo_final_inst_id</span><span class="p">,</span><span class="n">sfifo_final_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_final_rdata</span><span class="p">;</span>
-<a name="l-528"></a>
-<a name="l-529"></a>  <span class="k">assign</span> <span class="n">sfifo_final_pop</span> <span class="o">=</span> <span class="n">ctr_drbg_upd_rdy_i</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_final_not_empty</span><span class="p">;</span>
-<a name="l-530"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_ack_o</span> <span class="o">=</span> <span class="n">sfifo_final_pop</span><span class="p">;</span>
-<a name="l-531"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_ccmd_o</span> <span class="o">=</span> <span class="n">sfifo_final_ccmd</span><span class="p">;</span>
-<a name="l-532"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_inst_id_o</span> <span class="o">=</span> <span class="n">sfifo_final_inst_id</span><span class="p">;</span>
-<a name="l-533"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_key_o</span> <span class="o">=</span> <span class="n">sfifo_final_key</span><span class="p">;</span>
-<a name="l-534"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_v_o</span> <span class="o">=</span> <span class="n">sfifo_final_v</span><span class="p">;</span>
-<a name="l-535"></a>
-<a name="l-536"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_final_err_o</span> <span class="o">=</span>
-<a name="l-537"></a>         <span class="p">{(</span><span class="n">sfifo_final_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_final_not_full</span><span class="p">),</span>
-<a name="l-538"></a>          <span class="p">(</span><span class="n">sfifo_final_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_final_not_empty</span><span class="p">),</span>
-<a name="l-539"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_final_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_final_not_empty</span><span class="p">)};</span>
+<a name="l-505"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-506"></a>  <span class="c1">// final update processing</span>
+<a name="l-507"></a>  <span class="c1">//--------------------------------------------</span>
+<a name="l-508"></a>
+<a name="l-509"></a>  <span class="c1">// XOR the additional data with the new key and value from block encryption</span>
+<a name="l-510"></a>  <span class="k">assign</span> <span class="n">updated_key_and_v</span> <span class="o">=</span> <span class="n">concat_outblk_q</span> <span class="o">^</span> <span class="n">sfifo_pdata_v</span><span class="p">;</span>
+<a name="l-511"></a>
+<a name="l-512"></a>  <span class="n">prim_fifo_sync</span> <span class="p">#(</span>
+<a name="l-513"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">FinalFifoWidth</span><span class="p">),</span>
+<a name="l-514"></a>    <span class="p">.</span><span class="n">Pass</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<a name="l-515"></a>    <span class="p">.</span><span class="n">Depth</span><span class="p">(</span><span class="n">FinalFifoDepth</span><span class="p">)</span>
+<a name="l-516"></a>  <span class="p">)</span> <span class="n">u_prim_fifo_sync_final</span> <span class="p">(</span>
+<a name="l-517"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
+<a name="l-518"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-519"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span><span class="o">!</span><span class="n">ctr_drbg_upd_enable_i</span><span class="p">),</span>
+<a name="l-520"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span><span class="n">sfifo_final_push</span><span class="p">),</span>
+<a name="l-521"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span><span class="n">sfifo_final_not_full</span><span class="p">),</span>
+<a name="l-522"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span><span class="n">sfifo_final_wdata</span><span class="p">),</span>
+<a name="l-523"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span><span class="n">sfifo_final_not_empty</span><span class="p">),</span>
+<a name="l-524"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span><span class="n">sfifo_final_pop</span><span class="p">),</span>
+<a name="l-525"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span><span class="n">sfifo_final_rdata</span><span class="p">),</span>
+<a name="l-526"></a>    <span class="p">.</span><span class="n">full_o</span>   <span class="p">(),</span>
+<a name="l-527"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">()</span>
+<a name="l-528"></a>  <span class="p">);</span>
+<a name="l-529"></a>
+<a name="l-530"></a>  <span class="k">assign</span> <span class="n">sfifo_final_wdata</span> <span class="o">=</span> <span class="p">{</span><span class="n">updated_key_and_v</span><span class="p">,</span><span class="n">concat_inst_id_q</span><span class="p">,</span><span class="n">concat_ccmd_q</span><span class="p">};</span>
+<a name="l-531"></a>
+<a name="l-532"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">sfifo_final_key</span><span class="p">,</span><span class="n">sfifo_final_v</span><span class="p">,</span><span class="n">sfifo_final_inst_id</span><span class="p">,</span><span class="n">sfifo_final_ccmd</span><span class="p">}</span> <span class="o">=</span> <span class="n">sfifo_final_rdata</span><span class="p">;</span>
+<a name="l-533"></a>
+<a name="l-534"></a>  <span class="k">assign</span> <span class="n">sfifo_final_pop</span> <span class="o">=</span> <span class="n">ctr_drbg_upd_rdy_i</span> <span class="o">&amp;&amp;</span> <span class="n">sfifo_final_not_empty</span><span class="p">;</span>
+<a name="l-535"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_ack_o</span> <span class="o">=</span> <span class="n">sfifo_final_pop</span><span class="p">;</span>
+<a name="l-536"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_ccmd_o</span> <span class="o">=</span> <span class="n">sfifo_final_ccmd</span><span class="p">;</span>
+<a name="l-537"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_inst_id_o</span> <span class="o">=</span> <span class="n">sfifo_final_inst_id</span><span class="p">;</span>
+<a name="l-538"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_key_o</span> <span class="o">=</span> <span class="n">sfifo_final_key</span><span class="p">;</span>
+<a name="l-539"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_v_o</span> <span class="o">=</span> <span class="n">sfifo_final_v</span><span class="p">;</span>
 <a name="l-540"></a>
-<a name="l-541"></a>
-<a name="l-542"></a><span class="k">endmodule</span>
+<a name="l-541"></a>  <span class="k">assign</span> <span class="n">ctr_drbg_upd_sfifo_final_err_o</span> <span class="o">=</span>
+<a name="l-542"></a>         <span class="p">{(</span><span class="n">sfifo_final_push</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_final_not_full</span><span class="p">),</span>
+<a name="l-543"></a>          <span class="p">(</span><span class="n">sfifo_final_pop</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_final_not_empty</span><span class="p">),</span>
+<a name="l-544"></a>          <span class="p">(</span><span class="o">!</span><span class="n">sfifo_final_not_full</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">sfifo_final_not_empty</span><span class="p">)};</span>
+<a name="l-545"></a>
+<a name="l-546"></a>
+<a name="l-547"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>
