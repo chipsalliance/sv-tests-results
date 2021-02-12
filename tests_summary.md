@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Surelog            |           9|         0|    0|      0|        4851|
-|moore_parse        |           0|         0|    0|      9|        4605|
-|moore              |           0|         0|    0|      9|        4605|
-|UhdmVerilator      |           0|         9|    0|      0|        4851|
-|Odin               |           0|         0|    0|      9|        4605|
-|tree_sitter_verilog|           0|         0|    0|      9|        4505|
-|Icarus             |           0|         0|    0|      9|        4505|
-|Verible            |           0|         0|    0|      9|        4505|
-|Sv2v_zachjs        |           0|         0|    0|      9|        4605|
-|YosysSv            |           3|         6|    0|      0|        4851|
-|Yosys              |           3|         6|    0|      0|        4851|
-|sv_parser          |           0|         0|    0|      9|        4605|
-|Verilator          |           9|         0|    0|      0|        4851|
-|VeribleExtractor   |           0|         0|    0|      9|        4505|
-|Slang              |           8|         1|    0|      0|        4851|
-|UhdmYosys          |           0|         0|    0|      9|        4505|
+|Sv2v_zachjs        |           2|         1|    0|      6|        4596|
+|Surelog            |           5|         1|    0|      0|        4854|
+|tree_sitter_verilog|           0|         0|    0|      6|        4499|
+|VeribleExtractor   |           0|         0|    0|      6|        4499|
+|Slang              |           6|         1|    0|      0|        4853|
+|Odin               |           0|         0|    0|      6|        4599|
+|sv_parser          |           0|         0|    0|      6|        4599|
+|moore_parse        |           1|         1|    0|      6|        4597|
+|YosysSv            |           4|         4|    0|      0|        4852|
+|Icarus             |           0|         0|    0|      6|        4499|
+|Yosys              |           3|         4|    0|      0|        4853|
+|UhdmYosys          |           7|      1116|    0|      6|        3376|
+|moore              |           1|         2|    0|      6|        4596|
+|Verilator          |           5|         4|    0|      0|        4851|
+|UhdmVerilator      |           0|         6|    0|      0|        4854|
+|Verible            |           0|         0|    0|      6|        4499|
