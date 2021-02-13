@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|UhdmVerilator      |          15|         0|    0|      0|        4845|
-|Slang              |           2|        14|    0|      0|        4844|
-|Sv2v_zachjs        |           1|         1|   15|      0|        4597|
-|Verilator          |           4|        14|    0|      0|        4842|
-|moore              |           2|         1|   15|      0|        4596|
-|Surelog            |           1|        14|    0|      0|        4845|
-|moore_parse        |           1|         1|   15|      0|        4597|
-|tree_sitter_verilog|           0|         0|   15|      0|        4499|
-|UhdmYosys          |           0|         0|   15|      0|        4499|
-|VeribleExtractor   |           0|         0|   15|      0|        4499|
-|sv_parser          |           0|         0|   15|      0|        4599|
-|Verible            |           0|         0|   15|      0|        4499|
-|YosysSv            |          10|         6|    0|      0|        4844|
-|Odin               |           0|         0|   15|      0|        4599|
-|Icarus             |           0|         0|   15|      0|        4499|
-|Yosys              |          10|         6|    0|      0|        4844|
+|VeribleExtractor   |           0|         0|    3|     15|        4499|
+|sv_parser          |           0|         0|    3|     15|        4599|
+|Yosys              |           6|         9|    3|      0|        4845|
+|Icarus             |           0|         0|    3|     15|        4499|
+|Surelog            |          14|         1|    3|      0|        4845|
+|tree_sitter_verilog|           0|         0|    3|     15|        4499|
+|Verible            |           0|         0|    3|     15|        4499|
+|moore_parse        |           0|         0|    3|     15|        4599|
+|UhdmYosys          |           0|         0|    3|     15|        4499|
+|UhdmVerilator      |           0|        14|    3|      0|        4846|
+|Verilator          |          13|         2|    3|      0|        4845|
+|Odin               |           0|         0|    3|     15|        4599|
+|Slang              |          14|         1|    3|      0|        4845|
+|Sv2v_zachjs        |           0|         0|    3|     15|        4599|
+|YosysSv            |           6|         9|    3|      0|        4845|
+|moore              |           0|         0|    3|     15|        4599|
