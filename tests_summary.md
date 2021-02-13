@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Sv2v_zachjs        |           2|         1|    0|      6|        4596|
-|Surelog            |           5|         1|    0|      0|        4854|
-|tree_sitter_verilog|           0|         0|    0|      6|        4499|
-|VeribleExtractor   |           0|         0|    0|      6|        4499|
-|Slang              |           6|         1|    0|      0|        4853|
-|Odin               |           0|         0|    0|      6|        4599|
-|sv_parser          |           0|         0|    0|      6|        4599|
-|moore_parse        |           1|         1|    0|      6|        4597|
-|YosysSv            |           4|         4|    0|      0|        4852|
-|Icarus             |           0|         0|    0|      6|        4499|
-|Yosys              |           3|         4|    0|      0|        4853|
-|UhdmYosys          |           7|      1116|    0|      6|        3376|
-|moore              |           1|         2|    0|      6|        4596|
-|Verilator          |           5|         4|    0|      0|        4851|
-|UhdmVerilator      |           0|         6|    0|      0|        4854|
-|Verible            |           0|         0|    0|      6|        4499|
+|UhdmVerilator      |          15|         0|    0|      0|        4845|
+|Slang              |           2|        14|    0|      0|        4844|
+|Sv2v_zachjs        |           1|         1|   15|      0|        4597|
+|Verilator          |           4|        14|    0|      0|        4842|
+|moore              |           2|         1|   15|      0|        4596|
+|Surelog            |           1|        14|    0|      0|        4845|
+|moore_parse        |           1|         1|   15|      0|        4597|
+|tree_sitter_verilog|           0|         0|   15|      0|        4499|
+|UhdmYosys          |           0|         0|   15|      0|        4499|
+|VeribleExtractor   |           0|         0|   15|      0|        4499|
+|sv_parser          |           0|         0|   15|      0|        4599|
+|Verible            |           0|         0|   15|      0|        4499|
+|YosysSv            |          10|         6|    0|      0|        4844|
+|Odin               |           0|         0|   15|      0|        4599|
+|Icarus             |           0|         0|   15|      0|        4499|
+|Yosys              |          10|         6|    0|      0|        4844|
