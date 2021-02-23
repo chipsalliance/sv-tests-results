@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/cores/fx68k/fx68k.sv.html" target="file-frame">third_party/cores/fx68k/fx68k.sv</a> <a href="../../../../third_party/cores/fx68k/fx68kAlu.sv.html" target="file-frame">third_party/cores/fx68k/fx68kAlu.sv</a> <a href="../../../../third_party/cores/fx68k/uaddrPla.sv.html" target="file-frame">third_party/cores/fx68k/uaddrPla.sv</a>
 defines: 
-completed: 2021-02-20 05:14:00
-time_elapsed: 16.562s
-ram usage: 98604 KB
+completed: 2021-02-23 05:54:12
+time_elapsed: 19.128s
+ram usage: 102300 KB
 </pre>
 <pre class="log">
 
@@ -153,17 +153,17 @@ module fx68k (
 			Halti &lt;= HALTn;
 		end
 	localparam NANO_WIDTH = 68;
-	reg [NANO_WIDTH - 1:0] nanoLatch;
-	wire [NANO_WIDTH - 1:0] nanoOutput;
+	reg [67:0] nanoLatch;
+	wire [67:0] nanoOutput;
 	localparam UROM_WIDTH = 17;
-	reg [UROM_WIDTH - 1:0] microLatch;
-	wire [UROM_WIDTH - 1:0] microOutput;
+	reg [16:0] microLatch;
+	wire [16:0] microOutput;
 	localparam UADDR_WIDTH = 10;
-	reg [UADDR_WIDTH - 1:0] microAddr;
-	wire [UADDR_WIDTH - 1:0] nma;
+	reg [9:0] microAddr;
+	wire [9:0] nma;
 	localparam NADDR_WIDTH = 9;
-	reg [NADDR_WIDTH - 1:0] nanoAddr;
-	wire [NADDR_WIDTH - 1:0] orgAddr;
+	reg [8:0] nanoAddr;
+	wire [8:0] orgAddr;
 	wire rstUrom;
 	microToNanoAddr microToNanoAddr(
 		.uAddr(nma),
@@ -190,12 +190,12 @@ module fx68k (
 			nanoAddr &lt;= orgAddr;
 		end
 		if (Clks[3]) begin
-			microLatch &lt;= {UROM_WIDTH {1&#39;sb0}};
-			nanoLatch &lt;= {NANO_WIDTH {1&#39;sb0}};
+			microLatch &lt;= {17 {1&#39;sb0}};
+			nanoLatch &lt;= {68 {1&#39;sb0}};
 		end
 		else if (rstUrom) begin
 			{microLatch[16], microLatch[15], microLatch[0]} &lt;= {3 {1&#39;sb0}};
-			nanoLatch &lt;= {NANO_WIDTH {1&#39;sb0}};
+			nanoLatch &lt;= {68 {1&#39;sb0}};
 		end
 		else if (enT3) begin
 			microLatch &lt;= microOutput;
@@ -221,9 +221,9 @@ module fx68k (
 	wire au05z;
 	wire dcr4;
 	wire ze;
-	wire [UADDR_WIDTH - 1:0] a1;
-	wire [UADDR_WIDTH - 1:0] a2;
-	wire [UADDR_WIDTH - 1:0] a3;
+	wire [9:0] a1;
+	wire [9:0] a2;
+	wire [9:0] a3;
 	wire isPriv;
 	wire isIllegal;
 	wire isLineA;
@@ -389,7 +389,7 @@ module fx68k (
 		end
 	reg [2:0] rFC;
 	assign {FC2, FC1, FC0} = rFC;
-	assign Iac = rFC == 3&#39;b111;
+	assign Iac = {rFC == 3&#39;b111};
 	always @(posedge Clks[4])
 		if (Clks[3])
 			rFC &lt;= {3 {1&#39;sb0}};
@@ -501,7 +501,7 @@ module fx68k (
 		if (Clks[2]) begin
 			Tpend &lt;= 1&#39;b0;
 			{pswT, pswS, pswI} &lt;= {5 {1&#39;sb0}};
-			irdToCcr_t4 &lt;= 1&#39;sb0;
+			irdToCcr_t4 &lt;= 1&#39;b0;
 		end
 		else if (enT4)
 			irdToCcr_t4 &lt;= Irdecod[38];
@@ -552,9 +552,9 @@ module fx68k (
 	always @(*)
 		if (inExcept01) begin
 			if (tvnLatch == TVN_SPURIOUS)
-				tvnMux = {9&#39;b000000000, 5&#39;d24, 2&#39;b00};
+				tvnMux = 16&#39;b0000000001100000;
 			else if (tvnLatch == TVN_AUTOVEC)
-				tvnMux = {9&#39;b000000000, 2&#39;b11, pswI, 2&#39;b00};
+				tvnMux = {11&#39;b00000000011, pswI, 2&#39;b00};
 			else if (tvnLatch == TVN_INTERRUPT)
 				tvnMux = {6&#39;b000000, Ird[7:0], 2&#39;b00};
 			else
@@ -578,9 +578,9 @@ module nDecoder3 (
 	input enT2;
 	input enT4;
 	localparam UROM_WIDTH = 17;
-	input [UROM_WIDTH - 1:0] microLatch;
+	input [16:0] microLatch;
 	localparam NANO_WIDTH = 68;
-	input [NANO_WIDTH - 1:0] nanoLatch;
+	input [67:0] nanoLatch;
 	localparam NANO_IR2IRD = 67;
 	localparam NANO_TOIRC = 66;
 	localparam NANO_ALU_COL = 63;
@@ -649,16 +649,16 @@ module nDecoder3 (
 	reg [3:0] ftuCtrl;
 	wire [2:0] athCtrl;
 	wire [2:0] atlCtrl;
-	assign athCtrl = nanoLatch[NANO_ATHCTRL + 2:NANO_ATHCTRL];
-	assign atlCtrl = nanoLatch[NANO_ATLCTRL + 2:NANO_ATLCTRL];
-	wire [1:0] aobCtrl = nanoLatch[NANO_AOBCTRL + 1:NANO_AOBCTRL];
+	assign athCtrl = nanoLatch[11:NANO_ATHCTRL];
+	assign atlCtrl = nanoLatch[31:NANO_ATLCTRL];
+	wire [1:0] aobCtrl = nanoLatch[4:NANO_AOBCTRL];
 	wire [1:0] dobCtrl = {nanoLatch[NANO_DOBCTRL_1], nanoLatch[NANO_DOBCTRL_0]};
 	always @(posedge Clks[4])
 		if (enT4) begin
-			ftuCtrl &lt;= {nanoLatch[NANO_FTUCONTROL], nanoLatch[NANO_FTUCONTROL + 1], nanoLatch[NANO_FTUCONTROL + 2], nanoLatch[NANO_FTUCONTROL + 3]};
+			ftuCtrl &lt;= {nanoLatch[25], nanoLatch[26], nanoLatch[27], nanoLatch[28]};
 			Nanod[80] &lt;= !nanoLatch[NANO_AUCLKEN];
-			Nanod[78-:3] &lt;= nanoLatch[NANO_AUCTRL + 2:NANO_AUCTRL];
-			Nanod[79] &lt;= nanoLatch[NANO_NO_SP_ALGN + 1:NANO_NO_SP_ALGN] == 2&#39;b11;
+			Nanod[78-:3] &lt;= nanoLatch[18:16];
+			Nanod[79] &lt;= nanoLatch[1:NANO_NO_SP_ALGN] == 2&#39;b11;
 			Nanod[6] &lt;= nanoLatch[NANO_EXT_DBH];
 			Nanod[5] &lt;= nanoLatch[NANO_EXT_ABH];
 			Nanod[75] &lt;= nanoLatch[NANO_TODBIN];
@@ -678,63 +678,159 @@ module nDecoder3 (
 			Nanod[66] &lt;= athCtrl == 3&#39;b011;
 			Nanod[13] &lt;= nanoLatch[NANO_ALU2DBD];
 			Nanod[12] &lt;= nanoLatch[NANO_ALU2ABD];
-			Nanod[19] &lt;= nanoLatch[NANO_DCR + 1:NANO_DCR] == 2&#39;b11;
-			Nanod[18] &lt;= nanoLatch[NANO_DCR + 2:NANO_DCR + 1] == 2&#39;b11;
-			Nanod[17] &lt;= nanoLatch[NANO_ALUE + 2:NANO_ALUE + 1] == 2&#39;b10;
-			Nanod[16] &lt;= nanoLatch[NANO_ALUE + 1:NANO_ALUE] == 2&#39;b01;
+			Nanod[19] &lt;= nanoLatch[58:NANO_DCR] == 2&#39;b11;
+			Nanod[18] &lt;= nanoLatch[59:58] == 2&#39;b11;
+			Nanod[17] &lt;= nanoLatch[59:58] == 2&#39;b10;
+			Nanod[16] &lt;= nanoLatch[58:NANO_ALUE] == 2&#39;b01;
 			Nanod[15] &lt;= nanoLatch[NANO_DBD2ALUB];
 			Nanod[14] &lt;= nanoLatch[NANO_ABD2ALUB];
 			Nanod[60-:2] &lt;= dobCtrl;
 		end
-	always @(*) Nanod[61] = Nanod[62];
-	always @(*) Nanod[97] = ftuCtrl == NANO_FTU_UPDTPEND;
-	always @(*) Nanod[96] = ftuCtrl == NANO_FTU_CLRTPEND;
-	always @(*) Nanod[95] = ftuCtrl == NANO_FTU_TVN;
-	always @(*) Nanod[94] = ftuCtrl == NANO_FTU_CONST;
-	always @(*) Nanod[93] = (ftuCtrl == NANO_FTU_DBL) | (ftuCtrl == NANO_FTU_INL);
-	always @(*) Nanod[92] = ftuCtrl == NANO_FTU_2ABL;
-	always @(*) Nanod[89] = ftuCtrl == NANO_FTU_INL;
-	always @(*) Nanod[85] = ftuCtrl == NANO_FTU_PSWI;
-	always @(*) Nanod[88] = ftuCtrl == NANO_FTU_2SR;
-	always @(*) Nanod[87] = ftuCtrl == NANO_FTU_RDSR;
-	always @(*) Nanod[84] = ftuCtrl == NANO_FTU_IRD;
-	always @(*) Nanod[83] = ftuCtrl == NANO_FTU_SSW;
-	always @(*) Nanod[82] = ((ftuCtrl == NANO_FTU_INL) | (ftuCtrl == NANO_FTU_CLRTPEND)) | (ftuCtrl == NANO_FTU_INIT_ST);
-	always @(*) Nanod[91] = ftuCtrl == NANO_FTU_ABL2PREN;
-	always @(*) Nanod[90] = ftuCtrl == NANO_FTU_RSTPREN;
-	always @(*) Nanod[81] = nanoLatch[NANO_IR2IRD];
-	always @(*) Nanod[24-:2] = nanoLatch[NANO_ALU_DCTRL + 1:NANO_ALU_DCTRL];
-	always @(*) Nanod[22] = nanoLatch[NANO_ALU_ACTRL];
-	always @(*) Nanod[27-:3] = {nanoLatch[NANO_ALU_COL], nanoLatch[NANO_ALU_COL + 1], nanoLatch[NANO_ALU_COL + 2]};
-	wire [1:0] aluFinInit = nanoLatch[NANO_ALU_FI + 1:NANO_ALU_FI];
-	always @(*) Nanod[20] = aluFinInit == 2&#39;b10;
-	always @(*) Nanod[21] = aluFinInit == 2&#39;b01;
-	always @(*) Nanod[86] = aluFinInit == 2&#39;b11;
-	always @(*) Nanod[0] = nanoLatch[NANO_ABDHRECHARGE];
-	always @(*) Nanod[11] = nanoLatch[NANO_AUOUT + 1:NANO_AUOUT] == 2&#39;b01;
-	always @(*) Nanod[10] = nanoLatch[NANO_AUOUT + 1:NANO_AUOUT] == 2&#39;b10;
-	always @(*) Nanod[9] = nanoLatch[NANO_AUOUT + 1:NANO_AUOUT] == 2&#39;b11;
-	always @(*) Nanod[65] = aobCtrl == 2&#39;b10;
-	always @(*) Nanod[64] = aobCtrl == 2&#39;b01;
-	always @(*) Nanod[63] = aobCtrl == 2&#39;b11;
-	always @(*) Nanod[8] = nanoLatch[NANO_DBIN2ABD];
-	always @(*) Nanod[7] = nanoLatch[NANO_DBIN2DBD];
-	always @(*) Nanod[104] = |aobCtrl;
-	always @(*) Nanod[102] = |dobCtrl;
-	always @(*) Nanod[103] = (nanoLatch[NANO_TOIRC] | nanoLatch[NANO_TODBIN]) | Nanod[102];
-	always @(*) Nanod[101] = nanoLatch[NANO_BUSBYTE];
-	always @(*) Nanod[99] = nanoLatch[NANO_LOWBYTE];
-	always @(*) Nanod[98] = nanoLatch[NANO_HIGHBYTE];
-	always @(*) Nanod[57] = nanoLatch[NANO_ABL2REG];
-	always @(*) Nanod[58] = nanoLatch[NANO_ABH2REG];
-	always @(*) Nanod[53] = nanoLatch[NANO_DBL2REG];
-	always @(*) Nanod[54] = nanoLatch[NANO_DBH2REG];
-	always @(*) Nanod[52] = nanoLatch[NANO_REG2DBL];
-	always @(*) Nanod[51] = nanoLatch[NANO_REG2DBH];
-	always @(*) Nanod[56] = nanoLatch[NANO_REG2ABL];
-	always @(*) Nanod[55] = nanoLatch[NANO_REG2ABH];
-	always @(*) Nanod[50] = nanoLatch[NANO_SSP];
-	always @(*) Nanod[29] = nanoLatch[NANO_RZ];
+	wire [1:1] sv2v_tmp_A4E77;
+	assign sv2v_tmp_A4E77 = Nanod[62];
+	always @(*) Nanod[61] = sv2v_tmp_A4E77;
+	wire [1:1] sv2v_tmp_643E0;
+	assign sv2v_tmp_643E0 = ftuCtrl == NANO_FTU_UPDTPEND;
+	always @(*) Nanod[97] = sv2v_tmp_643E0;
+	wire [1:1] sv2v_tmp_F63F4;
+	assign sv2v_tmp_F63F4 = ftuCtrl == NANO_FTU_CLRTPEND;
+	always @(*) Nanod[96] = sv2v_tmp_F63F4;
+	wire [1:1] sv2v_tmp_C0277;
+	assign sv2v_tmp_C0277 = ftuCtrl == NANO_FTU_TVN;
+	always @(*) Nanod[95] = sv2v_tmp_C0277;
+	wire [1:1] sv2v_tmp_EC7E8;
+	assign sv2v_tmp_EC7E8 = ftuCtrl == NANO_FTU_CONST;
+	always @(*) Nanod[94] = sv2v_tmp_EC7E8;
+	wire [1:1] sv2v_tmp_46C16;
+	assign sv2v_tmp_46C16 = (ftuCtrl == NANO_FTU_DBL) | (ftuCtrl == NANO_FTU_INL);
+	always @(*) Nanod[93] = sv2v_tmp_46C16;
+	wire [1:1] sv2v_tmp_C30C4;
+	assign sv2v_tmp_C30C4 = ftuCtrl == NANO_FTU_2ABL;
+	always @(*) Nanod[92] = sv2v_tmp_C30C4;
+	wire [1:1] sv2v_tmp_6A23B;
+	assign sv2v_tmp_6A23B = ftuCtrl == NANO_FTU_INL;
+	always @(*) Nanod[89] = sv2v_tmp_6A23B;
+	wire [1:1] sv2v_tmp_BC678;
+	assign sv2v_tmp_BC678 = ftuCtrl == NANO_FTU_PSWI;
+	always @(*) Nanod[85] = sv2v_tmp_BC678;
+	wire [1:1] sv2v_tmp_3AA90;
+	assign sv2v_tmp_3AA90 = ftuCtrl == NANO_FTU_2SR;
+	always @(*) Nanod[88] = sv2v_tmp_3AA90;
+	wire [1:1] sv2v_tmp_F391B;
+	assign sv2v_tmp_F391B = ftuCtrl == NANO_FTU_RDSR;
+	always @(*) Nanod[87] = sv2v_tmp_F391B;
+	wire [1:1] sv2v_tmp_AC192;
+	assign sv2v_tmp_AC192 = ftuCtrl == NANO_FTU_IRD;
+	always @(*) Nanod[84] = sv2v_tmp_AC192;
+	wire [1:1] sv2v_tmp_BFE62;
+	assign sv2v_tmp_BFE62 = ftuCtrl == NANO_FTU_SSW;
+	always @(*) Nanod[83] = sv2v_tmp_BFE62;
+	wire [1:1] sv2v_tmp_16D3A;
+	assign sv2v_tmp_16D3A = ((ftuCtrl == NANO_FTU_INL) | (ftuCtrl == NANO_FTU_CLRTPEND)) | (ftuCtrl == NANO_FTU_INIT_ST);
+	always @(*) Nanod[82] = sv2v_tmp_16D3A;
+	wire [1:1] sv2v_tmp_F7768;
+	assign sv2v_tmp_F7768 = ftuCtrl == NANO_FTU_ABL2PREN;
+	always @(*) Nanod[91] = sv2v_tmp_F7768;
+	wire [1:1] sv2v_tmp_68453;
+	assign sv2v_tmp_68453 = ftuCtrl == NANO_FTU_RSTPREN;
+	always @(*) Nanod[90] = sv2v_tmp_68453;
+	wire [1:1] sv2v_tmp_8E3EA;
+	assign sv2v_tmp_8E3EA = nanoLatch[NANO_IR2IRD];
+	always @(*) Nanod[81] = sv2v_tmp_8E3EA;
+	wire [2:1] sv2v_tmp_FAFAC;
+	assign sv2v_tmp_FAFAC = nanoLatch[52:NANO_ALU_DCTRL];
+	always @(*) Nanod[24-:2] = sv2v_tmp_FAFAC;
+	wire [1:1] sv2v_tmp_84BBD;
+	assign sv2v_tmp_84BBD = nanoLatch[NANO_ALU_ACTRL];
+	always @(*) Nanod[22] = sv2v_tmp_84BBD;
+	wire [3:1] sv2v_tmp_C95DC;
+	assign sv2v_tmp_C95DC = {nanoLatch[NANO_ALU_COL], nanoLatch[64], nanoLatch[65]};
+	always @(*) Nanod[27-:3] = sv2v_tmp_C95DC;
+	wire [1:0] aluFinInit = nanoLatch[62:NANO_ALU_FI];
+	wire [1:1] sv2v_tmp_49996;
+	assign sv2v_tmp_49996 = aluFinInit == 2&#39;b10;
+	always @(*) Nanod[20] = sv2v_tmp_49996;
+	wire [1:1] sv2v_tmp_E445B;
+	assign sv2v_tmp_E445B = aluFinInit == 2&#39;b01;
+	always @(*) Nanod[21] = sv2v_tmp_E445B;
+	wire [1:1] sv2v_tmp_38643;
+	assign sv2v_tmp_38643 = aluFinInit == 2&#39;b11;
+	always @(*) Nanod[86] = sv2v_tmp_38643;
+	wire [1:1] sv2v_tmp_6F6BF;
+	assign sv2v_tmp_6F6BF = nanoLatch[NANO_ABDHRECHARGE];
+	always @(*) Nanod[0] = sv2v_tmp_6F6BF;
+	wire [1:1] sv2v_tmp_F6507;
+	assign sv2v_tmp_F6507 = nanoLatch[21:NANO_AUOUT] == 2&#39;b01;
+	always @(*) Nanod[11] = sv2v_tmp_F6507;
+	wire [1:1] sv2v_tmp_14B0E;
+	assign sv2v_tmp_14B0E = nanoLatch[21:NANO_AUOUT] == 2&#39;b10;
+	always @(*) Nanod[10] = sv2v_tmp_14B0E;
+	wire [1:1] sv2v_tmp_CBDF5;
+	assign sv2v_tmp_CBDF5 = nanoLatch[21:NANO_AUOUT] == 2&#39;b11;
+	always @(*) Nanod[9] = sv2v_tmp_CBDF5;
+	wire [1:1] sv2v_tmp_E450E;
+	assign sv2v_tmp_E450E = aobCtrl == 2&#39;b10;
+	always @(*) Nanod[65] = sv2v_tmp_E450E;
+	wire [1:1] sv2v_tmp_2AA90;
+	assign sv2v_tmp_2AA90 = aobCtrl == 2&#39;b01;
+	always @(*) Nanod[64] = sv2v_tmp_2AA90;
+	wire [1:1] sv2v_tmp_B349D;
+	assign sv2v_tmp_B349D = aobCtrl == 2&#39;b11;
+	always @(*) Nanod[63] = sv2v_tmp_B349D;
+	wire [1:1] sv2v_tmp_255C5;
+	assign sv2v_tmp_255C5 = nanoLatch[NANO_DBIN2ABD];
+	always @(*) Nanod[8] = sv2v_tmp_255C5;
+	wire [1:1] sv2v_tmp_87FD5;
+	assign sv2v_tmp_87FD5 = nanoLatch[NANO_DBIN2DBD];
+	always @(*) Nanod[7] = sv2v_tmp_87FD5;
+	wire [1:1] sv2v_tmp_3A783;
+	assign sv2v_tmp_3A783 = |aobCtrl;
+	always @(*) Nanod[104] = sv2v_tmp_3A783;
+	wire [1:1] sv2v_tmp_158C3;
+	assign sv2v_tmp_158C3 = |dobCtrl;
+	always @(*) Nanod[102] = sv2v_tmp_158C3;
+	wire [1:1] sv2v_tmp_7D6C6;
+	assign sv2v_tmp_7D6C6 = (nanoLatch[NANO_TOIRC] | nanoLatch[NANO_TODBIN]) | Nanod[102];
+	always @(*) Nanod[103] = sv2v_tmp_7D6C6;
+	wire [1:1] sv2v_tmp_CBB11;
+	assign sv2v_tmp_CBB11 = nanoLatch[NANO_BUSBYTE];
+	always @(*) Nanod[101] = sv2v_tmp_CBB11;
+	wire [1:1] sv2v_tmp_527B8;
+	assign sv2v_tmp_527B8 = nanoLatch[NANO_LOWBYTE];
+	always @(*) Nanod[99] = sv2v_tmp_527B8;
+	wire [1:1] sv2v_tmp_C2833;
+	assign sv2v_tmp_C2833 = nanoLatch[NANO_HIGHBYTE];
+	always @(*) Nanod[98] = sv2v_tmp_C2833;
+	wire [1:1] sv2v_tmp_2C49E;
+	assign sv2v_tmp_2C49E = nanoLatch[NANO_ABL2REG];
+	always @(*) Nanod[57] = sv2v_tmp_2C49E;
+	wire [1:1] sv2v_tmp_82F2B;
+	assign sv2v_tmp_82F2B = nanoLatch[NANO_ABH2REG];
+	always @(*) Nanod[58] = sv2v_tmp_82F2B;
+	wire [1:1] sv2v_tmp_A5DA8;
+	assign sv2v_tmp_A5DA8 = nanoLatch[NANO_DBL2REG];
+	always @(*) Nanod[53] = sv2v_tmp_A5DA8;
+	wire [1:1] sv2v_tmp_EDC92;
+	assign sv2v_tmp_EDC92 = nanoLatch[NANO_DBH2REG];
+	always @(*) Nanod[54] = sv2v_tmp_EDC92;
+	wire [1:1] sv2v_tmp_8E0CC;
+	assign sv2v_tmp_8E0CC = nanoLatch[NANO_REG2DBL];
+	always @(*) Nanod[52] = sv2v_tmp_8E0CC;
+	wire [1:1] sv2v_tmp_3B9CD;
+	assign sv2v_tmp_3B9CD = nanoLatch[NANO_REG2DBH];
+	always @(*) Nanod[51] = sv2v_tmp_3B9CD;
+	wire [1:1] sv2v_tmp_6A6D6;
+	assign sv2v_tmp_6A6D6 = nanoLatch[NANO_REG2ABL];
+	always @(*) Nanod[56] = sv2v_tmp_6A6D6;
+	wire [1:1] sv2v_tmp_ABEE2;
+	assign sv2v_tmp_ABEE2 = nanoLatch[NANO_REG2ABH];
+	always @(*) Nanod[55] = sv2v_tmp_ABEE2;
+	wire [1:1] sv2v_tmp_F7F78;
+	assign sv2v_tmp_F7F78 = nanoLatch[NANO_SSP];
+	always @(*) Nanod[50] = sv2v_tmp_F7F78;
+	wire [1:1] sv2v_tmp_F7FC5;
+	assign sv2v_tmp_F7FC5 = nanoLatch[NANO_RZ];
+	always @(*) Nanod[29] = sv2v_tmp_F7FC5;
 	wire dtldbd = 1&#39;b0;
 	wire dthdbh = 1&#39;b0;
 	wire dtlabd = 1&#39;b0;
@@ -743,16 +839,26 @@ module nDecoder3 (
 	wire dbhSpecial = Nanod[49] | dthdbh;
 	wire ablSpecial = Nanod[47] | dtlabd;
 	wire abhSpecial = Nanod[46] | dthabh;
-	always @(*) Nanod[28] = nanoLatch[NANO_RXL_DBL];
+	wire [1:1] sv2v_tmp_B721F;
+	assign sv2v_tmp_B721F = nanoLatch[NANO_RXL_DBL];
+	always @(*) Nanod[28] = sv2v_tmp_B721F;
 	wire isPcRel = Irdecod[41] &amp; !Nanod[29];
 	wire pcRelDbl = isPcRel &amp; !nanoLatch[NANO_RXL_DBL];
 	wire pcRelDbh = isPcRel &amp; !nanoLatch[NANO_RXH_DBH];
 	wire pcRelAbl = isPcRel &amp; nanoLatch[NANO_RXL_DBL];
 	wire pcRelAbh = isPcRel &amp; nanoLatch[NANO_RXH_DBH];
-	always @(*) Nanod[48] = nanoLatch[NANO_PCLDBL] | pcRelDbl;
-	always @(*) Nanod[49] = (nanoLatch[NANO_PCH + 1:NANO_PCH] == 2&#39;b01) | pcRelDbh;
-	always @(*) Nanod[47] = nanoLatch[NANO_PCLABL] | pcRelAbl;
-	always @(*) Nanod[46] = (nanoLatch[NANO_PCH + 1:NANO_PCH] == 2&#39;b10) | pcRelAbh;
+	wire [1:1] sv2v_tmp_11BF0;
+	assign sv2v_tmp_11BF0 = nanoLatch[NANO_PCLDBL] | pcRelDbl;
+	always @(*) Nanod[48] = sv2v_tmp_11BF0;
+	wire [1:1] sv2v_tmp_C476D;
+	assign sv2v_tmp_C476D = (nanoLatch[1:NANO_PCH] == 2&#39;b01) | pcRelDbh;
+	always @(*) Nanod[49] = sv2v_tmp_C476D;
+	wire [1:1] sv2v_tmp_E5915;
+	assign sv2v_tmp_E5915 = nanoLatch[NANO_PCLABL] | pcRelAbl;
+	always @(*) Nanod[47] = sv2v_tmp_E5915;
+	wire [1:1] sv2v_tmp_2D3FF;
+	assign sv2v_tmp_2D3FF = (nanoLatch[1:NANO_PCH] == 2&#39;b10) | pcRelAbh;
+	always @(*) Nanod[46] = sv2v_tmp_2D3FF;
 	always @(posedge Clks[4]) begin
 		if (enT4) begin
 			Nanod[41] &lt;= (Nanod[52] &amp; !dblSpecial) &amp; nanoLatch[NANO_RXL_DBL];
@@ -790,10 +896,18 @@ module irdDecode (
 	);
 	wire isRegShift = lineOnehot[&#39;he] &amp; (ird[7:6] != 2&#39;b11);
 	wire isDynShift = isRegShift &amp; ird[5];
-	always @(*) Irdecod[41] = ((&amp;ird[5:3] &amp; ~isDynShift) &amp; !ird[2]) &amp; ird[1];
-	always @(*) Irdecod[40] = lineOnehot[4] &amp; (ird[11:6] == 6&#39;b101011);
-	always @(*) Irdecod[30-:3] = ird[11:9];
-	always @(*) Irdecod[27-:3] = ird[2:0];
+	wire [1:1] sv2v_tmp_D0035;
+	assign sv2v_tmp_D0035 = ((&amp;ird[5:3] &amp; ~isDynShift) &amp; !ird[2]) &amp; ird[1];
+	always @(*) Irdecod[41] = sv2v_tmp_D0035;
+	wire [1:1] sv2v_tmp_A88AD;
+	assign sv2v_tmp_A88AD = lineOnehot[4] &amp; (ird[11:6] == 6&#39;b101011);
+	always @(*) Irdecod[40] = sv2v_tmp_A88AD;
+	wire [3:1] sv2v_tmp_9F1F6;
+	assign sv2v_tmp_9F1F6 = ird[11:9];
+	always @(*) Irdecod[30-:3] = sv2v_tmp_9F1F6;
+	wire [3:1] sv2v_tmp_FB1E3;
+	assign sv2v_tmp_FB1E3 = ird[2:0];
+	always @(*) Irdecod[27-:3] = sv2v_tmp_FB1E3;
 	wire isPreDecr = ird[5:3] == 3&#39;b100;
 	wire eaAreg = ird[5:3] == 3&#39;b001;
 	always @(*)
@@ -806,11 +920,19 @@ module irdDecode (
 			default: Irdecod[24] = Irdecod[39];
 		endcase
 	always @(*) Irdecod[34] = (lineOnehot[4] &amp; ~ird[8]) &amp; ~Irdecod[39];
-	always @(*) Irdecod[33] = Irdecod[34] &amp; isPreDecr;
-	always @(*) Irdecod[37] = lineOnehot[5] | (lineOnehot[0] &amp; ~ird[8]);
-	always @(*) Irdecod[35] = lineOnehot[4] &amp; (ird[11:4] == 8&#39;he6);
+	wire [1:1] sv2v_tmp_8335E;
+	assign sv2v_tmp_8335E = Irdecod[34] &amp; isPreDecr;
+	always @(*) Irdecod[33] = sv2v_tmp_8335E;
+	wire [1:1] sv2v_tmp_1A128;
+	assign sv2v_tmp_1A128 = lineOnehot[5] | (lineOnehot[0] &amp; ~ird[8]);
+	always @(*) Irdecod[37] = sv2v_tmp_1A128;
+	wire [1:1] sv2v_tmp_EAA96;
+	assign sv2v_tmp_EAA96 = lineOnehot[4] &amp; (ird[11:4] == 8&#39;he6);
+	always @(*) Irdecod[35] = sv2v_tmp_EAA96;
 	wire eaImmOrAbs = (ird[5:3] == 3&#39;b111) &amp; ~ird[1];
-	always @(*) Irdecod[36] = eaImmOrAbs &amp; ~isRegShift;
+	wire [1:1] sv2v_tmp_BCE90;
+	assign sv2v_tmp_BCE90 = eaImmOrAbs &amp; ~isRegShift;
+	always @(*) Irdecod[36] = sv2v_tmp_BCE90;
 	always @(*) begin : sv2v_autoblock_1
 		reg eaIsAreg;
 		eaIsAreg = (ird[5:3] != 3&#39;b000) &amp; (ird[5:3] != 3&#39;b111);
@@ -832,14 +954,18 @@ module irdDecode (
 			lineOnehot[8], lineOnehot[9], lineOnehot[&#39;hb], lineOnehot[&#39;hc], lineOnehot[&#39;hd], lineOnehot[&#39;he]: Irdecod[32] = ird[7:6] == 2&#39;b00;
 			default: Irdecod[32] = 1&#39;b0;
 		endcase
-	always @(*) Irdecod[31] = (lineOnehot[0] &amp; ird[8]) &amp; eaAreg;
+	wire [1:1] sv2v_tmp_F38A2;
+	assign sv2v_tmp_F38A2 = (lineOnehot[0] &amp; ird[8]) &amp; eaAreg;
+	always @(*) Irdecod[31] = sv2v_tmp_F38A2;
 	always @(*)
 		case (1&#39;b1)
 			lineOnehot[6]: Irdecod[39] = ird[11:8] == 4&#39;b0001;
 			lineOnehot[4]: Irdecod[39] = (ird[11:8] == 4&#39;b1110) | (ird[11:6] == 6&#39;b100001);
 			default: Irdecod[39] = 1&#39;b0;
 		endcase
-	always @(*) Irdecod[38] = (lineOnehot[4] &amp; ((ird[11:0] == 12&#39;he77) | (ird[11:6] == 6&#39;b010011))) | (lineOnehot[0] &amp; (ird[8:6] == 3&#39;b000));
+	wire [1:1] sv2v_tmp_929C6;
+	assign sv2v_tmp_929C6 = (lineOnehot[4] &amp; ((ird[11:0] == 12&#39;he77) | (ird[11:6] == 6&#39;b010011))) | (lineOnehot[0] &amp; (ird[8:6] == 3&#39;b000));
+	always @(*) Irdecod[38] = sv2v_tmp_929C6;
 	reg [15:0] ftuConst;
 	wire [3:0] zero28 = (ird[11:9] == 0 ? 4&#39;h8 : {1&#39;b0, ird[11:9]});
 	always @(*)
@@ -850,7 +976,9 @@ module irdDecode (
 			lineOnehot[4]: ftuConst = 16&#39;h0080;
 			default: ftuConst = {16 {1&#39;sb0}};
 		endcase
-	always @(*) Irdecod[22-:16] = ftuConst;
+	wire [16:1] sv2v_tmp_5C882;
+	assign sv2v_tmp_5C882 = ftuConst;
+	always @(*) Irdecod[22-:16] = sv2v_tmp_5C882;
 	always @(*)
 		if (lineOnehot[4])
 			case (ird[6:5])
@@ -862,7 +990,9 @@ module irdDecode (
 			Irdecod[6-:6] = 5;
 	wire eaAdir = ird[5:3] == 3&#39;b001;
 	wire size11 = ird[7] &amp; ird[6];
-	always @(*) Irdecod[0] = (((lineOnehot[9] | lineOnehot[&#39;hd]) &amp; size11) | (lineOnehot[5] &amp; eaAdir)) | ((lineOnehot[2] | lineOnehot[3]) &amp; (ird[8:6] == 3&#39;b001));
+	wire [1:1] sv2v_tmp_73194;
+	assign sv2v_tmp_73194 = (((lineOnehot[9] | lineOnehot[&#39;hd]) &amp; size11) | (lineOnehot[5] &amp; eaAdir)) | ((lineOnehot[2] | lineOnehot[3]) &amp; (ird[8:6] == 3&#39;b001));
+	always @(*) Irdecod[0] = sv2v_tmp_73194;
 endmodule
 module excUnit (
 	Clks,
@@ -1275,7 +1405,7 @@ module excUnit (
 	);
 	always @(posedge Clks[4])
 		if (Clks[2])
-			dcr4 &lt;= 1&#39;sb0;
+			dcr4 &lt;= 1&#39;b0;
 		else if (enT3 &amp; Nanod[19]) begin
 			dcrOutput &lt;= dcrCode;
 			dcr4 &lt;= Abd[4];
@@ -1427,9 +1557,9 @@ module uaddrDecode (
 );
 	input [15:0] opcode;
 	localparam UADDR_WIDTH = 10;
-	output [UADDR_WIDTH - 1:0] a1;
-	output [UADDR_WIDTH - 1:0] a2;
-	output [UADDR_WIDTH - 1:0] a3;
+	output [9:0] a1;
+	output [9:0] a2;
+	output [9:0] a3;
 	output reg isPriv;
 	output wire isIllegal;
 	output wire isLineA;
@@ -1561,7 +1691,7 @@ module sequencer (
 	input wire [4:0] Clks;
 	input enT3;
 	localparam UROM_WIDTH = 17;
-	input [UROM_WIDTH - 1:0] microLatch;
+	input [16:0] microLatch;
 	input A0Err;
 	input BerrA;
 	input busAddrErr;
@@ -1583,18 +1713,18 @@ module sequencer (
 	input [1:0] alue01;
 	input [15:0] Ird;
 	localparam UADDR_WIDTH = 10;
-	input [UADDR_WIDTH - 1:0] a1;
-	input [UADDR_WIDTH - 1:0] a2;
-	input [UADDR_WIDTH - 1:0] a3;
+	input [9:0] a1;
+	input [9:0] a2;
+	input [9:0] a3;
 	output reg [3:0] tvn;
-	output reg [UADDR_WIDTH - 1:0] nma;
-	reg [UADDR_WIDTH - 1:0] uNma;
-	reg [UADDR_WIDTH - 1:0] grp1Nma;
+	output reg [9:0] nma;
+	reg [9:0] uNma;
+	reg [9:0] grp1Nma;
 	reg [1:0] c0c1;
 	reg a0Rst;
 	wire A0Sel;
 	wire inGrp0Exc;
-	wire [UADDR_WIDTH - 1:0] dbNma = {microLatch[14:13], microLatch[6:5], microLatch[10:7], microLatch[12:11]};
+	wire [9:0] dbNma = {microLatch[14:13], microLatch[6:5], microLatch[10:7], microLatch[12:11]};
 	localparam BSER1_NMA = &#39;h3;
 	localparam HALT1_NMA = &#39;h1;
 	localparam RSTP0_NMA = &#39;h2;
@@ -1969,7 +2099,7 @@ module busControl (
 			rUDS &lt;= 1&#39;b1;
 			rLDS &lt;= 1&#39;b1;
 			rRWn &lt;= 1&#39;b1;
-			dataOe &lt;= 1&#39;sb0;
+			dataOe &lt;= 1&#39;b0;
 		end
 		else begin
 			if ((Clks[0] &amp; isWriteReg) &amp; (busPhase == S2))
@@ -2037,11 +2167,11 @@ module uRom (
 );
 	input clk;
 	localparam UADDR_WIDTH = 10;
-	input [UADDR_WIDTH - 1:0] microAddr;
+	input [9:0] microAddr;
 	localparam UROM_WIDTH = 17;
-	output reg [UROM_WIDTH - 1:0] microOutput;
+	output reg [16:0] microOutput;
 	localparam UROM_DEPTH = 1024;
-	reg [UROM_WIDTH - 1:0] uRam [0:UROM_DEPTH - 1];
+	reg [16:0] uRam [0:1023];
 	initial $readmemb(&#34;microrom.mem&#34;, uRam);
 	always @(posedge clk) microOutput &lt;= uRam[microAddr];
 endmodule
@@ -2052,11 +2182,11 @@ module nanoRom (
 );
 	input clk;
 	localparam NADDR_WIDTH = 9;
-	input [NADDR_WIDTH - 1:0] nanoAddr;
+	input [8:0] nanoAddr;
 	localparam NANO_WIDTH = 68;
-	output reg [NANO_WIDTH - 1:0] nanoOutput;
+	output reg [67:0] nanoOutput;
 	localparam NANO_DEPTH = 336;
-	reg [NANO_WIDTH - 1:0] nRam [0:NANO_DEPTH - 1];
+	reg [67:0] nRam [0:335];
 	initial $readmemb(&#34;nanorom.mem&#34;, nRam);
 	always @(posedge clk) nanoOutput &lt;= nRam[nanoAddr];
 endmodule
@@ -2065,11 +2195,11 @@ module microToNanoAddr (
 	orgAddr
 );
 	localparam UADDR_WIDTH = 10;
-	input [UADDR_WIDTH - 1:0] uAddr;
+	input [9:0] uAddr;
 	localparam NADDR_WIDTH = 9;
-	output [NADDR_WIDTH - 1:0] orgAddr;
-	wire [UADDR_WIDTH - 1:2] baseAddr = uAddr[UADDR_WIDTH - 1:2];
-	reg [NADDR_WIDTH - 1:2] orgBase;
+	output [8:0] orgAddr;
+	wire [9:2] baseAddr = uAddr[9:2];
+	reg [8:2] orgBase;
 	assign orgAddr = {orgBase, uAddr[1:0]};
 	always @(baseAddr)
 		case (baseAddr)
@@ -2209,7 +2339,7 @@ module microToNanoAddr (
 			&#39;hf9: orgBase = 7&#39;h53;
 			&#39;hfa: orgBase = 7&#39;h53;
 			&#39;hfb: orgBase = 7&#39;h53;
-			default: orgBase = {NADDR_WIDTH - 2 {1&#39;sbx}};
+			default: orgBase = {7 {1&#39;sbx}};
 		endcase
 endmodule
 module fx68kAlu (
@@ -2411,7 +2541,7 @@ module fx68kAlu (
 				else
 					shftCin = pswCcr[XF];
 			OP_SLAA: shftCin = aluColumn[1];
-			default: shftCin = 1&#39;sbx;
+			default: shftCin = 1&#39;bx;
 		endcase
 	end
 	task mySubber;
@@ -2554,7 +2684,9 @@ module fx68kAlu (
 		else if ((enT3 &amp; ~noCcrEn) &amp; (finish | init))
 			pswCcr &lt;= ccrMasked;
 	end
-	always @(*) ccr = {3&#39;b000, pswCcr};
+	wire [8:1] sv2v_tmp_C8A7F;
+	assign sv2v_tmp_C8A7F = {3&#39;b000, pswCcr};
+	always @(*) ccr = sv2v_tmp_C8A7F;
 endmodule
 module aluCorf (
 	binResult,
@@ -2845,7 +2977,7 @@ module ccrTable (
 	input [15:0] row;
 	input finish;
 	localparam MASK_NBITS = 5;
-	output reg [MASK_NBITS - 1:0] ccrMask;
+	output reg [4:0] ccrMask;
 	localparam KNZ00 = 5&#39;b01111;
 	localparam KKZKK = 5&#39;b00100;
 	localparam KNZKK = 5&#39;b01100;
@@ -2855,7 +2987,7 @@ module ccrTable (
 	localparam XNKVC = 5&#39;b11011;
 	localparam CUPDALL = 5&#39;b11111;
 	localparam CUNUSED = 5&#39;bxxxxx;
-	reg [MASK_NBITS - 1:0] ccrMask1;
+	reg [4:0] ccrMask1;
 	always @(*)
 		case (col)
 			1: ccrMask = ccrMask1;

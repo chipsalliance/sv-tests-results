@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_source_sync_channel_control_slave.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_source_sync_channel_control_slave.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_comm_link/bsg_source_sync_channel_control_slave.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_comm_link/bsg_source_sync_channel_control_slave.v</a>
 defines: 
-completed: 2021-02-20 05:15:12
-time_elapsed: 0.578s
-ram usage: 15648 KB
+completed: 2021-02-23 05:55:29
+time_elapsed: 0.471s
+ram usage: 16268 KB
 </pre>
 <pre class="log">
 
@@ -62,11 +62,15 @@ module bsg_source_sync_channel_control_slave (
 	wire out_active_mismatch;
 	wire [(((width_p + 1) &gt;&gt; 1) &lt;&lt; 1) - 1:0] out_active_pattern = {(width_p + 1) &gt;&gt; 1 {2&#39;b10}};
 	generate
-		if (width_p &gt;= 4) assign out_snoop_valid_data = in_snoop_valid_data_i[width_p-:5];
+		if (width_p &gt;= 4) begin
+			assign out_snoop_valid_data = {in_snoop_valid_data_i[width_p-:5]};
+		end
 		else assign out_snoop_valid_data = {in_snoop_valid_data_i[width_p-:4], 1&#39;b0};
 	endgenerate
 	generate
-		if (width_p &lt;= 4) assign out_active_mismatch = 1&#39;b0;
+		if (width_p &lt;= 4) begin
+			assign out_active_mismatch = 1&#39;b0;
+		end
 		else assign out_active_mismatch = |(out_active_pattern[width_p - 5:0] ^ in_snoop_valid_data_i[width_p - 5:0]);
 	endgenerate
 	reg [3:0] out_state_n;
@@ -115,16 +119,16 @@ module bsg_source_sync_channel_control_slave (
 	assign out_override_valid_data_o = out_override_valid_data_r;
 	assign out_override_en_o = out_override_en_r;
 	reg out_reset_r;
-	function automatic [counter_bits_lp - 1:0] sv2v_cast_2CCCC;
-		input reg [counter_bits_lp - 1:0] inp;
-		sv2v_cast_2CCCC = inp;
+	function automatic signed [counter_bits_lp - 1:0] sv2v_cast_1B9D5_signed;
+		input reg signed [counter_bits_lp - 1:0] inp;
+		sv2v_cast_1B9D5_signed = inp;
 	endfunction
 	always @(posedge out_clk_i) begin
 		out_reset_r &lt;= out_reset_i;
 		out_clk_init_r_o &lt;= (~out_reset_i &amp; (out_state_n == sResetClock)) &amp; (out_state_r == sBegin);
 		out_override_en_r &lt;= out_override_en_n;
 		if (out_reset_i ^ out_reset_r) begin
-			out_ctr_r &lt;= sv2v_cast_2CCCC(0);
+			out_ctr_r &lt;= sv2v_cast_1B9D5_signed(0);
 			out_override_valid_data_r &lt;= {width_p + 1 {1&#39;b0}};
 		end
 		else begin
@@ -145,9 +149,9 @@ module bsg_source_sync_channel_control_slave (
 		.iclk_i(out_clk_i),
 		.iclk_reset_i(1&#39;b0),
 		.oclk_i(core_clk_i),
-		.iclk_data_i(out_loopback_en),
+		.iclk_data_i({out_loopback_en}),
 		.iclk_data_o(),
-		.oclk_data_o(core_loopback_en_o)
+		.oclk_data_o({core_loopback_en_o})
 	);
 	wire AWC_ignore;
 	bsg_launch_sync_sync #(.width_p(3)) out_to_in_lss(
@@ -170,8 +174,8 @@ module bsg_source_sync_channel_control_slave (
 			sBegin: begin
 				out_ctr_n = out_ctr_r_p1;
 				out_override_en_n = 1&#39;b1;
-				if (out_ctr_r[counter_min_bits_lp - 1:lg_token_width_p] == 1&#39;b1)
-					out_override_valid_data_n = {1&#39;b1, 1&#39;b1, {width_p - 1 {1&#39;b0}}};
+				if (out_ctr_r[23:lg_token_width_p] == 1&#39;b1)
+					out_override_valid_data_n = {2&#39;b11, {width_p - 1 {1&#39;b0}}};
 			end
 			sPhase1: begin
 				out_rot_n = {out_rot_r[6:0], out_rot_r[7]};

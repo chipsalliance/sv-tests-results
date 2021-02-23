@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_router_crossbar_o_by_i.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_router_crossbar_o_by_i.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_router_crossbar_o_by_i.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_router_crossbar_o_by_i.v</a>
 defines: 
-completed: 2021-02-20 05:15:31
-time_elapsed: 0.446s
-ram usage: 14172 KB
+completed: 2021-02-23 05:55:13
+time_elapsed: 0.123s
+ram usage: 13528 KB
 </pre>
 <pre class="log">
 
@@ -43,7 +43,7 @@ module bsg_router_crossbar_o_by_i (
 	parameter _sv2v_width_i_width_p = 24;
 	parameter [_sv2v_width_i_width_p - 1:0] i_width_p = &#34;inv&#34;;
 	parameter [i_els_p - 1:0] i_use_credits_p = {i_els_p {1&#39;b0}};
-	parameter signed [(i_els_p * 32) - 1:0] i_fifo_els_p = {32&#39;sd2, 32&#39;sd2};
+	parameter signed [(i_els_p * 32) - 1:0] i_fifo_els_p = 64&#39;h0000000200000002;
 	parameter lg_o_els_lp = (o_els_p == 1 ? 1 : $clog2(o_els_p));
 	parameter drop_header_p = 0;
 	parameter o_width_lp = i_width_p - (drop_header_p * lg_o_els_lp);
@@ -119,7 +119,9 @@ module bsg_router_crossbar_o_by_i (
 	endgenerate
 	wire [(i_els_p * o_width_lp) - 1:0] odata;
 	generate
-		for (i = 0; i &lt; i_els_p; i = i + 1) if (drop_header_p) assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[(i * i_width_p) + ((i_width_p - 1) &gt;= lg_o_els_lp ? i_width_p - 1 : ((i_width_p - 1) + ((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)) - 1)-:((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)];
+		for (i = 0; i &lt; i_els_p; i = i + 1) if (drop_header_p) begin
+			assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[(i * i_width_p) + ((i_width_p - 1) &gt;= lg_o_els_lp ? i_width_p - 1 : ((i_width_p - 1) + ((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)) - 1)-:((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)];
+		end
 		else assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[i * i_width_p+:i_width_p];
 	endgenerate
 	generate

@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
+<pre class="test-failed">
 description: Tests imported from basejump
-rc: 0 (means success: 1)
+rc: 1 (means success: 0)
 tags: basejump
 incdirs: /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc
 top_module: top
@@ -17,218 +17,16 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_wormhole_router.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_wormhole_router.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router.v</a>
 defines: 
-completed: 2021-02-20 05:15:18
-time_elapsed: 1.052s
-ram usage: 20956 KB
+completed: 2021-02-23 05:55:30
+time_elapsed: 0.376s
+ram usage: 16704 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_wormhole_router.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_wormhole_router.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router.v</a>
-module top;
-	
-endmodule
-module bsg_wormhole_router (
-	clk_i,
-	reset_i,
-	link_i,
-	link_o,
-	my_cord_i
-);
-	import bsg_wormhole_router_pkg::StrictXY;
-	import bsg_wormhole_router_pkg::StrictX;
-	parameter _sv2v_width_flit_width_p = 24;
-	parameter [_sv2v_width_flit_width_p - 1:0] flit_width_p = &#34;inv&#34;;
-	parameter dims_p = 2;
-	parameter dirs_lp = (dims_p * 2) + 1;
-	parameter cord_dims_p = dims_p;
-	parameter signed [(cord_dims_p &gt;= 0 ? ((cord_dims_p + 1) * 32) - 1 : ((1 - cord_dims_p) * 32) + ((cord_dims_p * 32) - 1)):(cord_dims_p &gt;= 0 ? 0 : cord_dims_p * 32)] cord_markers_pos_p = {32&#39;sd5, 32&#39;sd4, 32&#39;sd0};
-	parameter [((2 * dirs_lp) * dirs_lp) - 1:0] routing_matrix_p = (dims_p == 2 ? StrictXY : StrictX);
-	parameter reverse_order_p = 0;
-	parameter _sv2v_width_len_width_p = 24;
-	parameter [_sv2v_width_len_width_p - 1:0] len_width_p = &#34;inv&#34;;
-	parameter debug_lp = 0;
-	input clk_i;
-	input reset_i;
-	input [((flit_width_p + 1) &gt;= 0 ? (dirs_lp * (flit_width_p + 2)) - 1 : (dirs_lp * (1 - (flit_width_p + 1))) + flit_width_p):((flit_width_p + 1) &gt;= 0 ? 0 : flit_width_p + 1)] link_i;
-	output [((flit_width_p + 1) &gt;= 0 ? (dirs_lp * (flit_width_p + 2)) - 1 : (dirs_lp * (1 - (flit_width_p + 1))) + flit_width_p):((flit_width_p + 1) &gt;= 0 ? 0 : flit_width_p + 1)] link_o;
-	input [cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1:0] my_cord_i;
-	localparam input_dirs_lp = dirs_lp;
-	localparam output_dirs_lp = dirs_lp;
-	wire [(dirs_lp * dirs_lp) - 1:0] matrix_out_in_transpose;
-	bsg_transpose #(
-		.width_p(dirs_lp),
-		.els_p(dirs_lp)
-	) tr(
-		.i(routing_matrix_p[0+:dirs_lp * dirs_lp]),
-		.o(matrix_out_in_transpose)
-	);
-	always @(negedge reset_i)
-		;
-	wire [(input_dirs_lp * flit_width_p) - 1:0] fifo_data_lo;
-	wire [input_dirs_lp - 1:0] fifo_valid_lo;
-	wire [dirs_lp - 1:0] releases;
-	wire [(dirs_lp * dirs_lp) - 1:0] reqs;
-	wire [(dirs_lp * dirs_lp) - 1:0] reqs_transpose;
-	wire [(dirs_lp * dirs_lp) - 1:0] yumis;
-	wire [(dirs_lp * dirs_lp) - 1:0] yumis_transpose;
-	wire [(dirs_lp * (2 + flit_width_p)) - 1:0] link_i_cast;
-	wire [(dirs_lp * (2 + flit_width_p)) - 1:0] link_o_cast;
-	assign link_i_cast = link_i;
-	assign link_o = link_o_cast;
-	genvar i;
-	genvar j;
-	generate
-		for (i = 0; i &lt; input_dirs_lp; i = i + 1) begin : in_ch
-			localparam output_dirs_sparse_lp = (dirs_lp &lt; 65 ? 1&#39;b0 : {dirs_lp {1&#39;sbx}}) + (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 0) &amp; 1&#39;b1) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 1) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 2) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 3) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 4) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 5) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 6) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 7) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 8) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 9) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 10) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 11) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 12) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 13) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 14) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 15) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 16) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 17) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 18) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 19) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 20) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 21) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 22) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 23) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 24) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 25) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 26) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 27) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 28) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 29) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 30) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 31) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 32) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 33) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 34) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 35) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 36) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 37) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 38) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 39) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 40) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 41) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 42) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 43) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 44) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 45) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 46) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 47) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 48) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 49) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 50) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 51) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 52) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 53) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 54) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 55) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 56) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 57) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 58) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 59) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 60) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 61) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 62) &amp; 1&#39;b1)) + ((routing_matrix_p[i * dirs_lp+:dirs_lp] &gt;&gt; 63) &amp; 1&#39;b1));
-			wire [output_dirs_lp - 1:0] decoded_dest_lo;
-			wire [output_dirs_sparse_lp - 1:0] decoded_dest_sparse_lo;
-			wire [output_dirs_sparse_lp - 1:0] reqs_lo;
-			wire [output_dirs_sparse_lp - 1:0] yumis_li;
-			bsg_concentrate_static #(.pattern_els_p(routing_matrix_p[i * dirs_lp+:dirs_lp])) conc(
-				.i(yumis_transpose[i * dirs_lp+:dirs_lp]),
-				.o(yumis_li)
-			);
-			wire any_yumi = |yumis_li;
-			bsg_two_fifo #(.width_p(flit_width_p)) twofer(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.ready_o(link_o_cast[(i * (2 + flit_width_p)) + flit_width_p]),
-				.data_i(link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]),
-				.v_i(link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]),
-				.v_o(fifo_valid_lo[i]),
-				.data_o(fifo_data_lo[i * flit_width_p+:flit_width_p]),
-				.yumi_i(any_yumi)
-			);
-			wire [(len_width_p + cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]) - 1:0] hdr;
-			assign hdr = fifo_data_lo[(i * flit_width_p) + ((len_width_p + cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]) - 1)-:len_width_p + cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]];
-			if (debug_lp) begin
-				reg release_r;
-				always @(posedge clk_i) release_r &lt;= releases[i];
-				always @(negedge clk_i) begin
-					if (releases[i] &amp; ~release_r)
-						$display(&#34;%m in  ch%2d: packet finished last cycle&#34;, i);
-					if (((reset_i === 1&#39;b0) &amp;&amp; link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]) &amp;&amp; !link_o_cast[(i * (2 + flit_width_p)) + flit_width_p])
-						$display(&#34;%m in  ch%2d: nacking   packet %h&#34;, i, link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]);
-					else if (((reset_i === 1&#39;b0) &amp;&amp; link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]) &amp;&amp; link_o_cast[(i * (2 + flit_width_p)) + flit_width_p])
-						$display(&#34;%m in  ch%2d: accepting packet %h&#34;, i, link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]);
-					if ((reset_i === 1&#39;b0) &amp;&amp; any_yumi)
-						if (reqs_lo)
-							$display(&#34;%m in  ch%2d: dequeing  header %h (outch=%b,len=%b,dest=%b)&#34;, i, fifo_data_lo[i * flit_width_p+:flit_width_p], reqs_lo, hdr[len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)-:((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) &gt;= cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] ? ((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) - cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]) + 1 : (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - (len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1))) + 1)], hdr[cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1-:cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]]);
-						else
-							$display(&#34;%m in  ch%2d: dequeing  packet %h&#34;, i, fifo_data_lo[i * flit_width_p+:flit_width_p]);
-				end
-			end
-			bsg_wormhole_router_decoder_dor #(
-				.dims_p(dims_p),
-				.cord_dims_p(cord_dims_p),
-				.reverse_order_p(reverse_order_p),
-				.cord_markers_pos_p(cord_markers_pos_p)
-			) dor(
-				.target_cord_i(hdr[cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1-:cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]]),
-				.my_cord_i(my_cord_i),
-				.req_o(decoded_dest_lo)
-			);
-			bsg_concentrate_static #(.pattern_els_p(routing_matrix_p[i * dirs_lp+:dirs_lp])) conc_dec(
-				.i(decoded_dest_lo),
-				.o(decoded_dest_sparse_lo)
-			);
-			wire detected_header_lo;
-			bsg_wormhole_router_input_control #(
-				.output_dirs_p(output_dirs_sparse_lp),
-				.payload_len_bits_p(((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) &gt;= cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] ? ((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) - cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]) + 1 : (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - (len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1))) + 1))
-			) wic(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.fifo_v_i(fifo_valid_lo[i]),
-				.fifo_yumi_i(any_yumi),
-				.fifo_decoded_dest_i(decoded_dest_sparse_lo),
-				.fifo_payload_len_i(hdr[len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)-:((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) &gt;= cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] ? ((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) - cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]) + 1 : (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - (len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1))) + 1)]),
-				.reqs_o(reqs_lo),
-				.release_o(releases[i]),
-				.detected_header_o(detected_header_lo)
-			);
-			bsg_unconcentrate_static #(.pattern_els_p(routing_matrix_p[i * dirs_lp+:dirs_lp])) unc(
-				.i(reqs_lo),
-				.o(reqs[i * dirs_lp+:dirs_lp])
-			);
-			always @(negedge clk_i)
-				if (debug_lp)
-					;
-		end
-	endgenerate
-	bsg_transpose #(
-		.width_p(dirs_lp),
-		.els_p(dirs_lp)
-	) reqs_trans(
-		.i(reqs),
-		.o(reqs_transpose)
-	);
-	generate
-		for (i = 0; i &lt; output_dirs_lp; i = i + 1) begin : out_ch
-			localparam input_dirs_sparse_lp = (dirs_lp &lt; 65 ? 1&#39;b0 : {dirs_lp {1&#39;sbx}}) + (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 0) &amp; 1&#39;b1) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 1) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 2) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 3) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 4) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 5) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 6) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 7) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 8) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 9) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 10) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 11) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 12) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 13) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 14) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 15) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 16) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 17) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 18) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 19) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 20) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 21) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 22) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 23) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 24) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 25) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 26) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 27) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 28) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 29) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 30) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 31) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 32) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 33) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 34) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 35) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 36) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 37) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 38) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 39) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 40) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 41) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 42) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 43) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 44) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 45) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 46) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 47) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 48) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 49) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 50) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 51) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 52) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 53) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 54) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 55) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 56) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 57) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 58) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 59) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 60) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 61) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 62) &amp; 1&#39;b1)) + ((routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp] &gt;&gt; 63) &amp; 1&#39;b1));
-			wire [input_dirs_sparse_lp - 1:0] reqs_li;
-			wire [input_dirs_sparse_lp - 1:0] release_li;
-			wire [input_dirs_sparse_lp - 1:0] valids_li;
-			wire [input_dirs_sparse_lp - 1:0] yumis_lo;
-			wire [input_dirs_sparse_lp - 1:0] data_sel_lo;
-			wire [(input_dirs_sparse_lp * flit_width_p) - 1:0] fifo_data_sparse_lo;
-			bsg_concentrate_static #(.pattern_els_p(routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp])) conc(
-				.i(reqs_transpose[i * dirs_lp+:dirs_lp]),
-				.o(reqs_li)
-			);
-			bsg_concentrate_static #(.pattern_els_p(routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp])) conc2(
-				.i(releases),
-				.o(release_li)
-			);
-			bsg_concentrate_static #(.pattern_els_p(routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp])) conc3(
-				.i(fifo_valid_lo),
-				.o(valids_li)
-			);
-			bsg_array_concentrate_static #(
-				.width_p(flit_width_p),
-				.pattern_els_p(routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp])
-			) conc4(
-				.i(fifo_data_lo),
-				.o(fifo_data_sparse_lo)
-			);
-			bsg_wormhole_router_output_control #(.input_dirs_p(input_dirs_sparse_lp)) woc(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.reqs_i(reqs_li),
-				.release_i(release_li),
-				.valid_i(valids_li),
-				.yumi_o(yumis_lo),
-				.ready_i(link_i_cast[(i * (2 + flit_width_p)) + flit_width_p]),
-				.valid_o(link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]),
-				.data_sel_o(data_sel_lo)
-			);
-			always @(negedge clk_i)
-				if (debug_lp)
-					if ((reset_i === 1&#39;b0) &amp;&amp; link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)])
-						if (link_i_cast[(i * (2 + flit_width_p)) + flit_width_p])
-							$display(&#34;%m out ch%2d: sending   packet %h&#34;, i, link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]);
-			bsg_mux_one_hot #(
-				.width_p(flit_width_p),
-				.els_p(input_dirs_sparse_lp)
-			) data_mux(
-				.data_i(fifo_data_sparse_lo),
-				.sel_one_hot_i(data_sel_lo),
-				.data_o(link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p])
-			);
-			bsg_unconcentrate_static #(.pattern_els_p(routing_matrix_p[(dirs_lp + i) * dirs_lp+:dirs_lp])) unc1(
-				.i(yumis_lo),
-				.o(yumis[i * dirs_lp+:dirs_lp])
-			);
-		end
-	endgenerate
-	bsg_transpose #(
-		.width_p(dirs_lp),
-		.els_p(dirs_lp)
-	) yumis_trans(
-		.i(yumis),
-		.o(yumis_transpose)
-	);
-endmodule
+zachjs-sv2v: could not find package &#34;bsg_wormhole_router_pkg&#34;
+CallStack (from HasCallStack):
+  error, called at src/Convert/Package.hs:389:42 in main:Convert.Package
 
 </pre>
 </body>

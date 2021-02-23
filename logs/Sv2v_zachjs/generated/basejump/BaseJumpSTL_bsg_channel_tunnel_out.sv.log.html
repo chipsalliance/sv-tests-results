@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_channel_tunnel_out.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_channel_tunnel_out.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_channel_tunnel_out.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_channel_tunnel_out.v</a>
 defines: 
-completed: 2021-02-20 05:15:13
-time_elapsed: 0.404s
-ram usage: 15004 KB
+completed: 2021-02-23 05:55:25
+time_elapsed: 0.471s
+ram usage: 13436 KB
 </pre>
 <pre class="log">
 
@@ -68,9 +68,13 @@ module bsg_channel_tunnel_out (
 	wire [num_in_p - 1:0] remote_credits_avail;
 	generate
 		for (i = 0; i &lt; num_in_p; i = i + 1) begin : rof
-			function automatic [lg_remote_credits_lp - 1:0] sv2v_cast_7A0A6;
+			function automatic signed [lg_remote_credits_lp - 1:0] sv2v_cast_99DC9_signed;
+				input reg signed [lg_remote_credits_lp - 1:0] inp;
+				sv2v_cast_99DC9_signed = inp;
+			endfunction
+			function automatic [lg_remote_credits_lp - 1:0] sv2v_cast_99DC9;
 				input reg [lg_remote_credits_lp - 1:0] inp;
-				sv2v_cast_7A0A6 = inp;
+				sv2v_cast_99DC9 = inp;
 			endfunction
 			bsg_counter_up_down_variable #(
 				.max_val_p(remote_credits_p),
@@ -79,8 +83,8 @@ module bsg_channel_tunnel_out (
 			) bcudv(
 				.clk_i(clk_i),
 				.reset_i(reset_i),
-				.up_i((credit_local_return_v_i ? credit_local_return_data_i[i * lg_remote_credits_lp+:lg_remote_credits_lp] : sv2v_cast_7A0A6(0))),
-				.down_i(sv2v_cast_7A0A6(yumi_o[i])),
+				.up_i((credit_local_return_v_i ? credit_local_return_data_i[i * lg_remote_credits_lp+:lg_remote_credits_lp] : sv2v_cast_99DC9_signed(0))),
+				.down_i(sv2v_cast_99DC9(yumi_o[i])),
 				.count_o(local_credits[i * lg_remote_credits_lp+:lg_remote_credits_lp])
 			);
 			assign local_credits_avail[i] = |local_credits[i * lg_remote_credits_lp+:lg_remote_credits_lp];
@@ -88,9 +92,9 @@ module bsg_channel_tunnel_out (
 		end
 	endgenerate
 	wire credit_v_li = |remote_credits_avail;
-	function automatic [width_p - 1:0] sv2v_cast_89401;
+	function automatic [width_p - 1:0] sv2v_cast_F445E;
 		input reg [width_p - 1:0] inp;
-		sv2v_cast_89401 = inp;
+		sv2v_cast_F445E = inp;
 	endfunction
 	bsg_round_robin_n_to_1 #(
 		.width_p(width_p),
@@ -99,7 +103,7 @@ module bsg_channel_tunnel_out (
 	) rr(
 		.clk_i(clk_i),
 		.reset_i(reset_i),
-		.data_i({sv2v_cast_89401(credit_remote_return_data_i), data_i}),
+		.data_i({sv2v_cast_F445E(credit_remote_return_data_i), data_i}),
 		.v_i({credit_v_li, v_i &amp; local_credits_avail}),
 		.yumi_o({credit_remote_return_yumi_o, yumi_o}),
 		.data_o(data_o[0+:width_p]),

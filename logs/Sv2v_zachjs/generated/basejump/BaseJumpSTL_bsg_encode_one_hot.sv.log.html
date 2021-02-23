@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_encode_one_hot.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_encode_one_hot.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_encode_one_hot.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_encode_one_hot.v</a>
 defines: 
-completed: 2021-02-20 05:15:24
-time_elapsed: 0.366s
-ram usage: 14788 KB
+completed: 2021-02-23 05:54:57
+time_elapsed: 0.479s
+ram usage: 13100 KB
 </pre>
 <pre class="log">
 
@@ -44,11 +44,11 @@ module bsg_encode_one_hot (
 	genvar segment;
 	wire [(levels_lp &gt;= 0 ? ((levels_lp + 1) * aligned_width_lp) - 1 : ((1 - levels_lp) * aligned_width_lp) + ((levels_lp * aligned_width_lp) - 1)):(levels_lp &gt;= 0 ? 0 : levels_lp * aligned_width_lp)] addr;
 	wire [(levels_lp &gt;= 0 ? ((levels_lp + 1) * aligned_width_lp) - 1 : ((1 - levels_lp) * aligned_width_lp) + ((levels_lp * aligned_width_lp) - 1)):(levels_lp &gt;= 0 ? 0 : levels_lp * aligned_width_lp)] v;
-	function automatic [aligned_width_lp - 1:0] sv2v_cast_9FB23;
+	function automatic [aligned_width_lp - 1:0] sv2v_cast_E092B;
 		input reg [aligned_width_lp - 1:0] inp;
-		sv2v_cast_9FB23 = inp;
+		sv2v_cast_E092B = inp;
 	endfunction
-	assign v[(levels_lp &gt;= 0 ? 0 : levels_lp) * aligned_width_lp+:aligned_width_lp] = (lo_to_hi_p ? sv2v_cast_9FB23(i) : i &lt;&lt; (aligned_width_lp - width_p));
+	assign v[(levels_lp &gt;= 0 ? 0 : levels_lp) * aligned_width_lp+:aligned_width_lp] = (lo_to_hi_p ? sv2v_cast_E092B(i) : i &lt;&lt; (aligned_width_lp - width_p));
 	assign addr[(levels_lp &gt;= 0 ? 0 : levels_lp) * aligned_width_lp+:aligned_width_lp] = (width_p == 1 ? {aligned_width_lp {1&#39;sb0}} : {aligned_width_lp {1&#39;sbx}});
 	generate
 		for (level = 1; level &lt; (levels_lp + 1); level = level + 1) begin : rof
@@ -58,7 +58,9 @@ module bsg_encode_one_hot (
 			for (segment = 0; segment &lt; segments_lp; segment = segment + 1) begin : rof1
 				wire [1:0] vs = {v[((levels_lp &gt;= 0 ? level - 1 : levels_lp - (level - 1)) * aligned_width_lp) + ((segment * segment_slot_lp) + (segment_slot_lp &gt;&gt; 1))], v[((levels_lp &gt;= 0 ? level - 1 : levels_lp - (level - 1)) * aligned_width_lp) + (segment * segment_slot_lp)]};
 				assign v[((levels_lp &gt;= 0 ? level : levels_lp - level) * aligned_width_lp) + (segment * segment_slot_lp)] = |vs;
-				if (level == 1) assign addr[((levels_lp &gt;= 0 ? level : levels_lp - level) * aligned_width_lp) + (segment * segment_slot_lp)+:segment_width_lp] = vs[lo_to_hi_p];
+				if (level == 1) begin
+					assign addr[((levels_lp &gt;= 0 ? level : levels_lp - level) * aligned_width_lp) + (segment * segment_slot_lp)+:segment_width_lp] = {vs[lo_to_hi_p]};
+				end
 				else begin : fi
 					assign addr[((levels_lp &gt;= 0 ? level : levels_lp - level) * aligned_width_lp) + (segment * segment_slot_lp)+:segment_width_lp] = {vs[lo_to_hi_p], addr[((levels_lp &gt;= 0 ? level - 1 : levels_lp - (level - 1)) * aligned_width_lp) + (segment * segment_slot_lp)+:segment_width_lp - 1] | addr[((levels_lp &gt;= 0 ? level - 1 : levels_lp - (level - 1)) * aligned_width_lp) + ((segment * segment_slot_lp) + (segment_slot_lp &gt;&gt; 1))+:segment_width_lp - 1]};
 				end

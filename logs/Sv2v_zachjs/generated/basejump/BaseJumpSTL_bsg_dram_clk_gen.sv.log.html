@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
+<pre class="test-failed">
 description: Tests imported from basejump
-rc: 0 (means success: 1)
+rc: 1 (means success: 0)
 tags: basejump
 incdirs: /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_clk_gen
 top_module: top
@@ -17,86 +17,16 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_dram_clk_gen.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_dram_clk_gen.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_clk_gen/bsg_dram_clk_gen.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_clk_gen/bsg_dram_clk_gen.v</a>
 defines: 
-completed: 2021-02-20 05:15:46
-time_elapsed: 0.184s
-ram usage: 14484 KB
+completed: 2021-02-23 05:54:55
+time_elapsed: 0.210s
+ram usage: 12492 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_clk_gen <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_dram_clk_gen.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_dram_clk_gen.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_clk_gen/bsg_dram_clk_gen.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_clk_gen/bsg_dram_clk_gen.v</a>
-module top;
-	
-endmodule
-import bsg_tag_pkg::bsg_tag_s;
-module bsg_dram_clk_gen (
-	bsg_osc_tag_i,
-	bsg_osc_trigger_tag_i,
-	bsg_ds_tag_i,
-	async_osc_reset_i,
-	osc_clk_o,
-	div_clk_o,
-	dly_clk_i,
-	dly_clk_o
-);
-	parameter num_lines_p = 1;
-	parameter downsample_width_p = 8;
-	parameter num_adgs_p = 1;
-	parameter version_p = 2;
-	input bsg_tag_s bsg_osc_tag_i;
-	input bsg_tag_s bsg_osc_trigger_tag_i;
-	input bsg_tag_s bsg_ds_tag_i;
-	input async_osc_reset_i;
-	output osc_clk_o;
-	output div_clk_o;
-	input [num_lines_p - 1:0] dly_clk_i;
-	output [num_lines_p - 1:0] dly_clk_o;
-	genvar i;
-	localparam debug_level_lp = 0;
-	bsg_clk_gen_osc #(.num_adgs_p(num_adgs_p)) clk_gen_osc_inst(
-		.bsg_tag_i(bsg_osc_tag_i),
-		.bsg_tag_trigger_i(bsg_osc_trigger_tag_i),
-		.async_reset_i(async_osc_reset_i),
-		.clk_o(osc_clk_o)
-	);
-	wire [downsample_width_p:0] ds_tag_payload_r;
-	wire ds_tag_payload_new_r;
-	bsg_tag_client #(
-		.width_p((downsample_width_p &gt;= 0 ? downsample_width_p + 1 : 1 - downsample_width_p)),
-		.default_p(0),
-		.harden_p(1)
-	) btc_ds(
-		.bsg_tag_i(bsg_ds_tag_i),
-		.recv_clk_i(osc_clk_o),
-		.recv_reset_i(1&#39;b0),
-		.recv_new_r_o(ds_tag_payload_new_r),
-		.recv_data_r_o(ds_tag_payload_r)
-	);
-	generate
-		if (debug_level_lp &gt; 1) always @(negedge osc_clk_o)
-			if (ds_tag_payload_new_r)
-				$display(&#34;## bsg_clk_gen downsampler received configuration state: %b&#34;, ds_tag_payload_r);
-	endgenerate
-	bsg_counter_clock_downsample #(
-		.width_p(downsample_width_p),
-		.harden_p(1)
-	) clk_gen_ds_inst(
-		.clk_i(osc_clk_o),
-		.reset_i(ds_tag_payload_r[0]),
-		.val_i(ds_tag_payload_r[downsample_width_p-:(downsample_width_p &gt;= 1 ? downsample_width_p : 2 - downsample_width_p)]),
-		.clk_r_o(div_clk_o)
-	);
-	generate
-		for (i = 0; i &lt; num_lines_p; i = i + 1) begin : dly_line
-			bsg_dly_line #(.num_adgs_p(num_adgs_p)) dly_line_inst(
-				.bsg_tag_i(bsg_osc_tag_i),
-				.bsg_tag_trigger_i(bsg_osc_trigger_tag_i),
-				.async_reset_i(async_osc_reset_i),
-				.clk_i(dly_clk_i[i]),
-				.clk_o(dly_clk_o[i])
-			);
-		end
-	endgenerate
-endmodule
+zachjs-sv2v: could not find package &#34;bsg_tag_pkg&#34;
+CallStack (from HasCallStack):
+  error, called at src/Convert/Package.hs:389:42 in main:Convert.Package
 
 </pre>
 </body>

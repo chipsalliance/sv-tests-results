@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/br955.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br955.v</a>
 defines: 
-completed: 2021-02-20 05:17:37
-time_elapsed: 0.086s
-ram usage: 10444 KB
+completed: 2021-02-23 05:56:49
+time_elapsed: 0.146s
+ram usage: 11236 KB
 </pre>
 <pre class="log">
 
@@ -47,20 +47,24 @@ module mux_n_to_1 (
 	genvar i;
 	genvar j;
 	generate
-		if (sel_w == 1) mux_2_to_1 mux_simple(
-			.sel_i(sel_i),
-			.dat_i(inputs_i),
-			.dat_o(output_o)
-		);
+		if (sel_w == 1) begin
+			mux_2_to_1 mux_simple(
+				.sel_i(sel_i),
+				.dat_i(inputs_i),
+				.dat_o(output_o)
+			);
+		end
 		else begin
 			wire [n_inputs - 2:0] inter_w;
 			for (i = 0; i &lt; sel_w; i = i + 1) begin : SELECT_STAGE
-				if (i == 0) for (j = 0; j &lt; (n_inputs / 2); j = j + 1) begin : FIRST_STAGE
-					mux_2_to_1 mux_first_stage(
-						.sel_i(sel_i[i]),
-						.dat_i(inputs_i[(2 * j) + 1:2 * j]),
-						.dat_o(inter_w[j])
-					);
+				if (i == 0) begin
+					for (j = 0; j &lt; (n_inputs / 2); j = j + 1) begin : FIRST_STAGE
+						mux_2_to_1 mux_first_stage(
+							.sel_i(sel_i[i]),
+							.dat_i(inputs_i[(2 * j) + 1:2 * j]),
+							.dat_o(inter_w[j])
+						);
+					end
 				end
 				else for (j = 0; j &lt; (n_inputs / (2 ** (i + 1))); j = j + 1) begin : INTERMEDIARY_STAGE
 					mux_2_to_1 mux_intermediary_stages(

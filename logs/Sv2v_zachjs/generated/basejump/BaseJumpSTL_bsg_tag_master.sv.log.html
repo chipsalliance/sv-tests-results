@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
+<pre class="test-failed">
 description: Tests imported from basejump
-rc: 0 (means success: 1)
+rc: 1 (means success: 0)
 tags: basejump
 incdirs: /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc /tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_tag
 top_module: top
@@ -17,154 +17,16 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_tag_master.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_tag_master.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_master.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_master.v</a>
 defines: 
-completed: 2021-02-20 05:15:09
-time_elapsed: 0.477s
-ram usage: 15732 KB
+completed: 2021-02-23 05:55:23
+time_elapsed: 0.175s
+ram usage: 14016 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_noc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_misc -I/tmpfs/src/github/sv-tests/third_party/cores/basejump_stl/bsg_tag <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_tag_master.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_tag_master.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_master.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_master.v</a>
-module top;
-	
-endmodule
-module bsg_tag_master (
-	clk_i,
-	en_i,
-	data_i,
-	clients_r_o
-);
-	import bsg_tag_pkg::bsg_tag_s;
-	parameter _sv2v_width_els_p = 24;
-	parameter [_sv2v_width_els_p - 1:0] els_p = &#34;inv&#34;;
-	parameter _sv2v_width_lg_width_p = 24;
-	parameter [_sv2v_width_lg_width_p - 1:0] lg_width_p = &#34;inv&#34;;
-	parameter debug_level_lp = 2;
-	input clk_i;
-	input en_i;
-	input data_i;
-	output bsg_tag_s [els_p - 1:0] clients_r_o;
-	localparam max_packet_len_lp = ((1 &lt;&lt; lg_width_p) - 1) + (((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p);
-	localparam reset_len_lp = (1 &lt;&lt; (((((1 &lt;&lt; lg_width_p) - 1) + (((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p)) + 1) == 1 ? 1 : $clog2((((1 &lt;&lt; lg_width_p) - 1) + (((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p)) + 1))) + 1;
-	localparam lg_max_packet_len_lp = ((max_packet_len_lp + 1) == 1 ? 1 : $clog2(max_packet_len_lp + 1));
-	generate
-		if (debug_level_lp &gt; 2) always @(negedge clk_i)
-			$display(&#34;## bsg_tag_master clients=%b (%m)&#34;, clients_r_o);
-	endgenerate
-	reg data_i_r;
-	always @(posedge clk_i) data_i_r &lt;= data_i;
-	localparam ctr_width_lp = lg_max_packet_len_lp + 1;
-	wire [ctr_width_lp - 1:0] zeros_ctr_r;
-	wire tag_reset_req = zeros_ctr_r[ctr_width_lp - 1];
-	bsg_counter_clear_up #(
-		.max_val_p((1 &lt;&lt; ctr_width_lp) - 1),
-		.init_val_p(0)
-	) bccu(
-		.clk_i(clk_i),
-		.reset_i(1&#39;b0),
-		.clear_i(data_i_r | tag_reset_req),
-		.up_i(~data_i_r),
-		.count_o(zeros_ctr_r)
-	);
-	initial $display(&#34;## %m instantiating bsg_tag_master with els_p=%d, lg_width_p=%d, max_packet_len_lp=%d, reset_zero_len=%d&#34;, els_p, lg_width_p, max_packet_len_lp, reset_len_lp);
-	reg [lg_max_packet_len_lp - 1:0] hdr_ptr_r;
-	reg [lg_max_packet_len_lp - 1:0] hdr_ptr_n;
-	reg [(((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1:0] hdr_r;
-	reg [(((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1:0] hdr_n;
-	reg v_n;
-	bsg_tag_s bsg_tag_n;
-	reg [1:0] state_r;
-	reg [1:0] state_n;
-	localparam [1:0] eStart = 0;
-	always @(posedge clk_i)
-		if (tag_reset_req &amp; ~data_i_r) begin
-			if (debug_level_lp &gt; 2)
-				$display(&#34;## bsg_tag_master RESET time %t (%m)&#34;, $time);
-			state_r &lt;= eStart;
-			hdr_ptr_r &lt;= 0;
-		end
-		else begin
-			state_r &lt;= state_n;
-			hdr_ptr_r &lt;= hdr_ptr_n;
-		end
-	always @(posedge clk_i) hdr_r &lt;= hdr_n;
-	always @(negedge clk_i)
-		if (state_n != state_r)
-			if (debug_level_lp &gt; 1)
-				$display(&#34;## bsg_tag_master STATE CHANGE  # %s --&gt; %s #&#34;, state_r.name(), state_n.name());
-	function automatic [lg_max_packet_len_lp - 1:0] sv2v_cast_F2492;
-		input reg [lg_max_packet_len_lp - 1:0] inp;
-		sv2v_cast_F2492 = inp;
-	endfunction
-	function automatic [lg_width_p - 1:0] sv2v_cast_755DA;
-		input reg [lg_width_p - 1:0] inp;
-		sv2v_cast_755DA = inp;
-	endfunction
-	localparam [1:0] eHeader = 1;
-	localparam [1:0] eStuck = 3;
-	localparam [1:0] eTransfer = 2;
-	always @(*) begin
-		state_n = state_r;
-		hdr_ptr_n = hdr_ptr_r;
-		hdr_n = hdr_r;
-		v_n = 1&#39;b0;
-		bsg_tag_n.op = 1&#39;b0;
-		bsg_tag_n.param = 1&#39;b0;
-		case (state_r)
-			eStart: begin
-				if (data_i_r)
-					state_n = eHeader;
-				hdr_ptr_n = 0;
-				hdr_n = 0;
-			end
-			eHeader: begin
-				if (debug_level_lp &gt; 1)
-					$display(&#34;## bsg_tag_master RECEIVING HEADER (%m) (%d) = %b&#34;, hdr_ptr_r, data_i_r);
-				hdr_n = {data_i_r, hdr_r[1+:(((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1]};
-				hdr_ptr_n = hdr_ptr_r + 1&#39;b1;
-				if (hdr_ptr_r == sv2v_cast_F2492((((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1))
-					if (hdr_n[lg_width_p - 1-:lg_width_p] == 0) begin
-						state_n = eStart;
-						$display(&#34;## bsg_tag_master NULL PACKET, len=0 (%m)&#34;);
-					end
-					else begin
-						if (debug_level_lp &gt; 1)
-							$display(&#34;## bsg_tag_master PACKET HEADER RECEIVED (length=%b,data_not_reset=%b,nodeID=%b) (%m) &#34;, hdr_n[lg_width_p - 1-:lg_width_p], hdr_n[lg_width_p], hdr_n[(els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p-:(((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p) &gt;= (1 + lg_width_p) ? (((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p) - (1 + lg_width_p)) + 1 : ((1 + lg_width_p) - ((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p)) + 1)]);
-						state_n = eTransfer;
-					end
-			end
-			eTransfer: begin
-				v_n = 1&#39;b1;
-				bsg_tag_n.op = hdr_r[lg_width_p];
-				bsg_tag_n.param = data_i_r;
-				if (debug_level_lp &gt; 2)
-					$display(&#34;## bsg_tag_master PACKET TRANSFER op,param=&lt;%b,%b&gt; (%m)&#34;, bsg_tag_n.op, bsg_tag_n.param);
-				if (hdr_r[lg_width_p - 1-:lg_width_p] == sv2v_cast_755DA(1)) begin
-					state_n = eStart;
-					if (debug_level_lp &gt; 1)
-						$display(&#34;## bsg_tag_master PACKET END (%m)&#34;);
-				end
-				hdr_n[lg_width_p - 1-:lg_width_p] = hdr_r[lg_width_p - 1-:lg_width_p] - 1;
-			end
-			eStuck: state_n = eStuck;
-			default: begin
-				state_n = eStuck;
-				$display(&#34;## bsg_tag_master transitioning to error state; be sure to run gate-level netlist to avoid sim/synth mismatch (%m)&#34;);
-			end
-		endcase
-	end
-	genvar i;
-	wire [els_p - 1:0] clients_decode = v_n &lt;&lt; hdr_r[(els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p-:(((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p) &gt;= (1 + lg_width_p) ? (((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p) - (1 + lg_width_p)) + 1 : ((1 + lg_width_p) - ((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p)) + 1)];
-	generate
-		for (i = 0; i &lt; els_p; i = i + 1) begin : rof
-			always @(posedge clk_i) begin
-				clients_r_o[i].op &lt;= clients_decode[i] &amp; bsg_tag_n.op;
-				clients_r_o[i].param &lt;= clients_decode[i] &amp; bsg_tag_n.param;
-			end
-			assign clients_r_o[i].clk = clk_i;
-			assign clients_r_o[i].en = en_i;
-		end
-	endgenerate
-endmodule
+zachjs-sv2v: could not find package &#34;bsg_tag_pkg&#34;
+CallStack (from HasCallStack):
+  error, called at src/Convert/Package.hs:389:42 in main:Convert.Package
 
 </pre>
 </body>

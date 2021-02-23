@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_scan.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_scan.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_scan.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_scan.v</a>
 defines: 
-completed: 2021-02-20 05:15:23
-time_elapsed: 0.357s
-ram usage: 14428 KB
+completed: 2021-02-23 05:55:08
+time_elapsed: 0.447s
+ram usage: 13616 KB
 </pre>
 <pre class="log">
 
@@ -60,7 +60,7 @@ module bsg_scan (
 				reg [width_p - 1:0] _sv2v_strm_1E0CB_out;
 				integer _sv2v_strm_1E0CB_idx;
 				begin
-					_sv2v_strm_1E0CB_inp = inp;
+					_sv2v_strm_1E0CB_inp = {inp};
 					for (_sv2v_strm_1E0CB_idx = 0; _sv2v_strm_1E0CB_idx &lt;= (width_p - 1); _sv2v_strm_1E0CB_idx = _sv2v_strm_1E0CB_idx + 1)
 						_sv2v_strm_1E0CB_out[(width_p - 1) - _sv2v_strm_1E0CB_idx-:1] = _sv2v_strm_1E0CB_inp[_sv2v_strm_1E0CB_idx+:1];
 					if ((width_p % 1) &gt; 0)
@@ -68,7 +68,7 @@ module bsg_scan (
 					_sv2v_strm_6F079 = (width_p &lt;= width_p ? _sv2v_strm_1E0CB_out &lt;&lt; (width_p - width_p) : _sv2v_strm_1E0CB_out &gt;&gt; (width_p - width_p));
 				end
 			endfunction
-			assign t[($clog2(width_p) &gt;= 0 ? 0 : $clog2(width_p)) * width_p+:width_p] = _sv2v_strm_6F079(i);
+			assign t[($clog2(width_p) &gt;= 0 ? 0 : $clog2(width_p)) * width_p+:width_p] = _sv2v_strm_6F079({i});
 		end
 		else assign t[($clog2(width_p) &gt;= 0 ? 0 : $clog2(width_p)) * width_p+:width_p] = i;
 	endgenerate
@@ -84,11 +84,11 @@ module bsg_scan (
 		end
 		else begin : scanN
 			for (j = 0; j &lt; $clog2(width_p); j = j + 1) begin : row
-				function automatic [width_p - 1:0] sv2v_cast_89401;
+				function automatic [width_p - 1:0] sv2v_cast_F445E;
 					input reg [width_p - 1:0] inp;
-					sv2v_cast_89401 = inp;
+					sv2v_cast_F445E = inp;
 				endfunction
-				wire [width_p - 1:0] shifted = sv2v_cast_89401({fill, t[($clog2(width_p) &gt;= 0 ? j : $clog2(width_p) - j) * width_p+:width_p]} &gt;&gt; (1 &lt;&lt; j));
+				wire [width_p - 1:0] shifted = sv2v_cast_F445E({fill, t[($clog2(width_p) &gt;= 0 ? j : $clog2(width_p) - j) * width_p+:width_p]} &gt;&gt; (1 &lt;&lt; j));
 				if (xor_p) begin
 					assign fill = {width_p {1&#39;b0}};
 					assign t[($clog2(width_p) &gt;= 0 ? j + 1 : $clog2(width_p) - (j + 1)) * width_p+:width_p] = t[($clog2(width_p) &gt;= 0 ? j : $clog2(width_p) - j) * width_p+:width_p] ^ shifted;
@@ -105,7 +105,9 @@ module bsg_scan (
 		end
 	endgenerate
 	generate
-		if (lo_to_hi_p) for (j = 0; j &lt; width_p; j = j + 1) assign o[j] = t[(($clog2(width_p) &gt;= 0 ? $clog2(width_p) : $clog2(width_p) - $clog2(width_p)) * width_p) + ((width_p - 1) - j)];
+		if (lo_to_hi_p) begin
+			for (j = 0; j &lt; width_p; j = j + 1) assign o[j] = t[(($clog2(width_p) &gt;= 0 ? $clog2(width_p) : $clog2(width_p) - $clog2(width_p)) * width_p) + ((width_p - 1) - j)];
+		end
 		else assign o = t[($clog2(width_p) &gt;= 0 ? $clog2(width_p) : $clog2(width_p) - $clog2(width_p)) * width_p+:width_p];
 	endgenerate
 endmodule

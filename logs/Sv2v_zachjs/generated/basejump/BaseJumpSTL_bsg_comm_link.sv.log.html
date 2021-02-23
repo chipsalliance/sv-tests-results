@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_comm_link.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_comm_link.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_comm_link/bsg_comm_link.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_comm_link/bsg_comm_link.v</a>
 defines: 
-completed: 2021-02-20 05:15:03
-time_elapsed: 0.919s
-ram usage: 21164 KB
+completed: 2021-02-23 05:55:19
+time_elapsed: 0.531s
+ram usage: 21220 KB
 </pre>
 <pre class="log">
 
@@ -63,14 +63,14 @@ module bsg_comm_link (
 	parameter [_sv2v_width_master_p - 1:0] master_p = &#34;inv&#34;;
 	parameter channel_mask_p = (1 &lt;&lt; link_channels_p) - 1;
 	parameter master_to_slave_speedup_p = 100;
-	function automatic [nodes_p - 1:0] sv2v_cast_86548;
-		input reg [nodes_p - 1:0] inp;
-		sv2v_cast_86548 = inp;
+	function automatic signed [nodes_p - 1:0] sv2v_cast_D2D30_signed;
+		input reg signed [nodes_p - 1:0] inp;
+		sv2v_cast_D2D30_signed = inp;
 	endfunction
-	parameter enabled_at_start_vec_p = sv2v_cast_86548(0);
+	parameter enabled_at_start_vec_p = sv2v_cast_D2D30_signed(0);
 	parameter sbox_pipeline_in_p = 1&#39;b1;
 	parameter sbox_pipeline_out_p = 1&#39;b1;
-	parameter snoop_vec_p = sv2v_cast_86548(0);
+	parameter snoop_vec_p = sv2v_cast_D2D30_signed(0);
 	parameter master_bypass_test_p = 5&#39;b00000;
 	parameter lg_credit_to_token_decimation_p = 3;
 	parameter master_lg_token_width_p = lg_credit_to_token_decimation_p + 2;
@@ -201,7 +201,7 @@ module bsg_comm_link (
 	endgenerate
 	generate
 		if (master_p) begin : mstr
-			wire [((tests_p + 1) * link_channels_p) - 1:0] im_test_scoreboard;
+			wire [(6 * link_channels_p) - 1:0] im_test_scoreboard;
 			wire [2:0] im_test_index;
 			wire im_prepare;
 			assign im_slave_reset_tline_n = im_prepare;
@@ -257,8 +257,8 @@ module bsg_comm_link (
 				.oclk_data_o(core_channel_active[i])
 			);
 			if (master_p) begin : m
-				wire [tests_p:0] im_tests_gather;
-				for (j = 0; j &lt; (tests_p + 1); j = j + 1) begin : mpa
+				wire [5:0] im_tests_gather;
+				for (j = 0; j &lt; 6; j = j + 1) begin : mpa
 					assign mstr.im_test_scoreboard[(j * link_channels_p) + i] = im_tests_gather[j];
 				end
 				bsg_source_sync_channel_control_master #(
@@ -303,7 +303,7 @@ module bsg_comm_link (
 				assign io_trigger_mode_en[i] = 1&#39;b0;
 				assign io_trigger_mode_alt_en[i] = 1&#39;b0;
 				assign core_loopback_en[i] = 1&#39;b0;
-				assign im_channel_active[i] = im_tests_gather[tests_p - 1:0] === {tests_p {1&#39;b1}};
+				assign im_channel_active[i] = im_tests_gather[4:0] === {tests_p {1&#39;b1}};
 				assign im_clk_init[i] = im_reset &amp; ~im_reset_r;
 			end
 			else begin : s

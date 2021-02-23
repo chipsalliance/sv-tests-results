@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_decode.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_decode.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_decode.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_decode.v</a>
 defines: 
-completed: 2021-02-20 05:15:17
-time_elapsed: 0.383s
-ram usage: 15012 KB
+completed: 2021-02-23 05:55:21
+time_elapsed: 0.355s
+ram usage: 14228 KB
 </pre>
 <pre class="log">
 
@@ -31,104 +31,123 @@ module bsg_cache_decode (
 	opcode_i,
 	decode_o
 );
-	localparam [3:0] e_cache_amo_swap = 4&#39;b0000;
-	localparam [3:0] e_cache_amo_add = 4&#39;b0001;
-	localparam [3:0] e_cache_amo_xor = 4&#39;b0010;
-	localparam [3:0] e_cache_amo_and = 4&#39;b0011;
-	localparam [3:0] e_cache_amo_or = 4&#39;b0100;
-	localparam [3:0] e_cache_amo_min = 4&#39;b0101;
-	localparam [3:0] e_cache_amo_max = 4&#39;b0110;
-	localparam [3:0] e_cache_amo_minu = 4&#39;b0111;
-	localparam [3:0] e_cache_amo_maxu = 4&#39;b1000;
-	localparam amo_support_level_none_lp = 1&#39;sb0;
-	localparam amo_support_level_swap_lp = amo_support_level_none_lp | (1 &lt;&lt; e_cache_amo_swap);
-	localparam amo_support_level_logical_lp = ((amo_support_level_swap_lp | (1 &lt;&lt; e_cache_amo_xor)) | (1 &lt;&lt; e_cache_amo_and)) | (1 &lt;&lt; e_cache_amo_or);
-	localparam amo_support_level_arithmetic_lp = ((((amo_support_level_logical_lp | (1 &lt;&lt; e_cache_amo_add)) | (1 &lt;&lt; e_cache_amo_min)) | (1 &lt;&lt; e_cache_amo_max)) | (1 &lt;&lt; e_cache_amo_minu)) | (1 &lt;&lt; e_cache_amo_maxu);
-	localparam [5:0] LB = 6&#39;b000000;
-	localparam [5:0] LH = 6&#39;b000001;
-	localparam [5:0] LW = 6&#39;b000010;
-	localparam [5:0] LD = 6&#39;b000011;
-	localparam [5:0] LBU = 6&#39;b000100;
-	localparam [5:0] LHU = 6&#39;b000101;
-	localparam [5:0] LWU = 6&#39;b000110;
-	localparam [5:0] LDU = 6&#39;b000111;
-	localparam [5:0] SB = 6&#39;b001000;
-	localparam [5:0] SH = 6&#39;b001001;
-	localparam [5:0] SW = 6&#39;b001010;
-	localparam [5:0] SD = 6&#39;b001011;
-	localparam [5:0] LM = 6&#39;b001100;
-	localparam [5:0] SM = 6&#39;b001101;
-	localparam [5:0] TAGST = 6&#39;b010000;
-	localparam [5:0] TAGFL = 6&#39;b010001;
-	localparam [5:0] TAGLV = 6&#39;b010010;
-	localparam [5:0] TAGLA = 6&#39;b010011;
-	localparam [5:0] AFL = 6&#39;b011000;
-	localparam [5:0] AFLINV = 6&#39;b011001;
-	localparam [5:0] AINV = 6&#39;b011010;
-	localparam [5:0] ALOCK = 6&#39;b011011;
-	localparam [5:0] AUNLOCK = 6&#39;b011100;
-	localparam [5:0] AMOSWAP_W = 6&#39;b100000;
-	localparam [5:0] AMOADD_W = 6&#39;b100001;
-	localparam [5:0] AMOXOR_W = 6&#39;b100010;
-	localparam [5:0] AMOAND_W = 6&#39;b100011;
-	localparam [5:0] AMOOR_W = 6&#39;b100100;
-	localparam [5:0] AMOMIN_W = 6&#39;b100101;
-	localparam [5:0] AMOMAX_W = 6&#39;b100110;
-	localparam [5:0] AMOMINU_W = 6&#39;b100111;
-	localparam [5:0] AMOMAXU_W = 6&#39;b101000;
-	localparam [5:0] AMOSWAP_D = 6&#39;b110000;
-	localparam [5:0] AMOADD_D = 6&#39;b110001;
-	localparam [5:0] AMOXOR_D = 6&#39;b110010;
-	localparam [5:0] AMOAND_D = 6&#39;b110011;
-	localparam [5:0] AMOOR_D = 6&#39;b110100;
-	localparam [5:0] AMOMIN_D = 6&#39;b110101;
-	localparam [5:0] AMOMAX_D = 6&#39;b110110;
-	localparam [5:0] AMOMINU_D = 6&#39;b110111;
-	localparam [5:0] AMOMAXU_D = 6&#39;b111000;
-	localparam [3:0] e_dma_nop = 4&#39;b0000;
-	localparam [3:0] e_dma_send_fill_addr = 4&#39;b0001;
-	localparam [3:0] e_dma_send_evict_addr = 4&#39;b0010;
-	localparam [3:0] e_dma_get_fill_data = 4&#39;b0100;
-	localparam [3:0] e_dma_send_evict_data = 4&#39;b1000;
 	input wire [5:0] opcode_i;
 	output reg [20:0] decode_o;
+	localparam [5:0] bsg_cache_pkg_AMOADD_D = 6&#39;b110001;
+	localparam [5:0] bsg_cache_pkg_AMOADD_W = 6&#39;b100001;
+	localparam [5:0] bsg_cache_pkg_AMOAND_D = 6&#39;b110011;
+	localparam [5:0] bsg_cache_pkg_AMOAND_W = 6&#39;b100011;
+	localparam [5:0] bsg_cache_pkg_AMOMAXU_D = 6&#39;b111000;
+	localparam [5:0] bsg_cache_pkg_AMOMAXU_W = 6&#39;b101000;
+	localparam [5:0] bsg_cache_pkg_AMOMAX_D = 6&#39;b110110;
+	localparam [5:0] bsg_cache_pkg_AMOMAX_W = 6&#39;b100110;
+	localparam [5:0] bsg_cache_pkg_AMOMINU_D = 6&#39;b110111;
+	localparam [5:0] bsg_cache_pkg_AMOMINU_W = 6&#39;b100111;
+	localparam [5:0] bsg_cache_pkg_AMOMIN_D = 6&#39;b110101;
+	localparam [5:0] bsg_cache_pkg_AMOMIN_W = 6&#39;b100101;
+	localparam [5:0] bsg_cache_pkg_AMOOR_D = 6&#39;b110100;
+	localparam [5:0] bsg_cache_pkg_AMOOR_W = 6&#39;b100100;
+	localparam [5:0] bsg_cache_pkg_AMOSWAP_D = 6&#39;b110000;
+	localparam [5:0] bsg_cache_pkg_AMOSWAP_W = 6&#39;b100000;
+	localparam [5:0] bsg_cache_pkg_AMOXOR_D = 6&#39;b110010;
+	localparam [5:0] bsg_cache_pkg_AMOXOR_W = 6&#39;b100010;
+	localparam [5:0] bsg_cache_pkg_LB = 6&#39;b000000;
+	localparam [5:0] bsg_cache_pkg_LBU = 6&#39;b000100;
+	localparam [5:0] bsg_cache_pkg_LD = 6&#39;b000011;
+	localparam [5:0] bsg_cache_pkg_LDU = 6&#39;b000111;
+	localparam [5:0] bsg_cache_pkg_LH = 6&#39;b000001;
+	localparam [5:0] bsg_cache_pkg_LHU = 6&#39;b000101;
+	localparam [5:0] bsg_cache_pkg_LW = 6&#39;b000010;
+	localparam [5:0] bsg_cache_pkg_LWU = 6&#39;b000110;
+	localparam [5:0] bsg_cache_pkg_SB = 6&#39;b001000;
+	localparam [5:0] bsg_cache_pkg_SD = 6&#39;b001011;
+	localparam [5:0] bsg_cache_pkg_SH = 6&#39;b001001;
+	localparam [5:0] bsg_cache_pkg_SW = 6&#39;b001010;
 	always @(*)
 		case (opcode_i)
-			AMOSWAP_D, AMOADD_D, AMOAND_D, AMOOR_D, AMOXOR_D, AMOMIN_D, AMOMAX_D, AMOMINU_D, AMOMAXU_D, LD, SD, LDU: decode_o[20-:2] = 2&#39;b11;
-			AMOSWAP_W, AMOADD_W, AMOAND_W, AMOOR_W, AMOXOR_W, AMOMIN_W, AMOMAX_W, AMOMINU_W, AMOMAXU_W, LW, SW, LWU: decode_o[20-:2] = 2&#39;b10;
-			LH, SH, LHU: decode_o[20-:2] = 2&#39;b01;
-			LB, SB, LBU: decode_o[20-:2] = 2&#39;b00;
+			bsg_cache_pkg_AMOSWAP_D, bsg_cache_pkg_AMOADD_D, bsg_cache_pkg_AMOAND_D, bsg_cache_pkg_AMOOR_D, bsg_cache_pkg_AMOXOR_D, bsg_cache_pkg_AMOMIN_D, bsg_cache_pkg_AMOMAX_D, bsg_cache_pkg_AMOMINU_D, bsg_cache_pkg_AMOMAXU_D, bsg_cache_pkg_LD, bsg_cache_pkg_SD, bsg_cache_pkg_LDU: decode_o[20-:2] = 2&#39;b11;
+			bsg_cache_pkg_AMOSWAP_W, bsg_cache_pkg_AMOADD_W, bsg_cache_pkg_AMOAND_W, bsg_cache_pkg_AMOOR_W, bsg_cache_pkg_AMOXOR_W, bsg_cache_pkg_AMOMIN_W, bsg_cache_pkg_AMOMAX_W, bsg_cache_pkg_AMOMINU_W, bsg_cache_pkg_AMOMAXU_W, bsg_cache_pkg_LW, bsg_cache_pkg_SW, bsg_cache_pkg_LWU: decode_o[20-:2] = 2&#39;b10;
+			bsg_cache_pkg_LH, bsg_cache_pkg_SH, bsg_cache_pkg_LHU: decode_o[20-:2] = 2&#39;b01;
+			bsg_cache_pkg_LB, bsg_cache_pkg_SB, bsg_cache_pkg_LBU: decode_o[20-:2] = 2&#39;b00;
 			default: decode_o[20-:2] = 2&#39;b00;
 		endcase
-	always @(*) decode_o[17] = (opcode_i == LM) | (opcode_i == SM);
-	always @(*) decode_o[18] = ((((opcode_i == LB) || (opcode_i == LH)) || (opcode_i == LW)) || (opcode_i == LD)) || decode_o[4];
-	always @(*) decode_o[16] = ((((((((opcode_i == LB) || (opcode_i == LH)) || (opcode_i == LW)) || (opcode_i == LD)) || (opcode_i == LBU)) || (opcode_i == LHU)) || (opcode_i == LWU)) || (opcode_i == LDU)) || (opcode_i == LM);
-	always @(*) decode_o[15] = ((((opcode_i == SB) || (opcode_i == SH)) || (opcode_i == SW)) || (opcode_i == SD)) || (opcode_i == SM);
-	always @(*) decode_o[14] = opcode_i == TAGST;
-	always @(*) decode_o[13] = opcode_i == TAGFL;
-	always @(*) decode_o[12] = opcode_i == TAGLV;
-	always @(*) decode_o[11] = opcode_i == TAGLA;
-	always @(*) decode_o[10] = opcode_i == AFL;
-	always @(*) decode_o[9] = opcode_i == AFLINV;
-	always @(*) decode_o[8] = opcode_i == AINV;
-	always @(*) decode_o[7] = opcode_i == ALOCK;
-	always @(*) decode_o[6] = opcode_i == AUNLOCK;
-	always @(*) decode_o[5] = ~decode_o[14];
+	localparam [5:0] bsg_cache_pkg_LM = 6&#39;b001100;
+	localparam [5:0] bsg_cache_pkg_SM = 6&#39;b001101;
+	wire [1:1] sv2v_tmp_E38F4;
+	assign sv2v_tmp_E38F4 = (opcode_i == bsg_cache_pkg_LM) | (opcode_i == bsg_cache_pkg_SM);
+	always @(*) decode_o[17] = sv2v_tmp_E38F4;
+	wire [1:1] sv2v_tmp_D3477;
+	assign sv2v_tmp_D3477 = ((((opcode_i == bsg_cache_pkg_LB) || (opcode_i == bsg_cache_pkg_LH)) || (opcode_i == bsg_cache_pkg_LW)) || (opcode_i == bsg_cache_pkg_LD)) || decode_o[4];
+	always @(*) decode_o[18] = sv2v_tmp_D3477;
+	wire [1:1] sv2v_tmp_8A128;
+	assign sv2v_tmp_8A128 = ((((((((opcode_i == bsg_cache_pkg_LB) || (opcode_i == bsg_cache_pkg_LH)) || (opcode_i == bsg_cache_pkg_LW)) || (opcode_i == bsg_cache_pkg_LD)) || (opcode_i == bsg_cache_pkg_LBU)) || (opcode_i == bsg_cache_pkg_LHU)) || (opcode_i == bsg_cache_pkg_LWU)) || (opcode_i == bsg_cache_pkg_LDU)) || (opcode_i == bsg_cache_pkg_LM);
+	always @(*) decode_o[16] = sv2v_tmp_8A128;
+	wire [1:1] sv2v_tmp_85B1E;
+	assign sv2v_tmp_85B1E = ((((opcode_i == bsg_cache_pkg_SB) || (opcode_i == bsg_cache_pkg_SH)) || (opcode_i == bsg_cache_pkg_SW)) || (opcode_i == bsg_cache_pkg_SD)) || (opcode_i == bsg_cache_pkg_SM);
+	always @(*) decode_o[15] = sv2v_tmp_85B1E;
+	localparam [5:0] bsg_cache_pkg_TAGST = 6&#39;b010000;
+	wire [1:1] sv2v_tmp_21BAF;
+	assign sv2v_tmp_21BAF = opcode_i == bsg_cache_pkg_TAGST;
+	always @(*) decode_o[14] = sv2v_tmp_21BAF;
+	localparam [5:0] bsg_cache_pkg_TAGFL = 6&#39;b010001;
+	wire [1:1] sv2v_tmp_F24C5;
+	assign sv2v_tmp_F24C5 = opcode_i == bsg_cache_pkg_TAGFL;
+	always @(*) decode_o[13] = sv2v_tmp_F24C5;
+	localparam [5:0] bsg_cache_pkg_TAGLV = 6&#39;b010010;
+	wire [1:1] sv2v_tmp_44358;
+	assign sv2v_tmp_44358 = opcode_i == bsg_cache_pkg_TAGLV;
+	always @(*) decode_o[12] = sv2v_tmp_44358;
+	localparam [5:0] bsg_cache_pkg_TAGLA = 6&#39;b010011;
+	wire [1:1] sv2v_tmp_D0188;
+	assign sv2v_tmp_D0188 = opcode_i == bsg_cache_pkg_TAGLA;
+	always @(*) decode_o[11] = sv2v_tmp_D0188;
+	localparam [5:0] bsg_cache_pkg_AFL = 6&#39;b011000;
+	wire [1:1] sv2v_tmp_7CE80;
+	assign sv2v_tmp_7CE80 = opcode_i == bsg_cache_pkg_AFL;
+	always @(*) decode_o[10] = sv2v_tmp_7CE80;
+	localparam [5:0] bsg_cache_pkg_AFLINV = 6&#39;b011001;
+	wire [1:1] sv2v_tmp_6F6C9;
+	assign sv2v_tmp_6F6C9 = opcode_i == bsg_cache_pkg_AFLINV;
+	always @(*) decode_o[9] = sv2v_tmp_6F6C9;
+	localparam [5:0] bsg_cache_pkg_AINV = 6&#39;b011010;
+	wire [1:1] sv2v_tmp_CBC93;
+	assign sv2v_tmp_CBC93 = opcode_i == bsg_cache_pkg_AINV;
+	always @(*) decode_o[8] = sv2v_tmp_CBC93;
+	localparam [5:0] bsg_cache_pkg_ALOCK = 6&#39;b011011;
+	wire [1:1] sv2v_tmp_A8A66;
+	assign sv2v_tmp_A8A66 = opcode_i == bsg_cache_pkg_ALOCK;
+	always @(*) decode_o[7] = sv2v_tmp_A8A66;
+	localparam [5:0] bsg_cache_pkg_AUNLOCK = 6&#39;b011100;
+	wire [1:1] sv2v_tmp_A8F58;
+	assign sv2v_tmp_A8F58 = opcode_i == bsg_cache_pkg_AUNLOCK;
+	always @(*) decode_o[6] = sv2v_tmp_A8F58;
+	wire [1:1] sv2v_tmp_6B41E;
+	assign sv2v_tmp_6B41E = ~decode_o[14];
+	always @(*) decode_o[5] = sv2v_tmp_6B41E;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_add = 4&#39;b0001;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_and = 4&#39;b0011;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_max = 4&#39;b0110;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_maxu = 4&#39;b1000;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_min = 4&#39;b0101;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_minu = 4&#39;b0111;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_or = 4&#39;b0100;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_swap = 4&#39;b0000;
+	localparam [3:0] bsg_cache_pkg_e_cache_amo_xor = 4&#39;b0010;
 	always @(*) begin
 		decode_o[4] = 1&#39;b1;
 		case (opcode_i)
-			AMOSWAP_W, AMOSWAP_D: decode_o[3-:4] = e_cache_amo_swap;
-			AMOADD_W, AMOADD_D: decode_o[3-:4] = e_cache_amo_add;
-			AMOXOR_W, AMOXOR_D: decode_o[3-:4] = e_cache_amo_xor;
-			AMOAND_W, AMOAND_D: decode_o[3-:4] = e_cache_amo_and;
-			AMOOR_W, AMOOR_D: decode_o[3-:4] = e_cache_amo_or;
-			AMOMIN_W, AMOMIN_D: decode_o[3-:4] = e_cache_amo_min;
-			AMOMAX_W, AMOMAX_D: decode_o[3-:4] = e_cache_amo_max;
-			AMOMINU_W, AMOMINU_D: decode_o[3-:4] = e_cache_amo_minu;
-			AMOMAXU_W, AMOMAXU_D: decode_o[3-:4] = e_cache_amo_maxu;
+			bsg_cache_pkg_AMOSWAP_W, bsg_cache_pkg_AMOSWAP_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_swap;
+			bsg_cache_pkg_AMOADD_W, bsg_cache_pkg_AMOADD_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_add;
+			bsg_cache_pkg_AMOXOR_W, bsg_cache_pkg_AMOXOR_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_xor;
+			bsg_cache_pkg_AMOAND_W, bsg_cache_pkg_AMOAND_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_and;
+			bsg_cache_pkg_AMOOR_W, bsg_cache_pkg_AMOOR_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_or;
+			bsg_cache_pkg_AMOMIN_W, bsg_cache_pkg_AMOMIN_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_min;
+			bsg_cache_pkg_AMOMAX_W, bsg_cache_pkg_AMOMAX_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_max;
+			bsg_cache_pkg_AMOMINU_W, bsg_cache_pkg_AMOMINU_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_minu;
+			bsg_cache_pkg_AMOMAXU_W, bsg_cache_pkg_AMOMAXU_D: decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_maxu;
 			default: begin
 				decode_o[4] = 1&#39;b0;
-				decode_o[3-:4] = e_cache_amo_swap;
+				decode_o[3-:4] = bsg_cache_pkg_e_cache_amo_swap;
 			end
 		endcase
 	end

@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_source_sync_input.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_source_sync_input.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_comm_link/bsg_source_sync_input.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_comm_link/bsg_source_sync_input.v</a>
 defines: 
-completed: 2021-02-20 05:15:11
-time_elapsed: 0.523s
-ram usage: 16652 KB
+completed: 2021-02-23 05:55:08
+time_elapsed: 0.452s
+ram usage: 15280 KB
 </pre>
 <pre class="log">
 
@@ -102,7 +102,7 @@ module bsg_source_sync_input (
 	);
 	localparam lg_io_trigger_words_lp = 3;
 	reg io_trigger_line_r;
-	reg [lg_io_trigger_words_lp:0] io_trigger_count_r;
+	reg [3:0] io_trigger_count_r;
 	wire io_trigger_line = (io_trigger_mode_alt_en_i ? io_trigger_mode_1 : io_trigger_mode_0);
 	wire io_trigger_mode_active = |io_trigger_count_r;
 	always @(posedge io_clk_i)
@@ -115,7 +115,7 @@ module bsg_source_sync_input (
 			if (io_trigger_mode_active)
 				io_trigger_count_r &lt;= io_trigger_count_r - 1;
 			else if (io_trigger_line ^ io_trigger_line_r)
-				io_trigger_count_r &lt;= 2 ** lg_io_trigger_words_lp;
+				io_trigger_count_r &lt;= 8;
 		end
 	wire io_async_fifo_full;
 	wire io_async_fifo_enq = (io_trigger_mode_en_i ? io_trigger_mode_active : io_valid_0_r | io_valid_1_r);
@@ -131,7 +131,7 @@ module bsg_source_sync_input (
 		.w_clk_i(io_clk_i),
 		.w_reset_i(io_reset_i),
 		.w_enq_i(io_async_fifo_enq),
-		.w_data_i((io_trigger_mode_en_i ? {1&#39;b1, 1&#39;b1, io_data_1_r_swizzle, io_data_0_r_swizzle} : {io_valid_1_r &amp; io_edge_i[1], io_valid_0_r &amp; io_edge_i[0], io_data_1_r, io_data_0_r})),
+		.w_data_i((io_trigger_mode_en_i ? {2&#39;b11, io_data_1_r_swizzle, io_data_0_r_swizzle} : {io_valid_1_r &amp; io_edge_i[1], io_valid_0_r &amp; io_edge_i[0], io_data_1_r, io_data_0_r})),
 		.w_full_o(io_async_fifo_full),
 		.r_clk_i(core_clk_i),
 		.r_reset_i(core_reset_i),

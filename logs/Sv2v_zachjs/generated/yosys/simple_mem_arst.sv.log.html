@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Tests imported from yosys
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: yosys
 incdirs: /tmpfs/src/github/sv-tests/third_party/tools/yosys/tests/simple
 top_module: 
@@ -17,14 +17,44 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/yosys/simple_mem_arst.sv.html" target="file-frame">tests/generated/yosys/simple_mem_arst.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/mem_arst.v.html" target="file-frame">third_party/tools/yosys/tests/simple/mem_arst.v</a>
 defines: 
-completed: 2021-02-20 05:11:43
-time_elapsed: 0.056s
-ram usage: 9620 KB
+completed: 2021-02-23 05:54:47
+time_elapsed: 0.047s
+ram usage: 10524 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_mem_arst.sv.html" target="file-frame">tests/generated/yosys/simple_mem_arst.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/mem_arst.v.html" target="file-frame">third_party/tools/yosys/tests/simple/mem_arst.v</a>
-<a href="../../../../third_party/tools/yosys/tests/simple/mem_arst.v.html#l-5" target="file-frame">third_party/tools/yosys/tests/simple/mem_arst.v:5</a>:3: Parse error: unexpected token &#39;(*&#39; (Sym_paren_l_aster).
+module MyMem (
+	Reset_n_i,
+	Clk_i,
+	Addr_i,
+	Data_i,
+	Data_o,
+	WR_i
+);
+	parameter AddrWidth = 4;
+	parameter DataWidth = 4;
+	(* gentb_constant = 1 *) input Reset_n_i;
+	input Clk_i;
+	input [AddrWidth - 1:0] Addr_i;
+	input [DataWidth - 1:0] Data_i;
+	output reg [DataWidth - 1:0] Data_o;
+	input WR_i;
+	localparam Size = 2 ** AddrWidth;
+	(* mem2reg *) reg [DataWidth - 1:0] Mem [Size - 1:0];
+	integer i;
+	always @(negedge Reset_n_i or posedge Clk_i)
+		if (!Reset_n_i) begin
+			Data_o &lt;= &#39;bx;
+			for (i = 0; i &lt; Size; i = i + 1)
+				Mem[i] &lt;= 0;
+		end
+		else begin
+			Data_o &lt;= Mem[Addr_i];
+			if (WR_i)
+				Mem[Addr_i] &lt;= Data_i;
+		end
+endmodule
 
 </pre>
 </body>
