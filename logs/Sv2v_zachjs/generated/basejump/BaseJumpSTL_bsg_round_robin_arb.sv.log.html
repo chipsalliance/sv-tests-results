@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_round_robin_arb.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_round_robin_arb.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_round_robin_arb.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_round_robin_arb.v</a>
 defines: 
-completed: 2021-02-27 01:21:41
-time_elapsed: 12.329s
-ram usage: 87952 KB
+completed: 2021-02-27 04:30:30
+time_elapsed: 11.559s
+ram usage: 86984 KB
 </pre>
 <pre class="log">
 
@@ -42,6 +42,7 @@ module bsg_round_robin_arb (
 	parameter lg_inputs_p = (inputs_p == 1 ? 1 : $clog2(inputs_p));
 	parameter reset_on_sr_p = 1&#39;b0;
 	parameter hold_on_sr_p = 1&#39;b0;
+	parameter hold_on_valid_p = 1&#39;b0;
 	input clk_i;
 	input reset_i;
 	input grants_en_i;
@@ -6804,6 +6805,10 @@ module bsg_round_robin_arb (
 			always @(*) last_r = sv2v_tmp_CD72F;
 		end
 		else begin
+			function automatic signed [lg_inputs_p - 1:0] sv2v_cast_B0A06_signed;
+				input reg signed [lg_inputs_p - 1:0] inp;
+				sv2v_cast_B0A06_signed = inp;
+			endfunction
 			always @(*)
 				if (hold_on_sr_p) begin : last_n_gen
 					last_n = (hold_on_sr ? last_r : (yumi_i ? tag_o : last_r));
@@ -6811,12 +6816,11 @@ module bsg_round_robin_arb (
 				else if (reset_on_sr_p) begin : reset_on_last_n_gen
 					last_n = (reset_on_sr ? inputs_p - 2 : (yumi_i ? tag_o : last_r));
 				end
+				else if (hold_on_valid_p) begin : hold_on_last_n_gen
+					last_n = (yumi_i ? tag_o : (v_o ? (~((1 &lt;&lt; $clog2(inputs_p)) == inputs_p) &amp;&amp; (tag_o == {lg_inputs_p {1&#39;sb0}}) ? sv2v_cast_B0A06_signed(inputs_p - 1) : tag_o - 1&#39;b1) : last_r));
+				end
 				else
 					last_n = (yumi_i ? tag_o : last_r);
-			function automatic signed [lg_inputs_p - 1:0] sv2v_cast_B0A06_signed;
-				input reg signed [lg_inputs_p - 1:0] inp;
-				sv2v_cast_B0A06_signed = inp;
-			endfunction
 			always @(posedge clk_i) last_r &lt;= (reset_i ? sv2v_cast_B0A06_signed(0) : last_n);
 		end
 	endgenerate

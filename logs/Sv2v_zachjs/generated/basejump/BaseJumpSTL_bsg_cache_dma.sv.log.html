@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_dma.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_dma.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_dma.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_dma.v</a>
 defines: 
-completed: 2021-02-27 01:19:52
-time_elapsed: 0.433s
-ram usage: 15784 KB
+completed: 2021-02-27 04:30:02
+time_elapsed: 0.624s
+ram usage: 15828 KB
 </pre>
 <pre class="log">
 
@@ -101,6 +101,7 @@ module bsg_cache_dma (
 	output reg dma_evict_o;
 	localparam counter_width_lp = ((burst_len_lp + 1) == 1 ? 1 : $clog2(burst_len_lp + 1));
 	localparam byte_offset_width_lp = ((data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(data_width_p &gt;&gt; 3));
+	localparam block_offset_width_lp = (block_size_in_words_p &gt; 1 ? byte_offset_width_lp + lg_block_size_in_words_lp : byte_offset_width_lp);
 	reg [1:0] dma_state_n;
 	reg [1:0] dma_state_r;
 	reg counter_clear;
@@ -160,9 +161,9 @@ module bsg_cache_dma (
 	);
 	generate
 		if (burst_len_lp == 1) begin
-			assign data_mem_addr_o = dma_addr_i[byte_offset_width_lp + lg_block_size_in_words_lp+:lg_sets_lp];
+			assign data_mem_addr_o = dma_addr_i[block_offset_width_lp+:lg_sets_lp];
 		end
-		else assign data_mem_addr_o = {dma_addr_i[byte_offset_width_lp + lg_block_size_in_words_lp+:lg_sets_lp], counter_r[0+:lg_burst_len_lp]};
+		else assign data_mem_addr_o = {dma_addr_i[block_offset_width_lp+:lg_sets_lp], counter_r[0+:lg_burst_len_lp]};
 	endgenerate
 	assign data_mem_data_o = {ways_p {in_fifo_data_lo}};
 	bsg_mux #(
@@ -185,7 +186,7 @@ module bsg_cache_dma (
 		done_o = 1&#39;b0;
 		dma_pkt_v_o = 1&#39;b0;
 		dma_pkt[addr_width_p] = 1&#39;b0;
-		dma_pkt[addr_width_p - 1-:addr_width_p] = {dma_addr_i[addr_width_p - 1:byte_offset_width_lp + lg_block_size_in_words_lp], {byte_offset_width_lp + lg_block_size_in_words_lp {1&#39;b0}}};
+		dma_pkt[addr_width_p - 1-:addr_width_p] = {dma_addr_i[addr_width_p - 1:block_offset_width_lp], {block_offset_width_lp {1&#39;b0}}};
 		data_mem_v_o = 1&#39;b0;
 		data_mem_w_o = 1&#39;b0;
 		in_fifo_yumi_li = 1&#39;b0;

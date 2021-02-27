@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache.v</a>
 defines: 
-completed: 2021-02-27 01:19:02
-time_elapsed: 1.503s
-ram usage: 24488 KB
+completed: 2021-02-27 04:30:09
+time_elapsed: 1.635s
+ram usage: 24412 KB
 </pre>
 <pre class="log">
 
@@ -86,7 +86,8 @@ module bsg_cache (
 	localparam data_mask_width_lp = data_width_p &gt;&gt; 3;
 	localparam lg_data_mask_width_lp = (data_mask_width_lp == 1 ? 1 : $clog2(data_mask_width_lp));
 	localparam lg_block_size_in_words_lp = (block_size_in_words_p == 1 ? 1 : $clog2(block_size_in_words_p));
-	localparam tag_width_lp = ((addr_width_p - lg_data_mask_width_lp) - lg_sets_lp) - lg_block_size_in_words_lp;
+	localparam block_offset_width_lp = (block_size_in_words_p &gt; 1 ? lg_data_mask_width_lp + lg_block_size_in_words_lp : lg_data_mask_width_lp);
+	localparam tag_width_lp = (addr_width_p - lg_sets_lp) - block_offset_width_lp;
 	localparam tag_info_width_lp = tag_width_lp + 2;
 	localparam lg_ways_lp = (ways_p == 1 ? 1 : $clog2(ways_p));
 	localparam stat_info_width_lp = (ways_p + ways_p) - 1;
@@ -109,8 +110,8 @@ module bsg_cache (
 		.opcode_i(cache_pkt[6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1)))-:((6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1)))) &gt;= (addr_width_p + (data_width_p + (data_width_p &gt;&gt; 3))) ? ((6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1)))) - (addr_width_p + (data_width_p + (data_width_p &gt;&gt; 3)))) + 1 : ((addr_width_p + (data_width_p + (data_width_p &gt;&gt; 3))) - (6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))))) + 1)]),
 		.decode_o(decode)
 	);
-	assign addr_way = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - ((lg_data_mask_width_lp + lg_block_size_in_words_lp) + lg_sets_lp))+:lg_ways_lp];
-	assign addr_index = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_block_size_in_words_lp))+:lg_sets_lp];
+	assign addr_way = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (block_offset_width_lp + lg_sets_lp))+:lg_ways_lp];
+	assign addr_index = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - block_offset_width_lp)+:lg_sets_lp];
 	assign addr_block_offset = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp];
 	wire [lg_data_mem_els_lp - 1:0] ld_data_mem_addr;
 	generate
@@ -146,7 +147,7 @@ module bsg_cache (
 			v_tl_r &lt;= 1&#39;b0;
 	wire [lg_sets_lp - 1:0] addr_index_tl;
 	wire [lg_block_size_in_words_lp - 1:0] addr_block_offset_tl;
-	assign addr_index_tl = addr_tl_r[lg_data_mask_width_lp + lg_block_size_in_words_lp+:lg_sets_lp];
+	assign addr_index_tl = addr_tl_r[block_offset_width_lp+:lg_sets_lp];
 	assign addr_block_offset_tl = addr_tl_r[lg_data_mask_width_lp+:lg_block_size_in_words_lp];
 	wire [lg_data_mem_els_lp - 1:0] recover_data_mem_addr;
 	generate
@@ -243,9 +244,9 @@ module bsg_cache (
 	wire [lg_sets_lp - 1:0] addr_index_v;
 	wire [lg_ways_lp - 1:0] addr_way_v;
 	wire [ways_p - 1:0] tag_hit_v;
-	assign addr_tag_v = addr_v_r[(lg_data_mask_width_lp + lg_block_size_in_words_lp) + lg_sets_lp+:tag_width_lp];
-	assign addr_index_v = addr_v_r[lg_data_mask_width_lp + lg_block_size_in_words_lp+:lg_sets_lp];
-	assign addr_way_v = addr_v_r[(lg_sets_lp + lg_block_size_in_words_lp) + lg_data_mask_width_lp+:lg_ways_lp];
+	assign addr_tag_v = addr_v_r[block_offset_width_lp + lg_sets_lp+:tag_width_lp];
+	assign addr_index_v = addr_v_r[block_offset_width_lp+:lg_sets_lp];
+	assign addr_way_v = addr_v_r[block_offset_width_lp + lg_sets_lp+:lg_ways_lp];
 	generate
 		for (i = 0; i &lt; ways_p; i = i + 1) assign tag_hit_v[i] = (addr_tag_v == tag_v_r[i * tag_width_lp+:tag_width_lp]) &amp; valid_v_r[i];
 	endgenerate
@@ -444,7 +445,7 @@ module bsg_cache (
 	endgenerate
 	generate
 		if (burst_len_lp == 1) begin
-			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_block_size_in_words_lp))+:lg_sets_lp];
+			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - block_offset_width_lp)+:lg_sets_lp];
 		end
 		else if (burst_len_lp == block_size_in_words_p) begin
 			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp + lg_sets_lp];
@@ -483,8 +484,8 @@ module bsg_cache (
 			wire [63:0] amo32_reg_in = data_v_r[0+:32] &lt;&lt; 32;
 			wire [63:0] amo64_reg_in = data_v_r[0+:64];
 			assign atomic_reg_data = (decode_v_r[19] ? amo64_reg_in : amo32_reg_in);
-			wire [63:0] amo32_mem_in = ld_data_final_li[2 * data_width_p+:data_width_p] &lt;&lt; 32;
-			wire [63:0] amo64_mem_in = ld_data_final_li[3 * data_width_p+:data_width_p];
+			wire [63:0] amo32_mem_in = ld_data_final_li[2 * data_width_p+:32] &lt;&lt; 32;
+			wire [63:0] amo64_mem_in = ld_data_final_li[3 * data_width_p+:64];
 			assign atomic_mem_data = (decode_v_r[19] ? amo64_mem_in : amo32_mem_in);
 		end
 		else if (data_width_p &gt;= 32) begin : atomic_32
@@ -530,23 +531,18 @@ module bsg_cache (
 			end
 			else assign slice_data = data_v_r[0+:slice_width_lp];
 			assign sbuf_data_in_mux_li[i * data_width_p+:data_width_p] = {data_width_p / slice_width_lp {slice_data}};
-			if (i == (data_sel_mux_els_lp - 1)) begin : max_size
-				assign sbuf_mask_in_mux_li[i * data_mask_width_lp+:data_mask_width_lp] = {data_mask_width_lp {1&#39;b1}};
-			end
-			else begin : non_max_size
-				wire [(data_width_p / slice_width_lp) - 1:0] decode_lo;
-				bsg_decode #(.num_out_p(data_width_p / slice_width_lp)) dec(
-					.i(addr_v_r[i+:((lg_data_mask_width_lp - i) &gt; 1 ? lg_data_mask_width_lp - i : 1)]),
-					.o(decode_lo)
-				);
-				bsg_expand_bitmask #(
-					.in_width_p(data_width_p / slice_width_lp),
-					.expand_p(2 ** i)
-				) exp(
-					.i(decode_lo),
-					.o(sbuf_mask_in_mux_li[i * data_mask_width_lp+:data_mask_width_lp])
-				);
-			end
+			wire [(data_width_p / slice_width_lp) - 1:0] decode_lo;
+			bsg_decode #(.num_out_p(data_width_p / slice_width_lp)) dec(
+				.i(addr_v_r[i+:((lg_data_mask_width_lp - i) &gt; 1 ? lg_data_mask_width_lp - i : 1)]),
+				.o(decode_lo)
+			);
+			bsg_expand_bitmask #(
+				.in_width_p(data_width_p / slice_width_lp),
+				.expand_p(2 ** i)
+			) exp(
+				.i(decode_lo),
+				.o(sbuf_mask_in_mux_li[i * data_mask_width_lp+:data_mask_width_lp])
+			);
 		end
 	endgenerate
 	always @(*)
@@ -599,21 +595,16 @@ module bsg_cache (
 	assign ld_data_masked = snoop_or_ld_data &amp; expanded_mask_v;
 	generate
 		for (i = 0; i &lt; data_sel_mux_els_lp; i = i + 1) begin : ld_data_sel
-			if (i == (data_sel_mux_els_lp - 1)) begin : max_size
-				assign ld_data_final_li[i * data_width_p+:data_width_p] = snoop_or_ld_data;
-			end
-			else begin : non_max_size
-				wire [(8 * (2 ** i)) - 1:0] byte_sel;
-				bsg_mux #(
-					.width_p(8 * (2 ** i)),
-					.els_p(data_width_p / (8 * (2 ** i)))
-				) byte_mux(
-					.data_i(snoop_or_ld_data),
-					.sel_i(addr_v_r[i+:((lg_data_mask_width_lp - i) &gt; 1 ? lg_data_mask_width_lp - i : 1)]),
-					.data_o(byte_sel)
-				);
-				assign ld_data_final_li[i * data_width_p+:data_width_p] = {{data_width_p - (8 * (2 ** i)) {decode_v_r[18] &amp; byte_sel[(8 * (2 ** i)) - 1]}}, byte_sel};
-			end
+			wire [(8 * (2 ** i)) - 1:0] byte_sel;
+			bsg_mux #(
+				.width_p(8 * (2 ** i)),
+				.els_p(data_width_p / (8 * (2 ** i)))
+			) byte_mux(
+				.data_i(snoop_or_ld_data),
+				.sel_i(addr_v_r[i+:((lg_data_mask_width_lp - i) &gt; 1 ? lg_data_mask_width_lp - i : 1)]),
+				.data_o(byte_sel)
+			);
+			assign ld_data_final_li[i * data_width_p+:data_width_p] = {{data_width_p - (8 * (2 ** i)) {decode_v_r[18] &amp; byte_sel[(8 * (2 ** i)) - 1]}}, byte_sel};
 		end
 	endgenerate
 	bsg_mux #(
@@ -629,7 +620,7 @@ module bsg_cache (
 			if (decode_v_r[12])
 				data_o = {{data_width_p - 2 {1&#39;b0}}, lock_v_r[addr_way_v], valid_v_r[addr_way_v]};
 			else if (decode_v_r[11])
-				data_o = {tag_v_r[addr_way_v * tag_width_lp+:tag_width_lp], addr_index_v, {lg_block_size_in_words_lp + lg_data_mask_width_lp {1&#39;b0}}};
+				data_o = {tag_v_r[addr_way_v * tag_width_lp+:tag_width_lp], addr_index_v, {block_offset_width_lp {1&#39;b0}}};
 			else if (decode_v_r[17])
 				data_o = ld_data_masked;
 			else
