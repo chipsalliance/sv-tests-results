@@ -1,0 +1,86 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/inside_synth2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/inside_synth2.v</a>
+defines: 
+completed: 2021-03-04 09:15:43
+time_elapsed: 0.071s
+ram usage: 10828 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/inside_synth2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/inside_synth2.v</a>
+module main;
+	reg [7:0] th2;
+	reg [7:0] init;
+	reg carry;
+	reg clk;
+	reg rst;
+	reg foo;
+	(* ivl_synthesis_on *) always @(posedge clk)
+		if (rst) begin
+			th2 &lt;= 0;
+			carry &lt;= 1;
+			foo &lt;= 0;
+		end
+		else if (carry)
+			{carry, th2} &lt;= {1&#39;b0, init};
+		else
+			{carry, th2} &lt;= {1&#39;b0, th2} + 9&#39;h001;
+	(* ivl_synthesis_off *) initial begin
+		rst = 1;
+		clk = 0;
+		init = 8&#39;hfe;
+		$monitor(&#34;clk=%b:  rst=%b, th2=%h, carry=%b&#34;, clk, rst, th2, carry);
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if (foo !== 0) begin
+			$display(&#34;FAILED -- foo=%b&#34;, foo);
+			$finish;
+		end
+		rst = 0;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if (th2 !== 8&#39;hff) begin
+			$display(&#34;FAILED -- th2=%h (1)&#34;, th2);
+			$finish;
+		end
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if (th2 !== 8&#39;h00) begin
+			$display(&#34;FAILED == th2=%h&#34;, th2);
+			$finish;
+		end
+		if (carry !== 1) begin
+			$display(&#34;FAILED -- carry=%b, th2=%h&#34;, carry, th2);
+			$finish;
+		end
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if (th2 !== 8&#39;hfe) begin
+			$display(&#34;FAILED -- th2=%h&#34;, th2);
+			$finish;
+		end
+		#(1)
+			$strobe(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>

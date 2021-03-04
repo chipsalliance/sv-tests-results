@@ -1,0 +1,84 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr748.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr748.v</a>
+defines: 
+completed: 2021-03-04 09:16:08
+time_elapsed: 0.105s
+ram usage: 11252 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr748.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr748.v</a>
+module signed_multiplier_test;
+	reg failed_flag = 0;
+	reg signed [5:0] s_prod;
+	wire [2:0] u_pos_two = 3&#39;b010;
+	wire signed [2:0] s_pos_two = 3&#39;sb010;
+	wire signed [2:0] s_neg_two = 3&#39;sb110;
+	wire s = 1&#39;b1;
+	wire u = 1&#39;b0;
+	task check_mult;
+		input reg [31:0] idx;
+		input reg signeda;
+		input reg [2:0] arga;
+		input reg signedb;
+		input reg [2:0] argb;
+		input reg [5:0] result;
+		input reg [5:0] expected;
+		if (result !== expected) begin
+			failed_flag = 1;
+			$write(&#34;failed: test %0d, &#34;, idx);
+			if (signeda)
+				$write(&#34;3&#39;sb%b&#34;, arga);
+			else
+				$write(&#34;3 &#39;b%b&#34;, arga);
+			$write(&#34; * &#34;);
+			if (signedb)
+				$write(&#34;3&#39;sb%b&#34;, argb);
+			else
+				$write(&#34;3 &#39;b%b&#34;, argb);
+			$write(&#34; = 6&#39;sb%b (expected 6&#39;sb%b)\n&#34;, result, expected);
+		end
+	endtask
+	initial begin
+		#(1) s_prod = u_pos_two * u_pos_two;
+		check_mult(1, u, u_pos_two, u, u_pos_two, s_prod, 6&#39;sb000100);
+		#(1) s_prod = u_pos_two * s_pos_two;
+		check_mult(2, u, u_pos_two, s, s_pos_two, s_prod, 6&#39;sb000100);
+		#(1) s_prod = u_pos_two * s_neg_two;
+		check_mult(3, u, u_pos_two, s, s_neg_two, s_prod, 6&#39;sb001100);
+		#(1) s_prod = s_pos_two * u_pos_two;
+		check_mult(4, s, s_pos_two, u, u_pos_two, s_prod, 6&#39;sb000100);
+		#(1) s_prod = s_pos_two * s_pos_two;
+		check_mult(5, s, s_pos_two, s, s_pos_two, s_prod, 6&#39;sb000100);
+		#(1) s_prod = s_pos_two * s_neg_two;
+		check_mult(6, s, s_pos_two, s, s_neg_two, s_prod, 6&#39;sb111100);
+		#(1) s_prod = s_neg_two * u_pos_two;
+		check_mult(7, s, s_neg_two, u, u_pos_two, s_prod, 6&#39;sb001100);
+		#(1) s_prod = s_neg_two * s_pos_two;
+		check_mult(8, s, s_neg_two, s, s_pos_two, s_prod, 6&#39;sb111100);
+		#(1) s_prod = s_neg_two * s_neg_two;
+		check_mult(9, s, s_neg_two, s, s_neg_two, s_prod, 6&#39;sb000100);
+		if (failed_flag == 0)
+			$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+
+</pre>
+</body>

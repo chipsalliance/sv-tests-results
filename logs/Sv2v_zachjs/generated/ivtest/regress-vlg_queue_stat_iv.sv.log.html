@@ -1,0 +1,232 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/queue_stat.v.html" target="file-frame">third_party/tests/ivtest/ivltests/queue_stat.v</a>
+defines: 
+completed: 2021-03-04 09:15:24
+time_elapsed: 0.331s
+ram usage: 12540 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/queue_stat.v.html" target="file-frame">third_party/tests/ivtest/ivltests/queue_stat.v</a>
+module top;
+	reg pass;
+	integer res;
+	integer status;
+	integer value;
+	integer value2;
+	integer id;
+	integer job;
+	integer item;
+	task print_stats;
+		input reg id;
+		integer id;
+		integer len;
+		integer inter;
+		integer max;
+		integer short;
+		integer long;
+		integer avg;
+		integer status;
+		begin
+			len = 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+			inter = 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+			max = 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+			short = 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+			long = 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+			avg = 32&#39;bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+			$display(&#34;Queue statistics at time %0d&#34;, $time);
+			$q_exam(id, 1, len, status);
+			if ((status !== 0) &amp;&amp; (status !== 10)) begin
+				$display(&#34;  Failed to get the length, status %0d&#34;, status);
+				pass = 1&#39;b0;
+			end
+			$q_exam(id, 2, inter, status);
+			if ((status !== 0) &amp;&amp; (status !== 10)) begin
+				$display(&#34;  Failed to get the inter-arrival, status %0d&#34;, status);
+				pass = 1&#39;b0;
+			end
+			$q_exam(id, 3, max, status);
+			if ((status !== 0) &amp;&amp; (status !== 10)) begin
+				$display(&#34;  Failed to get the maximum length, status %0d&#34;, status);
+				pass = 1&#39;b0;
+			end
+			$q_exam(id, 4, short, status);
+			if ((status !== 0) &amp;&amp; (status !== 10)) begin
+				$display(&#34;  Failed to get the shortest wait time, status %0d&#34;, status);
+				pass = 1&#39;b0;
+			end
+			$q_exam(id, 5, long, status);
+			if ((status !== 0) &amp;&amp; (status !== 10)) begin
+				$display(&#34;  Failed to get the longest wait time, status %0d&#34;, status);
+				pass = 1&#39;b0;
+			end
+			$q_exam(id, 6, avg, status);
+			if ((status !== 0) &amp;&amp; (status !== 10)) begin
+				$display(&#34;  Failed to get the average wait time, status %0d&#34;, status);
+				pass = 1&#39;b0;
+			end
+			$display(&#34;    %0d, %0d, %0d, %0d, %0d, %0d&#34;, len, inter, max, short, long, avg);
+		end
+	endtask
+	initial begin
+		pass = 1&#39;b1;
+		id = 1;
+		$display(&#34;----- INIT -----&#34;);
+		$q_initialize(id, 1, 5, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to initialize queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		job = 1;
+		item = 10;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		job = 1;
+		item = 20;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		job = 1;
+		item = 30;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		$display(&#34;----- REMOVE -----&#34;);
+		$q_remove(id, value, value2, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to remove element from the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			print_stats(id);
+		#(1)
+			;
+		job = 1;
+		item = 30;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		$display(&#34;----- REMOVE TWO -----&#34;);
+		$q_remove(id, value, value2, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to remove element (1) from the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		$q_remove(id, value, value2, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to remove element (2) from the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		$display(&#34;----- REMOVE -----&#34;);
+		$q_remove(id, value, value2, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to remove element from the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		job = 1;
+		item = 50;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		$display(&#34;----- REMOVE -----&#34;);
+		$q_remove(id, value, value2, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to remove element from the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(7)
+			;
+		job = 1;
+		item = 60;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		job = 1;
+		item = 70;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		#(1)
+			;
+		job = 1;
+		item = 80;
+		$display(&#34;----- ADD -----&#34;);
+		$q_add(id, job, item, status);
+		if (status !== 0) begin
+			$display(&#34;Failed to add element to the queue, got %d&#34;, status);
+			pass = 1&#39;b0;
+		end
+		print_stats(id);
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>

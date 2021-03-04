@@ -1,0 +1,152 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/readmem-error.v.html" target="file-frame">third_party/tests/ivtest/ivltests/readmem-error.v</a>
+defines: 
+completed: 2021-03-04 09:16:36
+time_elapsed: 0.425s
+ram usage: 13148 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/readmem-error.v.html" target="file-frame">third_party/tests/ivtest/ivltests/readmem-error.v</a>
+module top;
+	reg [191:0] str;
+	real rval;
+	reg [7:0] array [0:7];
+	reg [7:0] array2 [8:15];
+	reg [7:0] array3 [-1:7];
+	integer idx;
+	integer istr;
+	task clear_array;
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			begin
+				array[idx] = 0;
+				array2[idx + 8] = 0;
+			end
+	endtask
+	initial begin
+		$readmemb(str, array);
+		$readmemb(istr, array);
+		str = &#34;ivltests/readmemb.txt&#34;;
+		$readmemb(str, array);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemb 1, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		str[7:0] = &#39;d2;
+		$readmemb(str, array);
+		rval = 0.0;
+		clear_array;
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array, rval);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemb 2, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		rval = 7.0;
+		clear_array;
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array, 0, rval);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemb 3, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		clear_array;
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array, -1, 7);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemb 4, expected 0, got %0d&#34;, idx, array[idx]);
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array2, 7, 15);
+		for (idx = 8; idx &lt; 16; idx = idx + 1)
+			if (array2[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemb 5, expected 0, got %0d&#34;, idx, array2[idx]);
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array, 0, 8);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemb 6, expected 0, got %0d&#34;, idx, array[idx]);
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array2, 8, 16);
+		for (idx = 8; idx &lt; 16; idx = idx + 1)
+			if (array2[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemb 7, expected 0, got %0d&#34;, idx, array2[idx]);
+		clear_array;
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array, 0, 6);
+		for (idx = 0; idx &lt; 7; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemb 8, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		if (array[7] !== 0)
+			$display(&#34;Failed: for index 7 of readmemb 8, expected 0, got %0d&#34;, array[7]);
+		$readmemb(&#34;ivltests/readmemb.txt&#34;, array3, -1, 7);
+		for (idx = -1; idx &lt; 7; idx = idx + 1)
+			if ($signed(array3[idx]) !== (idx + 2))
+				$display(&#34;Failed: for index %0d of readmemb 9, expected %0d, got %0d&#34;, idx, idx + 2, array3[idx]);
+		if (array3[7] !== 8&#39;bxxxxxxxx)
+			$display(&#34;Failed: for index 7 of readmemb 9, expected &#39;dx, got %0d&#34;, array3[7]);
+		$readmemb(&#34;ivltests/readmem-error.txt&#34;, array);
+		str = &#39;bx;
+		$readmemh(str, array);
+		$readmemh(istr, array);
+		str = &#34;ivltests/readmemh.txt&#34;;
+		$readmemh(str, array);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemh 1, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		str[7:0] = &#39;d2;
+		$readmemh(str, array);
+		rval = 0.0;
+		clear_array;
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array, rval);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemh 2, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		rval = 7.0;
+		clear_array;
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array, 0, rval);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemh 3, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		clear_array;
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array, -1, 7);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemh 4, expected 0, got %0d&#34;, idx, array[idx]);
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array2, 7, 15);
+		for (idx = 8; idx &lt; 16; idx = idx + 1)
+			if (array2[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemh 5, expected 0, got %0d&#34;, idx, array2[idx]);
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array, 0, 8);
+		for (idx = 0; idx &lt; 8; idx = idx + 1)
+			if (array[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemh 6, expected 0, got %0d&#34;, idx, array[idx]);
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array2, 8, 16);
+		for (idx = 8; idx &lt; 16; idx = idx + 1)
+			if (array2[idx] !== 0)
+				$display(&#34;Failed: for index %0d of readmemh 7, expected 0, got %0d&#34;, idx, array2[idx]);
+		clear_array;
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array, 0, 6);
+		for (idx = 0; idx &lt; 7; idx = idx + 1)
+			if (array[idx] !== (idx + 1))
+				$display(&#34;Failed: for index %0d of readmemh 8, expected %0d, got %0d&#34;, idx, idx + 1, array[idx]);
+		if (array[7] !== 0)
+			$display(&#34;Failed: for index 7 of readmemh 8, expected 0, got %0d&#34;, array[7]);
+		$readmemh(&#34;ivltests/readmemh.txt&#34;, array3, -1, 7);
+		for (idx = -1; idx &lt; 7; idx = idx + 1)
+			if ($signed(array3[idx]) !== (idx + 2))
+				$display(&#34;Failed: for index %0d of readmemh 9, expected %0d, got %0d&#34;, idx, idx + 2, array3[idx]);
+		if (array3[7] !== 8&#39;bxxxxxxxx)
+			$display(&#34;Failed: for index 7 of readmemh 9, expected &#39;dx, got %0d&#34;, array3[7]);
+		$readmemh(&#34;ivltests/readmem-error.txt&#34;, array);
+	end
+endmodule
+
+</pre>
+</body>

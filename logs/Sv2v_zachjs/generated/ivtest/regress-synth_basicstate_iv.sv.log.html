@@ -1,0 +1,106 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/basicstate.v.html" target="file-frame">third_party/tests/ivtest/ivltests/basicstate.v</a>
+defines: 
+completed: 2021-03-04 09:15:21
+time_elapsed: 0.137s
+ram usage: 10884 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/basicstate.v.html" target="file-frame">third_party/tests/ivtest/ivltests/basicstate.v</a>
+module sm (
+	clk,
+	rst,
+	st
+);
+	input clk;
+	input rst;
+	output [1:0] st;
+	always @(posedge clk or posedge rst)
+		if (rst)
+			st &lt;= 2&#39;b00;
+		else
+			case (st)
+				2&#39;b00: st &lt;= 2&#39;b01;
+				2&#39;b01: st &lt;= 2&#39;b11;
+				2&#39;b11: st &lt;= 2&#39;b10;
+				2&#39;b10: st &lt;= 2&#39;b00;
+			endcase
+endmodule
+module test;
+	reg clk;
+	reg rst;
+	wire [1:0] st;
+	sm u_sm(
+		clk,
+		rst,
+		st
+	);
+	always #(5) clk = ~clk;
+	initial begin
+		clk = 0;
+		rst = 1;
+		@(posedge clk)
+			;
+		#(1)
+			;
+		rst = 0;
+		if (st !== 2&#39;b00) begin
+			$display(&#34;FAILED - SM didn&#39;t initialize&#34;);
+			$finish;
+		end
+		@(posedge clk)
+			;
+		#(1)
+			;
+		if (st !== 2&#39;b01) begin
+			$display(&#34;FAILED - SM didn&#39;t xsn to 01&#34;);
+			$finish;
+		end
+		@(posedge clk)
+			;
+		#(1)
+			;
+		if (st !== 2&#39;b11) begin
+			$display(&#34;FAILED - SM didn&#39;t xsn to 11&#34;);
+			$finish;
+		end
+		@(posedge clk)
+			;
+		#(1)
+			;
+		if (st !== 2&#39;b10) begin
+			$display(&#34;FAILED - SM didn&#39;t xsn to 10&#34;);
+			$finish;
+		end
+		@(posedge clk)
+			;
+		#(1)
+			;
+		if (st !== 2&#39;b00) begin
+			$display(&#34;FAILED - SM didn&#39;t xsn to 00&#34;);
+			$finish;
+		end
+		$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+
+</pre>
+</body>

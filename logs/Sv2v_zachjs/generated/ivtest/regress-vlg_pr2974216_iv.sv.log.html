@@ -1,0 +1,85 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2974216.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2974216.v</a>
+defines: 
+completed: 2021-03-04 09:16:51
+time_elapsed: 0.128s
+ram usage: 10872 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2974216.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2974216.v</a>
+module top;
+	reg pass;
+	reg [31:0] in_full;
+	wire [31:0] pa_out_full;
+	wire [31:0] ca_out_full;
+	reg [29:0] in_part;
+	wire [31:0] pa_out_part;
+	wire [31:0] ca_out_part;
+	initial begin
+		pass = 1&#39;b1;
+		in_full = {16 {2&#39;b10}};
+		in_part = {15 {2&#39;b01}};
+		#(1)
+			;
+		if (pa_out_full !== 32&#39;b10101010101010101010101010101010) begin
+			$display(&#34;Failed: pa_out_full, got %b&#34;, pa_out_full);
+			pass = 1&#39;b1;
+		end
+		if (ca_out_full !== 32&#39;b10101010101010101010101010101010) begin
+			$display(&#34;Failed: ca_out_full, got %b&#34;, ca_out_full);
+			pass = 1&#39;b1;
+		end
+		if (pa_out_part !== 32&#39;bxx010101010101010101010101010101) begin
+			$display(&#34;Failed: pa_out_part, got %b&#34;, pa_out_part);
+			pass = 1&#39;b1;
+		end
+		if (ca_out_part !== 32&#39;bzz010101010101010101010101010101) begin
+			$display(&#34;Failed: ca_out_part, got %b&#34;, ca_out_part);
+			pass = 1&#39;b1;
+		end
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+	param #(32) full(
+		pa_out_full,
+		ca_out_full,
+		in_full
+	);
+	param #(30) part(
+		pa_out_part,
+		ca_out_part,
+		in_part
+	);
+endmodule
+module param (
+	pa_out,
+	ca_out,
+	in
+);
+	parameter width = 32;
+	output reg [31:0] pa_out;
+	output wire [31:0] ca_out;
+	input [width - 1:0] in;
+	assign ca_out = {{32 - width {1&#39;bz}}, in};
+	always @(*) pa_out = {{32 - width {1&#39;bx}}, in};
+endmodule
+
+</pre>
+</body>

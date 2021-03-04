@@ -1,0 +1,81 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/case_wo_default.v.html" target="file-frame">third_party/tests/ivtest/ivltests/case_wo_default.v</a>
+defines: 
+completed: 2021-03-04 09:16:46
+time_elapsed: 0.026s
+ram usage: 10604 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/case_wo_default.v.html" target="file-frame">third_party/tests/ivtest/ivltests/case_wo_default.v</a>
+module test (
+	foo,
+	foo_en1,
+	foo_en2
+);
+	output reg [1:0] foo;
+	input wire foo_en1;
+	input wire foo_en2;
+	always @(*) begin
+		foo = 0;
+		case (1&#39;b1)
+			foo_en1: foo = 1;
+			foo_en2: foo = 2;
+		endcase
+	end
+endmodule
+module main;
+	wire [1:0] foo;
+	reg foo_en1;
+	reg foo_en2;
+	test dut(
+		.foo(foo),
+		.foo_en1(foo_en1),
+		.foo_en2(foo_en2)
+	);
+	task fail;
+		begin
+			$display(&#34;FAILED -- foo=%b, foo_en1=%b, foo_en2=%b&#34;, foo, foo_en1, foo_en2);
+			$finish;
+		end
+	endtask
+	initial begin
+		foo_en1 = 0;
+		foo_en2 = 0;
+		#(1)
+			if (foo !== 2&#39;d0)
+				fail;
+		foo_en2 = 1;
+		#(1)
+			if (foo !== 2&#39;d2)
+				fail;
+		foo_en1 = 1;
+		#(1)
+			if (foo !== 2&#39;d1)
+				fail;
+		foo_en2 = 0;
+		#(1)
+			if (foo !== 2&#39;d1)
+				fail;
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>

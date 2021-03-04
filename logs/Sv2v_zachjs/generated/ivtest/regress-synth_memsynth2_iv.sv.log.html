@@ -1,0 +1,110 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/memsynth2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/memsynth2.v</a>
+defines: 
+completed: 2021-03-04 09:16:51
+time_elapsed: 0.140s
+ram usage: 11120 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/memsynth2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/memsynth2.v</a>
+module main;
+	reg [1:0] mem;
+	reg D;
+	reg rst;
+	reg clk;
+	reg wr;
+	reg wadr;
+	reg radr;
+	(* ivl_synthesis_on *) always @(posedge clk or posedge rst)
+		if (rst) begin
+			mem[0] &lt;= 0;
+			mem[1] &lt;= 0;
+		end
+		else if (wr)
+			mem[wadr] &lt;= D;
+	wire Q = mem[radr];
+	(* ivl_synthesis_off *) initial begin
+		rst = 0;
+		clk = 0;
+		wadr = 0;
+		radr = 0;
+		wr = 0;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		rst = 1;
+		#(1)
+			if ((mem[0] !== 0) || (mem[1] !== 0)) begin
+				$display(&#34;FAILED -- Reset: mem[0]=%b, mem[1]=%b&#34;, mem[0], mem[1]);
+				$finish;
+			end
+		radr = 0;
+		#(1)
+			if (Q !== mem[radr]) begin
+				$display(&#34;FAILED -- mem[%b] = %b, Q=%b&#34;, radr, mem[radr], Q);
+				$finish;
+			end
+		radr = 1;
+		#(1)
+			if (Q !== mem[radr]) begin
+				$display(&#34;FAILED -- mem[%b] = %b, Q=%b&#34;, radr, mem[radr], Q);
+				$finish;
+			end
+		rst = 0;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((mem[0] !== 0) || (mem[1] !== 0)) begin
+			$display(&#34;FAILED -- Reset: mem[0]=%b, mem[1]=%b&#34;, mem[0], mem[1]);
+			$finish;
+		end
+		D = 1;
+		wr = 1;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((mem[0] !== 1) || (mem[1] !== 0)) begin
+			$display(&#34;FAILED -- write D=%b: mem[0]=%b, mem[1]=%b&#34;, D, mem[0], mem[1]);
+			$finish;
+		end
+		D = 0;
+		wadr = 1;
+		#(1) clk = 1;
+		#(1) clk = 0;
+		if ((mem[0] !== 1) || (mem[1] !== 0)) begin
+			$display(&#34;FAILED -- write D=%b: mem[0]=%b, mem[1]=%b&#34;, D, mem[0], mem[1]);
+			$finish;
+		end
+		radr = 0;
+		#(1)
+			if (Q !== mem[radr]) begin
+				$display(&#34;FAILED -- mem[%b] = %b, Q=%b&#34;, radr, mem[radr], Q);
+				$finish;
+			end
+		wr = 0;
+		D = 1;
+		if ((mem[0] !== 1) || (mem[1] !== 0)) begin
+			$display(&#34;FAILED -- write D=%b: mem[0]=%b, mem[1]=%b&#34;, D, mem[0], mem[1]);
+			$finish;
+		end
+		$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+
+</pre>
+</body>

@@ -1,0 +1,85 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr596.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr596.v</a>
+defines: 
+completed: 2021-03-04 09:16:25
+time_elapsed: 0.085s
+ram usage: 10948 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr596.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr596.v</a>
+module lfsr_test;
+	parameter SIZE = 4;
+	reg clk;
+	reg reset;
+	reg ena;
+	wire [SIZE - 1:0] out;
+	initial begin
+		clk = 0;
+		reset = 0;
+		ena = 1&#39;bz;
+		#(15) reset = 0;
+		#(20) reset = 1;
+	end
+	initial $monitor(&#34;out=%b&#34;, out);
+	always clk = #(10) ~clk;
+	lfsr_counter LF(
+		clk,
+		reset,
+		out
+	);
+	initial #(1000)
+		$finish(0);
+endmodule
+module lfsr_counter (
+	clk,
+	reset,
+	out
+);
+	parameter WIDTH = 4;
+	parameter TAP = 4&#39;b1001;
+	integer N;
+	output [WIDTH - 1:0] out;
+	input clk;
+	input reset;
+	wire [WIDTH - 1:0] gc;
+	reg [WIDTH - 1:0] lfsr;
+	reg [WIDTH - 1:0] next_lfsr;
+	reg fb_lsb;
+	reg fb;
+	always @(posedge clk or negedge reset)
+		if (reset == 1&#39;b0)
+			lfsr[WIDTH - 1:0] &lt;= 4&#39;b0000;
+		else
+			lfsr[WIDTH - 1:0] &lt;= next_lfsr[WIDTH - 1:0];
+	always @(lfsr) begin
+		fb_lsb = ~|lfsr[WIDTH - 2:0];
+		fb = lfsr[WIDTH - 1] ^ fb_lsb;
+		for (N = WIDTH; N &gt;= 0; N = N - 1)
+			if (TAP[N] == 1)
+				next_lfsr[N] = lfsr[N - 1] ^ fb;
+			else
+				next_lfsr[N] = lfsr[N - 1];
+		next_lfsr[0] = fb;
+	end
+	assign out[WIDTH - 1:0] = {1&#39;b0, lfsr[WIDTH - 1:1]};
+endmodule
+
+</pre>
+</body>

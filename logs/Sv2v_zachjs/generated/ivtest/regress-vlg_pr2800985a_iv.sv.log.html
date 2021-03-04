@@ -1,0 +1,300 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2800985a.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2800985a.v</a>
+defines: 
+completed: 2021-03-04 09:15:09
+time_elapsed: 0.409s
+ram usage: 14400 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2800985a.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2800985a.v</a>
+module top;
+	parameter _sv2v_width_work_file = 144;
+	parameter [_sv2v_width_work_file - 1:0] work_file = &#34;work/pr2800985.txt&#34;;
+	reg pass;
+	integer errno;
+	integer bfd;
+	integer vfd;
+	integer mcd;
+	integer res;
+	reg [639:0] result;
+	reg [639:0] str;
+	task clear_error;
+		begin
+			res = $ftell(vfd);
+			errno = $ferror(vfd, result);
+			if (errno != 0) begin
+				$display(&#34;Failed to clear error state (%0s)&#34;, result);
+				$finish;
+			end
+		end
+	endtask
+	task check_error;
+		begin
+			if (errno == 0) begin
+				$display(&#34;  FAILED: expected an error!&#34;);
+				pass = 1&#39;b0;
+			end
+			clear_error;
+		end
+	endtask
+	initial begin
+		pass = 1&#39;b1;
+		vfd = $fopen(work_file, &#34;w+&#34;);
+		if (vfd == 0) begin
+			errno = $ferror(vfd, result);
+			$display(&#34;Failed to open required file %s (%0s).&#34;, work_file, result);
+			$finish;
+		end
+		$display(&#34;Check a valid MCD.&#34;);
+		errno = $ferror(1, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Opening a file that does not exist.&#34;);
+		bfd = $fopen(&#34;FileDoesNotExist&#34;, &#34;r&#34;);
+		$display(&#34;  $fopen returned: %h&#34;, bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Opening a directory we should not be able to write.&#34;);
+		bfd = $fopen(&#34;/&#34;, &#34;w&#34;);
+		$display(&#34;  $fopen returned: %h&#34;, bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fclose with fd 0 and -1.&#34;);
+		bfd = 0;
+		$fclose(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		$fclose(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fdisplay with fd 0 and -1.&#34;);
+		bfd = 0;
+		$fdisplay(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		$fdisplay(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fwrite with fd 0 and -1.&#34;);
+		bfd = 0;
+		$fwrite(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		$fwrite(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fstrobe with fd 0 and -1.&#34;);
+		bfd = 0;
+		$fstrobe(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		$fstrobe(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fgetc with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $fgetc(bfd);
+		$display(&#34;  $fgetc returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $fgetc(bfd);
+		$display(&#34;  $fgetc returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $ungetc with fd 0 and -1 and char = EOF.&#34;);
+		bfd = 0;
+		res = $ungetc(0, bfd);
+		$display(&#34;  $ungetc returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $ungetc(0, bfd);
+		$display(&#34;  $ungetc returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		res = $ungetc(-1, vfd);
+		$display(&#34;  $ungetc returned: %0d&#34;, res);
+		errno = $ferror(vfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		if ((res != -1) || (errno != 0)) begin
+			$display(&#34;  Failed expected result (-1, 0), got (%0d, %0d).&#34;, res, errno);
+			if (res != -1)
+				pass = 1&#39;b0;
+			clear_error;
+		end
+		$display(&#34;Checking $fgets with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $fgets(str, bfd);
+		$display(&#34;  $fgets returned: %0d, &#39;%0s&#39;&#34;, res, str);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $fgets(str, bfd);
+		$display(&#34;  $fgets returned: %0d, &#39;%0s&#39;&#34;, res, str);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fscanf with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $fscanf(bfd, &#34;%s&#34;, str);
+		$display(&#34;  $fscanf returned: %0d, &#39;%0s&#39;&#34;, res, str);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $fscanf(bfd, &#34;%s&#34;, str);
+		$display(&#34;  $fscanf returned: %0d, &#39;%0s&#39;&#34;, res, str);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fread with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $fread(str, bfd);
+		$display(&#34;  $fread returned: %0d, &#39;%0s&#39;&#34;, res, str);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $fread(str, bfd);
+		$display(&#34;  $fread returned: %0d, &#39;%0s&#39;&#34;, res, str);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $ftell with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $ftell(bfd);
+		$display(&#34;  $ftell returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $ftell(bfd);
+		$display(&#34;  $ftell returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fseek.&#34;);
+		bfd = 0;
+		res = $fseek(bfd, 0, 0);
+		$display(&#34;  $fseek returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $fseek(bfd, 0, 0);
+		$display(&#34;  $fseek returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		res = $fseek(vfd, 0, 4);
+		$display(&#34;  $fseek returned: %0d&#34;, res);
+		errno = $ferror(vfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $rewind with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $rewind(bfd);
+		$display(&#34;  $rewind returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $rewind(bfd);
+		$display(&#34;  $rewind returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fflush with fd 0 and -1.&#34;);
+		bfd = 0;
+		$fflush(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		$fflush(bfd);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $feof with fd 0 and -1.&#34;);
+		bfd = 0;
+		res = $feof(bfd);
+		$display(&#34;  $feof returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		bfd = -1;
+		res = $feof(bfd);
+		$display(&#34;  $feof returned: %0d&#34;, res);
+		errno = $ferror(bfd, result);
+		$display(&#34;  $ferror returned: %0d, &#39;%0s&#39;&#34;, errno, result);
+		check_error;
+		$display(&#34;Checking $fstrobe after $fclose.&#34;);
+		res = $rewind(vfd);
+		if (res != 0) begin
+			$display(&#34;Failed to rewind file&#34;);
+			$finish;
+		end
+		$fwrite(vfd, &#34;test-&#34;);
+		$fstrobe(vfd, &#34;FAILED&#34;);
+		$fclose(vfd);
+		vfd = $fopen(work_file, &#34;r&#34;);
+		if (vfd == 0) begin
+			errno = $ferror(vfd, result);
+			$display(&#34;Failed to open required file %s (%0s).&#34;, work_file, result);
+			$finish;
+		end
+		res = $fgets(str, vfd);
+		if (res == 0) begin
+			errno = $ferror(vfd, result);
+			$display(&#34;Failed to read back result (%0s)&#34;, result);
+			str = &#34;failed&#34;;
+		end
+		if (str !== &#34;test-&#34;) begin
+			$display(&#34;$fstrobe was not skipped, expected &#39;test-&#39;, got &#39;%0s&#39;&#34;, str);
+			pass = 1&#39;b0;
+		end
+		$fclose(vfd);
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+endmodule
+
+</pre>
+</body>

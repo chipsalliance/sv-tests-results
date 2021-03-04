@@ -1,0 +1,120 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/ivltests/memidx.v.html" target="file-frame">third_party/tests/ivtest/ivltests/memidx.v</a>
+defines: 
+completed: 2021-03-04 09:15:35
+time_elapsed: 0.110s
+ram usage: 11156 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/memidx.v.html" target="file-frame">third_party/tests/ivtest/ivltests/memidx.v</a>
+module wire_test_case (
+	array_out,
+	clock,
+	reset
+);
+	output [15:0] array_out;
+	input clock;
+	input reset;
+	reg [3:0] readptr;
+	reg [15:0] body [15:0];
+	assign array_out = body[readptr];
+	always @(posedge clock)
+		if (reset == 0) begin
+			readptr &lt;= 16&#39;h0000;
+			body[0] &lt;= 16&#39;h0001;
+			body[1] &lt;= 16&#39;h0002;
+			body[2] &lt;= 16&#39;h0003;
+			body[3] &lt;= 16&#39;h0005;
+			body[4] &lt;= 16&#39;h0008;
+			body[5] &lt;= 16&#39;h000d;
+			body[6] &lt;= 16&#39;h0015;
+		end
+		else
+			readptr &lt;= readptr + 16&#39;h0001;
+endmodule
+module always_test_case (
+	array_out,
+	clock,
+	reset
+);
+	output [15:0] array_out;
+	input clock;
+	input reset;
+	reg [3:0] readptr;
+	reg [15:0] body [15:0];
+	always @(readptr or body[readptr]) array_out &lt;= body[readptr];
+	always @(posedge clock)
+		if (reset == 0) begin
+			readptr &lt;= 16&#39;h0000;
+			body[0] &lt;= 16&#39;h0001;
+			body[1] &lt;= 16&#39;h0002;
+			body[2] &lt;= 16&#39;h0003;
+			body[3] &lt;= 16&#39;h0005;
+			body[4] &lt;= 16&#39;h0008;
+			body[5] &lt;= 16&#39;h000d;
+			body[6] &lt;= 16&#39;h0015;
+		end
+		else
+			readptr &lt;= readptr + 16&#39;h0001;
+endmodule
+module BENCH;
+	wire [15:0] array_out1;
+	wire [15:0] array_out2;
+	reg clock;
+	reg reset;
+	integer count;
+	integer errors;
+	wire_test_case usingwire(
+		array_out1,
+		clock,
+		reset
+	);
+	always_test_case usingalways(
+		array_out2,
+		clock,
+		reset
+	);
+	initial begin
+		clock &lt;= 0;
+		reset &lt;= 0;
+		count &lt;= 0;
+		#(1000)
+			;
+		if (errors == 0)
+			$display(&#34;PASSED&#34;);
+		$finish;
+	end
+	always #(10) clock &lt;= ~clock;
+	always @(posedge clock) begin
+		count &lt;= count + 1;
+		case (count)
+			10: reset &lt;= 1;
+		endcase
+	end
+	initial errors = 0;
+	always @(negedge clock)
+		if (array_out1 !== array_out2) begin
+			$display(&#34;FAILED: %b !== %b&#34;, array_out1, array_out2);
+			errors = errors + 1;
+		end
+endmodule
+
+</pre>
+</body>

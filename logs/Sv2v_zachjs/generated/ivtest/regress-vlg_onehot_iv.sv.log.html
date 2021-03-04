@@ -1,0 +1,155 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+tags: ivtest
+incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../third_party/tests/ivtest/contrib/onehot.v.html" target="file-frame">third_party/tests/ivtest/contrib/onehot.v</a>
+defines: 
+completed: 2021-03-04 09:15:26
+time_elapsed: 0.110s
+ram usage: 11744 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/contrib/onehot.v.html" target="file-frame">third_party/tests/ivtest/contrib/onehot.v</a>
+module onehot (
+	clk,
+	resetb,
+	a,
+	b,
+	x,
+	y
+);
+	input clk;
+	input resetb;
+	input [7:0] a;
+	input [7:0] b;
+	output [7:0] x;
+	output [7:0] y;
+	reg [15:0] state;
+	reg [15:0] next_state;
+	reg [7:0] x_in;
+	reg [7:0] y_in;
+	always @(posedge clk or negedge resetb)
+		if (~resetb)
+			state = 0;
+		else if (next_state == 0)
+			state = 16&#39;h0001;
+		else
+			state = next_state;
+	always @(posedge clk or negedge resetb)
+		if (~resetb)
+			x = 0;
+		else
+			x = x_in;
+	always @(posedge clk or negedge resetb)
+		if (~resetb)
+			y = 0;
+		else
+			y = y_in;
+	always @(state or a or b or x or y) begin
+		x_in = x;
+		y_in = y;
+		next_state = 0;
+		case (1&#39;b1)
+			state[0]: begin
+				x_in = 8&#39;d20;
+				y_in = 8&#39;d100;
+				next_state[1] = 1&#39;b1;
+			end
+			state[1]: next_state[2] = 1&#39;b1;
+			state[2]: next_state[3] = 1&#39;b1;
+			state[3]: next_state[4] = 1&#39;b1;
+			state[4]: next_state[5] = 1&#39;b1;
+			state[5]: next_state[6] = 1&#39;b1;
+			state[6]: next_state[7] = 1&#39;b1;
+			state[7]:
+				if (a == 1) begin
+					y_in = y - 1;
+					next_state[1] = 1&#39;b1;
+				end
+				else
+					next_state[8] = 1&#39;b1;
+			state[8]: next_state[9] = 1&#39;b1;
+			state[9]: next_state[10] = 1&#39;b1;
+			state[10]: next_state[11] = 1&#39;b1;
+			state[11]:
+				if (b == 1) begin
+					x_in = x + 1;
+					next_state[1] = 1&#39;b1;
+				end
+				else
+					next_state[12] = 1&#39;b1;
+			state[12]: next_state[13] = 1&#39;b1;
+			state[13]: next_state[14] = 1&#39;b1;
+			state[14]: next_state[15] = 1&#39;b1;
+			state[15]: next_state[1] = 1&#39;b1;
+		endcase
+	end
+endmodule
+module test_onehot;
+	reg clk;
+	reg resetb;
+	reg [7:0] a;
+	reg [7:0] b;
+	wire [7:0] x;
+	wire [7:0] y;
+	reg error;
+	onehot onehot(
+		.clk(clk),
+		.resetb(resetb),
+		.a(a),
+		.b(b),
+		.x(x),
+		.y(y)
+	);
+	initial begin
+		clk = 0;
+		forever #(10) clk = ~clk;
+	end
+	initial begin
+		resetb = 0;
+		#(33) resetb = 1;
+	end
+	initial begin
+		error = 0;
+		a = 0;
+		b = 0;
+		repeat (64) @(posedge clk)
+			;
+		#(1) a = 1;
+		b = 0;
+		repeat (256) @(posedge clk)
+			;
+		#(1) a = 0;
+		b = 1;
+		repeat (256) @(posedge clk)
+			;
+		if (x !== 8&#39;d43) begin
+			error = 1;
+			$display(&#34;FAILED - X Expected value 43, is %d&#34;, x);
+		end
+		if (y !== 8&#39;d64) begin
+			error = 1;
+			$display(&#34;FAILED - Y Expected value 63, is %d&#34;, y);
+		end
+		if (error == 0)
+			$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+
+</pre>
+</body>
