@@ -161,20 +161,7 @@
 <span class="normal"><a href="#l-153">153</a></span>
 <span class="normal"><a href="#l-154">154</a></span>
 <span class="normal"><a href="#l-155">155</a></span>
-<span class="normal"><a href="#l-156">156</a></span>
-<span class="normal"><a href="#l-157">157</a></span>
-<span class="normal"><a href="#l-158">158</a></span>
-<span class="normal"><a href="#l-159">159</a></span>
-<span class="normal"><a href="#l-160">160</a></span>
-<span class="normal"><a href="#l-161">161</a></span>
-<span class="normal"><a href="#l-162">162</a></span>
-<span class="normal"><a href="#l-163">163</a></span>
-<span class="normal"><a href="#l-164">164</a></span>
-<span class="normal"><a href="#l-165">165</a></span>
-<span class="normal"><a href="#l-166">166</a></span>
-<span class="normal"><a href="#l-167">167</a></span>
-<span class="normal"><a href="#l-168">168</a></span>
-<span class="normal"><a href="#l-169">169</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-156">156</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a>
@@ -204,145 +191,132 @@
 <a name="l-28"></a>  <span class="c1">// real implementation running alongside and we check DMEM contents on completion.</span>
 <a name="l-29"></a>  <span class="k">parameter</span> <span class="kt">string</span> <span class="n">DesignScope</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span>
 <a name="l-30"></a>
-<a name="l-31"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">ImemAddrWidth</span> <span class="o">=</span> <span class="n">prim_util_pkg</span><span class="o">::</span><span class="n">vbits</span><span class="p">(</span><span class="n">ImemSizeByte</span><span class="p">),</span>
-<a name="l-32"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">DmemAddrWidth</span> <span class="o">=</span> <span class="n">prim_util_pkg</span><span class="o">::</span><span class="n">vbits</span><span class="p">(</span><span class="n">DmemSizeByte</span><span class="p">)</span>
-<a name="l-33"></a><span class="p">)(</span>
-<a name="l-34"></a>  <span class="k">input</span>  <span class="kt">logic</span>  <span class="n">clk_i</span><span class="p">,</span>
-<a name="l-35"></a>  <span class="k">input</span>  <span class="kt">logic</span>  <span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-36"></a>
-<a name="l-37"></a>  <span class="c1">// Enable the model. This signal is a &quot;runtime parameter&quot;, it is only honored if set in an initial</span>
-<a name="l-38"></a>  <span class="c1">// block.</span>
-<a name="l-39"></a>  <span class="k">input</span> <span class="kt">logic</span>   <span class="n">enable_i</span><span class="p">,</span>
+<a name="l-31"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">ImemAddrWidth</span> <span class="o">=</span> <span class="n">prim_util_pkg</span><span class="o">::</span><span class="n">vbits</span><span class="p">(</span><span class="n">ImemSizeByte</span><span class="p">)</span>
+<a name="l-32"></a><span class="p">)(</span>
+<a name="l-33"></a>  <span class="k">input</span>  <span class="kt">logic</span>  <span class="n">clk_i</span><span class="p">,</span>
+<a name="l-34"></a>  <span class="k">input</span>  <span class="kt">logic</span>  <span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-35"></a>
+<a name="l-36"></a>  <span class="k">input</span>  <span class="kt">logic</span>  <span class="n">start_i</span><span class="p">,</span> <span class="c1">// start the operation</span>
+<a name="l-37"></a>  <span class="k">output</span> <span class="kt">bit</span>    <span class="n">done_o</span><span class="p">,</span>  <span class="c1">// operation done</span>
+<a name="l-38"></a>
+<a name="l-39"></a>  <span class="k">output</span> <span class="n">err_bits_t</span> <span class="n">err_bits_o</span><span class="p">,</span> <span class="c1">// valid when done_o is asserted</span>
 <a name="l-40"></a>
-<a name="l-41"></a>  <span class="k">input</span>  <span class="kt">logic</span>  <span class="n">start_i</span><span class="p">,</span> <span class="c1">// start the operation</span>
-<a name="l-42"></a>  <span class="k">output</span> <span class="kt">bit</span>    <span class="n">done_o</span><span class="p">,</span>  <span class="c1">// operation done</span>
-<a name="l-43"></a>
-<a name="l-44"></a>  <span class="k">output</span> <span class="n">err_bits_t</span> <span class="n">err_bits_o</span><span class="p">,</span> <span class="c1">// valid when done_o is asserted</span>
+<a name="l-41"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">ImemAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">start_addr_i</span><span class="p">,</span> <span class="c1">// start byte address in IMEM</span>
+<a name="l-42"></a>
+<a name="l-43"></a>  <span class="k">output</span> <span class="kt">bit</span> <span class="n">err_o</span>        <span class="c1">// something went wrong</span>
+<a name="l-44"></a><span class="p">);</span>
 <a name="l-45"></a>
-<a name="l-46"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">ImemAddrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">start_addr_i</span><span class="p">,</span> <span class="c1">// start byte address in IMEM</span>
-<a name="l-47"></a>
-<a name="l-48"></a>  <span class="k">output</span> <span class="kt">bit</span> <span class="n">err_o</span>        <span class="c1">// something went wrong</span>
-<a name="l-49"></a><span class="p">);</span>
-<a name="l-50"></a>
-<a name="l-51"></a>  <span class="kn">import</span> <span class="err">&quot;</span><span class="nn">DPI</span><span class="o">-</span><span class="n">C</span><span class="s">&quot; function chandle otbn_model_init();</span>
-<a name="l-52"></a>  <span class="kn">import</span> <span class="err">&quot;</span><span class="nn">DPI</span><span class="o">-</span><span class="n">C</span><span class="s">&quot; function void otbn_model_destroy(chandle handle);</span>
-<a name="l-53"></a>  <span class="kn">import</span> <span class="err">&quot;</span><span class="nn">DPI</span><span class="o">-</span><span class="n">C</span><span class="s">&quot; context function</span>
-<a name="l-54"></a>    <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">otbn_model_step</span><span class="p">(</span><span class="kt">chandle</span>           <span class="n">model</span><span class="p">,</span>
-<a name="l-55"></a>                                 <span class="kt">string</span>            <span class="n">imem_scope</span><span class="p">,</span>
-<a name="l-56"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">imem_size</span><span class="p">,</span>
-<a name="l-57"></a>                                 <span class="kt">string</span>            <span class="n">dmem_scope</span><span class="p">,</span>
-<a name="l-58"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">dmem_size</span><span class="p">,</span>
-<a name="l-59"></a>                                 <span class="kt">string</span>            <span class="n">design_scope</span><span class="p">,</span>
-<a name="l-60"></a>                                 <span class="kt">logic</span>             <span class="n">start_i</span><span class="p">,</span>
-<a name="l-61"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">start_addr</span><span class="p">,</span>
-<a name="l-62"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">status</span><span class="p">,</span>
-<a name="l-63"></a>                                 <span class="k">inout</span> <span class="kt">bit</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">err_code</span><span class="p">);</span>
-<a name="l-64"></a>
-<a name="l-65"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">ImemSizeWords</span> <span class="o">=</span> <span class="n">ImemSizeByte</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
-<a name="l-66"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">DmemSizeWords</span> <span class="o">=</span> <span class="n">DmemSizeByte</span> <span class="o">/</span> <span class="p">(</span><span class="n">WLEN</span> <span class="o">/</span> <span class="mi">8</span><span class="p">);</span>
-<a name="l-67"></a>
-<a name="l-68"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">StartAddr32_A</span><span class="p">,</span> <span class="n">ImemAddrWidth</span> <span class="o">&lt;=</span> <span class="mi">32</span><span class="p">);</span>
-<a name="l-69"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">start_addr_32</span><span class="p">;</span>
-<a name="l-70"></a>  <span class="k">assign</span> <span class="n">start_addr_32</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">32</span> <span class="o">-</span> <span class="n">ImemAddrWidth</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">start_addr_i</span><span class="p">};</span>
-<a name="l-71"></a>
-<a name="l-72"></a>  <span class="c1">// Work-around for Verilator. IEEE 1800-2017 says you should compare/assign to a chandle with</span>
-<a name="l-73"></a>  <span class="c1">// null. Verilator would prefer you to use zero: it treats null as a synonym of 1&#39;b0 and chandle</span>
-<a name="l-74"></a>  <span class="c1">// as a synonym of bit [63:0], so comparing with null causes width mismatch errors.</span>
-<a name="l-75"></a><span class="no">`ifdef</span> <span class="n">VERILATOR</span>
-<a name="l-76"></a>  <span class="kt">chandle</span> <span class="n">chandle_null</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-77"></a><span class="no">`else</span>
-<a name="l-78"></a>  <span class="kt">chandle</span> <span class="n">chandle_null</span> <span class="o">=</span> <span class="k">null</span><span class="p">;</span>
-<a name="l-79"></a><span class="no">`endif</span>
-<a name="l-80"></a>
-<a name="l-81"></a>  <span class="c1">// Create and destroy an object through which we can talk to the ISS.</span>
-<a name="l-82"></a>  <span class="c1">// If enable_i is not set, do not initialize the ISS (and, by consequence, do not start the Python</span>
-<a name="l-83"></a>  <span class="c1">// process).</span>
-<a name="l-84"></a>  <span class="kt">chandle</span> <span class="n">model_handle</span> <span class="o">=</span> <span class="n">chandle_null</span><span class="p">;</span>
-<a name="l-85"></a>  <span class="k">initial</span> <span class="k">begin</span>
-<a name="l-86"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">enable_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-87"></a>      <span class="n">model_handle</span> <span class="o">=</span> <span class="n">otbn_model_init</span><span class="p">();</span>
-<a name="l-88"></a>      <span class="k">assert</span><span class="p">(</span><span class="n">model_handle</span> <span class="o">!=</span> <span class="n">chandle_null</span><span class="p">);</span>
-<a name="l-89"></a>      <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;OTBN: Model enabled.&quot;</span><span class="p">);</span>
-<a name="l-90"></a>    <span class="k">end</span>
-<a name="l-91"></a>  <span class="k">end</span>
-<a name="l-92"></a>  <span class="k">final</span> <span class="k">begin</span>
-<a name="l-93"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">model_handle</span> <span class="o">!=</span> <span class="n">chandle_null</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-94"></a>      <span class="n">otbn_model_destroy</span><span class="p">(</span><span class="n">model_handle</span><span class="p">);</span>
-<a name="l-95"></a>      <span class="n">model_handle</span> <span class="o">=</span> <span class="n">chandle_null</span><span class="p">;</span>
-<a name="l-96"></a>    <span class="k">end</span>
-<a name="l-97"></a>  <span class="k">end</span>
+<a name="l-46"></a>  <span class="kn">import</span> <span class="err">&quot;</span><span class="nn">DPI</span><span class="o">-</span><span class="n">C</span><span class="s">&quot; function chandle otbn_model_init();</span>
+<a name="l-47"></a>  <span class="kn">import</span> <span class="err">&quot;</span><span class="nn">DPI</span><span class="o">-</span><span class="n">C</span><span class="s">&quot; function void otbn_model_destroy(chandle handle);</span>
+<a name="l-48"></a>  <span class="kn">import</span> <span class="err">&quot;</span><span class="nn">DPI</span><span class="o">-</span><span class="n">C</span><span class="s">&quot; context function</span>
+<a name="l-49"></a>    <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">otbn_model_step</span><span class="p">(</span><span class="kt">chandle</span>           <span class="n">model</span><span class="p">,</span>
+<a name="l-50"></a>                                 <span class="kt">string</span>            <span class="n">imem_scope</span><span class="p">,</span>
+<a name="l-51"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">imem_size</span><span class="p">,</span>
+<a name="l-52"></a>                                 <span class="kt">string</span>            <span class="n">dmem_scope</span><span class="p">,</span>
+<a name="l-53"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">dmem_size</span><span class="p">,</span>
+<a name="l-54"></a>                                 <span class="kt">string</span>            <span class="n">design_scope</span><span class="p">,</span>
+<a name="l-55"></a>                                 <span class="kt">logic</span>             <span class="n">start_i</span><span class="p">,</span>
+<a name="l-56"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">start_addr</span><span class="p">,</span>
+<a name="l-57"></a>                                 <span class="kt">int</span> <span class="kt">unsigned</span>      <span class="n">status</span><span class="p">,</span>
+<a name="l-58"></a>                                 <span class="k">inout</span> <span class="kt">bit</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">err_code</span><span class="p">);</span>
+<a name="l-59"></a>
+<a name="l-60"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">ImemSizeWords</span> <span class="o">=</span> <span class="n">ImemSizeByte</span> <span class="o">/</span> <span class="mi">4</span><span class="p">;</span>
+<a name="l-61"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">DmemSizeWords</span> <span class="o">=</span> <span class="n">DmemSizeByte</span> <span class="o">/</span> <span class="p">(</span><span class="n">WLEN</span> <span class="o">/</span> <span class="mi">8</span><span class="p">);</span>
+<a name="l-62"></a>
+<a name="l-63"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">StartAddr32_A</span><span class="p">,</span> <span class="n">ImemAddrWidth</span> <span class="o">&lt;=</span> <span class="mi">32</span><span class="p">)</span>
+<a name="l-64"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">start_addr_32</span><span class="p">;</span>
+<a name="l-65"></a>  <span class="k">assign</span> <span class="n">start_addr_32</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">32</span> <span class="o">-</span> <span class="n">ImemAddrWidth</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">start_addr_i</span><span class="p">};</span>
+<a name="l-66"></a>
+<a name="l-67"></a>  <span class="c1">// Work-around for Verilator. IEEE 1800-2017 says you should compare/assign to a chandle with</span>
+<a name="l-68"></a>  <span class="c1">// null. Verilator would prefer you to use zero: it treats null as a synonym of 1&#39;b0 and chandle</span>
+<a name="l-69"></a>  <span class="c1">// as a synonym of bit [63:0], so comparing with null causes width mismatch errors.</span>
+<a name="l-70"></a><span class="no">`ifdef</span> <span class="n">VERILATOR</span>
+<a name="l-71"></a>  <span class="kt">chandle</span> <span class="n">chandle_null</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-72"></a><span class="no">`else</span>
+<a name="l-73"></a>  <span class="kt">chandle</span> <span class="n">chandle_null</span> <span class="o">=</span> <span class="k">null</span><span class="p">;</span>
+<a name="l-74"></a><span class="no">`endif</span>
+<a name="l-75"></a>
+<a name="l-76"></a>  <span class="c1">// Create and destroy an object through which we can talk to the ISS.</span>
+<a name="l-77"></a>  <span class="kt">chandle</span> <span class="n">model_handle</span><span class="p">;</span>
+<a name="l-78"></a>  <span class="k">initial</span> <span class="k">begin</span>
+<a name="l-79"></a>    <span class="n">model_handle</span> <span class="o">=</span> <span class="n">otbn_model_init</span><span class="p">();</span>
+<a name="l-80"></a>    <span class="k">assert</span><span class="p">(</span><span class="n">model_handle</span> <span class="o">!=</span> <span class="n">chandle_null</span><span class="p">);</span>
+<a name="l-81"></a>  <span class="k">end</span>
+<a name="l-82"></a>  <span class="k">final</span> <span class="k">begin</span>
+<a name="l-83"></a>    <span class="n">otbn_model_destroy</span><span class="p">(</span><span class="n">model_handle</span><span class="p">);</span>
+<a name="l-84"></a>  <span class="k">end</span>
+<a name="l-85"></a>
+<a name="l-86"></a>  <span class="c1">// A packed &quot;status&quot; value. This gets assigned by DPI function calls that need to update both</span>
+<a name="l-87"></a>  <span class="c1">// whether we&#39;re running and also error flags at the same time. The contents are magic simulation</span>
+<a name="l-88"></a>  <span class="c1">// values, so get initialized before reset (to avoid stopping the simulation before it even</span>
+<a name="l-89"></a>  <span class="c1">// starts).</span>
+<a name="l-90"></a>  <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">status</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-91"></a>
+<a name="l-92"></a>  <span class="c1">// Extract particular bits of the status value.</span>
+<a name="l-93"></a>  <span class="c1">//</span>
+<a name="l-94"></a>  <span class="c1">//   [0]     running:      The ISS is currently running</span>
+<a name="l-95"></a>  <span class="c1">//   [1]     check_due:    The ISS just finished but still needs to check results</span>
+<a name="l-96"></a>  <span class="c1">//   [2]     failed_step:  Something went wrong when trying to start or step the ISS.</span>
+<a name="l-97"></a>  <span class="c1">//   [3]     failed_cmp:   The consistency check at the end of run failed.</span>
 <a name="l-98"></a>
-<a name="l-99"></a>  <span class="c1">// A packed &quot;status&quot; value. This gets assigned by DPI function calls that need to update both</span>
-<a name="l-100"></a>  <span class="c1">// whether we&#39;re running and also error flags at the same time. The contents are magic simulation</span>
-<a name="l-101"></a>  <span class="c1">// values, so get initialized before reset (to avoid stopping the simulation before it even</span>
-<a name="l-102"></a>  <span class="c1">// starts).</span>
-<a name="l-103"></a>  <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">status</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-104"></a>
-<a name="l-105"></a>  <span class="c1">// Extract particular bits of the status value.</span>
-<a name="l-106"></a>  <span class="c1">//</span>
-<a name="l-107"></a>  <span class="c1">//   [0]     running:      The ISS is currently running</span>
-<a name="l-108"></a>  <span class="c1">//   [1]     check_due:    The ISS just finished but still needs to check results</span>
-<a name="l-109"></a>  <span class="c1">//   [2]     failed_step:  Something went wrong when trying to start or step the ISS.</span>
-<a name="l-110"></a>  <span class="c1">//   [3]     failed_cmp:   The consistency check at the end of run failed.</span>
-<a name="l-111"></a>
-<a name="l-112"></a>  <span class="kt">bit</span> <span class="n">failed_cmp</span><span class="p">,</span> <span class="n">failed_step</span><span class="p">,</span> <span class="n">check_due</span><span class="p">,</span> <span class="n">running</span><span class="p">;</span>
-<a name="l-113"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">failed_cmp</span><span class="p">,</span> <span class="n">failed_step</span><span class="p">,</span> <span class="n">check_due</span><span class="p">,</span> <span class="n">running</span><span class="p">}</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-114"></a>
-<a name="l-115"></a>  <span class="kt">bit</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">raw_err_bits_d</span><span class="p">,</span> <span class="n">raw_err_bits_q</span><span class="p">;</span>
-<a name="l-116"></a>  <span class="kt">bit</span> <span class="n">unused_raw_err_bits</span><span class="p">;</span>
-<a name="l-117"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-118"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span> <span class="o">||</span> <span class="o">!</span><span class="n">enable_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-119"></a>      <span class="c1">// Clear status (stop running, and forget any errors)</span>
-<a name="l-120"></a>      <span class="n">status</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-121"></a>      <span class="n">raw_err_bits_q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-122"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-123"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">start_i</span> <span class="o">|</span> <span class="n">running</span> <span class="o">|</span> <span class="n">check_due</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-124"></a>        <span class="n">status</span> <span class="o">&lt;=</span> <span class="n">otbn_model_step</span><span class="p">(</span><span class="n">model_handle</span><span class="p">,</span>
-<a name="l-125"></a>                                  <span class="n">ImemScope</span><span class="p">,</span> <span class="n">ImemSizeWords</span><span class="p">,</span>
-<a name="l-126"></a>                                  <span class="n">DmemScope</span><span class="p">,</span> <span class="n">DmemSizeWords</span><span class="p">,</span>
-<a name="l-127"></a>                                  <span class="n">DesignScope</span><span class="p">,</span>
-<a name="l-128"></a>                                  <span class="n">start_i</span><span class="p">,</span> <span class="n">start_addr_32</span><span class="p">,</span>
-<a name="l-129"></a>                                  <span class="n">status</span><span class="p">,</span> <span class="n">raw_err_bits_d</span><span class="p">);</span>
-<a name="l-130"></a>        <span class="n">raw_err_bits_q</span> <span class="o">&lt;=</span> <span class="n">raw_err_bits_d</span><span class="p">;</span>
-<a name="l-131"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-132"></a>        <span class="c1">// If we&#39;re not running and we&#39;re not being told to start, there&#39;s nothing to do.</span>
-<a name="l-133"></a>      <span class="k">end</span>
+<a name="l-99"></a>  <span class="kt">bit</span> <span class="n">failed_cmp</span><span class="p">,</span> <span class="n">failed_step</span><span class="p">,</span> <span class="n">check_due</span><span class="p">,</span> <span class="n">running</span><span class="p">;</span>
+<a name="l-100"></a>  <span class="k">assign</span> <span class="p">{</span><span class="n">failed_cmp</span><span class="p">,</span> <span class="n">failed_step</span><span class="p">,</span> <span class="n">check_due</span><span class="p">,</span> <span class="n">running</span><span class="p">}</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-101"></a>
+<a name="l-102"></a>  <span class="kt">bit</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">raw_err_bits_d</span><span class="p">,</span> <span class="n">raw_err_bits_q</span><span class="p">;</span>
+<a name="l-103"></a>  <span class="kt">bit</span> <span class="n">unused_raw_err_bits</span><span class="p">;</span>
+<a name="l-104"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-105"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-106"></a>      <span class="c1">// Clear status (stop running, and forget any errors)</span>
+<a name="l-107"></a>      <span class="n">status</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-108"></a>      <span class="n">raw_err_bits_q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-109"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-110"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">start_i</span> <span class="o">|</span> <span class="n">running</span> <span class="o">|</span> <span class="n">check_due</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-111"></a>        <span class="n">status</span> <span class="o">&lt;=</span> <span class="n">otbn_model_step</span><span class="p">(</span><span class="n">model_handle</span><span class="p">,</span>
+<a name="l-112"></a>                                  <span class="n">ImemScope</span><span class="p">,</span> <span class="n">ImemSizeWords</span><span class="p">,</span>
+<a name="l-113"></a>                                  <span class="n">DmemScope</span><span class="p">,</span> <span class="n">DmemSizeWords</span><span class="p">,</span>
+<a name="l-114"></a>                                  <span class="n">DesignScope</span><span class="p">,</span>
+<a name="l-115"></a>                                  <span class="n">start_i</span><span class="p">,</span> <span class="n">start_addr_32</span><span class="p">,</span>
+<a name="l-116"></a>                                  <span class="n">status</span><span class="p">,</span> <span class="n">raw_err_bits_d</span><span class="p">);</span>
+<a name="l-117"></a>        <span class="n">raw_err_bits_q</span> <span class="o">&lt;=</span> <span class="n">raw_err_bits_d</span><span class="p">;</span>
+<a name="l-118"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-119"></a>        <span class="c1">// If we&#39;re not running and we&#39;re not being told to start, there&#39;s nothing to do.</span>
+<a name="l-120"></a>      <span class="k">end</span>
+<a name="l-121"></a>    <span class="k">end</span>
+<a name="l-122"></a>  <span class="k">end</span>
+<a name="l-123"></a>
+<a name="l-124"></a>  <span class="k">assign</span> <span class="n">err_bits_o</span> <span class="o">=</span> <span class="n">raw_err_bits_q</span><span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-125"></a>  <span class="k">assign</span> <span class="n">unused_raw_err_bits</span> <span class="o">=</span> <span class="o">^</span><span class="n">raw_err_bits_q</span><span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">8</span><span class="p">];</span>
+<a name="l-126"></a>
+<a name="l-127"></a>  <span class="c1">// Track negedges of running_q and expose that as a &quot;done&quot; output.</span>
+<a name="l-128"></a>  <span class="kt">bit</span> <span class="n">running_r</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-129"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-130"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-131"></a>      <span class="n">running_r</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-132"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-133"></a>      <span class="n">running_r</span> <span class="o">&lt;=</span> <span class="n">running</span><span class="p">;</span>
 <a name="l-134"></a>    <span class="k">end</span>
 <a name="l-135"></a>  <span class="k">end</span>
-<a name="l-136"></a>
-<a name="l-137"></a>  <span class="k">assign</span> <span class="n">err_bits_o</span> <span class="o">=</span> <span class="n">raw_err_bits_q</span><span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-138"></a>  <span class="k">assign</span> <span class="n">unused_raw_err_bits</span> <span class="o">=</span> <span class="o">^</span><span class="n">raw_err_bits_q</span><span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">8</span><span class="p">];</span>
-<a name="l-139"></a>
-<a name="l-140"></a>  <span class="c1">// Track negedges of running_q and expose that as a &quot;done&quot; output.</span>
-<a name="l-141"></a>  <span class="kt">bit</span> <span class="n">running_r</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-142"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-143"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-144"></a>      <span class="n">running_r</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-145"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-146"></a>      <span class="n">running_r</span> <span class="o">&lt;=</span> <span class="n">running</span><span class="p">;</span>
-<a name="l-147"></a>    <span class="k">end</span>
-<a name="l-148"></a>  <span class="k">end</span>
-<a name="l-149"></a>  <span class="k">assign</span> <span class="n">done_o</span> <span class="o">=</span> <span class="n">running_r</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">running</span><span class="p">;</span>
-<a name="l-150"></a>
-<a name="l-151"></a>  <span class="c1">// If DesignScope is not empty, we have a design to check. Bind a copy of otbn_rf_snooper_if into</span>
-<a name="l-152"></a>  <span class="c1">// each register file. The otbn_model_check() function will use these to extract memory contents.</span>
-<a name="l-153"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">DesignScope</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">g_check_design</span>
-<a name="l-154"></a>    <span class="c1">// TODO: This bind is by module, rather than by instance, because I couldn&#39;t get the by-instance</span>
-<a name="l-155"></a>    <span class="c1">// syntax plus upwards name referencing to work with Verilator. Obviously, this won&#39;t work with</span>
-<a name="l-156"></a>    <span class="c1">// multiple OTBN instances, so it would be nice to get it right.</span>
-<a name="l-157"></a>    <span class="k">bind</span> <span class="n">otbn_rf_base_ff</span> <span class="n">otbn_rf_snooper_if</span> <span class="p">#(.</span><span class="n">Width</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="p">.</span><span class="n">Depth</span> <span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="n">u_snooper</span> <span class="p">(.</span><span class="n">rf</span> <span class="p">(</span><span class="n">rf_reg</span><span class="p">));</span>
-<a name="l-158"></a>    <span class="k">bind</span> <span class="n">otbn_rf_bignum_ff</span> <span class="n">otbn_rf_snooper_if</span> <span class="p">#(.</span><span class="n">Width</span> <span class="p">(</span><span class="mi">256</span><span class="p">),</span> <span class="p">.</span><span class="n">Depth</span> <span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="n">u_snooper</span> <span class="p">(.</span><span class="n">rf</span> <span class="p">(</span><span class="n">rf</span><span class="p">));</span>
-<a name="l-159"></a>    <span class="k">bind</span> <span class="n">otbn_rf_base</span> <span class="n">otbn_stack_snooper_if</span> <span class="p">#(.</span><span class="n">StackWidth</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="p">.</span><span class="n">StackDepth</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
-<a name="l-160"></a>      <span class="n">u_call_stack_snooper</span> <span class="p">(</span>
-<a name="l-161"></a>        <span class="p">.</span><span class="n">stack_storage</span><span class="p">(</span><span class="n">u_call_stack</span><span class="p">.</span><span class="n">stack_storage</span><span class="p">),</span>
-<a name="l-162"></a>        <span class="p">.</span><span class="n">stack_wr_ptr_q</span><span class="p">(</span><span class="n">u_call_stack</span><span class="p">.</span><span class="n">stack_wr_ptr_q</span><span class="p">)</span>
-<a name="l-163"></a>      <span class="p">);</span>
-<a name="l-164"></a>  <span class="k">end</span>
-<a name="l-165"></a>
-<a name="l-166"></a>  <span class="k">assign</span> <span class="n">err_o</span> <span class="o">=</span> <span class="n">failed_step</span> <span class="o">|</span> <span class="n">failed_cmp</span><span class="p">;</span>
-<a name="l-167"></a>
-<a name="l-168"></a><span class="k">endmodule</span>
-<a name="l-169"></a><span class="no">`endif</span> <span class="c1">// SYNTHESIS</span>
+<a name="l-136"></a>  <span class="k">assign</span> <span class="n">done_o</span> <span class="o">=</span> <span class="n">running_r</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">running</span><span class="p">;</span>
+<a name="l-137"></a>
+<a name="l-138"></a>  <span class="c1">// If DesignScope is not empty, we have a design to check. Bind a copy of otbn_rf_snooper_if into</span>
+<a name="l-139"></a>  <span class="c1">// each register file. The otbn_model_check() function will use these to extract memory contents.</span>
+<a name="l-140"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">DesignScope</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">begin</span><span class="o">:</span> <span class="n">g_check_design</span>
+<a name="l-141"></a>    <span class="c1">// TODO: This bind is by module, rather than by instance, because I couldn&#39;t get the by-instance</span>
+<a name="l-142"></a>    <span class="c1">// syntax plus upwards name referencing to work with Verilator. Obviously, this won&#39;t work with</span>
+<a name="l-143"></a>    <span class="c1">// multiple OTBN instances, so it would be nice to get it right.</span>
+<a name="l-144"></a>    <span class="k">bind</span> <span class="n">otbn_rf_base_ff</span> <span class="n">otbn_rf_snooper_if</span> <span class="p">#(.</span><span class="n">Width</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="p">.</span><span class="n">Depth</span> <span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="n">u_snooper</span> <span class="p">(.</span><span class="n">rf</span> <span class="p">(</span><span class="n">rf_reg</span><span class="p">));</span>
+<a name="l-145"></a>    <span class="k">bind</span> <span class="n">otbn_rf_bignum_ff</span> <span class="n">otbn_rf_snooper_if</span> <span class="p">#(.</span><span class="n">Width</span> <span class="p">(</span><span class="mi">256</span><span class="p">),</span> <span class="p">.</span><span class="n">Depth</span> <span class="p">(</span><span class="mi">32</span><span class="p">))</span> <span class="n">u_snooper</span> <span class="p">(.</span><span class="n">rf</span> <span class="p">(</span><span class="n">rf</span><span class="p">));</span>
+<a name="l-146"></a>    <span class="k">bind</span> <span class="n">otbn_rf_base</span> <span class="n">otbn_stack_snooper_if</span> <span class="p">#(.</span><span class="n">StackWidth</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="p">.</span><span class="n">StackDepth</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+<a name="l-147"></a>      <span class="n">u_call_stack_snooper</span> <span class="p">(</span>
+<a name="l-148"></a>        <span class="p">.</span><span class="n">stack_storage</span><span class="p">(</span><span class="n">u_call_stack</span><span class="p">.</span><span class="n">stack_storage</span><span class="p">),</span>
+<a name="l-149"></a>        <span class="p">.</span><span class="n">stack_wr_ptr_q</span><span class="p">(</span><span class="n">u_call_stack</span><span class="p">.</span><span class="n">stack_wr_ptr_q</span><span class="p">)</span>
+<a name="l-150"></a>      <span class="p">);</span>
+<a name="l-151"></a>  <span class="k">end</span>
+<a name="l-152"></a>
+<a name="l-153"></a>  <span class="k">assign</span> <span class="n">err_o</span> <span class="o">=</span> <span class="n">failed_step</span> <span class="o">|</span> <span class="n">failed_cmp</span><span class="p">;</span>
+<a name="l-154"></a>
+<a name="l-155"></a><span class="k">endmodule</span>
+<a name="l-156"></a><span class="no">`endif</span> <span class="c1">// SYNTHESIS</span>
 </pre></div>
 </td></tr></table>
   </body>

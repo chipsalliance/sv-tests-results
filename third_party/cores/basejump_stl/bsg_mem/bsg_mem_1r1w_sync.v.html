@@ -94,7 +94,10 @@
 <span class="normal"><a href="#l-86">86</a></span>
 <span class="normal"><a href="#l-87">87</a></span>
 <span class="normal"><a href="#l-88">88</a></span>
-<span class="normal"><a href="#l-89">89</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 7/7/2016</span>
+<span class="normal"><a href="#l-89">89</a></span>
+<span class="normal"><a href="#l-90">90</a></span>
+<span class="normal"><a href="#l-91">91</a></span>
+<span class="normal"><a href="#l-92">92</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// MBT 7/7/2016</span>
 <a name="l-2"></a><span class="c1">//</span>
 <a name="l-3"></a><span class="c1">// 1 read-port, 1 write-port ram</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -165,24 +168,27 @@
 <a name="l-69"></a>   <span class="c1">//synopsys translate_off</span>
 <a name="l-70"></a>   <span class="k">initial</span>
 <a name="l-71"></a>     <span class="k">begin</span>
-<a name="l-72"></a>        <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;## %L: instantiating width_p=%d, els_p=%d, read_write_same_addr_p=%d, harden_p=%d (%m)&quot;</span><span class="p">,</span><span class="n">width_p</span><span class="p">,</span><span class="n">els_p</span><span class="p">,</span><span class="n">read_write_same_addr_p</span><span class="p">,</span><span class="n">harden_p</span><span class="p">);</span>
-<a name="l-73"></a>     <span class="k">end</span>
-<a name="l-74"></a>
-<a name="l-75"></a>   <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_lo</span><span class="p">)</span>
-<a name="l-76"></a>     <span class="k">if</span> <span class="p">(</span><span class="n">w_v_i</span><span class="p">)</span>
-<a name="l-77"></a>       <span class="k">begin</span>
-<a name="l-78"></a>          <span class="k">assert</span> <span class="p">((</span><span class="n">reset_i</span> <span class="o">===</span> <span class="m">&#39;X</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">reset_i</span> <span class="o">===</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">w_addr_i</span> <span class="o">&lt;</span> <span class="n">els_p</span><span class="p">))</span>
-<a name="l-79"></a>            <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Invalid address %x to %m of size %x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">w_addr_i</span><span class="p">,</span> <span class="n">els_p</span><span class="p">);</span>
-<a name="l-80"></a>
-<a name="l-81"></a>          <span class="k">assert</span> <span class="p">((</span><span class="n">reset_i</span> <span class="o">===</span> <span class="m">&#39;X</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">reset_i</span> <span class="o">===</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">||</span> <span class="o">~</span><span class="p">(</span><span class="n">r_addr_i</span> <span class="o">==</span> <span class="n">w_addr_i</span> <span class="o">&amp;&amp;</span> <span class="n">w_v_i</span> <span class="o">&amp;&amp;</span> <span class="n">r_v_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">read_write_same_addr_p</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">disable_collision_warning_p</span><span class="p">))</span>
-<a name="l-82"></a>            <span class="k">else</span>
-<a name="l-83"></a>              <span class="k">begin</span>
-<a name="l-84"></a>                 <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;X&#39;ing matched read address %x (%m)&quot;</span><span class="p">,</span><span class="n">r_addr_i</span><span class="p">);</span>
-<a name="l-85"></a>              <span class="k">end</span>
-<a name="l-86"></a>       <span class="k">end</span>
-<a name="l-87"></a>   <span class="c1">//synopsys translate_on</span>
-<a name="l-88"></a>
-<a name="l-89"></a><span class="k">endmodule</span>
+<a name="l-72"></a>	<span class="c1">// we warn if els_p &gt;= 16 because it is a good candidate for hardening</span>
+<a name="l-73"></a>	<span class="c1">// and we warn for width_p &gt;= 128 because this starts to add up to some real memory</span>
+<a name="l-74"></a>	<span class="k">if</span> <span class="p">((</span><span class="n">els_p</span> <span class="o">&gt;=</span> <span class="mi">16</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">width_p</span> <span class="o">&gt;=</span> <span class="mi">128</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">width_p</span><span class="o">*</span><span class="n">els_p</span> <span class="o">&gt;</span> <span class="mi">256</span><span class="p">))</span>
+<a name="l-75"></a>          <span class="p">$</span><span class="n">display</span><span class="p">(</span><span class="s">&quot;## %L: instantiating width_p=%d, els_p=%d, read_write_same_addr_p=%d, harden_p=%d (%m)&quot;</span><span class="p">,</span><span class="n">width_p</span><span class="p">,</span><span class="n">els_p</span><span class="p">,</span><span class="n">read_write_same_addr_p</span><span class="p">,</span><span class="n">harden_p</span><span class="p">);</span>
+<a name="l-76"></a>     <span class="k">end</span>
+<a name="l-77"></a>
+<a name="l-78"></a>   <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_lo</span><span class="p">)</span>
+<a name="l-79"></a>     <span class="k">if</span> <span class="p">(</span><span class="n">w_v_i</span><span class="p">)</span>
+<a name="l-80"></a>       <span class="k">begin</span>
+<a name="l-81"></a>          <span class="k">assert</span> <span class="p">((</span><span class="n">reset_i</span> <span class="o">===</span> <span class="m">&#39;X</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">reset_i</span> <span class="o">===</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">w_addr_i</span> <span class="o">&lt;</span> <span class="n">els_p</span><span class="p">))</span>
+<a name="l-82"></a>            <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Invalid address %x to %m of size %x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">w_addr_i</span><span class="p">,</span> <span class="n">els_p</span><span class="p">);</span>
+<a name="l-83"></a>
+<a name="l-84"></a>          <span class="k">assert</span> <span class="p">((</span><span class="n">reset_i</span> <span class="o">===</span> <span class="m">&#39;X</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">reset_i</span> <span class="o">===</span> <span class="mb">1&#39;b1</span><span class="p">)</span> <span class="o">||</span> <span class="o">~</span><span class="p">(</span><span class="n">r_addr_i</span> <span class="o">==</span> <span class="n">w_addr_i</span> <span class="o">&amp;&amp;</span> <span class="n">w_v_i</span> <span class="o">&amp;&amp;</span> <span class="n">r_v_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">read_write_same_addr_p</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">disable_collision_warning_p</span><span class="p">))</span>
+<a name="l-85"></a>            <span class="k">else</span>
+<a name="l-86"></a>              <span class="k">begin</span>
+<a name="l-87"></a>                 <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;X&#39;ing matched read address %x (%m)&quot;</span><span class="p">,</span><span class="n">r_addr_i</span><span class="p">);</span>
+<a name="l-88"></a>              <span class="k">end</span>
+<a name="l-89"></a>       <span class="k">end</span>
+<a name="l-90"></a>   <span class="c1">//synopsys translate_on</span>
+<a name="l-91"></a>
+<a name="l-92"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

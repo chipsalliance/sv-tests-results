@@ -559,7 +559,9 @@
 <span class="normal"><a href="#l-551">551</a></span>
 <span class="normal"><a href="#l-552">552</a></span>
 <span class="normal"><a href="#l-553">553</a></span>
-<span class="normal"><a href="#l-554">554</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-554">554</a></span>
+<span class="normal"><a href="#l-555">555</a></span>
+<span class="normal"><a href="#l-556">556</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -591,7 +593,7 @@
 <a name="l-30"></a>  <span class="k">input</span>  <span class="n">jtag_pkg</span><span class="o">::</span><span class="n">jtag_req_t</span>                        <span class="n">jtag_i</span><span class="p">,</span>
 <a name="l-31"></a>  <span class="k">output</span> <span class="n">jtag_pkg</span><span class="o">::</span><span class="n">jtag_rsp_t</span>                        <span class="n">jtag_o</span><span class="p">,</span>
 <a name="l-32"></a>  <span class="c1">// This bypasses the clock inverter inside the JTAG TAP for scanmmode.</span>
-<a name="l-33"></a>  <span class="k">input</span>                                              <span class="n">scanmode_i</span><span class="p">,</span>
+<a name="l-33"></a>  <span class="k">input</span>  <span class="n">lc_tx_t</span>                                     <span class="n">scanmode_i</span><span class="p">,</span>
 <a name="l-34"></a>  <span class="c1">// Alert outputs.</span>
 <a name="l-35"></a>  <span class="k">input</span>  <span class="n">prim_alert_pkg</span><span class="o">::</span><span class="n">alert_rx_t</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">alert_rx_i</span><span class="p">,</span>
 <a name="l-36"></a>  <span class="k">output</span> <span class="n">prim_alert_pkg</span><span class="o">::</span><span class="n">alert_tx_t</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">alert_tx_o</span><span class="p">,</span>
@@ -668,451 +670,453 @@
 <a name="l-107"></a>    <span class="p">.</span><span class="n">tl_o</span><span class="p">,</span>
 <a name="l-108"></a>    <span class="p">.</span><span class="n">reg2hw</span>    <span class="p">(</span> <span class="n">reg2hw</span> <span class="p">),</span>
 <a name="l-109"></a>    <span class="p">.</span><span class="n">hw2reg</span>    <span class="p">(</span> <span class="n">hw2reg</span> <span class="p">),</span>
-<a name="l-110"></a>    <span class="p">.</span><span class="n">devmode_i</span> <span class="p">(</span> <span class="mb">1&#39;b1</span>   <span class="p">)</span>
-<a name="l-111"></a>  <span class="p">);</span>
-<a name="l-112"></a>
-<a name="l-113"></a>  <span class="c1">////////////////////</span>
-<a name="l-114"></a>  <span class="c1">// Life Cycle TAP //</span>
-<a name="l-115"></a>  <span class="c1">////////////////////</span>
-<a name="l-116"></a>
-<a name="l-117"></a>  <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_h2d_t</span> <span class="n">tap_tl_h2d</span><span class="p">;</span>
-<a name="l-118"></a>  <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_d2h_t</span> <span class="n">tap_tl_d2h</span><span class="p">;</span>
-<a name="l-119"></a>  <span class="n">lc_ctrl_reg_pkg</span><span class="o">::</span><span class="n">lc_ctrl_reg2hw_t</span> <span class="n">tap_reg2hw</span><span class="p">;</span>
-<a name="l-120"></a>  <span class="n">lc_ctrl_reg_pkg</span><span class="o">::</span><span class="n">lc_ctrl_hw2reg_t</span> <span class="n">tap_hw2reg</span><span class="p">;</span>
-<a name="l-121"></a>
-<a name="l-122"></a>  <span class="n">lc_ctrl_reg_top</span> <span class="n">u_reg_tap</span> <span class="p">(</span>
-<a name="l-123"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-124"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-125"></a>    <span class="p">.</span><span class="n">tl_i</span>      <span class="p">(</span> <span class="n">tap_tl_h2d</span> <span class="p">),</span>
-<a name="l-126"></a>    <span class="p">.</span><span class="n">tl_o</span>      <span class="p">(</span> <span class="n">tap_tl_d2h</span> <span class="p">),</span>
-<a name="l-127"></a>    <span class="p">.</span><span class="n">reg2hw</span>    <span class="p">(</span> <span class="n">tap_reg2hw</span> <span class="p">),</span>
-<a name="l-128"></a>    <span class="p">.</span><span class="n">hw2reg</span>    <span class="p">(</span> <span class="n">tap_hw2reg</span> <span class="p">),</span>
-<a name="l-129"></a>    <span class="p">.</span><span class="n">devmode_i</span> <span class="p">(</span> <span class="mb">1&#39;b1</span>       <span class="p">)</span>
-<a name="l-130"></a>  <span class="p">);</span>
-<a name="l-131"></a>
-<a name="l-132"></a>
-<a name="l-133"></a>  <span class="c1">// This reuses the JTAG DTM and DMI from the RISC-V external</span>
-<a name="l-134"></a>  <span class="c1">// debug v0.13 specification to read and write the lc_ctrl CSRs:</span>
-<a name="l-135"></a>  <span class="c1">// https://github.com/riscv/riscv-debug-spec/blob/release/riscv-debug-release.pdf</span>
-<a name="l-136"></a>  <span class="c1">// The register addresses correspond to the byte offsets of the lc_ctrl CSRs, divided by 4.</span>
-<a name="l-137"></a>  <span class="c1">// Note that the DMI reset does not affect the LC controller in any way.</span>
-<a name="l-138"></a>  <span class="n">dm</span><span class="o">::</span><span class="n">dmi_req_t</span> <span class="n">dmi_req</span><span class="p">;</span>
-<a name="l-139"></a>  <span class="kt">logic</span> <span class="n">dmi_req_valid</span><span class="p">;</span>
-<a name="l-140"></a>  <span class="kt">logic</span> <span class="n">dmi_req_ready</span><span class="p">;</span>
-<a name="l-141"></a>  <span class="n">dm</span><span class="o">::</span><span class="n">dmi_resp_t</span> <span class="n">dmi_resp</span><span class="p">;</span>
-<a name="l-142"></a>  <span class="kt">logic</span> <span class="n">dmi_resp_ready</span><span class="p">;</span>
-<a name="l-143"></a>  <span class="kt">logic</span> <span class="n">dmi_resp_valid</span><span class="p">;</span>
-<a name="l-144"></a>
-<a name="l-145"></a>  <span class="n">dmi_jtag</span> <span class="p">#(</span>
-<a name="l-146"></a>    <span class="p">.</span><span class="n">IdcodeValue</span><span class="p">(</span><span class="n">IdcodeValue</span><span class="p">)</span>
-<a name="l-147"></a>  <span class="p">)</span> <span class="n">u_dmi_jtag</span> <span class="p">(</span>
-<a name="l-148"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-149"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-150"></a>    <span class="p">.</span><span class="n">testmode_i</span>       <span class="p">(</span> <span class="n">scanmode_i</span>        <span class="p">),</span>
-<a name="l-151"></a>    <span class="p">.</span><span class="n">dmi_rst_no</span>       <span class="p">(</span>                   <span class="p">),</span> <span class="c1">// unused</span>
-<a name="l-152"></a>    <span class="p">.</span><span class="n">dmi_req_o</span>        <span class="p">(</span> <span class="n">dmi_req</span>           <span class="p">),</span>
-<a name="l-153"></a>    <span class="p">.</span><span class="n">dmi_req_valid_o</span>  <span class="p">(</span> <span class="n">dmi_req_valid</span>     <span class="p">),</span>
-<a name="l-154"></a>    <span class="p">.</span><span class="n">dmi_req_ready_i</span>  <span class="p">(</span> <span class="n">dmi_req_ready</span>     <span class="p">),</span>
-<a name="l-155"></a>    <span class="p">.</span><span class="n">dmi_resp_i</span>       <span class="p">(</span> <span class="n">dmi_resp</span>          <span class="p">),</span>
-<a name="l-156"></a>    <span class="p">.</span><span class="n">dmi_resp_ready_o</span> <span class="p">(</span> <span class="n">dmi_resp_ready</span>    <span class="p">),</span>
-<a name="l-157"></a>    <span class="p">.</span><span class="n">dmi_resp_valid_i</span> <span class="p">(</span> <span class="n">dmi_resp_valid</span>    <span class="p">),</span>
-<a name="l-158"></a>    <span class="p">.</span><span class="n">tck_i</span>            <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">tck</span>        <span class="p">),</span>
-<a name="l-159"></a>    <span class="p">.</span><span class="n">tms_i</span>            <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">tms</span>        <span class="p">),</span>
-<a name="l-160"></a>    <span class="p">.</span><span class="n">trst_ni</span>          <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">trst_n</span>     <span class="p">),</span>
-<a name="l-161"></a>    <span class="p">.</span><span class="n">td_i</span>             <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">tdi</span>        <span class="p">),</span>
-<a name="l-162"></a>    <span class="p">.</span><span class="n">td_o</span>             <span class="p">(</span> <span class="n">jtag_o</span><span class="p">.</span><span class="n">tdo</span>        <span class="p">),</span>
-<a name="l-163"></a>    <span class="p">.</span><span class="n">tdo_oe_o</span>         <span class="p">(</span> <span class="n">jtag_o</span><span class="p">.</span><span class="n">tdo_oe</span>     <span class="p">)</span>
-<a name="l-164"></a>  <span class="p">);</span>
-<a name="l-165"></a>
-<a name="l-166"></a>  <span class="c1">// DMI to TL-UL transducing</span>
-<a name="l-167"></a>  <span class="k">assign</span> <span class="n">dmi_req_ready</span>       <span class="o">=</span> <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">a_ready</span><span class="p">;</span>
-<a name="l-168"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_valid</span>  <span class="o">=</span> <span class="n">dmi_req_valid</span><span class="p">;</span>
-<a name="l-169"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_opcode</span> <span class="o">=</span> <span class="p">(</span><span class="n">dmi_req</span><span class="p">.</span><span class="n">op</span> <span class="o">==</span> <span class="n">dm</span><span class="o">::</span><span class="n">DTM_WRITE</span><span class="p">)</span> <span class="o">?</span> <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">PutFullData</span> <span class="o">:</span>
-<a name="l-170"></a>                                                               <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">Get</span><span class="p">;</span>
-<a name="l-171"></a>  <span class="c1">// Always read/write 32bit</span>
-<a name="l-172"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_size</span>    <span class="o">=</span> <span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_SZW</span><span class="p">&#39;(</span><span class="mh">2&#39;h2</span><span class="p">);</span>
-<a name="l-173"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_mask</span>    <span class="o">=</span> <span class="p">{</span><span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_DBW</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}};</span>
-<a name="l-174"></a>  <span class="c1">// Need to transform register address into byte address.</span>
-<a name="l-175"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_address</span> <span class="o">=</span> <span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_AW</span><span class="p">&#39;({</span><span class="n">dmi_req</span><span class="p">.</span><span class="n">addr</span><span class="p">,</span> <span class="mb">2&#39;b00</span><span class="p">});</span>
-<a name="l-176"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_data</span>    <span class="o">=</span> <span class="n">dmi_req</span><span class="p">.</span><span class="n">data</span><span class="p">;</span>
-<a name="l-177"></a>  <span class="c1">// Unused</span>
-<a name="l-178"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_param</span>   <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-179"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_source</span>  <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-180"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">a_user</span>    <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-181"></a>
-<a name="l-182"></a>  <span class="c1">// TL-UL to DMI transducing</span>
-<a name="l-183"></a>  <span class="k">assign</span> <span class="n">tap_tl_h2d</span><span class="p">.</span><span class="n">d_ready</span>  <span class="o">=</span> <span class="n">dmi_resp_ready</span><span class="p">;</span>
-<a name="l-184"></a>  <span class="k">assign</span> <span class="n">dmi_resp_valid</span>      <span class="o">=</span> <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_valid</span><span class="p">;</span>
-<a name="l-185"></a>  <span class="k">assign</span> <span class="n">dmi_resp</span><span class="p">.</span><span class="n">data</span>       <span class="o">=</span> <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_data</span><span class="p">;</span>
-<a name="l-186"></a>  <span class="k">assign</span> <span class="n">dmi_resp</span><span class="p">.</span><span class="n">resp</span>       <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span> <span class="c1">// unused inside dmi_jtag</span>
-<a name="l-187"></a>
-<a name="l-188"></a>  <span class="c1">// These signals are unused</span>
-<a name="l-189"></a>  <span class="kt">logic</span> <span class="n">unused_tap_tl_d2h</span><span class="p">;</span>
-<a name="l-190"></a>  <span class="k">assign</span> <span class="n">unused_tap_tl_d2h</span> <span class="o">=</span> <span class="o">^</span><span class="p">{</span>
-<a name="l-191"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_opcode</span><span class="p">,</span>
-<a name="l-192"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_param</span><span class="p">,</span>
-<a name="l-193"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_size</span><span class="p">,</span>
-<a name="l-194"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_source</span><span class="p">,</span>
-<a name="l-195"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_sink</span><span class="p">,</span>
-<a name="l-196"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_user</span><span class="p">,</span>
-<a name="l-197"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_error</span>
-<a name="l-198"></a>  <span class="p">};</span>
-<a name="l-199"></a>
-<a name="l-200"></a>  <span class="c1">///////////////////////////////////////</span>
-<a name="l-201"></a>  <span class="c1">// Transition Interface and HW Mutex //</span>
-<a name="l-202"></a>  <span class="c1">///////////////////////////////////////</span>
+<a name="l-110"></a>    <span class="p">.</span><span class="n">intg_err_o</span><span class="p">(</span>        <span class="p">),</span>
+<a name="l-111"></a>    <span class="p">.</span><span class="n">devmode_i</span> <span class="p">(</span> <span class="mb">1&#39;b1</span>   <span class="p">)</span>
+<a name="l-112"></a>  <span class="p">);</span>
+<a name="l-113"></a>
+<a name="l-114"></a>  <span class="c1">////////////////////</span>
+<a name="l-115"></a>  <span class="c1">// Life Cycle TAP //</span>
+<a name="l-116"></a>  <span class="c1">////////////////////</span>
+<a name="l-117"></a>
+<a name="l-118"></a>  <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_h2d_t</span> <span class="n">tap_tl_h2d</span><span class="p">;</span>
+<a name="l-119"></a>  <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">tl_d2h_t</span> <span class="n">tap_tl_d2h</span><span class="p">;</span>
+<a name="l-120"></a>  <span class="n">lc_ctrl_reg_pkg</span><span class="o">::</span><span class="n">lc_ctrl_reg2hw_t</span> <span class="n">tap_reg2hw</span><span class="p">;</span>
+<a name="l-121"></a>  <span class="n">lc_ctrl_reg_pkg</span><span class="o">::</span><span class="n">lc_ctrl_hw2reg_t</span> <span class="n">tap_hw2reg</span><span class="p">;</span>
+<a name="l-122"></a>
+<a name="l-123"></a>  <span class="n">lc_ctrl_reg_top</span> <span class="n">u_reg_tap</span> <span class="p">(</span>
+<a name="l-124"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-125"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-126"></a>    <span class="p">.</span><span class="n">tl_i</span>      <span class="p">(</span> <span class="n">tap_tl_h2d</span> <span class="p">),</span>
+<a name="l-127"></a>    <span class="p">.</span><span class="n">tl_o</span>      <span class="p">(</span> <span class="n">tap_tl_d2h</span> <span class="p">),</span>
+<a name="l-128"></a>    <span class="p">.</span><span class="n">reg2hw</span>    <span class="p">(</span> <span class="n">tap_reg2hw</span> <span class="p">),</span>
+<a name="l-129"></a>    <span class="p">.</span><span class="n">hw2reg</span>    <span class="p">(</span> <span class="n">tap_hw2reg</span> <span class="p">),</span>
+<a name="l-130"></a>    <span class="p">.</span><span class="n">intg_err_o</span><span class="p">(</span>            <span class="p">),</span>
+<a name="l-131"></a>    <span class="p">.</span><span class="n">devmode_i</span> <span class="p">(</span> <span class="mb">1&#39;b1</span>       <span class="p">)</span>
+<a name="l-132"></a>  <span class="p">);</span>
+<a name="l-133"></a>
+<a name="l-134"></a>
+<a name="l-135"></a>  <span class="c1">// This reuses the JTAG DTM and DMI from the RISC-V external</span>
+<a name="l-136"></a>  <span class="c1">// debug v0.13 specification to read and write the lc_ctrl CSRs:</span>
+<a name="l-137"></a>  <span class="c1">// https://github.com/riscv/riscv-debug-spec/blob/release/riscv-debug-release.pdf</span>
+<a name="l-138"></a>  <span class="c1">// The register addresses correspond to the byte offsets of the lc_ctrl CSRs, divided by 4.</span>
+<a name="l-139"></a>  <span class="c1">// Note that the DMI reset does not affect the LC controller in any way.</span>
+<a name="l-140"></a>  <span class="n">dm</span><span class="o">::</span><span class="n">dmi_req_t</span> <span class="n">dmi_req</span><span class="p">;</span>
+<a name="l-141"></a>  <span class="kt">logic</span> <span class="n">dmi_req_valid</span><span class="p">;</span>
+<a name="l-142"></a>  <span class="kt">logic</span> <span class="n">dmi_req_ready</span><span class="p">;</span>
+<a name="l-143"></a>  <span class="n">dm</span><span class="o">::</span><span class="n">dmi_resp_t</span> <span class="n">dmi_resp</span><span class="p">;</span>
+<a name="l-144"></a>  <span class="kt">logic</span> <span class="n">dmi_resp_ready</span><span class="p">;</span>
+<a name="l-145"></a>  <span class="kt">logic</span> <span class="n">dmi_resp_valid</span><span class="p">;</span>
+<a name="l-146"></a>
+<a name="l-147"></a>  <span class="kt">logic</span> <span class="n">scanmode</span><span class="p">;</span>
+<a name="l-148"></a>  <span class="k">assign</span> <span class="n">scanmode</span> <span class="o">=</span> <span class="p">(</span><span class="n">scanmode_i</span> <span class="o">==</span> <span class="n">On</span><span class="p">);</span>
+<a name="l-149"></a>
+<a name="l-150"></a>  <span class="kt">logic</span> <span class="n">tck_muxed</span><span class="p">;</span>
+<a name="l-151"></a>  <span class="n">prim_clock_mux2</span> <span class="p">#(</span>
+<a name="l-152"></a>    <span class="p">.</span><span class="n">NoFpgaBufG</span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a name="l-153"></a>  <span class="p">)</span> <span class="n">u_prim_clock_mux2</span> <span class="p">(</span>
+<a name="l-154"></a>    <span class="p">.</span><span class="n">clk0_i</span><span class="p">(</span><span class="n">jtag_i</span><span class="p">.</span><span class="n">tck</span><span class="p">),</span>
+<a name="l-155"></a>    <span class="p">.</span><span class="n">clk1_i</span><span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
+<a name="l-156"></a>    <span class="p">.</span><span class="n">sel_i</span> <span class="p">(</span><span class="n">scanmode</span><span class="p">),</span>
+<a name="l-157"></a>    <span class="p">.</span><span class="n">clk_o</span> <span class="p">(</span><span class="n">tck_muxed</span><span class="p">)</span>
+<a name="l-158"></a>  <span class="p">);</span>
+<a name="l-159"></a>
+<a name="l-160"></a>  <span class="kt">logic</span> <span class="n">req_ready</span><span class="p">;</span>
+<a name="l-161"></a>  <span class="k">assign</span> <span class="n">req_ready</span> <span class="o">=</span> <span class="n">dmi_req_ready</span> <span class="o">&amp;</span> <span class="n">dmi_resp_ready</span><span class="p">;</span>
+<a name="l-162"></a>  <span class="n">dmi_jtag</span> <span class="p">#(</span>
+<a name="l-163"></a>    <span class="p">.</span><span class="n">IdcodeValue</span><span class="p">(</span><span class="n">IdcodeValue</span><span class="p">)</span>
+<a name="l-164"></a>  <span class="p">)</span> <span class="n">u_dmi_jtag</span> <span class="p">(</span>
+<a name="l-165"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-166"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-167"></a>    <span class="p">.</span><span class="n">testmode_i</span>       <span class="p">(</span> <span class="n">scanmode</span>          <span class="p">),</span>
+<a name="l-168"></a>    <span class="p">.</span><span class="n">dmi_rst_no</span>       <span class="p">(</span>                   <span class="p">),</span> <span class="c1">// unused</span>
+<a name="l-169"></a>    <span class="p">.</span><span class="n">dmi_req_o</span>        <span class="p">(</span> <span class="n">dmi_req</span>           <span class="p">),</span>
+<a name="l-170"></a>    <span class="p">.</span><span class="n">dmi_req_valid_o</span>  <span class="p">(</span> <span class="n">dmi_req_valid</span>     <span class="p">),</span>
+<a name="l-171"></a>    <span class="c1">// unless there is room for response, stall</span>
+<a name="l-172"></a>    <span class="p">.</span><span class="n">dmi_req_ready_i</span>  <span class="p">(</span> <span class="n">req_ready</span>         <span class="p">),</span>
+<a name="l-173"></a>    <span class="p">.</span><span class="n">dmi_resp_i</span>       <span class="p">(</span> <span class="n">dmi_resp</span>          <span class="p">),</span>
+<a name="l-174"></a>    <span class="p">.</span><span class="n">dmi_resp_ready_o</span> <span class="p">(</span> <span class="n">dmi_resp_ready</span>    <span class="p">),</span>
+<a name="l-175"></a>    <span class="p">.</span><span class="n">dmi_resp_valid_i</span> <span class="p">(</span> <span class="n">dmi_resp_valid</span>    <span class="p">),</span>
+<a name="l-176"></a>    <span class="p">.</span><span class="n">tck_i</span>            <span class="p">(</span> <span class="n">tck_muxed</span>         <span class="p">),</span>
+<a name="l-177"></a>    <span class="p">.</span><span class="n">tms_i</span>            <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">tms</span>        <span class="p">),</span>
+<a name="l-178"></a>    <span class="p">.</span><span class="n">trst_ni</span>          <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">trst_n</span>     <span class="p">),</span>
+<a name="l-179"></a>    <span class="p">.</span><span class="n">td_i</span>             <span class="p">(</span> <span class="n">jtag_i</span><span class="p">.</span><span class="n">tdi</span>        <span class="p">),</span>
+<a name="l-180"></a>    <span class="p">.</span><span class="n">td_o</span>             <span class="p">(</span> <span class="n">jtag_o</span><span class="p">.</span><span class="n">tdo</span>        <span class="p">),</span>
+<a name="l-181"></a>    <span class="p">.</span><span class="n">tdo_oe_o</span>         <span class="p">(</span> <span class="n">jtag_o</span><span class="p">.</span><span class="n">tdo_oe</span>     <span class="p">)</span>
+<a name="l-182"></a>  <span class="p">);</span>
+<a name="l-183"></a>
+<a name="l-184"></a>  <span class="c1">// DMI to TL-UL transducing</span>
+<a name="l-185"></a>  <span class="n">tlul_adapter_host</span> <span class="n">u_tap_tlul_host</span> <span class="p">(</span>
+<a name="l-186"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-187"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-188"></a>    <span class="c1">// do not make a request unless there is room for the response</span>
+<a name="l-189"></a>    <span class="p">.</span><span class="n">req_i</span>      <span class="p">(</span> <span class="n">dmi_req_valid</span> <span class="o">&amp;</span> <span class="n">dmi_resp_ready</span>         <span class="p">),</span>
+<a name="l-190"></a>    <span class="p">.</span><span class="n">gnt_o</span>      <span class="p">(</span> <span class="n">dmi_req_ready</span>                          <span class="p">),</span>
+<a name="l-191"></a>    <span class="p">.</span><span class="n">addr_i</span>     <span class="p">(</span> <span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_AW</span><span class="p">&#39;({</span><span class="n">dmi_req</span><span class="p">.</span><span class="n">addr</span><span class="p">,</span> <span class="mb">2&#39;b00</span><span class="p">})</span> <span class="p">),</span>
+<a name="l-192"></a>    <span class="p">.</span><span class="n">we_i</span>       <span class="p">(</span> <span class="n">dmi_req</span><span class="p">.</span><span class="n">op</span> <span class="o">==</span> <span class="n">dm</span><span class="o">::</span><span class="n">DTM_WRITE</span>            <span class="p">),</span>
+<a name="l-193"></a>    <span class="p">.</span><span class="n">wdata_i</span>    <span class="p">(</span> <span class="n">dmi_req</span><span class="p">.</span><span class="n">data</span>                           <span class="p">),</span>
+<a name="l-194"></a>    <span class="p">.</span><span class="n">be_i</span>       <span class="p">(</span> <span class="p">{</span><span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_DBW</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}</span>                <span class="p">),</span>
+<a name="l-195"></a>    <span class="p">.</span><span class="n">type_i</span>     <span class="p">(</span> <span class="n">tlul_pkg</span><span class="o">::</span><span class="n">DataType</span>                     <span class="p">),</span>
+<a name="l-196"></a>    <span class="p">.</span><span class="n">valid_o</span>    <span class="p">(</span> <span class="n">dmi_resp_valid</span>                         <span class="p">),</span>
+<a name="l-197"></a>    <span class="p">.</span><span class="n">rdata_o</span>    <span class="p">(</span> <span class="n">dmi_resp</span><span class="p">.</span><span class="n">data</span>                          <span class="p">),</span>
+<a name="l-198"></a>    <span class="p">.</span><span class="n">err_o</span>      <span class="p">(</span>                                        <span class="p">),</span>
+<a name="l-199"></a>    <span class="p">.</span><span class="n">intg_err_o</span> <span class="p">(</span>                                        <span class="p">),</span>
+<a name="l-200"></a>    <span class="p">.</span><span class="n">tl_o</span>       <span class="p">(</span> <span class="n">tap_tl_h2d</span>                             <span class="p">),</span>
+<a name="l-201"></a>    <span class="p">.</span><span class="n">tl_i</span>       <span class="p">(</span> <span class="n">tap_tl_d2h</span>                             <span class="p">)</span>
+<a name="l-202"></a>  <span class="p">);</span>
 <a name="l-203"></a>
-<a name="l-204"></a>  <span class="c1">// All registers are HWext</span>
-<a name="l-205"></a>  <span class="kt">logic</span>          <span class="n">trans_success_d</span><span class="p">,</span> <span class="n">trans_success_q</span><span class="p">;</span>
-<a name="l-206"></a>  <span class="kt">logic</span>          <span class="n">trans_cnt_oflw_error_d</span><span class="p">,</span> <span class="n">trans_cnt_oflw_error_q</span><span class="p">;</span>
-<a name="l-207"></a>  <span class="kt">logic</span>          <span class="n">trans_invalid_error_d</span><span class="p">,</span> <span class="n">trans_invalid_error_q</span><span class="p">;</span>
-<a name="l-208"></a>  <span class="kt">logic</span>          <span class="n">token_invalid_error_d</span><span class="p">,</span> <span class="n">token_invalid_error_q</span><span class="p">;</span>
-<a name="l-209"></a>  <span class="kt">logic</span>          <span class="n">flash_rma_error_d</span><span class="p">,</span> <span class="n">flash_rma_error_q</span><span class="p">;</span>
-<a name="l-210"></a>  <span class="kt">logic</span>          <span class="n">otp_prog_error_d</span><span class="p">,</span> <span class="n">fatal_prog_error_q</span><span class="p">;</span>
-<a name="l-211"></a>  <span class="kt">logic</span>          <span class="n">state_invalid_error_d</span><span class="p">,</span> <span class="n">fatal_state_error_q</span><span class="p">;</span>
-<a name="l-212"></a>  <span class="kt">logic</span>          <span class="n">otp_part_error_q</span><span class="p">;</span>
-<a name="l-213"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sw_claim_transition_if_d</span><span class="p">,</span> <span class="n">sw_claim_transition_if_q</span><span class="p">;</span>
-<a name="l-214"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">tap_claim_transition_if_d</span><span class="p">,</span> <span class="n">tap_claim_transition_if_q</span><span class="p">;</span>
-<a name="l-215"></a>  <span class="kt">logic</span>          <span class="n">transition_cmd</span><span class="p">;</span>
-<a name="l-216"></a>  <span class="n">lc_token_t</span>     <span class="n">transition_token_d</span><span class="p">,</span> <span class="n">transition_token_q</span><span class="p">;</span>
-<a name="l-217"></a>  <span class="n">dec_lc_state_e</span> <span class="n">transition_target_d</span><span class="p">,</span> <span class="n">transition_target_q</span><span class="p">;</span>
-<a name="l-218"></a>  <span class="c1">// No need to register these.</span>
-<a name="l-219"></a>  <span class="n">dec_lc_state_e</span>    <span class="n">dec_lc_state</span><span class="p">;</span>
-<a name="l-220"></a>  <span class="n">dec_lc_cnt_t</span>      <span class="n">dec_lc_cnt</span><span class="p">;</span>
-<a name="l-221"></a>  <span class="n">dec_lc_id_state_e</span> <span class="n">dec_lc_id_state</span><span class="p">;</span>
+<a name="l-204"></a>  <span class="c1">// TL-UL to DMI transducing</span>
+<a name="l-205"></a>  <span class="k">assign</span> <span class="n">dmi_resp</span><span class="p">.</span><span class="n">resp</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span> <span class="c1">// unused inside dmi_jtag</span>
+<a name="l-206"></a>
+<a name="l-207"></a>  <span class="c1">// These signals are unused</span>
+<a name="l-208"></a>  <span class="kt">logic</span> <span class="n">unused_tap_tl_d2h</span><span class="p">;</span>
+<a name="l-209"></a>  <span class="k">assign</span> <span class="n">unused_tap_tl_d2h</span> <span class="o">=</span> <span class="o">^</span><span class="p">{</span>
+<a name="l-210"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_opcode</span><span class="p">,</span>
+<a name="l-211"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_param</span><span class="p">,</span>
+<a name="l-212"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_size</span><span class="p">,</span>
+<a name="l-213"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_source</span><span class="p">,</span>
+<a name="l-214"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_sink</span><span class="p">,</span>
+<a name="l-215"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_user</span><span class="p">,</span>
+<a name="l-216"></a>    <span class="n">tap_tl_d2h</span><span class="p">.</span><span class="n">d_error</span>
+<a name="l-217"></a>  <span class="p">};</span>
+<a name="l-218"></a>
+<a name="l-219"></a>  <span class="c1">///////////////////////////////////////</span>
+<a name="l-220"></a>  <span class="c1">// Transition Interface and HW Mutex //</span>
+<a name="l-221"></a>  <span class="c1">///////////////////////////////////////</span>
 <a name="l-222"></a>
-<a name="l-223"></a>  <span class="kt">logic</span> <span class="n">lc_idle_d</span><span class="p">;</span>
-<a name="l-224"></a>
-<a name="l-225"></a>  <span class="kt">logic</span> <span class="n">unused_otp_hw_cfg_bits</span><span class="p">;</span>
-<a name="l-226"></a>  <span class="k">assign</span> <span class="n">unused_otp_hw_cfg_bits</span> <span class="o">=</span> <span class="o">^</span><span class="n">otp_hw_cfg_i</span><span class="p">;</span>
-<a name="l-227"></a>
-<a name="l-228"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_csr_assign_outputs</span>
-<a name="l-229"></a>    <span class="n">hw2reg</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-230"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">ready</span>                  <span class="o">=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
-<a name="l-231"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">transition_successful</span>  <span class="o">=</span> <span class="n">trans_success_q</span><span class="p">;</span>
-<a name="l-232"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">transition_count_error</span> <span class="o">=</span> <span class="n">trans_cnt_oflw_error_q</span><span class="p">;</span>
-<a name="l-233"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">transition_error</span>       <span class="o">=</span> <span class="n">trans_invalid_error_q</span><span class="p">;</span>
-<a name="l-234"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">token_error</span>            <span class="o">=</span> <span class="n">token_invalid_error_q</span><span class="p">;</span>
-<a name="l-235"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">flash_rma_error</span>        <span class="o">=</span> <span class="n">flash_rma_error_q</span><span class="p">;</span>
-<a name="l-236"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">otp_error</span>              <span class="o">=</span> <span class="n">fatal_prog_error_q</span><span class="p">;</span>
-<a name="l-237"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">state_error</span>            <span class="o">=</span> <span class="n">fatal_state_error_q</span><span class="p">;</span>
-<a name="l-238"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">otp_partition_error</span>    <span class="o">=</span> <span class="n">otp_part_error_q</span><span class="p">;</span>
-<a name="l-239"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">lc_state</span>                      <span class="o">=</span> <span class="n">dec_lc_state</span><span class="p">;</span>
-<a name="l-240"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">lc_transition_cnt</span>             <span class="o">=</span> <span class="n">dec_lc_cnt</span><span class="p">;</span>
-<a name="l-241"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">lc_id_state</span>                   <span class="o">=</span> <span class="n">dec_lc_id_state</span><span class="p">;</span>
-<a name="l-242"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">device_id</span>                     <span class="o">=</span> <span class="n">otp_hw_cfg_i</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">device_id</span><span class="p">;</span>
+<a name="l-223"></a>  <span class="c1">// All registers are HWext</span>
+<a name="l-224"></a>  <span class="kt">logic</span>          <span class="n">trans_success_d</span><span class="p">,</span> <span class="n">trans_success_q</span><span class="p">;</span>
+<a name="l-225"></a>  <span class="kt">logic</span>          <span class="n">trans_cnt_oflw_error_d</span><span class="p">,</span> <span class="n">trans_cnt_oflw_error_q</span><span class="p">;</span>
+<a name="l-226"></a>  <span class="kt">logic</span>          <span class="n">trans_invalid_error_d</span><span class="p">,</span> <span class="n">trans_invalid_error_q</span><span class="p">;</span>
+<a name="l-227"></a>  <span class="kt">logic</span>          <span class="n">token_invalid_error_d</span><span class="p">,</span> <span class="n">token_invalid_error_q</span><span class="p">;</span>
+<a name="l-228"></a>  <span class="kt">logic</span>          <span class="n">flash_rma_error_d</span><span class="p">,</span> <span class="n">flash_rma_error_q</span><span class="p">;</span>
+<a name="l-229"></a>  <span class="kt">logic</span>          <span class="n">otp_prog_error_d</span><span class="p">,</span> <span class="n">fatal_prog_error_q</span><span class="p">;</span>
+<a name="l-230"></a>  <span class="kt">logic</span>          <span class="n">state_invalid_error_d</span><span class="p">,</span> <span class="n">fatal_state_error_q</span><span class="p">;</span>
+<a name="l-231"></a>  <span class="kt">logic</span>          <span class="n">otp_part_error_q</span><span class="p">;</span>
+<a name="l-232"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sw_claim_transition_if_d</span><span class="p">,</span> <span class="n">sw_claim_transition_if_q</span><span class="p">;</span>
+<a name="l-233"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">tap_claim_transition_if_d</span><span class="p">,</span> <span class="n">tap_claim_transition_if_q</span><span class="p">;</span>
+<a name="l-234"></a>  <span class="kt">logic</span>          <span class="n">transition_cmd</span><span class="p">;</span>
+<a name="l-235"></a>  <span class="n">lc_token_t</span>     <span class="n">transition_token_d</span><span class="p">,</span> <span class="n">transition_token_q</span><span class="p">;</span>
+<a name="l-236"></a>  <span class="n">dec_lc_state_e</span> <span class="n">transition_target_d</span><span class="p">,</span> <span class="n">transition_target_q</span><span class="p">;</span>
+<a name="l-237"></a>  <span class="c1">// No need to register these.</span>
+<a name="l-238"></a>  <span class="n">dec_lc_state_e</span>    <span class="n">dec_lc_state</span><span class="p">;</span>
+<a name="l-239"></a>  <span class="n">dec_lc_cnt_t</span>      <span class="n">dec_lc_cnt</span><span class="p">;</span>
+<a name="l-240"></a>  <span class="n">dec_lc_id_state_e</span> <span class="n">dec_lc_id_state</span><span class="p">;</span>
+<a name="l-241"></a>
+<a name="l-242"></a>  <span class="kt">logic</span> <span class="n">lc_idle_d</span><span class="p">;</span>
 <a name="l-243"></a>
-<a name="l-244"></a>    <span class="c1">// The assignments above are identical for the TAP.</span>
-<a name="l-245"></a>    <span class="n">tap_hw2reg</span> <span class="o">=</span> <span class="n">hw2reg</span><span class="p">;</span>
+<a name="l-244"></a>  <span class="kt">logic</span> <span class="n">unused_otp_hw_cfg_bits</span><span class="p">;</span>
+<a name="l-245"></a>  <span class="k">assign</span> <span class="n">unused_otp_hw_cfg_bits</span> <span class="o">=</span> <span class="o">^</span><span class="n">otp_hw_cfg_i</span><span class="p">;</span>
 <a name="l-246"></a>
-<a name="l-247"></a>    <span class="c1">// Assignments gated by mutex.</span>
-<a name="l-248"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">claim_transition_if</span> <span class="o">=</span> <span class="n">sw_claim_transition_if_q</span><span class="p">;</span>
-<a name="l-249"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sw_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-250"></a>      <span class="n">hw2reg</span><span class="p">.</span><span class="n">transition_token</span>  <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
-<a name="l-251"></a>      <span class="n">hw2reg</span><span class="p">.</span><span class="n">transition_target</span> <span class="o">=</span> <span class="n">transition_target_q</span><span class="p">;</span>
-<a name="l-252"></a>      <span class="n">hw2reg</span><span class="p">.</span><span class="n">transition_regwen</span> <span class="o">=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
-<a name="l-253"></a>    <span class="k">end</span>
-<a name="l-254"></a>
-<a name="l-255"></a>    <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">claim_transition_if</span> <span class="o">=</span> <span class="n">tap_claim_transition_if_q</span><span class="p">;</span>
-<a name="l-256"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tap_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-257"></a>      <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">transition_token</span>  <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
-<a name="l-258"></a>      <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">transition_target</span> <span class="o">=</span> <span class="n">transition_target_q</span><span class="p">;</span>
-<a name="l-259"></a>      <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">transition_regwen</span> <span class="o">=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
-<a name="l-260"></a>    <span class="k">end</span>
-<a name="l-261"></a>  <span class="k">end</span>
+<a name="l-247"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_csr_assign_outputs</span>
+<a name="l-248"></a>    <span class="n">hw2reg</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-249"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">ready</span>                  <span class="o">=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
+<a name="l-250"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">transition_successful</span>  <span class="o">=</span> <span class="n">trans_success_q</span><span class="p">;</span>
+<a name="l-251"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">transition_count_error</span> <span class="o">=</span> <span class="n">trans_cnt_oflw_error_q</span><span class="p">;</span>
+<a name="l-252"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">transition_error</span>       <span class="o">=</span> <span class="n">trans_invalid_error_q</span><span class="p">;</span>
+<a name="l-253"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">token_error</span>            <span class="o">=</span> <span class="n">token_invalid_error_q</span><span class="p">;</span>
+<a name="l-254"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">flash_rma_error</span>        <span class="o">=</span> <span class="n">flash_rma_error_q</span><span class="p">;</span>
+<a name="l-255"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">otp_error</span>              <span class="o">=</span> <span class="n">fatal_prog_error_q</span><span class="p">;</span>
+<a name="l-256"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">state_error</span>            <span class="o">=</span> <span class="n">fatal_state_error_q</span><span class="p">;</span>
+<a name="l-257"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">otp_partition_error</span>    <span class="o">=</span> <span class="n">otp_part_error_q</span><span class="p">;</span>
+<a name="l-258"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">lc_state</span>                      <span class="o">=</span> <span class="n">dec_lc_state</span><span class="p">;</span>
+<a name="l-259"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">lc_transition_cnt</span>             <span class="o">=</span> <span class="n">dec_lc_cnt</span><span class="p">;</span>
+<a name="l-260"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">lc_id_state</span>                   <span class="o">=</span> <span class="n">dec_lc_id_state</span><span class="p">;</span>
+<a name="l-261"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">device_id</span>                     <span class="o">=</span> <span class="n">otp_hw_cfg_i</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">device_id</span><span class="p">;</span>
 <a name="l-262"></a>
-<a name="l-263"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_csr_assign_inputs</span>
-<a name="l-264"></a>    <span class="n">sw_claim_transition_if_d</span>  <span class="o">=</span> <span class="n">sw_claim_transition_if_q</span><span class="p">;</span>
-<a name="l-265"></a>    <span class="n">tap_claim_transition_if_d</span> <span class="o">=</span> <span class="n">tap_claim_transition_if_q</span><span class="p">;</span>
-<a name="l-266"></a>    <span class="n">transition_token_d</span>        <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
-<a name="l-267"></a>    <span class="n">transition_target_d</span>       <span class="o">=</span> <span class="n">transition_target_q</span><span class="p">;</span>
-<a name="l-268"></a>    <span class="n">transition_cmd</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-269"></a>
-<a name="l-270"></a>    <span class="c1">// SW mutex claim.</span>
-<a name="l-271"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tap_claim_transition_if_q</span> <span class="o">!=</span> <span class="mh">8&#39;hA5</span> <span class="o">&amp;&amp;</span>
-<a name="l-272"></a>        <span class="n">reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-273"></a>      <span class="n">sw_claim_transition_if_d</span> <span class="o">=</span> <span class="n">reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a name="l-274"></a>    <span class="k">end</span>
-<a name="l-275"></a>    <span class="c1">// TAP mutex claim. This has prio over SW above.</span>
-<a name="l-276"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sw_claim_transition_if_q</span> <span class="o">!=</span> <span class="mh">8&#39;hA5</span> <span class="o">&amp;&amp;</span>
-<a name="l-277"></a>        <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-278"></a>      <span class="n">tap_claim_transition_if_d</span> <span class="o">=</span> <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a name="l-263"></a>    <span class="c1">// The assignments above are identical for the TAP.</span>
+<a name="l-264"></a>    <span class="n">tap_hw2reg</span> <span class="o">=</span> <span class="n">hw2reg</span><span class="p">;</span>
+<a name="l-265"></a>
+<a name="l-266"></a>    <span class="c1">// Assignments gated by mutex.</span>
+<a name="l-267"></a>    <span class="n">hw2reg</span><span class="p">.</span><span class="n">claim_transition_if</span> <span class="o">=</span> <span class="n">sw_claim_transition_if_q</span><span class="p">;</span>
+<a name="l-268"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sw_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-269"></a>      <span class="n">hw2reg</span><span class="p">.</span><span class="n">transition_token</span>  <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
+<a name="l-270"></a>      <span class="n">hw2reg</span><span class="p">.</span><span class="n">transition_target</span> <span class="o">=</span> <span class="n">transition_target_q</span><span class="p">;</span>
+<a name="l-271"></a>      <span class="n">hw2reg</span><span class="p">.</span><span class="n">transition_regwen</span> <span class="o">=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
+<a name="l-272"></a>    <span class="k">end</span>
+<a name="l-273"></a>
+<a name="l-274"></a>    <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">claim_transition_if</span> <span class="o">=</span> <span class="n">tap_claim_transition_if_q</span><span class="p">;</span>
+<a name="l-275"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tap_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-276"></a>      <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">transition_token</span>  <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
+<a name="l-277"></a>      <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">transition_target</span> <span class="o">=</span> <span class="n">transition_target_q</span><span class="p">;</span>
+<a name="l-278"></a>      <span class="n">tap_hw2reg</span><span class="p">.</span><span class="n">transition_regwen</span> <span class="o">=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
 <a name="l-279"></a>    <span class="k">end</span>
-<a name="l-280"></a>
-<a name="l-281"></a>    <span class="c1">// The idle signal serves as the REGWEN in this case.</span>
-<a name="l-282"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">lc_idle_d</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-283"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">tap_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-284"></a>        <span class="n">transition_cmd</span> <span class="o">=</span> <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
-<a name="l-285"></a>                         <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">qe</span><span class="p">;</span>
-<a name="l-286"></a>
-<a name="l-287"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">LcTokenWidth</span><span class="o">/</span><span class="mi">32</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-288"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-289"></a>            <span class="n">transition_token_d</span><span class="p">[</span><span class="n">k</span><span class="o">*</span><span class="mi">32</span> <span class="o">+:</span> <span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">q</span><span class="p">;</span>
-<a name="l-290"></a>          <span class="k">end</span>
-<a name="l-291"></a>        <span class="k">end</span>
-<a name="l-292"></a>
-<a name="l-293"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-294"></a>          <span class="n">transition_target_d</span> <span class="o">=</span> <span class="n">dec_lc_state_e</span><span class="p">&#39;(</span><span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">q</span><span class="p">);</span>
-<a name="l-295"></a>        <span class="k">end</span>
-<a name="l-296"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sw_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-297"></a>        <span class="n">transition_cmd</span> <span class="o">=</span> <span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
-<a name="l-298"></a>                         <span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">qe</span><span class="p">;</span>
+<a name="l-280"></a>  <span class="k">end</span>
+<a name="l-281"></a>
+<a name="l-282"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_csr_assign_inputs</span>
+<a name="l-283"></a>    <span class="n">sw_claim_transition_if_d</span>  <span class="o">=</span> <span class="n">sw_claim_transition_if_q</span><span class="p">;</span>
+<a name="l-284"></a>    <span class="n">tap_claim_transition_if_d</span> <span class="o">=</span> <span class="n">tap_claim_transition_if_q</span><span class="p">;</span>
+<a name="l-285"></a>    <span class="n">transition_token_d</span>        <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
+<a name="l-286"></a>    <span class="n">transition_target_d</span>       <span class="o">=</span> <span class="n">transition_target_q</span><span class="p">;</span>
+<a name="l-287"></a>    <span class="n">transition_cmd</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-288"></a>
+<a name="l-289"></a>    <span class="c1">// SW mutex claim.</span>
+<a name="l-290"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tap_claim_transition_if_q</span> <span class="o">!=</span> <span class="mh">8&#39;hA5</span> <span class="o">&amp;&amp;</span>
+<a name="l-291"></a>        <span class="n">reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-292"></a>      <span class="n">sw_claim_transition_if_d</span> <span class="o">=</span> <span class="n">reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a name="l-293"></a>    <span class="k">end</span>
+<a name="l-294"></a>    <span class="c1">// TAP mutex claim. This has prio over SW above.</span>
+<a name="l-295"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sw_claim_transition_if_q</span> <span class="o">!=</span> <span class="mh">8&#39;hA5</span> <span class="o">&amp;&amp;</span>
+<a name="l-296"></a>        <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-297"></a>      <span class="n">tap_claim_transition_if_d</span> <span class="o">=</span> <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">claim_transition_if</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a name="l-298"></a>    <span class="k">end</span>
 <a name="l-299"></a>
-<a name="l-300"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">LcTokenWidth</span><span class="o">/</span><span class="mi">32</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-301"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-302"></a>            <span class="n">transition_token_d</span><span class="p">[</span><span class="n">k</span><span class="o">*</span><span class="mi">32</span> <span class="o">+:</span> <span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">q</span><span class="p">;</span>
-<a name="l-303"></a>          <span class="k">end</span>
-<a name="l-304"></a>        <span class="k">end</span>
+<a name="l-300"></a>    <span class="c1">// The idle signal serves as the REGWEN in this case.</span>
+<a name="l-301"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">lc_idle_d</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-302"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">tap_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-303"></a>        <span class="n">transition_cmd</span> <span class="o">=</span> <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
+<a name="l-304"></a>                         <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">qe</span><span class="p">;</span>
 <a name="l-305"></a>
-<a name="l-306"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-307"></a>          <span class="n">transition_target_d</span> <span class="o">=</span> <span class="n">dec_lc_state_e</span><span class="p">&#39;(</span><span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">q</span><span class="p">);</span>
-<a name="l-308"></a>        <span class="k">end</span>
-<a name="l-309"></a>      <span class="k">end</span>
-<a name="l-310"></a>    <span class="k">end</span>
-<a name="l-311"></a>  <span class="k">end</span>
-<a name="l-312"></a>
-<a name="l-313"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_csrs</span>
-<a name="l-314"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-315"></a>      <span class="n">trans_success_q</span>           <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-316"></a>      <span class="n">trans_cnt_oflw_error_q</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-317"></a>      <span class="n">trans_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-318"></a>      <span class="n">token_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-319"></a>      <span class="n">flash_rma_error_q</span>         <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-320"></a>      <span class="n">fatal_prog_error_q</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-321"></a>      <span class="n">fatal_state_error_q</span>       <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-322"></a>      <span class="n">sw_claim_transition_if_q</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-323"></a>      <span class="n">tap_claim_transition_if_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-324"></a>      <span class="n">transition_token_q</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-325"></a>      <span class="n">transition_target_q</span>       <span class="o">&lt;=</span> <span class="n">DecLcStRaw</span><span class="p">;</span>
-<a name="l-326"></a>      <span class="n">otp_part_error_q</span>          <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-327"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-328"></a>      <span class="c1">// All status and error bits are terminal and require a reset cycle.</span>
-<a name="l-329"></a>      <span class="n">trans_success_q</span>           <span class="o">&lt;=</span> <span class="n">trans_success_d</span>        <span class="o">|</span> <span class="n">trans_success_q</span><span class="p">;</span>
-<a name="l-330"></a>      <span class="n">trans_cnt_oflw_error_q</span>    <span class="o">&lt;=</span> <span class="n">trans_cnt_oflw_error_d</span> <span class="o">|</span> <span class="n">trans_cnt_oflw_error_q</span><span class="p">;</span>
-<a name="l-331"></a>      <span class="n">trans_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="n">trans_invalid_error_d</span>  <span class="o">|</span> <span class="n">trans_invalid_error_q</span><span class="p">;</span>
-<a name="l-332"></a>      <span class="n">token_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="n">token_invalid_error_d</span>  <span class="o">|</span> <span class="n">token_invalid_error_q</span><span class="p">;</span>
-<a name="l-333"></a>      <span class="n">flash_rma_error_q</span>         <span class="o">&lt;=</span> <span class="n">flash_rma_error_d</span>      <span class="o">|</span> <span class="n">flash_rma_error_q</span><span class="p">;</span>
-<a name="l-334"></a>      <span class="n">fatal_prog_error_q</span>        <span class="o">&lt;=</span> <span class="n">otp_prog_error_d</span>       <span class="o">|</span> <span class="n">fatal_prog_error_q</span><span class="p">;</span>
-<a name="l-335"></a>      <span class="n">fatal_state_error_q</span>       <span class="o">&lt;=</span> <span class="n">state_invalid_error_d</span>  <span class="o">|</span> <span class="n">fatal_state_error_q</span><span class="p">;</span>
-<a name="l-336"></a>      <span class="n">otp_part_error_q</span>          <span class="o">&lt;=</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">error</span>    <span class="o">|</span> <span class="n">otp_part_error_q</span><span class="p">;</span>
-<a name="l-337"></a>      <span class="c1">// Other regs, gated by mutex further below.</span>
-<a name="l-338"></a>      <span class="n">sw_claim_transition_if_q</span>  <span class="o">&lt;=</span> <span class="n">sw_claim_transition_if_d</span><span class="p">;</span>
-<a name="l-339"></a>      <span class="n">tap_claim_transition_if_q</span> <span class="o">&lt;=</span> <span class="n">tap_claim_transition_if_d</span><span class="p">;</span>
-<a name="l-340"></a>      <span class="n">transition_token_q</span>        <span class="o">&lt;=</span> <span class="n">transition_token_d</span><span class="p">;</span>
-<a name="l-341"></a>      <span class="n">transition_target_q</span>       <span class="o">&lt;=</span> <span class="n">transition_target_d</span><span class="p">;</span>
-<a name="l-342"></a>    <span class="k">end</span>
-<a name="l-343"></a>  <span class="k">end</span>
-<a name="l-344"></a>
-<a name="l-345"></a>  <span class="c1">//////////////////</span>
-<a name="l-346"></a>  <span class="c1">// Alert Sender //</span>
-<a name="l-347"></a>  <span class="c1">//////////////////</span>
-<a name="l-348"></a>
-<a name="l-349"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">alerts</span><span class="p">;</span>
-<a name="l-350"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">alert_test</span><span class="p">;</span>
-<a name="l-351"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tap_alert_test</span><span class="p">;</span>
-<a name="l-352"></a>
-<a name="l-353"></a>  <span class="k">assign</span> <span class="n">alerts</span> <span class="o">=</span> <span class="p">{</span>
-<a name="l-354"></a>    <span class="n">fatal_state_error_q</span><span class="p">,</span>
-<a name="l-355"></a>    <span class="n">fatal_prog_error_q</span>
-<a name="l-356"></a>  <span class="p">};</span>
-<a name="l-357"></a>
-<a name="l-358"></a>  <span class="k">assign</span> <span class="n">alert_test</span> <span class="o">=</span> <span class="p">{</span>
-<a name="l-359"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
-<a name="l-360"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">qe</span><span class="p">,</span>
-<a name="l-361"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
-<a name="l-362"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">qe</span>
-<a name="l-363"></a>  <span class="p">};</span>
-<a name="l-364"></a>
-<a name="l-365"></a>   <span class="k">assign</span> <span class="n">tap_alert_test</span> <span class="o">=</span> <span class="p">{</span>
-<a name="l-366"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
-<a name="l-367"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">qe</span><span class="p">,</span>
-<a name="l-368"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
-<a name="l-369"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">qe</span>
-<a name="l-370"></a>  <span class="p">};</span>
+<a name="l-306"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">LcTokenWidth</span><span class="o">/</span><span class="mi">32</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-307"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-308"></a>            <span class="n">transition_token_d</span><span class="p">[</span><span class="n">k</span><span class="o">*</span><span class="mi">32</span> <span class="o">+:</span> <span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">q</span><span class="p">;</span>
+<a name="l-309"></a>          <span class="k">end</span>
+<a name="l-310"></a>        <span class="k">end</span>
+<a name="l-311"></a>
+<a name="l-312"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-313"></a>          <span class="n">transition_target_d</span> <span class="o">=</span> <span class="n">dec_lc_state_e</span><span class="p">&#39;(</span><span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">q</span><span class="p">);</span>
+<a name="l-314"></a>        <span class="k">end</span>
+<a name="l-315"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sw_claim_transition_if_q</span> <span class="o">==</span> <span class="mh">8&#39;hA5</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-316"></a>        <span class="n">transition_cmd</span> <span class="o">=</span> <span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
+<a name="l-317"></a>                         <span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_cmd</span><span class="p">.</span><span class="n">qe</span><span class="p">;</span>
+<a name="l-318"></a>
+<a name="l-319"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">LcTokenWidth</span><span class="o">/</span><span class="mi">32</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-320"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-321"></a>            <span class="n">transition_token_d</span><span class="p">[</span><span class="n">k</span><span class="o">*</span><span class="mi">32</span> <span class="o">+:</span> <span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_token</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="n">q</span><span class="p">;</span>
+<a name="l-322"></a>          <span class="k">end</span>
+<a name="l-323"></a>        <span class="k">end</span>
+<a name="l-324"></a>
+<a name="l-325"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">qe</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-326"></a>          <span class="n">transition_target_d</span> <span class="o">=</span> <span class="n">dec_lc_state_e</span><span class="p">&#39;(</span><span class="n">reg2hw</span><span class="p">.</span><span class="n">transition_target</span><span class="p">.</span><span class="n">q</span><span class="p">);</span>
+<a name="l-327"></a>        <span class="k">end</span>
+<a name="l-328"></a>      <span class="k">end</span>
+<a name="l-329"></a>    <span class="k">end</span>
+<a name="l-330"></a>  <span class="k">end</span>
+<a name="l-331"></a>
+<a name="l-332"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_csrs</span>
+<a name="l-333"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-334"></a>      <span class="n">trans_success_q</span>           <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-335"></a>      <span class="n">trans_cnt_oflw_error_q</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-336"></a>      <span class="n">trans_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-337"></a>      <span class="n">token_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-338"></a>      <span class="n">flash_rma_error_q</span>         <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-339"></a>      <span class="n">fatal_prog_error_q</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-340"></a>      <span class="n">fatal_state_error_q</span>       <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-341"></a>      <span class="n">sw_claim_transition_if_q</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-342"></a>      <span class="n">tap_claim_transition_if_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-343"></a>      <span class="n">transition_token_q</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-344"></a>      <span class="n">transition_target_q</span>       <span class="o">&lt;=</span> <span class="n">DecLcStRaw</span><span class="p">;</span>
+<a name="l-345"></a>      <span class="n">otp_part_error_q</span>          <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-346"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-347"></a>      <span class="c1">// All status and error bits are terminal and require a reset cycle.</span>
+<a name="l-348"></a>      <span class="n">trans_success_q</span>           <span class="o">&lt;=</span> <span class="n">trans_success_d</span>        <span class="o">|</span> <span class="n">trans_success_q</span><span class="p">;</span>
+<a name="l-349"></a>      <span class="n">trans_cnt_oflw_error_q</span>    <span class="o">&lt;=</span> <span class="n">trans_cnt_oflw_error_d</span> <span class="o">|</span> <span class="n">trans_cnt_oflw_error_q</span><span class="p">;</span>
+<a name="l-350"></a>      <span class="n">trans_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="n">trans_invalid_error_d</span>  <span class="o">|</span> <span class="n">trans_invalid_error_q</span><span class="p">;</span>
+<a name="l-351"></a>      <span class="n">token_invalid_error_q</span>     <span class="o">&lt;=</span> <span class="n">token_invalid_error_d</span>  <span class="o">|</span> <span class="n">token_invalid_error_q</span><span class="p">;</span>
+<a name="l-352"></a>      <span class="n">flash_rma_error_q</span>         <span class="o">&lt;=</span> <span class="n">flash_rma_error_d</span>      <span class="o">|</span> <span class="n">flash_rma_error_q</span><span class="p">;</span>
+<a name="l-353"></a>      <span class="n">fatal_prog_error_q</span>        <span class="o">&lt;=</span> <span class="n">otp_prog_error_d</span>       <span class="o">|</span> <span class="n">fatal_prog_error_q</span><span class="p">;</span>
+<a name="l-354"></a>      <span class="n">fatal_state_error_q</span>       <span class="o">&lt;=</span> <span class="n">state_invalid_error_d</span>  <span class="o">|</span> <span class="n">fatal_state_error_q</span><span class="p">;</span>
+<a name="l-355"></a>      <span class="n">otp_part_error_q</span>          <span class="o">&lt;=</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">error</span>    <span class="o">|</span> <span class="n">otp_part_error_q</span><span class="p">;</span>
+<a name="l-356"></a>      <span class="c1">// Other regs, gated by mutex further below.</span>
+<a name="l-357"></a>      <span class="n">sw_claim_transition_if_q</span>  <span class="o">&lt;=</span> <span class="n">sw_claim_transition_if_d</span><span class="p">;</span>
+<a name="l-358"></a>      <span class="n">tap_claim_transition_if_q</span> <span class="o">&lt;=</span> <span class="n">tap_claim_transition_if_d</span><span class="p">;</span>
+<a name="l-359"></a>      <span class="n">transition_token_q</span>        <span class="o">&lt;=</span> <span class="n">transition_token_d</span><span class="p">;</span>
+<a name="l-360"></a>      <span class="n">transition_target_q</span>       <span class="o">&lt;=</span> <span class="n">transition_target_d</span><span class="p">;</span>
+<a name="l-361"></a>    <span class="k">end</span>
+<a name="l-362"></a>  <span class="k">end</span>
+<a name="l-363"></a>
+<a name="l-364"></a>  <span class="c1">//////////////////</span>
+<a name="l-365"></a>  <span class="c1">// Alert Sender //</span>
+<a name="l-366"></a>  <span class="c1">//////////////////</span>
+<a name="l-367"></a>
+<a name="l-368"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">alerts</span><span class="p">;</span>
+<a name="l-369"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">alert_test</span><span class="p">;</span>
+<a name="l-370"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumAlerts</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">tap_alert_test</span><span class="p">;</span>
 <a name="l-371"></a>
-<a name="l-372"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">NumAlerts</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_alert_tx</span>
-<a name="l-373"></a>    <span class="n">prim_alert_sender</span> <span class="p">#(</span>
-<a name="l-374"></a>      <span class="p">.</span><span class="n">AsyncOn</span><span class="p">(</span><span class="n">AlertAsyncOn</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span>
-<a name="l-375"></a>      <span class="p">.</span><span class="n">IsFatal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-376"></a>    <span class="p">)</span> <span class="n">u_prim_alert_sender</span> <span class="p">(</span>
-<a name="l-377"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-378"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-379"></a>      <span class="p">.</span><span class="n">alert_test_i</span>  <span class="p">(</span> <span class="n">alert_test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">|</span>
-<a name="l-380"></a>                       <span class="n">tap_alert_test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="p">),</span>
-<a name="l-381"></a>      <span class="p">.</span><span class="n">alert_req_i</span>   <span class="p">(</span> <span class="n">alerts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>         <span class="p">),</span>
-<a name="l-382"></a>      <span class="p">.</span><span class="n">alert_ack_o</span>   <span class="p">(</span>                   <span class="p">),</span>
-<a name="l-383"></a>      <span class="p">.</span><span class="n">alert_state_o</span> <span class="p">(</span>                   <span class="p">),</span>
-<a name="l-384"></a>      <span class="p">.</span><span class="n">alert_rx_i</span>    <span class="p">(</span> <span class="n">alert_rx_i</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>     <span class="p">),</span>
-<a name="l-385"></a>      <span class="p">.</span><span class="n">alert_tx_o</span>    <span class="p">(</span> <span class="n">alert_tx_o</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>     <span class="p">)</span>
-<a name="l-386"></a>    <span class="p">);</span>
-<a name="l-387"></a>  <span class="k">end</span>
-<a name="l-388"></a>
-<a name="l-389"></a>  <span class="c1">//////////////////////////</span>
-<a name="l-390"></a>  <span class="c1">// Escalation Receivers //</span>
-<a name="l-391"></a>  <span class="c1">//////////////////////////</span>
-<a name="l-392"></a>
-<a name="l-393"></a>  <span class="c1">// This escalation action triggers the</span>
-<a name="l-394"></a>  <span class="c1">// lc_escalate_en life cycle control signal.</span>
-<a name="l-395"></a>  <span class="kt">logic</span> <span class="n">esc_wipe_secrets</span><span class="p">;</span>
-<a name="l-396"></a>  <span class="n">prim_esc_receiver</span> <span class="n">u_prim_esc_receiver1</span> <span class="p">(</span>
-<a name="l-397"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-398"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-399"></a>    <span class="p">.</span><span class="n">esc_en_o</span> <span class="p">(</span><span class="n">esc_wipe_secrets</span><span class="p">),</span>
-<a name="l-400"></a>    <span class="p">.</span><span class="n">esc_rx_o</span> <span class="p">(</span><span class="n">esc_wipe_secrets_rx_o</span><span class="p">),</span>
-<a name="l-401"></a>    <span class="p">.</span><span class="n">esc_tx_i</span> <span class="p">(</span><span class="n">esc_wipe_secrets_tx_i</span><span class="p">)</span>
-<a name="l-402"></a>  <span class="p">);</span>
-<a name="l-403"></a>
-<a name="l-404"></a>  <span class="c1">// This escalation action moves the life cycle</span>
-<a name="l-405"></a>  <span class="c1">// state into a temporary &quot;SCRAP&quot; state named &quot;ESCALATE&quot;.</span>
-<a name="l-406"></a>  <span class="kt">logic</span> <span class="n">esc_scrap_state</span><span class="p">;</span>
-<a name="l-407"></a>  <span class="n">prim_esc_receiver</span> <span class="n">u_prim_esc_receiver2</span> <span class="p">(</span>
-<a name="l-408"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-409"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-410"></a>    <span class="p">.</span><span class="n">esc_en_o</span> <span class="p">(</span><span class="n">esc_scrap_state</span><span class="p">),</span>
-<a name="l-411"></a>    <span class="p">.</span><span class="n">esc_rx_o</span> <span class="p">(</span><span class="n">esc_scrap_state_rx_o</span><span class="p">),</span>
-<a name="l-412"></a>    <span class="p">.</span><span class="n">esc_tx_i</span> <span class="p">(</span><span class="n">esc_scrap_state_tx_i</span><span class="p">)</span>
-<a name="l-413"></a>  <span class="p">);</span>
-<a name="l-414"></a>
-<a name="l-415"></a>  <span class="c1">////////////////////////////</span>
-<a name="l-416"></a>  <span class="c1">// Synchronization of IOs //</span>
-<a name="l-417"></a>  <span class="c1">////////////////////////////</span>
-<a name="l-418"></a>
-<a name="l-419"></a>  <span class="c1">// Signals going to and coming from power manager.</span>
-<a name="l-420"></a>  <span class="kt">logic</span> <span class="n">lc_init</span><span class="p">;</span>
-<a name="l-421"></a>  <span class="n">prim_flop_2sync</span> <span class="p">#(</span>
-<a name="l-422"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a name="l-423"></a>  <span class="p">)</span> <span class="n">u_prim_flop_2sync_init</span> <span class="p">(</span>
-<a name="l-424"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-425"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-426"></a>    <span class="p">.</span><span class="n">d_i</span><span class="p">(</span><span class="n">pwr_lc_i</span><span class="p">.</span><span class="n">lc_init</span><span class="p">),</span>
-<a name="l-427"></a>    <span class="p">.</span><span class="n">q_o</span><span class="p">(</span><span class="n">lc_init</span><span class="p">)</span>
-<a name="l-428"></a>  <span class="p">);</span>
-<a name="l-429"></a>
-<a name="l-430"></a>  <span class="kt">logic</span> <span class="n">lc_done_d</span><span class="p">,</span> <span class="n">lc_done_q</span><span class="p">;</span>
-<a name="l-431"></a>  <span class="kt">logic</span> <span class="n">lc_idle_q</span><span class="p">;</span>
-<a name="l-432"></a>
-<a name="l-433"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_sync_regs</span>
-<a name="l-434"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-435"></a>      <span class="n">lc_done_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-436"></a>      <span class="n">lc_idle_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-437"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-438"></a>      <span class="n">lc_done_q</span> <span class="o">&lt;=</span> <span class="n">lc_done_d</span><span class="p">;</span>
-<a name="l-439"></a>      <span class="n">lc_idle_q</span> <span class="o">&lt;=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
-<a name="l-440"></a>    <span class="k">end</span>
-<a name="l-441"></a>  <span class="k">end</span>
-<a name="l-442"></a>
-<a name="l-443"></a>  <span class="k">assign</span> <span class="n">pwr_lc_o</span><span class="p">.</span><span class="n">lc_done</span> <span class="o">=</span> <span class="n">lc_done_q</span><span class="p">;</span>
-<a name="l-444"></a>  <span class="k">assign</span> <span class="n">pwr_lc_o</span><span class="p">.</span><span class="n">lc_idle</span> <span class="o">=</span> <span class="n">lc_idle_q</span><span class="p">;</span>
-<a name="l-445"></a>
-<a name="l-446"></a>  <span class="c1">// Life cycle ACK signals.</span>
-<a name="l-447"></a>  <span class="n">lc_tx_t</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lc_clk_byp_ack</span><span class="p">;</span>
-<a name="l-448"></a>  <span class="n">prim_lc_sync</span> <span class="n">u_prim_lc_sync_clk_byp_ack</span> <span class="p">(</span>
-<a name="l-449"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-450"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-451"></a>    <span class="p">.</span><span class="n">lc_en_i</span><span class="p">(</span><span class="n">lc_clk_byp_ack_i</span><span class="p">),</span>
-<a name="l-452"></a>    <span class="p">.</span><span class="n">lc_en_o</span><span class="p">(</span><span class="n">lc_clk_byp_ack</span><span class="p">)</span>
-<a name="l-453"></a>  <span class="p">);</span>
-<a name="l-454"></a>
-<a name="l-455"></a>  <span class="n">lc_tx_t</span> <span class="p">[</span><span class="mi">0</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lc_flash_rma_ack</span><span class="p">;</span>
-<a name="l-456"></a>  <span class="n">prim_lc_sync</span> <span class="n">u_prim_lc_sync_flash_rma_ack</span> <span class="p">(</span>
-<a name="l-457"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-458"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-459"></a>    <span class="p">.</span><span class="n">lc_en_i</span><span class="p">(</span><span class="n">lc_flash_rma_ack_i</span><span class="p">),</span>
-<a name="l-460"></a>    <span class="p">.</span><span class="n">lc_en_o</span><span class="p">(</span><span class="n">lc_flash_rma_ack</span><span class="p">)</span>
-<a name="l-461"></a>  <span class="p">);</span>
-<a name="l-462"></a>
-<a name="l-463"></a>  <span class="c1">////////////</span>
-<a name="l-464"></a>  <span class="c1">// LC FSM //</span>
+<a name="l-372"></a>  <span class="k">assign</span> <span class="n">alerts</span> <span class="o">=</span> <span class="p">{</span>
+<a name="l-373"></a>    <span class="n">fatal_state_error_q</span><span class="p">,</span>
+<a name="l-374"></a>    <span class="n">fatal_prog_error_q</span>
+<a name="l-375"></a>  <span class="p">};</span>
+<a name="l-376"></a>
+<a name="l-377"></a>  <span class="k">assign</span> <span class="n">alert_test</span> <span class="o">=</span> <span class="p">{</span>
+<a name="l-378"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
+<a name="l-379"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">qe</span><span class="p">,</span>
+<a name="l-380"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
+<a name="l-381"></a>    <span class="n">reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">qe</span>
+<a name="l-382"></a>  <span class="p">};</span>
+<a name="l-383"></a>
+<a name="l-384"></a>   <span class="k">assign</span> <span class="n">tap_alert_test</span> <span class="o">=</span> <span class="p">{</span>
+<a name="l-385"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
+<a name="l-386"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_state_error</span><span class="p">.</span><span class="n">qe</span><span class="p">,</span>
+<a name="l-387"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">q</span> <span class="o">&amp;</span>
+<a name="l-388"></a>    <span class="n">tap_reg2hw</span><span class="p">.</span><span class="n">alert_test</span><span class="p">.</span><span class="n">fatal_prog_error</span><span class="p">.</span><span class="n">qe</span>
+<a name="l-389"></a>  <span class="p">};</span>
+<a name="l-390"></a>
+<a name="l-391"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">NumAlerts</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_alert_tx</span>
+<a name="l-392"></a>    <span class="n">prim_alert_sender</span> <span class="p">#(</span>
+<a name="l-393"></a>      <span class="p">.</span><span class="n">AsyncOn</span><span class="p">(</span><span class="n">AlertAsyncOn</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span>
+<a name="l-394"></a>      <span class="p">.</span><span class="n">IsFatal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-395"></a>    <span class="p">)</span> <span class="n">u_prim_alert_sender</span> <span class="p">(</span>
+<a name="l-396"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-397"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-398"></a>      <span class="p">.</span><span class="n">alert_test_i</span>  <span class="p">(</span> <span class="n">alert_test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">|</span>
+<a name="l-399"></a>                       <span class="n">tap_alert_test</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="p">),</span>
+<a name="l-400"></a>      <span class="p">.</span><span class="n">alert_req_i</span>   <span class="p">(</span> <span class="n">alerts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>         <span class="p">),</span>
+<a name="l-401"></a>      <span class="p">.</span><span class="n">alert_ack_o</span>   <span class="p">(</span>                   <span class="p">),</span>
+<a name="l-402"></a>      <span class="p">.</span><span class="n">alert_state_o</span> <span class="p">(</span>                   <span class="p">),</span>
+<a name="l-403"></a>      <span class="p">.</span><span class="n">alert_rx_i</span>    <span class="p">(</span> <span class="n">alert_rx_i</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>     <span class="p">),</span>
+<a name="l-404"></a>      <span class="p">.</span><span class="n">alert_tx_o</span>    <span class="p">(</span> <span class="n">alert_tx_o</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>     <span class="p">)</span>
+<a name="l-405"></a>    <span class="p">);</span>
+<a name="l-406"></a>  <span class="k">end</span>
+<a name="l-407"></a>
+<a name="l-408"></a>  <span class="c1">//////////////////////////</span>
+<a name="l-409"></a>  <span class="c1">// Escalation Receivers //</span>
+<a name="l-410"></a>  <span class="c1">//////////////////////////</span>
+<a name="l-411"></a>
+<a name="l-412"></a>  <span class="c1">// This escalation action triggers the</span>
+<a name="l-413"></a>  <span class="c1">// lc_escalate_en life cycle control signal.</span>
+<a name="l-414"></a>  <span class="kt">logic</span> <span class="n">esc_wipe_secrets</span><span class="p">;</span>
+<a name="l-415"></a>  <span class="n">prim_esc_receiver</span> <span class="n">u_prim_esc_receiver1</span> <span class="p">(</span>
+<a name="l-416"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-417"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-418"></a>    <span class="p">.</span><span class="n">esc_en_o</span> <span class="p">(</span><span class="n">esc_wipe_secrets</span><span class="p">),</span>
+<a name="l-419"></a>    <span class="p">.</span><span class="n">esc_rx_o</span> <span class="p">(</span><span class="n">esc_wipe_secrets_rx_o</span><span class="p">),</span>
+<a name="l-420"></a>    <span class="p">.</span><span class="n">esc_tx_i</span> <span class="p">(</span><span class="n">esc_wipe_secrets_tx_i</span><span class="p">)</span>
+<a name="l-421"></a>  <span class="p">);</span>
+<a name="l-422"></a>
+<a name="l-423"></a>  <span class="c1">// This escalation action moves the life cycle</span>
+<a name="l-424"></a>  <span class="c1">// state into a temporary &quot;SCRAP&quot; state named &quot;ESCALATE&quot;.</span>
+<a name="l-425"></a>  <span class="kt">logic</span> <span class="n">esc_scrap_state</span><span class="p">;</span>
+<a name="l-426"></a>  <span class="n">prim_esc_receiver</span> <span class="n">u_prim_esc_receiver2</span> <span class="p">(</span>
+<a name="l-427"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-428"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-429"></a>    <span class="p">.</span><span class="n">esc_en_o</span> <span class="p">(</span><span class="n">esc_scrap_state</span><span class="p">),</span>
+<a name="l-430"></a>    <span class="p">.</span><span class="n">esc_rx_o</span> <span class="p">(</span><span class="n">esc_scrap_state_rx_o</span><span class="p">),</span>
+<a name="l-431"></a>    <span class="p">.</span><span class="n">esc_tx_i</span> <span class="p">(</span><span class="n">esc_scrap_state_tx_i</span><span class="p">)</span>
+<a name="l-432"></a>  <span class="p">);</span>
+<a name="l-433"></a>
+<a name="l-434"></a>  <span class="c1">////////////////////////////</span>
+<a name="l-435"></a>  <span class="c1">// Synchronization of IOs //</span>
+<a name="l-436"></a>  <span class="c1">////////////////////////////</span>
+<a name="l-437"></a>
+<a name="l-438"></a>  <span class="c1">// Signals going to and coming from power manager.</span>
+<a name="l-439"></a>  <span class="kt">logic</span> <span class="n">lc_init</span><span class="p">;</span>
+<a name="l-440"></a>  <span class="n">prim_flop_2sync</span> <span class="p">#(</span>
+<a name="l-441"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a name="l-442"></a>  <span class="p">)</span> <span class="n">u_prim_flop_2sync_init</span> <span class="p">(</span>
+<a name="l-443"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-444"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-445"></a>    <span class="p">.</span><span class="n">d_i</span><span class="p">(</span><span class="n">pwr_lc_i</span><span class="p">.</span><span class="n">lc_init</span><span class="p">),</span>
+<a name="l-446"></a>    <span class="p">.</span><span class="n">q_o</span><span class="p">(</span><span class="n">lc_init</span><span class="p">)</span>
+<a name="l-447"></a>  <span class="p">);</span>
+<a name="l-448"></a>
+<a name="l-449"></a>  <span class="kt">logic</span> <span class="n">lc_done_d</span><span class="p">,</span> <span class="n">lc_done_q</span><span class="p">;</span>
+<a name="l-450"></a>  <span class="kt">logic</span> <span class="n">lc_idle_q</span><span class="p">;</span>
+<a name="l-451"></a>
+<a name="l-452"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_sync_regs</span>
+<a name="l-453"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-454"></a>      <span class="n">lc_done_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-455"></a>      <span class="n">lc_idle_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-456"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-457"></a>      <span class="n">lc_done_q</span> <span class="o">&lt;=</span> <span class="n">lc_done_d</span><span class="p">;</span>
+<a name="l-458"></a>      <span class="n">lc_idle_q</span> <span class="o">&lt;=</span> <span class="n">lc_idle_d</span><span class="p">;</span>
+<a name="l-459"></a>    <span class="k">end</span>
+<a name="l-460"></a>  <span class="k">end</span>
+<a name="l-461"></a>
+<a name="l-462"></a>  <span class="k">assign</span> <span class="n">pwr_lc_o</span><span class="p">.</span><span class="n">lc_done</span> <span class="o">=</span> <span class="n">lc_done_q</span><span class="p">;</span>
+<a name="l-463"></a>  <span class="k">assign</span> <span class="n">pwr_lc_o</span><span class="p">.</span><span class="n">lc_idle</span> <span class="o">=</span> <span class="n">lc_idle_q</span><span class="p">;</span>
+<a name="l-464"></a>
 <a name="l-465"></a>  <span class="c1">////////////</span>
-<a name="l-466"></a>
-<a name="l-467"></a>  <span class="k">assign</span> <span class="n">lc_otp_token_o</span><span class="p">.</span><span class="n">token_input</span> <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
-<a name="l-468"></a>  <span class="k">assign</span> <span class="n">lc_flash_rma_seed_o</span> <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">[</span><span class="n">RmaSeedWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-469"></a>
-<a name="l-470"></a>  <span class="n">lc_ctrl_fsm</span> <span class="p">#(</span>
-<a name="l-471"></a>    <span class="p">.</span><span class="n">RndCnstLcKeymgrDivInvalid</span>    <span class="p">(</span> <span class="n">RndCnstLcKeymgrDivInvalid</span>    <span class="p">),</span>
-<a name="l-472"></a>    <span class="p">.</span><span class="n">RndCnstLcKeymgrDivTestDevRma</span> <span class="p">(</span> <span class="n">RndCnstLcKeymgrDivTestDevRma</span> <span class="p">),</span>
-<a name="l-473"></a>    <span class="p">.</span><span class="n">RndCnstLcKeymgrDivProduction</span> <span class="p">(</span> <span class="n">RndCnstLcKeymgrDivProduction</span> <span class="p">)</span>
-<a name="l-474"></a>  <span class="p">)</span> <span class="n">u_lc_ctrl_fsm</span> <span class="p">(</span>
-<a name="l-475"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-476"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-477"></a>    <span class="p">.</span><span class="n">init_req_i</span>             <span class="p">(</span> <span class="n">lc_init</span>                         <span class="p">),</span>
-<a name="l-478"></a>    <span class="p">.</span><span class="n">init_done_o</span>            <span class="p">(</span> <span class="n">lc_done_d</span>                       <span class="p">),</span>
-<a name="l-479"></a>    <span class="p">.</span><span class="n">idle_o</span>                 <span class="p">(</span> <span class="n">lc_idle_d</span>                       <span class="p">),</span>
-<a name="l-480"></a>    <span class="p">.</span><span class="n">esc_scrap_state_i</span>      <span class="p">(</span> <span class="n">esc_scrap_state</span>                 <span class="p">),</span>
-<a name="l-481"></a>    <span class="p">.</span><span class="n">esc_wipe_secrets_i</span>     <span class="p">(</span> <span class="n">esc_wipe_secrets</span>                <span class="p">),</span>
-<a name="l-482"></a>    <span class="p">.</span><span class="n">lc_state_valid_i</span>       <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">valid</span>             <span class="p">),</span>
-<a name="l-483"></a>    <span class="p">.</span><span class="n">lc_state_i</span>             <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">state</span>             <span class="p">),</span>
-<a name="l-484"></a>    <span class="p">.</span><span class="n">lc_id_state_i</span>          <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">id_state</span>          <span class="p">),</span>
-<a name="l-485"></a>    <span class="p">.</span><span class="n">lc_cnt_i</span>               <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">count</span>             <span class="p">),</span>
-<a name="l-486"></a>    <span class="p">.</span><span class="n">test_unlock_token_i</span>    <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">test_unlock_token</span> <span class="p">),</span>
-<a name="l-487"></a>    <span class="p">.</span><span class="n">test_exit_token_i</span>      <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">test_exit_token</span>   <span class="p">),</span>
-<a name="l-488"></a>    <span class="p">.</span><span class="n">rma_token_i</span>            <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">rma_token</span>         <span class="p">),</span>
-<a name="l-489"></a>    <span class="p">.</span><span class="n">trans_cmd_i</span>            <span class="p">(</span> <span class="n">transition_cmd</span>                  <span class="p">),</span>
-<a name="l-490"></a>    <span class="p">.</span><span class="n">trans_target_i</span>         <span class="p">(</span> <span class="n">transition_target_q</span>             <span class="p">),</span>
-<a name="l-491"></a>    <span class="p">.</span><span class="n">dec_lc_state_o</span>         <span class="p">(</span> <span class="n">dec_lc_state</span>                    <span class="p">),</span>
-<a name="l-492"></a>    <span class="p">.</span><span class="n">dec_lc_cnt_o</span>           <span class="p">(</span> <span class="n">dec_lc_cnt</span>                      <span class="p">),</span>
-<a name="l-493"></a>    <span class="p">.</span><span class="n">dec_lc_id_state_o</span>      <span class="p">(</span> <span class="n">dec_lc_id_state</span>                 <span class="p">),</span>
-<a name="l-494"></a>    <span class="p">.</span><span class="n">token_hash_req_o</span>       <span class="p">(</span> <span class="n">lc_otp_token_o</span><span class="p">.</span><span class="n">req</span>              <span class="p">),</span>
-<a name="l-495"></a>    <span class="p">.</span><span class="n">token_hash_ack_i</span>       <span class="p">(</span> <span class="n">lc_otp_token_i</span><span class="p">.</span><span class="n">ack</span>              <span class="p">),</span>
-<a name="l-496"></a>    <span class="p">.</span><span class="n">hashed_token_i</span>         <span class="p">(</span> <span class="n">lc_otp_token_i</span><span class="p">.</span><span class="n">hashed_token</span>     <span class="p">),</span>
-<a name="l-497"></a>    <span class="p">.</span><span class="n">otp_prog_req_o</span>         <span class="p">(</span> <span class="n">lc_otp_program_o</span><span class="p">.</span><span class="n">req</span>            <span class="p">),</span>
-<a name="l-498"></a>    <span class="p">.</span><span class="n">otp_prog_lc_state_o</span>    <span class="p">(</span> <span class="n">lc_otp_program_o</span><span class="p">.</span><span class="n">state</span>          <span class="p">),</span>
-<a name="l-499"></a>    <span class="p">.</span><span class="n">otp_prog_lc_cnt_o</span>      <span class="p">(</span> <span class="n">lc_otp_program_o</span><span class="p">.</span><span class="n">count</span>          <span class="p">),</span>
-<a name="l-500"></a>    <span class="p">.</span><span class="n">otp_prog_ack_i</span>         <span class="p">(</span> <span class="n">lc_otp_program_i</span><span class="p">.</span><span class="n">ack</span>            <span class="p">),</span>
-<a name="l-501"></a>    <span class="p">.</span><span class="n">otp_prog_err_i</span>         <span class="p">(</span> <span class="n">lc_otp_program_i</span><span class="p">.</span><span class="n">err</span>            <span class="p">),</span>
-<a name="l-502"></a>    <span class="p">.</span><span class="n">trans_success_o</span>        <span class="p">(</span> <span class="n">trans_success_d</span>                 <span class="p">),</span>
-<a name="l-503"></a>    <span class="p">.</span><span class="n">trans_cnt_oflw_error_o</span> <span class="p">(</span> <span class="n">trans_cnt_oflw_error_d</span>          <span class="p">),</span>
-<a name="l-504"></a>    <span class="p">.</span><span class="n">trans_invalid_error_o</span>  <span class="p">(</span> <span class="n">trans_invalid_error_d</span>           <span class="p">),</span>
-<a name="l-505"></a>    <span class="p">.</span><span class="n">token_invalid_error_o</span>  <span class="p">(</span> <span class="n">token_invalid_error_d</span>           <span class="p">),</span>
-<a name="l-506"></a>    <span class="p">.</span><span class="n">flash_rma_error_o</span>      <span class="p">(</span> <span class="n">flash_rma_error_d</span>               <span class="p">),</span>
-<a name="l-507"></a>    <span class="p">.</span><span class="n">otp_prog_error_o</span>       <span class="p">(</span> <span class="n">otp_prog_error_d</span>                <span class="p">),</span>
-<a name="l-508"></a>    <span class="p">.</span><span class="n">state_invalid_error_o</span>  <span class="p">(</span> <span class="n">state_invalid_error_d</span>           <span class="p">),</span>
-<a name="l-509"></a>    <span class="p">.</span><span class="n">lc_dft_en_o</span><span class="p">,</span>
-<a name="l-510"></a>    <span class="p">.</span><span class="n">lc_nvm_debug_en_o</span><span class="p">,</span>
-<a name="l-511"></a>    <span class="p">.</span><span class="n">lc_hw_debug_en_o</span><span class="p">,</span>
-<a name="l-512"></a>    <span class="p">.</span><span class="n">lc_cpu_en_o</span><span class="p">,</span>
-<a name="l-513"></a>    <span class="p">.</span><span class="n">lc_creator_seed_sw_rw_en_o</span><span class="p">,</span>
-<a name="l-514"></a>    <span class="p">.</span><span class="n">lc_owner_seed_sw_rw_en_o</span><span class="p">,</span>
-<a name="l-515"></a>    <span class="p">.</span><span class="n">lc_iso_part_sw_rd_en_o</span><span class="p">,</span>
-<a name="l-516"></a>    <span class="p">.</span><span class="n">lc_iso_part_sw_wr_en_o</span><span class="p">,</span>
-<a name="l-517"></a>    <span class="p">.</span><span class="n">lc_seed_hw_rd_en_o</span><span class="p">,</span>
-<a name="l-518"></a>    <span class="p">.</span><span class="n">lc_keymgr_en_o</span><span class="p">,</span>
-<a name="l-519"></a>    <span class="p">.</span><span class="n">lc_escalate_en_o</span><span class="p">,</span>
-<a name="l-520"></a>    <span class="p">.</span><span class="n">lc_check_byp_en_o</span><span class="p">,</span>
-<a name="l-521"></a>    <span class="p">.</span><span class="n">lc_clk_byp_req_o</span><span class="p">,</span>
-<a name="l-522"></a>    <span class="p">.</span><span class="n">lc_clk_byp_ack_i</span>      <span class="p">(</span> <span class="n">lc_clk_byp_ack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>               <span class="p">),</span>
-<a name="l-523"></a>    <span class="p">.</span><span class="n">lc_flash_rma_req_o</span><span class="p">,</span>
-<a name="l-524"></a>    <span class="p">.</span><span class="n">lc_flash_rma_ack_i</span>    <span class="p">(</span> <span class="n">lc_flash_rma_ack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>             <span class="p">),</span>
-<a name="l-525"></a>    <span class="p">.</span><span class="n">lc_keymgr_div_o</span>
-<a name="l-526"></a>  <span class="p">);</span>
-<a name="l-527"></a>
-<a name="l-528"></a>  <span class="c1">////////////////</span>
-<a name="l-529"></a>  <span class="c1">// Assertions //</span>
+<a name="l-466"></a>  <span class="c1">// LC FSM //</span>
+<a name="l-467"></a>  <span class="c1">////////////</span>
+<a name="l-468"></a>
+<a name="l-469"></a>  <span class="k">assign</span> <span class="n">lc_otp_token_o</span><span class="p">.</span><span class="n">token_input</span> <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">;</span>
+<a name="l-470"></a>  <span class="k">assign</span> <span class="n">lc_flash_rma_seed_o</span> <span class="o">=</span> <span class="n">transition_token_q</span><span class="p">[</span><span class="n">RmaSeedWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-471"></a>
+<a name="l-472"></a>  <span class="n">lc_ctrl_fsm</span> <span class="p">#(</span>
+<a name="l-473"></a>    <span class="p">.</span><span class="n">RndCnstLcKeymgrDivInvalid</span>    <span class="p">(</span> <span class="n">RndCnstLcKeymgrDivInvalid</span>    <span class="p">),</span>
+<a name="l-474"></a>    <span class="p">.</span><span class="n">RndCnstLcKeymgrDivTestDevRma</span> <span class="p">(</span> <span class="n">RndCnstLcKeymgrDivTestDevRma</span> <span class="p">),</span>
+<a name="l-475"></a>    <span class="p">.</span><span class="n">RndCnstLcKeymgrDivProduction</span> <span class="p">(</span> <span class="n">RndCnstLcKeymgrDivProduction</span> <span class="p">)</span>
+<a name="l-476"></a>  <span class="p">)</span> <span class="n">u_lc_ctrl_fsm</span> <span class="p">(</span>
+<a name="l-477"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-478"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-479"></a>    <span class="p">.</span><span class="n">init_req_i</span>             <span class="p">(</span> <span class="n">lc_init</span>                         <span class="p">),</span>
+<a name="l-480"></a>    <span class="p">.</span><span class="n">init_done_o</span>            <span class="p">(</span> <span class="n">lc_done_d</span>                       <span class="p">),</span>
+<a name="l-481"></a>    <span class="p">.</span><span class="n">idle_o</span>                 <span class="p">(</span> <span class="n">lc_idle_d</span>                       <span class="p">),</span>
+<a name="l-482"></a>    <span class="p">.</span><span class="n">esc_scrap_state_i</span>      <span class="p">(</span> <span class="n">esc_scrap_state</span>                 <span class="p">),</span>
+<a name="l-483"></a>    <span class="p">.</span><span class="n">esc_wipe_secrets_i</span>     <span class="p">(</span> <span class="n">esc_wipe_secrets</span>                <span class="p">),</span>
+<a name="l-484"></a>    <span class="p">.</span><span class="n">lc_state_valid_i</span>       <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">valid</span>             <span class="p">),</span>
+<a name="l-485"></a>    <span class="p">.</span><span class="n">lc_state_i</span>             <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">state</span>             <span class="p">),</span>
+<a name="l-486"></a>    <span class="p">.</span><span class="n">lc_id_state_i</span>          <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">id_state</span>          <span class="p">),</span>
+<a name="l-487"></a>    <span class="p">.</span><span class="n">lc_cnt_i</span>               <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">count</span>             <span class="p">),</span>
+<a name="l-488"></a>    <span class="p">.</span><span class="n">test_unlock_token_i</span>    <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">test_unlock_token</span> <span class="p">),</span>
+<a name="l-489"></a>    <span class="p">.</span><span class="n">test_exit_token_i</span>      <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">test_exit_token</span>   <span class="p">),</span>
+<a name="l-490"></a>    <span class="p">.</span><span class="n">rma_token_i</span>            <span class="p">(</span> <span class="n">otp_lc_data_i</span><span class="p">.</span><span class="n">rma_token</span>         <span class="p">),</span>
+<a name="l-491"></a>    <span class="p">.</span><span class="n">trans_cmd_i</span>            <span class="p">(</span> <span class="n">transition_cmd</span>                  <span class="p">),</span>
+<a name="l-492"></a>    <span class="p">.</span><span class="n">trans_target_i</span>         <span class="p">(</span> <span class="n">transition_target_q</span>             <span class="p">),</span>
+<a name="l-493"></a>    <span class="p">.</span><span class="n">dec_lc_state_o</span>         <span class="p">(</span> <span class="n">dec_lc_state</span>                    <span class="p">),</span>
+<a name="l-494"></a>    <span class="p">.</span><span class="n">dec_lc_cnt_o</span>           <span class="p">(</span> <span class="n">dec_lc_cnt</span>                      <span class="p">),</span>
+<a name="l-495"></a>    <span class="p">.</span><span class="n">dec_lc_id_state_o</span>      <span class="p">(</span> <span class="n">dec_lc_id_state</span>                 <span class="p">),</span>
+<a name="l-496"></a>    <span class="p">.</span><span class="n">token_hash_req_o</span>       <span class="p">(</span> <span class="n">lc_otp_token_o</span><span class="p">.</span><span class="n">req</span>              <span class="p">),</span>
+<a name="l-497"></a>    <span class="p">.</span><span class="n">token_hash_ack_i</span>       <span class="p">(</span> <span class="n">lc_otp_token_i</span><span class="p">.</span><span class="n">ack</span>              <span class="p">),</span>
+<a name="l-498"></a>    <span class="p">.</span><span class="n">hashed_token_i</span>         <span class="p">(</span> <span class="n">lc_otp_token_i</span><span class="p">.</span><span class="n">hashed_token</span>     <span class="p">),</span>
+<a name="l-499"></a>    <span class="p">.</span><span class="n">otp_prog_req_o</span>         <span class="p">(</span> <span class="n">lc_otp_program_o</span><span class="p">.</span><span class="n">req</span>            <span class="p">),</span>
+<a name="l-500"></a>    <span class="p">.</span><span class="n">otp_prog_lc_state_o</span>    <span class="p">(</span> <span class="n">lc_otp_program_o</span><span class="p">.</span><span class="n">state</span>          <span class="p">),</span>
+<a name="l-501"></a>    <span class="p">.</span><span class="n">otp_prog_lc_cnt_o</span>      <span class="p">(</span> <span class="n">lc_otp_program_o</span><span class="p">.</span><span class="n">count</span>          <span class="p">),</span>
+<a name="l-502"></a>    <span class="p">.</span><span class="n">otp_prog_ack_i</span>         <span class="p">(</span> <span class="n">lc_otp_program_i</span><span class="p">.</span><span class="n">ack</span>            <span class="p">),</span>
+<a name="l-503"></a>    <span class="p">.</span><span class="n">otp_prog_err_i</span>         <span class="p">(</span> <span class="n">lc_otp_program_i</span><span class="p">.</span><span class="n">err</span>            <span class="p">),</span>
+<a name="l-504"></a>    <span class="p">.</span><span class="n">trans_success_o</span>        <span class="p">(</span> <span class="n">trans_success_d</span>                 <span class="p">),</span>
+<a name="l-505"></a>    <span class="p">.</span><span class="n">trans_cnt_oflw_error_o</span> <span class="p">(</span> <span class="n">trans_cnt_oflw_error_d</span>          <span class="p">),</span>
+<a name="l-506"></a>    <span class="p">.</span><span class="n">trans_invalid_error_o</span>  <span class="p">(</span> <span class="n">trans_invalid_error_d</span>           <span class="p">),</span>
+<a name="l-507"></a>    <span class="p">.</span><span class="n">token_invalid_error_o</span>  <span class="p">(</span> <span class="n">token_invalid_error_d</span>           <span class="p">),</span>
+<a name="l-508"></a>    <span class="p">.</span><span class="n">flash_rma_error_o</span>      <span class="p">(</span> <span class="n">flash_rma_error_d</span>               <span class="p">),</span>
+<a name="l-509"></a>    <span class="p">.</span><span class="n">otp_prog_error_o</span>       <span class="p">(</span> <span class="n">otp_prog_error_d</span>                <span class="p">),</span>
+<a name="l-510"></a>    <span class="p">.</span><span class="n">state_invalid_error_o</span>  <span class="p">(</span> <span class="n">state_invalid_error_d</span>           <span class="p">),</span>
+<a name="l-511"></a>    <span class="p">.</span><span class="n">lc_dft_en_o</span><span class="p">,</span>
+<a name="l-512"></a>    <span class="p">.</span><span class="n">lc_nvm_debug_en_o</span><span class="p">,</span>
+<a name="l-513"></a>    <span class="p">.</span><span class="n">lc_hw_debug_en_o</span><span class="p">,</span>
+<a name="l-514"></a>    <span class="p">.</span><span class="n">lc_cpu_en_o</span><span class="p">,</span>
+<a name="l-515"></a>    <span class="p">.</span><span class="n">lc_creator_seed_sw_rw_en_o</span><span class="p">,</span>
+<a name="l-516"></a>    <span class="p">.</span><span class="n">lc_owner_seed_sw_rw_en_o</span><span class="p">,</span>
+<a name="l-517"></a>    <span class="p">.</span><span class="n">lc_iso_part_sw_rd_en_o</span><span class="p">,</span>
+<a name="l-518"></a>    <span class="p">.</span><span class="n">lc_iso_part_sw_wr_en_o</span><span class="p">,</span>
+<a name="l-519"></a>    <span class="p">.</span><span class="n">lc_seed_hw_rd_en_o</span><span class="p">,</span>
+<a name="l-520"></a>    <span class="p">.</span><span class="n">lc_keymgr_en_o</span><span class="p">,</span>
+<a name="l-521"></a>    <span class="p">.</span><span class="n">lc_escalate_en_o</span><span class="p">,</span>
+<a name="l-522"></a>    <span class="p">.</span><span class="n">lc_check_byp_en_o</span><span class="p">,</span>
+<a name="l-523"></a>    <span class="p">.</span><span class="n">lc_clk_byp_req_o</span><span class="p">,</span>
+<a name="l-524"></a>    <span class="p">.</span><span class="n">lc_clk_byp_ack_i</span><span class="p">,</span>
+<a name="l-525"></a>    <span class="p">.</span><span class="n">lc_flash_rma_req_o</span><span class="p">,</span>
+<a name="l-526"></a>    <span class="p">.</span><span class="n">lc_flash_rma_ack_i</span><span class="p">,</span>
+<a name="l-527"></a>    <span class="p">.</span><span class="n">lc_keymgr_div_o</span>
+<a name="l-528"></a>  <span class="p">);</span>
+<a name="l-529"></a>
 <a name="l-530"></a>  <span class="c1">////////////////</span>
-<a name="l-531"></a>
-<a name="l-532"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlOKnown</span><span class="p">,</span>               <span class="n">tl_o</span>                       <span class="p">)</span>
-<a name="l-533"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">AlertTxKnown_A</span><span class="p">,</span>         <span class="n">alert_tx_o</span>                 <span class="p">)</span>
-<a name="l-534"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">PwrLcKnown_A</span><span class="p">,</span>           <span class="n">pwr_lc_o</span>                   <span class="p">)</span>
-<a name="l-535"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcOtpProgramKnown_A</span><span class="p">,</span>    <span class="n">lc_otp_program_o</span>           <span class="p">)</span>
-<a name="l-536"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcOtpTokenKnown_A</span><span class="p">,</span>      <span class="n">lc_otp_token_o</span>             <span class="p">)</span>
-<a name="l-537"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcDftEnKnown_A</span><span class="p">,</span>         <span class="n">lc_dft_en_o</span>                <span class="p">)</span>
-<a name="l-538"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcNvmDebugEnKnown_A</span><span class="p">,</span>    <span class="n">lc_nvm_debug_en_o</span>          <span class="p">)</span>
-<a name="l-539"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcHwDebugEnKnown_A</span><span class="p">,</span>     <span class="n">lc_hw_debug_en_o</span>           <span class="p">)</span>
-<a name="l-540"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcCpuEnKnown_A</span><span class="p">,</span>         <span class="n">lc_cpu_en_o</span>                <span class="p">)</span>
-<a name="l-541"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcCreatorSwRwEn_A</span><span class="p">,</span>      <span class="n">lc_creator_seed_sw_rw_en_o</span> <span class="p">)</span>
-<a name="l-542"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcOwnerSwRwEn_A</span><span class="p">,</span>        <span class="n">lc_owner_seed_sw_rw_en_o</span>   <span class="p">)</span>
-<a name="l-543"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcIsoSwRwEn_A</span><span class="p">,</span>          <span class="n">lc_iso_part_sw_rd_en_o</span>     <span class="p">)</span>
-<a name="l-544"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcIsoSwWrEn_A</span><span class="p">,</span>          <span class="n">lc_iso_part_sw_wr_en_o</span>     <span class="p">)</span>
-<a name="l-545"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcSeedHwRdEn_A</span><span class="p">,</span>         <span class="n">lc_seed_hw_rd_en_o</span>         <span class="p">)</span>
-<a name="l-546"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcKeymgrEnKnown_A</span><span class="p">,</span>      <span class="n">lc_keymgr_en_o</span>             <span class="p">)</span>
-<a name="l-547"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcEscalateEnKnown_A</span><span class="p">,</span>    <span class="n">lc_escalate_en_o</span>           <span class="p">)</span>
-<a name="l-548"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcCheckBypassEnKnown_A</span><span class="p">,</span> <span class="n">lc_check_byp_en_o</span>          <span class="p">)</span>
-<a name="l-549"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcClkBypReqKnown_A</span><span class="p">,</span>     <span class="n">lc_clk_byp_req_o</span>           <span class="p">)</span>
-<a name="l-550"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcFlashRmaSeedKnown_A</span><span class="p">,</span>  <span class="n">lc_flash_rma_seed_o</span>        <span class="p">)</span>
-<a name="l-551"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcFlashRmaReqKnown_A</span><span class="p">,</span>   <span class="n">lc_flash_rma_req_o</span>         <span class="p">)</span>
-<a name="l-552"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcKeymgrDiv_A</span><span class="p">,</span>          <span class="n">lc_keymgr_div_o</span>            <span class="p">)</span>
-<a name="l-553"></a>
-<a name="l-554"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">lc_ctrl</span>
+<a name="l-531"></a>  <span class="c1">// Assertions //</span>
+<a name="l-532"></a>  <span class="c1">////////////////</span>
+<a name="l-533"></a>
+<a name="l-534"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlOKnown</span><span class="p">,</span>               <span class="n">tl_o</span>                       <span class="p">)</span>
+<a name="l-535"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">AlertTxKnown_A</span><span class="p">,</span>         <span class="n">alert_tx_o</span>                 <span class="p">)</span>
+<a name="l-536"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">PwrLcKnown_A</span><span class="p">,</span>           <span class="n">pwr_lc_o</span>                   <span class="p">)</span>
+<a name="l-537"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcOtpProgramKnown_A</span><span class="p">,</span>    <span class="n">lc_otp_program_o</span>           <span class="p">)</span>
+<a name="l-538"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcOtpTokenKnown_A</span><span class="p">,</span>      <span class="n">lc_otp_token_o</span>             <span class="p">)</span>
+<a name="l-539"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcDftEnKnown_A</span><span class="p">,</span>         <span class="n">lc_dft_en_o</span>                <span class="p">)</span>
+<a name="l-540"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcNvmDebugEnKnown_A</span><span class="p">,</span>    <span class="n">lc_nvm_debug_en_o</span>          <span class="p">)</span>
+<a name="l-541"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcHwDebugEnKnown_A</span><span class="p">,</span>     <span class="n">lc_hw_debug_en_o</span>           <span class="p">)</span>
+<a name="l-542"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcCpuEnKnown_A</span><span class="p">,</span>         <span class="n">lc_cpu_en_o</span>                <span class="p">)</span>
+<a name="l-543"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcCreatorSwRwEn_A</span><span class="p">,</span>      <span class="n">lc_creator_seed_sw_rw_en_o</span> <span class="p">)</span>
+<a name="l-544"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcOwnerSwRwEn_A</span><span class="p">,</span>        <span class="n">lc_owner_seed_sw_rw_en_o</span>   <span class="p">)</span>
+<a name="l-545"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcIsoSwRwEn_A</span><span class="p">,</span>          <span class="n">lc_iso_part_sw_rd_en_o</span>     <span class="p">)</span>
+<a name="l-546"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcIsoSwWrEn_A</span><span class="p">,</span>          <span class="n">lc_iso_part_sw_wr_en_o</span>     <span class="p">)</span>
+<a name="l-547"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcSeedHwRdEn_A</span><span class="p">,</span>         <span class="n">lc_seed_hw_rd_en_o</span>         <span class="p">)</span>
+<a name="l-548"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcKeymgrEnKnown_A</span><span class="p">,</span>      <span class="n">lc_keymgr_en_o</span>             <span class="p">)</span>
+<a name="l-549"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcEscalateEnKnown_A</span><span class="p">,</span>    <span class="n">lc_escalate_en_o</span>           <span class="p">)</span>
+<a name="l-550"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcCheckBypassEnKnown_A</span><span class="p">,</span> <span class="n">lc_check_byp_en_o</span>          <span class="p">)</span>
+<a name="l-551"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcClkBypReqKnown_A</span><span class="p">,</span>     <span class="n">lc_clk_byp_req_o</span>           <span class="p">)</span>
+<a name="l-552"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcFlashRmaSeedKnown_A</span><span class="p">,</span>  <span class="n">lc_flash_rma_seed_o</span>        <span class="p">)</span>
+<a name="l-553"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcFlashRmaReqKnown_A</span><span class="p">,</span>   <span class="n">lc_flash_rma_req_o</span>         <span class="p">)</span>
+<a name="l-554"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">LcKeymgrDiv_A</span><span class="p">,</span>          <span class="n">lc_keymgr_div_o</span>            <span class="p">)</span>
+<a name="l-555"></a>
+<a name="l-556"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">lc_ctrl</span>
 </pre></div>
 </td></tr></table>
   </body>

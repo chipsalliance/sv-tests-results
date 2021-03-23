@@ -133,7 +133,11 @@
 <span class="normal"><a href="#l-125">125</a></span>
 <span class="normal"><a href="#l-126">126</a></span>
 <span class="normal"><a href="#l-127">127</a></span>
-<span class="normal"><a href="#l-128">128</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-128">128</a></span>
+<span class="normal"><a href="#l-129">129</a></span>
+<span class="normal"><a href="#l-130">130</a></span>
+<span class="normal"><a href="#l-131">131</a></span>
+<span class="normal"><a href="#l-132">132</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -225,42 +229,46 @@
 <a name="l-90"></a>        <span class="c1">// See also originating issue:</span>
 <a name="l-91"></a>        <span class="c1">// https://github.com/lowRISC/opentitan/issues/1355</span>
 <a name="l-92"></a>        <span class="c1">// Xilinx issue:</span>
-<a name="l-93"></a>        <span class="c1">// https://forums.xilinx.com/t5/Synthesis/Simulation-Synthesis-Mismatch-with-Vivado-2018-3/m-p/1065923#M33849</span>
-<a name="l-94"></a>
-<a name="l-95"></a>        <span class="kt">logic</span> <span class="n">sel</span><span class="p">;</span> <span class="c1">// local helper variable</span>
-<a name="l-96"></a>        <span class="c1">// in case only one of the parent has a pending irq_o, forward that one</span>
-<a name="l-97"></a>        <span class="c1">// in case both irqs are pending, forward the one with higher priority</span>
-<a name="l-98"></a>        <span class="k">assign</span> <span class="n">sel</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">is_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span> <span class="o">|</span>
-<a name="l-99"></a>                     <span class="p">(</span><span class="n">is_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="kt">logic</span><span class="p">&#39;(</span><span class="n">max_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]));</span>
-<a name="l-100"></a>        <span class="c1">// forwarding muxes</span>
-<a name="l-101"></a>        <span class="k">assign</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">Pa</span><span class="p">]</span>  <span class="o">=</span> <span class="p">(</span><span class="n">sel</span>              <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span>  <span class="o">|</span> <span class="p">((</span><span class="o">~</span><span class="n">sel</span><span class="p">)</span>            <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]);</span>
-<a name="l-102"></a>        <span class="k">assign</span> <span class="n">id_tree</span><span class="p">[</span><span class="n">Pa</span><span class="p">]</span>  <span class="o">=</span> <span class="p">({</span><span class="n">SrcWidth</span><span class="p">{</span><span class="n">sel</span><span class="p">}}</span>  <span class="o">&amp;</span> <span class="n">id_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span>  <span class="o">|</span> <span class="p">({</span><span class="n">SrcWidth</span><span class="p">{</span><span class="o">~</span><span class="n">sel</span><span class="p">}}</span>  <span class="o">&amp;</span> <span class="n">id_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]);</span>
-<a name="l-103"></a>        <span class="k">assign</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">Pa</span><span class="p">]</span> <span class="o">=</span> <span class="p">({</span><span class="n">PrioWidth</span><span class="p">{</span><span class="n">sel</span><span class="p">}}</span> <span class="o">&amp;</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span> <span class="o">|</span> <span class="p">({</span><span class="n">PrioWidth</span><span class="p">{</span><span class="o">~</span><span class="n">sel</span><span class="p">}}</span> <span class="o">&amp;</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]);</span>
-<a name="l-104"></a>      <span class="k">end</span>
-<a name="l-105"></a>    <span class="k">end</span> <span class="o">:</span> <span class="n">gen_level</span>
-<a name="l-106"></a>  <span class="k">end</span> <span class="o">:</span> <span class="n">gen_tree</span>
-<a name="l-107"></a>
-<a name="l-108"></a>  <span class="kt">logic</span> <span class="n">irq_d</span><span class="p">,</span> <span class="n">irq_q</span><span class="p">;</span>
-<a name="l-109"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">SrcWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">irq_id_d</span><span class="p">,</span> <span class="n">irq_id_q</span><span class="p">;</span>
-<a name="l-110"></a>
-<a name="l-111"></a>  <span class="c1">// the results can be found at the tree root</span>
-<a name="l-112"></a>  <span class="k">assign</span> <span class="n">irq_d</span>    <span class="o">=</span> <span class="p">(</span><span class="n">max_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold_i</span><span class="p">)</span> <span class="o">?</span> <span class="n">is_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-113"></a>  <span class="k">assign</span> <span class="n">irq_id_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">?</span> <span class="n">id_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-93"></a>        <span class="c1">// https://forums.xilinx.com/t5/Synthesis/</span>
+<a name="l-94"></a>        <span class="c1">// Simulation-Synthesis-Mismatch-with-Vivado-2018-3/m-p/1065923#M33849</span>
+<a name="l-95"></a>
+<a name="l-96"></a>        <span class="kt">logic</span> <span class="n">sel</span><span class="p">;</span> <span class="c1">// local helper variable</span>
+<a name="l-97"></a>        <span class="c1">// in case only one of the parent has a pending irq_o, forward that one</span>
+<a name="l-98"></a>        <span class="c1">// in case both irqs are pending, forward the one with higher priority</span>
+<a name="l-99"></a>        <span class="k">assign</span> <span class="n">sel</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">is_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span> <span class="o">|</span>
+<a name="l-100"></a>                     <span class="p">(</span><span class="n">is_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="kt">logic</span><span class="p">&#39;(</span><span class="n">max_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]));</span>
+<a name="l-101"></a>        <span class="c1">// forwarding muxes</span>
+<a name="l-102"></a>        <span class="k">assign</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">Pa</span><span class="p">]</span>  <span class="o">=</span> <span class="p">(</span><span class="n">sel</span>               <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span>  <span class="o">|</span>
+<a name="l-103"></a>                              <span class="p">((</span><span class="o">~</span><span class="n">sel</span><span class="p">)</span>            <span class="o">&amp;</span> <span class="n">is_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]);</span>
+<a name="l-104"></a>        <span class="k">assign</span> <span class="n">id_tree</span><span class="p">[</span><span class="n">Pa</span><span class="p">]</span>  <span class="o">=</span> <span class="p">({</span><span class="n">SrcWidth</span><span class="p">{</span><span class="n">sel</span><span class="p">}}</span>   <span class="o">&amp;</span> <span class="n">id_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span>  <span class="o">|</span>
+<a name="l-105"></a>                              <span class="p">({</span><span class="n">SrcWidth</span><span class="p">{</span><span class="o">~</span><span class="n">sel</span><span class="p">}}</span>  <span class="o">&amp;</span> <span class="n">id_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]);</span>
+<a name="l-106"></a>        <span class="k">assign</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">Pa</span><span class="p">]</span> <span class="o">=</span> <span class="p">({</span><span class="n">PrioWidth</span><span class="p">{</span><span class="n">sel</span><span class="p">}}</span>  <span class="o">&amp;</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">C1</span><span class="p">])</span> <span class="o">|</span>
+<a name="l-107"></a>                              <span class="p">({</span><span class="n">PrioWidth</span><span class="p">{</span><span class="o">~</span><span class="n">sel</span><span class="p">}}</span> <span class="o">&amp;</span> <span class="n">max_tree</span><span class="p">[</span><span class="n">C0</span><span class="p">]);</span>
+<a name="l-108"></a>      <span class="k">end</span>
+<a name="l-109"></a>    <span class="k">end</span> <span class="o">:</span> <span class="n">gen_level</span>
+<a name="l-110"></a>  <span class="k">end</span> <span class="o">:</span> <span class="n">gen_tree</span>
+<a name="l-111"></a>
+<a name="l-112"></a>  <span class="kt">logic</span> <span class="n">irq_d</span><span class="p">,</span> <span class="n">irq_q</span><span class="p">;</span>
+<a name="l-113"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">SrcWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">irq_id_d</span><span class="p">,</span> <span class="n">irq_id_q</span><span class="p">;</span>
 <a name="l-114"></a>
-<a name="l-115"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_regs</span>
-<a name="l-116"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-117"></a>      <span class="n">irq_q</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-118"></a>      <span class="n">irq_id_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-119"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-120"></a>      <span class="n">irq_q</span>    <span class="o">&lt;=</span> <span class="n">irq_d</span><span class="p">;</span>
-<a name="l-121"></a>      <span class="n">irq_id_q</span> <span class="o">&lt;=</span> <span class="n">irq_id_d</span><span class="p">;</span>
-<a name="l-122"></a>    <span class="k">end</span>
-<a name="l-123"></a>  <span class="k">end</span>
-<a name="l-124"></a>
-<a name="l-125"></a>  <span class="k">assign</span> <span class="n">irq_o</span>    <span class="o">=</span> <span class="n">irq_q</span><span class="p">;</span>
-<a name="l-126"></a>  <span class="k">assign</span> <span class="n">irq_id_o</span> <span class="o">=</span> <span class="n">irq_id_q</span><span class="p">;</span>
-<a name="l-127"></a>
-<a name="l-128"></a><span class="k">endmodule</span>
+<a name="l-115"></a>  <span class="c1">// the results can be found at the tree root</span>
+<a name="l-116"></a>  <span class="k">assign</span> <span class="n">irq_d</span>    <span class="o">=</span> <span class="p">(</span><span class="n">max_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold_i</span><span class="p">)</span> <span class="o">?</span> <span class="n">is_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-117"></a>  <span class="k">assign</span> <span class="n">irq_id_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">?</span> <span class="n">id_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-118"></a>
+<a name="l-119"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_regs</span>
+<a name="l-120"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-121"></a>      <span class="n">irq_q</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-122"></a>      <span class="n">irq_id_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-123"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-124"></a>      <span class="n">irq_q</span>    <span class="o">&lt;=</span> <span class="n">irq_d</span><span class="p">;</span>
+<a name="l-125"></a>      <span class="n">irq_id_q</span> <span class="o">&lt;=</span> <span class="n">irq_id_d</span><span class="p">;</span>
+<a name="l-126"></a>    <span class="k">end</span>
+<a name="l-127"></a>  <span class="k">end</span>
+<a name="l-128"></a>
+<a name="l-129"></a>  <span class="k">assign</span> <span class="n">irq_o</span>    <span class="o">=</span> <span class="n">irq_q</span><span class="p">;</span>
+<a name="l-130"></a>  <span class="k">assign</span> <span class="n">irq_id_o</span> <span class="o">=</span> <span class="n">irq_id_q</span><span class="p">;</span>
+<a name="l-131"></a>
+<a name="l-132"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

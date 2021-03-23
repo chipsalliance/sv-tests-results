@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_round_robin_n_to_1.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_round_robin_n_to_1.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_round_robin_n_to_1.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_round_robin_n_to_1.v</a>
 defines: 
-completed: 2021-03-09 11:05:51
-time_elapsed: 0.381s
-ram usage: 12756 KB
+completed: 2021-03-23 09:00:53
+time_elapsed: 0.052s
+ram usage: 45776 KB
 </pre>
 <pre class="log">
 
@@ -42,6 +42,7 @@ module bsg_round_robin_n_to_1 (
 	parameter num_in_p = -1;
 	parameter _sv2v_width_strict_p = 24;
 	parameter [_sv2v_width_strict_p - 1:0] strict_p = &#34;inv&#34;;
+	parameter use_scan_p = 0;
 	parameter tag_width_lp = (num_in_p == 1 ? 1 : $clog2(num_in_p));
 	input clk_i;
 	input reset_i;
@@ -76,17 +77,34 @@ module bsg_round_robin_n_to_1 (
 		end
 		else begin : greedy
 			wire [num_in_p - 1:0] grants_lo;
-			bsg_round_robin_arb #(.inputs_p(num_in_p)) rr_arb_ctrl(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.grants_en_i(1&#39;b1),
-				.reqs_i(v_i),
-				.grants_o(grants_lo),
-				.sel_one_hot_o(),
-				.v_o(v_o),
-				.tag_o(tag_o),
-				.yumi_i(yumi_i &amp; v_o)
-			);
+			if (use_scan_p) begin : scan1
+				bsg_arb_round_robin #(.width_p(num_in_p)) rr(
+					.clk_i(clk_i),
+					.reset_i(reset_i),
+					.reqs_i(v_i),
+					.grants_o(grants_lo),
+					.yumi_i(yumi_i)
+				);
+				assign v_o = |v_i;
+				bsg_encode_one_hot #(.width_p(num_in_p)) enc(
+					.i(grants_lo),
+					.addr_o(tag_o),
+					.v_o()
+				);
+			end
+			else begin : scan0
+				bsg_round_robin_arb #(.inputs_p(num_in_p)) rr_arb_ctrl(
+					.clk_i(clk_i),
+					.reset_i(reset_i),
+					.grants_en_i(1&#39;b1),
+					.reqs_i(v_i),
+					.grants_o(grants_lo),
+					.sel_one_hot_o(),
+					.v_o(v_o),
+					.tag_o(tag_o),
+					.yumi_i(yumi_i &amp; v_o)
+				);
+			end
 			bsg_crossbar_o_by_i #(
 				.i_els_p(num_in_p),
 				.o_els_p(1),

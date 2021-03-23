@@ -107,7 +107,16 @@
 <span class="normal"><a href="#l-99"> 99</a></span>
 <span class="normal"><a href="#l-100">100</a></span>
 <span class="normal"><a href="#l-101">101</a></span>
-<span class="normal"><a href="#l-102">102</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-102">102</a></span>
+<span class="normal"><a href="#l-103">103</a></span>
+<span class="normal"><a href="#l-104">104</a></span>
+<span class="normal"><a href="#l-105">105</a></span>
+<span class="normal"><a href="#l-106">106</a></span>
+<span class="normal"><a href="#l-107">107</a></span>
+<span class="normal"><a href="#l-108">108</a></span>
+<span class="normal"><a href="#l-109">109</a></span>
+<span class="normal"><a href="#l-110">110</a></span>
+<span class="normal"><a href="#l-111">111</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -148,7 +157,7 @@
 <a name="l-39"></a>    <span class="n">trans_cnt_oflw_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
 <a name="l-40"></a>    <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
 <a name="l-41"></a>
-<a name="l-42"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">fsm_state_i</span> <span class="o">==</span> <span class="n">CntIncrSt</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-42"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">fsm_state_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">CntIncrSt</span><span class="p">,</span> <span class="n">CntProgSt</span><span class="p">})</span> <span class="k">begin</span>
 <a name="l-43"></a>      <span class="c1">// In this state, the life cycle counter is incremented.</span>
 <a name="l-44"></a>      <span class="c1">// Throw an error if the counter is already maxed out.</span>
 <a name="l-45"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">lc_cnt_i</span><span class="p">)</span>
@@ -171,44 +180,53 @@
 <a name="l-62"></a>        <span class="nl">LcCnt16:</span>  <span class="n">trans_cnt_oflw_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
 <a name="l-63"></a>        <span class="k">default</span><span class="o">:</span>  <span class="n">trans_cnt_oflw_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
 <a name="l-64"></a>      <span class="k">endcase</span> <span class="c1">// lc_cnt_i</span>
-<a name="l-65"></a>    <span class="k">end</span>
-<a name="l-66"></a>
-<a name="l-67"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">fsm_state_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">TransCheckSt</span><span class="p">,</span> <span class="n">TokenCheck0St</span><span class="p">,</span> <span class="n">TokenCheck1St</span><span class="p">})</span> <span class="k">begin</span>
-<a name="l-68"></a>      <span class="c1">// Check that the decoded transition indexes are valid</span>
-<a name="l-69"></a>      <span class="c1">// before indexing the state transition matrix.</span>
-<a name="l-70"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">dec_lc_state_i</span> <span class="o">&lt;=</span> <span class="n">DecLcStScrap</span> <span class="o">||</span>
-<a name="l-71"></a>          <span class="n">trans_target_i</span> <span class="o">&lt;=</span> <span class="n">DecLcStScrap</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-72"></a>        <span class="c1">// Check the state transition token matrix in order to see whether this</span>
-<a name="l-73"></a>        <span class="c1">// transition is valid. All transitions have a token index value different</span>
-<a name="l-74"></a>        <span class="c1">// from InvalidTokenIdx.</span>
-<a name="l-75"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">TransTokenIdxMatrix</span><span class="p">[</span><span class="n">dec_lc_state_i</span><span class="p">][</span><span class="n">trans_target_i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">InvalidTokenIdx</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-76"></a>          <span class="c1">// Encode the target state.</span>
-<a name="l-77"></a>          <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">trans_target_i</span><span class="p">)</span>
-<a name="l-78"></a>            <span class="nl">DecLcStRaw:</span>           <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStRaw</span><span class="p">;</span>
-<a name="l-79"></a>            <span class="nl">DecLcStTestUnlocked0:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked0</span><span class="p">;</span>
-<a name="l-80"></a>            <span class="nl">DecLcStTestLocked0:</span>   <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestLocked0</span><span class="p">;</span>
-<a name="l-81"></a>            <span class="nl">DecLcStTestUnlocked1:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked1</span><span class="p">;</span>
-<a name="l-82"></a>            <span class="nl">DecLcStTestLocked1:</span>   <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestLocked1</span><span class="p">;</span>
-<a name="l-83"></a>            <span class="nl">DecLcStTestUnlocked2:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked2</span><span class="p">;</span>
-<a name="l-84"></a>            <span class="nl">DecLcStTestLocked2:</span>   <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestLocked2</span><span class="p">;</span>
-<a name="l-85"></a>            <span class="nl">DecLcStTestUnlocked3:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked3</span><span class="p">;</span>
-<a name="l-86"></a>            <span class="nl">DecLcStDev:</span>           <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStDev</span><span class="p">;</span>
-<a name="l-87"></a>            <span class="nl">DecLcStProd:</span>          <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStProd</span><span class="p">;</span>
-<a name="l-88"></a>            <span class="nl">DecLcStProdEnd:</span>       <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStProdEnd</span><span class="p">;</span>
-<a name="l-89"></a>            <span class="nl">DecLcStRma:</span>           <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStRma</span><span class="p">;</span>
-<a name="l-90"></a>            <span class="nl">DecLcStScrap:</span>         <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStScrap</span><span class="p">;</span>
-<a name="l-91"></a>            <span class="k">default</span><span class="o">:</span>              <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-92"></a>          <span class="k">endcase</span> <span class="c1">// trans_target_i</span>
-<a name="l-93"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-94"></a>          <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-95"></a>        <span class="k">end</span>
-<a name="l-96"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-97"></a>        <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-98"></a>      <span class="k">end</span>
-<a name="l-99"></a>    <span class="k">end</span>
-<a name="l-100"></a>  <span class="k">end</span>
-<a name="l-101"></a>
-<a name="l-102"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">lc_ctrl_state_transition</span>
+<a name="l-65"></a>
+<a name="l-66"></a>      <span class="c1">// In case the transition target is SCRAP, max out the counter.</span>
+<a name="l-67"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">trans_target_i</span> <span class="o">==</span> <span class="n">DecLcStScrap</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-68"></a>        <span class="n">next_lc_cnt_o</span> <span class="o">=</span> <span class="n">LcCnt16</span><span class="p">;</span>
+<a name="l-69"></a>      <span class="k">end</span>
+<a name="l-70"></a>    <span class="k">end</span>
+<a name="l-71"></a>
+<a name="l-72"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">fsm_state_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">TransCheckSt</span><span class="p">,</span> <span class="n">TokenCheck0St</span><span class="p">,</span> <span class="n">TokenCheck1St</span><span class="p">,</span> <span class="n">TransProgSt</span><span class="p">})</span> <span class="k">begin</span>
+<a name="l-73"></a>      <span class="c1">// Check that the decoded transition indexes are valid</span>
+<a name="l-74"></a>      <span class="c1">// before indexing the state transition matrix.</span>
+<a name="l-75"></a>      <span class="k">if</span> <span class="p">(</span><span class="n">dec_lc_state_i</span> <span class="o">&lt;=</span> <span class="n">DecLcStScrap</span> <span class="o">||</span>
+<a name="l-76"></a>          <span class="n">trans_target_i</span> <span class="o">&lt;=</span> <span class="n">DecLcStScrap</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-77"></a>        <span class="c1">// Check the state transition token matrix in order to see whether this</span>
+<a name="l-78"></a>        <span class="c1">// transition is valid. All transitions have a token index value different</span>
+<a name="l-79"></a>        <span class="c1">// from InvalidTokenIdx.</span>
+<a name="l-80"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">TransTokenIdxMatrix</span><span class="p">[</span><span class="n">dec_lc_state_i</span><span class="p">][</span><span class="n">trans_target_i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">InvalidTokenIdx</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-81"></a>          <span class="c1">// Encode the target state.</span>
+<a name="l-82"></a>          <span class="c1">// Note that the life cycle encoding itself also ensures that only certain transitions are</span>
+<a name="l-83"></a>          <span class="c1">// possible. So even if this logic here is tampered with, the encoding values won&#39;t allow</span>
+<a name="l-84"></a>          <span class="c1">// an invalid transition (instead, the programming operation will fail and leave the life</span>
+<a name="l-85"></a>          <span class="c1">// cycle state corrupted/invalid).</span>
+<a name="l-86"></a>          <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">trans_target_i</span><span class="p">)</span>
+<a name="l-87"></a>            <span class="nl">DecLcStRaw:</span>           <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStRaw</span><span class="p">;</span>
+<a name="l-88"></a>            <span class="nl">DecLcStTestUnlocked0:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked0</span><span class="p">;</span>
+<a name="l-89"></a>            <span class="nl">DecLcStTestLocked0:</span>   <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestLocked0</span><span class="p">;</span>
+<a name="l-90"></a>            <span class="nl">DecLcStTestUnlocked1:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked1</span><span class="p">;</span>
+<a name="l-91"></a>            <span class="nl">DecLcStTestLocked1:</span>   <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestLocked1</span><span class="p">;</span>
+<a name="l-92"></a>            <span class="nl">DecLcStTestUnlocked2:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked2</span><span class="p">;</span>
+<a name="l-93"></a>            <span class="nl">DecLcStTestLocked2:</span>   <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestLocked2</span><span class="p">;</span>
+<a name="l-94"></a>            <span class="nl">DecLcStTestUnlocked3:</span> <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStTestUnlocked3</span><span class="p">;</span>
+<a name="l-95"></a>            <span class="nl">DecLcStDev:</span>           <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStDev</span><span class="p">;</span>
+<a name="l-96"></a>            <span class="nl">DecLcStProd:</span>          <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStProd</span><span class="p">;</span>
+<a name="l-97"></a>            <span class="nl">DecLcStProdEnd:</span>       <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStProdEnd</span><span class="p">;</span>
+<a name="l-98"></a>            <span class="nl">DecLcStRma:</span>           <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStRma</span><span class="p">;</span>
+<a name="l-99"></a>            <span class="nl">DecLcStScrap:</span>         <span class="n">next_lc_state_o</span> <span class="o">=</span> <span class="n">LcStScrap</span><span class="p">;</span>
+<a name="l-100"></a>            <span class="k">default</span><span class="o">:</span>              <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-101"></a>          <span class="k">endcase</span> <span class="c1">// trans_target_i</span>
+<a name="l-102"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-103"></a>          <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-104"></a>        <span class="k">end</span>
+<a name="l-105"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-106"></a>        <span class="n">trans_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-107"></a>      <span class="k">end</span>
+<a name="l-108"></a>    <span class="k">end</span>
+<a name="l-109"></a>  <span class="k">end</span>
+<a name="l-110"></a>
+<a name="l-111"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">lc_ctrl_state_transition</span>
 </pre></div>
 </td></tr></table>
   </body>

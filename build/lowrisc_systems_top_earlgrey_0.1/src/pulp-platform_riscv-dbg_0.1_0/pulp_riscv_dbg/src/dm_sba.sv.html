@@ -175,9 +175,7 @@
 <span class="normal"><a href="#l-167">167</a></span>
 <span class="normal"><a href="#l-168">168</a></span>
 <span class="normal"><a href="#l-169">169</a></span>
-<span class="normal"><a href="#l-170">170</a></span>
-<span class="normal"><a href="#l-171">171</a></span>
-<span class="normal"><a href="#l-172">172</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/* Copyright 2018 ETH Zurich and University of Bologna.</span>
+<span class="normal"><a href="#l-170">170</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="cm">/* Copyright 2018 ETH Zurich and University of Bologna.</span>
 <a name="l-2"></a><span class="cm">* Copyright and related rights are licensed under the Solderpad Hardware</span>
 <a name="l-3"></a><span class="cm">* License, Version 0.51 (the “License”); you may not use this file except in</span>
 <a name="l-4"></a><span class="cm">* compliance with the License.  You may obtain a copy of the License at</span>
@@ -195,160 +193,158 @@
 <a name="l-16"></a><span class="cm">*</span>
 <a name="l-17"></a><span class="cm">*/</span>
 <a name="l-18"></a><span class="k">module</span> <span class="n">dm_sba</span> <span class="p">#(</span>
-<a name="l-19"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">BusWidth</span> <span class="o">=</span> <span class="mi">32</span>
-<a name="l-20"></a><span class="p">)</span> <span class="p">(</span>
-<a name="l-21"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">clk_i</span><span class="p">,</span>       <span class="c1">// Clock</span>
-<a name="l-22"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-23"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">dmactive_i</span><span class="p">,</span>  <span class="c1">// synchronous reset active low</span>
-<a name="l-24"></a>
-<a name="l-25"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">master_req_o</span><span class="p">,</span>
-<a name="l-26"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">master_add_o</span><span class="p">,</span>
-<a name="l-27"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">master_we_o</span><span class="p">,</span>
-<a name="l-28"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">master_wdata_o</span><span class="p">,</span>
-<a name="l-29"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">master_be_o</span><span class="p">,</span>
-<a name="l-30"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">master_gnt_i</span><span class="p">,</span>
-<a name="l-31"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">master_r_valid_i</span><span class="p">,</span>
-<a name="l-32"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">master_r_rdata_i</span><span class="p">,</span>
-<a name="l-33"></a>
-<a name="l-34"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbaddress_i</span><span class="p">,</span>
-<a name="l-35"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbaddress_write_valid_i</span><span class="p">,</span>
-<a name="l-36"></a>  <span class="c1">// control signals in</span>
-<a name="l-37"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbreadonaddr_i</span><span class="p">,</span>
-<a name="l-38"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbaddress_o</span><span class="p">,</span>
-<a name="l-39"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbautoincrement_i</span><span class="p">,</span>
-<a name="l-40"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>             <span class="n">sbaccess_i</span><span class="p">,</span>
-<a name="l-41"></a>  <span class="c1">// data in</span>
-<a name="l-42"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbreadondata_i</span><span class="p">,</span>
-<a name="l-43"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbdata_i</span><span class="p">,</span>
-<a name="l-44"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbdata_read_valid_i</span><span class="p">,</span>
-<a name="l-45"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbdata_write_valid_i</span><span class="p">,</span>
-<a name="l-46"></a>  <span class="c1">// read data out</span>
-<a name="l-47"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbdata_o</span><span class="p">,</span>
-<a name="l-48"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">sbdata_valid_o</span><span class="p">,</span>
-<a name="l-49"></a>  <span class="c1">// control signals</span>
-<a name="l-50"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">sbbusy_o</span><span class="p">,</span>
-<a name="l-51"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">sberror_valid_o</span><span class="p">,</span> <span class="c1">// bus error occurred</span>
-<a name="l-52"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>             <span class="n">sberror_o</span> <span class="c1">// bus error occurred</span>
-<a name="l-53"></a><span class="p">);</span>
-<a name="l-54"></a>
-<a name="l-55"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span> <span class="n">Idle</span><span class="p">,</span> <span class="n">Read</span><span class="p">,</span> <span class="n">Write</span><span class="p">,</span> <span class="n">WaitRead</span><span class="p">,</span> <span class="n">WaitWrite</span> <span class="p">}</span> <span class="n">state_e</span><span class="p">;</span>
-<a name="l-56"></a>  <span class="n">state_e</span> <span class="n">state_d</span><span class="p">,</span> <span class="n">state_q</span><span class="p">;</span>
+<a name="l-19"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">BusWidth</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+<a name="l-20"></a>  <span class="k">parameter</span> <span class="kt">bit</span>          <span class="n">ReadByteEnable</span> <span class="o">=</span> <span class="mi">1</span>
+<a name="l-21"></a><span class="p">)</span> <span class="p">(</span>
+<a name="l-22"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">clk_i</span><span class="p">,</span>       <span class="c1">// Clock</span>
+<a name="l-23"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-24"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">dmactive_i</span><span class="p">,</span>  <span class="c1">// synchronous reset active low</span>
+<a name="l-25"></a>
+<a name="l-26"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">master_req_o</span><span class="p">,</span>
+<a name="l-27"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">master_add_o</span><span class="p">,</span>
+<a name="l-28"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">master_we_o</span><span class="p">,</span>
+<a name="l-29"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">master_wdata_o</span><span class="p">,</span>
+<a name="l-30"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">master_be_o</span><span class="p">,</span>
+<a name="l-31"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">master_gnt_i</span><span class="p">,</span>
+<a name="l-32"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">master_r_valid_i</span><span class="p">,</span>
+<a name="l-33"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">master_r_rdata_i</span><span class="p">,</span>
+<a name="l-34"></a>
+<a name="l-35"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbaddress_i</span><span class="p">,</span>
+<a name="l-36"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbaddress_write_valid_i</span><span class="p">,</span>
+<a name="l-37"></a>  <span class="c1">// control signals in</span>
+<a name="l-38"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbreadonaddr_i</span><span class="p">,</span>
+<a name="l-39"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbaddress_o</span><span class="p">,</span>
+<a name="l-40"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbautoincrement_i</span><span class="p">,</span>
+<a name="l-41"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>             <span class="n">sbaccess_i</span><span class="p">,</span>
+<a name="l-42"></a>  <span class="c1">// data in</span>
+<a name="l-43"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbreadondata_i</span><span class="p">,</span>
+<a name="l-44"></a>  <span class="k">input</span>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbdata_i</span><span class="p">,</span>
+<a name="l-45"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbdata_read_valid_i</span><span class="p">,</span>
+<a name="l-46"></a>  <span class="k">input</span>  <span class="kt">logic</span>                   <span class="n">sbdata_write_valid_i</span><span class="p">,</span>
+<a name="l-47"></a>  <span class="c1">// read data out</span>
+<a name="l-48"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>    <span class="n">sbdata_o</span><span class="p">,</span>
+<a name="l-49"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">sbdata_valid_o</span><span class="p">,</span>
+<a name="l-50"></a>  <span class="c1">// control signals</span>
+<a name="l-51"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">sbbusy_o</span><span class="p">,</span>
+<a name="l-52"></a>  <span class="k">output</span> <span class="kt">logic</span>                   <span class="n">sberror_valid_o</span><span class="p">,</span> <span class="c1">// bus error occurred</span>
+<a name="l-53"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>             <span class="n">sberror_o</span> <span class="c1">// bus error occurred</span>
+<a name="l-54"></a><span class="p">);</span>
+<a name="l-55"></a>
+<a name="l-56"></a>  <span class="n">dm</span><span class="o">::</span><span class="n">sba_state_e</span> <span class="n">state_d</span><span class="p">,</span> <span class="n">state_q</span><span class="p">;</span>
 <a name="l-57"></a>
 <a name="l-58"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>           <span class="n">address</span><span class="p">;</span>
 <a name="l-59"></a>  <span class="kt">logic</span>                          <span class="n">req</span><span class="p">;</span>
 <a name="l-60"></a>  <span class="kt">logic</span>                          <span class="n">gnt</span><span class="p">;</span>
 <a name="l-61"></a>  <span class="kt">logic</span>                          <span class="n">we</span><span class="p">;</span>
 <a name="l-62"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">be</span><span class="p">;</span>
-<a name="l-63"></a>  <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">be_idx</span><span class="p">;</span>
-<a name="l-64"></a>
-<a name="l-65"></a>  <span class="k">assign</span> <span class="n">sbbusy_o</span> <span class="o">=</span> <span class="kt">logic</span><span class="p">&#39;(</span><span class="n">state_q</span> <span class="o">!=</span> <span class="n">Idle</span><span class="p">);</span>
-<a name="l-66"></a>
-<a name="l-67"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_fsm</span>
-<a name="l-68"></a>    <span class="n">req</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-69"></a>    <span class="n">address</span> <span class="o">=</span> <span class="n">sbaddress_i</span><span class="p">;</span>
-<a name="l-70"></a>    <span class="n">we</span>      <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-71"></a>    <span class="n">be</span>      <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-72"></a>    <span class="n">be_idx</span>  <span class="o">=</span> <span class="n">sbaddress_i</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-73"></a>
-<a name="l-74"></a>    <span class="n">sberror_o</span>       <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-75"></a>    <span class="n">sberror_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-76"></a>    <span class="n">sbaddress_o</span>     <span class="o">=</span> <span class="n">sbaddress_i</span><span class="p">;</span>
-<a name="l-77"></a>
-<a name="l-78"></a>    <span class="n">state_d</span> <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
-<a name="l-79"></a>
-<a name="l-80"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
-<a name="l-81"></a>      <span class="nl">Idle:</span> <span class="k">begin</span>
-<a name="l-82"></a>        <span class="c1">// debugger requested a read</span>
-<a name="l-83"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbaddress_write_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">sbreadonaddr_i</span><span class="p">)</span>  <span class="n">state_d</span> <span class="o">=</span> <span class="n">Read</span><span class="p">;</span>
-<a name="l-84"></a>        <span class="c1">// debugger requested a write</span>
-<a name="l-85"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_write_valid_i</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">Write</span><span class="p">;</span>
-<a name="l-86"></a>        <span class="c1">// perform another read</span>
-<a name="l-87"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_read_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">sbreadondata_i</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">Read</span><span class="p">;</span>
-<a name="l-88"></a>      <span class="k">end</span>
-<a name="l-89"></a>
-<a name="l-90"></a>      <span class="nl">Read:</span> <span class="k">begin</span>
-<a name="l-91"></a>        <span class="n">req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-92"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">gnt</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">WaitRead</span><span class="p">;</span>
-<a name="l-93"></a>      <span class="k">end</span>
+<a name="l-63"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">be_mask</span><span class="p">;</span>
+<a name="l-64"></a>  <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">be_idx</span><span class="p">;</span>
+<a name="l-65"></a>
+<a name="l-66"></a>  <span class="k">assign</span> <span class="n">sbbusy_o</span> <span class="o">=</span> <span class="kt">logic</span><span class="p">&#39;(</span><span class="n">state_q</span> <span class="o">!=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">);</span>
+<a name="l-67"></a>
+<a name="l-68"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_be_mask</span>
+<a name="l-69"></a>    <span class="n">be_mask</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-70"></a>
+<a name="l-71"></a>    <span class="c1">// generate byte enable mask</span>
+<a name="l-72"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sbaccess_i</span><span class="p">)</span>
+<a name="l-73"></a>      <span class="mb">3&#39;b000</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-74"></a>        <span class="n">be_mask</span><span class="p">[</span><span class="n">be_idx</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-75"></a>      <span class="k">end</span>
+<a name="l-76"></a>      <span class="mb">3&#39;b001</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-77"></a>        <span class="n">be_mask</span><span class="p">[</span><span class="kt">int</span><span class="p">&#39;({</span><span class="n">be_idx</span><span class="p">[$</span><span class="n">high</span><span class="p">(</span><span class="n">be_idx</span><span class="p">)</span><span class="o">:</span><span class="mi">1</span><span class="p">],</span> <span class="mb">1&#39;b0</span><span class="p">})</span> <span class="o">+:</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-78"></a>      <span class="k">end</span>
+<a name="l-79"></a>      <span class="mb">3&#39;b010</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-80"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">BusWidth</span> <span class="o">==</span> <span class="mi">32&#39;d64</span><span class="p">)</span> <span class="n">be_mask</span><span class="p">[</span><span class="kt">int</span><span class="p">&#39;({</span><span class="n">be_idx</span><span class="p">[$</span><span class="n">high</span><span class="p">(</span><span class="n">be_idx</span><span class="p">)],</span> <span class="mh">2&#39;h0</span><span class="p">})</span> <span class="o">+:</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-81"></a>        <span class="k">else</span>                    <span class="n">be_mask</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-82"></a>      <span class="k">end</span>
+<a name="l-83"></a>      <span class="mb">3&#39;b011</span><span class="o">:</span> <span class="n">be_mask</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-84"></a>      <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
+<a name="l-85"></a>    <span class="k">endcase</span>
+<a name="l-86"></a>  <span class="k">end</span>
+<a name="l-87"></a>
+<a name="l-88"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_fsm</span>
+<a name="l-89"></a>    <span class="n">req</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-90"></a>    <span class="n">address</span> <span class="o">=</span> <span class="n">sbaddress_i</span><span class="p">;</span>
+<a name="l-91"></a>    <span class="n">we</span>      <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-92"></a>    <span class="n">be</span>      <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-93"></a>    <span class="n">be_idx</span>  <span class="o">=</span> <span class="n">sbaddress_i</span><span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
 <a name="l-94"></a>
-<a name="l-95"></a>      <span class="nl">Write:</span> <span class="k">begin</span>
-<a name="l-96"></a>        <span class="n">req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-97"></a>        <span class="n">we</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-98"></a>        <span class="c1">// generate byte enable mask</span>
-<a name="l-99"></a>        <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sbaccess_i</span><span class="p">)</span>
-<a name="l-100"></a>          <span class="mb">3&#39;b000</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-101"></a>            <span class="n">be</span><span class="p">[</span><span class="n">be_idx</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a name="l-102"></a>          <span class="k">end</span>
-<a name="l-103"></a>          <span class="mb">3&#39;b001</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-104"></a>            <span class="n">be</span><span class="p">[</span><span class="kt">int</span><span class="p">&#39;({</span><span class="n">be_idx</span><span class="p">[$</span><span class="n">high</span><span class="p">(</span><span class="n">be_idx</span><span class="p">)</span><span class="o">:</span><span class="mi">1</span><span class="p">],</span> <span class="mb">1&#39;b0</span><span class="p">})</span> <span class="o">+:</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a name="l-105"></a>          <span class="k">end</span>
-<a name="l-106"></a>          <span class="mb">3&#39;b010</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-107"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">BusWidth</span> <span class="o">==</span> <span class="mi">32&#39;d64</span><span class="p">)</span> <span class="n">be</span><span class="p">[</span><span class="kt">int</span><span class="p">&#39;({</span><span class="n">be_idx</span><span class="p">[$</span><span class="n">high</span><span class="p">(</span><span class="n">be_idx</span><span class="p">)],</span> <span class="mh">2&#39;h0</span><span class="p">})</span> <span class="o">+:</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a name="l-108"></a>            <span class="k">else</span>                    <span class="n">be</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a name="l-109"></a>          <span class="k">end</span>
-<a name="l-110"></a>          <span class="mb">3&#39;b011</span><span class="o">:</span> <span class="n">be</span> <span class="o">=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a name="l-111"></a>          <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
-<a name="l-112"></a>        <span class="k">endcase</span>
-<a name="l-113"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">gnt</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">WaitWrite</span><span class="p">;</span>
-<a name="l-114"></a>      <span class="k">end</span>
-<a name="l-115"></a>
-<a name="l-116"></a>      <span class="nl">WaitRead:</span> <span class="k">begin</span>
-<a name="l-117"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_valid_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-118"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
-<a name="l-119"></a>          <span class="c1">// auto-increment address</span>
-<a name="l-120"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sbautoincrement_i</span><span class="p">)</span> <span class="n">sbaddress_o</span> <span class="o">=</span> <span class="n">sbaddress_i</span> <span class="o">+</span> <span class="p">(</span><span class="mh">32&#39;h1</span> <span class="o">&lt;&lt;</span> <span class="n">sbaccess_i</span><span class="p">);</span>
-<a name="l-121"></a>        <span class="k">end</span>
+<a name="l-95"></a>    <span class="n">sberror_o</span>       <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-96"></a>    <span class="n">sberror_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-97"></a>    <span class="n">sbaddress_o</span>     <span class="o">=</span> <span class="n">sbaddress_i</span><span class="p">;</span>
+<a name="l-98"></a>
+<a name="l-99"></a>    <span class="n">state_d</span> <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
+<a name="l-100"></a>
+<a name="l-101"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
+<a name="l-102"></a>      <span class="n">dm</span><span class="o">::</span><span class="nl">Idle:</span> <span class="k">begin</span>
+<a name="l-103"></a>        <span class="c1">// debugger requested a read</span>
+<a name="l-104"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbaddress_write_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">sbreadonaddr_i</span><span class="p">)</span>  <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Read</span><span class="p">;</span>
+<a name="l-105"></a>        <span class="c1">// debugger requested a write</span>
+<a name="l-106"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_write_valid_i</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Write</span><span class="p">;</span>
+<a name="l-107"></a>        <span class="c1">// perform another read</span>
+<a name="l-108"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_read_valid_i</span> <span class="o">&amp;&amp;</span> <span class="n">sbreadondata_i</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Read</span><span class="p">;</span>
+<a name="l-109"></a>      <span class="k">end</span>
+<a name="l-110"></a>
+<a name="l-111"></a>      <span class="n">dm</span><span class="o">::</span><span class="nl">Read:</span> <span class="k">begin</span>
+<a name="l-112"></a>        <span class="n">req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-113"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ReadByteEnable</span><span class="p">)</span> <span class="n">be</span> <span class="o">=</span> <span class="n">be_mask</span><span class="p">;</span>
+<a name="l-114"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">gnt</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">WaitRead</span><span class="p">;</span>
+<a name="l-115"></a>      <span class="k">end</span>
+<a name="l-116"></a>
+<a name="l-117"></a>      <span class="n">dm</span><span class="o">::</span><span class="nl">Write:</span> <span class="k">begin</span>
+<a name="l-118"></a>        <span class="n">req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-119"></a>        <span class="n">we</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-120"></a>        <span class="n">be</span> <span class="o">=</span> <span class="n">be_mask</span><span class="p">;</span>
+<a name="l-121"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">gnt</span><span class="p">)</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">WaitWrite</span><span class="p">;</span>
 <a name="l-122"></a>      <span class="k">end</span>
 <a name="l-123"></a>
-<a name="l-124"></a>      <span class="nl">WaitWrite:</span> <span class="k">begin</span>
+<a name="l-124"></a>      <span class="n">dm</span><span class="o">::</span><span class="nl">WaitRead:</span> <span class="k">begin</span>
 <a name="l-125"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_valid_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-126"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
+<a name="l-126"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">;</span>
 <a name="l-127"></a>          <span class="c1">// auto-increment address</span>
 <a name="l-128"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sbautoincrement_i</span><span class="p">)</span> <span class="n">sbaddress_o</span> <span class="o">=</span> <span class="n">sbaddress_i</span> <span class="o">+</span> <span class="p">(</span><span class="mh">32&#39;h1</span> <span class="o">&lt;&lt;</span> <span class="n">sbaccess_i</span><span class="p">);</span>
 <a name="l-129"></a>        <span class="k">end</span>
 <a name="l-130"></a>      <span class="k">end</span>
 <a name="l-131"></a>
-<a name="l-132"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span> <span class="c1">// catch parasitic state</span>
-<a name="l-133"></a>    <span class="k">endcase</span>
-<a name="l-134"></a>
-<a name="l-135"></a>    <span class="c1">// handle error case</span>
-<a name="l-136"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sbaccess_i</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">&amp;&amp;</span> <span class="n">state_q</span> <span class="o">!=</span> <span class="n">Idle</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-137"></a>      <span class="n">req</span>             <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-138"></a>      <span class="n">state_d</span>         <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
-<a name="l-139"></a>      <span class="n">sberror_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-140"></a>      <span class="n">sberror_o</span>       <span class="o">=</span> <span class="mi">3&#39;d3</span><span class="p">;</span>
-<a name="l-141"></a>    <span class="k">end</span>
-<a name="l-142"></a>    <span class="c1">// further error handling should go here ...</span>
-<a name="l-143"></a>  <span class="k">end</span>
-<a name="l-144"></a>
-<a name="l-145"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
-<a name="l-146"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-147"></a>      <span class="n">state_q</span> <span class="o">&lt;=</span> <span class="n">Idle</span><span class="p">;</span>
-<a name="l-148"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-149"></a>      <span class="n">state_q</span> <span class="o">&lt;=</span> <span class="n">state_d</span><span class="p">;</span>
-<a name="l-150"></a>    <span class="k">end</span>
+<a name="l-132"></a>      <span class="n">dm</span><span class="o">::</span><span class="nl">WaitWrite:</span> <span class="k">begin</span>
+<a name="l-133"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sbdata_valid_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-134"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">;</span>
+<a name="l-135"></a>          <span class="c1">// auto-increment address</span>
+<a name="l-136"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sbautoincrement_i</span><span class="p">)</span> <span class="n">sbaddress_o</span> <span class="o">=</span> <span class="n">sbaddress_i</span> <span class="o">+</span> <span class="p">(</span><span class="mh">32&#39;h1</span> <span class="o">&lt;&lt;</span> <span class="n">sbaccess_i</span><span class="p">);</span>
+<a name="l-137"></a>        <span class="k">end</span>
+<a name="l-138"></a>      <span class="k">end</span>
+<a name="l-139"></a>
+<a name="l-140"></a>      <span class="k">default</span><span class="o">:</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">;</span> <span class="c1">// catch parasitic state</span>
+<a name="l-141"></a>    <span class="k">endcase</span>
+<a name="l-142"></a>
+<a name="l-143"></a>    <span class="c1">// handle error case</span>
+<a name="l-144"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sbaccess_i</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">&amp;&amp;</span> <span class="n">state_q</span> <span class="o">!=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-145"></a>      <span class="n">req</span>             <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-146"></a>      <span class="n">state_d</span>         <span class="o">=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">;</span>
+<a name="l-147"></a>      <span class="n">sberror_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-148"></a>      <span class="n">sberror_o</span>       <span class="o">=</span> <span class="mi">3&#39;d3</span><span class="p">;</span>
+<a name="l-149"></a>    <span class="k">end</span>
+<a name="l-150"></a>    <span class="c1">// further error handling should go here ...</span>
 <a name="l-151"></a>  <span class="k">end</span>
 <a name="l-152"></a>
-<a name="l-153"></a>  <span class="k">assign</span> <span class="n">master_req_o</span>    <span class="o">=</span> <span class="n">req</span><span class="p">;</span>
-<a name="l-154"></a>  <span class="k">assign</span> <span class="n">master_add_o</span>    <span class="o">=</span> <span class="n">address</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-155"></a>  <span class="k">assign</span> <span class="n">master_we_o</span>     <span class="o">=</span> <span class="n">we</span><span class="p">;</span>
-<a name="l-156"></a>  <span class="k">assign</span> <span class="n">master_wdata_o</span>  <span class="o">=</span> <span class="n">sbdata_i</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-157"></a>  <span class="k">assign</span> <span class="n">master_be_o</span>     <span class="o">=</span> <span class="n">be</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-158"></a>  <span class="k">assign</span> <span class="n">gnt</span>             <span class="o">=</span> <span class="n">master_gnt_i</span><span class="p">;</span>
-<a name="l-159"></a>  <span class="k">assign</span> <span class="n">sbdata_valid_o</span>  <span class="o">=</span> <span class="n">master_r_valid_i</span><span class="p">;</span>
-<a name="l-160"></a>  <span class="k">assign</span> <span class="n">sbdata_o</span>        <span class="o">=</span> <span class="n">master_r_rdata_i</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-161"></a>
-<a name="l-162"></a>
-<a name="l-163"></a>  <span class="c1">//pragma translate_off</span>
-<a name="l-164"></a>  <span class="no">`ifndef</span> <span class="n">VERILATOR</span>
-<a name="l-165"></a>    <span class="c1">// maybe bump severity to $error if not handled at runtime</span>
-<a name="l-166"></a>    <span class="nl">dm_sba_access_size:</span> <span class="k">assert</span> <span class="k">property</span><span class="p">(@(</span><span class="k">posedge</span> <span class="n">clk_i</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="n">dmactive_i</span> <span class="o">!==</span> <span class="mb">1&#39;b0</span><span class="p">)</span>
-<a name="l-167"></a>        <span class="p">(</span><span class="n">state_d</span> <span class="o">!=</span> <span class="n">Idle</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">(</span><span class="n">sbaccess_i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">))</span>
-<a name="l-168"></a>            <span class="k">else</span> <span class="p">$</span><span class="n">warning</span> <span class="p">(</span><span class="s">&quot;accesses &gt; 8 byte not supported at the moment&quot;</span><span class="p">);</span>
-<a name="l-169"></a>  <span class="no">`endif</span>
-<a name="l-170"></a>  <span class="c1">//pragma translate_on</span>
-<a name="l-171"></a>
-<a name="l-172"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">dm_sba</span>
+<a name="l-153"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
+<a name="l-154"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-155"></a>      <span class="n">state_q</span> <span class="o">&lt;=</span> <span class="n">dm</span><span class="o">::</span><span class="n">Idle</span><span class="p">;</span>
+<a name="l-156"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-157"></a>      <span class="n">state_q</span> <span class="o">&lt;=</span> <span class="n">state_d</span><span class="p">;</span>
+<a name="l-158"></a>    <span class="k">end</span>
+<a name="l-159"></a>  <span class="k">end</span>
+<a name="l-160"></a>
+<a name="l-161"></a>  <span class="k">assign</span> <span class="n">master_req_o</span>    <span class="o">=</span> <span class="n">req</span><span class="p">;</span>
+<a name="l-162"></a>  <span class="k">assign</span> <span class="n">master_add_o</span>    <span class="o">=</span> <span class="n">address</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-163"></a>  <span class="k">assign</span> <span class="n">master_we_o</span>     <span class="o">=</span> <span class="n">we</span><span class="p">;</span>
+<a name="l-164"></a>  <span class="k">assign</span> <span class="n">master_wdata_o</span>  <span class="o">=</span> <span class="n">sbdata_i</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-165"></a>  <span class="k">assign</span> <span class="n">master_be_o</span>     <span class="o">=</span> <span class="n">be</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">/</span><span class="mi">8</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-166"></a>  <span class="k">assign</span> <span class="n">gnt</span>             <span class="o">=</span> <span class="n">master_gnt_i</span><span class="p">;</span>
+<a name="l-167"></a>  <span class="k">assign</span> <span class="n">sbdata_valid_o</span>  <span class="o">=</span> <span class="n">master_r_valid_i</span><span class="p">;</span>
+<a name="l-168"></a>  <span class="k">assign</span> <span class="n">sbdata_o</span>        <span class="o">=</span> <span class="n">master_r_rdata_i</span><span class="p">[</span><span class="n">BusWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-169"></a>
+<a name="l-170"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">dm_sba</span>
 </pre></div>
 </td></tr></table>
   </body>
