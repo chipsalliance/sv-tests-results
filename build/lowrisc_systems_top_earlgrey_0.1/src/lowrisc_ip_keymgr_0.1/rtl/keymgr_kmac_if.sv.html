@@ -292,7 +292,20 @@
 <span class="normal"><a href="#l-284">284</a></span>
 <span class="normal"><a href="#l-285">285</a></span>
 <span class="normal"><a href="#l-286">286</a></span>
-<span class="normal"><a href="#l-287">287</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-287">287</a></span>
+<span class="normal"><a href="#l-288">288</a></span>
+<span class="normal"><a href="#l-289">289</a></span>
+<span class="normal"><a href="#l-290">290</a></span>
+<span class="normal"><a href="#l-291">291</a></span>
+<span class="normal"><a href="#l-292">292</a></span>
+<span class="normal"><a href="#l-293">293</a></span>
+<span class="normal"><a href="#l-294">294</a></span>
+<span class="normal"><a href="#l-295">295</a></span>
+<span class="normal"><a href="#l-296">296</a></span>
+<span class="normal"><a href="#l-297">297</a></span>
+<span class="normal"><a href="#l-298">298</a></span>
+<span class="normal"><a href="#l-299">299</a></span>
+<span class="normal"><a href="#l-300">300</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -320,8 +333,8 @@
 <a name="l-26"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">Shares</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span><span class="p">,</span>
 <a name="l-27"></a>
 <a name="l-28"></a>  <span class="c1">// actual connection to kmac</span>
-<a name="l-29"></a>  <span class="k">output</span> <span class="n">kmac_data_req_t</span> <span class="n">kmac_data_o</span><span class="p">,</span>
-<a name="l-30"></a>  <span class="k">input</span> <span class="n">kmac_data_rsp_t</span> <span class="n">kmac_data_i</span><span class="p">,</span>
+<a name="l-29"></a>  <span class="k">output</span> <span class="n">kmac_pkg</span><span class="o">::</span><span class="n">app_req_t</span> <span class="n">kmac_data_o</span><span class="p">,</span>
+<a name="l-30"></a>  <span class="k">input</span>  <span class="n">kmac_pkg</span><span class="o">::</span><span class="n">app_rsp_t</span> <span class="n">kmac_data_i</span><span class="p">,</span>
 <a name="l-31"></a>
 <a name="l-32"></a>  <span class="c1">// entropy input</span>
 <a name="l-33"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">prng_en_o</span><span class="p">,</span>
@@ -352,9 +365,9 @@
 <a name="l-58"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">GenRemBytes_A</span><span class="p">,</span> <span class="n">GenRem</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 <a name="l-59"></a>
 <a name="l-60"></a>  <span class="c1">// Number of kmac transactions required</span>
-<a name="l-61"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">AdvRounds</span> <span class="o">=</span> <span class="n">AdvDataWidth</span> <span class="o">/</span> <span class="n">KmacDataIfWidth</span> <span class="o">+</span> <span class="p">(</span><span class="n">AdvRem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
-<a name="l-62"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">IdRounds</span>  <span class="o">=</span> <span class="n">IdDataWidth</span>  <span class="o">/</span> <span class="n">KmacDataIfWidth</span> <span class="o">+</span> <span class="p">(</span><span class="n">IdRem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
-<a name="l-63"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">GenRounds</span> <span class="o">=</span> <span class="n">GenDataWidth</span> <span class="o">/</span> <span class="n">KmacDataIfWidth</span> <span class="o">+</span> <span class="p">(</span><span class="n">GenRem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+<a name="l-61"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">AdvRounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">AdvDataWidth</span> <span class="o">+</span> <span class="n">KmacDataIfWidth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">KmacDataIfWidth</span><span class="p">;</span>
+<a name="l-62"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">IdRounds</span>  <span class="o">=</span> <span class="p">(</span><span class="n">IdDataWidth</span> <span class="o">+</span> <span class="n">KmacDataIfWidth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">KmacDataIfWidth</span><span class="p">;</span>
+<a name="l-63"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">GenRounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">GenDataWidth</span> <span class="o">+</span> <span class="n">KmacDataIfWidth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">KmacDataIfWidth</span><span class="p">;</span>
 <a name="l-64"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">MaxRounds</span> <span class="o">=</span> <span class="n">KDFMaxWidth</span>  <span class="o">/</span> <span class="n">KmacDataIfWidth</span><span class="p">;</span>
 <a name="l-65"></a>
 <a name="l-66"></a>  <span class="c1">// Total transmitted bits, this is the same as *DataWidth if it all</span>
@@ -572,13 +585,26 @@
 <a name="l-278"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">enables</span><span class="p">,</span> <span class="n">enables_sub</span><span class="p">;</span>
 <a name="l-279"></a>  <span class="k">assign</span> <span class="n">enables</span> <span class="o">=</span> <span class="p">{</span><span class="n">adv_en_i</span><span class="p">,</span> <span class="n">id_en_i</span><span class="p">,</span> <span class="n">gen_en_i</span><span class="p">};</span>
 <a name="l-280"></a>  <span class="k">assign</span> <span class="n">enables_sub</span> <span class="o">=</span> <span class="n">enables</span> <span class="o">-</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-281"></a>  <span class="c1">// command error occurs if kmac errors or if the command itself is invalid</span>
-<a name="l-282"></a>  <span class="k">assign</span> <span class="n">cmd_error_o</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">enables</span> <span class="o">&amp;</span> <span class="n">enables_sub</span><span class="p">);</span>
-<a name="l-283"></a>
-<a name="l-284"></a>  <span class="c1">// request entropy to churn whenever a transaction is accepted</span>
-<a name="l-285"></a>  <span class="k">assign</span> <span class="n">prng_en_o</span> <span class="o">=</span> <span class="n">kmac_data_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">&amp;</span> <span class="n">kmac_data_i</span><span class="p">.</span><span class="n">ready</span><span class="p">;</span>
-<a name="l-286"></a>
-<a name="l-287"></a><span class="k">endmodule</span> <span class="c1">// keymgr_kmac_if</span>
+<a name="l-281"></a>
+<a name="l-282"></a>  <span class="c1">// if a one hot error occurs, latch onto it permanently</span>
+<a name="l-283"></a>  <span class="kt">logic</span> <span class="n">one_hot_err_q</span><span class="p">,</span> <span class="n">one_hot_err_d</span><span class="p">;</span>
+<a name="l-284"></a>  <span class="k">assign</span> <span class="n">one_hot_err_d</span> <span class="o">=</span> <span class="o">|</span><span class="p">(</span><span class="n">enables</span> <span class="o">&amp;</span> <span class="n">enables_sub</span><span class="p">);</span>
+<a name="l-285"></a>
+<a name="l-286"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-287"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-288"></a>      <span class="n">one_hot_err_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-289"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">one_hot_err_d</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-290"></a>      <span class="n">one_hot_err_q</span> <span class="o">&lt;=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a name="l-291"></a>    <span class="k">end</span>
+<a name="l-292"></a>  <span class="k">end</span>
+<a name="l-293"></a>
+<a name="l-294"></a>  <span class="c1">// command error occurs if kmac errors or if the command itself is invalid</span>
+<a name="l-295"></a>  <span class="k">assign</span> <span class="n">cmd_error_o</span> <span class="o">=</span> <span class="n">one_hot_err_q</span><span class="p">;</span>
+<a name="l-296"></a>
+<a name="l-297"></a>  <span class="c1">// request entropy to churn whenever a transaction is accepted</span>
+<a name="l-298"></a>  <span class="k">assign</span> <span class="n">prng_en_o</span> <span class="o">=</span> <span class="n">kmac_data_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">&amp;</span> <span class="n">kmac_data_i</span><span class="p">.</span><span class="n">ready</span><span class="p">;</span>
+<a name="l-299"></a>
+<a name="l-300"></a><span class="k">endmodule</span> <span class="c1">// keymgr_kmac_if</span>
 </pre></div>
 </td></tr></table>
   </body>

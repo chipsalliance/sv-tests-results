@@ -1105,7 +1105,11 @@
 <span class="normal"><a href="#l-1097">1097</a></span>
 <span class="normal"><a href="#l-1098">1098</a></span>
 <span class="normal"><a href="#l-1099">1099</a></span>
-<span class="normal"><a href="#l-1100">1100</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-1100">1100</a></span>
+<span class="normal"><a href="#l-1101">1101</a></span>
+<span class="normal"><a href="#l-1102">1102</a></span>
+<span class="normal"><a href="#l-1103">1103</a></span>
+<span class="normal"><a href="#l-1104">1104</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Copyright 2018 ETH Zurich and University of Bologna, see also CREDITS.md.</span>
 <a name="l-3"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-4"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
@@ -1778,433 +1782,437 @@
 <a name="l-671"></a>    <span class="c1">// Branches always take two cycles in fixed time execution mode, with or without the branch</span>
 <a name="l-672"></a>    <span class="c1">// target ALU (to avoid a path from the branch decision into the branch target ALU operand</span>
 <a name="l-673"></a>    <span class="c1">// muxing).</span>
-<a name="l-674"></a>    <span class="k">assign</span> <span class="n">branch_set_raw</span>      <span class="o">=</span> <span class="p">(</span><span class="n">BranchTargetALU</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">data_ind_timing_i</span><span class="p">)</span> <span class="o">?</span> <span class="n">branch_set_raw_d</span> <span class="o">:</span> <span class="n">branch_set_raw_q</span><span class="p">;</span>
-<a name="l-675"></a>    <span class="c1">// Use the speculative branch signal when BTALU is enabled</span>
-<a name="l-676"></a>    <span class="k">assign</span> <span class="n">branch_set_raw_spec</span> <span class="o">=</span> <span class="p">(</span><span class="n">BranchTargetALU</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">data_ind_timing_i</span><span class="p">)</span> <span class="o">?</span> <span class="n">branch_spec</span> <span class="o">:</span> <span class="n">branch_set_raw_q</span><span class="p">;</span>
-<a name="l-677"></a>  <span class="k">end</span>
-<a name="l-678"></a>
-<a name="l-679"></a>  <span class="c1">// Track whether the current instruction in ID/EX has done a branch or jump set.</span>
-<a name="l-680"></a>  <span class="k">assign</span> <span class="n">branch_jump_set_done_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">branch_set_raw</span> <span class="o">|</span> <span class="n">jump_set_raw</span> <span class="o">|</span> <span class="n">branch_jump_set_done_q</span><span class="p">)</span> <span class="o">&amp;</span>
-<a name="l-681"></a>    <span class="o">~</span><span class="n">instr_valid_clear_o</span><span class="p">;</span>
-<a name="l-682"></a>
-<a name="l-683"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-684"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-685"></a>      <span class="n">branch_jump_set_done_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-686"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-687"></a>      <span class="n">branch_jump_set_done_q</span> <span class="o">&lt;=</span> <span class="n">branch_jump_set_done_d</span><span class="p">;</span>
-<a name="l-688"></a>    <span class="k">end</span>
-<a name="l-689"></a>  <span class="k">end</span>
-<a name="l-690"></a>
-<a name="l-691"></a>  <span class="c1">// the _raw signals from the state machine may be asserted for multiple cycles when</span>
-<a name="l-692"></a>  <span class="c1">// instr_executing_spec is asserted and instr_executing is not asserted. This may occur where</span>
-<a name="l-693"></a>  <span class="c1">// a memory error is seen or a there are outstanding memory accesses (indicate a load or store is</span>
-<a name="l-694"></a>  <span class="c1">// in the WB stage). The branch or jump speculatively begins the fetch but is held back from completing</span>
-<a name="l-695"></a>  <span class="c1">// until it is certain the outstanding access hasn&#39;t seen a memory error. This logic ensures only</span>
-<a name="l-696"></a>  <span class="c1">// the first cycle of a branch or jump set is sent to the controller to prevent needless extra IF</span>
-<a name="l-697"></a>  <span class="c1">// flushes and fetches.</span>
-<a name="l-698"></a>  <span class="k">assign</span> <span class="n">jump_set</span>        <span class="o">=</span> <span class="n">jump_set_raw</span>        <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_jump_set_done_q</span><span class="p">;</span>
-<a name="l-699"></a>  <span class="k">assign</span> <span class="n">branch_set</span>      <span class="o">=</span> <span class="n">branch_set_raw</span>      <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_jump_set_done_q</span><span class="p">;</span>
-<a name="l-700"></a>  <span class="k">assign</span> <span class="n">branch_set_spec</span> <span class="o">=</span> <span class="n">branch_set_raw_spec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_jump_set_done_q</span><span class="p">;</span>
-<a name="l-701"></a>
-<a name="l-702"></a>  <span class="c1">// Branch condition is calculated in the first cycle and flopped for use in the second cycle</span>
-<a name="l-703"></a>  <span class="c1">// (only used in fixed time execution mode to determine branch destination).</span>
-<a name="l-704"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">DataIndTiming</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_sec_branch_taken</span>
-<a name="l-705"></a>    <span class="kt">logic</span> <span class="n">branch_taken_q</span><span class="p">;</span>
-<a name="l-706"></a>
-<a name="l-707"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-708"></a>      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-709"></a>        <span class="n">branch_taken_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-710"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-711"></a>        <span class="n">branch_taken_q</span> <span class="o">&lt;=</span> <span class="n">branch_decision_i</span><span class="p">;</span>
-<a name="l-712"></a>      <span class="k">end</span>
-<a name="l-713"></a>    <span class="k">end</span>
-<a name="l-714"></a>
-<a name="l-715"></a>    <span class="k">assign</span> <span class="n">branch_taken</span> <span class="o">=</span> <span class="o">~</span><span class="n">data_ind_timing_i</span> <span class="o">|</span> <span class="n">branch_taken_q</span><span class="p">;</span>
-<a name="l-716"></a>
-<a name="l-717"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_nosec_branch_taken</span>
-<a name="l-718"></a>
-<a name="l-719"></a>    <span class="c1">// Signal unused without fixed time execution mode - only taken branches will trigger branch_set_raw</span>
-<a name="l-720"></a>    <span class="k">assign</span> <span class="n">branch_taken</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-674"></a>    <span class="k">assign</span> <span class="n">branch_set_raw</span>      <span class="o">=</span> <span class="p">(</span><span class="n">BranchTargetALU</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">data_ind_timing_i</span><span class="p">)</span> <span class="o">?</span> <span class="n">branch_set_raw_d</span> <span class="o">:</span>
+<a name="l-675"></a>                                                                           <span class="n">branch_set_raw_q</span><span class="p">;</span>
+<a name="l-676"></a>
+<a name="l-677"></a>    <span class="c1">// Use the speculative branch signal when BTALU is enabled</span>
+<a name="l-678"></a>    <span class="k">assign</span> <span class="n">branch_set_raw_spec</span> <span class="o">=</span> <span class="p">(</span><span class="n">BranchTargetALU</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">data_ind_timing_i</span><span class="p">)</span> <span class="o">?</span> <span class="n">branch_spec</span> <span class="o">:</span>
+<a name="l-679"></a>                                                                           <span class="n">branch_set_raw_q</span><span class="p">;</span>
+<a name="l-680"></a>  <span class="k">end</span>
+<a name="l-681"></a>
+<a name="l-682"></a>  <span class="c1">// Track whether the current instruction in ID/EX has done a branch or jump set.</span>
+<a name="l-683"></a>  <span class="k">assign</span> <span class="n">branch_jump_set_done_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">branch_set_raw</span> <span class="o">|</span> <span class="n">jump_set_raw</span> <span class="o">|</span> <span class="n">branch_jump_set_done_q</span><span class="p">)</span> <span class="o">&amp;</span>
+<a name="l-684"></a>    <span class="o">~</span><span class="n">instr_valid_clear_o</span><span class="p">;</span>
+<a name="l-685"></a>
+<a name="l-686"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-687"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-688"></a>      <span class="n">branch_jump_set_done_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-689"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-690"></a>      <span class="n">branch_jump_set_done_q</span> <span class="o">&lt;=</span> <span class="n">branch_jump_set_done_d</span><span class="p">;</span>
+<a name="l-691"></a>    <span class="k">end</span>
+<a name="l-692"></a>  <span class="k">end</span>
+<a name="l-693"></a>
+<a name="l-694"></a>  <span class="c1">// the _raw signals from the state machine may be asserted for multiple cycles when</span>
+<a name="l-695"></a>  <span class="c1">// instr_executing_spec is asserted and instr_executing is not asserted. This may occur where</span>
+<a name="l-696"></a>  <span class="c1">// a memory error is seen or a there are outstanding memory accesses (indicate a load or store is</span>
+<a name="l-697"></a>  <span class="c1">// in the WB stage). The branch or jump speculatively begins the fetch but is held back from</span>
+<a name="l-698"></a>  <span class="c1">// completing until it is certain the outstanding access hasn&#39;t seen a memory error. This logic</span>
+<a name="l-699"></a>  <span class="c1">// ensures only the first cycle of a branch or jump set is sent to the controller to prevent</span>
+<a name="l-700"></a>  <span class="c1">// needless extra IF flushes and fetches.</span>
+<a name="l-701"></a>  <span class="k">assign</span> <span class="n">jump_set</span>        <span class="o">=</span> <span class="n">jump_set_raw</span>        <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_jump_set_done_q</span><span class="p">;</span>
+<a name="l-702"></a>  <span class="k">assign</span> <span class="n">branch_set</span>      <span class="o">=</span> <span class="n">branch_set_raw</span>      <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_jump_set_done_q</span><span class="p">;</span>
+<a name="l-703"></a>  <span class="k">assign</span> <span class="n">branch_set_spec</span> <span class="o">=</span> <span class="n">branch_set_raw_spec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_jump_set_done_q</span><span class="p">;</span>
+<a name="l-704"></a>
+<a name="l-705"></a>  <span class="c1">// Branch condition is calculated in the first cycle and flopped for use in the second cycle</span>
+<a name="l-706"></a>  <span class="c1">// (only used in fixed time execution mode to determine branch destination).</span>
+<a name="l-707"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">DataIndTiming</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_sec_branch_taken</span>
+<a name="l-708"></a>    <span class="kt">logic</span> <span class="n">branch_taken_q</span><span class="p">;</span>
+<a name="l-709"></a>
+<a name="l-710"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-711"></a>      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-712"></a>        <span class="n">branch_taken_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-713"></a>      <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-714"></a>        <span class="n">branch_taken_q</span> <span class="o">&lt;=</span> <span class="n">branch_decision_i</span><span class="p">;</span>
+<a name="l-715"></a>      <span class="k">end</span>
+<a name="l-716"></a>    <span class="k">end</span>
+<a name="l-717"></a>
+<a name="l-718"></a>    <span class="k">assign</span> <span class="n">branch_taken</span> <span class="o">=</span> <span class="o">~</span><span class="n">data_ind_timing_i</span> <span class="o">|</span> <span class="n">branch_taken_q</span><span class="p">;</span>
+<a name="l-719"></a>
+<a name="l-720"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">g_nosec_branch_taken</span>
 <a name="l-721"></a>
-<a name="l-722"></a>  <span class="k">end</span>
-<a name="l-723"></a>
-<a name="l-724"></a>  <span class="c1">// Holding branch_set/jump_set high for more than one cycle should not cause a functional issue.</span>
-<a name="l-725"></a>  <span class="c1">// However it could generate needless prefetch buffer flushes and instruction fetches. The ID/EX</span>
-<a name="l-726"></a>  <span class="c1">// designs ensures that this never happens for non-predicted branches.</span>
-<a name="l-727"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">NeverDoubleBranch</span><span class="p">,</span> <span class="n">branch_set</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_bp_taken_i</span> <span class="o">|=&gt;</span> <span class="o">~</span><span class="n">branch_set</span><span class="p">)</span>
-<a name="l-728"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">NeverDoubleJump</span><span class="p">,</span> <span class="n">jump_set</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_bp_taken_i</span> <span class="o">|=&gt;</span> <span class="o">~</span><span class="n">jump_set</span><span class="p">)</span>
-<a name="l-729"></a>
-<a name="l-730"></a>  <span class="c1">///////////////</span>
-<a name="l-731"></a>  <span class="c1">// ID-EX FSM //</span>
-<a name="l-732"></a>  <span class="c1">///////////////</span>
+<a name="l-722"></a>    <span class="c1">// Signal unused without fixed time execution mode - only taken branches will trigger</span>
+<a name="l-723"></a>    <span class="c1">// branch_set_raw</span>
+<a name="l-724"></a>    <span class="k">assign</span> <span class="n">branch_taken</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-725"></a>
+<a name="l-726"></a>  <span class="k">end</span>
+<a name="l-727"></a>
+<a name="l-728"></a>  <span class="c1">// Holding branch_set/jump_set high for more than one cycle should not cause a functional issue.</span>
+<a name="l-729"></a>  <span class="c1">// However it could generate needless prefetch buffer flushes and instruction fetches. The ID/EX</span>
+<a name="l-730"></a>  <span class="c1">// designs ensures that this never happens for non-predicted branches.</span>
+<a name="l-731"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">NeverDoubleBranch</span><span class="p">,</span> <span class="n">branch_set</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_bp_taken_i</span> <span class="o">|=&gt;</span> <span class="o">~</span><span class="n">branch_set</span><span class="p">)</span>
+<a name="l-732"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">NeverDoubleJump</span><span class="p">,</span> <span class="n">jump_set</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_bp_taken_i</span> <span class="o">|=&gt;</span> <span class="o">~</span><span class="n">jump_set</span><span class="p">)</span>
 <a name="l-733"></a>
-<a name="l-734"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span> <span class="n">FIRST_CYCLE</span><span class="p">,</span> <span class="n">MULTI_CYCLE</span> <span class="p">}</span> <span class="n">id_fsm_e</span><span class="p">;</span>
-<a name="l-735"></a>  <span class="n">id_fsm_e</span> <span class="n">id_fsm_q</span><span class="p">,</span> <span class="n">id_fsm_d</span><span class="p">;</span>
-<a name="l-736"></a>
-<a name="l-737"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">id_pipeline_reg</span>
-<a name="l-738"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-739"></a>      <span class="n">id_fsm_q</span> <span class="o">&lt;=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
-<a name="l-740"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">instr_executing</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-741"></a>      <span class="n">id_fsm_q</span> <span class="o">&lt;=</span> <span class="n">id_fsm_d</span><span class="p">;</span>
-<a name="l-742"></a>    <span class="k">end</span>
-<a name="l-743"></a>  <span class="k">end</span>
-<a name="l-744"></a>
-<a name="l-745"></a>  <span class="c1">// ID/EX stage can be in two states, FIRST_CYCLE and MULTI_CYCLE. An instruction enters</span>
-<a name="l-746"></a>  <span class="c1">// MULTI_CYCLE if it requires multiple cycles to complete regardless of stalls and other</span>
-<a name="l-747"></a>  <span class="c1">// considerations. An instruction may be held in FIRST_CYCLE if it&#39;s unable to begin executing</span>
-<a name="l-748"></a>  <span class="c1">// (this is controlled by instr_executing).</span>
-<a name="l-749"></a>
-<a name="l-750"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-751"></a>    <span class="n">id_fsm_d</span>                <span class="o">=</span> <span class="n">id_fsm_q</span><span class="p">;</span>
-<a name="l-752"></a>    <span class="n">rf_we_raw</span>               <span class="o">=</span> <span class="n">rf_we_dec</span><span class="p">;</span>
-<a name="l-753"></a>    <span class="n">stall_multdiv</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-754"></a>    <span class="n">stall_jump</span>              <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-755"></a>    <span class="n">stall_branch</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-756"></a>    <span class="n">stall_alu</span>               <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-757"></a>    <span class="n">branch_set_raw_d</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-758"></a>    <span class="n">branch_spec</span>             <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-759"></a>    <span class="n">branch_not_set</span>          <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-760"></a>    <span class="n">jump_set_raw</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-761"></a>    <span class="n">perf_branch_o</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-762"></a>
-<a name="l-763"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">instr_executing_spec</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-764"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">id_fsm_q</span><span class="p">)</span>
-<a name="l-765"></a>        <span class="nl">FIRST_CYCLE:</span> <span class="k">begin</span>
-<a name="l-766"></a>          <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a name="l-767"></a>            <span class="nl">lsu_req_dec:</span> <span class="k">begin</span>
-<a name="l-768"></a>              <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">WritebackStage</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-769"></a>                <span class="c1">// LSU operation</span>
-<a name="l-770"></a>                <span class="n">id_fsm_d</span>    <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
-<a name="l-771"></a>              <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-772"></a>                <span class="k">if</span><span class="p">(</span><span class="o">~</span><span class="n">lsu_req_done_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-773"></a>                  <span class="n">id_fsm_d</span>  <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
-<a name="l-774"></a>                <span class="k">end</span>
-<a name="l-775"></a>              <span class="k">end</span>
-<a name="l-776"></a>            <span class="k">end</span>
-<a name="l-777"></a>            <span class="nl">multdiv_en_dec:</span> <span class="k">begin</span>
-<a name="l-778"></a>              <span class="c1">// MUL or DIV operation</span>
-<a name="l-779"></a>              <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">ex_valid_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-780"></a>                <span class="c1">// When single-cycle multiply is configured mul can finish in the first cycle so</span>
-<a name="l-781"></a>                <span class="c1">// only enter MULTI_CYCLE state if a result isn&#39;t immediately available</span>
-<a name="l-782"></a>                <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
-<a name="l-783"></a>                <span class="n">rf_we_raw</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-784"></a>                <span class="n">stall_multdiv</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-785"></a>              <span class="k">end</span>
-<a name="l-786"></a>            <span class="k">end</span>
-<a name="l-787"></a>            <span class="nl">branch_in_dec:</span> <span class="k">begin</span>
-<a name="l-788"></a>              <span class="c1">// cond branch operation</span>
-<a name="l-789"></a>              <span class="c1">// All branches take two cycles in fixed time execution mode, regardless of branch</span>
-<a name="l-790"></a>              <span class="c1">// condition.</span>
-<a name="l-791"></a>              <span class="n">id_fsm_d</span>         <span class="o">=</span> <span class="p">(</span><span class="n">data_ind_timing_i</span> <span class="o">||</span> <span class="p">(</span><span class="o">!</span><span class="n">BranchTargetALU</span> <span class="o">&amp;&amp;</span> <span class="n">branch_decision_i</span><span class="p">))</span> <span class="o">?</span>
-<a name="l-792"></a>                                     <span class="n">MULTI_CYCLE</span> <span class="o">:</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
-<a name="l-793"></a>              <span class="n">stall_branch</span>     <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">BranchTargetALU</span> <span class="o">&amp;</span> <span class="n">branch_decision_i</span><span class="p">)</span> <span class="o">|</span> <span class="n">data_ind_timing_i</span><span class="p">;</span>
-<a name="l-794"></a>              <span class="n">branch_set_raw_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">branch_decision_i</span> <span class="o">|</span> <span class="n">data_ind_timing_i</span><span class="p">);</span>
-<a name="l-795"></a>
-<a name="l-796"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">BranchPredictor</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-797"></a>                <span class="n">branch_not_set</span> <span class="o">=</span> <span class="o">~</span><span class="n">branch_decision_i</span><span class="p">;</span>
-<a name="l-798"></a>              <span class="k">end</span>
+<a name="l-734"></a>  <span class="c1">///////////////</span>
+<a name="l-735"></a>  <span class="c1">// ID-EX FSM //</span>
+<a name="l-736"></a>  <span class="c1">///////////////</span>
+<a name="l-737"></a>
+<a name="l-738"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span> <span class="n">FIRST_CYCLE</span><span class="p">,</span> <span class="n">MULTI_CYCLE</span> <span class="p">}</span> <span class="n">id_fsm_e</span><span class="p">;</span>
+<a name="l-739"></a>  <span class="n">id_fsm_e</span> <span class="n">id_fsm_q</span><span class="p">,</span> <span class="n">id_fsm_d</span><span class="p">;</span>
+<a name="l-740"></a>
+<a name="l-741"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">id_pipeline_reg</span>
+<a name="l-742"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-743"></a>      <span class="n">id_fsm_q</span> <span class="o">&lt;=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
+<a name="l-744"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">instr_executing</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-745"></a>      <span class="n">id_fsm_q</span> <span class="o">&lt;=</span> <span class="n">id_fsm_d</span><span class="p">;</span>
+<a name="l-746"></a>    <span class="k">end</span>
+<a name="l-747"></a>  <span class="k">end</span>
+<a name="l-748"></a>
+<a name="l-749"></a>  <span class="c1">// ID/EX stage can be in two states, FIRST_CYCLE and MULTI_CYCLE. An instruction enters</span>
+<a name="l-750"></a>  <span class="c1">// MULTI_CYCLE if it requires multiple cycles to complete regardless of stalls and other</span>
+<a name="l-751"></a>  <span class="c1">// considerations. An instruction may be held in FIRST_CYCLE if it&#39;s unable to begin executing</span>
+<a name="l-752"></a>  <span class="c1">// (this is controlled by instr_executing).</span>
+<a name="l-753"></a>
+<a name="l-754"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-755"></a>    <span class="n">id_fsm_d</span>                <span class="o">=</span> <span class="n">id_fsm_q</span><span class="p">;</span>
+<a name="l-756"></a>    <span class="n">rf_we_raw</span>               <span class="o">=</span> <span class="n">rf_we_dec</span><span class="p">;</span>
+<a name="l-757"></a>    <span class="n">stall_multdiv</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-758"></a>    <span class="n">stall_jump</span>              <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-759"></a>    <span class="n">stall_branch</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-760"></a>    <span class="n">stall_alu</span>               <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-761"></a>    <span class="n">branch_set_raw_d</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-762"></a>    <span class="n">branch_spec</span>             <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-763"></a>    <span class="n">branch_not_set</span>          <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-764"></a>    <span class="n">jump_set_raw</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-765"></a>    <span class="n">perf_branch_o</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-766"></a>
+<a name="l-767"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">instr_executing_spec</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-768"></a>      <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">id_fsm_q</span><span class="p">)</span>
+<a name="l-769"></a>        <span class="nl">FIRST_CYCLE:</span> <span class="k">begin</span>
+<a name="l-770"></a>          <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a name="l-771"></a>            <span class="nl">lsu_req_dec:</span> <span class="k">begin</span>
+<a name="l-772"></a>              <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">WritebackStage</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-773"></a>                <span class="c1">// LSU operation</span>
+<a name="l-774"></a>                <span class="n">id_fsm_d</span>    <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
+<a name="l-775"></a>              <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-776"></a>                <span class="k">if</span><span class="p">(</span><span class="o">~</span><span class="n">lsu_req_done_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-777"></a>                  <span class="n">id_fsm_d</span>  <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
+<a name="l-778"></a>                <span class="k">end</span>
+<a name="l-779"></a>              <span class="k">end</span>
+<a name="l-780"></a>            <span class="k">end</span>
+<a name="l-781"></a>            <span class="nl">multdiv_en_dec:</span> <span class="k">begin</span>
+<a name="l-782"></a>              <span class="c1">// MUL or DIV operation</span>
+<a name="l-783"></a>              <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">ex_valid_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-784"></a>                <span class="c1">// When single-cycle multiply is configured mul can finish in the first cycle so</span>
+<a name="l-785"></a>                <span class="c1">// only enter MULTI_CYCLE state if a result isn&#39;t immediately available</span>
+<a name="l-786"></a>                <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
+<a name="l-787"></a>                <span class="n">rf_we_raw</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-788"></a>                <span class="n">stall_multdiv</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-789"></a>              <span class="k">end</span>
+<a name="l-790"></a>            <span class="k">end</span>
+<a name="l-791"></a>            <span class="nl">branch_in_dec:</span> <span class="k">begin</span>
+<a name="l-792"></a>              <span class="c1">// cond branch operation</span>
+<a name="l-793"></a>              <span class="c1">// All branches take two cycles in fixed time execution mode, regardless of branch</span>
+<a name="l-794"></a>              <span class="c1">// condition.</span>
+<a name="l-795"></a>              <span class="n">id_fsm_d</span>         <span class="o">=</span> <span class="p">(</span><span class="n">data_ind_timing_i</span> <span class="o">||</span> <span class="p">(</span><span class="o">!</span><span class="n">BranchTargetALU</span> <span class="o">&amp;&amp;</span> <span class="n">branch_decision_i</span><span class="p">))</span> <span class="o">?</span>
+<a name="l-796"></a>                                     <span class="n">MULTI_CYCLE</span> <span class="o">:</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
+<a name="l-797"></a>              <span class="n">stall_branch</span>     <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">BranchTargetALU</span> <span class="o">&amp;</span> <span class="n">branch_decision_i</span><span class="p">)</span> <span class="o">|</span> <span class="n">data_ind_timing_i</span><span class="p">;</span>
+<a name="l-798"></a>              <span class="n">branch_set_raw_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">branch_decision_i</span> <span class="o">|</span> <span class="n">data_ind_timing_i</span><span class="p">);</span>
 <a name="l-799"></a>
-<a name="l-800"></a>              <span class="c1">// Speculative branch (excludes branch_decision_i)</span>
-<a name="l-801"></a>              <span class="n">branch_spec</span>   <span class="o">=</span> <span class="n">SpecBranch</span> <span class="o">?</span> <span class="mb">1&#39;b1</span> <span class="o">:</span> <span class="n">branch_decision_i</span><span class="p">;</span>
-<a name="l-802"></a>              <span class="n">perf_branch_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-803"></a>            <span class="k">end</span>
-<a name="l-804"></a>            <span class="nl">jump_in_dec:</span> <span class="k">begin</span>
-<a name="l-805"></a>              <span class="c1">// uncond branch operation</span>
-<a name="l-806"></a>              <span class="c1">// BTALU means jumps only need one cycle</span>
-<a name="l-807"></a>              <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">BranchTargetALU</span> <span class="o">?</span> <span class="n">FIRST_CYCLE</span> <span class="o">:</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
-<a name="l-808"></a>              <span class="n">stall_jump</span>    <span class="o">=</span> <span class="o">~</span><span class="n">BranchTargetALU</span><span class="p">;</span>
-<a name="l-809"></a>              <span class="n">jump_set_raw</span>  <span class="o">=</span> <span class="n">jump_set_dec</span><span class="p">;</span>
-<a name="l-810"></a>            <span class="k">end</span>
-<a name="l-811"></a>            <span class="nl">alu_multicycle_dec:</span> <span class="k">begin</span>
-<a name="l-812"></a>              <span class="n">stall_alu</span>     <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-813"></a>              <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
-<a name="l-814"></a>              <span class="n">rf_we_raw</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-815"></a>            <span class="k">end</span>
-<a name="l-816"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-817"></a>              <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
-<a name="l-818"></a>            <span class="k">end</span>
-<a name="l-819"></a>          <span class="k">endcase</span>
-<a name="l-820"></a>        <span class="k">end</span>
-<a name="l-821"></a>
-<a name="l-822"></a>        <span class="nl">MULTI_CYCLE:</span> <span class="k">begin</span>
-<a name="l-823"></a>          <span class="k">if</span><span class="p">(</span><span class="n">multdiv_en_dec</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-824"></a>            <span class="n">rf_we_raw</span>       <span class="o">=</span> <span class="n">rf_we_dec</span> <span class="o">&amp;</span> <span class="n">ex_valid_i</span><span class="p">;</span>
-<a name="l-825"></a>          <span class="k">end</span>
-<a name="l-826"></a>
-<a name="l-827"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">multicycle_done</span> <span class="o">&amp;</span> <span class="n">ready_wb_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-828"></a>            <span class="n">id_fsm_d</span>        <span class="o">=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
-<a name="l-829"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-830"></a>            <span class="n">stall_multdiv</span>   <span class="o">=</span> <span class="n">multdiv_en_dec</span><span class="p">;</span>
-<a name="l-831"></a>            <span class="n">stall_branch</span>    <span class="o">=</span> <span class="n">branch_in_dec</span><span class="p">;</span>
-<a name="l-832"></a>            <span class="n">stall_jump</span>      <span class="o">=</span> <span class="n">jump_in_dec</span><span class="p">;</span>
-<a name="l-833"></a>          <span class="k">end</span>
-<a name="l-834"></a>        <span class="k">end</span>
-<a name="l-835"></a>
-<a name="l-836"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-837"></a>          <span class="n">id_fsm_d</span>          <span class="o">=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
+<a name="l-800"></a>              <span class="k">if</span> <span class="p">(</span><span class="n">BranchPredictor</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-801"></a>                <span class="n">branch_not_set</span> <span class="o">=</span> <span class="o">~</span><span class="n">branch_decision_i</span><span class="p">;</span>
+<a name="l-802"></a>              <span class="k">end</span>
+<a name="l-803"></a>
+<a name="l-804"></a>              <span class="c1">// Speculative branch (excludes branch_decision_i)</span>
+<a name="l-805"></a>              <span class="n">branch_spec</span>   <span class="o">=</span> <span class="n">SpecBranch</span> <span class="o">?</span> <span class="mb">1&#39;b1</span> <span class="o">:</span> <span class="n">branch_decision_i</span><span class="p">;</span>
+<a name="l-806"></a>              <span class="n">perf_branch_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-807"></a>            <span class="k">end</span>
+<a name="l-808"></a>            <span class="nl">jump_in_dec:</span> <span class="k">begin</span>
+<a name="l-809"></a>              <span class="c1">// uncond branch operation</span>
+<a name="l-810"></a>              <span class="c1">// BTALU means jumps only need one cycle</span>
+<a name="l-811"></a>              <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">BranchTargetALU</span> <span class="o">?</span> <span class="n">FIRST_CYCLE</span> <span class="o">:</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
+<a name="l-812"></a>              <span class="n">stall_jump</span>    <span class="o">=</span> <span class="o">~</span><span class="n">BranchTargetALU</span><span class="p">;</span>
+<a name="l-813"></a>              <span class="n">jump_set_raw</span>  <span class="o">=</span> <span class="n">jump_set_dec</span><span class="p">;</span>
+<a name="l-814"></a>            <span class="k">end</span>
+<a name="l-815"></a>            <span class="nl">alu_multicycle_dec:</span> <span class="k">begin</span>
+<a name="l-816"></a>              <span class="n">stall_alu</span>     <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-817"></a>              <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">MULTI_CYCLE</span><span class="p">;</span>
+<a name="l-818"></a>              <span class="n">rf_we_raw</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-819"></a>            <span class="k">end</span>
+<a name="l-820"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-821"></a>              <span class="n">id_fsm_d</span>      <span class="o">=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
+<a name="l-822"></a>            <span class="k">end</span>
+<a name="l-823"></a>          <span class="k">endcase</span>
+<a name="l-824"></a>        <span class="k">end</span>
+<a name="l-825"></a>
+<a name="l-826"></a>        <span class="nl">MULTI_CYCLE:</span> <span class="k">begin</span>
+<a name="l-827"></a>          <span class="k">if</span><span class="p">(</span><span class="n">multdiv_en_dec</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-828"></a>            <span class="n">rf_we_raw</span>       <span class="o">=</span> <span class="n">rf_we_dec</span> <span class="o">&amp;</span> <span class="n">ex_valid_i</span><span class="p">;</span>
+<a name="l-829"></a>          <span class="k">end</span>
+<a name="l-830"></a>
+<a name="l-831"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">multicycle_done</span> <span class="o">&amp;</span> <span class="n">ready_wb_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-832"></a>            <span class="n">id_fsm_d</span>        <span class="o">=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
+<a name="l-833"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-834"></a>            <span class="n">stall_multdiv</span>   <span class="o">=</span> <span class="n">multdiv_en_dec</span><span class="p">;</span>
+<a name="l-835"></a>            <span class="n">stall_branch</span>    <span class="o">=</span> <span class="n">branch_in_dec</span><span class="p">;</span>
+<a name="l-836"></a>            <span class="n">stall_jump</span>      <span class="o">=</span> <span class="n">jump_in_dec</span><span class="p">;</span>
+<a name="l-837"></a>          <span class="k">end</span>
 <a name="l-838"></a>        <span class="k">end</span>
-<a name="l-839"></a>      <span class="k">endcase</span>
-<a name="l-840"></a>    <span class="k">end</span>
-<a name="l-841"></a>  <span class="k">end</span>
-<a name="l-842"></a>
-<a name="l-843"></a>  <span class="c1">// Note for the two-stage configuration ready_wb_i is always set</span>
-<a name="l-844"></a>  <span class="k">assign</span> <span class="n">multdiv_ready_id_o</span> <span class="o">=</span> <span class="n">ready_wb_i</span><span class="p">;</span>
-<a name="l-845"></a>
-<a name="l-846"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">StallIDIfMulticycle</span><span class="p">,</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_d</span> <span class="o">==</span> <span class="n">MULTI_CYCLE</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">stall_id</span><span class="p">)</span>
-<a name="l-847"></a>
-<a name="l-848"></a>  <span class="c1">// Stall ID/EX stage for reason that relates to instruction in ID/EX</span>
-<a name="l-849"></a>  <span class="k">assign</span> <span class="n">stall_id</span> <span class="o">=</span> <span class="n">stall_ld_hz</span> <span class="o">|</span> <span class="n">stall_mem</span> <span class="o">|</span> <span class="n">stall_multdiv</span> <span class="o">|</span> <span class="n">stall_jump</span> <span class="o">|</span> <span class="n">stall_branch</span> <span class="o">|</span>
-<a name="l-850"></a>                      <span class="n">stall_alu</span><span class="p">;</span>
+<a name="l-839"></a>
+<a name="l-840"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-841"></a>          <span class="n">id_fsm_d</span>          <span class="o">=</span> <span class="n">FIRST_CYCLE</span><span class="p">;</span>
+<a name="l-842"></a>        <span class="k">end</span>
+<a name="l-843"></a>      <span class="k">endcase</span>
+<a name="l-844"></a>    <span class="k">end</span>
+<a name="l-845"></a>  <span class="k">end</span>
+<a name="l-846"></a>
+<a name="l-847"></a>  <span class="c1">// Note for the two-stage configuration ready_wb_i is always set</span>
+<a name="l-848"></a>  <span class="k">assign</span> <span class="n">multdiv_ready_id_o</span> <span class="o">=</span> <span class="n">ready_wb_i</span><span class="p">;</span>
+<a name="l-849"></a>
+<a name="l-850"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">StallIDIfMulticycle</span><span class="p">,</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_d</span> <span class="o">==</span> <span class="n">MULTI_CYCLE</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">stall_id</span><span class="p">)</span>
 <a name="l-851"></a>
-<a name="l-852"></a>  <span class="k">assign</span> <span class="n">instr_done</span> <span class="o">=</span> <span class="o">~</span><span class="n">stall_id</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">flush_id</span> <span class="o">&amp;</span> <span class="n">instr_executing</span><span class="p">;</span>
-<a name="l-853"></a>
-<a name="l-854"></a>  <span class="c1">// Signal instruction in ID is in it&#39;s first cycle. It can remain in its</span>
-<a name="l-855"></a>  <span class="c1">// first cycle if it is stalled.</span>
-<a name="l-856"></a>  <span class="k">assign</span> <span class="n">instr_first_cycle</span>      <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">);</span>
-<a name="l-857"></a>  <span class="c1">// Used by RVFI to know when to capture register read data</span>
-<a name="l-858"></a>  <span class="c1">// Used by ALU to access RS3 if ternary instruction.</span>
-<a name="l-859"></a>  <span class="k">assign</span> <span class="n">instr_first_cycle_id_o</span> <span class="o">=</span> <span class="n">instr_first_cycle</span><span class="p">;</span>
-<a name="l-860"></a>
-<a name="l-861"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">WritebackStage</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_stall_mem</span>
-<a name="l-862"></a>    <span class="c1">// Register read address matches write address in WB</span>
-<a name="l-863"></a>    <span class="kt">logic</span> <span class="n">rf_rd_a_wb_match</span><span class="p">;</span>
-<a name="l-864"></a>    <span class="kt">logic</span> <span class="n">rf_rd_b_wb_match</span><span class="p">;</span>
-<a name="l-865"></a>    <span class="c1">// Hazard between registers being read and written</span>
-<a name="l-866"></a>    <span class="kt">logic</span> <span class="n">rf_rd_a_hz</span><span class="p">;</span>
-<a name="l-867"></a>    <span class="kt">logic</span> <span class="n">rf_rd_b_hz</span><span class="p">;</span>
-<a name="l-868"></a>
-<a name="l-869"></a>    <span class="kt">logic</span> <span class="n">outstanding_memory_access</span><span class="p">;</span>
-<a name="l-870"></a>
-<a name="l-871"></a>    <span class="kt">logic</span> <span class="n">instr_kill</span><span class="p">;</span>
+<a name="l-852"></a>  <span class="c1">// Stall ID/EX stage for reason that relates to instruction in ID/EX</span>
+<a name="l-853"></a>  <span class="k">assign</span> <span class="n">stall_id</span> <span class="o">=</span> <span class="n">stall_ld_hz</span> <span class="o">|</span> <span class="n">stall_mem</span> <span class="o">|</span> <span class="n">stall_multdiv</span> <span class="o">|</span> <span class="n">stall_jump</span> <span class="o">|</span> <span class="n">stall_branch</span> <span class="o">|</span>
+<a name="l-854"></a>                      <span class="n">stall_alu</span><span class="p">;</span>
+<a name="l-855"></a>
+<a name="l-856"></a>  <span class="k">assign</span> <span class="n">instr_done</span> <span class="o">=</span> <span class="o">~</span><span class="n">stall_id</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">flush_id</span> <span class="o">&amp;</span> <span class="n">instr_executing</span><span class="p">;</span>
+<a name="l-857"></a>
+<a name="l-858"></a>  <span class="c1">// Signal instruction in ID is in it&#39;s first cycle. It can remain in its</span>
+<a name="l-859"></a>  <span class="c1">// first cycle if it is stalled.</span>
+<a name="l-860"></a>  <span class="k">assign</span> <span class="n">instr_first_cycle</span>      <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">);</span>
+<a name="l-861"></a>  <span class="c1">// Used by RVFI to know when to capture register read data</span>
+<a name="l-862"></a>  <span class="c1">// Used by ALU to access RS3 if ternary instruction.</span>
+<a name="l-863"></a>  <span class="k">assign</span> <span class="n">instr_first_cycle_id_o</span> <span class="o">=</span> <span class="n">instr_first_cycle</span><span class="p">;</span>
+<a name="l-864"></a>
+<a name="l-865"></a>  <span class="k">if</span> <span class="p">(</span><span class="n">WritebackStage</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_stall_mem</span>
+<a name="l-866"></a>    <span class="c1">// Register read address matches write address in WB</span>
+<a name="l-867"></a>    <span class="kt">logic</span> <span class="n">rf_rd_a_wb_match</span><span class="p">;</span>
+<a name="l-868"></a>    <span class="kt">logic</span> <span class="n">rf_rd_b_wb_match</span><span class="p">;</span>
+<a name="l-869"></a>    <span class="c1">// Hazard between registers being read and written</span>
+<a name="l-870"></a>    <span class="kt">logic</span> <span class="n">rf_rd_a_hz</span><span class="p">;</span>
+<a name="l-871"></a>    <span class="kt">logic</span> <span class="n">rf_rd_b_hz</span><span class="p">;</span>
 <a name="l-872"></a>
-<a name="l-873"></a>    <span class="k">assign</span> <span class="n">multicycle_done</span> <span class="o">=</span> <span class="n">lsu_req_dec</span> <span class="o">?</span> <span class="o">~</span><span class="n">stall_mem</span> <span class="o">:</span> <span class="n">ex_valid_i</span><span class="p">;</span>
+<a name="l-873"></a>    <span class="kt">logic</span> <span class="n">outstanding_memory_access</span><span class="p">;</span>
 <a name="l-874"></a>
-<a name="l-875"></a>    <span class="c1">// Is a memory access ongoing that isn&#39;t finishing this cycle</span>
-<a name="l-876"></a>    <span class="k">assign</span> <span class="n">outstanding_memory_access</span> <span class="o">=</span> <span class="p">(</span><span class="n">outstanding_load_wb_i</span> <span class="o">|</span> <span class="n">outstanding_store_wb_i</span><span class="p">)</span> <span class="o">&amp;</span>
-<a name="l-877"></a>                                       <span class="o">~</span><span class="n">lsu_resp_valid_i</span><span class="p">;</span>
+<a name="l-875"></a>    <span class="kt">logic</span> <span class="n">instr_kill</span><span class="p">;</span>
+<a name="l-876"></a>
+<a name="l-877"></a>    <span class="k">assign</span> <span class="n">multicycle_done</span> <span class="o">=</span> <span class="n">lsu_req_dec</span> <span class="o">?</span> <span class="o">~</span><span class="n">stall_mem</span> <span class="o">:</span> <span class="n">ex_valid_i</span><span class="p">;</span>
 <a name="l-878"></a>
-<a name="l-879"></a>    <span class="c1">// Can start a new memory access if any previous one has finished or is finishing</span>
-<a name="l-880"></a>    <span class="k">assign</span> <span class="n">data_req_allowed</span> <span class="o">=</span> <span class="o">~</span><span class="n">outstanding_memory_access</span><span class="p">;</span>
-<a name="l-881"></a>
-<a name="l-882"></a>    <span class="c1">// Instruction won&#39;t execute because:</span>
-<a name="l-883"></a>    <span class="c1">// - There is a pending exception in writeback</span>
-<a name="l-884"></a>    <span class="c1">//   The instruction in ID/EX will be flushed and the core will jump to an exception handler</span>
-<a name="l-885"></a>    <span class="c1">// - The controller isn&#39;t running instructions</span>
-<a name="l-886"></a>    <span class="c1">//   This either happens in preparation for a flush and jump to an exception handler e.g. in</span>
-<a name="l-887"></a>    <span class="c1">//   response to an IRQ or debug request or whilst the core is sleeping or resetting/fetching</span>
-<a name="l-888"></a>    <span class="c1">//   first instruction in which case any valid instruction in ID/EX should be ignored.</span>
-<a name="l-889"></a>    <span class="c1">// - There was an error on instruction fetch</span>
-<a name="l-890"></a>    <span class="k">assign</span> <span class="n">instr_kill</span> <span class="o">=</span> <span class="n">instr_fetch_err_i</span> <span class="o">|</span>
-<a name="l-891"></a>                        <span class="n">wb_exception</span>      <span class="o">|</span>
-<a name="l-892"></a>                        <span class="o">~</span><span class="n">controller_run</span><span class="p">;</span>
-<a name="l-893"></a>
-<a name="l-894"></a>    <span class="c1">// With writeback stage instructions must be prevented from executing if there is:</span>
-<a name="l-895"></a>    <span class="c1">// - A load hazard</span>
-<a name="l-896"></a>    <span class="c1">// - A pending memory access</span>
-<a name="l-897"></a>    <span class="c1">//   If it receives an error response this results in a precise exception from WB so ID/EX</span>
-<a name="l-898"></a>    <span class="c1">//   instruction must not execute until error response is known).</span>
-<a name="l-899"></a>    <span class="c1">// - A load/store error</span>
-<a name="l-900"></a>    <span class="c1">//   This will cause a precise exception for the instruction in WB so ID/EX instruction must not</span>
-<a name="l-901"></a>    <span class="c1">//   execute</span>
-<a name="l-902"></a>    <span class="c1">//</span>
-<a name="l-903"></a>    <span class="c1">// instr_executing_spec is a speculative signal. It indicates an instruction can execute</span>
-<a name="l-904"></a>    <span class="c1">// assuming there are no exceptions from writeback and any outstanding memory access won&#39;t</span>
-<a name="l-905"></a>    <span class="c1">// receive an error. It is required so branch and jump requests don&#39;t factor in an incoming dmem</span>
-<a name="l-906"></a>    <span class="c1">// error (that in turn would factor directly into imem requests leading to a feedthrough path).</span>
-<a name="l-907"></a>    <span class="c1">//</span>
-<a name="l-908"></a>    <span class="c1">// instr_executing is the full signal, it will only allow execution once any potential</span>
-<a name="l-909"></a>    <span class="c1">// exceptions from writeback have been resolved.</span>
-<a name="l-910"></a>    <span class="k">assign</span> <span class="n">instr_executing_spec</span> <span class="o">=</span> <span class="n">instr_valid_i</span>      <span class="o">&amp;</span>
-<a name="l-911"></a>                                  <span class="o">~</span><span class="n">instr_fetch_err_i</span> <span class="o">&amp;</span>
-<a name="l-912"></a>                                  <span class="n">controller_run</span>     <span class="o">&amp;</span>
-<a name="l-913"></a>                                  <span class="o">~</span><span class="n">stall_ld_hz</span><span class="p">;</span>
-<a name="l-914"></a>
-<a name="l-915"></a>    <span class="k">assign</span> <span class="n">instr_executing</span> <span class="o">=</span> <span class="n">instr_valid_i</span>              <span class="o">&amp;</span>
-<a name="l-916"></a>                             <span class="o">~</span><span class="n">instr_kill</span>                <span class="o">&amp;</span>
-<a name="l-917"></a>                             <span class="o">~</span><span class="n">stall_ld_hz</span>               <span class="o">&amp;</span>
-<a name="l-918"></a>                             <span class="o">~</span><span class="n">outstanding_memory_access</span><span class="p">;</span>
-<a name="l-919"></a>
-<a name="l-920"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexExecutingSpecIfExecuting</span><span class="p">,</span> <span class="n">instr_executing</span> <span class="o">|-&gt;</span> <span class="n">instr_executing_spec</span><span class="p">)</span>
-<a name="l-921"></a>
-<a name="l-922"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexStallIfValidInstrNotExecuting</span><span class="p">,</span>
-<a name="l-923"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_kill</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_executing</span> <span class="o">|-&gt;</span> <span class="n">stall_id</span><span class="p">)</span>
-<a name="l-924"></a>
-<a name="l-925"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexCannotRetireWithPendingExceptions</span><span class="p">,</span>
-<a name="l-926"></a>      <span class="n">instr_done</span> <span class="o">|-&gt;</span> <span class="o">~</span><span class="p">(</span><span class="n">wb_exception</span> <span class="o">|</span> <span class="n">outstanding_memory_access</span><span class="p">))</span>
-<a name="l-927"></a>
-<a name="l-928"></a>    <span class="c1">// Stall for reasons related to memory:</span>
-<a name="l-929"></a>    <span class="c1">// * There is an outstanding memory access that won&#39;t resolve this cycle (need to wait to allow</span>
-<a name="l-930"></a>    <span class="c1">//   precise exceptions)</span>
-<a name="l-931"></a>    <span class="c1">// * There is a load/store request not being granted or which is unaligned and waiting to issue</span>
-<a name="l-932"></a>    <span class="c1">//   a second request (needs to stay in ID for the address calculation)</span>
-<a name="l-933"></a>    <span class="k">assign</span> <span class="n">stall_mem</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span>
-<a name="l-934"></a>                       <span class="p">(</span><span class="n">outstanding_memory_access</span> <span class="o">|</span> <span class="p">(</span><span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lsu_req_done_i</span><span class="p">));</span>
-<a name="l-935"></a>
-<a name="l-936"></a>    <span class="c1">// If we stall a load in ID for any reason, it must not make an LSU request</span>
-<a name="l-937"></a>    <span class="c1">// (otherwide we might issue two requests for the same instruction)</span>
-<a name="l-938"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexStallMemNoRequest</span><span class="p">,</span>
-<a name="l-939"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_done</span> <span class="o">|-&gt;</span> <span class="o">~</span><span class="n">lsu_req_done_i</span><span class="p">)</span>
-<a name="l-940"></a>
-<a name="l-941"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_wb_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">rf_waddr_wb_i</span> <span class="o">==</span> <span class="n">rf_raddr_a_o</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">|</span><span class="n">rf_raddr_a_o</span><span class="p">;</span>
-<a name="l-942"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_wb_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">rf_waddr_wb_i</span> <span class="o">==</span> <span class="n">rf_raddr_b_o</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">|</span><span class="n">rf_raddr_b_o</span><span class="p">;</span>
-<a name="l-943"></a>
-<a name="l-944"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_wb_match_o</span> <span class="o">=</span> <span class="n">rf_rd_a_wb_match</span><span class="p">;</span>
-<a name="l-945"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_wb_match_o</span> <span class="o">=</span> <span class="n">rf_rd_b_wb_match</span><span class="p">;</span>
-<a name="l-946"></a>
-<a name="l-947"></a>    <span class="c1">// If instruction is reading register that load will be writing stall in</span>
-<a name="l-948"></a>    <span class="c1">// ID until load is complete. No need to stall when reading zero register.</span>
-<a name="l-949"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_hz</span> <span class="o">=</span> <span class="n">rf_rd_a_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_ren_a</span><span class="p">;</span>
-<a name="l-950"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_hz</span> <span class="o">=</span> <span class="n">rf_rd_b_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_ren_b</span><span class="p">;</span>
-<a name="l-951"></a>
-<a name="l-952"></a>    <span class="c1">// If instruction is read register that writeback is writing forward writeback data to read</span>
-<a name="l-953"></a>    <span class="c1">// data. Note this doesn&#39;t factor in load data as it arrives too late, such hazards are</span>
-<a name="l-954"></a>    <span class="c1">// resolved via a stall (see above).</span>
-<a name="l-955"></a>    <span class="k">assign</span> <span class="n">rf_rdata_a_fwd</span> <span class="o">=</span> <span class="n">rf_rd_a_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_write_wb_i</span> <span class="o">?</span> <span class="n">rf_wdata_fwd_wb_i</span> <span class="o">:</span> <span class="n">rf_rdata_a_i</span><span class="p">;</span>
-<a name="l-956"></a>    <span class="k">assign</span> <span class="n">rf_rdata_b_fwd</span> <span class="o">=</span> <span class="n">rf_rd_b_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_write_wb_i</span> <span class="o">?</span> <span class="n">rf_wdata_fwd_wb_i</span> <span class="o">:</span> <span class="n">rf_rdata_b_i</span><span class="p">;</span>
-<a name="l-957"></a>
-<a name="l-958"></a>    <span class="k">assign</span> <span class="n">stall_ld_hz</span> <span class="o">=</span> <span class="n">outstanding_load_wb_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rf_rd_a_hz</span> <span class="o">|</span> <span class="n">rf_rd_b_hz</span><span class="p">);</span>
-<a name="l-959"></a>
-<a name="l-960"></a>    <span class="k">assign</span> <span class="n">instr_type_wb_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">lsu_req_dec</span> <span class="o">?</span> <span class="n">WB_INSTR_OTHER</span> <span class="o">:</span>
-<a name="l-961"></a>                              <span class="n">lsu_we</span>      <span class="o">?</span> <span class="n">WB_INSTR_STORE</span> <span class="o">:</span>
-<a name="l-962"></a>                                            <span class="n">WB_INSTR_LOAD</span><span class="p">;</span>
+<a name="l-879"></a>    <span class="c1">// Is a memory access ongoing that isn&#39;t finishing this cycle</span>
+<a name="l-880"></a>    <span class="k">assign</span> <span class="n">outstanding_memory_access</span> <span class="o">=</span> <span class="p">(</span><span class="n">outstanding_load_wb_i</span> <span class="o">|</span> <span class="n">outstanding_store_wb_i</span><span class="p">)</span> <span class="o">&amp;</span>
+<a name="l-881"></a>                                       <span class="o">~</span><span class="n">lsu_resp_valid_i</span><span class="p">;</span>
+<a name="l-882"></a>
+<a name="l-883"></a>    <span class="c1">// Can start a new memory access if any previous one has finished or is finishing</span>
+<a name="l-884"></a>    <span class="k">assign</span> <span class="n">data_req_allowed</span> <span class="o">=</span> <span class="o">~</span><span class="n">outstanding_memory_access</span><span class="p">;</span>
+<a name="l-885"></a>
+<a name="l-886"></a>    <span class="c1">// Instruction won&#39;t execute because:</span>
+<a name="l-887"></a>    <span class="c1">// - There is a pending exception in writeback</span>
+<a name="l-888"></a>    <span class="c1">//   The instruction in ID/EX will be flushed and the core will jump to an exception handler</span>
+<a name="l-889"></a>    <span class="c1">// - The controller isn&#39;t running instructions</span>
+<a name="l-890"></a>    <span class="c1">//   This either happens in preparation for a flush and jump to an exception handler e.g. in</span>
+<a name="l-891"></a>    <span class="c1">//   response to an IRQ or debug request or whilst the core is sleeping or resetting/fetching</span>
+<a name="l-892"></a>    <span class="c1">//   first instruction in which case any valid instruction in ID/EX should be ignored.</span>
+<a name="l-893"></a>    <span class="c1">// - There was an error on instruction fetch</span>
+<a name="l-894"></a>    <span class="k">assign</span> <span class="n">instr_kill</span> <span class="o">=</span> <span class="n">instr_fetch_err_i</span> <span class="o">|</span>
+<a name="l-895"></a>                        <span class="n">wb_exception</span>      <span class="o">|</span>
+<a name="l-896"></a>                        <span class="o">~</span><span class="n">controller_run</span><span class="p">;</span>
+<a name="l-897"></a>
+<a name="l-898"></a>    <span class="c1">// With writeback stage instructions must be prevented from executing if there is:</span>
+<a name="l-899"></a>    <span class="c1">// - A load hazard</span>
+<a name="l-900"></a>    <span class="c1">// - A pending memory access</span>
+<a name="l-901"></a>    <span class="c1">//   If it receives an error response this results in a precise exception from WB so ID/EX</span>
+<a name="l-902"></a>    <span class="c1">//   instruction must not execute until error response is known).</span>
+<a name="l-903"></a>    <span class="c1">// - A load/store error</span>
+<a name="l-904"></a>    <span class="c1">//   This will cause a precise exception for the instruction in WB so ID/EX instruction must not</span>
+<a name="l-905"></a>    <span class="c1">//   execute</span>
+<a name="l-906"></a>    <span class="c1">//</span>
+<a name="l-907"></a>    <span class="c1">// instr_executing_spec is a speculative signal. It indicates an instruction can execute</span>
+<a name="l-908"></a>    <span class="c1">// assuming there are no exceptions from writeback and any outstanding memory access won&#39;t</span>
+<a name="l-909"></a>    <span class="c1">// receive an error. It is required so branch and jump requests don&#39;t factor in an incoming dmem</span>
+<a name="l-910"></a>    <span class="c1">// error (that in turn would factor directly into imem requests leading to a feedthrough path).</span>
+<a name="l-911"></a>    <span class="c1">//</span>
+<a name="l-912"></a>    <span class="c1">// instr_executing is the full signal, it will only allow execution once any potential</span>
+<a name="l-913"></a>    <span class="c1">// exceptions from writeback have been resolved.</span>
+<a name="l-914"></a>    <span class="k">assign</span> <span class="n">instr_executing_spec</span> <span class="o">=</span> <span class="n">instr_valid_i</span>      <span class="o">&amp;</span>
+<a name="l-915"></a>                                  <span class="o">~</span><span class="n">instr_fetch_err_i</span> <span class="o">&amp;</span>
+<a name="l-916"></a>                                  <span class="n">controller_run</span>     <span class="o">&amp;</span>
+<a name="l-917"></a>                                  <span class="o">~</span><span class="n">stall_ld_hz</span><span class="p">;</span>
+<a name="l-918"></a>
+<a name="l-919"></a>    <span class="k">assign</span> <span class="n">instr_executing</span> <span class="o">=</span> <span class="n">instr_valid_i</span>              <span class="o">&amp;</span>
+<a name="l-920"></a>                             <span class="o">~</span><span class="n">instr_kill</span>                <span class="o">&amp;</span>
+<a name="l-921"></a>                             <span class="o">~</span><span class="n">stall_ld_hz</span>               <span class="o">&amp;</span>
+<a name="l-922"></a>                             <span class="o">~</span><span class="n">outstanding_memory_access</span><span class="p">;</span>
+<a name="l-923"></a>
+<a name="l-924"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexExecutingSpecIfExecuting</span><span class="p">,</span> <span class="n">instr_executing</span> <span class="o">|-&gt;</span> <span class="n">instr_executing_spec</span><span class="p">)</span>
+<a name="l-925"></a>
+<a name="l-926"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexStallIfValidInstrNotExecuting</span><span class="p">,</span>
+<a name="l-927"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_kill</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_executing</span> <span class="o">|-&gt;</span> <span class="n">stall_id</span><span class="p">)</span>
+<a name="l-928"></a>
+<a name="l-929"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexCannotRetireWithPendingExceptions</span><span class="p">,</span>
+<a name="l-930"></a>      <span class="n">instr_done</span> <span class="o">|-&gt;</span> <span class="o">~</span><span class="p">(</span><span class="n">wb_exception</span> <span class="o">|</span> <span class="n">outstanding_memory_access</span><span class="p">))</span>
+<a name="l-931"></a>
+<a name="l-932"></a>    <span class="c1">// Stall for reasons related to memory:</span>
+<a name="l-933"></a>    <span class="c1">// * There is an outstanding memory access that won&#39;t resolve this cycle (need to wait to allow</span>
+<a name="l-934"></a>    <span class="c1">//   precise exceptions)</span>
+<a name="l-935"></a>    <span class="c1">// * There is a load/store request not being granted or which is unaligned and waiting to issue</span>
+<a name="l-936"></a>    <span class="c1">//   a second request (needs to stay in ID for the address calculation)</span>
+<a name="l-937"></a>    <span class="k">assign</span> <span class="n">stall_mem</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span>
+<a name="l-938"></a>                       <span class="p">(</span><span class="n">outstanding_memory_access</span> <span class="o">|</span> <span class="p">(</span><span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lsu_req_done_i</span><span class="p">));</span>
+<a name="l-939"></a>
+<a name="l-940"></a>    <span class="c1">// If we stall a load in ID for any reason, it must not make an LSU request</span>
+<a name="l-941"></a>    <span class="c1">// (otherwide we might issue two requests for the same instruction)</span>
+<a name="l-942"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexStallMemNoRequest</span><span class="p">,</span>
+<a name="l-943"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_done</span> <span class="o">|-&gt;</span> <span class="o">~</span><span class="n">lsu_req_done_i</span><span class="p">)</span>
+<a name="l-944"></a>
+<a name="l-945"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_wb_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">rf_waddr_wb_i</span> <span class="o">==</span> <span class="n">rf_raddr_a_o</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">|</span><span class="n">rf_raddr_a_o</span><span class="p">;</span>
+<a name="l-946"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_wb_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">rf_waddr_wb_i</span> <span class="o">==</span> <span class="n">rf_raddr_b_o</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">|</span><span class="n">rf_raddr_b_o</span><span class="p">;</span>
+<a name="l-947"></a>
+<a name="l-948"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_wb_match_o</span> <span class="o">=</span> <span class="n">rf_rd_a_wb_match</span><span class="p">;</span>
+<a name="l-949"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_wb_match_o</span> <span class="o">=</span> <span class="n">rf_rd_b_wb_match</span><span class="p">;</span>
+<a name="l-950"></a>
+<a name="l-951"></a>    <span class="c1">// If instruction is reading register that load will be writing stall in</span>
+<a name="l-952"></a>    <span class="c1">// ID until load is complete. No need to stall when reading zero register.</span>
+<a name="l-953"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_hz</span> <span class="o">=</span> <span class="n">rf_rd_a_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_ren_a</span><span class="p">;</span>
+<a name="l-954"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_hz</span> <span class="o">=</span> <span class="n">rf_rd_b_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_ren_b</span><span class="p">;</span>
+<a name="l-955"></a>
+<a name="l-956"></a>    <span class="c1">// If instruction is read register that writeback is writing forward writeback data to read</span>
+<a name="l-957"></a>    <span class="c1">// data. Note this doesn&#39;t factor in load data as it arrives too late, such hazards are</span>
+<a name="l-958"></a>    <span class="c1">// resolved via a stall (see above).</span>
+<a name="l-959"></a>    <span class="k">assign</span> <span class="n">rf_rdata_a_fwd</span> <span class="o">=</span> <span class="n">rf_rd_a_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_write_wb_i</span> <span class="o">?</span> <span class="n">rf_wdata_fwd_wb_i</span> <span class="o">:</span> <span class="n">rf_rdata_a_i</span><span class="p">;</span>
+<a name="l-960"></a>    <span class="k">assign</span> <span class="n">rf_rdata_b_fwd</span> <span class="o">=</span> <span class="n">rf_rd_b_wb_match</span> <span class="o">&amp;</span> <span class="n">rf_write_wb_i</span> <span class="o">?</span> <span class="n">rf_wdata_fwd_wb_i</span> <span class="o">:</span> <span class="n">rf_rdata_b_i</span><span class="p">;</span>
+<a name="l-961"></a>
+<a name="l-962"></a>    <span class="k">assign</span> <span class="n">stall_ld_hz</span> <span class="o">=</span> <span class="n">outstanding_load_wb_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rf_rd_a_hz</span> <span class="o">|</span> <span class="n">rf_rd_b_hz</span><span class="p">);</span>
 <a name="l-963"></a>
-<a name="l-964"></a>    <span class="k">assign</span> <span class="n">instr_id_done_o</span> <span class="o">=</span> <span class="n">en_wb_o</span> <span class="o">&amp;</span> <span class="n">ready_wb_i</span><span class="p">;</span>
-<a name="l-965"></a>
-<a name="l-966"></a>    <span class="c1">// Stall ID/EX as instruction in ID/EX cannot proceed to writeback yet</span>
-<a name="l-967"></a>    <span class="k">assign</span> <span class="n">stall_wb</span> <span class="o">=</span> <span class="n">en_wb_o</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ready_wb_i</span><span class="p">;</span>
-<a name="l-968"></a>
-<a name="l-969"></a>    <span class="k">assign</span> <span class="n">perf_dside_wait_o</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_kill</span> <span class="o">&amp;</span>
-<a name="l-970"></a>                               <span class="p">(</span><span class="n">outstanding_memory_access</span> <span class="o">|</span> <span class="n">stall_ld_hz</span><span class="p">);</span>
-<a name="l-971"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_no_stall_mem</span>
+<a name="l-964"></a>    <span class="k">assign</span> <span class="n">instr_type_wb_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">lsu_req_dec</span> <span class="o">?</span> <span class="n">WB_INSTR_OTHER</span> <span class="o">:</span>
+<a name="l-965"></a>                              <span class="n">lsu_we</span>      <span class="o">?</span> <span class="n">WB_INSTR_STORE</span> <span class="o">:</span>
+<a name="l-966"></a>                                            <span class="n">WB_INSTR_LOAD</span><span class="p">;</span>
+<a name="l-967"></a>
+<a name="l-968"></a>    <span class="k">assign</span> <span class="n">instr_id_done_o</span> <span class="o">=</span> <span class="n">en_wb_o</span> <span class="o">&amp;</span> <span class="n">ready_wb_i</span><span class="p">;</span>
+<a name="l-969"></a>
+<a name="l-970"></a>    <span class="c1">// Stall ID/EX as instruction in ID/EX cannot proceed to writeback yet</span>
+<a name="l-971"></a>    <span class="k">assign</span> <span class="n">stall_wb</span> <span class="o">=</span> <span class="n">en_wb_o</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ready_wb_i</span><span class="p">;</span>
 <a name="l-972"></a>
-<a name="l-973"></a>    <span class="k">assign</span> <span class="n">multicycle_done</span> <span class="o">=</span> <span class="n">lsu_req_dec</span> <span class="o">?</span> <span class="n">lsu_resp_valid_i</span> <span class="o">:</span> <span class="n">ex_valid_i</span><span class="p">;</span>
-<a name="l-974"></a>
-<a name="l-975"></a>    <span class="k">assign</span> <span class="n">data_req_allowed</span> <span class="o">=</span> <span class="n">instr_first_cycle</span><span class="p">;</span>
+<a name="l-973"></a>    <span class="k">assign</span> <span class="n">perf_dside_wait_o</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_kill</span> <span class="o">&amp;</span>
+<a name="l-974"></a>                               <span class="p">(</span><span class="n">outstanding_memory_access</span> <span class="o">|</span> <span class="n">stall_ld_hz</span><span class="p">);</span>
+<a name="l-975"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_no_stall_mem</span>
 <a name="l-976"></a>
-<a name="l-977"></a>    <span class="c1">// Without Writeback Stage always stall the first cycle of a load/store.</span>
-<a name="l-978"></a>    <span class="c1">// Then stall until it is complete</span>
-<a name="l-979"></a>    <span class="k">assign</span> <span class="n">stall_mem</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">lsu_resp_valid_i</span> <span class="o">|</span> <span class="n">instr_first_cycle</span><span class="p">));</span>
+<a name="l-977"></a>    <span class="k">assign</span> <span class="n">multicycle_done</span> <span class="o">=</span> <span class="n">lsu_req_dec</span> <span class="o">?</span> <span class="n">lsu_resp_valid_i</span> <span class="o">:</span> <span class="n">ex_valid_i</span><span class="p">;</span>
+<a name="l-978"></a>
+<a name="l-979"></a>    <span class="k">assign</span> <span class="n">data_req_allowed</span> <span class="o">=</span> <span class="n">instr_first_cycle</span><span class="p">;</span>
 <a name="l-980"></a>
-<a name="l-981"></a>    <span class="c1">// No load hazards without Writeback Stage</span>
-<a name="l-982"></a>    <span class="k">assign</span> <span class="n">stall_ld_hz</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-983"></a>
-<a name="l-984"></a>    <span class="c1">// Without writeback stage any valid instruction that hasn&#39;t seen an error will execute</span>
-<a name="l-985"></a>    <span class="k">assign</span> <span class="n">instr_executing_spec</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_fetch_err_i</span> <span class="o">&amp;</span> <span class="n">controller_run</span><span class="p">;</span>
-<a name="l-986"></a>    <span class="k">assign</span> <span class="n">instr_executing</span> <span class="o">=</span> <span class="n">instr_executing_spec</span><span class="p">;</span>
+<a name="l-981"></a>    <span class="c1">// Without Writeback Stage always stall the first cycle of a load/store.</span>
+<a name="l-982"></a>    <span class="c1">// Then stall until it is complete</span>
+<a name="l-983"></a>    <span class="k">assign</span> <span class="n">stall_mem</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">lsu_resp_valid_i</span> <span class="o">|</span> <span class="n">instr_first_cycle</span><span class="p">));</span>
+<a name="l-984"></a>
+<a name="l-985"></a>    <span class="c1">// No load hazards without Writeback Stage</span>
+<a name="l-986"></a>    <span class="k">assign</span> <span class="n">stall_ld_hz</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
 <a name="l-987"></a>
-<a name="l-988"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexStallIfValidInstrNotExecuting</span><span class="p">,</span>
-<a name="l-989"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_fetch_err_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="n">controller_run</span> <span class="o">|-&gt;</span> <span class="n">stall_id</span><span class="p">)</span>
-<a name="l-990"></a>
-<a name="l-991"></a>    <span class="c1">// No data forwarding without writeback stage so always take source register data direct from</span>
-<a name="l-992"></a>    <span class="c1">// register file</span>
-<a name="l-993"></a>    <span class="k">assign</span> <span class="n">rf_rdata_a_fwd</span> <span class="o">=</span> <span class="n">rf_rdata_a_i</span><span class="p">;</span>
-<a name="l-994"></a>    <span class="k">assign</span> <span class="n">rf_rdata_b_fwd</span> <span class="o">=</span> <span class="n">rf_rdata_b_i</span><span class="p">;</span>
-<a name="l-995"></a>
-<a name="l-996"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_wb_match_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-997"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_wb_match_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-998"></a>
-<a name="l-999"></a>    <span class="c1">// Unused Writeback stage only IO &amp; wiring</span>
-<a name="l-1000"></a>    <span class="c1">// Assign inputs and internal wiring to unused signals to satisfy lint checks</span>
-<a name="l-1001"></a>    <span class="c1">// Tie-off outputs to constant values</span>
-<a name="l-1002"></a>    <span class="kt">logic</span> <span class="n">unused_data_req_done_ex</span><span class="p">;</span>
-<a name="l-1003"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">unused_rf_waddr_wb</span><span class="p">;</span>
-<a name="l-1004"></a>    <span class="kt">logic</span> <span class="n">unused_rf_write_wb</span><span class="p">;</span>
-<a name="l-1005"></a>    <span class="kt">logic</span> <span class="n">unused_outstanding_load_wb</span><span class="p">;</span>
-<a name="l-1006"></a>    <span class="kt">logic</span> <span class="n">unused_outstanding_store_wb</span><span class="p">;</span>
-<a name="l-1007"></a>    <span class="kt">logic</span> <span class="n">unused_wb_exception</span><span class="p">;</span>
-<a name="l-1008"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">unused_rf_wdata_fwd_wb</span><span class="p">;</span>
-<a name="l-1009"></a>
-<a name="l-1010"></a>    <span class="k">assign</span> <span class="n">unused_data_req_done_ex</span>     <span class="o">=</span> <span class="n">lsu_req_done_i</span><span class="p">;</span>
-<a name="l-1011"></a>    <span class="k">assign</span> <span class="n">unused_rf_waddr_wb</span>          <span class="o">=</span> <span class="n">rf_waddr_wb_i</span><span class="p">;</span>
-<a name="l-1012"></a>    <span class="k">assign</span> <span class="n">unused_rf_write_wb</span>          <span class="o">=</span> <span class="n">rf_write_wb_i</span><span class="p">;</span>
-<a name="l-1013"></a>    <span class="k">assign</span> <span class="n">unused_outstanding_load_wb</span>  <span class="o">=</span> <span class="n">outstanding_load_wb_i</span><span class="p">;</span>
-<a name="l-1014"></a>    <span class="k">assign</span> <span class="n">unused_outstanding_store_wb</span> <span class="o">=</span> <span class="n">outstanding_store_wb_i</span><span class="p">;</span>
-<a name="l-1015"></a>    <span class="k">assign</span> <span class="n">unused_wb_exception</span>         <span class="o">=</span> <span class="n">wb_exception</span><span class="p">;</span>
-<a name="l-1016"></a>    <span class="k">assign</span> <span class="n">unused_rf_wdata_fwd_wb</span>      <span class="o">=</span> <span class="n">rf_wdata_fwd_wb_i</span><span class="p">;</span>
-<a name="l-1017"></a>
-<a name="l-1018"></a>    <span class="k">assign</span> <span class="n">instr_type_wb_o</span> <span class="o">=</span> <span class="n">WB_INSTR_OTHER</span><span class="p">;</span>
-<a name="l-1019"></a>    <span class="k">assign</span> <span class="n">stall_wb</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-1020"></a>
-<a name="l-1021"></a>    <span class="k">assign</span> <span class="n">perf_dside_wait_o</span> <span class="o">=</span> <span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lsu_resp_valid_i</span><span class="p">;</span>
-<a name="l-1022"></a>
-<a name="l-1023"></a>    <span class="k">assign</span> <span class="n">instr_id_done_o</span> <span class="o">=</span> <span class="n">instr_done</span><span class="p">;</span>
-<a name="l-1024"></a>  <span class="k">end</span>
-<a name="l-1025"></a>
-<a name="l-1026"></a>  <span class="c1">// Signal which instructions to count as retired in minstret, all traps along with ebrk and</span>
-<a name="l-1027"></a>  <span class="c1">// ecall instructions are not counted.</span>
-<a name="l-1028"></a>  <span class="k">assign</span> <span class="n">instr_perf_count_id_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">ebrk_insn</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ecall_insn_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">illegal_insn_dec</span> <span class="o">&amp;</span>
-<a name="l-1029"></a>      <span class="o">~</span><span class="n">illegal_csr_insn_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_fetch_err_i</span><span class="p">;</span>
-<a name="l-1030"></a>
-<a name="l-1031"></a>  <span class="c1">// An instruction is ready to move to the writeback stage (or retire if there is no writeback</span>
-<a name="l-1032"></a>  <span class="c1">// stage)</span>
-<a name="l-1033"></a>  <span class="k">assign</span> <span class="n">en_wb_o</span> <span class="o">=</span> <span class="n">instr_done</span><span class="p">;</span>
+<a name="l-988"></a>    <span class="c1">// Without writeback stage any valid instruction that hasn&#39;t seen an error will execute</span>
+<a name="l-989"></a>    <span class="k">assign</span> <span class="n">instr_executing_spec</span> <span class="o">=</span> <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_fetch_err_i</span> <span class="o">&amp;</span> <span class="n">controller_run</span><span class="p">;</span>
+<a name="l-990"></a>    <span class="k">assign</span> <span class="n">instr_executing</span> <span class="o">=</span> <span class="n">instr_executing_spec</span><span class="p">;</span>
+<a name="l-991"></a>
+<a name="l-992"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexStallIfValidInstrNotExecuting</span><span class="p">,</span>
+<a name="l-993"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_fetch_err_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="n">controller_run</span> <span class="o">|-&gt;</span> <span class="n">stall_id</span><span class="p">)</span>
+<a name="l-994"></a>
+<a name="l-995"></a>    <span class="c1">// No data forwarding without writeback stage so always take source register data direct from</span>
+<a name="l-996"></a>    <span class="c1">// register file</span>
+<a name="l-997"></a>    <span class="k">assign</span> <span class="n">rf_rdata_a_fwd</span> <span class="o">=</span> <span class="n">rf_rdata_a_i</span><span class="p">;</span>
+<a name="l-998"></a>    <span class="k">assign</span> <span class="n">rf_rdata_b_fwd</span> <span class="o">=</span> <span class="n">rf_rdata_b_i</span><span class="p">;</span>
+<a name="l-999"></a>
+<a name="l-1000"></a>    <span class="k">assign</span> <span class="n">rf_rd_a_wb_match_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-1001"></a>    <span class="k">assign</span> <span class="n">rf_rd_b_wb_match_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-1002"></a>
+<a name="l-1003"></a>    <span class="c1">// Unused Writeback stage only IO &amp; wiring</span>
+<a name="l-1004"></a>    <span class="c1">// Assign inputs and internal wiring to unused signals to satisfy lint checks</span>
+<a name="l-1005"></a>    <span class="c1">// Tie-off outputs to constant values</span>
+<a name="l-1006"></a>    <span class="kt">logic</span> <span class="n">unused_data_req_done_ex</span><span class="p">;</span>
+<a name="l-1007"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">unused_rf_waddr_wb</span><span class="p">;</span>
+<a name="l-1008"></a>    <span class="kt">logic</span> <span class="n">unused_rf_write_wb</span><span class="p">;</span>
+<a name="l-1009"></a>    <span class="kt">logic</span> <span class="n">unused_outstanding_load_wb</span><span class="p">;</span>
+<a name="l-1010"></a>    <span class="kt">logic</span> <span class="n">unused_outstanding_store_wb</span><span class="p">;</span>
+<a name="l-1011"></a>    <span class="kt">logic</span> <span class="n">unused_wb_exception</span><span class="p">;</span>
+<a name="l-1012"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">unused_rf_wdata_fwd_wb</span><span class="p">;</span>
+<a name="l-1013"></a>
+<a name="l-1014"></a>    <span class="k">assign</span> <span class="n">unused_data_req_done_ex</span>     <span class="o">=</span> <span class="n">lsu_req_done_i</span><span class="p">;</span>
+<a name="l-1015"></a>    <span class="k">assign</span> <span class="n">unused_rf_waddr_wb</span>          <span class="o">=</span> <span class="n">rf_waddr_wb_i</span><span class="p">;</span>
+<a name="l-1016"></a>    <span class="k">assign</span> <span class="n">unused_rf_write_wb</span>          <span class="o">=</span> <span class="n">rf_write_wb_i</span><span class="p">;</span>
+<a name="l-1017"></a>    <span class="k">assign</span> <span class="n">unused_outstanding_load_wb</span>  <span class="o">=</span> <span class="n">outstanding_load_wb_i</span><span class="p">;</span>
+<a name="l-1018"></a>    <span class="k">assign</span> <span class="n">unused_outstanding_store_wb</span> <span class="o">=</span> <span class="n">outstanding_store_wb_i</span><span class="p">;</span>
+<a name="l-1019"></a>    <span class="k">assign</span> <span class="n">unused_wb_exception</span>         <span class="o">=</span> <span class="n">wb_exception</span><span class="p">;</span>
+<a name="l-1020"></a>    <span class="k">assign</span> <span class="n">unused_rf_wdata_fwd_wb</span>      <span class="o">=</span> <span class="n">rf_wdata_fwd_wb_i</span><span class="p">;</span>
+<a name="l-1021"></a>
+<a name="l-1022"></a>    <span class="k">assign</span> <span class="n">instr_type_wb_o</span> <span class="o">=</span> <span class="n">WB_INSTR_OTHER</span><span class="p">;</span>
+<a name="l-1023"></a>    <span class="k">assign</span> <span class="n">stall_wb</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-1024"></a>
+<a name="l-1025"></a>    <span class="k">assign</span> <span class="n">perf_dside_wait_o</span> <span class="o">=</span> <span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="n">lsu_req_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">lsu_resp_valid_i</span><span class="p">;</span>
+<a name="l-1026"></a>
+<a name="l-1027"></a>    <span class="k">assign</span> <span class="n">instr_id_done_o</span> <span class="o">=</span> <span class="n">instr_done</span><span class="p">;</span>
+<a name="l-1028"></a>  <span class="k">end</span>
+<a name="l-1029"></a>
+<a name="l-1030"></a>  <span class="c1">// Signal which instructions to count as retired in minstret, all traps along with ebrk and</span>
+<a name="l-1031"></a>  <span class="c1">// ecall instructions are not counted.</span>
+<a name="l-1032"></a>  <span class="k">assign</span> <span class="n">instr_perf_count_id_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">ebrk_insn</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ecall_insn_dec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">illegal_insn_dec</span> <span class="o">&amp;</span>
+<a name="l-1033"></a>      <span class="o">~</span><span class="n">illegal_csr_insn_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">instr_fetch_err_i</span><span class="p">;</span>
 <a name="l-1034"></a>
-<a name="l-1035"></a>  <span class="k">assign</span> <span class="n">perf_mul_wait_o</span> <span class="o">=</span> <span class="n">stall_multdiv</span> <span class="o">&amp;</span> <span class="n">mult_en_dec</span><span class="p">;</span>
-<a name="l-1036"></a>  <span class="k">assign</span> <span class="n">perf_div_wait_o</span> <span class="o">=</span> <span class="n">stall_multdiv</span> <span class="o">&amp;</span> <span class="n">div_en_dec</span><span class="p">;</span>
-<a name="l-1037"></a>
-<a name="l-1038"></a>  <span class="c1">//////////</span>
-<a name="l-1039"></a>  <span class="c1">// FCOV //</span>
-<a name="l-1040"></a>  <span class="c1">//////////</span>
+<a name="l-1035"></a>  <span class="c1">// An instruction is ready to move to the writeback stage (or retire if there is no writeback</span>
+<a name="l-1036"></a>  <span class="c1">// stage)</span>
+<a name="l-1037"></a>  <span class="k">assign</span> <span class="n">en_wb_o</span> <span class="o">=</span> <span class="n">instr_done</span><span class="p">;</span>
+<a name="l-1038"></a>
+<a name="l-1039"></a>  <span class="k">assign</span> <span class="n">perf_mul_wait_o</span> <span class="o">=</span> <span class="n">stall_multdiv</span> <span class="o">&amp;</span> <span class="n">mult_en_dec</span><span class="p">;</span>
+<a name="l-1040"></a>  <span class="k">assign</span> <span class="n">perf_div_wait_o</span> <span class="o">=</span> <span class="n">stall_multdiv</span> <span class="o">&amp;</span> <span class="n">div_en_dec</span><span class="p">;</span>
 <a name="l-1041"></a>
-<a name="l-1042"></a>  <span class="no">`DV_FCOV_SIGNAL_GEN_IF</span><span class="p">(</span><span class="kt">logic</span><span class="p">,</span> <span class="n">rf_rd_wb_hz</span><span class="p">,</span>
-<a name="l-1043"></a>    <span class="p">(</span><span class="n">gen_stall_mem</span><span class="p">.</span><span class="n">rf_rd_a_hz</span> <span class="o">|</span> <span class="n">gen_stall_mem</span><span class="p">.</span><span class="n">rf_rd_b_hz</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">instr_valid_i</span><span class="p">,</span> <span class="n">WritebackStage</span><span class="p">)</span>
-<a name="l-1044"></a>  <span class="no">`DV_FCOV_SIGNAL</span><span class="p">(</span><span class="kt">logic</span><span class="p">,</span> <span class="n">branch_taken</span><span class="p">,</span>
-<a name="l-1045"></a>    <span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">branch_decision_i</span><span class="p">)</span>
-<a name="l-1046"></a>  <span class="no">`DV_FCOV_SIGNAL</span><span class="p">(</span><span class="kt">logic</span><span class="p">,</span> <span class="n">branch_not_taken</span><span class="p">,</span>
-<a name="l-1047"></a>    <span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_decision_i</span><span class="p">)</span>
-<a name="l-1048"></a>
-<a name="l-1049"></a>  <span class="c1">////////////////</span>
-<a name="l-1050"></a>  <span class="c1">// Assertions //</span>
-<a name="l-1051"></a>  <span class="c1">////////////////</span>
+<a name="l-1042"></a>  <span class="c1">//////////</span>
+<a name="l-1043"></a>  <span class="c1">// FCOV //</span>
+<a name="l-1044"></a>  <span class="c1">//////////</span>
+<a name="l-1045"></a>
+<a name="l-1046"></a>  <span class="no">`DV_FCOV_SIGNAL_GEN_IF</span><span class="p">(</span><span class="kt">logic</span><span class="p">,</span> <span class="n">rf_rd_wb_hz</span><span class="p">,</span>
+<a name="l-1047"></a>    <span class="p">(</span><span class="n">gen_stall_mem</span><span class="p">.</span><span class="n">rf_rd_a_hz</span> <span class="o">|</span> <span class="n">gen_stall_mem</span><span class="p">.</span><span class="n">rf_rd_b_hz</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">instr_valid_i</span><span class="p">,</span> <span class="n">WritebackStage</span><span class="p">)</span>
+<a name="l-1048"></a>  <span class="no">`DV_FCOV_SIGNAL</span><span class="p">(</span><span class="kt">logic</span><span class="p">,</span> <span class="n">branch_taken</span><span class="p">,</span>
+<a name="l-1049"></a>    <span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">branch_decision_i</span><span class="p">)</span>
+<a name="l-1050"></a>  <span class="no">`DV_FCOV_SIGNAL</span><span class="p">(</span><span class="kt">logic</span><span class="p">,</span> <span class="n">branch_not_taken</span><span class="p">,</span>
+<a name="l-1051"></a>    <span class="n">instr_executing</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">id_fsm_q</span> <span class="o">==</span> <span class="n">FIRST_CYCLE</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">branch_decision_i</span><span class="p">)</span>
 <a name="l-1052"></a>
-<a name="l-1053"></a>  <span class="c1">// Selectors must be known/valid.</span>
-<a name="l-1054"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexAluOpMuxSelKnown</span><span class="p">,</span> <span class="n">alu_op_a_mux_sel</span><span class="p">,</span> <span class="n">instr_valid_i</span><span class="p">)</span>
-<a name="l-1055"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexAluAOpMuxSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">alu_op_a_mux_sel</span> <span class="ow">inside</span> <span class="p">{</span>
-<a name="l-1056"></a>      <span class="n">OP_A_REG_A</span><span class="p">,</span>
-<a name="l-1057"></a>      <span class="n">OP_A_FWD</span><span class="p">,</span>
-<a name="l-1058"></a>      <span class="n">OP_A_CURRPC</span><span class="p">,</span>
-<a name="l-1059"></a>      <span class="n">OP_A_IMM</span><span class="p">})</span>
-<a name="l-1060"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexBTAluAOpMuxSelKnown</span><span class="p">,</span> <span class="n">bt_a_mux_sel</span><span class="p">,</span> <span class="n">instr_valid_i</span><span class="p">)</span>
-<a name="l-1061"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexBTAluAOpMuxSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">bt_a_mux_sel</span> <span class="ow">inside</span> <span class="p">{</span>
-<a name="l-1062"></a>      <span class="n">OP_A_REG_A</span><span class="p">,</span>
-<a name="l-1063"></a>      <span class="n">OP_A_CURRPC</span><span class="p">})</span>
-<a name="l-1064"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexBTAluBOpMuxSelKnown</span><span class="p">,</span> <span class="n">bt_b_mux_sel</span><span class="p">,</span> <span class="n">instr_valid_i</span><span class="p">)</span>
-<a name="l-1065"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexBTAluBOpMuxSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">bt_b_mux_sel</span> <span class="ow">inside</span> <span class="p">{</span>
-<a name="l-1066"></a>      <span class="n">IMM_B_I</span><span class="p">,</span>
-<a name="l-1067"></a>      <span class="n">IMM_B_B</span><span class="p">,</span>
-<a name="l-1068"></a>      <span class="n">IMM_B_J</span><span class="p">,</span>
-<a name="l-1069"></a>      <span class="n">IMM_B_INCR_PC</span><span class="p">})</span>
-<a name="l-1070"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexRegfileWdataSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">rf_wdata_sel</span> <span class="ow">inside</span> <span class="p">{</span>
-<a name="l-1071"></a>      <span class="n">RF_WD_EX</span><span class="p">,</span>
-<a name="l-1072"></a>      <span class="n">RF_WD_CSR</span><span class="p">})</span>
-<a name="l-1073"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IbexWbStateKnown</span><span class="p">,</span> <span class="n">id_fsm_q</span><span class="p">)</span>
-<a name="l-1074"></a>
-<a name="l-1075"></a>  <span class="c1">// Branch decision must be valid when jumping.</span>
-<a name="l-1076"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexBranchDecisionValid</span><span class="p">,</span> <span class="n">branch_decision_i</span><span class="p">,</span>
-<a name="l-1077"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">illegal_csr_insn_i</span> <span class="o">||</span> <span class="n">instr_fetch_err_i</span><span class="p">))</span>
+<a name="l-1053"></a>  <span class="c1">////////////////</span>
+<a name="l-1054"></a>  <span class="c1">// Assertions //</span>
+<a name="l-1055"></a>  <span class="c1">////////////////</span>
+<a name="l-1056"></a>
+<a name="l-1057"></a>  <span class="c1">// Selectors must be known/valid.</span>
+<a name="l-1058"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexAluOpMuxSelKnown</span><span class="p">,</span> <span class="n">alu_op_a_mux_sel</span><span class="p">,</span> <span class="n">instr_valid_i</span><span class="p">)</span>
+<a name="l-1059"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexAluAOpMuxSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">alu_op_a_mux_sel</span> <span class="ow">inside</span> <span class="p">{</span>
+<a name="l-1060"></a>      <span class="n">OP_A_REG_A</span><span class="p">,</span>
+<a name="l-1061"></a>      <span class="n">OP_A_FWD</span><span class="p">,</span>
+<a name="l-1062"></a>      <span class="n">OP_A_CURRPC</span><span class="p">,</span>
+<a name="l-1063"></a>      <span class="n">OP_A_IMM</span><span class="p">})</span>
+<a name="l-1064"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexBTAluAOpMuxSelKnown</span><span class="p">,</span> <span class="n">bt_a_mux_sel</span><span class="p">,</span> <span class="n">instr_valid_i</span><span class="p">)</span>
+<a name="l-1065"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexBTAluAOpMuxSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">bt_a_mux_sel</span> <span class="ow">inside</span> <span class="p">{</span>
+<a name="l-1066"></a>      <span class="n">OP_A_REG_A</span><span class="p">,</span>
+<a name="l-1067"></a>      <span class="n">OP_A_CURRPC</span><span class="p">})</span>
+<a name="l-1068"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexBTAluBOpMuxSelKnown</span><span class="p">,</span> <span class="n">bt_b_mux_sel</span><span class="p">,</span> <span class="n">instr_valid_i</span><span class="p">)</span>
+<a name="l-1069"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexBTAluBOpMuxSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">bt_b_mux_sel</span> <span class="ow">inside</span> <span class="p">{</span>
+<a name="l-1070"></a>      <span class="n">IMM_B_I</span><span class="p">,</span>
+<a name="l-1071"></a>      <span class="n">IMM_B_B</span><span class="p">,</span>
+<a name="l-1072"></a>      <span class="n">IMM_B_J</span><span class="p">,</span>
+<a name="l-1073"></a>      <span class="n">IMM_B_INCR_PC</span><span class="p">})</span>
+<a name="l-1074"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexRegfileWdataSelValid</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">rf_wdata_sel</span> <span class="ow">inside</span> <span class="p">{</span>
+<a name="l-1075"></a>      <span class="n">RF_WD_EX</span><span class="p">,</span>
+<a name="l-1076"></a>      <span class="n">RF_WD_CSR</span><span class="p">})</span>
+<a name="l-1077"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IbexWbStateKnown</span><span class="p">,</span> <span class="n">id_fsm_q</span><span class="p">)</span>
 <a name="l-1078"></a>
-<a name="l-1079"></a>  <span class="c1">// Instruction delivered to ID stage can not contain X.</span>
-<a name="l-1080"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexIdInstrKnown</span><span class="p">,</span> <span class="n">instr_rdata_i</span><span class="p">,</span>
-<a name="l-1081"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">illegal_c_insn_i</span> <span class="o">||</span> <span class="n">instr_fetch_err_i</span><span class="p">))</span>
+<a name="l-1079"></a>  <span class="c1">// Branch decision must be valid when jumping.</span>
+<a name="l-1080"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexBranchDecisionValid</span><span class="p">,</span> <span class="n">branch_decision_i</span><span class="p">,</span>
+<a name="l-1081"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">illegal_csr_insn_i</span> <span class="o">||</span> <span class="n">instr_fetch_err_i</span><span class="p">))</span>
 <a name="l-1082"></a>
 <a name="l-1083"></a>  <span class="c1">// Instruction delivered to ID stage can not contain X.</span>
-<a name="l-1084"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexIdInstrALUKnown</span><span class="p">,</span> <span class="n">instr_rdata_alu_i</span><span class="p">,</span>
+<a name="l-1084"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexIdInstrKnown</span><span class="p">,</span> <span class="n">instr_rdata_i</span><span class="p">,</span>
 <a name="l-1085"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">illegal_c_insn_i</span> <span class="o">||</span> <span class="n">instr_fetch_err_i</span><span class="p">))</span>
 <a name="l-1086"></a>
-<a name="l-1087"></a>  <span class="c1">// Multicycle enable signals must be unique.</span>
-<a name="l-1088"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexMulticycleEnableUnique</span><span class="p">,</span>
-<a name="l-1089"></a>      <span class="p">$</span><span class="n">onehot0</span><span class="p">({</span><span class="n">lsu_req_dec</span><span class="p">,</span> <span class="n">multdiv_en_dec</span><span class="p">,</span> <span class="n">branch_in_dec</span><span class="p">,</span> <span class="n">jump_in_dec</span><span class="p">}))</span>
+<a name="l-1087"></a>  <span class="c1">// Instruction delivered to ID stage can not contain X.</span>
+<a name="l-1088"></a>  <span class="no">`ASSERT_KNOWN_IF</span><span class="p">(</span><span class="n">IbexIdInstrALUKnown</span><span class="p">,</span> <span class="n">instr_rdata_alu_i</span><span class="p">,</span>
+<a name="l-1089"></a>      <span class="n">instr_valid_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="n">illegal_c_insn_i</span> <span class="o">||</span> <span class="n">instr_fetch_err_i</span><span class="p">))</span>
 <a name="l-1090"></a>
-<a name="l-1091"></a>  <span class="c1">// Duplicated instruction flops must match</span>
-<a name="l-1092"></a>  <span class="c1">// === as DV environment can produce instructions with Xs in, so must use precise match that</span>
-<a name="l-1093"></a>  <span class="c1">// includes Xs</span>
-<a name="l-1094"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexDuplicateInstrMatch</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">instr_rdata_i</span> <span class="o">===</span> <span class="n">instr_rdata_alu_i</span><span class="p">)</span>
-<a name="l-1095"></a>
-<a name="l-1096"></a>  <span class="no">`ifdef</span> <span class="n">CHECK_MISALIGNED</span>
-<a name="l-1097"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexMisalignedMemoryAccess</span><span class="p">,</span> <span class="o">!</span><span class="n">lsu_addr_incr_req_i</span><span class="p">)</span>
-<a name="l-1098"></a>  <span class="no">`endif</span>
+<a name="l-1091"></a>  <span class="c1">// Multicycle enable signals must be unique.</span>
+<a name="l-1092"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexMulticycleEnableUnique</span><span class="p">,</span>
+<a name="l-1093"></a>      <span class="p">$</span><span class="n">onehot0</span><span class="p">({</span><span class="n">lsu_req_dec</span><span class="p">,</span> <span class="n">multdiv_en_dec</span><span class="p">,</span> <span class="n">branch_in_dec</span><span class="p">,</span> <span class="n">jump_in_dec</span><span class="p">}))</span>
+<a name="l-1094"></a>
+<a name="l-1095"></a>  <span class="c1">// Duplicated instruction flops must match</span>
+<a name="l-1096"></a>  <span class="c1">// === as DV environment can produce instructions with Xs in, so must use precise match that</span>
+<a name="l-1097"></a>  <span class="c1">// includes Xs</span>
+<a name="l-1098"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexDuplicateInstrMatch</span><span class="p">,</span> <span class="n">instr_valid_i</span> <span class="o">|-&gt;</span> <span class="n">instr_rdata_i</span> <span class="o">===</span> <span class="n">instr_rdata_alu_i</span><span class="p">)</span>
 <a name="l-1099"></a>
-<a name="l-1100"></a><span class="k">endmodule</span>
+<a name="l-1100"></a>  <span class="no">`ifdef</span> <span class="n">CHECK_MISALIGNED</span>
+<a name="l-1101"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">IbexMisalignedMemoryAccess</span><span class="p">,</span> <span class="o">!</span><span class="n">lsu_addr_incr_req_i</span><span class="p">)</span>
+<a name="l-1102"></a>  <span class="no">`endif</span>
+<a name="l-1103"></a>
+<a name="l-1104"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

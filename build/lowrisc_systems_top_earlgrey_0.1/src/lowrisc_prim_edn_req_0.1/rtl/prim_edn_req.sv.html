@@ -99,7 +99,12 @@
 <span class="normal"><a href="#l-91">91</a></span>
 <span class="normal"><a href="#l-92">92</a></span>
 <span class="normal"><a href="#l-93">93</a></span>
-<span class="normal"><a href="#l-94">94</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-94">94</a></span>
+<span class="normal"><a href="#l-95">95</a></span>
+<span class="normal"><a href="#l-96">96</a></span>
+<span class="normal"><a href="#l-97">97</a></span>
+<span class="normal"><a href="#l-98">98</a></span>
+<span class="normal"><a href="#l-99">99</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -117,82 +122,87 @@
 <a name="l-16"></a><span class="k">module</span> <span class="n">prim_edn_req</span>
 <a name="l-17"></a>  <span class="kn">import</span> <span class="nn">prim_alert_pkg::*</span><span class="p">;</span>
 <a name="l-18"></a><span class="p">#(</span>
-<a name="l-19"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">OutWidth</span> <span class="o">=</span> <span class="mi">32</span>
-<a name="l-20"></a><span class="p">)</span> <span class="p">(</span>
-<a name="l-21"></a>  <span class="c1">// Design side</span>
-<a name="l-22"></a>  <span class="k">input</span>                       <span class="n">clk_i</span><span class="p">,</span>
-<a name="l-23"></a>  <span class="k">input</span>                       <span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-24"></a>  <span class="k">input</span>                       <span class="n">req_i</span><span class="p">,</span>
-<a name="l-25"></a>  <span class="k">output</span> <span class="kt">logic</span>                <span class="n">ack_o</span><span class="p">,</span>
-<a name="l-26"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">OutWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span><span class="p">,</span>
-<a name="l-27"></a>  <span class="k">output</span> <span class="kt">logic</span>                <span class="n">fips_o</span><span class="p">,</span>
-<a name="l-28"></a>  <span class="c1">// EDN side</span>
-<a name="l-29"></a>  <span class="k">input</span>                       <span class="n">clk_edn_i</span><span class="p">,</span>
-<a name="l-30"></a>  <span class="k">input</span>                       <span class="n">rst_edn_ni</span><span class="p">,</span>
-<a name="l-31"></a>  <span class="k">output</span> <span class="n">edn_pkg</span><span class="o">::</span><span class="n">edn_req_t</span>   <span class="n">edn_o</span><span class="p">,</span>
-<a name="l-32"></a>  <span class="k">input</span>  <span class="n">edn_pkg</span><span class="o">::</span><span class="n">edn_rsp_t</span>   <span class="n">edn_i</span>
-<a name="l-33"></a><span class="p">);</span>
-<a name="l-34"></a>
-<a name="l-35"></a>  <span class="c1">// Stop requesting words from EDN once desired amount of data is available.</span>
-<a name="l-36"></a>  <span class="kt">logic</span> <span class="n">word_req</span><span class="p">,</span> <span class="n">word_ack</span><span class="p">;</span>
-<a name="l-37"></a>  <span class="k">assign</span> <span class="n">word_req</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ack_o</span><span class="p">;</span>
+<a name="l-19"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">OutWidth</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+<a name="l-20"></a>
+<a name="l-21"></a>  <span class="c1">// Non-functional parameter to switch on the request stability assertion.</span>
+<a name="l-22"></a>  <span class="c1">// Used in submodule `prim_sync_reqack`.</span>
+<a name="l-23"></a>  <span class="k">parameter</span> <span class="kt">bit</span> <span class="n">EnReqStabA</span> <span class="o">=</span> <span class="mi">1</span>
+<a name="l-24"></a><span class="p">)</span> <span class="p">(</span>
+<a name="l-25"></a>  <span class="c1">// Design side</span>
+<a name="l-26"></a>  <span class="k">input</span>                       <span class="n">clk_i</span><span class="p">,</span>
+<a name="l-27"></a>  <span class="k">input</span>                       <span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-28"></a>  <span class="k">input</span>                       <span class="n">req_i</span><span class="p">,</span>
+<a name="l-29"></a>  <span class="k">output</span> <span class="kt">logic</span>                <span class="n">ack_o</span><span class="p">,</span>
+<a name="l-30"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">OutWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data_o</span><span class="p">,</span>
+<a name="l-31"></a>  <span class="k">output</span> <span class="kt">logic</span>                <span class="n">fips_o</span><span class="p">,</span>
+<a name="l-32"></a>  <span class="c1">// EDN side</span>
+<a name="l-33"></a>  <span class="k">input</span>                       <span class="n">clk_edn_i</span><span class="p">,</span>
+<a name="l-34"></a>  <span class="k">input</span>                       <span class="n">rst_edn_ni</span><span class="p">,</span>
+<a name="l-35"></a>  <span class="k">output</span> <span class="n">edn_pkg</span><span class="o">::</span><span class="n">edn_req_t</span>   <span class="n">edn_o</span><span class="p">,</span>
+<a name="l-36"></a>  <span class="k">input</span>  <span class="n">edn_pkg</span><span class="o">::</span><span class="n">edn_rsp_t</span>   <span class="n">edn_i</span>
+<a name="l-37"></a><span class="p">);</span>
 <a name="l-38"></a>
-<a name="l-39"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">edn_pkg</span><span class="o">::</span><span class="n">ENDPOINT_BUS_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">word_data</span><span class="p">;</span>
-<a name="l-40"></a>  <span class="kt">logic</span> <span class="n">word_fips</span><span class="p">;</span>
-<a name="l-41"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">SyncWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">bits</span><span class="p">({</span><span class="n">edn_i</span><span class="p">.</span><span class="n">edn_fips</span><span class="p">,</span> <span class="n">edn_i</span><span class="p">.</span><span class="n">edn_bus</span><span class="p">});</span>
-<a name="l-42"></a>  <span class="n">prim_sync_reqack_data</span> <span class="p">#(</span>
-<a name="l-43"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">SyncWidth</span><span class="p">),</span>
-<a name="l-44"></a>    <span class="p">.</span><span class="n">DataSrc2Dst</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span>
-<a name="l-45"></a>    <span class="p">.</span><span class="n">DataReg</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">)</span>
-<a name="l-46"></a>  <span class="p">)</span> <span class="n">u_prim_sync_reqack_data</span> <span class="p">(</span>
-<a name="l-47"></a>    <span class="p">.</span><span class="n">clk_src_i</span>  <span class="p">(</span> <span class="n">clk_i</span>                           <span class="p">),</span>
-<a name="l-48"></a>    <span class="p">.</span><span class="n">rst_src_ni</span> <span class="p">(</span> <span class="n">rst_ni</span>                          <span class="p">),</span>
-<a name="l-49"></a>    <span class="p">.</span><span class="n">clk_dst_i</span>  <span class="p">(</span> <span class="n">clk_edn_i</span>                       <span class="p">),</span>
-<a name="l-50"></a>    <span class="p">.</span><span class="n">rst_dst_ni</span> <span class="p">(</span> <span class="n">rst_edn_ni</span>                      <span class="p">),</span>
-<a name="l-51"></a>    <span class="p">.</span><span class="n">src_req_i</span>  <span class="p">(</span> <span class="n">word_req</span>                        <span class="p">),</span>
-<a name="l-52"></a>    <span class="p">.</span><span class="n">src_ack_o</span>  <span class="p">(</span> <span class="n">word_ack</span>                        <span class="p">),</span>
-<a name="l-53"></a>    <span class="p">.</span><span class="n">dst_req_o</span>  <span class="p">(</span> <span class="n">edn_o</span><span class="p">.</span><span class="n">edn_req</span>                   <span class="p">),</span>
-<a name="l-54"></a>    <span class="p">.</span><span class="n">dst_ack_i</span>  <span class="p">(</span> <span class="n">edn_i</span><span class="p">.</span><span class="n">edn_ack</span>                   <span class="p">),</span>
-<a name="l-55"></a>    <span class="p">.</span><span class="n">data_i</span>     <span class="p">(</span> <span class="p">{</span><span class="n">edn_i</span><span class="p">.</span><span class="n">edn_fips</span><span class="p">,</span> <span class="n">edn_i</span><span class="p">.</span><span class="n">edn_bus</span><span class="p">}</span> <span class="p">),</span>
-<a name="l-56"></a>    <span class="p">.</span><span class="n">data_o</span>     <span class="p">(</span> <span class="p">{</span><span class="n">word_fips</span><span class="p">,</span>      <span class="n">word_data</span><span class="p">}</span>     <span class="p">)</span>
-<a name="l-57"></a>  <span class="p">);</span>
-<a name="l-58"></a>
-<a name="l-59"></a>  <span class="n">prim_packer_fifo</span> <span class="p">#(</span>
-<a name="l-60"></a>    <span class="p">.</span><span class="n">InW</span><span class="p">(</span><span class="n">edn_pkg</span><span class="o">::</span><span class="n">ENDPOINT_BUS_WIDTH</span><span class="p">),</span>
-<a name="l-61"></a>    <span class="p">.</span><span class="n">OutW</span><span class="p">(</span><span class="n">OutWidth</span><span class="p">)</span>
-<a name="l-62"></a>  <span class="p">)</span> <span class="n">u_prim_packer_fifo</span> <span class="p">(</span>
-<a name="l-63"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-64"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-65"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span> <span class="mb">1&#39;b0</span>          <span class="p">),</span> <span class="c1">// not needed</span>
-<a name="l-66"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span> <span class="n">word_ack</span>      <span class="p">),</span>
-<a name="l-67"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span> <span class="n">word_data</span>     <span class="p">),</span>
-<a name="l-68"></a>    <span class="c1">// no need for backpressure since we&#39;re always ready to</span>
-<a name="l-69"></a>    <span class="c1">// sink data at this point.</span>
-<a name="l-70"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span>               <span class="p">),</span>
-<a name="l-71"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span> <span class="n">ack_o</span>         <span class="p">),</span>
-<a name="l-72"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span> <span class="n">data_o</span>        <span class="p">),</span>
-<a name="l-73"></a>    <span class="c1">// we&#39;re always ready to receive the packed output word</span>
-<a name="l-74"></a>    <span class="c1">// at this point.</span>
-<a name="l-75"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span> <span class="mb">1&#39;b1</span>          <span class="p">),</span>
-<a name="l-76"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">(</span>               <span class="p">)</span>
-<a name="l-77"></a>  <span class="p">);</span>
-<a name="l-78"></a>
-<a name="l-79"></a>  <span class="c1">// Need to track if any of the packed words has been generated with a pre-FIPS seed, i.e., has</span>
-<a name="l-80"></a>  <span class="c1">// fips == 1&#39;b0.</span>
-<a name="l-81"></a>  <span class="kt">logic</span> <span class="n">fips_d</span><span class="p">,</span> <span class="n">fips_q</span><span class="p">;</span>
-<a name="l-82"></a>  <span class="k">assign</span> <span class="n">fips_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">req_i</span> <span class="o">&amp;&amp;</span> <span class="n">ack_o</span><span class="p">)</span> <span class="o">?</span> <span class="mb">1&#39;b1</span>               <span class="o">:</span> <span class="c1">// clear</span>
-<a name="l-83"></a>                  <span class="p">(</span><span class="n">word_ack</span><span class="p">)</span>       <span class="o">?</span> <span class="n">fips_q</span> <span class="o">&amp;</span> <span class="n">word_fips</span> <span class="o">:</span> <span class="c1">// accumulate</span>
-<a name="l-84"></a>                                     <span class="n">fips_q</span><span class="p">;</span>              <span class="c1">// keep</span>
-<a name="l-85"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-86"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-87"></a>      <span class="n">fips_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-88"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-89"></a>      <span class="n">fips_q</span> <span class="o">&lt;=</span> <span class="n">fips_d</span><span class="p">;</span>
-<a name="l-90"></a>    <span class="k">end</span>
-<a name="l-91"></a>  <span class="k">end</span>
-<a name="l-92"></a>  <span class="k">assign</span> <span class="n">fips_o</span> <span class="o">=</span> <span class="n">fips_q</span><span class="p">;</span>
-<a name="l-93"></a>
-<a name="l-94"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">prim_edn_req</span>
+<a name="l-39"></a>  <span class="c1">// Stop requesting words from EDN once desired amount of data is available.</span>
+<a name="l-40"></a>  <span class="kt">logic</span> <span class="n">word_req</span><span class="p">,</span> <span class="n">word_ack</span><span class="p">;</span>
+<a name="l-41"></a>  <span class="k">assign</span> <span class="n">word_req</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ack_o</span><span class="p">;</span>
+<a name="l-42"></a>
+<a name="l-43"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">edn_pkg</span><span class="o">::</span><span class="n">ENDPOINT_BUS_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">word_data</span><span class="p">;</span>
+<a name="l-44"></a>  <span class="kt">logic</span> <span class="n">word_fips</span><span class="p">;</span>
+<a name="l-45"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">SyncWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">bits</span><span class="p">({</span><span class="n">edn_i</span><span class="p">.</span><span class="n">edn_fips</span><span class="p">,</span> <span class="n">edn_i</span><span class="p">.</span><span class="n">edn_bus</span><span class="p">});</span>
+<a name="l-46"></a>  <span class="n">prim_sync_reqack_data</span> <span class="p">#(</span>
+<a name="l-47"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">SyncWidth</span><span class="p">),</span>
+<a name="l-48"></a>    <span class="p">.</span><span class="n">DataSrc2Dst</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span>
+<a name="l-49"></a>    <span class="p">.</span><span class="n">DataReg</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span>
+<a name="l-50"></a>    <span class="p">.</span><span class="n">EnReqStabA</span><span class="p">(</span><span class="n">EnReqStabA</span><span class="p">)</span>
+<a name="l-51"></a>  <span class="p">)</span> <span class="n">u_prim_sync_reqack_data</span> <span class="p">(</span>
+<a name="l-52"></a>    <span class="p">.</span><span class="n">clk_src_i</span>  <span class="p">(</span> <span class="n">clk_i</span>                           <span class="p">),</span>
+<a name="l-53"></a>    <span class="p">.</span><span class="n">rst_src_ni</span> <span class="p">(</span> <span class="n">rst_ni</span>                          <span class="p">),</span>
+<a name="l-54"></a>    <span class="p">.</span><span class="n">clk_dst_i</span>  <span class="p">(</span> <span class="n">clk_edn_i</span>                       <span class="p">),</span>
+<a name="l-55"></a>    <span class="p">.</span><span class="n">rst_dst_ni</span> <span class="p">(</span> <span class="n">rst_edn_ni</span>                      <span class="p">),</span>
+<a name="l-56"></a>    <span class="p">.</span><span class="n">src_req_i</span>  <span class="p">(</span> <span class="n">word_req</span>                        <span class="p">),</span>
+<a name="l-57"></a>    <span class="p">.</span><span class="n">src_ack_o</span>  <span class="p">(</span> <span class="n">word_ack</span>                        <span class="p">),</span>
+<a name="l-58"></a>    <span class="p">.</span><span class="n">dst_req_o</span>  <span class="p">(</span> <span class="n">edn_o</span><span class="p">.</span><span class="n">edn_req</span>                   <span class="p">),</span>
+<a name="l-59"></a>    <span class="p">.</span><span class="n">dst_ack_i</span>  <span class="p">(</span> <span class="n">edn_i</span><span class="p">.</span><span class="n">edn_ack</span>                   <span class="p">),</span>
+<a name="l-60"></a>    <span class="p">.</span><span class="n">data_i</span>     <span class="p">(</span> <span class="p">{</span><span class="n">edn_i</span><span class="p">.</span><span class="n">edn_fips</span><span class="p">,</span> <span class="n">edn_i</span><span class="p">.</span><span class="n">edn_bus</span><span class="p">}</span> <span class="p">),</span>
+<a name="l-61"></a>    <span class="p">.</span><span class="n">data_o</span>     <span class="p">(</span> <span class="p">{</span><span class="n">word_fips</span><span class="p">,</span>      <span class="n">word_data</span><span class="p">}</span>     <span class="p">)</span>
+<a name="l-62"></a>  <span class="p">);</span>
+<a name="l-63"></a>
+<a name="l-64"></a>  <span class="n">prim_packer_fifo</span> <span class="p">#(</span>
+<a name="l-65"></a>    <span class="p">.</span><span class="n">InW</span><span class="p">(</span><span class="n">edn_pkg</span><span class="o">::</span><span class="n">ENDPOINT_BUS_WIDTH</span><span class="p">),</span>
+<a name="l-66"></a>    <span class="p">.</span><span class="n">OutW</span><span class="p">(</span><span class="n">OutWidth</span><span class="p">)</span>
+<a name="l-67"></a>  <span class="p">)</span> <span class="n">u_prim_packer_fifo</span> <span class="p">(</span>
+<a name="l-68"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-69"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-70"></a>    <span class="p">.</span><span class="n">clr_i</span>    <span class="p">(</span> <span class="mb">1&#39;b0</span>          <span class="p">),</span> <span class="c1">// not needed</span>
+<a name="l-71"></a>    <span class="p">.</span><span class="n">wvalid_i</span> <span class="p">(</span> <span class="n">word_ack</span>      <span class="p">),</span>
+<a name="l-72"></a>    <span class="p">.</span><span class="n">wdata_i</span>  <span class="p">(</span> <span class="n">word_data</span>     <span class="p">),</span>
+<a name="l-73"></a>    <span class="c1">// no need for backpressure since we&#39;re always ready to</span>
+<a name="l-74"></a>    <span class="c1">// sink data at this point.</span>
+<a name="l-75"></a>    <span class="p">.</span><span class="n">wready_o</span> <span class="p">(</span>               <span class="p">),</span>
+<a name="l-76"></a>    <span class="p">.</span><span class="n">rvalid_o</span> <span class="p">(</span> <span class="n">ack_o</span>         <span class="p">),</span>
+<a name="l-77"></a>    <span class="p">.</span><span class="n">rdata_o</span>  <span class="p">(</span> <span class="n">data_o</span>        <span class="p">),</span>
+<a name="l-78"></a>    <span class="c1">// we&#39;re always ready to receive the packed output word</span>
+<a name="l-79"></a>    <span class="c1">// at this point.</span>
+<a name="l-80"></a>    <span class="p">.</span><span class="n">rready_i</span> <span class="p">(</span> <span class="mb">1&#39;b1</span>          <span class="p">),</span>
+<a name="l-81"></a>    <span class="p">.</span><span class="n">depth_o</span>  <span class="p">(</span>               <span class="p">)</span>
+<a name="l-82"></a>  <span class="p">);</span>
+<a name="l-83"></a>
+<a name="l-84"></a>  <span class="c1">// Need to track if any of the packed words has been generated with a pre-FIPS seed, i.e., has</span>
+<a name="l-85"></a>  <span class="c1">// fips == 1&#39;b0.</span>
+<a name="l-86"></a>  <span class="kt">logic</span> <span class="n">fips_d</span><span class="p">,</span> <span class="n">fips_q</span><span class="p">;</span>
+<a name="l-87"></a>  <span class="k">assign</span> <span class="n">fips_d</span> <span class="o">=</span> <span class="p">(</span><span class="n">req_i</span> <span class="o">&amp;&amp;</span> <span class="n">ack_o</span><span class="p">)</span> <span class="o">?</span> <span class="mb">1&#39;b1</span>               <span class="o">:</span> <span class="c1">// clear</span>
+<a name="l-88"></a>                  <span class="p">(</span><span class="n">word_ack</span><span class="p">)</span>       <span class="o">?</span> <span class="n">fips_q</span> <span class="o">&amp;</span> <span class="n">word_fips</span> <span class="o">:</span> <span class="c1">// accumulate</span>
+<a name="l-89"></a>                                     <span class="n">fips_q</span><span class="p">;</span>              <span class="c1">// keep</span>
+<a name="l-90"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-91"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-92"></a>      <span class="n">fips_q</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-93"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-94"></a>      <span class="n">fips_q</span> <span class="o">&lt;=</span> <span class="n">fips_d</span><span class="p">;</span>
+<a name="l-95"></a>    <span class="k">end</span>
+<a name="l-96"></a>  <span class="k">end</span>
+<a name="l-97"></a>  <span class="k">assign</span> <span class="n">fips_o</span> <span class="o">=</span> <span class="n">fips_q</span><span class="p">;</span>
+<a name="l-98"></a>
+<a name="l-99"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">prim_edn_req</span>
 </pre></div>
 </td></tr></table>
   </body>

@@ -598,7 +598,18 @@
 <span class="normal"><a href="#l-590">590</a></span>
 <span class="normal"><a href="#l-591">591</a></span>
 <span class="normal"><a href="#l-592">592</a></span>
-<span class="normal"><a href="#l-593">593</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-593">593</a></span>
+<span class="normal"><a href="#l-594">594</a></span>
+<span class="normal"><a href="#l-595">595</a></span>
+<span class="normal"><a href="#l-596">596</a></span>
+<span class="normal"><a href="#l-597">597</a></span>
+<span class="normal"><a href="#l-598">598</a></span>
+<span class="normal"><a href="#l-599">599</a></span>
+<span class="normal"><a href="#l-600">600</a></span>
+<span class="normal"><a href="#l-601">601</a></span>
+<span class="normal"><a href="#l-602">602</a></span>
+<span class="normal"><a href="#l-603">603</a></span>
+<span class="normal"><a href="#l-604">604</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -772,425 +783,436 @@
 <a name="l-172"></a>  <span class="p">);</span>
 <a name="l-173"></a>
 <a name="l-174"></a>  <span class="n">keymgr_key_update_e</span> <span class="n">update_sel</span><span class="p">;</span>
-<a name="l-175"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-176"></a>    <span class="n">key_state_d</span> <span class="o">=</span> <span class="n">key_state_q</span><span class="p">;</span>
-<a name="l-177"></a>    <span class="n">data_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-178"></a>    <span class="n">wipe_key_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-179"></a>
-<a name="l-180"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">update_sel</span><span class="p">)</span>
-<a name="l-181"></a>      <span class="nl">KeyUpdateRandom:</span> <span class="k">begin</span>
-<a name="l-182"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Shares</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-183"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">cnt</span><span class="p">]</span> <span class="o">=</span> <span class="n">entropy_i</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
-<a name="l-184"></a>        <span class="k">end</span>
-<a name="l-185"></a>      <span class="k">end</span>
-<a name="l-186"></a>
-<a name="l-187"></a>      <span class="nl">KeyUpdateRoot:</span> <span class="k">begin</span>
-<a name="l-188"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">root_key_valid_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-189"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">root_key_i</span><span class="p">.</span><span class="n">key_share0</span><span class="p">;</span>
-<a name="l-190"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">root_key_i</span><span class="p">.</span><span class="n">key_share1</span><span class="p">;</span>
-<a name="l-191"></a>        <span class="k">end</span>
-<a name="l-192"></a>      <span class="k">end</span>
-<a name="l-193"></a>
-<a name="l-194"></a>      <span class="nl">KeyUpdateKmac:</span> <span class="k">begin</span>
-<a name="l-195"></a>        <span class="n">data_valid_o</span> <span class="o">=</span> <span class="n">data_update</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">fault_err</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">op_err</span><span class="p">;</span>
-<a name="l-196"></a>        <span class="n">key_state_d</span> <span class="o">=</span> <span class="n">key_update</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">fault_err</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">op_err</span> <span class="o">?</span> <span class="n">kmac_data_i</span> <span class="o">:</span> <span class="n">key_state_q</span><span class="p">;</span>
-<a name="l-197"></a>      <span class="k">end</span>
-<a name="l-198"></a>
-<a name="l-199"></a>      <span class="nl">KeyUpdateInvalid:</span> <span class="k">begin</span>
-<a name="l-200"></a>        <span class="n">data_valid_o</span> <span class="o">=</span> <span class="n">data_update</span><span class="p">;</span>
-<a name="l-201"></a>        <span class="n">key_state_d</span> <span class="o">=</span> <span class="n">key_update</span> <span class="o">?</span> <span class="n">kmac_data_i</span> <span class="o">:</span> <span class="n">key_state_q</span><span class="p">;</span>
-<a name="l-202"></a>      <span class="k">end</span>
-<a name="l-203"></a>
-<a name="l-204"></a>      <span class="nl">KeyUpdateWipe:</span> <span class="k">begin</span>
-<a name="l-205"></a>        <span class="n">wipe_key_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-206"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Shares</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-207"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">EntropyRounds</span><span class="p">{</span><span class="n">entropy_i</span><span class="p">[</span><span class="n">i</span><span class="p">]}};</span>
-<a name="l-208"></a>        <span class="k">end</span>
-<a name="l-209"></a>      <span class="k">end</span>
-<a name="l-210"></a>
-<a name="l-211"></a>      <span class="k">default</span><span class="o">:</span><span class="p">;</span>
-<a name="l-212"></a>    <span class="k">endcase</span> <span class="c1">// unique case (update_sel)</span>
-<a name="l-213"></a>  <span class="k">end</span>
+<a name="l-175"></a>  <span class="kt">logic</span> <span class="n">key_update_vld</span><span class="p">;</span>
+<a name="l-176"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-177"></a>    <span class="n">key_state_d</span> <span class="o">=</span> <span class="n">key_state_q</span><span class="p">;</span>
+<a name="l-178"></a>    <span class="n">data_valid_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-179"></a>    <span class="n">wipe_key_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-180"></a>    <span class="n">key_update_vld</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-181"></a>
+<a name="l-182"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">update_sel</span><span class="p">)</span>
+<a name="l-183"></a>      <span class="nl">KeyUpdateRandom:</span> <span class="k">begin</span>
+<a name="l-184"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Shares</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-185"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">cnt</span><span class="p">]</span> <span class="o">=</span> <span class="n">entropy_i</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a name="l-186"></a>        <span class="k">end</span>
+<a name="l-187"></a>      <span class="k">end</span>
+<a name="l-188"></a>
+<a name="l-189"></a>      <span class="nl">KeyUpdateRoot:</span> <span class="k">begin</span>
+<a name="l-190"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">root_key_valid_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-191"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">root_key_i</span><span class="p">.</span><span class="n">key_share0</span><span class="p">;</span>
+<a name="l-192"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">root_key_i</span><span class="p">.</span><span class="n">key_share1</span><span class="p">;</span>
+<a name="l-193"></a>        <span class="k">end</span>
+<a name="l-194"></a>      <span class="k">end</span>
+<a name="l-195"></a>
+<a name="l-196"></a>      <span class="nl">KeyUpdateKmac:</span> <span class="k">begin</span>
+<a name="l-197"></a>        <span class="n">data_valid_o</span> <span class="o">=</span> <span class="n">data_update</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">fault_err</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">op_err</span><span class="p">;</span>
+<a name="l-198"></a>        <span class="n">key_update_vld</span> <span class="o">=</span> <span class="n">key_update</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">fault_err</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">op_err</span><span class="p">;</span>
+<a name="l-199"></a>        <span class="n">key_state_d</span> <span class="o">=</span> <span class="n">key_update_vld</span> <span class="o">?</span> <span class="n">kmac_data_i</span> <span class="o">:</span> <span class="n">key_state_q</span><span class="p">;</span>
+<a name="l-200"></a>      <span class="k">end</span>
+<a name="l-201"></a>
+<a name="l-202"></a>      <span class="nl">KeyUpdateInvalid:</span> <span class="k">begin</span>
+<a name="l-203"></a>        <span class="n">data_valid_o</span> <span class="o">=</span> <span class="n">data_update</span><span class="p">;</span>
+<a name="l-204"></a>        <span class="n">key_update_vld</span> <span class="o">=</span> <span class="n">key_update</span><span class="p">;</span>
+<a name="l-205"></a>        <span class="n">key_state_d</span> <span class="o">=</span> <span class="n">key_update_vld</span> <span class="o">?</span> <span class="n">kmac_data_i</span> <span class="o">:</span> <span class="n">key_state_q</span><span class="p">;</span>
+<a name="l-206"></a>      <span class="k">end</span>
+<a name="l-207"></a>
+<a name="l-208"></a>      <span class="nl">KeyUpdateWipe:</span> <span class="k">begin</span>
+<a name="l-209"></a>        <span class="n">wipe_key_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-210"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Shares</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-211"></a>          <span class="n">key_state_d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">EntropyRounds</span><span class="p">{</span><span class="n">entropy_i</span><span class="p">[</span><span class="n">i</span><span class="p">]}};</span>
+<a name="l-212"></a>        <span class="k">end</span>
+<a name="l-213"></a>      <span class="k">end</span>
 <a name="l-214"></a>
-<a name="l-215"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-216"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-217"></a>      <span class="n">cnt</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-218"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cnt_clr</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-219"></a>      <span class="n">cnt</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-220"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cnt_en</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-221"></a>      <span class="n">cnt</span> <span class="o">&lt;=</span> <span class="n">cnt</span> <span class="o">+</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-222"></a>    <span class="k">end</span>
-<a name="l-223"></a>  <span class="k">end</span>
-<a name="l-224"></a>
-<a name="l-225"></a>  <span class="c1">// TODO: Create a no select option, do not leave this as binary</span>
-<a name="l-226"></a>  <span class="k">assign</span> <span class="n">hw_sel_o</span> <span class="o">=</span> <span class="n">gen_out_hw_sel</span> <span class="o">?</span> <span class="n">HwKey</span> <span class="o">:</span> <span class="n">SwKey</span><span class="p">;</span>
-<a name="l-227"></a>
-<a name="l-228"></a>  <span class="kt">logic</span> <span class="n">in_disabled</span><span class="p">;</span>
-<a name="l-229"></a>  <span class="k">assign</span> <span class="n">in_disabled</span> <span class="o">=</span> <span class="p">(</span><span class="n">state_q</span> <span class="o">==</span> <span class="n">StCtrlDisabled</span><span class="p">);</span>
-<a name="l-230"></a>
-<a name="l-231"></a>  <span class="c1">// when in a state that accepts commands, look at kmac completion for operation done.</span>
-<a name="l-232"></a>  <span class="c1">// when in a state that does not accept commands, wait for other triggers.</span>
-<a name="l-233"></a>  <span class="k">assign</span> <span class="n">op_done_o</span> <span class="o">=</span> <span class="n">op_accept</span> <span class="o">?</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">kmac_done_i</span> <span class="o">:</span>
-<a name="l-234"></a>                                 <span class="p">(</span><span class="n">init_o</span> <span class="o">|</span> <span class="n">invalid_op</span><span class="p">);</span>
-<a name="l-235"></a>
-<a name="l-236"></a>
-<a name="l-237"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-238"></a>    <span class="c1">// persistent data</span>
-<a name="l-239"></a>    <span class="n">state_d</span> <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
-<a name="l-240"></a>    <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateIdle</span><span class="p">;</span>
-<a name="l-241"></a>
-<a name="l-242"></a>    <span class="c1">// counter controls</span>
-<a name="l-243"></a>    <span class="n">cnt_en</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-244"></a>    <span class="n">cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-245"></a>
-<a name="l-246"></a>    <span class="c1">// state OK to accept KMAC operations</span>
-<a name="l-247"></a>    <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-248"></a>
-<a name="l-249"></a>    <span class="c1">// invalid operation issued</span>
-<a name="l-250"></a>    <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-251"></a>
-<a name="l-252"></a>    <span class="c1">// data update and select signals</span>
-<a name="l-253"></a>    <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
-<a name="l-254"></a>
-<a name="l-255"></a>    <span class="c1">// enable prng toggling</span>
-<a name="l-256"></a>    <span class="n">prng_reseed_req_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-257"></a>    <span class="n">prng_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-258"></a>
-<a name="l-259"></a>    <span class="c1">// initialization complete</span>
-<a name="l-260"></a>    <span class="n">init_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-261"></a>
-<a name="l-262"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
-<a name="l-263"></a>      <span class="c1">// Only advance can be called from reset state</span>
-<a name="l-264"></a>      <span class="nl">StCtrlReset:</span> <span class="k">begin</span>
-<a name="l-265"></a>        <span class="c1">// in reset state, don&#39;t enable entropy yet, since there are no users.</span>
-<a name="l-266"></a>        <span class="n">prng_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-267"></a>
-<a name="l-268"></a>        <span class="c1">// always use random data for advance, since out of reset state</span>
-<a name="l-269"></a>        <span class="c1">// the key state will be randomized.</span>
-<a name="l-270"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
-<a name="l-271"></a>
-<a name="l-272"></a>        <span class="c1">// key state is updated when it is an advance call</span>
-<a name="l-273"></a>        <span class="c1">// all other operations are invalid, including disable</span>
-<a name="l-274"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">advance_sel</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-275"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlEntropyReseed</span><span class="p">;</span>
-<a name="l-276"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-277"></a>          <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-278"></a>        <span class="k">end</span>
-<a name="l-279"></a>      <span class="k">end</span>
-<a name="l-280"></a>
-<a name="l-281"></a>      <span class="c1">// reseed entropy</span>
-<a name="l-282"></a>      <span class="nl">StCtrlEntropyReseed:</span> <span class="k">begin</span>
-<a name="l-283"></a>        <span class="n">prng_reseed_req_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-284"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">prng_reseed_ack_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-285"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlRandom</span><span class="p">;</span>
+<a name="l-215"></a>      <span class="k">default</span><span class="o">:</span><span class="p">;</span>
+<a name="l-216"></a>    <span class="k">endcase</span> <span class="c1">// unique case (update_sel)</span>
+<a name="l-217"></a>  <span class="k">end</span>
+<a name="l-218"></a>
+<a name="l-219"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-220"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-221"></a>      <span class="n">cnt</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-222"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cnt_clr</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-223"></a>      <span class="n">cnt</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-224"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cnt_en</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-225"></a>      <span class="n">cnt</span> <span class="o">&lt;=</span> <span class="n">cnt</span> <span class="o">+</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-226"></a>    <span class="k">end</span>
+<a name="l-227"></a>  <span class="k">end</span>
+<a name="l-228"></a>
+<a name="l-229"></a>  <span class="c1">// TODO: Create a no select option, do not leave this as binary</span>
+<a name="l-230"></a>  <span class="k">assign</span> <span class="n">hw_sel_o</span> <span class="o">=</span> <span class="n">gen_out_hw_sel</span> <span class="o">?</span> <span class="n">HwKey</span> <span class="o">:</span> <span class="n">SwKey</span><span class="p">;</span>
+<a name="l-231"></a>
+<a name="l-232"></a>  <span class="kt">logic</span> <span class="n">in_disabled</span><span class="p">;</span>
+<a name="l-233"></a>  <span class="k">assign</span> <span class="n">in_disabled</span> <span class="o">=</span> <span class="p">(</span><span class="n">state_q</span> <span class="o">==</span> <span class="n">StCtrlDisabled</span><span class="p">);</span>
+<a name="l-234"></a>
+<a name="l-235"></a>  <span class="c1">// when in a state that accepts commands, look at kmac completion for operation done.</span>
+<a name="l-236"></a>  <span class="c1">// when in a state that does not accept commands, wait for other triggers.</span>
+<a name="l-237"></a>  <span class="k">assign</span> <span class="n">op_done_o</span> <span class="o">=</span> <span class="n">op_accept</span> <span class="o">?</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">kmac_done_i</span> <span class="o">:</span>
+<a name="l-238"></a>                                 <span class="p">(</span><span class="n">init_o</span> <span class="o">|</span> <span class="n">invalid_op</span><span class="p">);</span>
+<a name="l-239"></a>
+<a name="l-240"></a>
+<a name="l-241"></a>  <span class="kt">logic</span> <span class="n">next_state</span><span class="p">;</span>
+<a name="l-242"></a>  <span class="kt">logic</span> <span class="n">invalid_state</span><span class="p">;</span>
+<a name="l-243"></a>  <span class="k">assign</span> <span class="n">next_state</span> <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="n">advance_sel</span> <span class="o">&amp;&amp;</span> <span class="n">key_update_vld</span><span class="p">;</span>
+<a name="l-244"></a>  <span class="k">assign</span> <span class="n">invalid_state</span> <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">disable_sel</span> <span class="o">||</span> <span class="n">fault_err</span><span class="p">);</span>
+<a name="l-245"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-246"></a>    <span class="c1">// persistent data</span>
+<a name="l-247"></a>    <span class="n">state_d</span> <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
+<a name="l-248"></a>    <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateIdle</span><span class="p">;</span>
+<a name="l-249"></a>
+<a name="l-250"></a>    <span class="c1">// counter controls</span>
+<a name="l-251"></a>    <span class="n">cnt_en</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-252"></a>    <span class="n">cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-253"></a>
+<a name="l-254"></a>    <span class="c1">// state OK to accept KMAC operations</span>
+<a name="l-255"></a>    <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-256"></a>
+<a name="l-257"></a>    <span class="c1">// invalid operation issued</span>
+<a name="l-258"></a>    <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-259"></a>
+<a name="l-260"></a>    <span class="c1">// data update and select signals</span>
+<a name="l-261"></a>    <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
+<a name="l-262"></a>
+<a name="l-263"></a>    <span class="c1">// enable prng toggling</span>
+<a name="l-264"></a>    <span class="n">prng_reseed_req_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-265"></a>    <span class="n">prng_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-266"></a>
+<a name="l-267"></a>    <span class="c1">// initialization complete</span>
+<a name="l-268"></a>    <span class="n">init_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-269"></a>
+<a name="l-270"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
+<a name="l-271"></a>      <span class="c1">// Only advance can be called from reset state</span>
+<a name="l-272"></a>      <span class="nl">StCtrlReset:</span> <span class="k">begin</span>
+<a name="l-273"></a>        <span class="c1">// in reset state, don&#39;t enable entropy yet, since there are no users.</span>
+<a name="l-274"></a>        <span class="n">prng_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-275"></a>
+<a name="l-276"></a>        <span class="c1">// always use random data for advance, since out of reset state</span>
+<a name="l-277"></a>        <span class="c1">// the key state will be randomized.</span>
+<a name="l-278"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
+<a name="l-279"></a>
+<a name="l-280"></a>        <span class="c1">// key state is updated when it is an advance call</span>
+<a name="l-281"></a>        <span class="c1">// all other operations are invalid, including disable</span>
+<a name="l-282"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">advance_sel</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-283"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlEntropyReseed</span><span class="p">;</span>
+<a name="l-284"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-285"></a>          <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
 <a name="l-286"></a>        <span class="k">end</span>
 <a name="l-287"></a>      <span class="k">end</span>
 <a name="l-288"></a>
-<a name="l-289"></a>      <span class="c1">// This state does not accept any command.</span>
-<a name="l-290"></a>      <span class="nl">StCtrlRandom:</span> <span class="k">begin</span>
-<a name="l-291"></a>        <span class="n">prng_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-292"></a>        <span class="c1">// populate both shares with the same entropy</span>
-<a name="l-293"></a>        <span class="c1">// This is the default mask</span>
-<a name="l-294"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateRandom</span><span class="p">;</span>
-<a name="l-295"></a>
-<a name="l-296"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&lt;</span> <span class="n">EntropyRounds</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-297"></a>          <span class="n">cnt_en</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-298"></a>        <span class="k">end</span>
-<a name="l-299"></a>        <span class="c1">// when mask population is complete, xor the root_key into the zero share</span>
-<a name="l-300"></a>        <span class="c1">// if in the future the root key is updated to 2 shares, it will direclty overwrite</span>
-<a name="l-301"></a>        <span class="c1">// the values here</span>
-<a name="l-302"></a>        <span class="k">else</span> <span class="k">begin</span>
-<a name="l-303"></a>          <span class="n">cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-304"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlRootKey</span><span class="p">;</span>
-<a name="l-305"></a>        <span class="k">end</span>
-<a name="l-306"></a>      <span class="k">end</span>
-<a name="l-307"></a>
-<a name="l-308"></a>      <span class="c1">// load the root key.</span>
-<a name="l-309"></a>      <span class="nl">StCtrlRootKey:</span> <span class="k">begin</span>
-<a name="l-310"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateRoot</span><span class="p">;</span>
-<a name="l-311"></a>        <span class="n">init_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-312"></a>        <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlInit</span><span class="p">;</span>
-<a name="l-313"></a>      <span class="k">end</span>
-<a name="l-314"></a>
-<a name="l-315"></a>      <span class="c1">// Beginning from the Init state, operations are accepted.</span>
-<a name="l-316"></a>      <span class="c1">// Only valid operation is advance state. If invalid command received,</span>
-<a name="l-317"></a>      <span class="c1">// random data is selected for operation and no persistent state is changed.</span>
-<a name="l-318"></a>      <span class="nl">StCtrlInit:</span> <span class="k">begin</span>
-<a name="l-319"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-320"></a>
-<a name="l-321"></a>        <span class="c1">// when advancing select creator data, otherwise use random input</span>
-<a name="l-322"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">Creator</span> <span class="o">:</span> <span class="n">Disable</span><span class="p">;</span>
-<a name="l-323"></a>        <span class="n">invalid_op</span> <span class="o">=</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span><span class="n">advance_sel</span> <span class="o">|</span> <span class="n">disable_sel</span><span class="p">);</span>
-<a name="l-324"></a>
-<a name="l-325"></a>        <span class="c1">// key state is updated when it is an advance call</span>
-<a name="l-326"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
-<a name="l-327"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-328"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
-<a name="l-329"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">disable_sel</span> <span class="o">||</span> <span class="n">fault_err</span><span class="p">))</span> <span class="k">begin</span>
-<a name="l-330"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
-<a name="l-331"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
-<a name="l-332"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="n">advance_sel</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-333"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlCreatorRootKey</span><span class="p">;</span>
-<a name="l-334"></a>        <span class="k">end</span>
-<a name="l-335"></a>      <span class="k">end</span>
-<a name="l-336"></a>
-<a name="l-337"></a>      <span class="c1">// all commands are valid during this stage</span>
-<a name="l-338"></a>      <span class="nl">StCtrlCreatorRootKey:</span> <span class="k">begin</span>
-<a name="l-339"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-340"></a>
-<a name="l-341"></a>        <span class="c1">// when generating, select creator data input</span>
-<a name="l-342"></a>        <span class="c1">// when advancing, select owner intermediate key as target</span>
-<a name="l-343"></a>        <span class="c1">// when disabling, select random data input</span>
-<a name="l-344"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">disable_sel</span> <span class="o">?</span> <span class="n">Disable</span>  <span class="o">:</span>
-<a name="l-345"></a>                      <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">OwnerInt</span> <span class="o">:</span> <span class="n">Creator</span><span class="p">;</span>
-<a name="l-346"></a>
-<a name="l-347"></a>        <span class="c1">// key state is updated when it is an advance call</span>
-<a name="l-348"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
-<a name="l-349"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-350"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
-<a name="l-351"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">disable_sel</span> <span class="o">||</span> <span class="n">fault_err</span><span class="p">))</span> <span class="k">begin</span>
-<a name="l-352"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
-<a name="l-353"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
-<a name="l-354"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="n">advance_sel</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-355"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlOwnerIntKey</span><span class="p">;</span>
-<a name="l-356"></a>        <span class="k">end</span>
-<a name="l-357"></a>      <span class="k">end</span>
-<a name="l-358"></a>
-<a name="l-359"></a>      <span class="c1">// all commands are valid during this stage</span>
-<a name="l-360"></a>      <span class="nl">StCtrlOwnerIntKey:</span> <span class="k">begin</span>
-<a name="l-361"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-362"></a>
-<a name="l-363"></a>        <span class="c1">// when generating, select owner intermediate data input</span>
-<a name="l-364"></a>        <span class="c1">// when advancing, select owner as target</span>
-<a name="l-365"></a>        <span class="c1">// when disabling, select random data input</span>
-<a name="l-366"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">disable_sel</span> <span class="o">?</span> <span class="n">Disable</span>  <span class="o">:</span>
-<a name="l-367"></a>                      <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">Owner</span> <span class="o">:</span> <span class="n">OwnerInt</span><span class="p">;</span>
-<a name="l-368"></a>
-<a name="l-369"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
-<a name="l-370"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-371"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
-<a name="l-372"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">disable_sel</span> <span class="o">||</span> <span class="n">fault_err</span><span class="p">))</span> <span class="k">begin</span>
-<a name="l-373"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
-<a name="l-374"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
-<a name="l-375"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="n">advance_sel</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-376"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlOwnerKey</span><span class="p">;</span>
-<a name="l-377"></a>        <span class="k">end</span>
-<a name="l-378"></a>      <span class="k">end</span>
-<a name="l-379"></a>
-<a name="l-380"></a>      <span class="c1">// all commands are valid during this stage</span>
-<a name="l-381"></a>      <span class="c1">// however advance goes directly to disabled state</span>
-<a name="l-382"></a>      <span class="nl">StCtrlOwnerKey:</span> <span class="k">begin</span>
-<a name="l-383"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
-<a name="l-384"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-385"></a>
-<a name="l-386"></a>        <span class="c1">// when generating, select owner data input</span>
-<a name="l-387"></a>        <span class="c1">// when advancing, select disable as target</span>
-<a name="l-388"></a>        <span class="c1">// when disabling, select random data input</span>
-<a name="l-389"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">disable_sel</span> <span class="o">|</span> <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">Disable</span> <span class="o">:</span> <span class="n">Owner</span><span class="p">;</span>
-<a name="l-390"></a>
-<a name="l-391"></a>        <span class="c1">// Calling advanced from ownerKey also leads to disable</span>
-<a name="l-392"></a>        <span class="c1">// Thus data_valid is not checked</span>
-<a name="l-393"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-394"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
-<a name="l-395"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">advance_sel</span> <span class="o">||</span> <span class="n">disable_sel</span> <span class="o">||</span> <span class="n">fault_err</span><span class="p">))</span> <span class="k">begin</span>
-<a name="l-396"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
-<a name="l-397"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
-<a name="l-398"></a>        <span class="k">end</span>
-<a name="l-399"></a>      <span class="k">end</span>
-<a name="l-400"></a>
-<a name="l-401"></a>      <span class="c1">// The wipe state immediately clears out the key state, but waits for any ongoing</span>
-<a name="l-402"></a>      <span class="c1">// transaction to finish before going to disabled state.</span>
-<a name="l-403"></a>      <span class="c1">// Unlike the random state, this is an immedaite shutdown request, so all parts of the</span>
-<a name="l-404"></a>      <span class="c1">// key are wiped.</span>
-<a name="l-405"></a>      <span class="nl">StCtrlWipe:</span> <span class="k">begin</span>
-<a name="l-406"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateWipe</span><span class="p">;</span>
-<a name="l-407"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
-<a name="l-408"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-409"></a>
-<a name="l-410"></a>        <span class="c1">// If the enable is dropped during the middle of a transaction, we clear and wait for that</span>
-<a name="l-411"></a>        <span class="c1">// transaction to gracefully complete (if it can).</span>
-<a name="l-412"></a>        <span class="c1">// There are two scenarios:</span>
-<a name="l-413"></a>        <span class="c1">// 1. the operation completed right when we started wiping, in which case the done would</span>
-<a name="l-414"></a>        <span class="c1">//    clear the start.</span>
-<a name="l-415"></a>        <span class="c1">// 2. the operation completed before we started wiping, or there was never an operation to</span>
-<a name="l-416"></a>        <span class="c1">//    begin with (op_start_i == 0), in this case, don&#39;t wait and immediately transition</span>
-<a name="l-417"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-418"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlInvalid</span><span class="p">;</span>
-<a name="l-419"></a>        <span class="k">end</span>
-<a name="l-420"></a>      <span class="k">end</span>
-<a name="l-421"></a>
-<a name="l-422"></a>      <span class="c1">// Default state (StCtrlDisabled and StCtrlInvalid included)</span>
-<a name="l-423"></a>      <span class="c1">// Continue to kick off random transactions</span>
-<a name="l-424"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-425"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span> <span class="o">&amp;&amp;</span> <span class="n">in_disabled</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-426"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
-<a name="l-427"></a>          <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-428"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-429"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
-<a name="l-430"></a>          <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-431"></a>          <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
+<a name="l-289"></a>      <span class="c1">// reseed entropy</span>
+<a name="l-290"></a>      <span class="nl">StCtrlEntropyReseed:</span> <span class="k">begin</span>
+<a name="l-291"></a>        <span class="n">prng_reseed_req_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-292"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">prng_reseed_ack_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-293"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlRandom</span><span class="p">;</span>
+<a name="l-294"></a>        <span class="k">end</span>
+<a name="l-295"></a>      <span class="k">end</span>
+<a name="l-296"></a>
+<a name="l-297"></a>      <span class="c1">// This state does not accept any command.</span>
+<a name="l-298"></a>      <span class="nl">StCtrlRandom:</span> <span class="k">begin</span>
+<a name="l-299"></a>        <span class="n">prng_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-300"></a>        <span class="c1">// populate both shares with the same entropy</span>
+<a name="l-301"></a>        <span class="c1">// This is the default mask</span>
+<a name="l-302"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateRandom</span><span class="p">;</span>
+<a name="l-303"></a>
+<a name="l-304"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">&lt;</span> <span class="n">EntropyRounds</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-305"></a>          <span class="n">cnt_en</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-306"></a>        <span class="k">end</span>
+<a name="l-307"></a>        <span class="c1">// when mask population is complete, xor the root_key into the zero share</span>
+<a name="l-308"></a>        <span class="c1">// if in the future the root key is updated to 2 shares, it will direclty overwrite</span>
+<a name="l-309"></a>        <span class="c1">// the values here</span>
+<a name="l-310"></a>        <span class="k">else</span> <span class="k">begin</span>
+<a name="l-311"></a>          <span class="n">cnt_clr</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-312"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlRootKey</span><span class="p">;</span>
+<a name="l-313"></a>        <span class="k">end</span>
+<a name="l-314"></a>      <span class="k">end</span>
+<a name="l-315"></a>
+<a name="l-316"></a>      <span class="c1">// load the root key.</span>
+<a name="l-317"></a>      <span class="nl">StCtrlRootKey:</span> <span class="k">begin</span>
+<a name="l-318"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateRoot</span><span class="p">;</span>
+<a name="l-319"></a>        <span class="n">init_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-320"></a>        <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlInit</span><span class="p">;</span>
+<a name="l-321"></a>      <span class="k">end</span>
+<a name="l-322"></a>
+<a name="l-323"></a>      <span class="c1">// Beginning from the Init state, operations are accepted.</span>
+<a name="l-324"></a>      <span class="c1">// Only valid operation is advance state. If invalid command received,</span>
+<a name="l-325"></a>      <span class="c1">// random data is selected for operation and no persistent state is changed.</span>
+<a name="l-326"></a>      <span class="nl">StCtrlInit:</span> <span class="k">begin</span>
+<a name="l-327"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-328"></a>
+<a name="l-329"></a>        <span class="c1">// when advancing select creator data, otherwise use random input</span>
+<a name="l-330"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">Creator</span> <span class="o">:</span> <span class="n">Disable</span><span class="p">;</span>
+<a name="l-331"></a>        <span class="n">invalid_op</span> <span class="o">=</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span><span class="n">advance_sel</span> <span class="o">|</span> <span class="n">disable_sel</span><span class="p">);</span>
+<a name="l-332"></a>
+<a name="l-333"></a>        <span class="c1">// key state is updated when it is an advance call</span>
+<a name="l-334"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
+<a name="l-335"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-336"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
+<a name="l-337"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">invalid_state</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-338"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
+<a name="l-339"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
+<a name="l-340"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">next_state</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-341"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlCreatorRootKey</span><span class="p">;</span>
+<a name="l-342"></a>        <span class="k">end</span>
+<a name="l-343"></a>      <span class="k">end</span>
+<a name="l-344"></a>
+<a name="l-345"></a>      <span class="c1">// all commands are valid during this stage</span>
+<a name="l-346"></a>      <span class="nl">StCtrlCreatorRootKey:</span> <span class="k">begin</span>
+<a name="l-347"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-348"></a>
+<a name="l-349"></a>        <span class="c1">// when generating, select creator data input</span>
+<a name="l-350"></a>        <span class="c1">// when advancing, select owner intermediate key as target</span>
+<a name="l-351"></a>        <span class="c1">// when disabling, select random data input</span>
+<a name="l-352"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">disable_sel</span> <span class="o">?</span> <span class="n">Disable</span>  <span class="o">:</span>
+<a name="l-353"></a>                      <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">OwnerInt</span> <span class="o">:</span> <span class="n">Creator</span><span class="p">;</span>
+<a name="l-354"></a>
+<a name="l-355"></a>        <span class="c1">// key state is updated when it is an advance call</span>
+<a name="l-356"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
+<a name="l-357"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-358"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
+<a name="l-359"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">invalid_state</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-360"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
+<a name="l-361"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
+<a name="l-362"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">next_state</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-363"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlOwnerIntKey</span><span class="p">;</span>
+<a name="l-364"></a>        <span class="k">end</span>
+<a name="l-365"></a>      <span class="k">end</span>
+<a name="l-366"></a>
+<a name="l-367"></a>      <span class="c1">// all commands are valid during this stage</span>
+<a name="l-368"></a>      <span class="nl">StCtrlOwnerIntKey:</span> <span class="k">begin</span>
+<a name="l-369"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-370"></a>
+<a name="l-371"></a>        <span class="c1">// when generating, select owner intermediate data input</span>
+<a name="l-372"></a>        <span class="c1">// when advancing, select owner as target</span>
+<a name="l-373"></a>        <span class="c1">// when disabling, select random data input</span>
+<a name="l-374"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">disable_sel</span> <span class="o">?</span> <span class="n">Disable</span>  <span class="o">:</span>
+<a name="l-375"></a>                      <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">Owner</span> <span class="o">:</span> <span class="n">OwnerInt</span><span class="p">;</span>
+<a name="l-376"></a>
+<a name="l-377"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
+<a name="l-378"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-379"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
+<a name="l-380"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">invalid_state</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-381"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
+<a name="l-382"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
+<a name="l-383"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">next_state</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-384"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlOwnerKey</span><span class="p">;</span>
+<a name="l-385"></a>        <span class="k">end</span>
+<a name="l-386"></a>      <span class="k">end</span>
+<a name="l-387"></a>
+<a name="l-388"></a>      <span class="c1">// all commands are valid during this stage</span>
+<a name="l-389"></a>      <span class="c1">// however advance goes directly to disabled state</span>
+<a name="l-390"></a>      <span class="nl">StCtrlOwnerKey:</span> <span class="k">begin</span>
+<a name="l-391"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateKmac</span><span class="p">;</span>
+<a name="l-392"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-393"></a>
+<a name="l-394"></a>        <span class="c1">// when generating, select owner data input</span>
+<a name="l-395"></a>        <span class="c1">// when advancing, select disable as target</span>
+<a name="l-396"></a>        <span class="c1">// when disabling, select random data input</span>
+<a name="l-397"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">disable_sel</span> <span class="o">|</span> <span class="n">advance_sel</span> <span class="o">?</span> <span class="n">Disable</span> <span class="o">:</span> <span class="n">Owner</span><span class="p">;</span>
+<a name="l-398"></a>
+<a name="l-399"></a>        <span class="c1">// Calling advanced from ownerKey also leads to disable</span>
+<a name="l-400"></a>        <span class="c1">// Thus data_valid is not checked</span>
+<a name="l-401"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-402"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
+<a name="l-403"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_ack</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">advance_sel</span> <span class="o">||</span> <span class="n">disable_sel</span> <span class="o">||</span> <span class="n">fault_err</span><span class="p">))</span> <span class="k">begin</span>
+<a name="l-404"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
+<a name="l-405"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlDisabled</span><span class="p">;</span>
+<a name="l-406"></a>        <span class="k">end</span>
+<a name="l-407"></a>      <span class="k">end</span>
+<a name="l-408"></a>
+<a name="l-409"></a>      <span class="c1">// The wipe state immediately clears out the key state, but waits for any ongoing</span>
+<a name="l-410"></a>      <span class="c1">// transaction to finish before going to disabled state.</span>
+<a name="l-411"></a>      <span class="c1">// Unlike the random state, this is an immedaite shutdown request, so all parts of the</span>
+<a name="l-412"></a>      <span class="c1">// key are wiped.</span>
+<a name="l-413"></a>      <span class="nl">StCtrlWipe:</span> <span class="k">begin</span>
+<a name="l-414"></a>        <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateWipe</span><span class="p">;</span>
+<a name="l-415"></a>        <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
+<a name="l-416"></a>
+<a name="l-417"></a>        <span class="c1">// while wiping, accept commands, but treat them all as invalid operations</span>
+<a name="l-418"></a>        <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-419"></a>        <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-420"></a>
+<a name="l-421"></a>        <span class="c1">// If the enable is dropped during the middle of a transaction, we clear and wait for that</span>
+<a name="l-422"></a>        <span class="c1">// transaction to gracefully complete (if it can).</span>
+<a name="l-423"></a>        <span class="c1">// There are two scenarios:</span>
+<a name="l-424"></a>        <span class="c1">// 1. the operation completed right when we started wiping, in which case the done would</span>
+<a name="l-425"></a>        <span class="c1">//    clear the start.</span>
+<a name="l-426"></a>        <span class="c1">// 2. the operation completed before we started wiping, or there was never an operation to</span>
+<a name="l-427"></a>        <span class="c1">//    begin with (op_start_i == 0), in this case, don&#39;t wait and immediately transition</span>
+<a name="l-428"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-429"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlInvalid</span><span class="p">;</span>
+<a name="l-430"></a>        <span class="k">end</span>
+<a name="l-431"></a>      <span class="k">end</span>
 <a name="l-432"></a>
-<a name="l-433"></a>          <span class="c1">// Despite accepting all commands, operations are always</span>
-<a name="l-434"></a>          <span class="c1">// considered invalid in disabled / invalid states</span>
-<a name="l-435"></a>          <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-436"></a>        <span class="k">end</span>
-<a name="l-437"></a>      <span class="k">end</span>
-<a name="l-438"></a>    <span class="k">endcase</span> <span class="c1">// unique case (state_q)</span>
-<a name="l-439"></a>  <span class="k">end</span> <span class="c1">// always_comb</span>
-<a name="l-440"></a>
-<a name="l-441"></a>  <span class="c1">// Current working state provided for software read</span>
-<a name="l-442"></a>  <span class="c1">// Certain states are collapsed for simplicity</span>
-<a name="l-443"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-444"></a>    <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInvalid</span><span class="p">;</span>
-<a name="l-445"></a>
-<a name="l-446"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
-<a name="l-447"></a>      <span class="n">StCtrlReset</span><span class="p">,</span> <span class="n">StCtrlEntropyReseed</span><span class="p">,</span> <span class="n">StCtrlRandom</span><span class="p">,</span> <span class="nl">StCtrlRootKey:</span>
-<a name="l-448"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StReset</span><span class="p">;</span>
-<a name="l-449"></a>
-<a name="l-450"></a>      <span class="nl">StCtrlInit:</span>
-<a name="l-451"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInit</span><span class="p">;</span>
-<a name="l-452"></a>
-<a name="l-453"></a>      <span class="nl">StCtrlCreatorRootKey:</span>
-<a name="l-454"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StCreatorRootKey</span><span class="p">;</span>
-<a name="l-455"></a>
-<a name="l-456"></a>      <span class="nl">StCtrlOwnerIntKey:</span>
-<a name="l-457"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StOwnerIntKey</span><span class="p">;</span>
-<a name="l-458"></a>
-<a name="l-459"></a>      <span class="nl">StCtrlOwnerKey:</span>
-<a name="l-460"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StOwnerKey</span><span class="p">;</span>
-<a name="l-461"></a>
-<a name="l-462"></a>      <span class="nl">StCtrlDisabled:</span>
-<a name="l-463"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StDisabled</span><span class="p">;</span>
-<a name="l-464"></a>
-<a name="l-465"></a>      <span class="n">StCtrlWipe</span><span class="p">,</span> <span class="nl">StCtrlInvalid:</span>
-<a name="l-466"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInvalid</span><span class="p">;</span>
-<a name="l-467"></a>
-<a name="l-468"></a>      <span class="k">default</span><span class="o">:</span>
-<a name="l-469"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInvalid</span><span class="p">;</span>
-<a name="l-470"></a>    <span class="k">endcase</span> <span class="c1">// unique case (state_q)</span>
-<a name="l-471"></a>  <span class="k">end</span>
+<a name="l-433"></a>      <span class="c1">// Default state (StCtrlDisabled and StCtrlInvalid included)</span>
+<a name="l-434"></a>      <span class="c1">// Continue to kick off random transactions</span>
+<a name="l-435"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-436"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">en_i</span> <span class="o">&amp;&amp;</span> <span class="n">in_disabled</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-437"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">StCtrlWipe</span><span class="p">;</span>
+<a name="l-438"></a>          <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-439"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-440"></a>          <span class="n">update_sel</span> <span class="o">=</span> <span class="n">KeyUpdateInvalid</span><span class="p">;</span>
+<a name="l-441"></a>          <span class="n">op_accept</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-442"></a>          <span class="n">stage_sel_o</span> <span class="o">=</span> <span class="n">Disable</span><span class="p">;</span>
+<a name="l-443"></a>
+<a name="l-444"></a>          <span class="c1">// Despite accepting all commands, operations are always</span>
+<a name="l-445"></a>          <span class="c1">// considered invalid in disabled / invalid states</span>
+<a name="l-446"></a>          <span class="n">invalid_op</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-447"></a>        <span class="k">end</span>
+<a name="l-448"></a>      <span class="k">end</span>
+<a name="l-449"></a>    <span class="k">endcase</span> <span class="c1">// unique case (state_q)</span>
+<a name="l-450"></a>  <span class="k">end</span> <span class="c1">// always_comb</span>
+<a name="l-451"></a>
+<a name="l-452"></a>  <span class="c1">// Current working state provided for software read</span>
+<a name="l-453"></a>  <span class="c1">// Certain states are collapsed for simplicity</span>
+<a name="l-454"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-455"></a>    <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInvalid</span><span class="p">;</span>
+<a name="l-456"></a>
+<a name="l-457"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
+<a name="l-458"></a>      <span class="n">StCtrlReset</span><span class="p">,</span> <span class="n">StCtrlEntropyReseed</span><span class="p">,</span> <span class="n">StCtrlRandom</span><span class="p">,</span> <span class="nl">StCtrlRootKey:</span>
+<a name="l-459"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StReset</span><span class="p">;</span>
+<a name="l-460"></a>
+<a name="l-461"></a>      <span class="nl">StCtrlInit:</span>
+<a name="l-462"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInit</span><span class="p">;</span>
+<a name="l-463"></a>
+<a name="l-464"></a>      <span class="nl">StCtrlCreatorRootKey:</span>
+<a name="l-465"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StCreatorRootKey</span><span class="p">;</span>
+<a name="l-466"></a>
+<a name="l-467"></a>      <span class="nl">StCtrlOwnerIntKey:</span>
+<a name="l-468"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StOwnerIntKey</span><span class="p">;</span>
+<a name="l-469"></a>
+<a name="l-470"></a>      <span class="nl">StCtrlOwnerKey:</span>
+<a name="l-471"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StOwnerKey</span><span class="p">;</span>
 <a name="l-472"></a>
-<a name="l-473"></a>  <span class="c1">// data errors are not relevant when operation was not accepted.</span>
-<a name="l-474"></a>  <span class="c1">// invalid operation errors can happen even when operations are not accepted.</span>
-<a name="l-475"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidOp</span><span class="p">]</span>  <span class="o">=</span> <span class="n">op_done_o</span> <span class="o">&amp;</span> <span class="n">invalid_op</span><span class="p">;</span>
-<a name="l-476"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;</span> <span class="n">fault_err</span><span class="p">;</span>
-<a name="l-477"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidIn</span><span class="p">]</span>  <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;</span> <span class="n">kmac_input_invalid_i</span><span class="p">;</span>
-<a name="l-478"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidOut</span><span class="p">]</span> <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">kmac_out_valid</span><span class="p">;</span>
-<a name="l-479"></a>
-<a name="l-480"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-481"></a>    <span class="n">status_o</span> <span class="o">=</span> <span class="n">OpIdle</span><span class="p">;</span>
-<a name="l-482"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">op_done_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-483"></a>      <span class="n">status_o</span> <span class="o">=</span> <span class="o">|</span><span class="n">error_o</span> <span class="o">?</span> <span class="n">OpDoneFail</span> <span class="o">:</span> <span class="n">OpDoneSuccess</span><span class="p">;</span>
-<a name="l-484"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-485"></a>      <span class="n">status_o</span> <span class="o">=</span> <span class="n">OpWip</span><span class="p">;</span>
-<a name="l-486"></a>    <span class="k">end</span>
-<a name="l-487"></a>  <span class="k">end</span>
-<a name="l-488"></a>
-<a name="l-489"></a>
-<a name="l-490"></a>  <span class="c1">///////////////////////////////</span>
-<a name="l-491"></a>  <span class="c1">// Suppress kmac return data</span>
-<a name="l-492"></a>  <span class="c1">///////////////////////////////</span>
-<a name="l-493"></a>  <span class="c1">// This is a separate data path from the FSM used to control the data_en_o output</span>
-<a name="l-494"></a>
-<a name="l-495"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-496"></a>    <span class="n">StCtrlDataIdle</span><span class="p">,</span>
-<a name="l-497"></a>    <span class="n">StCtrlDataEn</span><span class="p">,</span>
-<a name="l-498"></a>    <span class="n">StCtrlDataDis</span><span class="p">,</span>
-<a name="l-499"></a>    <span class="n">StCtrlDataWait</span>
-<a name="l-500"></a>  <span class="p">}</span> <span class="n">keymgr_ctrl_data_state_e</span><span class="p">;</span>
-<a name="l-501"></a>
-<a name="l-502"></a>  <span class="n">keymgr_ctrl_data_state_e</span> <span class="n">data_st_d</span><span class="p">,</span> <span class="n">data_st_q</span><span class="p">;</span>
-<a name="l-503"></a>
-<a name="l-504"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-505"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-506"></a>      <span class="n">data_st_q</span> <span class="o">&lt;=</span> <span class="n">StCtrlDataIdle</span><span class="p">;</span>
-<a name="l-507"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-508"></a>      <span class="n">data_st_q</span> <span class="o">&lt;=</span> <span class="n">data_st_d</span><span class="p">;</span>
-<a name="l-509"></a>    <span class="k">end</span>
-<a name="l-510"></a>  <span class="k">end</span>
-<a name="l-511"></a>
-<a name="l-512"></a>  <span class="c1">// The below control path is used for modulating the datapath to sideload and sw keys.</span>
-<a name="l-513"></a>  <span class="c1">// This path is separate from the data_valid_o path, thus creating two separate attack points.</span>
-<a name="l-514"></a>  <span class="c1">// The data is only enabled when a non-advance operation is invoked.</span>
-<a name="l-515"></a>  <span class="c1">// When an advance operation is called, the data is disabled. It will stay disabled until an</span>
-<a name="l-516"></a>  <span class="c1">// entire completion sequence is seen (op_done_o assert -&gt; start_i de-assertion).</span>
-<a name="l-517"></a>  <span class="c1">// When a generate operation is called, the data is enabled.  However, any indication of this</span>
-<a name="l-518"></a>  <span class="c1">// supposedly being an advance call will force the path to disable again.</span>
-<a name="l-519"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-520"></a>    <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">data_st_q</span><span class="p">;</span>
-<a name="l-521"></a>    <span class="n">data_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-522"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">data_st_q</span><span class="p">)</span>
-<a name="l-523"></a>
-<a name="l-524"></a>      <span class="nl">StCtrlDataIdle:</span> <span class="k">begin</span>
-<a name="l-525"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">adv_en_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-526"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataDis</span><span class="p">;</span>
-<a name="l-527"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">id_en_o</span> <span class="o">||</span> <span class="n">gen_en_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-528"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataEn</span><span class="p">;</span>
-<a name="l-529"></a>        <span class="k">end</span>
-<a name="l-530"></a>      <span class="k">end</span>
-<a name="l-531"></a>
-<a name="l-532"></a>      <span class="nl">StCtrlDataEn:</span> <span class="k">begin</span>
-<a name="l-533"></a>        <span class="n">data_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-534"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">adv_en_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-535"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataDis</span><span class="p">;</span>
-<a name="l-536"></a>        <span class="k">end</span>
-<a name="l-537"></a>      <span class="k">end</span>
-<a name="l-538"></a>
-<a name="l-539"></a>      <span class="nl">StCtrlDataDis:</span> <span class="k">begin</span>
-<a name="l-540"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">op_done_o</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-541"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataWait</span><span class="p">;</span>
-<a name="l-542"></a>        <span class="k">end</span>
-<a name="l-543"></a>      <span class="k">end</span>
-<a name="l-544"></a>
-<a name="l-545"></a>      <span class="nl">StCtrlDataWait:</span> <span class="k">begin</span>
-<a name="l-546"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-547"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataIdle</span><span class="p">;</span>
-<a name="l-548"></a>        <span class="k">end</span>
-<a name="l-549"></a>      <span class="k">end</span>
-<a name="l-550"></a>
-<a name="l-551"></a>      <span class="k">default</span><span class="o">:</span><span class="p">;</span>
-<a name="l-552"></a>
-<a name="l-553"></a>    <span class="k">endcase</span> <span class="c1">// unique case (data_st_q)</span>
-<a name="l-554"></a>  <span class="k">end</span>
+<a name="l-473"></a>      <span class="nl">StCtrlDisabled:</span>
+<a name="l-474"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StDisabled</span><span class="p">;</span>
+<a name="l-475"></a>
+<a name="l-476"></a>      <span class="n">StCtrlWipe</span><span class="p">,</span> <span class="nl">StCtrlInvalid:</span>
+<a name="l-477"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInvalid</span><span class="p">;</span>
+<a name="l-478"></a>
+<a name="l-479"></a>      <span class="k">default</span><span class="o">:</span>
+<a name="l-480"></a>        <span class="n">working_state_o</span> <span class="o">=</span> <span class="n">StInvalid</span><span class="p">;</span>
+<a name="l-481"></a>    <span class="k">endcase</span> <span class="c1">// unique case (state_q)</span>
+<a name="l-482"></a>  <span class="k">end</span>
+<a name="l-483"></a>
+<a name="l-484"></a>  <span class="c1">// data errors are not relevant when operation was not accepted.</span>
+<a name="l-485"></a>  <span class="c1">// invalid operation errors can happen even when operations are not accepted.</span>
+<a name="l-486"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidOp</span><span class="p">]</span>  <span class="o">=</span> <span class="n">op_done_o</span> <span class="o">&amp;</span> <span class="n">invalid_op</span><span class="p">;</span>
+<a name="l-487"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;</span> <span class="n">fault_err</span><span class="p">;</span>
+<a name="l-488"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidIn</span><span class="p">]</span>  <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;</span> <span class="n">kmac_input_invalid_i</span><span class="p">;</span>
+<a name="l-489"></a>  <span class="k">assign</span> <span class="n">error_o</span><span class="p">[</span><span class="n">ErrInvalidOut</span><span class="p">]</span> <span class="o">=</span> <span class="n">op_ack</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">kmac_out_valid</span><span class="p">;</span>
+<a name="l-490"></a>
+<a name="l-491"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-492"></a>    <span class="n">status_o</span> <span class="o">=</span> <span class="n">OpIdle</span><span class="p">;</span>
+<a name="l-493"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">op_done_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-494"></a>      <span class="n">status_o</span> <span class="o">=</span> <span class="o">|</span><span class="n">error_o</span> <span class="o">?</span> <span class="n">OpDoneFail</span> <span class="o">:</span> <span class="n">OpDoneSuccess</span><span class="p">;</span>
+<a name="l-495"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-496"></a>      <span class="n">status_o</span> <span class="o">=</span> <span class="n">OpWip</span><span class="p">;</span>
+<a name="l-497"></a>    <span class="k">end</span>
+<a name="l-498"></a>  <span class="k">end</span>
+<a name="l-499"></a>
+<a name="l-500"></a>
+<a name="l-501"></a>  <span class="c1">///////////////////////////////</span>
+<a name="l-502"></a>  <span class="c1">// Suppress kmac return data</span>
+<a name="l-503"></a>  <span class="c1">///////////////////////////////</span>
+<a name="l-504"></a>  <span class="c1">// This is a separate data path from the FSM used to control the data_en_o output</span>
+<a name="l-505"></a>
+<a name="l-506"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a name="l-507"></a>    <span class="n">StCtrlDataIdle</span><span class="p">,</span>
+<a name="l-508"></a>    <span class="n">StCtrlDataEn</span><span class="p">,</span>
+<a name="l-509"></a>    <span class="n">StCtrlDataDis</span><span class="p">,</span>
+<a name="l-510"></a>    <span class="n">StCtrlDataWait</span>
+<a name="l-511"></a>  <span class="p">}</span> <span class="n">keymgr_ctrl_data_state_e</span><span class="p">;</span>
+<a name="l-512"></a>
+<a name="l-513"></a>  <span class="n">keymgr_ctrl_data_state_e</span> <span class="n">data_st_d</span><span class="p">,</span> <span class="n">data_st_q</span><span class="p">;</span>
+<a name="l-514"></a>
+<a name="l-515"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-516"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-517"></a>      <span class="n">data_st_q</span> <span class="o">&lt;=</span> <span class="n">StCtrlDataIdle</span><span class="p">;</span>
+<a name="l-518"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-519"></a>      <span class="n">data_st_q</span> <span class="o">&lt;=</span> <span class="n">data_st_d</span><span class="p">;</span>
+<a name="l-520"></a>    <span class="k">end</span>
+<a name="l-521"></a>  <span class="k">end</span>
+<a name="l-522"></a>
+<a name="l-523"></a>  <span class="c1">// The below control path is used for modulating the datapath to sideload and sw keys.</span>
+<a name="l-524"></a>  <span class="c1">// This path is separate from the data_valid_o path, thus creating two separate attack points.</span>
+<a name="l-525"></a>  <span class="c1">// The data is only enabled when a non-advance operation is invoked.</span>
+<a name="l-526"></a>  <span class="c1">// When an advance operation is called, the data is disabled. It will stay disabled until an</span>
+<a name="l-527"></a>  <span class="c1">// entire completion sequence is seen (op_done_o assert -&gt; start_i de-assertion).</span>
+<a name="l-528"></a>  <span class="c1">// When a generate operation is called, the data is enabled.  However, any indication of this</span>
+<a name="l-529"></a>  <span class="c1">// supposedly being an advance call will force the path to disable again.</span>
+<a name="l-530"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-531"></a>    <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">data_st_q</span><span class="p">;</span>
+<a name="l-532"></a>    <span class="n">data_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-533"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">data_st_q</span><span class="p">)</span>
+<a name="l-534"></a>
+<a name="l-535"></a>      <span class="nl">StCtrlDataIdle:</span> <span class="k">begin</span>
+<a name="l-536"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">adv_en_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-537"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataDis</span><span class="p">;</span>
+<a name="l-538"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">id_en_o</span> <span class="o">||</span> <span class="n">gen_en_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-539"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataEn</span><span class="p">;</span>
+<a name="l-540"></a>        <span class="k">end</span>
+<a name="l-541"></a>      <span class="k">end</span>
+<a name="l-542"></a>
+<a name="l-543"></a>      <span class="nl">StCtrlDataEn:</span> <span class="k">begin</span>
+<a name="l-544"></a>        <span class="n">data_en_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-545"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">adv_en_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-546"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataDis</span><span class="p">;</span>
+<a name="l-547"></a>        <span class="k">end</span>
+<a name="l-548"></a>      <span class="k">end</span>
+<a name="l-549"></a>
+<a name="l-550"></a>      <span class="nl">StCtrlDataDis:</span> <span class="k">begin</span>
+<a name="l-551"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">op_done_o</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-552"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataWait</span><span class="p">;</span>
+<a name="l-553"></a>        <span class="k">end</span>
+<a name="l-554"></a>      <span class="k">end</span>
 <a name="l-555"></a>
-<a name="l-556"></a>
-<a name="l-557"></a>
-<a name="l-558"></a>
-<a name="l-559"></a>  <span class="c1">///////////////////////////////</span>
-<a name="l-560"></a>  <span class="c1">// Functions</span>
-<a name="l-561"></a>  <span class="c1">///////////////////////////////</span>
-<a name="l-562"></a>
-<a name="l-563"></a>  <span class="c1">// unclear what this is supposed to be yet</span>
-<a name="l-564"></a>  <span class="c1">// right now just check to see if it not all 0&#39;s and not all 1&#39;s</span>
-<a name="l-565"></a> <span class="k">function</span> <span class="k">automatic</span> <span class="kt">logic</span> <span class="n">valid_data_chk</span> <span class="p">(</span><span class="kt">logic</span> <span class="p">[</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">value</span><span class="p">);</span>
+<a name="l-556"></a>      <span class="nl">StCtrlDataWait:</span> <span class="k">begin</span>
+<a name="l-557"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">op_start_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-558"></a>          <span class="n">data_st_d</span> <span class="o">=</span> <span class="n">StCtrlDataIdle</span><span class="p">;</span>
+<a name="l-559"></a>        <span class="k">end</span>
+<a name="l-560"></a>      <span class="k">end</span>
+<a name="l-561"></a>
+<a name="l-562"></a>      <span class="k">default</span><span class="o">:</span><span class="p">;</span>
+<a name="l-563"></a>
+<a name="l-564"></a>    <span class="k">endcase</span> <span class="c1">// unique case (data_st_q)</span>
+<a name="l-565"></a>  <span class="k">end</span>
 <a name="l-566"></a>
-<a name="l-567"></a>    <span class="k">return</span> <span class="o">|</span><span class="n">value</span> <span class="o">&amp;</span> <span class="o">~&amp;</span><span class="n">value</span><span class="p">;</span>
+<a name="l-567"></a>
 <a name="l-568"></a>
-<a name="l-569"></a>  <span class="k">endfunction</span> <span class="c1">// byte_mask</span>
-<a name="l-570"></a>
-<a name="l-571"></a>  <span class="c1">/////////////////////////////////</span>
-<a name="l-572"></a>  <span class="c1">// Assertions</span>
-<a name="l-573"></a>  <span class="c1">/////////////////////////////////</span>
-<a name="l-574"></a>
-<a name="l-575"></a>  <span class="c1">// stage select should always be Disable whenever it is not enabled</span>
-<a name="l-576"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">StageDisableSel_A</span><span class="p">,</span> <span class="o">!</span><span class="n">en_i</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
+<a name="l-569"></a>
+<a name="l-570"></a>  <span class="c1">///////////////////////////////</span>
+<a name="l-571"></a>  <span class="c1">// Functions</span>
+<a name="l-572"></a>  <span class="c1">///////////////////////////////</span>
+<a name="l-573"></a>
+<a name="l-574"></a>  <span class="c1">// unclear what this is supposed to be yet</span>
+<a name="l-575"></a>  <span class="c1">// right now just check to see if it not all 0&#39;s and not all 1&#39;s</span>
+<a name="l-576"></a> <span class="k">function</span> <span class="k">automatic</span> <span class="kt">logic</span> <span class="n">valid_data_chk</span> <span class="p">(</span><span class="kt">logic</span> <span class="p">[</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">value</span><span class="p">);</span>
 <a name="l-577"></a>
-<a name="l-578"></a>  <span class="c1">// Unless it is a legal command, only select disable</span>
-<a name="l-579"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">InitLegalCommands_A</span><span class="p">,</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">en_i</span> <span class="o">&amp;</span> <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StCtrlInit</span><span class="p">}</span> <span class="o">&amp;</span>
-<a name="l-580"></a>                               <span class="o">!</span><span class="p">(</span><span class="n">op_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">OpAdvance</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
+<a name="l-578"></a>    <span class="k">return</span> <span class="o">|</span><span class="n">value</span> <span class="o">&amp;</span> <span class="o">~&amp;</span><span class="n">value</span><span class="p">;</span>
+<a name="l-579"></a>
+<a name="l-580"></a>  <span class="k">endfunction</span> <span class="c1">// byte_mask</span>
 <a name="l-581"></a>
-<a name="l-582"></a>  <span class="c1">// All commands are legal, so select disable only if operation is disable</span>
-<a name="l-583"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">GeneralLegalCommands_A</span><span class="p">,</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">en_i</span> <span class="o">&amp;</span>
-<a name="l-584"></a>                                  <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StCtrlCreatorRootKey</span><span class="p">,</span> <span class="n">StCtrlOwnerIntKey</span><span class="p">}</span> <span class="o">&amp;</span>
-<a name="l-585"></a>                                  <span class="p">(</span><span class="n">op_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">OpDisable</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
-<a name="l-586"></a>
-<a name="l-587"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">OwnerLegalCommands_A</span><span class="p">,</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">en_i</span> <span class="o">&amp;</span> <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StCtrlOwnerKey</span><span class="p">}</span> <span class="o">&amp;</span>
-<a name="l-588"></a>                                <span class="p">(</span><span class="n">op_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">OpAdvance</span><span class="p">,</span> <span class="n">OpDisable</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
-<a name="l-589"></a>
-<a name="l-590"></a>  <span class="c1">// load_key should not be high if there is no ongoing operation</span>
-<a name="l-591"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">LoadKey_A</span><span class="p">,</span> <span class="n">load_key_o</span> <span class="o">|-&gt;</span> <span class="n">op_start_i</span><span class="p">)</span>
+<a name="l-582"></a>  <span class="c1">/////////////////////////////////</span>
+<a name="l-583"></a>  <span class="c1">// Assertions</span>
+<a name="l-584"></a>  <span class="c1">/////////////////////////////////</span>
+<a name="l-585"></a>
+<a name="l-586"></a>  <span class="c1">// stage select should always be Disable whenever it is not enabled</span>
+<a name="l-587"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">StageDisableSel_A</span><span class="p">,</span> <span class="o">!</span><span class="n">en_i</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
+<a name="l-588"></a>
+<a name="l-589"></a>  <span class="c1">// Unless it is a legal command, only select disable</span>
+<a name="l-590"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">InitLegalCommands_A</span><span class="p">,</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">en_i</span> <span class="o">&amp;</span> <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StCtrlInit</span><span class="p">}</span> <span class="o">&amp;</span>
+<a name="l-591"></a>                               <span class="o">!</span><span class="p">(</span><span class="n">op_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">OpAdvance</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
 <a name="l-592"></a>
-<a name="l-593"></a><span class="k">endmodule</span>
+<a name="l-593"></a>  <span class="c1">// All commands are legal, so select disable only if operation is disable</span>
+<a name="l-594"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">GeneralLegalCommands_A</span><span class="p">,</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">en_i</span> <span class="o">&amp;</span>
+<a name="l-595"></a>                                  <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StCtrlCreatorRootKey</span><span class="p">,</span> <span class="n">StCtrlOwnerIntKey</span><span class="p">}</span> <span class="o">&amp;</span>
+<a name="l-596"></a>                                  <span class="p">(</span><span class="n">op_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">OpDisable</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
+<a name="l-597"></a>
+<a name="l-598"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">OwnerLegalCommands_A</span><span class="p">,</span> <span class="n">op_start_i</span> <span class="o">&amp;</span> <span class="n">en_i</span> <span class="o">&amp;</span> <span class="n">state_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StCtrlOwnerKey</span><span class="p">}</span> <span class="o">&amp;</span>
+<a name="l-599"></a>                                <span class="p">(</span><span class="n">op_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">OpAdvance</span><span class="p">,</span> <span class="n">OpDisable</span><span class="p">})</span> <span class="o">|-&gt;</span> <span class="n">stage_sel_o</span> <span class="o">==</span> <span class="n">Disable</span><span class="p">)</span>
+<a name="l-600"></a>
+<a name="l-601"></a>  <span class="c1">// load_key should not be high if there is no ongoing operation</span>
+<a name="l-602"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">LoadKey_A</span><span class="p">,</span> <span class="n">load_key_o</span> <span class="o">|-&gt;</span> <span class="n">op_start_i</span><span class="p">)</span>
+<a name="l-603"></a>
+<a name="l-604"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

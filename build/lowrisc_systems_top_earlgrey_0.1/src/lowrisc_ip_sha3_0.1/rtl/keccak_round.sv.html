@@ -434,14 +434,14 @@
 <a name="l-22"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">DInAddr</span>  <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">DInEntry</span><span class="p">),</span>
 <a name="l-23"></a>
 <a name="l-24"></a>  <span class="c1">// Control parameters</span>
-<a name="l-25"></a>  <span class="k">parameter</span>  <span class="kt">bit</span> <span class="n">EnMasking</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1">// Enable secure hardening</span>
+<a name="l-25"></a>  <span class="k">parameter</span>  <span class="kt">bit</span> <span class="n">EnMasking</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">,</span>  <span class="c1">// Enable secure hardening</span>
 <a name="l-26"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">Share</span>     <span class="o">=</span> <span class="n">EnMasking</span> <span class="o">?</span> <span class="mi">2</span> <span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
 <a name="l-27"></a>
 <a name="l-28"></a>  <span class="c1">// If ReuseShare is not 0, the logic will use unused sheet as an entropy</span>
 <a name="l-29"></a>  <span class="c1">// at Chi stage. It still needs small portion of the fresh entropy from</span>
 <a name="l-30"></a>  <span class="c1">// rand_data_i but the amount required are significantly small.</span>
 <a name="l-31"></a>  <span class="c1">// TODO: Implement the feature inside keccak_2share</span>
-<a name="l-32"></a>  <span class="k">parameter</span>  <span class="kt">int</span> <span class="n">ReuseShare</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1">// Re-use adjacent share for entropy</span>
+<a name="l-32"></a>  <span class="k">parameter</span>  <span class="kt">bit</span> <span class="n">ReuseShare</span> <span class="o">=</span> <span class="mb">1&#39;b0</span>  <span class="c1">// Re-use adjacent share for entropy</span>
 <a name="l-33"></a><span class="p">)</span> <span class="p">(</span>
 <a name="l-34"></a>  <span class="k">input</span> <span class="n">clk_i</span><span class="p">,</span>
 <a name="l-35"></a>  <span class="k">input</span> <span class="n">rst_ni</span><span class="p">,</span>
@@ -539,7 +539,7 @@
 <a name="l-127"></a>  <span class="c1">//////////////////////</span>
 <a name="l-128"></a>
 <a name="l-129"></a>  <span class="c1">// state inputs</span>
-<a name="l-130"></a>  <span class="k">assign</span> <span class="n">rnd_eq_end</span> <span class="o">=</span> <span class="p">(</span><span class="n">round</span> <span class="o">==</span> <span class="n">MaxRound</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+<a name="l-130"></a>  <span class="k">assign</span> <span class="n">rnd_eq_end</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">&#39;(</span><span class="n">round</span><span class="p">)</span> <span class="o">==</span> <span class="n">MaxRound</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
 <a name="l-131"></a>
 <a name="l-132"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
 <a name="l-133"></a>      <span class="n">StIdle</span><span class="p">,</span>
@@ -719,11 +719,11 @@
 <a name="l-307"></a>    <span class="n">storage_d</span> <span class="o">=</span> <span class="n">keccak_out</span><span class="p">;</span>
 <a name="l-308"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">xor_message</span><span class="p">)</span> <span class="k">begin</span>
 <a name="l-309"></a>      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-310"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">DInEntry</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-310"></a>        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">DInEntry</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
 <a name="l-311"></a>          <span class="c1">// TODO: handle If Width is not integer divisable by DInWidth</span>
 <a name="l-312"></a>          <span class="c1">// Currently it is not allowed to have partial write</span>
 <a name="l-313"></a>          <span class="c1">// Please see the Assertion `WidthDivisableByDInWidth_A`</span>
-<a name="l-314"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">addr_i</span> <span class="o">==</span> <span class="p">$</span><span class="kt">unsigned</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">begin</span>
+<a name="l-314"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">addr_i</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="n">DInAddr</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">])</span> <span class="k">begin</span>
 <a name="l-315"></a>            <span class="n">storage_d</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="o">*</span><span class="n">DInWidth</span><span class="o">+:</span><span class="n">DInWidth</span><span class="p">]</span> <span class="o">=</span>
 <a name="l-316"></a>              <span class="n">storage</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="o">*</span><span class="n">DInWidth</span><span class="o">+:</span><span class="n">DInWidth</span><span class="p">]</span> <span class="o">^</span> <span class="n">data_i</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
 <a name="l-317"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>

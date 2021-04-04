@@ -72,7 +72,14 @@
 <span class="normal"><a href="#l-64">64</a></span>
 <span class="normal"><a href="#l-65">65</a></span>
 <span class="normal"><a href="#l-66">66</a></span>
-<span class="normal"><a href="#l-67">67</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-67">67</a></span>
+<span class="normal"><a href="#l-68">68</a></span>
+<span class="normal"><a href="#l-69">69</a></span>
+<span class="normal"><a href="#l-70">70</a></span>
+<span class="normal"><a href="#l-71">71</a></span>
+<span class="normal"><a href="#l-72">72</a></span>
+<span class="normal"><a href="#l-73">73</a></span>
+<span class="normal"><a href="#l-74">74</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -92,7 +99,7 @@
 <a name="l-18"></a>  <span class="k">input</span> <span class="p">[</span><span class="n">NumWkups</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">wakeups_i</span><span class="p">,</span>
 <a name="l-19"></a>  <span class="k">input</span> <span class="n">fall_through_i</span><span class="p">,</span>
 <a name="l-20"></a>  <span class="k">input</span> <span class="n">abort_i</span><span class="p">,</span>
-<a name="l-21"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">TotalWakeWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">info_o</span>
+<a name="l-21"></a>  <span class="k">output</span> <span class="n">pwrmgr_hw2reg_wake_info_reg_t</span> <span class="n">info_o</span>
 <a name="l-22"></a><span class="p">);</span>
 <a name="l-23"></a>
 <a name="l-24"></a>  <span class="kt">logic</span> <span class="n">record_en</span><span class="p">;</span>
@@ -126,19 +133,26 @@
 <a name="l-52"></a>    <span class="k">end</span>
 <a name="l-53"></a>  <span class="k">end</span>
 <a name="l-54"></a>
-<a name="l-55"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-56"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-57"></a>      <span class="n">info_o</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-58"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">wr_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-59"></a>      <span class="n">info_o</span> <span class="o">&lt;=</span> <span class="n">info_o</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_i</span><span class="p">;</span> <span class="c1">// W1C</span>
-<a name="l-60"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">record_en</span><span class="p">)</span> <span class="k">begin</span> <span class="c1">// If set once, hold until clear</span>
-<a name="l-61"></a>      <span class="n">info_o</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">NumWkups</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">info_o</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">NumWkups</span><span class="p">]</span> <span class="o">|</span> <span class="n">wakeups_i</span><span class="p">;</span>
-<a name="l-62"></a>      <span class="n">info_o</span><span class="p">[</span><span class="n">NumWkups</span> <span class="o">+:</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">info_o</span><span class="p">[</span><span class="n">NumWkups</span> <span class="o">+:</span> <span class="mi">2</span><span class="p">]</span> <span class="o">|</span> <span class="p">{</span><span class="n">abort_i</span><span class="p">,</span> <span class="n">fall_through_i</span><span class="p">};</span>
-<a name="l-63"></a>    <span class="k">end</span>
-<a name="l-64"></a>  <span class="k">end</span>
-<a name="l-65"></a>
+<a name="l-55"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">TotalWakeWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">info</span><span class="p">;</span>
+<a name="l-56"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-57"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-58"></a>      <span class="n">info</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-59"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">wr_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-60"></a>      <span class="n">info</span> <span class="o">&lt;=</span> <span class="n">info</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">data_i</span><span class="p">;</span> <span class="c1">// W1C</span>
+<a name="l-61"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">record_en</span><span class="p">)</span> <span class="k">begin</span> <span class="c1">// If set once, hold until clear</span>
+<a name="l-62"></a>      <span class="n">info</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">NumWkups</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">info</span><span class="p">[</span><span class="mi">0</span> <span class="o">+:</span> <span class="n">NumWkups</span><span class="p">]</span> <span class="o">|</span> <span class="n">wakeups_i</span><span class="p">;</span>
+<a name="l-63"></a>      <span class="n">info</span><span class="p">[</span><span class="n">NumWkups</span> <span class="o">+:</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">info</span><span class="p">[</span><span class="n">NumWkups</span> <span class="o">+:</span> <span class="mi">2</span><span class="p">]</span> <span class="o">|</span> <span class="p">{</span><span class="n">abort_i</span><span class="p">,</span> <span class="n">fall_through_i</span><span class="p">};</span>
+<a name="l-64"></a>    <span class="k">end</span>
+<a name="l-65"></a>  <span class="k">end</span>
 <a name="l-66"></a>
-<a name="l-67"></a><span class="k">endmodule</span>
+<a name="l-67"></a>  <span class="c1">// assign outputs</span>
+<a name="l-68"></a>  <span class="k">assign</span> <span class="n">info_o</span><span class="p">.</span><span class="n">abort</span><span class="p">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">NumWkups</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>
+<a name="l-69"></a>  <span class="k">assign</span> <span class="n">info_o</span><span class="p">.</span><span class="n">fall_through</span><span class="p">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">NumWkups</span><span class="p">];</span>
+<a name="l-70"></a>  <span class="k">assign</span> <span class="n">info_o</span><span class="p">.</span><span class="n">reasons</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">NumWkups</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-71"></a>
+<a name="l-72"></a>
+<a name="l-73"></a>
+<a name="l-74"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>
