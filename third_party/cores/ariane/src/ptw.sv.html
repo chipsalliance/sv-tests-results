@@ -490,326 +490,326 @@
 <a name="l-78"></a>      <span class="n">IDLE</span><span class="p">,</span>
 <a name="l-79"></a>      <span class="n">WAIT_GRANT</span><span class="p">,</span>
 <a name="l-80"></a>      <span class="n">PTE_LOOKUP</span><span class="p">,</span>
-<a name="l-81"></a>      <span class="n">WAIT_RVALID</span><span class="p">,</span>
-<a name="l-82"></a>      <span class="n">PROPAGATE_ERROR</span><span class="p">,</span>
-<a name="l-83"></a>      <span class="n">PROPAGATE_ACCESS_ERROR</span>
-<a name="l-84"></a>    <span class="p">}</span> <span class="n">state_q</span><span class="p">,</span> <span class="n">state_d</span><span class="p">;</span>
-<a name="l-85"></a>
-<a name="l-86"></a>    <span class="c1">// SV39 defines three levels of page tables</span>
-<a name="l-87"></a>    <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-88"></a>        <span class="n">LVL1</span><span class="p">,</span> <span class="n">LVL2</span><span class="p">,</span> <span class="n">LVL3</span>
-<a name="l-89"></a>    <span class="p">}</span> <span class="n">ptw_lvl_q</span><span class="p">,</span> <span class="n">ptw_lvl_n</span><span class="p">;</span>
-<a name="l-90"></a>
-<a name="l-91"></a>    <span class="c1">// is this an instruction page table walk?</span>
-<a name="l-92"></a>    <span class="kt">logic</span> <span class="n">is_instr_ptw_q</span><span class="p">,</span>   <span class="n">is_instr_ptw_n</span><span class="p">;</span>
-<a name="l-93"></a>    <span class="kt">logic</span> <span class="n">global_mapping_q</span><span class="p">,</span> <span class="n">global_mapping_n</span><span class="p">;</span>
-<a name="l-94"></a>    <span class="c1">// latched tag signal</span>
-<a name="l-95"></a>    <span class="kt">logic</span> <span class="n">tag_valid_n</span><span class="p">,</span>      <span class="n">tag_valid_q</span><span class="p">;</span>
-<a name="l-96"></a>    <span class="c1">// register the ASID</span>
-<a name="l-97"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">ASID_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">tlb_update_asid_q</span><span class="p">,</span> <span class="n">tlb_update_asid_n</span><span class="p">;</span>
-<a name="l-98"></a>    <span class="c1">// register the VPN we need to walk, SV39 defines a 39 bit virtual address</span>
-<a name="l-99"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">vaddr_q</span><span class="p">,</span>   <span class="n">vaddr_n</span><span class="p">;</span>
-<a name="l-100"></a>    <span class="c1">// 4 byte aligned physical pointer</span>
-<a name="l-101"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">ptw_pptr_q</span><span class="p">,</span> <span class="n">ptw_pptr_n</span><span class="p">;</span>
-<a name="l-102"></a>
-<a name="l-103"></a>    <span class="c1">// Assignments</span>
-<a name="l-104"></a>    <span class="k">assign</span> <span class="n">update_vaddr_o</span>  <span class="o">=</span> <span class="n">vaddr_q</span><span class="p">;</span>
-<a name="l-105"></a>
-<a name="l-106"></a>    <span class="k">assign</span> <span class="n">ptw_active_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">state_q</span> <span class="o">!=</span> <span class="n">IDLE</span><span class="p">);</span>
-<a name="l-107"></a>    <span class="k">assign</span> <span class="n">walking_instr_o</span> <span class="o">=</span> <span class="n">is_instr_ptw_q</span><span class="p">;</span>
-<a name="l-108"></a>    <span class="c1">// directly output the correct physical address</span>
-<a name="l-109"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">address_index</span> <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">[</span><span class="n">DCACHE_INDEX_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a name="l-110"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">address_tag</span>   <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">[</span><span class="n">DCACHE_INDEX_WIDTH</span><span class="o">+</span><span class="n">DCACHE_TAG_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">DCACHE_INDEX_WIDTH</span><span class="p">];</span>
-<a name="l-111"></a>    <span class="c1">// we are never going to kill this request</span>
-<a name="l-112"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">kill_req</span>      <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-113"></a>    <span class="c1">// we are never going to write with the HPTW</span>
-<a name="l-114"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_wdata</span>    <span class="o">=</span> <span class="mb">64&#39;b0</span><span class="p">;</span>
-<a name="l-115"></a>    <span class="c1">// -----------</span>
-<a name="l-116"></a>    <span class="c1">// TLB Update</span>
-<a name="l-117"></a>    <span class="c1">// -----------</span>
-<a name="l-118"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">vpn</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">39</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">12</span><span class="p">]};</span>
-<a name="l-119"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">vpn</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">39</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">12</span><span class="p">]};</span>
-<a name="l-120"></a>    <span class="c1">// update the correct page table level</span>
-<a name="l-121"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">is_2M</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span><span class="p">);</span>
-<a name="l-122"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">is_1G</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span><span class="p">);</span>
-<a name="l-123"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">is_2M</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span><span class="p">);</span>
-<a name="l-124"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">is_1G</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span><span class="p">);</span>
-<a name="l-125"></a>    <span class="c1">// output the correct ASID</span>
-<a name="l-126"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">asid</span> <span class="o">=</span> <span class="n">tlb_update_asid_q</span><span class="p">;</span>
-<a name="l-127"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">asid</span> <span class="o">=</span> <span class="n">tlb_update_asid_q</span><span class="p">;</span>
-<a name="l-128"></a>    <span class="c1">// set the global mapping bit</span>
-<a name="l-129"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">pte</span> <span class="o">|</span> <span class="p">(</span><span class="n">global_mapping_q</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">);</span>
-<a name="l-130"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">pte</span> <span class="o">|</span> <span class="p">(</span><span class="n">global_mapping_q</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">);</span>
-<a name="l-131"></a>
-<a name="l-132"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">tag_valid</span>      <span class="o">=</span> <span class="n">tag_valid_q</span><span class="p">;</span>
-<a name="l-133"></a>
-<a name="l-134"></a>    <span class="kt">logic</span> <span class="n">allow_access</span><span class="p">;</span>
-<a name="l-135"></a>
-<a name="l-136"></a>    <span class="k">assign</span> <span class="n">bad_paddr_o</span> <span class="o">=</span> <span class="n">ptw_access_exception_o</span> <span class="o">?</span> <span class="n">ptw_pptr_q</span> <span class="o">:</span> <span class="mb">&#39;b0</span><span class="p">;</span>
-<a name="l-137"></a>
-<a name="l-138"></a>    <span class="n">pmp</span> <span class="p">#(</span>
-<a name="l-139"></a>        <span class="p">.</span><span class="n">PLEN</span>       <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span>            <span class="p">),</span>
-<a name="l-140"></a>        <span class="p">.</span><span class="n">PMP_LEN</span>    <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span> <span class="o">-</span> <span class="mi">2</span>        <span class="p">),</span>
-<a name="l-141"></a>        <span class="p">.</span><span class="n">NR_ENTRIES</span> <span class="p">(</span> <span class="n">ArianeCfg</span><span class="p">.</span><span class="n">NrPMPEntries</span> <span class="p">)</span>
-<a name="l-142"></a>    <span class="p">)</span> <span class="n">i_pmp_ptw</span> <span class="p">(</span>
-<a name="l-143"></a>        <span class="p">.</span><span class="n">addr_i</span>        <span class="p">(</span> <span class="n">ptw_pptr_q</span>         <span class="p">),</span>
-<a name="l-144"></a>        <span class="c1">// PTW access are always checked as if in S-Mode...</span>
-<a name="l-145"></a>        <span class="p">.</span><span class="n">priv_lvl_i</span>    <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PRIV_LVL_S</span>  <span class="p">),</span>
-<a name="l-146"></a>        <span class="c1">// ...and they are always loads</span>
-<a name="l-147"></a>        <span class="p">.</span><span class="n">access_type_i</span> <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">ACCESS_READ</span> <span class="p">),</span>
-<a name="l-148"></a>        <span class="c1">// Configuration</span>
-<a name="l-149"></a>        <span class="p">.</span><span class="n">conf_addr_i</span>   <span class="p">(</span> <span class="n">pmpaddr_i</span>          <span class="p">),</span>
-<a name="l-150"></a>        <span class="p">.</span><span class="n">conf_i</span>        <span class="p">(</span> <span class="n">pmpcfg_i</span>           <span class="p">),</span>
-<a name="l-151"></a>        <span class="p">.</span><span class="n">allow_o</span>       <span class="p">(</span> <span class="n">allow_access</span>       <span class="p">)</span>
-<a name="l-152"></a>    <span class="p">);</span>
-<a name="l-153"></a>
-<a name="l-154"></a>    <span class="c1">//-------------------</span>
-<a name="l-155"></a>    <span class="c1">// Page table walker</span>
-<a name="l-156"></a>    <span class="c1">//-------------------</span>
-<a name="l-157"></a>    <span class="c1">// A virtual address va is translated into a physical address pa as follows:</span>
-<a name="l-158"></a>    <span class="c1">// 1. Let a be sptbr.ppn × PAGESIZE, and let i = LEVELS-1. (For Sv39,</span>
-<a name="l-159"></a>    <span class="c1">//    PAGESIZE=2^12 and LEVELS=3.)</span>
-<a name="l-160"></a>    <span class="c1">// 2. Let pte be the value of the PTE at address a+va.vpn[i]×PTESIZE. (For</span>
-<a name="l-161"></a>    <span class="c1">//    Sv32, PTESIZE=4.)</span>
-<a name="l-162"></a>    <span class="c1">// 3. If pte.v = 0, or if pte.r = 0 and pte.w = 1, stop and raise an access</span>
-<a name="l-163"></a>    <span class="c1">//    exception.</span>
-<a name="l-164"></a>    <span class="c1">// 4. Otherwise, the PTE is valid. If pte.r = 1 or pte.x = 1, go to step 5.</span>
-<a name="l-165"></a>    <span class="c1">//    Otherwise, this PTE is a pointer to the next level of the page table.</span>
-<a name="l-166"></a>    <span class="c1">//    Let i=i-1. If i &lt; 0, stop and raise an access exception. Otherwise, let</span>
-<a name="l-167"></a>    <span class="c1">//    a = pte.ppn × PAGESIZE and go to step 2.</span>
-<a name="l-168"></a>    <span class="c1">// 5. A leaf PTE has been found. Determine if the requested memory access</span>
-<a name="l-169"></a>    <span class="c1">//    is allowed by the pte.r, pte.w, and pte.x bits. If not, stop and</span>
-<a name="l-170"></a>    <span class="c1">//    raise an access exception. Otherwise, the translation is successful.</span>
-<a name="l-171"></a>    <span class="c1">//    Set pte.a to 1, and, if the memory access is a store, set pte.d to 1.</span>
-<a name="l-172"></a>    <span class="c1">//    The translated physical address is given as follows:</span>
-<a name="l-173"></a>    <span class="c1">//      - pa.pgoff = va.pgoff.</span>
-<a name="l-174"></a>    <span class="c1">//      - If i &gt; 0, then this is a superpage translation and</span>
-<a name="l-175"></a>    <span class="c1">//        pa.ppn[i-1:0] = va.vpn[i-1:0].</span>
-<a name="l-176"></a>    <span class="c1">//      - pa.ppn[LEVELS-1:i] = pte.ppn[LEVELS-1:i].</span>
-<a name="l-177"></a>    <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">ptw</span>
-<a name="l-178"></a>        <span class="c1">// default assignments</span>
-<a name="l-179"></a>        <span class="c1">// PTW memory interface</span>
-<a name="l-180"></a>        <span class="n">tag_valid_n</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-181"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_req</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-182"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_be</span>     <span class="o">=</span> <span class="mh">8&#39;hFF</span><span class="p">;</span>
-<a name="l-183"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_size</span>   <span class="o">=</span> <span class="mb">2&#39;b11</span><span class="p">;</span>
-<a name="l-184"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_we</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-185"></a>        <span class="n">ptw_error_o</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-186"></a>        <span class="n">ptw_access_exception_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-187"></a>        <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-188"></a>        <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-189"></a>        <span class="n">is_instr_ptw_n</span>         <span class="o">=</span> <span class="n">is_instr_ptw_q</span><span class="p">;</span>
-<a name="l-190"></a>        <span class="n">ptw_lvl_n</span>              <span class="o">=</span> <span class="n">ptw_lvl_q</span><span class="p">;</span>
-<a name="l-191"></a>        <span class="n">ptw_pptr_n</span>             <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">;</span>
-<a name="l-192"></a>        <span class="n">state_d</span>                <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
-<a name="l-193"></a>        <span class="n">global_mapping_n</span>       <span class="o">=</span> <span class="n">global_mapping_q</span><span class="p">;</span>
-<a name="l-194"></a>        <span class="c1">// input registers</span>
-<a name="l-195"></a>        <span class="n">tlb_update_asid_n</span>     <span class="o">=</span> <span class="n">tlb_update_asid_q</span><span class="p">;</span>
-<a name="l-196"></a>        <span class="n">vaddr_n</span>               <span class="o">=</span> <span class="n">vaddr_q</span><span class="p">;</span>
-<a name="l-197"></a>
-<a name="l-198"></a>        <span class="n">itlb_miss_o</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-199"></a>        <span class="n">dtlb_miss_o</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-200"></a>
-<a name="l-201"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
+<a name="l-81"></a>      <span class="n">PROPAGATE_ERROR</span><span class="p">,</span>
+<a name="l-82"></a>      <span class="n">PROPAGATE_ACCESS_ERROR</span>
+<a name="l-83"></a>    <span class="p">}</span> <span class="n">state_q</span><span class="p">,</span> <span class="n">state_d</span><span class="p">;</span>
+<a name="l-84"></a>
+<a name="l-85"></a>    <span class="c1">// SV39 defines three levels of page tables</span>
+<a name="l-86"></a>    <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a name="l-87"></a>        <span class="n">LVL1</span><span class="p">,</span> <span class="n">LVL2</span><span class="p">,</span> <span class="n">LVL3</span>
+<a name="l-88"></a>    <span class="p">}</span> <span class="n">ptw_lvl_q</span><span class="p">,</span> <span class="n">ptw_lvl_n</span><span class="p">;</span>
+<a name="l-89"></a>
+<a name="l-90"></a>    <span class="c1">// is this an instruction page table walk?</span>
+<a name="l-91"></a>    <span class="kt">logic</span> <span class="n">is_instr_ptw_q</span><span class="p">,</span>   <span class="n">is_instr_ptw_n</span><span class="p">;</span>
+<a name="l-92"></a>    <span class="kt">logic</span> <span class="n">global_mapping_q</span><span class="p">,</span> <span class="n">global_mapping_n</span><span class="p">;</span>
+<a name="l-93"></a>    <span class="c1">// latched tag signal</span>
+<a name="l-94"></a>    <span class="kt">logic</span> <span class="n">tag_valid_n</span><span class="p">,</span>      <span class="n">tag_valid_q</span><span class="p">;</span>
+<a name="l-95"></a>    <span class="c1">// latched kill signal</span>
+<a name="l-96"></a>    <span class="kt">logic</span> <span class="n">kill_req_q</span><span class="p">,</span>       <span class="n">kill_req_d</span><span class="p">;</span>
+<a name="l-97"></a>    <span class="c1">// register the ASID</span>
+<a name="l-98"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">ASID_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>  <span class="n">tlb_update_asid_q</span><span class="p">,</span> <span class="n">tlb_update_asid_n</span><span class="p">;</span>
+<a name="l-99"></a>    <span class="c1">// register the VPN we need to walk, SV39 defines a 39 bit virtual address</span>
+<a name="l-100"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">VLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">vaddr_q</span><span class="p">,</span>   <span class="n">vaddr_n</span><span class="p">;</span>
+<a name="l-101"></a>    <span class="c1">// 4 byte aligned physical pointer</span>
+<a name="l-102"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">ptw_pptr_q</span><span class="p">,</span> <span class="n">ptw_pptr_n</span><span class="p">;</span>
+<a name="l-103"></a>
+<a name="l-104"></a>    <span class="c1">// Assignments</span>
+<a name="l-105"></a>    <span class="k">assign</span> <span class="n">update_vaddr_o</span>  <span class="o">=</span> <span class="n">vaddr_q</span><span class="p">;</span>
+<a name="l-106"></a>
+<a name="l-107"></a>    <span class="k">assign</span> <span class="n">ptw_active_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">state_q</span> <span class="o">!=</span> <span class="n">IDLE</span><span class="p">);</span>
+<a name="l-108"></a>    <span class="k">assign</span> <span class="n">walking_instr_o</span> <span class="o">=</span> <span class="n">is_instr_ptw_q</span><span class="p">;</span>
+<a name="l-109"></a>    <span class="c1">// directly output the correct physical address</span>
+<a name="l-110"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">address_index</span> <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">[</span><span class="n">DCACHE_INDEX_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a name="l-111"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">address_tag</span>   <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">[</span><span class="n">DCACHE_INDEX_WIDTH</span><span class="o">+</span><span class="n">DCACHE_TAG_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">DCACHE_INDEX_WIDTH</span><span class="p">];</span>
+<a name="l-112"></a>    <span class="c1">// kill this request</span>
+<a name="l-113"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">kill_req</span>      <span class="o">=</span> <span class="n">kill_req_q</span><span class="p">;</span>
+<a name="l-114"></a>    <span class="c1">// we are never going to write with the HPTW</span>
+<a name="l-115"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_wdata</span>    <span class="o">=</span> <span class="mb">64&#39;b0</span><span class="p">;</span>
+<a name="l-116"></a>    <span class="c1">// -----------</span>
+<a name="l-117"></a>    <span class="c1">// TLB Update</span>
+<a name="l-118"></a>    <span class="c1">// -----------</span>
+<a name="l-119"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">vpn</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">39</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">12</span><span class="p">]};</span>
+<a name="l-120"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">vpn</span> <span class="o">=</span> <span class="p">{{</span><span class="mi">39</span><span class="o">-</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="p">{</span><span class="mb">1&#39;b0</span><span class="p">}},</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">12</span><span class="p">]};</span>
+<a name="l-121"></a>    <span class="c1">// update the correct page table level</span>
+<a name="l-122"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">is_2M</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span><span class="p">);</span>
+<a name="l-123"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">is_1G</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span><span class="p">);</span>
+<a name="l-124"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">is_2M</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span><span class="p">);</span>
+<a name="l-125"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">is_1G</span> <span class="o">=</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span><span class="p">);</span>
+<a name="l-126"></a>    <span class="c1">// output the correct ASID</span>
+<a name="l-127"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">asid</span> <span class="o">=</span> <span class="n">tlb_update_asid_q</span><span class="p">;</span>
+<a name="l-128"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">asid</span> <span class="o">=</span> <span class="n">tlb_update_asid_q</span><span class="p">;</span>
+<a name="l-129"></a>    <span class="c1">// set the global mapping bit</span>
+<a name="l-130"></a>    <span class="k">assign</span> <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">pte</span> <span class="o">|</span> <span class="p">(</span><span class="n">global_mapping_q</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">);</span>
+<a name="l-131"></a>    <span class="k">assign</span> <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">pte</span> <span class="o">|</span> <span class="p">(</span><span class="n">global_mapping_q</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">);</span>
+<a name="l-132"></a>
+<a name="l-133"></a>    <span class="k">assign</span> <span class="n">req_port_o</span><span class="p">.</span><span class="n">tag_valid</span>      <span class="o">=</span> <span class="n">tag_valid_q</span><span class="p">;</span>
+<a name="l-134"></a>
+<a name="l-135"></a>    <span class="kt">logic</span> <span class="n">allow_access</span><span class="p">;</span>
+<a name="l-136"></a>
+<a name="l-137"></a>    <span class="k">assign</span> <span class="n">bad_paddr_o</span> <span class="o">=</span> <span class="n">ptw_access_exception_o</span> <span class="o">?</span> <span class="n">ptw_pptr_q</span> <span class="o">:</span> <span class="mb">&#39;b0</span><span class="p">;</span>
+<a name="l-138"></a>
+<a name="l-139"></a>    <span class="n">pmp</span> <span class="p">#(</span>
+<a name="l-140"></a>        <span class="p">.</span><span class="n">PLEN</span>       <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span>            <span class="p">),</span>
+<a name="l-141"></a>        <span class="p">.</span><span class="n">PMP_LEN</span>    <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PLEN</span> <span class="o">-</span> <span class="mi">2</span>        <span class="p">),</span>
+<a name="l-142"></a>        <span class="p">.</span><span class="n">NR_ENTRIES</span> <span class="p">(</span> <span class="n">ArianeCfg</span><span class="p">.</span><span class="n">NrPMPEntries</span> <span class="p">)</span>
+<a name="l-143"></a>    <span class="p">)</span> <span class="n">i_pmp_ptw</span> <span class="p">(</span>
+<a name="l-144"></a>        <span class="p">.</span><span class="n">addr_i</span>        <span class="p">(</span> <span class="n">ptw_pptr_q</span>         <span class="p">),</span>
+<a name="l-145"></a>        <span class="c1">// PTW access are always checked as if in S-Mode...</span>
+<a name="l-146"></a>        <span class="p">.</span><span class="n">priv_lvl_i</span>    <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">PRIV_LVL_S</span>  <span class="p">),</span>
+<a name="l-147"></a>        <span class="c1">// ...and they are always loads</span>
+<a name="l-148"></a>        <span class="p">.</span><span class="n">access_type_i</span> <span class="p">(</span> <span class="n">riscv</span><span class="o">::</span><span class="n">ACCESS_READ</span> <span class="p">),</span>
+<a name="l-149"></a>        <span class="c1">// Configuration</span>
+<a name="l-150"></a>        <span class="p">.</span><span class="n">conf_addr_i</span>   <span class="p">(</span> <span class="n">pmpaddr_i</span>          <span class="p">),</span>
+<a name="l-151"></a>        <span class="p">.</span><span class="n">conf_i</span>        <span class="p">(</span> <span class="n">pmpcfg_i</span>           <span class="p">),</span>
+<a name="l-152"></a>        <span class="p">.</span><span class="n">allow_o</span>       <span class="p">(</span> <span class="n">allow_access</span>       <span class="p">)</span>
+<a name="l-153"></a>    <span class="p">);</span>
+<a name="l-154"></a>
+<a name="l-155"></a>    <span class="c1">//-------------------</span>
+<a name="l-156"></a>    <span class="c1">// Page table walker</span>
+<a name="l-157"></a>    <span class="c1">//-------------------</span>
+<a name="l-158"></a>    <span class="c1">// A virtual address va is translated into a physical address pa as follows:</span>
+<a name="l-159"></a>    <span class="c1">// 1. Let a be sptbr.ppn × PAGESIZE, and let i = LEVELS-1. (For Sv39,</span>
+<a name="l-160"></a>    <span class="c1">//    PAGESIZE=2^12 and LEVELS=3.)</span>
+<a name="l-161"></a>    <span class="c1">// 2. Let pte be the value of the PTE at address a+va.vpn[i]×PTESIZE. (For</span>
+<a name="l-162"></a>    <span class="c1">//    Sv32, PTESIZE=4.)</span>
+<a name="l-163"></a>    <span class="c1">// 3. If pte.v = 0, or if pte.r = 0 and pte.w = 1, stop and raise an access</span>
+<a name="l-164"></a>    <span class="c1">//    exception.</span>
+<a name="l-165"></a>    <span class="c1">// 4. Otherwise, the PTE is valid. If pte.r = 1 or pte.x = 1, go to step 5.</span>
+<a name="l-166"></a>    <span class="c1">//    Otherwise, this PTE is a pointer to the next level of the page table.</span>
+<a name="l-167"></a>    <span class="c1">//    Let i=i-1. If i &lt; 0, stop and raise an access exception. Otherwise, let</span>
+<a name="l-168"></a>    <span class="c1">//    a = pte.ppn × PAGESIZE and go to step 2.</span>
+<a name="l-169"></a>    <span class="c1">// 5. A leaf PTE has been found. Determine if the requested memory access</span>
+<a name="l-170"></a>    <span class="c1">//    is allowed by the pte.r, pte.w, and pte.x bits. If not, stop and</span>
+<a name="l-171"></a>    <span class="c1">//    raise an access exception. Otherwise, the translation is successful.</span>
+<a name="l-172"></a>    <span class="c1">//    Set pte.a to 1, and, if the memory access is a store, set pte.d to 1.</span>
+<a name="l-173"></a>    <span class="c1">//    The translated physical address is given as follows:</span>
+<a name="l-174"></a>    <span class="c1">//      - pa.pgoff = va.pgoff.</span>
+<a name="l-175"></a>    <span class="c1">//      - If i &gt; 0, then this is a superpage translation and</span>
+<a name="l-176"></a>    <span class="c1">//        pa.ppn[i-1:0] = va.vpn[i-1:0].</span>
+<a name="l-177"></a>    <span class="c1">//      - pa.ppn[LEVELS-1:i] = pte.ppn[LEVELS-1:i].</span>
+<a name="l-178"></a>    <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">ptw</span>
+<a name="l-179"></a>        <span class="c1">// default assignments</span>
+<a name="l-180"></a>        <span class="c1">// PTW memory interface</span>
+<a name="l-181"></a>        <span class="n">tag_valid_n</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-182"></a>        <span class="n">kill_req_d</span>             <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-183"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_req</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-184"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_be</span>     <span class="o">=</span> <span class="mh">8&#39;hFF</span><span class="p">;</span>
+<a name="l-185"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_size</span>   <span class="o">=</span> <span class="mb">2&#39;b11</span><span class="p">;</span>
+<a name="l-186"></a>        <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_we</span>     <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-187"></a>        <span class="n">ptw_error_o</span>            <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-188"></a>        <span class="n">ptw_access_exception_o</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-189"></a>        <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-190"></a>        <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span>    <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-191"></a>        <span class="n">is_instr_ptw_n</span>         <span class="o">=</span> <span class="n">is_instr_ptw_q</span><span class="p">;</span>
+<a name="l-192"></a>        <span class="n">ptw_lvl_n</span>              <span class="o">=</span> <span class="n">ptw_lvl_q</span><span class="p">;</span>
+<a name="l-193"></a>        <span class="n">ptw_pptr_n</span>             <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">;</span>
+<a name="l-194"></a>        <span class="n">state_d</span>                <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
+<a name="l-195"></a>        <span class="n">global_mapping_n</span>       <span class="o">=</span> <span class="n">global_mapping_q</span><span class="p">;</span>
+<a name="l-196"></a>        <span class="c1">// input registers</span>
+<a name="l-197"></a>        <span class="n">tlb_update_asid_n</span>     <span class="o">=</span> <span class="n">tlb_update_asid_q</span><span class="p">;</span>
+<a name="l-198"></a>        <span class="n">vaddr_n</span>               <span class="o">=</span> <span class="n">vaddr_q</span><span class="p">;</span>
+<a name="l-199"></a>
+<a name="l-200"></a>        <span class="n">itlb_miss_o</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-201"></a>        <span class="n">dtlb_miss_o</span>           <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
 <a name="l-202"></a>
-<a name="l-203"></a>            <span class="nl">IDLE:</span> <span class="k">begin</span>
-<a name="l-204"></a>                <span class="c1">// by default we start with the top-most page table</span>
-<a name="l-205"></a>                <span class="n">ptw_lvl_n</span>        <span class="o">=</span> <span class="n">LVL1</span><span class="p">;</span>
-<a name="l-206"></a>                <span class="n">global_mapping_n</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-207"></a>                <span class="n">is_instr_ptw_n</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-208"></a>                <span class="c1">// if we got an ITLB miss</span>
-<a name="l-209"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">enable_translation_i</span> <span class="o">&amp;</span> <span class="n">itlb_access_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">itlb_hit_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dtlb_access_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-210"></a>                    <span class="n">ptw_pptr_n</span>          <span class="o">=</span> <span class="p">{</span><span class="n">satp_ppn_i</span><span class="p">,</span> <span class="n">itlb_vaddr_i</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">30</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
-<a name="l-211"></a>                    <span class="n">is_instr_ptw_n</span>      <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-212"></a>                    <span class="n">tlb_update_asid_n</span>   <span class="o">=</span> <span class="n">asid_i</span><span class="p">;</span>
-<a name="l-213"></a>                    <span class="n">vaddr_n</span>             <span class="o">=</span> <span class="n">itlb_vaddr_i</span><span class="p">;</span>
-<a name="l-214"></a>                    <span class="n">state_d</span>             <span class="o">=</span> <span class="n">WAIT_GRANT</span><span class="p">;</span>
-<a name="l-215"></a>                    <span class="n">itlb_miss_o</span>         <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-216"></a>                <span class="c1">// we got an DTLB miss</span>
-<a name="l-217"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">en_ld_st_translation_i</span> <span class="o">&amp;</span> <span class="n">dtlb_access_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dtlb_hit_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-218"></a>                    <span class="n">ptw_pptr_n</span>          <span class="o">=</span> <span class="p">{</span><span class="n">satp_ppn_i</span><span class="p">,</span> <span class="n">dtlb_vaddr_i</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">30</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
-<a name="l-219"></a>                    <span class="n">tlb_update_asid_n</span>   <span class="o">=</span> <span class="n">asid_i</span><span class="p">;</span>
-<a name="l-220"></a>                    <span class="n">vaddr_n</span>             <span class="o">=</span> <span class="n">dtlb_vaddr_i</span><span class="p">;</span>
-<a name="l-221"></a>                    <span class="n">state_d</span>             <span class="o">=</span> <span class="n">WAIT_GRANT</span><span class="p">;</span>
-<a name="l-222"></a>                    <span class="n">dtlb_miss_o</span>         <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-223"></a>                <span class="k">end</span>
-<a name="l-224"></a>            <span class="k">end</span>
-<a name="l-225"></a>
-<a name="l-226"></a>            <span class="nl">WAIT_GRANT:</span> <span class="k">begin</span>
-<a name="l-227"></a>                <span class="c1">// send a request out</span>
-<a name="l-228"></a>                <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-229"></a>                <span class="c1">// wait for the WAIT_GRANT</span>
-<a name="l-230"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_gnt</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-231"></a>                    <span class="c1">// send the tag valid signal one cycle later</span>
-<a name="l-232"></a>                    <span class="n">tag_valid_n</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-233"></a>                    <span class="n">state_d</span>     <span class="o">=</span> <span class="n">PTE_LOOKUP</span><span class="p">;</span>
-<a name="l-234"></a>                <span class="k">end</span>
-<a name="l-235"></a>            <span class="k">end</span>
-<a name="l-236"></a>
-<a name="l-237"></a>            <span class="nl">PTE_LOOKUP:</span> <span class="k">begin</span>
-<a name="l-238"></a>                <span class="c1">// we wait for the valid signal</span>
-<a name="l-239"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">data_rvalid_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-240"></a>
-<a name="l-241"></a>                    <span class="c1">// check if the global mapping bit is set</span>
-<a name="l-242"></a>                    <span class="k">if</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">g</span><span class="p">)</span>
-<a name="l-243"></a>                        <span class="n">global_mapping_n</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-244"></a>
-<a name="l-245"></a>                    <span class="c1">// -------------</span>
-<a name="l-246"></a>                    <span class="c1">// Invalid PTE</span>
+<a name="l-203"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
+<a name="l-204"></a>
+<a name="l-205"></a>            <span class="nl">IDLE:</span> <span class="k">begin</span>
+<a name="l-206"></a>                <span class="c1">// by default we start with the top-most page table</span>
+<a name="l-207"></a>                <span class="n">ptw_lvl_n</span>        <span class="o">=</span> <span class="n">LVL1</span><span class="p">;</span>
+<a name="l-208"></a>                <span class="n">global_mapping_n</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-209"></a>                <span class="n">is_instr_ptw_n</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-210"></a>                <span class="c1">// if we got an ITLB miss</span>
+<a name="l-211"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">enable_translation_i</span> <span class="o">&amp;</span> <span class="n">itlb_access_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">itlb_hit_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dtlb_access_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-212"></a>                    <span class="n">ptw_pptr_n</span>          <span class="o">=</span> <span class="p">{</span><span class="n">satp_ppn_i</span><span class="p">,</span> <span class="n">itlb_vaddr_i</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">30</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
+<a name="l-213"></a>                    <span class="n">is_instr_ptw_n</span>      <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-214"></a>                    <span class="n">tlb_update_asid_n</span>   <span class="o">=</span> <span class="n">asid_i</span><span class="p">;</span>
+<a name="l-215"></a>                    <span class="n">vaddr_n</span>             <span class="o">=</span> <span class="n">itlb_vaddr_i</span><span class="p">;</span>
+<a name="l-216"></a>                    <span class="n">state_d</span>             <span class="o">=</span> <span class="n">WAIT_GRANT</span><span class="p">;</span>
+<a name="l-217"></a>                    <span class="n">itlb_miss_o</span>         <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-218"></a>                <span class="c1">// we got an DTLB miss</span>
+<a name="l-219"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">en_ld_st_translation_i</span> <span class="o">&amp;</span> <span class="n">dtlb_access_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dtlb_hit_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-220"></a>                    <span class="n">ptw_pptr_n</span>          <span class="o">=</span> <span class="p">{</span><span class="n">satp_ppn_i</span><span class="p">,</span> <span class="n">dtlb_vaddr_i</span><span class="p">[</span><span class="n">riscv</span><span class="o">::</span><span class="n">SV</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">30</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
+<a name="l-221"></a>                    <span class="n">tlb_update_asid_n</span>   <span class="o">=</span> <span class="n">asid_i</span><span class="p">;</span>
+<a name="l-222"></a>                    <span class="n">vaddr_n</span>             <span class="o">=</span> <span class="n">dtlb_vaddr_i</span><span class="p">;</span>
+<a name="l-223"></a>                    <span class="n">state_d</span>             <span class="o">=</span> <span class="n">WAIT_GRANT</span><span class="p">;</span>
+<a name="l-224"></a>                    <span class="n">dtlb_miss_o</span>         <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-225"></a>                <span class="k">end</span>
+<a name="l-226"></a>            <span class="k">end</span>
+<a name="l-227"></a>
+<a name="l-228"></a>            <span class="nl">WAIT_GRANT:</span> <span class="k">begin</span>
+<a name="l-229"></a>                <span class="c1">// send a request out</span>
+<a name="l-230"></a>                <span class="n">req_port_o</span><span class="p">.</span><span class="n">data_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-231"></a>                <span class="c1">// wait for the WAIT_GRANT</span>
+<a name="l-232"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_gnt</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-233"></a>                    <span class="c1">// send the tag valid signal one cycle later</span>
+<a name="l-234"></a>                    <span class="n">tag_valid_n</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-235"></a>                    <span class="n">state_d</span>     <span class="o">=</span> <span class="n">PTE_LOOKUP</span><span class="p">;</span>
+<a name="l-236"></a>                <span class="k">end</span>
+<a name="l-237"></a>            <span class="k">end</span>
+<a name="l-238"></a>
+<a name="l-239"></a>            <span class="nl">PTE_LOOKUP:</span> <span class="k">begin</span>
+<a name="l-240"></a>                <span class="c1">// we wait for the valid signal</span>
+<a name="l-241"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">data_rvalid_q</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-242"></a>
+<a name="l-243"></a>                    <span class="c1">// check if the global mapping bit is set</span>
+<a name="l-244"></a>                    <span class="k">if</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">g</span><span class="p">)</span>
+<a name="l-245"></a>                        <span class="n">global_mapping_n</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-246"></a>
 <a name="l-247"></a>                    <span class="c1">// -------------</span>
-<a name="l-248"></a>                    <span class="c1">// If pte.v = 0, or if pte.r = 0 and pte.w = 1, stop and raise a page-fault exception.</span>
-<a name="l-249"></a>                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">v</span> <span class="o">||</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">pte</span><span class="p">.</span><span class="n">w</span><span class="p">))</span>
-<a name="l-250"></a>                        <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-251"></a>                    <span class="c1">// -----------</span>
-<a name="l-252"></a>                    <span class="c1">// Valid PTE</span>
+<a name="l-248"></a>                    <span class="c1">// Invalid PTE</span>
+<a name="l-249"></a>                    <span class="c1">// -------------</span>
+<a name="l-250"></a>                    <span class="c1">// If pte.v = 0, or if pte.r = 0 and pte.w = 1, stop and raise a page-fault exception.</span>
+<a name="l-251"></a>                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">v</span> <span class="o">||</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">r</span> <span class="o">&amp;&amp;</span> <span class="n">pte</span><span class="p">.</span><span class="n">w</span><span class="p">))</span>
+<a name="l-252"></a>                        <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
 <a name="l-253"></a>                    <span class="c1">// -----------</span>
-<a name="l-254"></a>                    <span class="k">else</span> <span class="k">begin</span>
-<a name="l-255"></a>                        <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
-<a name="l-256"></a>                        <span class="c1">// it is a valid PTE</span>
-<a name="l-257"></a>                        <span class="c1">// if pte.r = 1 or pte.x = 1 it is a valid PTE</span>
-<a name="l-258"></a>                        <span class="k">if</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">r</span> <span class="o">||</span> <span class="n">pte</span><span class="p">.</span><span class="n">x</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-259"></a>                            <span class="c1">// Valid translation found (either 1G, 2M or 4K entry)</span>
-<a name="l-260"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">is_instr_ptw_q</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-261"></a>                                <span class="c1">// ------------</span>
-<a name="l-262"></a>                                <span class="c1">// Update ITLB</span>
+<a name="l-254"></a>                    <span class="c1">// Valid PTE</span>
+<a name="l-255"></a>                    <span class="c1">// -----------</span>
+<a name="l-256"></a>                    <span class="k">else</span> <span class="k">begin</span>
+<a name="l-257"></a>                        <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
+<a name="l-258"></a>                        <span class="c1">// it is a valid PTE</span>
+<a name="l-259"></a>                        <span class="c1">// if pte.r = 1 or pte.x = 1 it is a valid PTE</span>
+<a name="l-260"></a>                        <span class="k">if</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">r</span> <span class="o">||</span> <span class="n">pte</span><span class="p">.</span><span class="n">x</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-261"></a>                            <span class="c1">// Valid translation found (either 1G, 2M or 4K entry)</span>
+<a name="l-262"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">is_instr_ptw_q</span><span class="p">)</span> <span class="k">begin</span>
 <a name="l-263"></a>                                <span class="c1">// ------------</span>
-<a name="l-264"></a>                                <span class="c1">// If page is not executable, we can directly raise an error. This</span>
-<a name="l-265"></a>                                <span class="c1">// doesn&#39;t put a useless entry into the TLB. The same idea applies</span>
-<a name="l-266"></a>                                <span class="c1">// to the access flag since we let the access flag be managed by SW.</span>
-<a name="l-267"></a>                                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">x</span> <span class="o">||</span> <span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">a</span><span class="p">)</span>
-<a name="l-268"></a>                                  <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-269"></a>                                <span class="k">else</span>
-<a name="l-270"></a>                                  <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-271"></a>
-<a name="l-272"></a>                            <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-273"></a>                                <span class="c1">// ------------</span>
-<a name="l-274"></a>                                <span class="c1">// Update DTLB</span>
+<a name="l-264"></a>                                <span class="c1">// Update ITLB</span>
+<a name="l-265"></a>                                <span class="c1">// ------------</span>
+<a name="l-266"></a>                                <span class="c1">// If page is not executable, we can directly raise an error. This</span>
+<a name="l-267"></a>                                <span class="c1">// doesn&#39;t put a useless entry into the TLB. The same idea applies</span>
+<a name="l-268"></a>                                <span class="c1">// to the access flag since we let the access flag be managed by SW.</span>
+<a name="l-269"></a>                                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">x</span> <span class="o">||</span> <span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">a</span><span class="p">)</span>
+<a name="l-270"></a>                                  <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
+<a name="l-271"></a>                                <span class="k">else</span>
+<a name="l-272"></a>                                  <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-273"></a>
+<a name="l-274"></a>                            <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
 <a name="l-275"></a>                                <span class="c1">// ------------</span>
-<a name="l-276"></a>                                <span class="c1">// Check if the access flag has been set, otherwise throw a page-fault</span>
-<a name="l-277"></a>                                <span class="c1">// and let the software handle those bits.</span>
-<a name="l-278"></a>                                <span class="c1">// If page is not readable (there are no write-only pages)</span>
-<a name="l-279"></a>                                <span class="c1">// we can directly raise an error. This doesn&#39;t put a useless</span>
-<a name="l-280"></a>                                <span class="c1">// entry into the TLB.</span>
-<a name="l-281"></a>                                <span class="k">if</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">a</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">r</span> <span class="o">||</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">mxr_i</span><span class="p">)))</span> <span class="k">begin</span>
-<a name="l-282"></a>                                  <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-283"></a>                                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-284"></a>                                  <span class="n">state_d</span>   <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-285"></a>                                <span class="k">end</span>
-<a name="l-286"></a>                                <span class="c1">// Request is a store: perform some additional checks</span>
-<a name="l-287"></a>                                <span class="c1">// If the request was a store and the page is not write-able, raise an error</span>
-<a name="l-288"></a>                                <span class="c1">// the same applies if the dirty flag is not set</span>
-<a name="l-289"></a>                                <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_i</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">w</span> <span class="o">||</span> <span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">d</span><span class="p">))</span> <span class="k">begin</span>
-<a name="l-290"></a>                                    <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-291"></a>                                    <span class="n">state_d</span>   <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-292"></a>                                <span class="k">end</span>
-<a name="l-293"></a>                            <span class="k">end</span>
-<a name="l-294"></a>                            <span class="c1">// check if the ppn is correctly aligned:</span>
-<a name="l-295"></a>                            <span class="c1">// 6. If i &gt; 0 and pa.ppn[i − 1 : 0] != 0, this is a misaligned superpage; stop and raise a page-fault</span>
-<a name="l-296"></a>                            <span class="c1">// exception.</span>
-<a name="l-297"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span> <span class="o">&amp;&amp;</span> <span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">[</span><span class="mi">17</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-298"></a>                                <span class="n">state_d</span>             <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-299"></a>                                <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-300"></a>                                <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-301"></a>                            <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span> <span class="o">&amp;&amp;</span> <span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">[</span><span class="mi">8</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-302"></a>                                <span class="n">state_d</span>             <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-303"></a>                                <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-304"></a>                                <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-305"></a>                            <span class="k">end</span>
-<a name="l-306"></a>                        <span class="c1">// this is a pointer to the next TLB level</span>
-<a name="l-307"></a>                        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-308"></a>                            <span class="c1">// pointer to next level of page table</span>
-<a name="l-309"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-310"></a>                                <span class="c1">// we are in the second level now</span>
-<a name="l-311"></a>                                <span class="n">ptw_lvl_n</span>  <span class="o">=</span> <span class="n">LVL2</span><span class="p">;</span>
-<a name="l-312"></a>                                <span class="n">ptw_pptr_n</span> <span class="o">=</span> <span class="p">{</span><span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">,</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="mi">29</span><span class="o">:</span><span class="mi">21</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
-<a name="l-313"></a>                            <span class="k">end</span>
-<a name="l-314"></a>
-<a name="l-315"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-316"></a>                                <span class="c1">// here we received a pointer to the third level</span>
-<a name="l-317"></a>                                <span class="n">ptw_lvl_n</span>  <span class="o">=</span> <span class="n">LVL3</span><span class="p">;</span>
-<a name="l-318"></a>                                <span class="n">ptw_pptr_n</span> <span class="o">=</span> <span class="p">{</span><span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">,</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
-<a name="l-319"></a>                            <span class="k">end</span>
-<a name="l-320"></a>
-<a name="l-321"></a>                            <span class="n">state_d</span> <span class="o">=</span> <span class="n">WAIT_GRANT</span><span class="p">;</span>
+<a name="l-276"></a>                                <span class="c1">// Update DTLB</span>
+<a name="l-277"></a>                                <span class="c1">// ------------</span>
+<a name="l-278"></a>                                <span class="c1">// Check if the access flag has been set, otherwise throw a page-fault</span>
+<a name="l-279"></a>                                <span class="c1">// and let the software handle those bits.</span>
+<a name="l-280"></a>                                <span class="c1">// If page is not readable (there are no write-only pages)</span>
+<a name="l-281"></a>                                <span class="c1">// we can directly raise an error. This doesn&#39;t put a useless</span>
+<a name="l-282"></a>                                <span class="c1">// entry into the TLB.</span>
+<a name="l-283"></a>                                <span class="k">if</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">a</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">r</span> <span class="o">||</span> <span class="p">(</span><span class="n">pte</span><span class="p">.</span><span class="n">x</span> <span class="o">&amp;&amp;</span> <span class="n">mxr_i</span><span class="p">)))</span> <span class="k">begin</span>
+<a name="l-284"></a>                                  <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-285"></a>                                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-286"></a>                                  <span class="n">state_d</span>   <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
+<a name="l-287"></a>                                <span class="k">end</span>
+<a name="l-288"></a>                                <span class="c1">// Request is a store: perform some additional checks</span>
+<a name="l-289"></a>                                <span class="c1">// If the request was a store and the page is not write-able, raise an error</span>
+<a name="l-290"></a>                                <span class="c1">// the same applies if the dirty flag is not set</span>
+<a name="l-291"></a>                                <span class="k">if</span> <span class="p">(</span><span class="n">lsu_is_store_i</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">w</span> <span class="o">||</span> <span class="o">!</span><span class="n">pte</span><span class="p">.</span><span class="n">d</span><span class="p">))</span> <span class="k">begin</span>
+<a name="l-292"></a>                                    <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-293"></a>                                    <span class="n">state_d</span>   <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
+<a name="l-294"></a>                                <span class="k">end</span>
+<a name="l-295"></a>                            <span class="k">end</span>
+<a name="l-296"></a>                            <span class="c1">// check if the ppn is correctly aligned:</span>
+<a name="l-297"></a>                            <span class="c1">// 6. If i &gt; 0 and pa.ppn[i − 1 : 0] != 0, this is a misaligned superpage; stop and raise a page-fault</span>
+<a name="l-298"></a>                            <span class="c1">// exception.</span>
+<a name="l-299"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span> <span class="o">&amp;&amp;</span> <span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">[</span><span class="mi">17</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-300"></a>                                <span class="n">state_d</span>             <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
+<a name="l-301"></a>                                <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-302"></a>                                <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-303"></a>                            <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span> <span class="o">&amp;&amp;</span> <span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">[</span><span class="mi">8</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-304"></a>                                <span class="n">state_d</span>             <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
+<a name="l-305"></a>                                <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-306"></a>                                <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-307"></a>                            <span class="k">end</span>
+<a name="l-308"></a>                        <span class="c1">// this is a pointer to the next TLB level</span>
+<a name="l-309"></a>                        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-310"></a>                            <span class="c1">// pointer to next level of page table</span>
+<a name="l-311"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL1</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-312"></a>                                <span class="c1">// we are in the second level now</span>
+<a name="l-313"></a>                                <span class="n">ptw_lvl_n</span>  <span class="o">=</span> <span class="n">LVL2</span><span class="p">;</span>
+<a name="l-314"></a>                                <span class="n">ptw_pptr_n</span> <span class="o">=</span> <span class="p">{</span><span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">,</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="mi">29</span><span class="o">:</span><span class="mi">21</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
+<a name="l-315"></a>                            <span class="k">end</span>
+<a name="l-316"></a>
+<a name="l-317"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL2</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-318"></a>                                <span class="c1">// here we received a pointer to the third level</span>
+<a name="l-319"></a>                                <span class="n">ptw_lvl_n</span>  <span class="o">=</span> <span class="n">LVL3</span><span class="p">;</span>
+<a name="l-320"></a>                                <span class="n">ptw_pptr_n</span> <span class="o">=</span> <span class="p">{</span><span class="n">pte</span><span class="p">.</span><span class="n">ppn</span><span class="p">,</span> <span class="n">vaddr_q</span><span class="p">[</span><span class="mi">20</span><span class="o">:</span><span class="mi">12</span><span class="p">],</span> <span class="mb">3&#39;b0</span><span class="p">};</span>
+<a name="l-321"></a>                            <span class="k">end</span>
 <a name="l-322"></a>
-<a name="l-323"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL3</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-324"></a>                              <span class="c1">// Should already be the last level page table =&gt; Error</span>
-<a name="l-325"></a>                              <span class="n">ptw_lvl_n</span>   <span class="o">=</span> <span class="n">LVL3</span><span class="p">;</span>
-<a name="l-326"></a>                              <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
-<a name="l-327"></a>                            <span class="k">end</span>
-<a name="l-328"></a>                        <span class="k">end</span>
-<a name="l-329"></a>                    <span class="k">end</span>
-<a name="l-330"></a>                    
-<a name="l-331"></a>                    <span class="c1">// Check if this access was actually allowed from a PMP perspective</span>
-<a name="l-332"></a>                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">allow_access</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-333"></a>                        <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-334"></a>                        <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-335"></a>                        <span class="c1">// we have to return the failed address in bad_addr</span>
-<a name="l-336"></a>                        <span class="n">ptw_pptr_n</span> <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">;</span> 
-<a name="l-337"></a>                        <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ACCESS_ERROR</span><span class="p">;</span>
-<a name="l-338"></a>                    <span class="k">end</span>
-<a name="l-339"></a>                <span class="k">end</span>
-<a name="l-340"></a>                <span class="c1">// we&#39;ve got a data WAIT_GRANT so tell the cache that the tag is valid</span>
-<a name="l-341"></a>            <span class="k">end</span>
-<a name="l-342"></a>            <span class="c1">// Propagate error to MMU/LSU</span>
-<a name="l-343"></a>            <span class="nl">PROPAGATE_ERROR:</span> <span class="k">begin</span>
-<a name="l-344"></a>                <span class="n">state_d</span>     <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
-<a name="l-345"></a>                <span class="n">ptw_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-346"></a>            <span class="k">end</span>
-<a name="l-347"></a>            <span class="nl">PROPAGATE_ACCESS_ERROR:</span> <span class="k">begin</span>
-<a name="l-348"></a>                <span class="n">state_d</span>     <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
-<a name="l-349"></a>                <span class="n">ptw_access_exception_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a name="l-350"></a>            <span class="k">end</span>
-<a name="l-351"></a>            <span class="c1">// wait for the rvalid before going back to IDLE</span>
-<a name="l-352"></a>            <span class="nl">WAIT_RVALID:</span> <span class="k">begin</span>
-<a name="l-353"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">data_rvalid_q</span><span class="p">)</span>
-<a name="l-354"></a>                    <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
+<a name="l-323"></a>                            <span class="n">state_d</span> <span class="o">=</span> <span class="n">WAIT_GRANT</span><span class="p">;</span>
+<a name="l-324"></a>
+<a name="l-325"></a>                            <span class="k">if</span> <span class="p">(</span><span class="n">ptw_lvl_q</span> <span class="o">==</span> <span class="n">LVL3</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-326"></a>                              <span class="c1">// Should already be the last level page table =&gt; Error</span>
+<a name="l-327"></a>                              <span class="n">ptw_lvl_n</span>   <span class="o">=</span> <span class="n">LVL3</span><span class="p">;</span>
+<a name="l-328"></a>                              <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ERROR</span><span class="p">;</span>
+<a name="l-329"></a>                            <span class="k">end</span>
+<a name="l-330"></a>                        <span class="k">end</span>
+<a name="l-331"></a>                    <span class="k">end</span>
+<a name="l-332"></a>                    
+<a name="l-333"></a>                    <span class="c1">// Check if this access was actually allowed from a PMP perspective</span>
+<a name="l-334"></a>                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">allow_access</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-335"></a>                        <span class="n">itlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-336"></a>                        <span class="n">dtlb_update_o</span><span class="p">.</span><span class="n">valid</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-337"></a>                        <span class="c1">// we have to return the failed address in bad_addr</span>
+<a name="l-338"></a>                        <span class="n">ptw_pptr_n</span> <span class="o">=</span> <span class="n">ptw_pptr_q</span><span class="p">;</span> 
+<a name="l-339"></a>                        <span class="n">state_d</span> <span class="o">=</span> <span class="n">PROPAGATE_ACCESS_ERROR</span><span class="p">;</span>
+<a name="l-340"></a>                    <span class="k">end</span>
+<a name="l-341"></a>                <span class="k">end</span>
+<a name="l-342"></a>                <span class="c1">// we&#39;ve got a data WAIT_GRANT so tell the cache that the tag is valid</span>
+<a name="l-343"></a>            <span class="k">end</span>
+<a name="l-344"></a>            <span class="c1">// Propagate error to MMU/LSU</span>
+<a name="l-345"></a>            <span class="nl">PROPAGATE_ERROR:</span> <span class="k">begin</span>
+<a name="l-346"></a>                <span class="n">state_d</span>     <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
+<a name="l-347"></a>                <span class="n">ptw_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-348"></a>            <span class="k">end</span>
+<a name="l-349"></a>            <span class="nl">PROPAGATE_ACCESS_ERROR:</span> <span class="k">begin</span>
+<a name="l-350"></a>                <span class="n">state_d</span>     <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
+<a name="l-351"></a>                <span class="n">ptw_access_exception_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-352"></a>            <span class="k">end</span>
+<a name="l-353"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-354"></a>                <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
 <a name="l-355"></a>            <span class="k">end</span>
-<a name="l-356"></a>            <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-357"></a>                <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
-<a name="l-358"></a>            <span class="k">end</span>
-<a name="l-359"></a>        <span class="k">endcase</span>
-<a name="l-360"></a>
-<a name="l-361"></a>        <span class="c1">// -------</span>
-<a name="l-362"></a>        <span class="c1">// Flush</span>
-<a name="l-363"></a>        <span class="c1">// -------</span>
-<a name="l-364"></a>        <span class="c1">// should we have flushed before we got an rvalid, wait for it until going back to IDLE</span>
-<a name="l-365"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">flush_i</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-366"></a>            <span class="c1">// on a flush check whether we are</span>
-<a name="l-367"></a>            <span class="c1">// 1. in the PTE Lookup check whether we still need to wait for an rvalid</span>
-<a name="l-368"></a>            <span class="c1">// 2. waiting for a grant, if so: wait for it</span>
-<a name="l-369"></a>            <span class="c1">// if not, go back to idle</span>
-<a name="l-370"></a>            <span class="k">if</span> <span class="p">((</span><span class="n">state_q</span> <span class="o">==</span> <span class="n">PTE_LOOKUP</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">data_rvalid_q</span><span class="p">)</span> <span class="o">||</span> <span class="p">((</span><span class="n">state_q</span> <span class="o">==</span> <span class="n">WAIT_GRANT</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">req_port_i</span><span class="p">.</span><span class="n">data_gnt</span><span class="p">))</span>
-<a name="l-371"></a>                <span class="n">state_d</span> <span class="o">=</span> <span class="n">WAIT_RVALID</span><span class="p">;</span>
-<a name="l-372"></a>            <span class="k">else</span>
-<a name="l-373"></a>                <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
-<a name="l-374"></a>        <span class="k">end</span>
-<a name="l-375"></a>    <span class="k">end</span>
-<a name="l-376"></a>
-<a name="l-377"></a>    <span class="c1">// sequential process</span>
-<a name="l-378"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-379"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-380"></a>            <span class="n">state_q</span>            <span class="o">&lt;=</span> <span class="n">IDLE</span><span class="p">;</span>
-<a name="l-381"></a>            <span class="n">is_instr_ptw_q</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-382"></a>            <span class="n">ptw_lvl_q</span>          <span class="o">&lt;=</span> <span class="n">LVL1</span><span class="p">;</span>
-<a name="l-383"></a>            <span class="n">tag_valid_q</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-384"></a>            <span class="n">tlb_update_asid_q</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-385"></a>            <span class="n">vaddr_q</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-386"></a>            <span class="n">ptw_pptr_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-387"></a>            <span class="n">global_mapping_q</span>   <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-388"></a>            <span class="n">data_rdata_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-389"></a>            <span class="n">data_rvalid_q</span>      <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-390"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a name="l-391"></a>            <span class="n">state_q</span>            <span class="o">&lt;=</span> <span class="n">state_d</span><span class="p">;</span>
-<a name="l-392"></a>            <span class="n">ptw_pptr_q</span>         <span class="o">&lt;=</span> <span class="n">ptw_pptr_n</span><span class="p">;</span>
-<a name="l-393"></a>            <span class="n">is_instr_ptw_q</span>     <span class="o">&lt;=</span> <span class="n">is_instr_ptw_n</span><span class="p">;</span>
-<a name="l-394"></a>            <span class="n">ptw_lvl_q</span>          <span class="o">&lt;=</span> <span class="n">ptw_lvl_n</span><span class="p">;</span>
-<a name="l-395"></a>            <span class="n">tag_valid_q</span>        <span class="o">&lt;=</span> <span class="n">tag_valid_n</span><span class="p">;</span>
-<a name="l-396"></a>            <span class="n">tlb_update_asid_q</span>  <span class="o">&lt;=</span> <span class="n">tlb_update_asid_n</span><span class="p">;</span>
-<a name="l-397"></a>            <span class="n">vaddr_q</span>            <span class="o">&lt;=</span> <span class="n">vaddr_n</span><span class="p">;</span>
-<a name="l-398"></a>            <span class="n">global_mapping_q</span>   <span class="o">&lt;=</span> <span class="n">global_mapping_n</span><span class="p">;</span>
-<a name="l-399"></a>            <span class="n">data_rdata_q</span>       <span class="o">&lt;=</span> <span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rdata</span><span class="p">;</span>
-<a name="l-400"></a>            <span class="n">data_rvalid_q</span>      <span class="o">&lt;=</span> <span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rvalid</span><span class="p">;</span>
+<a name="l-356"></a>        <span class="k">endcase</span>
+<a name="l-357"></a>
+<a name="l-358"></a>        <span class="c1">// -------</span>
+<a name="l-359"></a>        <span class="c1">// Flush</span>
+<a name="l-360"></a>        <span class="c1">// -------</span>
+<a name="l-361"></a>        <span class="c1">// should we have flushed before we got an rvalid, wait for it until going back to IDLE</span>
+<a name="l-362"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">flush_i</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-363"></a>            <span class="c1">// on a flush check whether we are</span>
+<a name="l-364"></a>            <span class="c1">// 1. in the PTE Lookup check whether we still need to wait for an rvalid</span>
+<a name="l-365"></a>            <span class="c1">// 2. waiting for a grant, if so: wait for it</span>
+<a name="l-366"></a>            <span class="c1">// if not, go back to idle</span>
+<a name="l-367"></a>            <span class="k">if</span> <span class="p">((</span><span class="n">state_q</span> <span class="o">==</span> <span class="n">PTE_LOOKUP</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">data_rvalid_q</span><span class="p">)</span> <span class="o">||</span> <span class="p">((</span><span class="n">state_q</span> <span class="o">==</span> <span class="n">WAIT_GRANT</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">req_port_i</span><span class="p">.</span><span class="n">data_gnt</span><span class="p">))</span> <span class="k">begin</span>
+<a name="l-368"></a>                <span class="n">tag_valid_n</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-369"></a>                <span class="n">kill_req_d</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a name="l-370"></a>            <span class="k">end</span>
+<a name="l-371"></a>            <span class="n">state_d</span> <span class="o">=</span> <span class="n">IDLE</span><span class="p">;</span>
+<a name="l-372"></a>        <span class="k">end</span>
+<a name="l-373"></a>    <span class="k">end</span>
+<a name="l-374"></a>
+<a name="l-375"></a>    <span class="c1">// sequential process</span>
+<a name="l-376"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-377"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-378"></a>            <span class="n">state_q</span>            <span class="o">&lt;=</span> <span class="n">IDLE</span><span class="p">;</span>
+<a name="l-379"></a>            <span class="n">is_instr_ptw_q</span>     <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-380"></a>            <span class="n">ptw_lvl_q</span>          <span class="o">&lt;=</span> <span class="n">LVL1</span><span class="p">;</span>
+<a name="l-381"></a>            <span class="n">tag_valid_q</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-382"></a>            <span class="n">tlb_update_asid_q</span>  <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-383"></a>            <span class="n">vaddr_q</span>            <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-384"></a>            <span class="n">ptw_pptr_q</span>         <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-385"></a>            <span class="n">global_mapping_q</span>   <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-386"></a>            <span class="n">data_rdata_q</span>       <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-387"></a>            <span class="n">data_rvalid_q</span>      <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-388"></a>            <span class="n">kill_req_q</span>         <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-389"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a name="l-390"></a>            <span class="n">state_q</span>            <span class="o">&lt;=</span> <span class="n">state_d</span><span class="p">;</span>
+<a name="l-391"></a>            <span class="n">ptw_pptr_q</span>         <span class="o">&lt;=</span> <span class="n">ptw_pptr_n</span><span class="p">;</span>
+<a name="l-392"></a>            <span class="n">is_instr_ptw_q</span>     <span class="o">&lt;=</span> <span class="n">is_instr_ptw_n</span><span class="p">;</span>
+<a name="l-393"></a>            <span class="n">ptw_lvl_q</span>          <span class="o">&lt;=</span> <span class="n">ptw_lvl_n</span><span class="p">;</span>
+<a name="l-394"></a>            <span class="n">tag_valid_q</span>        <span class="o">&lt;=</span> <span class="n">tag_valid_n</span><span class="p">;</span>
+<a name="l-395"></a>            <span class="n">tlb_update_asid_q</span>  <span class="o">&lt;=</span> <span class="n">tlb_update_asid_n</span><span class="p">;</span>
+<a name="l-396"></a>            <span class="n">vaddr_q</span>            <span class="o">&lt;=</span> <span class="n">vaddr_n</span><span class="p">;</span>
+<a name="l-397"></a>            <span class="n">global_mapping_q</span>   <span class="o">&lt;=</span> <span class="n">global_mapping_n</span><span class="p">;</span>
+<a name="l-398"></a>            <span class="n">data_rdata_q</span>       <span class="o">&lt;=</span> <span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rdata</span><span class="p">;</span>
+<a name="l-399"></a>            <span class="n">data_rvalid_q</span>      <span class="o">&lt;=</span> <span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rvalid</span><span class="p">;</span>
+<a name="l-400"></a>            <span class="n">kill_req_q</span>         <span class="o">&lt;=</span> <span class="n">kill_req_d</span><span class="p">;</span>
 <a name="l-401"></a>        <span class="k">end</span>
 <a name="l-402"></a>    <span class="k">end</span>
 <a name="l-403"></a>
