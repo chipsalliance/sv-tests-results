@@ -17,9 +17,9 @@ type: simulation parsing
 mode: parsing
 files: <a href="../../../tests/chapter-12/12.8--break.sv.html" target="file-frame">tests/chapter-12/12.8--break.sv</a>
 defines: 
-completed: 2021-04-12 10:39:37
-time_elapsed: 0.016s
-ram usage: 14376 KB
+completed: 2021-04-15 09:16:18
+time_elapsed: 0.014s
+ram usage: 15300 KB
 </pre>
 <pre class="log">
 
@@ -30,14 +30,20 @@ module jump_tb;
 		_sv2v_jump = 2&#39;b00;
 		begin : sv2v_autoblock_2
 			reg signed [31:0] i;
-			for (i = 0; (i &lt; 256) &amp;&amp; (_sv2v_jump &lt; 2&#39;b10); i = i + 1)
-				begin
+			begin : sv2v_autoblock_3
+				reg signed [31:0] _sv2v_value_on_break;
+				for (i = 0; i &lt; 256; i = i + 1)
+					if (_sv2v_jump &lt; 2&#39;b10) begin
+						_sv2v_jump = 2&#39;b00;
+						if (i &gt; 100)
+							_sv2v_jump = 2&#39;b10;
+						_sv2v_value_on_break = i;
+					end
+				if (!(_sv2v_jump &lt; 2&#39;b10))
+					i = _sv2v_value_on_break;
+				if (_sv2v_jump != 2&#39;b11)
 					_sv2v_jump = 2&#39;b00;
-					if (i &gt; 100)
-						_sv2v_jump = 2&#39;b10;
-				end
-			if (_sv2v_jump != 2&#39;b11)
-				_sv2v_jump = 2&#39;b00;
+			end
 			if (_sv2v_jump == 2&#39;b00)
 				$display(&#34;:assert:(%d == 101)&#34;, i);
 		end

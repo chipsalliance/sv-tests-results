@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/function12.v.html" target="file-frame">third_party/tests/ivtest/ivltests/function12.v</a>
 defines: 
-completed: 2021-04-12 10:38:34
-time_elapsed: 0.017s
-ram usage: 17064 KB
+completed: 2021-04-15 09:21:03
+time_elapsed: 0.018s
+ram usage: 18104 KB
 </pre>
 <pre class="log">
 
@@ -31,16 +31,22 @@ module main;
 		reg [0:1] _sv2v_jump;
 		begin
 			_sv2v_jump = 2&#39;b00;
-			for (i = 0; (i &lt; 10) &amp;&amp; (_sv2v_jump &lt; 2&#39;b10); i = i + 1)
-				begin
+			begin : sv2v_autoblock_1
+				reg signed [31:0] _sv2v_value_on_break;
+				for (i = 0; i &lt; 10; i = i + 1)
+					if (_sv2v_jump &lt; 2&#39;b10) begin
+						_sv2v_jump = 2&#39;b00;
+						res = i;
+						$display(&#34;loop %d&#34;, i);
+						if (i == 5)
+							_sv2v_jump = 2&#39;b11;
+						_sv2v_value_on_break = i;
+					end
+				if (!(_sv2v_jump &lt; 2&#39;b10))
+					i = _sv2v_value_on_break;
+				if (_sv2v_jump != 2&#39;b11)
 					_sv2v_jump = 2&#39;b00;
-					res = i;
-					$display(&#34;loop %d&#34;, i);
-					if (i == 5)
-						_sv2v_jump = 2&#39;b11;
-				end
-			if (_sv2v_jump != 2&#39;b11)
-				_sv2v_jump = 2&#39;b00;
+			end
 		end
 	endtask
 	initial begin
