@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cam_1r1w_unmanaged.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cam_1r1w_unmanaged.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_mem/bsg_cam_1r1w_unmanaged.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_mem/bsg_cam_1r1w_unmanaged.v</a>
 defines: 
-completed: 2021-04-17 01:43:02
-time_elapsed: 0.046s
-ram usage: 40928 KB
+completed: 2021-04-17 04:43:42
+time_elapsed: 0.039s
+ram usage: 42264 KB
 </pre>
 <pre class="log">
 
@@ -46,23 +46,24 @@ module bsg_cam_1r1w_unmanaged (
 	parameter [_sv2v_width_tag_width_p - 1:0] tag_width_p = &#34;inv&#34;;
 	parameter _sv2v_width_data_width_p = 24;
 	parameter [_sv2v_width_data_width_p - 1:0] data_width_p = &#34;inv&#34;;
+	parameter safe_els_lp = (els_p &gt; 1 ? els_p : 1);
 	input clk_i;
 	input reset_i;
-	input [els_p - 1:0] w_v_i;
+	input [safe_els_lp - 1:0] w_v_i;
 	input w_set_not_clear_i;
 	input [tag_width_p - 1:0] w_tag_i;
 	input [data_width_p - 1:0] w_data_i;
-	output [els_p - 1:0] w_empty_o;
+	output [safe_els_lp - 1:0] w_empty_o;
 	input r_v_i;
 	input [tag_width_p - 1:0] r_tag_i;
 	output wire [data_width_p - 1:0] r_data_o;
 	output wire r_v_o;
-	wire [els_p - 1:0] tag_r_match_lo;
-	wire [els_p - 1:0] tag_empty_lo;
-	wire [els_p - 1:0] tag_w_v_li;
+	wire [safe_els_lp - 1:0] tag_r_match_lo;
+	wire [safe_els_lp - 1:0] tag_empty_lo;
+	wire [safe_els_lp - 1:0] tag_w_v_li;
 	bsg_cam_1r1w_tag_array #(
 		.width_p(tag_width_p),
-		.els_p(els_p)
+		.els_p(safe_els_lp)
 	) cam_tag_array(
 		.clk_i(clk_i),
 		.reset_i(reset_i),
@@ -74,10 +75,10 @@ module bsg_cam_1r1w_unmanaged (
 		.r_tag_i(r_tag_i),
 		.r_match_o(tag_r_match_lo)
 	);
-	wire [els_p - 1:0] mem_w_v_li;
+	wire [safe_els_lp - 1:0] mem_w_v_li;
 	bsg_mem_1r1w_one_hot #(
 		.width_p(data_width_p),
-		.els_p(els_p)
+		.els_p(safe_els_lp)
 	) one_hot_mem(
 		.w_clk_i(clk_i),
 		.w_reset_i(reset_i),

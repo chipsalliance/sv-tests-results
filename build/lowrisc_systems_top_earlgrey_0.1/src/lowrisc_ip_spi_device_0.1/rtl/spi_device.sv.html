@@ -862,7 +862,13 @@
 <span class="normal"><a href="#l-854">854</a></span>
 <span class="normal"><a href="#l-855">855</a></span>
 <span class="normal"><a href="#l-856">856</a></span>
-<span class="normal"><a href="#l-857">857</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-857">857</a></span>
+<span class="normal"><a href="#l-858">858</a></span>
+<span class="normal"><a href="#l-859">859</a></span>
+<span class="normal"><a href="#l-860">860</a></span>
+<span class="normal"><a href="#l-861">861</a></span>
+<span class="normal"><a href="#l-862">862</a></span>
+<span class="normal"><a href="#l-863">863</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -1019,7 +1025,7 @@
 <a name="l-155"></a>  <span class="kt">logic</span>        <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeEnd</span><span class="p">];</span>
 <a name="l-156"></a>
 <a name="l-157"></a>  <span class="c1">// CMD interface</span>
-<a name="l-158"></a>  <span class="n">sel_datapath_e</span> <span class="n">cmd_dp_sel</span><span class="p">;</span>
+<a name="l-158"></a>  <span class="n">sel_datapath_e</span> <span class="n">cmd_dp_sel</span><span class="p">,</span> <span class="n">cmd_dp_sel_outclk</span><span class="p">;</span>
 <a name="l-159"></a>  <span class="n">spi_byte_t</span>     <span class="n">cmd_opcode</span><span class="p">;</span>
 <a name="l-160"></a>
 <a name="l-161"></a>
@@ -1360,365 +1366,371 @@
 <a name="l-496"></a>    <span class="k">else</span>            <span class="n">io_mode_outclk</span> <span class="o">&lt;=</span> <span class="n">io_mode</span><span class="p">;</span>
 <a name="l-497"></a>  <span class="k">end</span>
 <a name="l-498"></a>
-<a name="l-499"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
-<a name="l-500"></a>    <span class="n">io_mode</span> <span class="o">=</span> <span class="n">SingleIO</span><span class="p">;</span>
-<a name="l-501"></a>    <span class="n">p2s_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-502"></a>    <span class="n">p2s_data</span>  <span class="o">=</span> <span class="mh">8&#39;h 0</span><span class="p">;</span>
-<a name="l-503"></a>    <span class="n">sub_p2s_sent</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="mb">1&#39;b 0</span><span class="p">};</span>
-<a name="l-504"></a>
-<a name="l-505"></a>    <span class="n">mem_b_req</span>   <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-506"></a>    <span class="n">mem_b_write</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a name="l-507"></a>    <span class="n">mem_b_addr</span>  <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-508"></a>    <span class="n">mem_b_wdata</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-509"></a>    <span class="n">sub_sram_rvalid</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span>  <span class="mb">1&#39;b 0</span><span class="p">};</span>
-<a name="l-510"></a>    <span class="n">sub_sram_rdata</span>  <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span>     <span class="m">&#39;0</span><span class="p">};</span>
-<a name="l-511"></a>    <span class="n">sub_sram_rerror</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="mb">2&#39;b 00</span><span class="p">};</span>
-<a name="l-512"></a>
-<a name="l-513"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">spi_mode</span><span class="p">)</span>
-<a name="l-514"></a>      <span class="nl">FwMode:</span> <span class="k">begin</span>
-<a name="l-515"></a>        <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-516"></a>
-<a name="l-517"></a>        <span class="n">p2s_valid</span> <span class="o">=</span> <span class="n">sub_p2s_valid</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-518"></a>        <span class="n">p2s_data</span>  <span class="o">=</span> <span class="n">sub_p2s_data</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-519"></a>        <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
-<a name="l-520"></a>
-<a name="l-521"></a>        <span class="c1">// SRAM:: Remember this has glitch</span>
-<a name="l-522"></a>        <span class="c1">// switch should happen only when clock gate is disabled.</span>
-<a name="l-523"></a>        <span class="n">mem_b_req</span>   <span class="o">=</span> <span class="n">sub_sram_req</span>   <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-524"></a>        <span class="n">mem_b_write</span> <span class="o">=</span> <span class="n">sub_sram_write</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-525"></a>        <span class="n">mem_b_addr</span>  <span class="o">=</span> <span class="n">sub_sram_addr</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-526"></a>        <span class="n">mem_b_wdata</span> <span class="o">=</span> <span class="n">sub_sram_wdata</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
-<a name="l-527"></a>        <span class="n">sub_sram_rvalid</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rvalid</span><span class="p">;</span>
-<a name="l-528"></a>        <span class="n">sub_sram_rdata</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rdata</span><span class="p">;</span>
-<a name="l-529"></a>        <span class="n">sub_sram_rerror</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rerror</span><span class="p">;</span>
-<a name="l-530"></a>      <span class="k">end</span>
-<a name="l-531"></a>
-<a name="l-532"></a>      <span class="nl">FlashMode:</span> <span class="k">begin</span>
-<a name="l-533"></a>        <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">cmd_dp_sel</span><span class="p">)</span>
-<a name="l-534"></a>          <span class="nl">DpNone:</span> <span class="k">begin</span>
-<a name="l-535"></a>            <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">];</span>
+<a name="l-499"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_spi_out_buf</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_spi_n</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-500"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_spi_n</span><span class="p">)</span> <span class="n">cmd_dp_sel_outclk</span> <span class="o">&lt;=</span> <span class="n">DpNone</span><span class="p">;</span>
+<a name="l-501"></a>    <span class="k">else</span>            <span class="n">cmd_dp_sel_outclk</span> <span class="o">&lt;=</span> <span class="n">cmd_dp_sel</span><span class="p">;</span>
+<a name="l-502"></a>  <span class="k">end</span>
+<a name="l-503"></a>
+<a name="l-504"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
+<a name="l-505"></a>    <span class="n">io_mode</span> <span class="o">=</span> <span class="n">SingleIO</span><span class="p">;</span>
+<a name="l-506"></a>    <span class="n">p2s_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-507"></a>    <span class="n">p2s_data</span>  <span class="o">=</span> <span class="mh">8&#39;h 0</span><span class="p">;</span>
+<a name="l-508"></a>    <span class="n">sub_p2s_sent</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="mb">1&#39;b 0</span><span class="p">};</span>
+<a name="l-509"></a>
+<a name="l-510"></a>    <span class="n">mem_b_req</span>   <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-511"></a>    <span class="n">mem_b_write</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a name="l-512"></a>    <span class="n">mem_b_addr</span>  <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-513"></a>    <span class="n">mem_b_wdata</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-514"></a>    <span class="n">sub_sram_rvalid</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span>  <span class="mb">1&#39;b 0</span><span class="p">};</span>
+<a name="l-515"></a>    <span class="n">sub_sram_rdata</span>  <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span>     <span class="m">&#39;0</span><span class="p">};</span>
+<a name="l-516"></a>    <span class="n">sub_sram_rerror</span> <span class="o">=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="mb">2&#39;b 00</span><span class="p">};</span>
+<a name="l-517"></a>
+<a name="l-518"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">spi_mode</span><span class="p">)</span>
+<a name="l-519"></a>      <span class="nl">FwMode:</span> <span class="k">begin</span>
+<a name="l-520"></a>        <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-521"></a>
+<a name="l-522"></a>        <span class="n">p2s_valid</span> <span class="o">=</span> <span class="n">sub_p2s_valid</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-523"></a>        <span class="n">p2s_data</span>  <span class="o">=</span> <span class="n">sub_p2s_data</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-524"></a>        <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
+<a name="l-525"></a>
+<a name="l-526"></a>        <span class="c1">// SRAM:: Remember this has glitch</span>
+<a name="l-527"></a>        <span class="c1">// switch should happen only when clock gate is disabled.</span>
+<a name="l-528"></a>        <span class="n">mem_b_req</span>   <span class="o">=</span> <span class="n">sub_sram_req</span>   <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-529"></a>        <span class="n">mem_b_write</span> <span class="o">=</span> <span class="n">sub_sram_write</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-530"></a>        <span class="n">mem_b_addr</span>  <span class="o">=</span> <span class="n">sub_sram_addr</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-531"></a>        <span class="n">mem_b_wdata</span> <span class="o">=</span> <span class="n">sub_sram_wdata</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">];</span>
+<a name="l-532"></a>        <span class="n">sub_sram_rvalid</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rvalid</span><span class="p">;</span>
+<a name="l-533"></a>        <span class="n">sub_sram_rdata</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rdata</span><span class="p">;</span>
+<a name="l-534"></a>        <span class="n">sub_sram_rerror</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rerror</span><span class="p">;</span>
+<a name="l-535"></a>      <span class="k">end</span>
 <a name="l-536"></a>
-<a name="l-537"></a>            <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
-<a name="l-538"></a>
-<a name="l-539"></a>            <span class="c1">// Leave SRAM default;</span>
-<a name="l-540"></a>          <span class="k">end</span>
-<a name="l-541"></a>          <span class="nl">DpReadCmd:</span> <span class="k">begin</span>
-<a name="l-542"></a>            <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-537"></a>      <span class="nl">FlashMode:</span> <span class="k">begin</span>
+<a name="l-538"></a>        <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">cmd_dp_sel_outclk</span><span class="p">)</span>
+<a name="l-539"></a>          <span class="nl">DpNone:</span> <span class="k">begin</span>
+<a name="l-540"></a>            <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">];</span>
+<a name="l-541"></a>
+<a name="l-542"></a>            <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
 <a name="l-543"></a>
-<a name="l-544"></a>            <span class="n">p2s_valid</span> <span class="o">=</span> <span class="n">sub_p2s_valid</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
-<a name="l-545"></a>            <span class="n">p2s_data</span>  <span class="o">=</span> <span class="n">sub_p2s_data</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
-<a name="l-546"></a>            <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
-<a name="l-547"></a>
-<a name="l-548"></a>            <span class="c1">// SRAM:: Remember this has glitch</span>
-<a name="l-549"></a>            <span class="c1">// switch should happen only when clock gate is disabled.</span>
-<a name="l-550"></a>            <span class="n">mem_b_req</span>   <span class="o">=</span> <span class="n">sub_sram_req</span>   <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
-<a name="l-551"></a>            <span class="n">mem_b_write</span> <span class="o">=</span> <span class="n">sub_sram_write</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
-<a name="l-552"></a>            <span class="n">mem_b_addr</span>  <span class="o">=</span> <span class="n">sub_sram_addr</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
-<a name="l-553"></a>            <span class="n">mem_b_wdata</span> <span class="o">=</span> <span class="n">sub_sram_wdata</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
-<a name="l-554"></a>            <span class="n">sub_sram_rvalid</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rvalid</span><span class="p">;</span>
-<a name="l-555"></a>            <span class="n">sub_sram_rdata</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rdata</span><span class="p">;</span>
-<a name="l-556"></a>            <span class="n">sub_sram_rerror</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rerror</span><span class="p">;</span>
-<a name="l-557"></a>          <span class="k">end</span>
-<a name="l-558"></a>          <span class="c1">// DpReadStatus:</span>
-<a name="l-559"></a>          <span class="c1">// DpReadSFDP:</span>
-<a name="l-560"></a>          <span class="c1">// DpReadJEDEC:</span>
-<a name="l-561"></a>          <span class="c1">// DpUpload:</span>
-<a name="l-562"></a>          <span class="c1">// DpUnknown:</span>
-<a name="l-563"></a>          <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-564"></a>            <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">];</span>
-<a name="l-565"></a>
-<a name="l-566"></a>            <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
-<a name="l-567"></a>          <span class="k">end</span>
-<a name="l-568"></a>        <span class="k">endcase</span>
-<a name="l-569"></a>      <span class="k">end</span>
+<a name="l-544"></a>            <span class="c1">// Leave SRAM default;</span>
+<a name="l-545"></a>          <span class="k">end</span>
+<a name="l-546"></a>          <span class="nl">DpReadCmd:</span> <span class="k">begin</span>
+<a name="l-547"></a>            <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-548"></a>
+<a name="l-549"></a>            <span class="n">p2s_valid</span> <span class="o">=</span> <span class="n">sub_p2s_valid</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-550"></a>            <span class="n">p2s_data</span>  <span class="o">=</span> <span class="n">sub_p2s_data</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-551"></a>            <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
+<a name="l-552"></a>
+<a name="l-553"></a>            <span class="c1">// SRAM:: Remember this has glitch</span>
+<a name="l-554"></a>            <span class="c1">// switch should happen only when clock gate is disabled.</span>
+<a name="l-555"></a>            <span class="n">mem_b_req</span>   <span class="o">=</span> <span class="n">sub_sram_req</span>   <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-556"></a>            <span class="n">mem_b_write</span> <span class="o">=</span> <span class="n">sub_sram_write</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-557"></a>            <span class="n">mem_b_addr</span>  <span class="o">=</span> <span class="n">sub_sram_addr</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-558"></a>            <span class="n">mem_b_wdata</span> <span class="o">=</span> <span class="n">sub_sram_wdata</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">];</span>
+<a name="l-559"></a>            <span class="n">sub_sram_rvalid</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rvalid</span><span class="p">;</span>
+<a name="l-560"></a>            <span class="n">sub_sram_rdata</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rdata</span><span class="p">;</span>
+<a name="l-561"></a>            <span class="n">sub_sram_rerror</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">mem_b_rerror</span><span class="p">;</span>
+<a name="l-562"></a>          <span class="k">end</span>
+<a name="l-563"></a>          <span class="c1">// DpReadStatus:</span>
+<a name="l-564"></a>          <span class="c1">// DpReadSFDP:</span>
+<a name="l-565"></a>          <span class="c1">// DpReadJEDEC:</span>
+<a name="l-566"></a>          <span class="c1">// DpUpload:</span>
+<a name="l-567"></a>          <span class="c1">// DpUnknown:</span>
+<a name="l-568"></a>          <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-569"></a>            <span class="n">io_mode</span> <span class="o">=</span> <span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">];</span>
 <a name="l-570"></a>
-<a name="l-571"></a>      <span class="nl">PassThrough:</span> <span class="k">begin</span>
-<a name="l-572"></a>        <span class="c1">// TODO: Revise when implementing PassThrough</span>
-<a name="l-573"></a>        <span class="n">io_mode</span> <span class="o">=</span> <span class="n">SingleIO</span><span class="p">;</span>
+<a name="l-571"></a>            <span class="n">sub_p2s_sent</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">]</span> <span class="o">=</span> <span class="n">p2s_sent</span><span class="p">;</span>
+<a name="l-572"></a>          <span class="k">end</span>
+<a name="l-573"></a>        <span class="k">endcase</span>
 <a name="l-574"></a>      <span class="k">end</span>
 <a name="l-575"></a>
-<a name="l-576"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a name="l-577"></a>        <span class="n">io_mode</span> <span class="o">=</span> <span class="n">SingleIO</span><span class="p">;</span>
-<a name="l-578"></a>      <span class="k">end</span>
-<a name="l-579"></a>    <span class="k">endcase</span>
-<a name="l-580"></a>  <span class="k">end</span>
-<a name="l-581"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">SpiModeKnown_A</span><span class="p">,</span> <span class="n">spi_mode</span><span class="p">)</span>
-<a name="l-582"></a>
-<a name="l-583"></a>
-<a name="l-584"></a>
-<a name="l-585"></a>  <span class="c1">////////////////////////////</span>
-<a name="l-586"></a>  <span class="c1">// SPI Serial to Parallel //</span>
-<a name="l-587"></a>  <span class="c1">////////////////////////////</span>
-<a name="l-588"></a>  <span class="n">spi_s2p</span> <span class="n">u_s2p</span> <span class="p">(</span>
-<a name="l-589"></a>    <span class="p">.</span><span class="n">clk_i</span>        <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
-<a name="l-590"></a>    <span class="p">.</span><span class="n">rst_ni</span>       <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
-<a name="l-591"></a>
-<a name="l-592"></a>    <span class="c1">// SPI interface</span>
-<a name="l-593"></a>    <span class="p">.</span><span class="n">s_i</span>          <span class="p">(</span><span class="n">cio_sd_i</span><span class="p">),</span>
-<a name="l-594"></a>
-<a name="l-595"></a>    <span class="p">.</span><span class="n">data_valid_o</span> <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
-<a name="l-596"></a>    <span class="p">.</span><span class="n">data_o</span>       <span class="p">(</span><span class="n">s2p_data</span>      <span class="p">),</span>
-<a name="l-597"></a>    <span class="p">.</span><span class="n">bitcnt_o</span>     <span class="p">(</span><span class="n">s2p_bitcnt</span>    <span class="p">),</span>
-<a name="l-598"></a>
-<a name="l-599"></a>    <span class="c1">// Config (changed dynamically)</span>
-<a name="l-600"></a>    <span class="p">.</span><span class="n">order_i</span>      <span class="p">(</span><span class="n">rxorder</span><span class="p">),</span>
-<a name="l-601"></a>    <span class="p">.</span><span class="n">io_mode_i</span>    <span class="p">(</span><span class="n">io_mode_outclk</span><span class="p">)</span>
-<a name="l-602"></a>  <span class="p">);</span>
+<a name="l-576"></a>      <span class="nl">PassThrough:</span> <span class="k">begin</span>
+<a name="l-577"></a>        <span class="c1">// TODO: Revise when implementing PassThrough</span>
+<a name="l-578"></a>        <span class="n">io_mode</span> <span class="o">=</span> <span class="n">SingleIO</span><span class="p">;</span>
+<a name="l-579"></a>      <span class="k">end</span>
+<a name="l-580"></a>
+<a name="l-581"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a name="l-582"></a>        <span class="n">io_mode</span> <span class="o">=</span> <span class="n">SingleIO</span><span class="p">;</span>
+<a name="l-583"></a>      <span class="k">end</span>
+<a name="l-584"></a>    <span class="k">endcase</span>
+<a name="l-585"></a>  <span class="k">end</span>
+<a name="l-586"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">SpiModeKnown_A</span><span class="p">,</span> <span class="n">spi_mode</span><span class="p">)</span>
+<a name="l-587"></a>
+<a name="l-588"></a>
+<a name="l-589"></a>
+<a name="l-590"></a>  <span class="c1">////////////////////////////</span>
+<a name="l-591"></a>  <span class="c1">// SPI Serial to Parallel //</span>
+<a name="l-592"></a>  <span class="c1">////////////////////////////</span>
+<a name="l-593"></a>  <span class="n">spi_s2p</span> <span class="n">u_s2p</span> <span class="p">(</span>
+<a name="l-594"></a>    <span class="p">.</span><span class="n">clk_i</span>        <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
+<a name="l-595"></a>    <span class="p">.</span><span class="n">rst_ni</span>       <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
+<a name="l-596"></a>
+<a name="l-597"></a>    <span class="c1">// SPI interface</span>
+<a name="l-598"></a>    <span class="p">.</span><span class="n">s_i</span>          <span class="p">(</span><span class="n">cio_sd_i</span><span class="p">),</span>
+<a name="l-599"></a>
+<a name="l-600"></a>    <span class="p">.</span><span class="n">data_valid_o</span> <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
+<a name="l-601"></a>    <span class="p">.</span><span class="n">data_o</span>       <span class="p">(</span><span class="n">s2p_data</span>      <span class="p">),</span>
+<a name="l-602"></a>    <span class="p">.</span><span class="n">bitcnt_o</span>     <span class="p">(</span><span class="n">s2p_bitcnt</span>    <span class="p">),</span>
 <a name="l-603"></a>
-<a name="l-604"></a>  <span class="n">spi_p2s</span> <span class="n">u_p2s</span> <span class="p">(</span>
-<a name="l-605"></a>    <span class="p">.</span><span class="n">clk_i</span>        <span class="p">(</span><span class="n">clk_spi_out_buf</span><span class="p">),</span>
-<a name="l-606"></a>    <span class="p">.</span><span class="n">rst_ni</span>       <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
-<a name="l-607"></a>
-<a name="l-608"></a>    <span class="p">.</span><span class="n">data_valid_i</span> <span class="p">(</span><span class="n">p2s_valid</span><span class="p">),</span>
-<a name="l-609"></a>    <span class="p">.</span><span class="n">data_i</span>       <span class="p">(</span><span class="n">p2s_data</span><span class="p">),</span>
-<a name="l-610"></a>    <span class="p">.</span><span class="n">data_sent_o</span>  <span class="p">(</span><span class="n">p2s_sent</span><span class="p">),</span>
-<a name="l-611"></a>
-<a name="l-612"></a>    <span class="p">.</span><span class="n">csb_i</span>        <span class="p">(</span><span class="n">cio_csb_i</span><span class="p">),</span>
-<a name="l-613"></a>    <span class="p">.</span><span class="n">s_en_o</span>       <span class="p">(</span><span class="n">cio_sd_en_o</span><span class="p">),</span>
-<a name="l-614"></a>    <span class="p">.</span><span class="n">s_o</span>          <span class="p">(</span><span class="n">cio_sd_o</span><span class="p">),</span>
-<a name="l-615"></a>
-<a name="l-616"></a>    <span class="p">.</span><span class="n">cpha_i</span>       <span class="p">(</span><span class="n">cpha</span><span class="p">),</span>
-<a name="l-617"></a>    <span class="p">.</span><span class="n">order_i</span>      <span class="p">(</span><span class="n">txorder</span><span class="p">),</span>
-<a name="l-618"></a>    <span class="p">.</span><span class="n">io_mode_i</span>    <span class="p">(</span><span class="n">io_mode_outclk</span><span class="p">)</span>
-<a name="l-619"></a>  <span class="p">);</span>
+<a name="l-604"></a>    <span class="c1">// Config (changed dynamically)</span>
+<a name="l-605"></a>    <span class="p">.</span><span class="n">order_i</span>      <span class="p">(</span><span class="n">rxorder</span><span class="p">),</span>
+<a name="l-606"></a>    <span class="p">.</span><span class="n">io_mode_i</span>    <span class="p">(</span><span class="n">io_mode_outclk</span><span class="p">)</span>
+<a name="l-607"></a>  <span class="p">);</span>
+<a name="l-608"></a>
+<a name="l-609"></a>  <span class="n">spi_p2s</span> <span class="n">u_p2s</span> <span class="p">(</span>
+<a name="l-610"></a>    <span class="p">.</span><span class="n">clk_i</span>        <span class="p">(</span><span class="n">clk_spi_out_buf</span><span class="p">),</span>
+<a name="l-611"></a>    <span class="p">.</span><span class="n">rst_ni</span>       <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
+<a name="l-612"></a>
+<a name="l-613"></a>    <span class="p">.</span><span class="n">data_valid_i</span> <span class="p">(</span><span class="n">p2s_valid</span><span class="p">),</span>
+<a name="l-614"></a>    <span class="p">.</span><span class="n">data_i</span>       <span class="p">(</span><span class="n">p2s_data</span><span class="p">),</span>
+<a name="l-615"></a>    <span class="p">.</span><span class="n">data_sent_o</span>  <span class="p">(</span><span class="n">p2s_sent</span><span class="p">),</span>
+<a name="l-616"></a>
+<a name="l-617"></a>    <span class="p">.</span><span class="n">csb_i</span>        <span class="p">(</span><span class="n">cio_csb_i</span><span class="p">),</span>
+<a name="l-618"></a>    <span class="p">.</span><span class="n">s_en_o</span>       <span class="p">(</span><span class="n">cio_sd_en_o</span><span class="p">),</span>
+<a name="l-619"></a>    <span class="p">.</span><span class="n">s_o</span>          <span class="p">(</span><span class="n">cio_sd_o</span><span class="p">),</span>
 <a name="l-620"></a>
-<a name="l-621"></a>  <span class="c1">/////////////</span>
-<a name="l-622"></a>  <span class="c1">// FW Mode //</span>
-<a name="l-623"></a>  <span class="c1">/////////////</span>
-<a name="l-624"></a>  <span class="n">spi_fwmode</span> <span class="p">#(</span>
-<a name="l-625"></a>    <span class="p">.</span><span class="n">FifoWidth</span> <span class="p">(</span><span class="n">FifoWidth</span><span class="p">),</span>
-<a name="l-626"></a>    <span class="p">.</span><span class="n">FifoDepth</span> <span class="p">(</span><span class="n">FifoDepth</span><span class="p">)</span>
-<a name="l-627"></a>  <span class="p">)</span> <span class="n">u_fwmode</span> <span class="p">(</span>
-<a name="l-628"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-629"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-630"></a>
-<a name="l-631"></a>    <span class="p">.</span><span class="n">clk_spi_in_i</span>  <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
-<a name="l-632"></a>    <span class="p">.</span><span class="n">rst_rxfifo_ni</span> <span class="p">(</span><span class="n">rst_rxfifo_n</span><span class="p">),</span>
-<a name="l-633"></a>    <span class="p">.</span><span class="n">clk_spi_out_i</span> <span class="p">(</span><span class="n">clk_spi_out_buf</span><span class="p">),</span>
-<a name="l-634"></a>    <span class="p">.</span><span class="n">rst_txfifo_ni</span> <span class="p">(</span><span class="n">rst_txfifo_n</span><span class="p">),</span>
+<a name="l-621"></a>    <span class="p">.</span><span class="n">cpha_i</span>       <span class="p">(</span><span class="n">cpha</span><span class="p">),</span>
+<a name="l-622"></a>    <span class="p">.</span><span class="n">order_i</span>      <span class="p">(</span><span class="n">txorder</span><span class="p">),</span>
+<a name="l-623"></a>    <span class="p">.</span><span class="n">io_mode_i</span>    <span class="p">(</span><span class="n">io_mode_outclk</span><span class="p">)</span>
+<a name="l-624"></a>  <span class="p">);</span>
+<a name="l-625"></a>
+<a name="l-626"></a>  <span class="c1">/////////////</span>
+<a name="l-627"></a>  <span class="c1">// FW Mode //</span>
+<a name="l-628"></a>  <span class="c1">/////////////</span>
+<a name="l-629"></a>  <span class="n">spi_fwmode</span> <span class="p">#(</span>
+<a name="l-630"></a>    <span class="p">.</span><span class="n">FifoWidth</span> <span class="p">(</span><span class="n">FifoWidth</span><span class="p">),</span>
+<a name="l-631"></a>    <span class="p">.</span><span class="n">FifoDepth</span> <span class="p">(</span><span class="n">FifoDepth</span><span class="p">)</span>
+<a name="l-632"></a>  <span class="p">)</span> <span class="n">u_fwmode</span> <span class="p">(</span>
+<a name="l-633"></a>    <span class="p">.</span><span class="n">clk_i</span>    <span class="p">(</span><span class="n">sram_clk</span><span class="p">),</span>
+<a name="l-634"></a>    <span class="p">.</span><span class="n">rst_ni</span>   <span class="p">(</span><span class="n">sram_rst_n</span><span class="p">),</span>
 <a name="l-635"></a>
-<a name="l-636"></a>    <span class="p">.</span><span class="n">mode_i</span>        <span class="p">(</span><span class="n">spi_mode</span><span class="p">),</span>
-<a name="l-637"></a>
-<a name="l-638"></a>    <span class="p">.</span><span class="n">rxf_overflow_o</span>  <span class="p">(</span><span class="n">rxf_overflow</span><span class="p">),</span>
-<a name="l-639"></a>    <span class="p">.</span><span class="n">txf_underflow_o</span> <span class="p">(</span><span class="n">txf_underflow</span><span class="p">),</span>
+<a name="l-636"></a>    <span class="p">.</span><span class="n">clk_spi_in_i</span>  <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
+<a name="l-637"></a>    <span class="p">.</span><span class="n">rst_rxfifo_ni</span> <span class="p">(</span><span class="n">rst_rxfifo_n</span><span class="p">),</span>
+<a name="l-638"></a>    <span class="p">.</span><span class="n">clk_spi_out_i</span> <span class="p">(</span><span class="n">clk_spi_out_buf</span><span class="p">),</span>
+<a name="l-639"></a>    <span class="p">.</span><span class="n">rst_txfifo_ni</span> <span class="p">(</span><span class="n">rst_txfifo_n</span><span class="p">),</span>
 <a name="l-640"></a>
-<a name="l-641"></a>    <span class="c1">// SRAM interface</span>
-<a name="l-642"></a>    <span class="p">.</span><span class="n">fwm_req_o</span>    <span class="p">(</span><span class="n">sub_sram_req</span>    <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-643"></a>    <span class="p">.</span><span class="n">fwm_write_o</span>  <span class="p">(</span><span class="n">sub_sram_write</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-644"></a>    <span class="p">.</span><span class="n">fwm_addr_o</span>   <span class="p">(</span><span class="n">sub_sram_addr</span>   <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-645"></a>    <span class="p">.</span><span class="n">fwm_wdata_o</span>  <span class="p">(</span><span class="n">sub_sram_wdata</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-646"></a>    <span class="p">.</span><span class="n">fwm_rvalid_i</span> <span class="p">(</span><span class="n">sub_sram_rvalid</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-647"></a>    <span class="p">.</span><span class="n">fwm_rdata_i</span>  <span class="p">(</span><span class="n">sub_sram_rdata</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-648"></a>    <span class="p">.</span><span class="n">fwm_rerror_i</span> <span class="p">(</span><span class="n">sub_sram_rerror</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-649"></a>
-<a name="l-650"></a>    <span class="c1">// Input from S2P</span>
-<a name="l-651"></a>    <span class="p">.</span><span class="n">rx_data_valid_i</span> <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
-<a name="l-652"></a>    <span class="p">.</span><span class="n">rx_data_i</span>       <span class="p">(</span><span class="n">s2p_data</span><span class="p">),</span>
-<a name="l-653"></a>
-<a name="l-654"></a>    <span class="c1">// Output to S2P (mode select)</span>
-<a name="l-655"></a>    <span class="p">.</span><span class="n">io_mode_o</span>       <span class="p">(</span><span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-656"></a>
-<a name="l-657"></a>    <span class="c1">// P2S</span>
-<a name="l-658"></a>    <span class="p">.</span><span class="n">tx_wvalid_o</span> <span class="p">(</span><span class="n">sub_p2s_valid</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-659"></a>    <span class="p">.</span><span class="n">tx_data_o</span>   <span class="p">(</span><span class="n">sub_p2s_data</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
-<a name="l-660"></a>    <span class="p">.</span><span class="n">tx_wready_i</span> <span class="p">(</span><span class="n">sub_p2s_sent</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-641"></a>    <span class="p">.</span><span class="n">mode_i</span>        <span class="p">(</span><span class="n">spi_mode</span><span class="p">),</span>
+<a name="l-642"></a>
+<a name="l-643"></a>    <span class="p">.</span><span class="n">rxf_overflow_o</span>  <span class="p">(</span><span class="n">rxf_overflow</span><span class="p">),</span>
+<a name="l-644"></a>    <span class="p">.</span><span class="n">txf_underflow_o</span> <span class="p">(</span><span class="n">txf_underflow</span><span class="p">),</span>
+<a name="l-645"></a>
+<a name="l-646"></a>    <span class="c1">// SRAM interface</span>
+<a name="l-647"></a>    <span class="p">.</span><span class="n">fwm_req_o</span>    <span class="p">(</span><span class="n">sub_sram_req</span>    <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-648"></a>    <span class="p">.</span><span class="n">fwm_write_o</span>  <span class="p">(</span><span class="n">sub_sram_write</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-649"></a>    <span class="p">.</span><span class="n">fwm_addr_o</span>   <span class="p">(</span><span class="n">sub_sram_addr</span>   <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-650"></a>    <span class="p">.</span><span class="n">fwm_wdata_o</span>  <span class="p">(</span><span class="n">sub_sram_wdata</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-651"></a>    <span class="p">.</span><span class="n">fwm_rvalid_i</span> <span class="p">(</span><span class="n">sub_sram_rvalid</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-652"></a>    <span class="p">.</span><span class="n">fwm_rdata_i</span>  <span class="p">(</span><span class="n">sub_sram_rdata</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-653"></a>    <span class="p">.</span><span class="n">fwm_rerror_i</span> <span class="p">(</span><span class="n">sub_sram_rerror</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-654"></a>
+<a name="l-655"></a>    <span class="c1">// Input from S2P</span>
+<a name="l-656"></a>    <span class="p">.</span><span class="n">rx_data_valid_i</span> <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
+<a name="l-657"></a>    <span class="p">.</span><span class="n">rx_data_i</span>       <span class="p">(</span><span class="n">s2p_data</span><span class="p">),</span>
+<a name="l-658"></a>
+<a name="l-659"></a>    <span class="c1">// Output to S2P (mode select)</span>
+<a name="l-660"></a>    <span class="p">.</span><span class="n">io_mode_o</span>       <span class="p">(</span><span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
 <a name="l-661"></a>
-<a name="l-662"></a>    <span class="c1">// CSRs</span>
-<a name="l-663"></a>    <span class="p">.</span><span class="n">timer_v_i</span>   <span class="p">(</span><span class="n">timer_v</span><span class="p">),</span>
-<a name="l-664"></a>    <span class="p">.</span><span class="n">sram_rxf_bindex_i</span> <span class="p">(</span><span class="n">sram_rxf_bindex</span><span class="p">),</span>
-<a name="l-665"></a>    <span class="p">.</span><span class="n">sram_txf_bindex_i</span> <span class="p">(</span><span class="n">sram_txf_bindex</span><span class="p">),</span>
-<a name="l-666"></a>    <span class="p">.</span><span class="n">sram_rxf_lindex_i</span> <span class="p">(</span><span class="n">sram_rxf_lindex</span><span class="p">),</span>
-<a name="l-667"></a>    <span class="p">.</span><span class="n">sram_txf_lindex_i</span> <span class="p">(</span><span class="n">sram_txf_lindex</span><span class="p">),</span>
-<a name="l-668"></a>
-<a name="l-669"></a>    <span class="p">.</span><span class="n">abort_i</span> <span class="p">(</span><span class="n">abort</span><span class="p">),</span>
-<a name="l-670"></a>
-<a name="l-671"></a>    <span class="p">.</span><span class="n">sram_rxf_rptr_i</span>  <span class="p">(</span><span class="n">sram_rxf_rptr</span> <span class="p">),</span>
-<a name="l-672"></a>    <span class="p">.</span><span class="n">sram_rxf_wptr_o</span>  <span class="p">(</span><span class="n">sram_rxf_wptr</span> <span class="p">),</span>
-<a name="l-673"></a>    <span class="p">.</span><span class="n">sram_txf_rptr_o</span>  <span class="p">(</span><span class="n">sram_txf_rptr</span> <span class="p">),</span>
-<a name="l-674"></a>    <span class="p">.</span><span class="n">sram_txf_wptr_i</span>  <span class="p">(</span><span class="n">sram_txf_wptr</span> <span class="p">),</span>
-<a name="l-675"></a>    <span class="p">.</span><span class="n">sram_rxf_depth_o</span> <span class="p">(</span><span class="n">sram_rxf_depth</span><span class="p">),</span>
-<a name="l-676"></a>    <span class="p">.</span><span class="n">sram_txf_depth_o</span> <span class="p">(</span><span class="n">sram_txf_depth</span><span class="p">),</span>
-<a name="l-677"></a>    <span class="p">.</span><span class="n">sram_rxf_full_o</span>  <span class="p">(</span><span class="n">sram_rxf_full</span> <span class="p">),</span>
-<a name="l-678"></a>
-<a name="l-679"></a>    <span class="p">.</span><span class="n">as_txfifo_depth_o</span> <span class="p">(</span><span class="n">as_txfifo_depth</span><span class="p">),</span>
-<a name="l-680"></a>    <span class="p">.</span><span class="n">as_rxfifo_depth_o</span> <span class="p">(</span><span class="n">as_rxfifo_depth</span><span class="p">),</span>
-<a name="l-681"></a>
-<a name="l-682"></a>    <span class="p">.</span><span class="n">rxf_empty_o</span> <span class="p">(</span><span class="n">rxf_empty</span><span class="p">),</span>
-<a name="l-683"></a>    <span class="p">.</span><span class="n">rxf_full_o</span>  <span class="p">(</span><span class="n">rxf_full</span><span class="p">),</span>
-<a name="l-684"></a>    <span class="p">.</span><span class="n">txf_empty_o</span> <span class="p">(</span><span class="n">txf_empty</span><span class="p">),</span>
-<a name="l-685"></a>    <span class="p">.</span><span class="n">txf_full_o</span>  <span class="p">(</span><span class="n">txf_full</span><span class="p">)</span>
+<a name="l-662"></a>    <span class="c1">// P2S</span>
+<a name="l-663"></a>    <span class="p">.</span><span class="n">tx_wvalid_o</span> <span class="p">(</span><span class="n">sub_p2s_valid</span> <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-664"></a>    <span class="p">.</span><span class="n">tx_data_o</span>   <span class="p">(</span><span class="n">sub_p2s_data</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-665"></a>    <span class="p">.</span><span class="n">tx_wready_i</span> <span class="p">(</span><span class="n">sub_p2s_sent</span>  <span class="p">[</span><span class="n">IoModeFw</span><span class="p">]),</span>
+<a name="l-666"></a>
+<a name="l-667"></a>    <span class="c1">// CSRs</span>
+<a name="l-668"></a>    <span class="p">.</span><span class="n">timer_v_i</span>   <span class="p">(</span><span class="n">timer_v</span><span class="p">),</span>
+<a name="l-669"></a>    <span class="p">.</span><span class="n">sram_rxf_bindex_i</span> <span class="p">(</span><span class="n">sram_rxf_bindex</span><span class="p">),</span>
+<a name="l-670"></a>    <span class="p">.</span><span class="n">sram_txf_bindex_i</span> <span class="p">(</span><span class="n">sram_txf_bindex</span><span class="p">),</span>
+<a name="l-671"></a>    <span class="p">.</span><span class="n">sram_rxf_lindex_i</span> <span class="p">(</span><span class="n">sram_rxf_lindex</span><span class="p">),</span>
+<a name="l-672"></a>    <span class="p">.</span><span class="n">sram_txf_lindex_i</span> <span class="p">(</span><span class="n">sram_txf_lindex</span><span class="p">),</span>
+<a name="l-673"></a>
+<a name="l-674"></a>    <span class="p">.</span><span class="n">abort_i</span> <span class="p">(</span><span class="n">abort</span><span class="p">),</span>
+<a name="l-675"></a>
+<a name="l-676"></a>    <span class="p">.</span><span class="n">sram_rxf_rptr_i</span>  <span class="p">(</span><span class="n">sram_rxf_rptr</span> <span class="p">),</span>
+<a name="l-677"></a>    <span class="p">.</span><span class="n">sram_rxf_wptr_o</span>  <span class="p">(</span><span class="n">sram_rxf_wptr</span> <span class="p">),</span>
+<a name="l-678"></a>    <span class="p">.</span><span class="n">sram_txf_rptr_o</span>  <span class="p">(</span><span class="n">sram_txf_rptr</span> <span class="p">),</span>
+<a name="l-679"></a>    <span class="p">.</span><span class="n">sram_txf_wptr_i</span>  <span class="p">(</span><span class="n">sram_txf_wptr</span> <span class="p">),</span>
+<a name="l-680"></a>    <span class="p">.</span><span class="n">sram_rxf_depth_o</span> <span class="p">(</span><span class="n">sram_rxf_depth</span><span class="p">),</span>
+<a name="l-681"></a>    <span class="p">.</span><span class="n">sram_txf_depth_o</span> <span class="p">(</span><span class="n">sram_txf_depth</span><span class="p">),</span>
+<a name="l-682"></a>    <span class="p">.</span><span class="n">sram_rxf_full_o</span>  <span class="p">(</span><span class="n">sram_rxf_full</span> <span class="p">),</span>
+<a name="l-683"></a>
+<a name="l-684"></a>    <span class="p">.</span><span class="n">as_txfifo_depth_o</span> <span class="p">(</span><span class="n">as_txfifo_depth</span><span class="p">),</span>
+<a name="l-685"></a>    <span class="p">.</span><span class="n">as_rxfifo_depth_o</span> <span class="p">(</span><span class="n">as_rxfifo_depth</span><span class="p">),</span>
 <a name="l-686"></a>
-<a name="l-687"></a>  <span class="p">);</span>
-<a name="l-688"></a>
-<a name="l-689"></a>  <span class="c1">////////////////////</span>
-<a name="l-690"></a>  <span class="c1">// SPI Flash Mode //</span>
-<a name="l-691"></a>  <span class="c1">////////////////////</span>
-<a name="l-692"></a>
-<a name="l-693"></a>  <span class="n">spi_cmdparse</span> <span class="n">u_cmdparse</span> <span class="p">(</span>
-<a name="l-694"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
-<a name="l-695"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
-<a name="l-696"></a>
-<a name="l-697"></a>    <span class="p">.</span><span class="n">data_valid_i</span> <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
-<a name="l-698"></a>    <span class="p">.</span><span class="n">data_i</span>       <span class="p">(</span><span class="n">s2p_data</span><span class="p">),</span>
-<a name="l-699"></a>
-<a name="l-700"></a>    <span class="p">.</span><span class="n">spi_mode_i</span>   <span class="p">(</span><span class="n">spi_mode</span><span class="p">),</span>
+<a name="l-687"></a>    <span class="p">.</span><span class="n">rxf_empty_o</span> <span class="p">(</span><span class="n">rxf_empty</span><span class="p">),</span>
+<a name="l-688"></a>    <span class="p">.</span><span class="n">rxf_full_o</span>  <span class="p">(</span><span class="n">rxf_full</span><span class="p">),</span>
+<a name="l-689"></a>    <span class="p">.</span><span class="n">txf_empty_o</span> <span class="p">(</span><span class="n">txf_empty</span><span class="p">),</span>
+<a name="l-690"></a>    <span class="p">.</span><span class="n">txf_full_o</span>  <span class="p">(</span><span class="n">txf_full</span><span class="p">)</span>
+<a name="l-691"></a>
+<a name="l-692"></a>  <span class="p">);</span>
+<a name="l-693"></a>
+<a name="l-694"></a>  <span class="c1">////////////////////</span>
+<a name="l-695"></a>  <span class="c1">// SPI Flash Mode //</span>
+<a name="l-696"></a>  <span class="c1">////////////////////</span>
+<a name="l-697"></a>
+<a name="l-698"></a>  <span class="n">spi_cmdparse</span> <span class="n">u_cmdparse</span> <span class="p">(</span>
+<a name="l-699"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
+<a name="l-700"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
 <a name="l-701"></a>
-<a name="l-702"></a>    <span class="p">.</span><span class="n">upload_mask_i</span> <span class="p">(</span><span class="n">cfg_upload_mask</span><span class="p">),</span>
-<a name="l-703"></a>
-<a name="l-704"></a>    <span class="p">.</span><span class="n">io_mode_o</span>    <span class="p">(</span><span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">]),</span>
-<a name="l-705"></a>
-<a name="l-706"></a>    <span class="p">.</span><span class="n">sel_dp_o</span>     <span class="p">(</span><span class="n">cmd_dp_sel</span><span class="p">),</span>
-<a name="l-707"></a>    <span class="p">.</span><span class="n">opcode_o</span>     <span class="p">(</span><span class="n">cmd_opcode</span><span class="p">),</span>
+<a name="l-702"></a>    <span class="p">.</span><span class="n">data_valid_i</span> <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
+<a name="l-703"></a>    <span class="p">.</span><span class="n">data_i</span>       <span class="p">(</span><span class="n">s2p_data</span><span class="p">),</span>
+<a name="l-704"></a>
+<a name="l-705"></a>    <span class="p">.</span><span class="n">spi_mode_i</span>   <span class="p">(</span><span class="n">spi_mode</span><span class="p">),</span>
+<a name="l-706"></a>
+<a name="l-707"></a>    <span class="p">.</span><span class="n">upload_mask_i</span> <span class="p">(</span><span class="n">cfg_upload_mask</span><span class="p">),</span>
 <a name="l-708"></a>
-<a name="l-709"></a>    <span class="c1">// Not used for now</span>
-<a name="l-710"></a>    <span class="p">.</span><span class="n">cmd_config_req_o</span> <span class="p">(),</span>
-<a name="l-711"></a>    <span class="p">.</span><span class="n">cmd_config_idx_o</span> <span class="p">()</span>
-<a name="l-712"></a>  <span class="p">);</span>
+<a name="l-709"></a>    <span class="p">.</span><span class="n">io_mode_o</span>    <span class="p">(</span><span class="n">sub_iomode</span><span class="p">[</span><span class="n">IoModeCmdParse</span><span class="p">]),</span>
+<a name="l-710"></a>
+<a name="l-711"></a>    <span class="p">.</span><span class="n">sel_dp_o</span>     <span class="p">(</span><span class="n">cmd_dp_sel</span><span class="p">),</span>
+<a name="l-712"></a>    <span class="p">.</span><span class="n">opcode_o</span>     <span class="p">(</span><span class="n">cmd_opcode</span><span class="p">),</span>
 <a name="l-713"></a>
-<a name="l-714"></a>  <span class="n">spi_readcmd</span> <span class="n">u_readcmd</span> <span class="p">(</span>
-<a name="l-715"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
-<a name="l-716"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
-<a name="l-717"></a>
-<a name="l-718"></a>    <span class="p">.</span><span class="n">clk_out_i</span> <span class="p">(</span><span class="n">clk_spi_out_buf</span><span class="p">),</span>
-<a name="l-719"></a>
-<a name="l-720"></a>    <span class="p">.</span><span class="n">sys_rst_ni</span> <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-721"></a>
-<a name="l-722"></a>    <span class="p">.</span><span class="n">sel_dp_i</span>   <span class="p">(</span><span class="n">cmd_dp_sel</span><span class="p">),</span>
-<a name="l-723"></a>    <span class="p">.</span><span class="n">opcode_i</span>   <span class="p">(</span><span class="n">cmd_opcode</span><span class="p">),</span>
+<a name="l-714"></a>    <span class="c1">// Not used for now</span>
+<a name="l-715"></a>    <span class="p">.</span><span class="n">cmd_config_req_o</span> <span class="p">(),</span>
+<a name="l-716"></a>    <span class="p">.</span><span class="n">cmd_config_idx_o</span> <span class="p">()</span>
+<a name="l-717"></a>  <span class="p">);</span>
+<a name="l-718"></a>
+<a name="l-719"></a>  <span class="n">spi_readcmd</span> <span class="n">u_readcmd</span> <span class="p">(</span>
+<a name="l-720"></a>    <span class="p">.</span><span class="n">clk_i</span>  <span class="p">(</span><span class="n">clk_spi_in_buf</span><span class="p">),</span>
+<a name="l-721"></a>    <span class="p">.</span><span class="n">rst_ni</span> <span class="p">(</span><span class="n">rst_spi_n</span><span class="p">),</span>
+<a name="l-722"></a>
+<a name="l-723"></a>    <span class="p">.</span><span class="n">clk_out_i</span> <span class="p">(</span><span class="n">clk_spi_out_buf</span><span class="p">),</span>
 <a name="l-724"></a>
-<a name="l-725"></a>    <span class="c1">// SRAM interface</span>
-<a name="l-726"></a>    <span class="p">.</span><span class="n">sram_req_o</span>    <span class="p">(</span><span class="n">sub_sram_req</span>      <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-727"></a>    <span class="p">.</span><span class="n">sram_we_o</span>     <span class="p">(</span><span class="n">sub_sram_write</span>    <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-728"></a>    <span class="p">.</span><span class="n">sram_addr_o</span>   <span class="p">(</span><span class="n">sub_sram_addr</span>     <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-729"></a>    <span class="p">.</span><span class="n">sram_wdata_o</span>  <span class="p">(</span><span class="n">sub_sram_wdata</span>    <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-730"></a>    <span class="p">.</span><span class="n">sram_rvalid_i</span> <span class="p">(</span><span class="n">sub_sram_rvalid</span>   <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-731"></a>    <span class="p">.</span><span class="n">sram_rdata_i</span>  <span class="p">(</span><span class="n">sub_sram_rdata</span>    <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-732"></a>    <span class="p">.</span><span class="n">sram_rerror_i</span> <span class="p">(</span><span class="n">sub_sram_rerror</span>   <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-733"></a>
-<a name="l-734"></a>    <span class="c1">// S2P</span>
-<a name="l-735"></a>    <span class="p">.</span><span class="n">s2p_valid_i</span>   <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
-<a name="l-736"></a>    <span class="p">.</span><span class="n">s2p_byte_i</span>    <span class="p">(</span><span class="n">s2p_data</span><span class="p">),</span>
-<a name="l-737"></a>    <span class="p">.</span><span class="n">s2p_bitcnt_i</span>  <span class="p">(</span><span class="n">s2p_bitcnt</span><span class="p">),</span>
+<a name="l-725"></a>    <span class="p">.</span><span class="n">sys_rst_ni</span> <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-726"></a>
+<a name="l-727"></a>    <span class="p">.</span><span class="n">sel_dp_i</span>   <span class="p">(</span><span class="n">cmd_dp_sel</span><span class="p">),</span>
+<a name="l-728"></a>    <span class="p">.</span><span class="n">opcode_i</span>   <span class="p">(</span><span class="n">cmd_opcode</span><span class="p">),</span>
+<a name="l-729"></a>
+<a name="l-730"></a>    <span class="c1">// SRAM interface</span>
+<a name="l-731"></a>    <span class="p">.</span><span class="n">sram_req_o</span>    <span class="p">(</span><span class="n">sub_sram_req</span>      <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-732"></a>    <span class="p">.</span><span class="n">sram_we_o</span>     <span class="p">(</span><span class="n">sub_sram_write</span>    <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-733"></a>    <span class="p">.</span><span class="n">sram_addr_o</span>   <span class="p">(</span><span class="n">sub_sram_addr</span>     <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-734"></a>    <span class="p">.</span><span class="n">sram_wdata_o</span>  <span class="p">(</span><span class="n">sub_sram_wdata</span>    <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-735"></a>    <span class="p">.</span><span class="n">sram_rvalid_i</span> <span class="p">(</span><span class="n">sub_sram_rvalid</span>   <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-736"></a>    <span class="p">.</span><span class="n">sram_rdata_i</span>  <span class="p">(</span><span class="n">sub_sram_rdata</span>    <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-737"></a>    <span class="p">.</span><span class="n">sram_rerror_i</span> <span class="p">(</span><span class="n">sub_sram_rerror</span>   <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
 <a name="l-738"></a>
-<a name="l-739"></a>    <span class="c1">// P2S</span>
-<a name="l-740"></a>    <span class="p">.</span><span class="n">p2s_valid_o</span>   <span class="p">(</span><span class="n">sub_p2s_valid</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-741"></a>    <span class="p">.</span><span class="n">p2s_byte_o</span>    <span class="p">(</span><span class="n">sub_p2s_data</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
-<a name="l-742"></a>    <span class="p">.</span><span class="n">p2s_sent_i</span>    <span class="p">(</span><span class="n">sub_p2s_sent</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-739"></a>    <span class="c1">// S2P</span>
+<a name="l-740"></a>    <span class="p">.</span><span class="n">s2p_valid_i</span>   <span class="p">(</span><span class="n">s2p_data_valid</span><span class="p">),</span>
+<a name="l-741"></a>    <span class="p">.</span><span class="n">s2p_byte_i</span>    <span class="p">(</span><span class="n">s2p_data</span><span class="p">),</span>
+<a name="l-742"></a>    <span class="p">.</span><span class="n">s2p_bitcnt_i</span>  <span class="p">(</span><span class="n">s2p_bitcnt</span><span class="p">),</span>
 <a name="l-743"></a>
-<a name="l-744"></a>    <span class="p">.</span><span class="n">spi_mode_i</span>       <span class="p">(</span><span class="n">spi_mode</span><span class="p">),</span>
-<a name="l-745"></a>    <span class="c1">// TODO: connect to reg intf</span>
-<a name="l-746"></a>    <span class="p">.</span><span class="n">fastread_dummy_i</span> <span class="p">(</span><span class="mh">3&#39;h 7</span><span class="p">),</span>
-<a name="l-747"></a>    <span class="p">.</span><span class="n">dualread_dummy_i</span> <span class="p">(</span><span class="mh">3&#39;h 3</span><span class="p">),</span>
-<a name="l-748"></a>    <span class="p">.</span><span class="n">quadread_dummy_i</span> <span class="p">(</span><span class="mh">3&#39;h 1</span><span class="p">),</span>
-<a name="l-749"></a>
-<a name="l-750"></a>    <span class="p">.</span><span class="n">readbuf_threshold_i</span> <span class="p">(</span><span class="m">&#39;0</span><span class="p">),</span> <span class="c1">//$clog2(ReadBufferDepth)-1</span>
-<a name="l-751"></a>
-<a name="l-752"></a>    <span class="p">.</span><span class="n">addr_4b_en_i</span> <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span>
-<a name="l-753"></a>
-<a name="l-754"></a>    <span class="p">.</span><span class="n">mailbox_en_i</span>   <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span>
-<a name="l-755"></a>    <span class="p">.</span><span class="n">mailbox_addr_i</span> <span class="p">(</span><span class="m">&#39;0</span><span class="p">),</span> <span class="c1">// 32</span>
+<a name="l-744"></a>    <span class="c1">// P2S</span>
+<a name="l-745"></a>    <span class="p">.</span><span class="n">p2s_valid_o</span>   <span class="p">(</span><span class="n">sub_p2s_valid</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-746"></a>    <span class="p">.</span><span class="n">p2s_byte_o</span>    <span class="p">(</span><span class="n">sub_p2s_data</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-747"></a>    <span class="p">.</span><span class="n">p2s_sent_i</span>    <span class="p">(</span><span class="n">sub_p2s_sent</span>  <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-748"></a>
+<a name="l-749"></a>    <span class="p">.</span><span class="n">spi_mode_i</span>       <span class="p">(</span><span class="n">spi_mode</span><span class="p">),</span>
+<a name="l-750"></a>    <span class="c1">// TODO: connect to reg intf</span>
+<a name="l-751"></a>    <span class="p">.</span><span class="n">fastread_dummy_i</span> <span class="p">(</span><span class="mh">3&#39;h 7</span><span class="p">),</span>
+<a name="l-752"></a>    <span class="p">.</span><span class="n">dualread_dummy_i</span> <span class="p">(</span><span class="mh">3&#39;h 3</span><span class="p">),</span>
+<a name="l-753"></a>    <span class="p">.</span><span class="n">quadread_dummy_i</span> <span class="p">(</span><span class="mh">3&#39;h 1</span><span class="p">),</span>
+<a name="l-754"></a>
+<a name="l-755"></a>    <span class="p">.</span><span class="n">readbuf_threshold_i</span> <span class="p">(</span><span class="m">&#39;0</span><span class="p">),</span> <span class="c1">//$clog2(ReadBufferDepth)-1</span>
 <a name="l-756"></a>
-<a name="l-757"></a>    <span class="p">.</span><span class="n">io_mode_o</span> <span class="p">(</span><span class="n">sub_iomode</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-757"></a>    <span class="p">.</span><span class="n">addr_4b_en_i</span> <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span>
 <a name="l-758"></a>
-<a name="l-759"></a>    <span class="p">.</span><span class="n">read_watermark_o</span> <span class="p">()</span>
-<a name="l-760"></a>  <span class="p">);</span>
+<a name="l-759"></a>    <span class="p">.</span><span class="n">mailbox_en_i</span>   <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span>
+<a name="l-760"></a>    <span class="p">.</span><span class="n">mailbox_addr_i</span> <span class="p">(</span><span class="m">&#39;0</span><span class="p">),</span> <span class="c1">// 32</span>
 <a name="l-761"></a>
-<a name="l-762"></a>  <span class="c1">////////////////////</span>
-<a name="l-763"></a>  <span class="c1">// Common modules //</span>
-<a name="l-764"></a>  <span class="c1">////////////////////</span>
-<a name="l-765"></a>
-<a name="l-766"></a>  <span class="n">tlul_adapter_sram</span> <span class="p">#(</span>
-<a name="l-767"></a>    <span class="p">.</span><span class="n">SramAw</span>      <span class="p">(</span><span class="n">SramAw</span><span class="p">),</span>
-<a name="l-768"></a>    <span class="p">.</span><span class="n">SramDw</span>      <span class="p">(</span><span class="n">SramDw</span><span class="p">),</span>
-<a name="l-769"></a>    <span class="p">.</span><span class="n">Outstanding</span> <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-<a name="l-770"></a>    <span class="p">.</span><span class="n">ByteAccess</span>  <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a name="l-771"></a>  <span class="p">)</span> <span class="n">u_tlul2sram</span> <span class="p">(</span>
-<a name="l-772"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-773"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-774"></a>
-<a name="l-775"></a>    <span class="p">.</span><span class="n">tl_i</span>        <span class="p">(</span><span class="n">tl_sram_h2d</span> <span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-<a name="l-776"></a>    <span class="p">.</span><span class="n">tl_o</span>        <span class="p">(</span><span class="n">tl_sram_d2h</span> <span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-<a name="l-777"></a>    <span class="p">.</span><span class="n">en_ifetch_i</span> <span class="p">(</span><span class="n">tlul_pkg</span><span class="o">::</span><span class="n">InstrDis</span><span class="p">),</span>
-<a name="l-778"></a>    <span class="p">.</span><span class="n">req_o</span>       <span class="p">(</span><span class="n">mem_a_req</span><span class="p">),</span>
-<a name="l-779"></a>    <span class="p">.</span><span class="n">gnt_i</span>       <span class="p">(</span><span class="n">mem_a_req</span><span class="p">),</span>  <span class="c1">//Always grant when request</span>
-<a name="l-780"></a>    <span class="p">.</span><span class="n">we_o</span>        <span class="p">(</span><span class="n">mem_a_write</span><span class="p">),</span>
-<a name="l-781"></a>    <span class="p">.</span><span class="n">addr_o</span>      <span class="p">(</span><span class="n">mem_a_addr</span><span class="p">),</span>
-<a name="l-782"></a>    <span class="p">.</span><span class="n">wdata_o</span>     <span class="p">(</span><span class="n">mem_a_wdata</span><span class="p">),</span>
-<a name="l-783"></a>    <span class="p">.</span><span class="n">wmask_o</span>     <span class="p">(),</span>           <span class="c1">// Not used</span>
-<a name="l-784"></a>    <span class="p">.</span><span class="n">intg_error_o</span><span class="p">(),</span>
-<a name="l-785"></a>    <span class="p">.</span><span class="n">rdata_i</span>     <span class="p">(</span><span class="n">mem_a_rdata</span><span class="p">),</span>
-<a name="l-786"></a>    <span class="p">.</span><span class="n">rvalid_i</span>    <span class="p">(</span><span class="n">mem_a_rvalid</span><span class="p">),</span>
-<a name="l-787"></a>    <span class="p">.</span><span class="n">rerror_i</span>    <span class="p">(</span><span class="n">mem_a_rerror</span><span class="p">)</span>
-<a name="l-788"></a>  <span class="p">);</span>
-<a name="l-789"></a>
-<a name="l-790"></a>  <span class="c1">// SRAM Wrapper</span>
-<a name="l-791"></a>  <span class="n">prim_ram_2p_async_adv</span> <span class="p">#(</span>
-<a name="l-792"></a>    <span class="p">.</span><span class="n">Depth</span> <span class="p">(</span><span class="n">SramDepth</span><span class="p">),</span>
-<a name="l-793"></a>    <span class="p">.</span><span class="n">Width</span> <span class="p">(</span><span class="n">SramDw</span><span class="p">),</span>    <span class="c1">// 32 x 512 --&gt; 2kB</span>
-<a name="l-794"></a>    <span class="p">.</span><span class="n">DataBitsPerMask</span> <span class="p">(</span><span class="mi">8</span><span class="p">),</span>
+<a name="l-762"></a>    <span class="p">.</span><span class="n">io_mode_o</span> <span class="p">(</span><span class="n">sub_iomode</span> <span class="p">[</span><span class="n">IoModeReadCmd</span><span class="p">]),</span>
+<a name="l-763"></a>
+<a name="l-764"></a>    <span class="p">.</span><span class="n">read_watermark_o</span> <span class="p">()</span>
+<a name="l-765"></a>  <span class="p">);</span>
+<a name="l-766"></a>
+<a name="l-767"></a>  <span class="c1">////////////////////</span>
+<a name="l-768"></a>  <span class="c1">// Common modules //</span>
+<a name="l-769"></a>  <span class="c1">////////////////////</span>
+<a name="l-770"></a>
+<a name="l-771"></a>  <span class="n">tlul_adapter_sram</span> <span class="p">#(</span>
+<a name="l-772"></a>    <span class="p">.</span><span class="n">SramAw</span>      <span class="p">(</span><span class="n">SramAw</span><span class="p">),</span>
+<a name="l-773"></a>    <span class="p">.</span><span class="n">SramDw</span>      <span class="p">(</span><span class="n">SramDw</span><span class="p">),</span>
+<a name="l-774"></a>    <span class="p">.</span><span class="n">Outstanding</span> <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+<a name="l-775"></a>    <span class="p">.</span><span class="n">ByteAccess</span>  <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-776"></a>  <span class="p">)</span> <span class="n">u_tlul2sram</span> <span class="p">(</span>
+<a name="l-777"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-778"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
+<a name="l-779"></a>
+<a name="l-780"></a>    <span class="p">.</span><span class="n">tl_i</span>        <span class="p">(</span><span class="n">tl_sram_h2d</span> <span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+<a name="l-781"></a>    <span class="p">.</span><span class="n">tl_o</span>        <span class="p">(</span><span class="n">tl_sram_d2h</span> <span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+<a name="l-782"></a>    <span class="p">.</span><span class="n">en_ifetch_i</span> <span class="p">(</span><span class="n">tlul_pkg</span><span class="o">::</span><span class="n">InstrDis</span><span class="p">),</span>
+<a name="l-783"></a>    <span class="p">.</span><span class="n">req_o</span>       <span class="p">(</span><span class="n">mem_a_req</span><span class="p">),</span>
+<a name="l-784"></a>    <span class="p">.</span><span class="n">req_type_o</span>  <span class="p">(),</span>
+<a name="l-785"></a>    <span class="p">.</span><span class="n">gnt_i</span>       <span class="p">(</span><span class="n">mem_a_req</span><span class="p">),</span>  <span class="c1">//Always grant when request</span>
+<a name="l-786"></a>    <span class="p">.</span><span class="n">we_o</span>        <span class="p">(</span><span class="n">mem_a_write</span><span class="p">),</span>
+<a name="l-787"></a>    <span class="p">.</span><span class="n">addr_o</span>      <span class="p">(</span><span class="n">mem_a_addr</span><span class="p">),</span>
+<a name="l-788"></a>    <span class="p">.</span><span class="n">wdata_o</span>     <span class="p">(</span><span class="n">mem_a_wdata</span><span class="p">),</span>
+<a name="l-789"></a>    <span class="p">.</span><span class="n">wmask_o</span>     <span class="p">(),</span>           <span class="c1">// Not used</span>
+<a name="l-790"></a>    <span class="p">.</span><span class="n">intg_error_o</span><span class="p">(),</span>
+<a name="l-791"></a>    <span class="p">.</span><span class="n">rdata_i</span>     <span class="p">(</span><span class="n">mem_a_rdata</span><span class="p">),</span>
+<a name="l-792"></a>    <span class="p">.</span><span class="n">rvalid_i</span>    <span class="p">(</span><span class="n">mem_a_rvalid</span><span class="p">),</span>
+<a name="l-793"></a>    <span class="p">.</span><span class="n">rerror_i</span>    <span class="p">(</span><span class="n">mem_a_rerror</span><span class="p">)</span>
+<a name="l-794"></a>  <span class="p">);</span>
 <a name="l-795"></a>
-<a name="l-796"></a>    <span class="p">.</span><span class="n">EnableECC</span>           <span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<a name="l-797"></a>    <span class="p">.</span><span class="n">EnableParity</span>        <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-<a name="l-798"></a>    <span class="p">.</span><span class="n">EnableInputPipeline</span> <span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<a name="l-799"></a>    <span class="p">.</span><span class="n">EnableOutputPipeline</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a name="l-800"></a>  <span class="p">)</span> <span class="n">u_memory_2p</span> <span class="p">(</span>
-<a name="l-801"></a>    <span class="p">.</span><span class="n">clk_a_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
-<a name="l-802"></a>    <span class="p">.</span><span class="n">rst_a_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
-<a name="l-803"></a>
-<a name="l-804"></a>    <span class="p">.</span><span class="n">clk_b_i</span>    <span class="p">(</span><span class="n">sram_clk</span><span class="p">),</span>
-<a name="l-805"></a>    <span class="p">.</span><span class="n">rst_b_ni</span>   <span class="p">(</span><span class="n">sram_rst_n</span><span class="p">),</span>
-<a name="l-806"></a>
-<a name="l-807"></a>    <span class="p">.</span><span class="n">a_req_i</span>    <span class="p">(</span><span class="n">mem_a_req</span><span class="p">),</span>
-<a name="l-808"></a>    <span class="p">.</span><span class="n">a_write_i</span>  <span class="p">(</span><span class="n">mem_a_write</span><span class="p">),</span>
-<a name="l-809"></a>    <span class="p">.</span><span class="n">a_addr_i</span>   <span class="p">(</span><span class="n">mem_a_addr</span><span class="p">),</span>
-<a name="l-810"></a>    <span class="p">.</span><span class="n">a_wdata_i</span>  <span class="p">(</span><span class="n">mem_a_wdata</span><span class="p">),</span>
-<a name="l-811"></a>    <span class="p">.</span><span class="n">a_wmask_i</span>  <span class="p">({</span><span class="n">SramDw</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
-<a name="l-812"></a>    <span class="p">.</span><span class="n">a_rvalid_o</span> <span class="p">(</span><span class="n">mem_a_rvalid</span><span class="p">),</span>
-<a name="l-813"></a>    <span class="p">.</span><span class="n">a_rdata_o</span>  <span class="p">(</span><span class="n">mem_a_rdata</span><span class="p">),</span>
-<a name="l-814"></a>    <span class="p">.</span><span class="n">a_rerror_o</span> <span class="p">(</span><span class="n">mem_a_rerror</span><span class="p">),</span>
-<a name="l-815"></a>
-<a name="l-816"></a>    <span class="p">.</span><span class="n">b_req_i</span>    <span class="p">(</span><span class="n">mem_b_req</span><span class="p">),</span>
-<a name="l-817"></a>    <span class="p">.</span><span class="n">b_write_i</span>  <span class="p">(</span><span class="n">mem_b_write</span><span class="p">),</span>
-<a name="l-818"></a>    <span class="p">.</span><span class="n">b_addr_i</span>   <span class="p">(</span><span class="n">mem_b_addr</span><span class="p">),</span>
-<a name="l-819"></a>    <span class="p">.</span><span class="n">b_wdata_i</span>  <span class="p">(</span><span class="n">mem_b_wdata</span><span class="p">),</span>
-<a name="l-820"></a>    <span class="p">.</span><span class="n">b_wmask_i</span>  <span class="p">({</span><span class="n">SramDw</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
-<a name="l-821"></a>    <span class="p">.</span><span class="n">b_rvalid_o</span> <span class="p">(</span><span class="n">mem_b_rvalid</span><span class="p">),</span>
-<a name="l-822"></a>    <span class="p">.</span><span class="n">b_rdata_o</span>  <span class="p">(</span><span class="n">mem_b_rdata</span><span class="p">),</span>
-<a name="l-823"></a>    <span class="p">.</span><span class="n">b_rerror_o</span> <span class="p">(</span><span class="n">mem_b_rerror</span><span class="p">),</span>
-<a name="l-824"></a>
-<a name="l-825"></a>    <span class="p">.</span><span class="n">cfg_i</span>      <span class="p">(</span><span class="n">ram_cfg_i</span><span class="p">)</span>
-<a name="l-826"></a>  <span class="p">);</span>
-<a name="l-827"></a>
-<a name="l-828"></a>  <span class="c1">// Register module</span>
-<a name="l-829"></a>  <span class="n">spi_device_reg_top</span> <span class="n">u_reg</span> <span class="p">(</span>
-<a name="l-830"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-831"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a name="l-832"></a>
-<a name="l-833"></a>    <span class="p">.</span><span class="n">tl_i</span> <span class="p">(</span><span class="n">tl_i</span><span class="p">),</span>
-<a name="l-834"></a>    <span class="p">.</span><span class="n">tl_o</span> <span class="p">(</span><span class="n">tl_o</span><span class="p">),</span>
-<a name="l-835"></a>
-<a name="l-836"></a>    <span class="p">.</span><span class="n">tl_win_o</span> <span class="p">(</span><span class="n">tl_sram_h2d</span><span class="p">),</span>
-<a name="l-837"></a>    <span class="p">.</span><span class="n">tl_win_i</span> <span class="p">(</span><span class="n">tl_sram_d2h</span><span class="p">),</span>
+<a name="l-796"></a>  <span class="c1">// SRAM Wrapper</span>
+<a name="l-797"></a>  <span class="n">prim_ram_2p_async_adv</span> <span class="p">#(</span>
+<a name="l-798"></a>    <span class="p">.</span><span class="n">Depth</span> <span class="p">(</span><span class="n">SramDepth</span><span class="p">),</span>
+<a name="l-799"></a>    <span class="p">.</span><span class="n">Width</span> <span class="p">(</span><span class="n">SramDw</span><span class="p">),</span>    <span class="c1">// 32 x 512 --&gt; 2kB</span>
+<a name="l-800"></a>    <span class="p">.</span><span class="n">DataBitsPerMask</span> <span class="p">(</span><span class="mi">8</span><span class="p">),</span>
+<a name="l-801"></a>
+<a name="l-802"></a>    <span class="p">.</span><span class="n">EnableECC</span>           <span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<a name="l-803"></a>    <span class="p">.</span><span class="n">EnableParity</span>        <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+<a name="l-804"></a>    <span class="p">.</span><span class="n">EnableInputPipeline</span> <span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<a name="l-805"></a>    <span class="p">.</span><span class="n">EnableOutputPipeline</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a name="l-806"></a>  <span class="p">)</span> <span class="n">u_memory_2p</span> <span class="p">(</span>
+<a name="l-807"></a>    <span class="p">.</span><span class="n">clk_a_i</span>    <span class="p">(</span><span class="n">clk_i</span><span class="p">),</span>
+<a name="l-808"></a>    <span class="p">.</span><span class="n">rst_a_ni</span>   <span class="p">(</span><span class="n">rst_ni</span><span class="p">),</span>
+<a name="l-809"></a>
+<a name="l-810"></a>    <span class="p">.</span><span class="n">clk_b_i</span>    <span class="p">(</span><span class="n">sram_clk</span><span class="p">),</span>
+<a name="l-811"></a>    <span class="p">.</span><span class="n">rst_b_ni</span>   <span class="p">(</span><span class="n">sram_rst_n</span><span class="p">),</span>
+<a name="l-812"></a>
+<a name="l-813"></a>    <span class="p">.</span><span class="n">a_req_i</span>    <span class="p">(</span><span class="n">mem_a_req</span><span class="p">),</span>
+<a name="l-814"></a>    <span class="p">.</span><span class="n">a_write_i</span>  <span class="p">(</span><span class="n">mem_a_write</span><span class="p">),</span>
+<a name="l-815"></a>    <span class="p">.</span><span class="n">a_addr_i</span>   <span class="p">(</span><span class="n">mem_a_addr</span><span class="p">),</span>
+<a name="l-816"></a>    <span class="p">.</span><span class="n">a_wdata_i</span>  <span class="p">(</span><span class="n">mem_a_wdata</span><span class="p">),</span>
+<a name="l-817"></a>    <span class="p">.</span><span class="n">a_wmask_i</span>  <span class="p">({</span><span class="n">SramDw</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
+<a name="l-818"></a>    <span class="p">.</span><span class="n">a_rvalid_o</span> <span class="p">(</span><span class="n">mem_a_rvalid</span><span class="p">),</span>
+<a name="l-819"></a>    <span class="p">.</span><span class="n">a_rdata_o</span>  <span class="p">(</span><span class="n">mem_a_rdata</span><span class="p">),</span>
+<a name="l-820"></a>    <span class="p">.</span><span class="n">a_rerror_o</span> <span class="p">(</span><span class="n">mem_a_rerror</span><span class="p">),</span>
+<a name="l-821"></a>
+<a name="l-822"></a>    <span class="p">.</span><span class="n">b_req_i</span>    <span class="p">(</span><span class="n">mem_b_req</span><span class="p">),</span>
+<a name="l-823"></a>    <span class="p">.</span><span class="n">b_write_i</span>  <span class="p">(</span><span class="n">mem_b_write</span><span class="p">),</span>
+<a name="l-824"></a>    <span class="p">.</span><span class="n">b_addr_i</span>   <span class="p">(</span><span class="n">mem_b_addr</span><span class="p">),</span>
+<a name="l-825"></a>    <span class="p">.</span><span class="n">b_wdata_i</span>  <span class="p">(</span><span class="n">mem_b_wdata</span><span class="p">),</span>
+<a name="l-826"></a>    <span class="p">.</span><span class="n">b_wmask_i</span>  <span class="p">({</span><span class="n">SramDw</span><span class="p">{</span><span class="mb">1&#39;b1</span><span class="p">}}),</span>
+<a name="l-827"></a>    <span class="p">.</span><span class="n">b_rvalid_o</span> <span class="p">(</span><span class="n">mem_b_rvalid</span><span class="p">),</span>
+<a name="l-828"></a>    <span class="p">.</span><span class="n">b_rdata_o</span>  <span class="p">(</span><span class="n">mem_b_rdata</span><span class="p">),</span>
+<a name="l-829"></a>    <span class="p">.</span><span class="n">b_rerror_o</span> <span class="p">(</span><span class="n">mem_b_rerror</span><span class="p">),</span>
+<a name="l-830"></a>
+<a name="l-831"></a>    <span class="p">.</span><span class="n">cfg_i</span>      <span class="p">(</span><span class="n">ram_cfg_i</span><span class="p">)</span>
+<a name="l-832"></a>  <span class="p">);</span>
+<a name="l-833"></a>
+<a name="l-834"></a>  <span class="c1">// Register module</span>
+<a name="l-835"></a>  <span class="n">spi_device_reg_top</span> <span class="n">u_reg</span> <span class="p">(</span>
+<a name="l-836"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-837"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
 <a name="l-838"></a>
-<a name="l-839"></a>    <span class="p">.</span><span class="n">reg2hw</span><span class="p">,</span>
-<a name="l-840"></a>    <span class="p">.</span><span class="n">hw2reg</span><span class="p">,</span>
+<a name="l-839"></a>    <span class="p">.</span><span class="n">tl_i</span> <span class="p">(</span><span class="n">tl_i</span><span class="p">),</span>
+<a name="l-840"></a>    <span class="p">.</span><span class="n">tl_o</span> <span class="p">(</span><span class="n">tl_o</span><span class="p">),</span>
 <a name="l-841"></a>
-<a name="l-842"></a>    <span class="p">.</span><span class="n">intg_err_o</span> <span class="p">(),</span>
-<a name="l-843"></a>    <span class="p">.</span><span class="n">devmode_i</span>  <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a name="l-844"></a>  <span class="p">);</span>
-<a name="l-845"></a>
-<a name="l-846"></a>  <span class="c1">// make sure scanmode_i is never X (including during reset)</span>
-<a name="l-847"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">scanmodeKnown</span><span class="p">,</span> <span class="n">scanmode_i</span><span class="p">,</span> <span class="n">clk_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<a name="l-848"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">CioSdoEnOKnown</span><span class="p">,</span> <span class="n">cio_sd_en_o</span><span class="p">)</span>
-<a name="l-849"></a>
-<a name="l-850"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxfOKnown</span><span class="p">,</span>         <span class="n">intr_rxf_o</span>        <span class="p">)</span>
-<a name="l-851"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxlvlOKnown</span><span class="p">,</span>       <span class="n">intr_rxlvl_o</span>      <span class="p">)</span>
-<a name="l-852"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrTxlvlOKnown</span><span class="p">,</span>       <span class="n">intr_txlvl_o</span>      <span class="p">)</span>
-<a name="l-853"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxerrOKnown</span><span class="p">,</span>       <span class="n">intr_rxerr_o</span>      <span class="p">)</span>
-<a name="l-854"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxoverflowOKnown</span><span class="p">,</span>  <span class="n">intr_rxoverflow_o</span> <span class="p">)</span>
-<a name="l-855"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrTxunderflowOKnown</span><span class="p">,</span> <span class="n">intr_txunderflow_o</span><span class="p">)</span>
-<a name="l-856"></a>
-<a name="l-857"></a><span class="k">endmodule</span>
+<a name="l-842"></a>    <span class="p">.</span><span class="n">tl_win_o</span> <span class="p">(</span><span class="n">tl_sram_h2d</span><span class="p">),</span>
+<a name="l-843"></a>    <span class="p">.</span><span class="n">tl_win_i</span> <span class="p">(</span><span class="n">tl_sram_d2h</span><span class="p">),</span>
+<a name="l-844"></a>
+<a name="l-845"></a>    <span class="p">.</span><span class="n">reg2hw</span><span class="p">,</span>
+<a name="l-846"></a>    <span class="p">.</span><span class="n">hw2reg</span><span class="p">,</span>
+<a name="l-847"></a>
+<a name="l-848"></a>    <span class="p">.</span><span class="n">intg_err_o</span> <span class="p">(),</span>
+<a name="l-849"></a>    <span class="p">.</span><span class="n">devmode_i</span>  <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a name="l-850"></a>  <span class="p">);</span>
+<a name="l-851"></a>
+<a name="l-852"></a>  <span class="c1">// make sure scanmode_i is never X (including during reset)</span>
+<a name="l-853"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">scanmodeKnown</span><span class="p">,</span> <span class="n">scanmode_i</span><span class="p">,</span> <span class="n">clk_i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a name="l-854"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">CioSdoEnOKnown</span><span class="p">,</span> <span class="n">cio_sd_en_o</span><span class="p">)</span>
+<a name="l-855"></a>
+<a name="l-856"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxfOKnown</span><span class="p">,</span>         <span class="n">intr_rxf_o</span>        <span class="p">)</span>
+<a name="l-857"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxlvlOKnown</span><span class="p">,</span>       <span class="n">intr_rxlvl_o</span>      <span class="p">)</span>
+<a name="l-858"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrTxlvlOKnown</span><span class="p">,</span>       <span class="n">intr_txlvl_o</span>      <span class="p">)</span>
+<a name="l-859"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxerrOKnown</span><span class="p">,</span>       <span class="n">intr_rxerr_o</span>      <span class="p">)</span>
+<a name="l-860"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrRxoverflowOKnown</span><span class="p">,</span>  <span class="n">intr_rxoverflow_o</span> <span class="p">)</span>
+<a name="l-861"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">IntrTxunderflowOKnown</span><span class="p">,</span> <span class="n">intr_txunderflow_o</span><span class="p">)</span>
+<a name="l-862"></a>
+<a name="l-863"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

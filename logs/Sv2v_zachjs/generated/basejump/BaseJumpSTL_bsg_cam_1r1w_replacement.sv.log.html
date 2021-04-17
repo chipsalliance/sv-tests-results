@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cam_1r1w_replacement.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cam_1r1w_replacement.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_mem/bsg_cam_1r1w_replacement.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_mem/bsg_cam_1r1w_replacement.v</a>
 defines: 
-completed: 2021-04-17 01:43:03
-time_elapsed: 0.056s
-ram usage: 49668 KB
+completed: 2021-04-17 04:43:49
+time_elapsed: 0.051s
+ram usage: 52872 KB
 </pre>
 <pre class="log">
 
@@ -38,14 +38,21 @@ module bsg_cam_1r1w_replacement (
 	parameter els_p = 2;
 	parameter _sv2v_width_scheme_p = 24;
 	parameter [_sv2v_width_scheme_p - 1:0] scheme_p = &#34;lru&#34;;
+	parameter safe_els_lp = (els_p &gt; 1 ? els_p : 1);
 	input clk_i;
 	input reset_i;
-	input [els_p - 1:0] read_v_i;
+	input [safe_els_lp - 1:0] read_v_i;
 	input alloc_v_i;
-	input [els_p - 1:0] alloc_empty_i;
-	output [els_p - 1:0] alloc_v_o;
+	input [safe_els_lp - 1:0] alloc_empty_i;
+	output [safe_els_lp - 1:0] alloc_v_o;
 	generate
-		if (scheme_p == &#34;lru&#34;) begin : lru
+		if (els_p == 0) begin : zero
+			assign alloc_v_o = 1&#39;b0;
+		end
+		else if (els_p == 1) begin : one
+			assign alloc_v_o = 1&#39;b1;
+		end
+		else if (scheme_p == &#34;lru&#34;) begin : lru
 			localparam lg_els_lp = (els_p == 1 ? 1 : $clog2(els_p));
 			wire read_v_li = |read_v_i;
 			wire lru_touch_li = read_v_li | alloc_v_i;

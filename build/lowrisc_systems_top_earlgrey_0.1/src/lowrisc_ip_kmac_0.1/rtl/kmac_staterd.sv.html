@@ -124,7 +124,8 @@
 <span class="normal"><a href="#l-116">116</a></span>
 <span class="normal"><a href="#l-117">117</a></span>
 <span class="normal"><a href="#l-118">118</a></span>
-<span class="normal"><a href="#l-119">119</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-119">119</a></span>
+<span class="normal"><a href="#l-120">120</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -192,57 +193,58 @@
 <a name="l-66"></a>    <span class="p">.</span><span class="n">tl_o</span><span class="p">,</span>
 <a name="l-67"></a>    <span class="p">.</span><span class="n">en_ifetch_i</span> <span class="p">(</span><span class="n">tlul_pkg</span><span class="o">::</span><span class="n">InstrDis</span><span class="p">),</span>
 <a name="l-68"></a>    <span class="p">.</span><span class="n">req_o</span>       <span class="p">(</span><span class="n">tlram_req</span><span class="p">),</span>
-<a name="l-69"></a>    <span class="p">.</span><span class="n">gnt_i</span>       <span class="p">(</span><span class="n">tlram_gnt</span><span class="p">),</span>
-<a name="l-70"></a>    <span class="p">.</span><span class="n">we_o</span>        <span class="p">(</span><span class="n">tlram_we</span> <span class="p">),</span>
-<a name="l-71"></a>    <span class="p">.</span><span class="n">addr_o</span>      <span class="p">(</span><span class="n">tlram_addr</span><span class="p">),</span>
-<a name="l-72"></a>    <span class="p">.</span><span class="n">wdata_o</span>     <span class="p">(</span><span class="n">unused_tlram_wdata</span><span class="p">),</span>
-<a name="l-73"></a>    <span class="p">.</span><span class="n">wmask_o</span>     <span class="p">(</span><span class="n">unused_tlram_wmask</span><span class="p">),</span>
-<a name="l-74"></a>    <span class="p">.</span><span class="n">intg_error_o</span><span class="p">(),</span>
-<a name="l-75"></a>    <span class="p">.</span><span class="n">rdata_i</span>     <span class="p">(</span><span class="n">tlram_rdata</span><span class="p">),</span>
-<a name="l-76"></a>    <span class="p">.</span><span class="n">rvalid_i</span>    <span class="p">(</span><span class="n">tlram_rvalid</span><span class="p">),</span>
-<a name="l-77"></a>    <span class="p">.</span><span class="n">rerror_i</span>    <span class="p">(</span><span class="n">tlram_rerror</span><span class="p">)</span>
-<a name="l-78"></a>  <span class="p">);</span>
-<a name="l-79"></a>
-<a name="l-80"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-81"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-82"></a>      <span class="n">tlram_rdata</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-83"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tlram_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">tlram_we</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-84"></a>      <span class="n">tlram_rdata</span> <span class="o">&lt;=</span> <span class="n">conv_endian32</span><span class="p">(</span><span class="n">tlram_rdata_endian</span><span class="p">,</span> <span class="n">endian_swap_i</span><span class="p">);</span>
-<a name="l-85"></a>    <span class="k">end</span>
-<a name="l-86"></a>  <span class="k">end</span>
-<a name="l-87"></a>
-<a name="l-88"></a>  <span class="c1">// Always grant</span>
-<a name="l-89"></a>  <span class="k">assign</span> <span class="n">tlram_gnt</span> <span class="o">=</span> <span class="n">tlram_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">tlram_we</span><span class="p">;</span>
-<a name="l-90"></a>
-<a name="l-91"></a>  <span class="c1">// always no error on reading</span>
-<a name="l-92"></a>  <span class="k">assign</span> <span class="n">tlram_rerror</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a name="l-93"></a>
-<a name="l-94"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a name="l-95"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="n">tlram_rvalid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a name="l-96"></a>    <span class="k">else</span>         <span class="n">tlram_rvalid</span> <span class="o">&lt;=</span> <span class="n">tlram_req</span> <span class="o">&amp;</span> <span class="o">!</span><span class="n">tlram_we</span><span class="p">;</span>
-<a name="l-97"></a>  <span class="k">end</span>
-<a name="l-98"></a>
-<a name="l-99"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">muxed_state</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
-<a name="l-100"></a>
+<a name="l-69"></a>    <span class="p">.</span><span class="n">req_type_o</span>  <span class="p">(),</span>
+<a name="l-70"></a>    <span class="p">.</span><span class="n">gnt_i</span>       <span class="p">(</span><span class="n">tlram_gnt</span><span class="p">),</span>
+<a name="l-71"></a>    <span class="p">.</span><span class="n">we_o</span>        <span class="p">(</span><span class="n">tlram_we</span> <span class="p">),</span>
+<a name="l-72"></a>    <span class="p">.</span><span class="n">addr_o</span>      <span class="p">(</span><span class="n">tlram_addr</span><span class="p">),</span>
+<a name="l-73"></a>    <span class="p">.</span><span class="n">wdata_o</span>     <span class="p">(</span><span class="n">unused_tlram_wdata</span><span class="p">),</span>
+<a name="l-74"></a>    <span class="p">.</span><span class="n">wmask_o</span>     <span class="p">(</span><span class="n">unused_tlram_wmask</span><span class="p">),</span>
+<a name="l-75"></a>    <span class="p">.</span><span class="n">intg_error_o</span><span class="p">(),</span>
+<a name="l-76"></a>    <span class="p">.</span><span class="n">rdata_i</span>     <span class="p">(</span><span class="n">tlram_rdata</span><span class="p">),</span>
+<a name="l-77"></a>    <span class="p">.</span><span class="n">rvalid_i</span>    <span class="p">(</span><span class="n">tlram_rvalid</span><span class="p">),</span>
+<a name="l-78"></a>    <span class="p">.</span><span class="n">rerror_i</span>    <span class="p">(</span><span class="n">tlram_rerror</span><span class="p">)</span>
+<a name="l-79"></a>  <span class="p">);</span>
+<a name="l-80"></a>
+<a name="l-81"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-82"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-83"></a>      <span class="n">tlram_rdata</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-84"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tlram_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">tlram_we</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-85"></a>      <span class="n">tlram_rdata</span> <span class="o">&lt;=</span> <span class="n">conv_endian32</span><span class="p">(</span><span class="n">tlram_rdata_endian</span><span class="p">,</span> <span class="n">endian_swap_i</span><span class="p">);</span>
+<a name="l-86"></a>    <span class="k">end</span>
+<a name="l-87"></a>  <span class="k">end</span>
+<a name="l-88"></a>
+<a name="l-89"></a>  <span class="c1">// Always grant</span>
+<a name="l-90"></a>  <span class="k">assign</span> <span class="n">tlram_gnt</span> <span class="o">=</span> <span class="n">tlram_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">tlram_we</span><span class="p">;</span>
+<a name="l-91"></a>
+<a name="l-92"></a>  <span class="c1">// always no error on reading</span>
+<a name="l-93"></a>  <span class="k">assign</span> <span class="n">tlram_rerror</span> <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a name="l-94"></a>
+<a name="l-95"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a name="l-96"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="n">tlram_rvalid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a name="l-97"></a>    <span class="k">else</span>         <span class="n">tlram_rvalid</span> <span class="o">&lt;=</span> <span class="n">tlram_req</span> <span class="o">&amp;</span> <span class="o">!</span><span class="n">tlram_we</span><span class="p">;</span>
+<a name="l-98"></a>  <span class="k">end</span>
+<a name="l-99"></a>
+<a name="l-100"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">muxed_state</span> <span class="p">[</span><span class="n">Share</span><span class="p">];</span>
 <a name="l-101"></a>
-<a name="l-102"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_slicer</span>
-<a name="l-103"></a>    <span class="n">prim_slicer</span> <span class="p">#(</span>
-<a name="l-104"></a>      <span class="p">.</span><span class="n">InW</span> <span class="p">(</span><span class="n">sha3_pkg</span><span class="o">::</span><span class="n">StateW</span><span class="p">),</span>
-<a name="l-105"></a>      <span class="p">.</span><span class="n">OutW</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span>
-<a name="l-106"></a>      <span class="p">.</span><span class="n">IndexW</span> <span class="p">(</span><span class="n">StateAddrW</span><span class="p">)</span>
-<a name="l-107"></a>    <span class="p">)</span> <span class="n">u_state_slice</span> <span class="p">(</span>
-<a name="l-108"></a>      <span class="p">.</span><span class="n">sel_i</span> <span class="p">(</span><span class="n">tlram_addr</span><span class="p">[</span><span class="n">StateAddrW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span>
-<a name="l-109"></a>      <span class="p">.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">state_i</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a name="l-110"></a>      <span class="p">.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">muxed_state</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-111"></a>    <span class="p">);</span>
-<a name="l-112"></a>  <span class="k">end</span> <span class="o">:</span> <span class="n">gen_slicer</span>
-<a name="l-113"></a>
-<a name="l-114"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">SelAddrW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">addr_sel</span><span class="p">;</span>
-<a name="l-115"></a>  <span class="k">assign</span> <span class="n">addr_sel</span> <span class="o">=</span> <span class="n">tlram_addr</span><span class="p">[</span><span class="n">StateAddrW</span><span class="o">+:</span><span class="n">SelAddrW</span><span class="p">];</span>
-<a name="l-116"></a>
-<a name="l-117"></a>  <span class="k">assign</span> <span class="n">tlram_rdata_endian</span> <span class="o">=</span> <span class="kt">int</span><span class="p">&#39;(</span><span class="n">addr_sel</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="o">?</span> <span class="n">muxed_state</span><span class="p">[</span><span class="n">addr_sel</span><span class="p">]</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-118"></a>
-<a name="l-119"></a><span class="k">endmodule</span>
+<a name="l-102"></a>
+<a name="l-103"></a>  <span class="k">for</span> <span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_slicer</span>
+<a name="l-104"></a>    <span class="n">prim_slicer</span> <span class="p">#(</span>
+<a name="l-105"></a>      <span class="p">.</span><span class="n">InW</span> <span class="p">(</span><span class="n">sha3_pkg</span><span class="o">::</span><span class="n">StateW</span><span class="p">),</span>
+<a name="l-106"></a>      <span class="p">.</span><span class="n">OutW</span> <span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+<a name="l-107"></a>      <span class="p">.</span><span class="n">IndexW</span> <span class="p">(</span><span class="n">StateAddrW</span><span class="p">)</span>
+<a name="l-108"></a>    <span class="p">)</span> <span class="n">u_state_slice</span> <span class="p">(</span>
+<a name="l-109"></a>      <span class="p">.</span><span class="n">sel_i</span> <span class="p">(</span><span class="n">tlram_addr</span><span class="p">[</span><span class="n">StateAddrW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]),</span>
+<a name="l-110"></a>      <span class="p">.</span><span class="n">data_i</span> <span class="p">(</span><span class="n">state_i</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a name="l-111"></a>      <span class="p">.</span><span class="n">data_o</span> <span class="p">(</span><span class="n">muxed_state</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-112"></a>    <span class="p">);</span>
+<a name="l-113"></a>  <span class="k">end</span> <span class="o">:</span> <span class="n">gen_slicer</span>
+<a name="l-114"></a>
+<a name="l-115"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">SelAddrW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">addr_sel</span><span class="p">;</span>
+<a name="l-116"></a>  <span class="k">assign</span> <span class="n">addr_sel</span> <span class="o">=</span> <span class="n">tlram_addr</span><span class="p">[</span><span class="n">StateAddrW</span><span class="o">+:</span><span class="n">SelAddrW</span><span class="p">];</span>
+<a name="l-117"></a>
+<a name="l-118"></a>  <span class="k">assign</span> <span class="n">tlram_rdata_endian</span> <span class="o">=</span> <span class="kt">int</span><span class="p">&#39;(</span><span class="n">addr_sel</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Share</span> <span class="o">?</span> <span class="n">muxed_state</span><span class="p">[</span><span class="n">addr_sel</span><span class="p">]</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
+<a name="l-119"></a>
+<a name="l-120"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

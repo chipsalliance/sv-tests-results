@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cam_1r1w_tag_array.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cam_1r1w_tag_array.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_mem/bsg_cam_1r1w_tag_array.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_mem/bsg_cam_1r1w_tag_array.v</a>
 defines: 
-completed: 2021-04-17 01:42:56
-time_elapsed: 0.044s
-ram usage: 41072 KB
+completed: 2021-04-17 04:43:45
+time_elapsed: 0.047s
+ram usage: 47452 KB
 </pre>
 <pre class="log">
 
@@ -43,35 +43,42 @@ module bsg_cam_1r1w_tag_array (
 	parameter _sv2v_width_els_p = 24;
 	parameter [_sv2v_width_els_p - 1:0] els_p = &#34;inv&#34;;
 	parameter multiple_entries_p = 0;
+	parameter safe_els_lp = (els_p &gt; 1 ? els_p : 1);
 	input clk_i;
 	input reset_i;
-	input [els_p - 1:0] w_v_i;
+	input [safe_els_lp - 1:0] w_v_i;
 	input w_set_not_clear_i;
 	input [width_p - 1:0] w_tag_i;
-	output wire [els_p - 1:0] w_empty_o;
+	output wire [safe_els_lp - 1:0] w_empty_o;
 	input r_v_i;
 	input [width_p - 1:0] r_tag_i;
-	output wire [els_p - 1:0] r_match_o;
-	wire [(els_p * width_p) - 1:0] tag_r;
-	wire [els_p - 1:0] v_r;
+	output wire [safe_els_lp - 1:0] r_match_o;
+	wire [(safe_els_lp * width_p) - 1:0] tag_r;
+	wire [safe_els_lp - 1:0] v_r;
 	generate
-		genvar i;
-		for (i = 0; i &lt; els_p; i = i + 1) begin : tag_array
-			bsg_dff_reset_en #(.width_p(1)) v_reg(
-				.clk_i(clk_i),
-				.reset_i(reset_i),
-				.en_i(w_v_i[i]),
-				.data_i(w_set_not_clear_i),
-				.data_o(v_r[i])
-			);
-			bsg_dff_en #(.width_p(width_p)) tag_r_reg(
-				.clk_i(clk_i),
-				.en_i(w_v_i[i] &amp; w_set_not_clear_i),
-				.data_i(w_tag_i),
-				.data_o(tag_r[i * width_p+:width_p])
-			);
-			assign r_match_o[i] = (r_v_i &amp; v_r[i]) &amp; (tag_r[i * width_p+:width_p] == r_tag_i);
-			assign w_empty_o[i] = ~v_r[i];
+		if (els_p == 0) begin : zero
+			assign w_empty_o = {safe_els_lp {1&#39;sb0}};
+			assign r_match_o = {safe_els_lp {1&#39;sb0}};
+		end
+		else begin : nz
+			genvar i;
+			for (i = 0; i &lt; els_p; i = i + 1) begin : tag_array
+				bsg_dff_reset_en #(.width_p(1)) v_reg(
+					.clk_i(clk_i),
+					.reset_i(reset_i),
+					.en_i(w_v_i[i]),
+					.data_i(w_set_not_clear_i),
+					.data_o(v_r[i])
+				);
+				bsg_dff_en #(.width_p(width_p)) tag_r_reg(
+					.clk_i(clk_i),
+					.en_i(w_v_i[i] &amp; w_set_not_clear_i),
+					.data_i(w_tag_i),
+					.data_o(tag_r[i * width_p+:width_p])
+				);
+				assign r_match_o[i] = (r_v_i &amp; v_r[i]) &amp; (tag_r[i * width_p+:width_p] == r_tag_i);
+				assign w_empty_o[i] = ~v_r[i];
+			end
 		end
 	endgenerate
 	always @(negedge clk_i)
