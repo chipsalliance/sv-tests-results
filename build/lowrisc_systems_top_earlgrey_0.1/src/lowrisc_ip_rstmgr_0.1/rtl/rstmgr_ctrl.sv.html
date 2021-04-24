@@ -89,7 +89,8 @@
 <span class="normal"><a href="#l-81">81</a></span>
 <span class="normal"><a href="#l-82">82</a></span>
 <span class="normal"><a href="#l-83">83</a></span>
-<span class="normal"><a href="#l-84">84</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-84">84</a></span>
+<span class="normal"><a href="#l-85">85</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a name="l-4"></a><span class="c1">//</span>
@@ -112,7 +113,7 @@
 <a name="l-21"></a><span class="p">);</span>
 <a name="l-22"></a>
 <a name="l-23"></a>  <span class="c1">// the always on root reset</span>
-<a name="l-24"></a>  <span class="kt">logic</span> <span class="n">rst_aon_n</span><span class="p">;</span>
+<a name="l-24"></a>  <span class="kt">logic</span> <span class="n">rst_aon_n_premux</span><span class="p">,</span> <span class="n">rst_aon_n</span><span class="p">;</span>
 <a name="l-25"></a>
 <a name="l-26"></a>  <span class="c1">// the remaining resets</span>
 <a name="l-27"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">OffDomains</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rst_pd_nd</span><span class="p">,</span> <span class="n">rst_pd_nq</span><span class="p">;</span>
@@ -135,44 +136,45 @@
 <a name="l-44"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
 <a name="l-45"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
 <a name="l-46"></a>    <span class="p">.</span><span class="n">d_i</span><span class="p">(</span><span class="o">~</span><span class="n">rst_req_i</span><span class="p">[</span><span class="n">DomainAonSel</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">rst_parent_synced</span><span class="p">[</span><span class="n">DomainAonSel</span><span class="p">]),</span>
-<a name="l-47"></a>    <span class="p">.</span><span class="n">q_o</span><span class="p">(</span><span class="n">rst_aon_n</span><span class="p">)</span>
+<a name="l-47"></a>    <span class="p">.</span><span class="n">q_o</span><span class="p">(</span><span class="n">rst_aon_n_premux</span><span class="p">)</span>
 <a name="l-48"></a>  <span class="p">);</span>
 <a name="l-49"></a>
 <a name="l-50"></a>  <span class="n">prim_clock_mux2</span> <span class="p">#(</span>
 <a name="l-51"></a>    <span class="p">.</span><span class="n">NoFpgaBufG</span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
 <a name="l-52"></a>  <span class="p">)</span> <span class="n">u_rst_aon_mux</span> <span class="p">(</span>
-<a name="l-53"></a>    <span class="p">.</span><span class="n">clk0_i</span><span class="p">(</span><span class="n">rst_aon_n</span><span class="p">),</span>
+<a name="l-53"></a>    <span class="p">.</span><span class="n">clk0_i</span><span class="p">(</span><span class="n">rst_aon_n_premux</span><span class="p">),</span>
 <a name="l-54"></a>    <span class="p">.</span><span class="n">clk1_i</span><span class="p">(</span><span class="n">scan_rst_ni</span><span class="p">),</span>
 <a name="l-55"></a>    <span class="p">.</span><span class="n">sel_i</span><span class="p">(</span><span class="n">scanmode_i</span><span class="p">),</span>
-<a name="l-56"></a>    <span class="p">.</span><span class="n">clk_o</span><span class="p">(</span><span class="n">rst_no</span><span class="p">[</span><span class="n">DomainAonSel</span><span class="p">])</span>
+<a name="l-56"></a>    <span class="p">.</span><span class="n">clk_o</span><span class="p">(</span><span class="n">rst_aon_n</span><span class="p">)</span>
 <a name="l-57"></a>  <span class="p">);</span>
-<a name="l-58"></a>
-<a name="l-59"></a>  <span class="c1">// the non-always-on domains</span>
-<a name="l-60"></a>  <span class="c1">// These reset whenever the always on domain reset, to ensure power definition consistency.</span>
-<a name="l-61"></a>  <span class="c1">// By extension, they also reset whenever the root (rst_ni) resets</span>
-<a name="l-62"></a>  <span class="k">assign</span> <span class="n">rst_pd_nd</span> <span class="o">=</span> <span class="o">~</span><span class="n">rst_req_i</span><span class="p">[</span><span class="n">Domain0Sel</span> <span class="o">+:</span> <span class="n">OffDomains</span><span class="p">]</span> <span class="o">&amp;</span>
-<a name="l-63"></a>                     <span class="n">rst_parent_synced</span><span class="p">[</span><span class="n">Domain0Sel</span> <span class="o">+:</span> <span class="n">OffDomains</span><span class="p">];</span>
-<a name="l-64"></a>
-<a name="l-65"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">DomainPdStartIdx</span> <span class="o">=</span> <span class="n">DomainAonSel</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-66"></a>  <span class="k">for</span><span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">OffDomains</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rst_pd_n</span>
-<a name="l-67"></a>    <span class="n">prim_flop</span> <span class="n">u_pd_rst</span> <span class="p">(</span>
-<a name="l-68"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a name="l-69"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">(</span><span class="n">rst_aon_n</span><span class="p">),</span>
-<a name="l-70"></a>      <span class="p">.</span><span class="n">d_i</span><span class="p">(</span><span class="n">rst_pd_nd</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a name="l-71"></a>      <span class="p">.</span><span class="n">q_o</span><span class="p">(</span><span class="n">rst_pd_nq</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a name="l-72"></a>    <span class="p">);</span>
-<a name="l-73"></a>
-<a name="l-74"></a>    <span class="n">prim_clock_mux2</span> <span class="p">#(</span>
-<a name="l-75"></a>      <span class="p">.</span><span class="n">NoFpgaBufG</span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a name="l-76"></a>    <span class="p">)</span> <span class="n">u_rst_pd_mux</span> <span class="p">(</span>
-<a name="l-77"></a>      <span class="p">.</span><span class="n">clk0_i</span><span class="p">(</span><span class="n">rst_pd_nq</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a name="l-78"></a>      <span class="p">.</span><span class="n">clk1_i</span><span class="p">(</span><span class="n">scan_rst_ni</span><span class="p">),</span>
-<a name="l-79"></a>      <span class="p">.</span><span class="n">sel_i</span><span class="p">(</span><span class="n">scanmode_i</span><span class="p">),</span>
-<a name="l-80"></a>      <span class="p">.</span><span class="n">clk_o</span><span class="p">(</span><span class="n">rst_no</span><span class="p">[</span><span class="n">DomainPdStartIdx</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
-<a name="l-81"></a>    <span class="p">);</span>
-<a name="l-82"></a>  <span class="k">end</span>
-<a name="l-83"></a>
-<a name="l-84"></a><span class="k">endmodule</span> <span class="c1">// rstmgr_ctrl</span>
+<a name="l-58"></a>  <span class="k">assign</span> <span class="n">rst_no</span><span class="p">[</span><span class="n">DomainAonSel</span><span class="p">]</span> <span class="o">=</span> <span class="n">rst_aon_n</span><span class="p">;</span>
+<a name="l-59"></a>
+<a name="l-60"></a>  <span class="c1">// the non-always-on domains</span>
+<a name="l-61"></a>  <span class="c1">// These reset whenever the always on domain reset, to ensure power definition consistency.</span>
+<a name="l-62"></a>  <span class="c1">// By extension, they also reset whenever the root (rst_ni) resets</span>
+<a name="l-63"></a>  <span class="k">assign</span> <span class="n">rst_pd_nd</span> <span class="o">=</span> <span class="o">~</span><span class="n">rst_req_i</span><span class="p">[</span><span class="n">Domain0Sel</span> <span class="o">+:</span> <span class="n">OffDomains</span><span class="p">]</span> <span class="o">&amp;</span>
+<a name="l-64"></a>                     <span class="n">rst_parent_synced</span><span class="p">[</span><span class="n">Domain0Sel</span> <span class="o">+:</span> <span class="n">OffDomains</span><span class="p">];</span>
+<a name="l-65"></a>
+<a name="l-66"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">DomainPdStartIdx</span> <span class="o">=</span> <span class="n">DomainAonSel</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+<a name="l-67"></a>  <span class="k">for</span><span class="p">(</span><span class="k">genvar</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">OffDomains</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_rst_pd_n</span>
+<a name="l-68"></a>    <span class="n">prim_flop</span> <span class="n">u_pd_rst</span> <span class="p">(</span>
+<a name="l-69"></a>      <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
+<a name="l-70"></a>      <span class="p">.</span><span class="n">rst_ni</span><span class="p">(</span><span class="n">rst_aon_n</span><span class="p">),</span>
+<a name="l-71"></a>      <span class="p">.</span><span class="n">d_i</span><span class="p">(</span><span class="n">rst_pd_nd</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a name="l-72"></a>      <span class="p">.</span><span class="n">q_o</span><span class="p">(</span><span class="n">rst_pd_nq</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a name="l-73"></a>    <span class="p">);</span>
+<a name="l-74"></a>
+<a name="l-75"></a>    <span class="n">prim_clock_mux2</span> <span class="p">#(</span>
+<a name="l-76"></a>      <span class="p">.</span><span class="n">NoFpgaBufG</span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a name="l-77"></a>    <span class="p">)</span> <span class="n">u_rst_pd_mux</span> <span class="p">(</span>
+<a name="l-78"></a>      <span class="p">.</span><span class="n">clk0_i</span><span class="p">(</span><span class="n">rst_pd_nq</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a name="l-79"></a>      <span class="p">.</span><span class="n">clk1_i</span><span class="p">(</span><span class="n">scan_rst_ni</span><span class="p">),</span>
+<a name="l-80"></a>      <span class="p">.</span><span class="n">sel_i</span><span class="p">(</span><span class="n">scanmode_i</span><span class="p">),</span>
+<a name="l-81"></a>      <span class="p">.</span><span class="n">clk_o</span><span class="p">(</span><span class="n">rst_no</span><span class="p">[</span><span class="n">DomainPdStartIdx</span> <span class="o">+</span> <span class="n">i</span><span class="p">])</span>
+<a name="l-82"></a>    <span class="p">);</span>
+<a name="l-83"></a>  <span class="k">end</span>
+<a name="l-84"></a>
+<a name="l-85"></a><span class="k">endmodule</span> <span class="c1">// rstmgr_ctrl</span>
 </pre></div>
 </td></tr></table>
   </body>
