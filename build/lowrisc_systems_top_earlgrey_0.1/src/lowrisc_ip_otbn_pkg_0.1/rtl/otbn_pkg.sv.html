@@ -394,395 +394,395 @@
 <span class="normal"><a href="#l-386">386</a></span>
 <span class="normal"><a href="#l-387">387</a></span>
 <span class="normal"><a href="#l-388">388</a></span>
-<span class="normal"><a href="#l-389">389</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
-<a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
-<a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
-<a name="l-4"></a>
-<a name="l-5"></a><span class="no">`include</span> <span class="s">&quot;prim_assert.sv&quot;</span>
-<a name="l-6"></a>
-<a name="l-7"></a><span class="kn">package</span> <span class="n">otbn_pkg</span><span class="p">;</span>
-<a name="l-8"></a>
-<a name="l-9"></a>  <span class="c1">// Global Constants ==============================================================================</span>
-<a name="l-10"></a>
-<a name="l-11"></a>  <span class="c1">// Data path width for BN (wide) instructions, in bits.</span>
-<a name="l-12"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">WLEN</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
-<a name="l-13"></a>
-<a name="l-14"></a>  <span class="c1">// &quot;Extended&quot; WLEN: the size of the datapath with added parity bits</span>
-<a name="l-15"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">ExtWLEN</span> <span class="o">=</span> <span class="n">WLEN</span> <span class="o">*</span> <span class="mi">39</span> <span class="o">/</span> <span class="mi">32</span><span class="p">;</span>
-<a name="l-16"></a>
-<a name="l-17"></a>  <span class="c1">// Number of 32-bit words per WLEN</span>
-<a name="l-18"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">BaseWordsPerWLEN</span> <span class="o">=</span> <span class="n">WLEN</span> <span class="o">/</span> <span class="mi">32</span><span class="p">;</span>
-<a name="l-19"></a>
-<a name="l-20"></a>  <span class="c1">// Number of flag groups</span>
-<a name="l-21"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NFlagGroups</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-<a name="l-22"></a>
-<a name="l-23"></a>  <span class="c1">// Width of the GPR index/address</span>
-<a name="l-24"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">GprAw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-<a name="l-25"></a>
-<a name="l-26"></a>  <span class="c1">// Number of General Purpose Registers (GPRs)</span>
-<a name="l-27"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NGpr</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">GprAw</span><span class="p">;</span>
-<a name="l-28"></a>
-<a name="l-29"></a>  <span class="c1">// Width of the WDR index/address</span>
-<a name="l-30"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">WdrAw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-<a name="l-31"></a>
-<a name="l-32"></a>  <span class="c1">// Number of Wide Data Registers (WDRs)</span>
-<a name="l-33"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NWdr</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">WdrAw</span><span class="p">;</span>
-<a name="l-34"></a>
-<a name="l-35"></a>  <span class="c1">// Width of entropy input</span>
-<a name="l-36"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">EdnDataWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
-<a name="l-37"></a>
-<a name="l-38"></a>
-<a name="l-39"></a>  <span class="c1">// Toplevel constants ============================================================================</span>
-<a name="l-40"></a>
-<a name="l-41"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">AlertFatal</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-<a name="l-42"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">AlertRecov</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-<a name="l-43"></a>
-<a name="l-44"></a>  <span class="c1">// Register file implementation selection enum.</span>
-<a name="l-45"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">integer</span> <span class="p">{</span>
-<a name="l-46"></a>    <span class="n">RegFileFF</span>    <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">// Generic flip-flop based implementation</span>
-<a name="l-47"></a>    <span class="n">RegFileFPGA</span>  <span class="o">=</span> <span class="mi">1</span>  <span class="c1">// FPGA implmentation, does infer RAM primitives.</span>
-<a name="l-48"></a>  <span class="p">}</span> <span class="n">regfile_e</span><span class="p">;</span>
-<a name="l-49"></a>
-<a name="l-50"></a>  <span class="c1">// Error bits</span>
-<a name="l-51"></a>  <span class="c1">//</span>
-<a name="l-52"></a>  <span class="c1">// Note: These errors are duplicated in the register HJSON (../data/otbn.hjson), the ISS</span>
-<a name="l-53"></a>  <span class="c1">// (../dv/otbnsim/sim/alert.py), and the DIF. If updating them here, update those too.</span>
-<a name="l-54"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-55"></a>    <span class="kt">logic</span> <span class="n">fatal_reg</span><span class="p">;</span>
-<a name="l-56"></a>    <span class="kt">logic</span> <span class="n">fatal_dmem</span><span class="p">;</span>
-<a name="l-57"></a>    <span class="kt">logic</span> <span class="n">fatal_imem</span><span class="p">;</span>
-<a name="l-58"></a>    <span class="kt">logic</span> <span class="n">loop</span><span class="p">;</span>
-<a name="l-59"></a>    <span class="kt">logic</span> <span class="n">illegal_insn</span><span class="p">;</span>
-<a name="l-60"></a>    <span class="kt">logic</span> <span class="n">call_stack</span><span class="p">;</span>
-<a name="l-61"></a>    <span class="kt">logic</span> <span class="n">bad_insn_addr</span><span class="p">;</span>
-<a name="l-62"></a>    <span class="kt">logic</span> <span class="n">bad_data_addr</span><span class="p">;</span>
-<a name="l-63"></a>  <span class="p">}</span> <span class="n">err_bits_t</span><span class="p">;</span>
-<a name="l-64"></a>
-<a name="l-65"></a>  <span class="c1">// Constants =====================================================================================</span>
-<a name="l-66"></a>
-<a name="l-67"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
-<a name="l-68"></a>    <span class="n">InsnSubsetBase</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">,</span>  <span class="c1">// Base (RV32/Narrow) Instruction Subset</span>
-<a name="l-69"></a>    <span class="n">InsnSubsetBignum</span> <span class="o">=</span> <span class="mb">1&#39;b1</span> <span class="c1">// Big Number (BN/Wide) Instruction Subset</span>
-<a name="l-70"></a>  <span class="p">}</span> <span class="n">insn_subset_e</span><span class="p">;</span>
-<a name="l-71"></a>
-<a name="l-72"></a>  <span class="c1">// Opcodes (field [6:0] in the instruction), matching the RISC-V specification for the base</span>
-<a name="l-73"></a>  <span class="c1">// instruction subset.</span>
-<a name="l-74"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">6</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-75"></a>    <span class="n">InsnOpcodeBaseLoad</span>       <span class="o">=</span> <span class="mh">7&#39;h03</span><span class="p">,</span>
-<a name="l-76"></a>    <span class="n">InsnOpcodeBaseMemMisc</span>    <span class="o">=</span> <span class="mh">7&#39;h0f</span><span class="p">,</span>
-<a name="l-77"></a>    <span class="n">InsnOpcodeBaseOpImm</span>      <span class="o">=</span> <span class="mh">7&#39;h13</span><span class="p">,</span>
-<a name="l-78"></a>    <span class="n">InsnOpcodeBaseAuipc</span>      <span class="o">=</span> <span class="mh">7&#39;h17</span><span class="p">,</span>
-<a name="l-79"></a>    <span class="n">InsnOpcodeBaseStore</span>      <span class="o">=</span> <span class="mh">7&#39;h23</span><span class="p">,</span>
-<a name="l-80"></a>    <span class="n">InsnOpcodeBaseOp</span>         <span class="o">=</span> <span class="mh">7&#39;h33</span><span class="p">,</span>
-<a name="l-81"></a>    <span class="n">InsnOpcodeBaseLui</span>        <span class="o">=</span> <span class="mh">7&#39;h37</span><span class="p">,</span>
-<a name="l-82"></a>    <span class="n">InsnOpcodeBaseBranch</span>     <span class="o">=</span> <span class="mh">7&#39;h63</span><span class="p">,</span>
-<a name="l-83"></a>    <span class="n">InsnOpcodeBaseJalr</span>       <span class="o">=</span> <span class="mh">7&#39;h67</span><span class="p">,</span>
-<a name="l-84"></a>    <span class="n">InsnOpcodeBaseJal</span>        <span class="o">=</span> <span class="mh">7&#39;h6f</span><span class="p">,</span>
-<a name="l-85"></a>    <span class="n">InsnOpcodeBaseSystem</span>     <span class="o">=</span> <span class="mh">7&#39;h73</span><span class="p">,</span>
-<a name="l-86"></a>    <span class="n">InsnOpcodeBignumMisc</span>     <span class="o">=</span> <span class="mh">7&#39;h0B</span><span class="p">,</span>
-<a name="l-87"></a>    <span class="n">InsnOpcodeBignumArith</span>    <span class="o">=</span> <span class="mh">7&#39;h2B</span><span class="p">,</span>
-<a name="l-88"></a>    <span class="n">InsnOpcodeBignumMulqacc</span>  <span class="o">=</span> <span class="mh">7&#39;h3B</span><span class="p">,</span>
-<a name="l-89"></a>    <span class="n">InsnOpcodeBignumBaseMisc</span> <span class="o">=</span> <span class="mh">7&#39;h7B</span>
-<a name="l-90"></a>  <span class="p">}</span> <span class="n">insn_opcode_e</span><span class="p">;</span>
-<a name="l-91"></a>
-<a name="l-92"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-93"></a>    <span class="n">AluOpBaseAdd</span><span class="p">,</span>
-<a name="l-94"></a>    <span class="n">AluOpBaseSub</span><span class="p">,</span>
-<a name="l-95"></a>
-<a name="l-96"></a>    <span class="n">AluOpBaseXor</span><span class="p">,</span>
-<a name="l-97"></a>    <span class="n">AluOpBaseOr</span><span class="p">,</span>
-<a name="l-98"></a>    <span class="n">AluOpBaseAnd</span><span class="p">,</span>
-<a name="l-99"></a>    <span class="n">AluOpBaseNot</span><span class="p">,</span>
-<a name="l-100"></a>
-<a name="l-101"></a>    <span class="n">AluOpBaseSra</span><span class="p">,</span>
-<a name="l-102"></a>    <span class="n">AluOpBaseSrl</span><span class="p">,</span>
-<a name="l-103"></a>    <span class="n">AluOpBaseSll</span>
-<a name="l-104"></a>  <span class="p">}</span> <span class="n">alu_op_base_e</span><span class="p">;</span>
-<a name="l-105"></a>
-<a name="l-106"></a>  <span class="c1">// TODO: Can we arrange this to simplify decoding logic?</span>
-<a name="l-107"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-108"></a>    <span class="n">AluOpBignumAdd</span><span class="p">,</span>
-<a name="l-109"></a>    <span class="n">AluOpBignumAddc</span><span class="p">,</span>
-<a name="l-110"></a>    <span class="n">AluOpBignumAddm</span><span class="p">,</span>
-<a name="l-111"></a>
-<a name="l-112"></a>    <span class="n">AluOpBignumSub</span><span class="p">,</span>
-<a name="l-113"></a>    <span class="n">AluOpBignumSubb</span><span class="p">,</span>
-<a name="l-114"></a>    <span class="n">AluOpBignumSubm</span><span class="p">,</span>
-<a name="l-115"></a>
-<a name="l-116"></a>    <span class="n">AluOpBignumRshi</span><span class="p">,</span>
-<a name="l-117"></a>
-<a name="l-118"></a>    <span class="n">AluOpBignumXor</span><span class="p">,</span>
-<a name="l-119"></a>    <span class="n">AluOpBignumOr</span><span class="p">,</span>
-<a name="l-120"></a>    <span class="n">AluOpBignumAnd</span><span class="p">,</span>
-<a name="l-121"></a>    <span class="n">AluOpBignumNot</span><span class="p">,</span>
-<a name="l-122"></a>
-<a name="l-123"></a>    <span class="n">AluOpBignumSel</span><span class="p">,</span>
-<a name="l-124"></a>    <span class="n">AluOpBignumMov</span>
-<a name="l-125"></a>  <span class="p">}</span> <span class="n">alu_op_bignum_e</span><span class="p">;</span>
-<a name="l-126"></a>
-<a name="l-127"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
-<a name="l-128"></a>    <span class="n">ComparisonOpBaseEq</span><span class="p">,</span>
-<a name="l-129"></a>    <span class="n">ComparisonOpBaseNeq</span>
-<a name="l-130"></a>  <span class="p">}</span> <span class="n">comparison_op_base_e</span><span class="p">;</span>
-<a name="l-131"></a>
-<a name="l-132"></a>  <span class="c1">// Operand a source selection</span>
-<a name="l-133"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-134"></a>    <span class="n">OpASelRegister</span>  <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
-<a name="l-135"></a>    <span class="n">OpASelZero</span> <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
-<a name="l-136"></a>    <span class="n">OpASelCurrPc</span> <span class="o">=</span> <span class="mi">&#39;d2</span>
-<a name="l-137"></a>  <span class="p">}</span> <span class="n">op_a_sel_e</span><span class="p">;</span>
-<a name="l-138"></a>
-<a name="l-139"></a>  <span class="c1">// Operand b source selection</span>
-<a name="l-140"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
-<a name="l-141"></a>    <span class="n">OpBSelRegister</span>  <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
-<a name="l-142"></a>    <span class="n">OpBSelImmediate</span> <span class="o">=</span> <span class="mi">&#39;d1</span>
-<a name="l-143"></a>  <span class="p">}</span> <span class="n">op_b_sel_e</span><span class="p">;</span>
-<a name="l-144"></a>
-<a name="l-145"></a>  <span class="c1">// Immediate b selection for base ISA</span>
-<a name="l-146"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-147"></a>    <span class="n">ImmBaseBI</span><span class="p">,</span>
-<a name="l-148"></a>    <span class="n">ImmBaseBS</span><span class="p">,</span>
-<a name="l-149"></a>    <span class="n">ImmBaseBB</span><span class="p">,</span>
-<a name="l-150"></a>    <span class="n">ImmBaseBU</span><span class="p">,</span>
-<a name="l-151"></a>    <span class="n">ImmBaseBJ</span><span class="p">,</span>
-<a name="l-152"></a>    <span class="n">ImmBaseBL</span><span class="p">,</span>
-<a name="l-153"></a>    <span class="n">ImmBaseBX</span>
-<a name="l-154"></a>  <span class="p">}</span> <span class="n">imm_b_sel_base_e</span><span class="p">;</span>
-<a name="l-155"></a>
-<a name="l-156"></a>  <span class="c1">// Shift amount select for bignum ISA</span>
-<a name="l-157"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-158"></a>    <span class="n">ShamtSelBignumA</span><span class="p">,</span>
-<a name="l-159"></a>    <span class="n">ShamtSelBignumS</span><span class="p">,</span>
-<a name="l-160"></a>    <span class="n">ShamtSelBignumZero</span>
-<a name="l-161"></a>  <span class="p">}</span> <span class="n">shamt_sel_bignum_e</span><span class="p">;</span>
-<a name="l-162"></a>
-<a name="l-163"></a>  <span class="c1">// Regfile write data selection</span>
-<a name="l-164"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-165"></a>    <span class="n">RfWdSelEx</span><span class="p">,</span>
-<a name="l-166"></a>    <span class="n">RfWdSelNextPc</span><span class="p">,</span>
-<a name="l-167"></a>    <span class="n">RfWdSelLsu</span><span class="p">,</span>
-<a name="l-168"></a>    <span class="n">RfWdSelIspr</span><span class="p">,</span>
-<a name="l-169"></a>    <span class="n">RfWdSelIncr</span><span class="p">,</span>
-<a name="l-170"></a>    <span class="n">RfWdSelMac</span>
-<a name="l-171"></a>  <span class="p">}</span> <span class="n">rf_wd_sel_e</span><span class="p">;</span>
-<a name="l-172"></a>
-<a name="l-173"></a>  <span class="c1">// Control and Status Registers (CSRs)</span>
-<a name="l-174"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">CsrNumWidth</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span>
-<a name="l-175"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">CsrNumWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-176"></a>    <span class="n">CsrFg0</span>         <span class="o">=</span> <span class="mh">12&#39;h7C0</span><span class="p">,</span>
-<a name="l-177"></a>    <span class="n">CsrFg1</span>         <span class="o">=</span> <span class="mh">12&#39;h7C1</span><span class="p">,</span>
-<a name="l-178"></a>    <span class="n">CsrFlags</span>       <span class="o">=</span> <span class="mh">12&#39;h7C8</span><span class="p">,</span>
-<a name="l-179"></a>    <span class="n">CsrMod0</span>        <span class="o">=</span> <span class="mh">12&#39;h7D0</span><span class="p">,</span>
-<a name="l-180"></a>    <span class="n">CsrMod1</span>        <span class="o">=</span> <span class="mh">12&#39;h7D1</span><span class="p">,</span>
-<a name="l-181"></a>    <span class="n">CsrMod2</span>        <span class="o">=</span> <span class="mh">12&#39;h7D2</span><span class="p">,</span>
-<a name="l-182"></a>    <span class="n">CsrMod3</span>        <span class="o">=</span> <span class="mh">12&#39;h7D3</span><span class="p">,</span>
-<a name="l-183"></a>    <span class="n">CsrMod4</span>        <span class="o">=</span> <span class="mh">12&#39;h7D4</span><span class="p">,</span>
-<a name="l-184"></a>    <span class="n">CsrMod5</span>        <span class="o">=</span> <span class="mh">12&#39;h7D5</span><span class="p">,</span>
-<a name="l-185"></a>    <span class="n">CsrMod6</span>        <span class="o">=</span> <span class="mh">12&#39;h7D6</span><span class="p">,</span>
-<a name="l-186"></a>    <span class="n">CsrMod7</span>        <span class="o">=</span> <span class="mh">12&#39;h7D7</span><span class="p">,</span>
-<a name="l-187"></a>    <span class="n">CsrRnd</span>         <span class="o">=</span> <span class="mh">12&#39;hFC0</span><span class="p">,</span>
-<a name="l-188"></a>    <span class="n">CsrRndPrefetch</span> <span class="o">=</span> <span class="mh">12&#39;hFC1</span><span class="p">,</span>
-<a name="l-189"></a>    <span class="n">CsrUrnd</span>        <span class="o">=</span> <span class="mh">12&#39;hFC2</span>
-<a name="l-190"></a>  <span class="p">}</span> <span class="n">csr_e</span><span class="p">;</span>
-<a name="l-191"></a>
-<a name="l-192"></a>  <span class="c1">// Wide Special Purpose Registers (WSRs)</span>
-<a name="l-193"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NWsr</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// Number of WSRs</span>
-<a name="l-194"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">WsrNumWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NWsr</span><span class="p">);</span>
-<a name="l-195"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">WsrNumWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-196"></a>    <span class="n">WsrMod</span>   <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
-<a name="l-197"></a>    <span class="n">WsrRnd</span>   <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
-<a name="l-198"></a>    <span class="n">WsrAcc</span>   <span class="o">=</span> <span class="mi">&#39;d2</span><span class="p">,</span>
-<a name="l-199"></a>    <span class="n">WsrUrnd</span>  <span class="o">=</span> <span class="mi">&#39;d3</span>
-<a name="l-200"></a>  <span class="p">}</span> <span class="n">wsr_e</span><span class="p">;</span>
-<a name="l-201"></a>
-<a name="l-202"></a>  <span class="c1">// Internal Special Purpose Registers (ISPRs)</span>
-<a name="l-203"></a>  <span class="c1">// CSRs and WSRs have some overlap into what they map into. ISPRs are the actual registers in the</span>
-<a name="l-204"></a>  <span class="c1">// design which CSRs and WSRs are mapped on to.</span>
-<a name="l-205"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NIspr</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-<a name="l-206"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">IsprNumWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NIspr</span><span class="p">);</span>
-<a name="l-207"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">IsprNumWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-208"></a>    <span class="n">IsprMod</span>   <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
-<a name="l-209"></a>    <span class="n">IsprRnd</span>   <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
-<a name="l-210"></a>    <span class="n">IsprAcc</span>   <span class="o">=</span> <span class="mi">&#39;d2</span><span class="p">,</span>
-<a name="l-211"></a>    <span class="n">IsprFlags</span> <span class="o">=</span> <span class="mi">&#39;d3</span><span class="p">,</span>
-<a name="l-212"></a>    <span class="n">IsprUrnd</span>  <span class="o">=</span> <span class="mi">&#39;d4</span>
-<a name="l-213"></a>  <span class="p">}</span> <span class="n">ispr_e</span><span class="p">;</span>
-<a name="l-214"></a>
-<a name="l-215"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NFlagGroups</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">flag_group_t</span><span class="p">;</span>
-<a name="l-216"></a>
-<a name="l-217"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-218"></a>    <span class="kt">logic</span> <span class="n">Z</span><span class="p">;</span>
-<a name="l-219"></a>    <span class="kt">logic</span> <span class="n">L</span><span class="p">;</span>
-<a name="l-220"></a>    <span class="kt">logic</span> <span class="n">M</span><span class="p">;</span>
-<a name="l-221"></a>    <span class="kt">logic</span> <span class="n">C</span><span class="p">;</span>
-<a name="l-222"></a>  <span class="p">}</span> <span class="n">flags_t</span><span class="p">;</span>
-<a name="l-223"></a>
-<a name="l-224"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">FlagsWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">bits</span><span class="p">(</span><span class="n">flags_t</span><span class="p">);</span>
-<a name="l-225"></a>
-<a name="l-226"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">FlagsWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-227"></a>    <span class="n">FlagC</span> <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
-<a name="l-228"></a>    <span class="n">FlagM</span> <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
-<a name="l-229"></a>    <span class="n">FlagL</span> <span class="o">=</span> <span class="mi">&#39;d2</span><span class="p">,</span>
-<a name="l-230"></a>    <span class="n">FlagZ</span> <span class="o">=</span> <span class="mi">&#39;d3</span>
-<a name="l-231"></a>  <span class="p">}</span> <span class="n">flag_e</span><span class="p">;</span>
-<a name="l-232"></a>
-<a name="l-233"></a>  <span class="c1">// TODO: Figure out how to add assertions for the enum type width; initial blocks, as produced by</span>
-<a name="l-234"></a>  <span class="c1">// ASSERT_INIT, aren&#39;t allowed in packages.</span>
-<a name="l-235"></a>  <span class="c1">//`ASSERT_INIT(WsrESizeMatchesParameter_A, $bits(wsr_e) == WsrNumWidth)</span>
-<a name="l-236"></a>
-<a name="l-237"></a>  <span class="c1">// Structures for decoded instructions, grouped into three:</span>
-<a name="l-238"></a>  <span class="c1">// - insn_dec_shared_t - Anything that applies to both bignum and base microarchitecture</span>
-<a name="l-239"></a>  <span class="c1">// - insn_dec_base_t - Anything that only applies to the base side microarchitecture</span>
-<a name="l-240"></a>  <span class="c1">// - insn_dec_bignum_t - Anything that only applies to bignum side microarchitecture</span>
-<a name="l-241"></a>  <span class="c1">//</span>
-<a name="l-242"></a>  <span class="c1">// TODO: The variable names are rather short, especially &quot;i&quot; is confusing. Think about renaming.</span>
-<a name="l-243"></a>  <span class="c1">//</span>
-<a name="l-244"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-245"></a>    <span class="n">insn_subset_e</span>   <span class="n">subset</span><span class="p">;</span>
-<a name="l-246"></a>    <span class="kt">logic</span>           <span class="n">ecall_insn</span><span class="p">;</span>
-<a name="l-247"></a>    <span class="kt">logic</span>           <span class="n">ld_insn</span><span class="p">;</span>
-<a name="l-248"></a>    <span class="kt">logic</span>           <span class="n">st_insn</span><span class="p">;</span>
-<a name="l-249"></a>    <span class="kt">logic</span>           <span class="n">branch_insn</span><span class="p">;</span>
-<a name="l-250"></a>    <span class="kt">logic</span>           <span class="n">jump_insn</span><span class="p">;</span>
-<a name="l-251"></a>    <span class="kt">logic</span>           <span class="n">loop_insn</span><span class="p">;</span>
-<a name="l-252"></a>    <span class="kt">logic</span>           <span class="n">ispr_rd_insn</span><span class="p">;</span>
-<a name="l-253"></a>    <span class="kt">logic</span>           <span class="n">ispr_wr_insn</span><span class="p">;</span>
-<a name="l-254"></a>    <span class="kt">logic</span>           <span class="n">ispr_rs_insn</span><span class="p">;</span>
-<a name="l-255"></a>  <span class="p">}</span> <span class="n">insn_dec_shared_t</span><span class="p">;</span>
-<a name="l-256"></a>
-<a name="l-257"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-258"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">d</span><span class="p">;</span>             <span class="c1">// Destination register</span>
-<a name="l-259"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">a</span><span class="p">;</span>             <span class="c1">// First source register</span>
-<a name="l-260"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">b</span><span class="p">;</span>             <span class="c1">// Second source register</span>
-<a name="l-261"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">i</span><span class="p">;</span>             <span class="c1">// Immediate</span>
-<a name="l-262"></a>    <span class="n">alu_op_base_e</span>        <span class="n">alu_op</span><span class="p">;</span>
-<a name="l-263"></a>    <span class="n">comparison_op_base_e</span> <span class="n">comparison_op</span><span class="p">;</span>
-<a name="l-264"></a>    <span class="n">op_a_sel_e</span>           <span class="n">op_a_sel</span><span class="p">;</span>
-<a name="l-265"></a>    <span class="n">op_b_sel_e</span>           <span class="n">op_b_sel</span><span class="p">;</span>
-<a name="l-266"></a>    <span class="kt">logic</span>                <span class="n">rf_ren_a</span><span class="p">;</span>
-<a name="l-267"></a>    <span class="kt">logic</span>                <span class="n">rf_ren_b</span><span class="p">;</span>
-<a name="l-268"></a>    <span class="kt">logic</span>                <span class="n">rf_we</span><span class="p">;</span>
-<a name="l-269"></a>    <span class="n">rf_wd_sel_e</span>          <span class="n">rf_wdata_sel</span><span class="p">;</span>
-<a name="l-270"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">loop_bodysize</span><span class="p">;</span>
-<a name="l-271"></a>    <span class="kt">logic</span>                <span class="n">loop_immediate</span><span class="p">;</span>
-<a name="l-272"></a>  <span class="p">}</span> <span class="n">insn_dec_base_t</span><span class="p">;</span>
-<a name="l-273"></a>
-<a name="l-274"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-275"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WdrAw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">d</span><span class="p">;</span>           <span class="c1">// Destination register</span>
-<a name="l-276"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WdrAw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">a</span><span class="p">;</span>           <span class="c1">// First source register</span>
-<a name="l-277"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WdrAw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">b</span><span class="p">;</span>           <span class="c1">// Second source register</span>
-<a name="l-278"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">i</span><span class="p">;</span>           <span class="c1">// Immediate</span>
-<a name="l-279"></a>
-<a name="l-280"></a>    <span class="kt">logic</span>                    <span class="n">rf_a_indirect</span><span class="p">;</span> <span class="c1">// Indirect lookup, bignum register index a comes from</span>
-<a name="l-281"></a>                                            <span class="c1">// base register a read</span>
-<a name="l-282"></a>    <span class="kt">logic</span>                    <span class="n">rf_b_indirect</span><span class="p">;</span> <span class="c1">// Indirect lookup, bignum register index b comes from</span>
-<a name="l-283"></a>                                            <span class="c1">// base register b read</span>
-<a name="l-284"></a>    <span class="kt">logic</span>                    <span class="n">rf_d_indirect</span><span class="p">;</span> <span class="c1">// Indirect lookup, bignum register index d comes from</span>
-<a name="l-285"></a>                                            <span class="c1">// base register b read using d in this struct</span>
-<a name="l-286"></a>
-<a name="l-287"></a>    <span class="kt">logic</span>                    <span class="n">d_inc</span><span class="p">;</span>           <span class="c1">// Increment destination register index in base</span>
-<a name="l-288"></a>                                              <span class="c1">// register file</span>
-<a name="l-289"></a>    <span class="kt">logic</span>                    <span class="n">a_inc</span><span class="p">;</span>           <span class="c1">// Increment source register index a in base register</span>
-<a name="l-290"></a>                                              <span class="c1">// file</span>
-<a name="l-291"></a>    <span class="kt">logic</span>                    <span class="n">a_wlen_word_inc</span><span class="p">;</span> <span class="c1">// Increment source register a in base register file</span>
-<a name="l-292"></a>                                              <span class="c1">// by WLEN word size</span>
-<a name="l-293"></a>    <span class="kt">logic</span>                    <span class="n">b_inc</span><span class="p">;</span>           <span class="c1">// Increment source register index b in base register</span>
-<a name="l-294"></a>                                              <span class="c1">// file</span>
-<a name="l-295"></a>
-<a name="l-296"></a>    <span class="c1">// Shifting only applies to a subset of ALU operations</span>
-<a name="l-297"></a>    <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">WLEN</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">alu_shift_amt</span><span class="p">;</span>   <span class="c1">// Shift amount</span>
-<a name="l-298"></a>    <span class="kt">logic</span>                    <span class="n">alu_shift_right</span><span class="p">;</span> <span class="c1">// Shift right if set otherwise left</span>
-<a name="l-299"></a>
-<a name="l-300"></a>    <span class="n">flag_group_t</span>             <span class="n">alu_flag_group</span><span class="p">;</span>
-<a name="l-301"></a>    <span class="n">flag_e</span>                   <span class="n">alu_sel_flag</span><span class="p">;</span>
-<a name="l-302"></a>    <span class="kt">logic</span>                    <span class="n">alu_flag_en</span><span class="p">;</span>
-<a name="l-303"></a>    <span class="kt">logic</span>                    <span class="n">mac_flag_en</span><span class="p">;</span>
-<a name="l-304"></a>    <span class="n">alu_op_bignum_e</span>          <span class="n">alu_op</span><span class="p">;</span>
-<a name="l-305"></a>    <span class="n">op_b_sel_e</span>               <span class="n">alu_op_b_sel</span><span class="p">;</span>
-<a name="l-306"></a>
-<a name="l-307"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">mac_op_a_qw_sel</span><span class="p">;</span>
-<a name="l-308"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">mac_op_b_qw_sel</span><span class="p">;</span>
-<a name="l-309"></a>    <span class="kt">logic</span>                    <span class="n">mac_wr_hw_sel_upper</span><span class="p">;</span>
-<a name="l-310"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">mac_pre_acc_shift</span><span class="p">;</span>
-<a name="l-311"></a>    <span class="kt">logic</span>                    <span class="n">mac_zero_acc</span><span class="p">;</span>
-<a name="l-312"></a>    <span class="kt">logic</span>                    <span class="n">mac_shift_out</span><span class="p">;</span>
-<a name="l-313"></a>    <span class="kt">logic</span>                    <span class="n">mac_en</span><span class="p">;</span>
-<a name="l-314"></a>
-<a name="l-315"></a>    <span class="kt">logic</span>                    <span class="n">rf_we</span><span class="p">;</span>
-<a name="l-316"></a>    <span class="n">rf_wd_sel_e</span>              <span class="n">rf_wdata_sel</span><span class="p">;</span>
-<a name="l-317"></a>    <span class="kt">logic</span>                    <span class="n">rf_ren_a</span><span class="p">;</span>
-<a name="l-318"></a>    <span class="kt">logic</span>                    <span class="n">rf_ren_b</span><span class="p">;</span>
-<a name="l-319"></a>  <span class="p">}</span> <span class="n">insn_dec_bignum_t</span><span class="p">;</span>
-<a name="l-320"></a>
-<a name="l-321"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-322"></a>    <span class="n">alu_op_base_e</span>     <span class="n">op</span><span class="p">;</span>
-<a name="l-323"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_a</span><span class="p">;</span>
-<a name="l-324"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_b</span><span class="p">;</span>
-<a name="l-325"></a>  <span class="p">}</span> <span class="n">alu_base_operation_t</span><span class="p">;</span>
-<a name="l-326"></a>
-<a name="l-327"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-328"></a>    <span class="n">comparison_op_base_e</span> <span class="n">op</span><span class="p">;</span>
-<a name="l-329"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_a</span><span class="p">;</span>
-<a name="l-330"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_b</span><span class="p">;</span>
-<a name="l-331"></a>  <span class="p">}</span> <span class="n">alu_base_comparison_t</span><span class="p">;</span>
-<a name="l-332"></a>
-<a name="l-333"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-334"></a>    <span class="n">alu_op_bignum_e</span> <span class="n">op</span><span class="p">;</span>
-<a name="l-335"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">operand_a</span><span class="p">;</span>
-<a name="l-336"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">operand_b</span><span class="p">;</span>
-<a name="l-337"></a>    <span class="kt">logic</span>                    <span class="n">shift_right</span><span class="p">;</span>
-<a name="l-338"></a>    <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">WLEN</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shift_amt</span><span class="p">;</span>
-<a name="l-339"></a>    <span class="n">flag_group_t</span>             <span class="n">flag_group</span><span class="p">;</span>
-<a name="l-340"></a>    <span class="n">flag_e</span>                   <span class="n">sel_flag</span><span class="p">;</span>
-<a name="l-341"></a>    <span class="kt">logic</span>                    <span class="n">alu_flag_en</span><span class="p">;</span>
-<a name="l-342"></a>    <span class="kt">logic</span>                    <span class="n">mac_flag_en</span><span class="p">;</span>
-<a name="l-343"></a>  <span class="p">}</span> <span class="n">alu_bignum_operation_t</span><span class="p">;</span>
-<a name="l-344"></a>
-<a name="l-345"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a name="l-346"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_a</span><span class="p">;</span>
-<a name="l-347"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_b</span><span class="p">;</span>
-<a name="l-348"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">operand_a_qw_sel</span><span class="p">;</span>
-<a name="l-349"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">operand_b_qw_sel</span><span class="p">;</span>
-<a name="l-350"></a>    <span class="kt">logic</span>            <span class="n">wr_hw_sel_upper</span><span class="p">;</span>
-<a name="l-351"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">pre_acc_shift_imm</span><span class="p">;</span>
-<a name="l-352"></a>    <span class="kt">logic</span>            <span class="n">zero_acc</span><span class="p">;</span>
-<a name="l-353"></a>    <span class="kt">logic</span>            <span class="n">shift_acc</span><span class="p">;</span>
-<a name="l-354"></a>  <span class="p">}</span> <span class="n">mac_bignum_operation_t</span><span class="p">;</span>
-<a name="l-355"></a>
-<a name="l-356"></a>  <span class="c1">// States for controller state machine</span>
-<a name="l-357"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-358"></a>    <span class="n">OtbnStateHalt</span><span class="p">,</span>
-<a name="l-359"></a>    <span class="n">OtbnStateUrndRefresh</span><span class="p">,</span>
-<a name="l-360"></a>    <span class="n">OtbnStateRun</span><span class="p">,</span>
-<a name="l-361"></a>    <span class="n">OtbnStateStall</span>
-<a name="l-362"></a>  <span class="p">}</span> <span class="n">otbn_state_e</span><span class="p">;</span>
-<a name="l-363"></a>
-<a name="l-364"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a name="l-365"></a>    <span class="n">OtbnStartStopStateHalt</span><span class="p">,</span>
-<a name="l-366"></a>    <span class="n">OtbnStartStopStateUrndRefresh</span><span class="p">,</span>
-<a name="l-367"></a>    <span class="n">OtbnStartStopStateRunning</span>
-<a name="l-368"></a>  <span class="p">}</span> <span class="n">otbn_start_stop_state_e</span><span class="p">;</span>
-<a name="l-369"></a>
-<a name="l-370"></a>  <span class="c1">// URNG PRNG default LFSR seed and permutation</span>
-<a name="l-371"></a>  <span class="c1">// A single default seed is split into 64 bit chunks, a seperate LFSR is used for each chunk. All</span>
-<a name="l-372"></a>  <span class="c1">// LFSR chunks use the same permutation.</span>
-<a name="l-373"></a>  <span class="c1">// These LFSR parameters have been generated with</span>
-<a name="l-374"></a>  <span class="c1">// $ ./util/design/gen-lfsr-seed.py --width 256 --seed 2840984437 --prefix &quot;Urnd&quot;</span>
-<a name="l-375"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">UrndLfsrWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
-<a name="l-376"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">UrndLfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">urnd_lfsr_seed_t</span><span class="p">;</span>
-<a name="l-377"></a>  <span class="k">parameter</span> <span class="n">urnd_lfsr_seed_t</span> <span class="n">RndCnstUrndLfsrSeedDefault</span> <span class="o">=</span>
-<a name="l-378"></a>      <span class="mh">256&#39;h84ddfadaf7e1134d70aa1c59de6197ff25a4fe335d095f1e2cba89acbe4a07e9</span><span class="p">;</span>
-<a name="l-379"></a>
-<a name="l-380"></a>  <span class="c1">// These LFSR parameters have been generated with</span>
-<a name="l-381"></a>  <span class="c1">// $ ./util/design/gen-lfsr-seed.py --width 64 --seed 2840984437 --prefix &quot;UrndChunk&quot;</span>
-<a name="l-382"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">UrndChunkLfsrWidth</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
-<a name="l-383"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">UrndChunkLfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][$</span><span class="n">clog2</span><span class="p">(</span><span class="n">UrndChunkLfsrWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">urnd_chunk_lfsr_perm_t</span><span class="p">;</span>
-<a name="l-384"></a>  <span class="k">parameter</span> <span class="n">urnd_chunk_lfsr_perm_t</span> <span class="n">RndCnstUrndChunkLfsrPermDefault</span> <span class="o">=</span> <span class="p">{</span>
-<a name="l-385"></a>    <span class="mh">128&#39;h911992e063cafd4f3b13ee5682b969be</span><span class="p">,</span>
-<a name="l-386"></a>    <span class="mh">256&#39;h86c701ecc39d9d483bdcacb5a15340b0988e2336e955ddd0dc01ab17e173726e</span>
-<a name="l-387"></a>  <span class="p">};</span>
-<a name="l-388"></a>
-<a name="l-389"></a><span class="k">endpackage</span>
+<span class="normal"><a href="#l-389">389</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
+<a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
+<a id="l-4" name="l-4"></a>
+<a id="l-5" name="l-5"></a><span class="no">`include</span> <span class="s">&quot;prim_assert.sv&quot;</span>
+<a id="l-6" name="l-6"></a>
+<a id="l-7" name="l-7"></a><span class="kn">package</span> <span class="n">otbn_pkg</span><span class="p">;</span>
+<a id="l-8" name="l-8"></a>
+<a id="l-9" name="l-9"></a>  <span class="c1">// Global Constants ==============================================================================</span>
+<a id="l-10" name="l-10"></a>
+<a id="l-11" name="l-11"></a>  <span class="c1">// Data path width for BN (wide) instructions, in bits.</span>
+<a id="l-12" name="l-12"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">WLEN</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+<a id="l-13" name="l-13"></a>
+<a id="l-14" name="l-14"></a>  <span class="c1">// &quot;Extended&quot; WLEN: the size of the datapath with added parity bits</span>
+<a id="l-15" name="l-15"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">ExtWLEN</span> <span class="o">=</span> <span class="n">WLEN</span> <span class="o">*</span> <span class="mi">39</span> <span class="o">/</span> <span class="mi">32</span><span class="p">;</span>
+<a id="l-16" name="l-16"></a>
+<a id="l-17" name="l-17"></a>  <span class="c1">// Number of 32-bit words per WLEN</span>
+<a id="l-18" name="l-18"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">BaseWordsPerWLEN</span> <span class="o">=</span> <span class="n">WLEN</span> <span class="o">/</span> <span class="mi">32</span><span class="p">;</span>
+<a id="l-19" name="l-19"></a>
+<a id="l-20" name="l-20"></a>  <span class="c1">// Number of flag groups</span>
+<a id="l-21" name="l-21"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NFlagGroups</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<a id="l-22" name="l-22"></a>
+<a id="l-23" name="l-23"></a>  <span class="c1">// Width of the GPR index/address</span>
+<a id="l-24" name="l-24"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">GprAw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<a id="l-25" name="l-25"></a>
+<a id="l-26" name="l-26"></a>  <span class="c1">// Number of General Purpose Registers (GPRs)</span>
+<a id="l-27" name="l-27"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NGpr</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">GprAw</span><span class="p">;</span>
+<a id="l-28" name="l-28"></a>
+<a id="l-29" name="l-29"></a>  <span class="c1">// Width of the WDR index/address</span>
+<a id="l-30" name="l-30"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">WdrAw</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<a id="l-31" name="l-31"></a>
+<a id="l-32" name="l-32"></a>  <span class="c1">// Number of Wide Data Registers (WDRs)</span>
+<a id="l-33" name="l-33"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NWdr</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">WdrAw</span><span class="p">;</span>
+<a id="l-34" name="l-34"></a>
+<a id="l-35" name="l-35"></a>  <span class="c1">// Width of entropy input</span>
+<a id="l-36" name="l-36"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">EdnDataWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+<a id="l-37" name="l-37"></a>
+<a id="l-38" name="l-38"></a>
+<a id="l-39" name="l-39"></a>  <span class="c1">// Toplevel constants ============================================================================</span>
+<a id="l-40" name="l-40"></a>
+<a id="l-41" name="l-41"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">AlertFatal</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<a id="l-42" name="l-42"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">AlertRecov</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<a id="l-43" name="l-43"></a>
+<a id="l-44" name="l-44"></a>  <span class="c1">// Register file implementation selection enum.</span>
+<a id="l-45" name="l-45"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">integer</span> <span class="p">{</span>
+<a id="l-46" name="l-46"></a>    <span class="n">RegFileFF</span>    <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">// Generic flip-flop based implementation</span>
+<a id="l-47" name="l-47"></a>    <span class="n">RegFileFPGA</span>  <span class="o">=</span> <span class="mi">1</span>  <span class="c1">// FPGA implmentation, does infer RAM primitives.</span>
+<a id="l-48" name="l-48"></a>  <span class="p">}</span> <span class="n">regfile_e</span><span class="p">;</span>
+<a id="l-49" name="l-49"></a>
+<a id="l-50" name="l-50"></a>  <span class="c1">// Error bits</span>
+<a id="l-51" name="l-51"></a>  <span class="c1">//</span>
+<a id="l-52" name="l-52"></a>  <span class="c1">// Note: These errors are duplicated in the register HJSON (../data/otbn.hjson), the ISS</span>
+<a id="l-53" name="l-53"></a>  <span class="c1">// (../dv/otbnsim/sim/alert.py), and the DIF. If updating them here, update those too.</span>
+<a id="l-54" name="l-54"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-55" name="l-55"></a>    <span class="kt">logic</span> <span class="n">fatal_reg</span><span class="p">;</span>
+<a id="l-56" name="l-56"></a>    <span class="kt">logic</span> <span class="n">fatal_dmem</span><span class="p">;</span>
+<a id="l-57" name="l-57"></a>    <span class="kt">logic</span> <span class="n">fatal_imem</span><span class="p">;</span>
+<a id="l-58" name="l-58"></a>    <span class="kt">logic</span> <span class="n">loop</span><span class="p">;</span>
+<a id="l-59" name="l-59"></a>    <span class="kt">logic</span> <span class="n">illegal_insn</span><span class="p">;</span>
+<a id="l-60" name="l-60"></a>    <span class="kt">logic</span> <span class="n">call_stack</span><span class="p">;</span>
+<a id="l-61" name="l-61"></a>    <span class="kt">logic</span> <span class="n">bad_insn_addr</span><span class="p">;</span>
+<a id="l-62" name="l-62"></a>    <span class="kt">logic</span> <span class="n">bad_data_addr</span><span class="p">;</span>
+<a id="l-63" name="l-63"></a>  <span class="p">}</span> <span class="n">err_bits_t</span><span class="p">;</span>
+<a id="l-64" name="l-64"></a>
+<a id="l-65" name="l-65"></a>  <span class="c1">// Constants =====================================================================================</span>
+<a id="l-66" name="l-66"></a>
+<a id="l-67" name="l-67"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
+<a id="l-68" name="l-68"></a>    <span class="n">InsnSubsetBase</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">,</span>  <span class="c1">// Base (RV32/Narrow) Instruction Subset</span>
+<a id="l-69" name="l-69"></a>    <span class="n">InsnSubsetBignum</span> <span class="o">=</span> <span class="mb">1&#39;b1</span> <span class="c1">// Big Number (BN/Wide) Instruction Subset</span>
+<a id="l-70" name="l-70"></a>  <span class="p">}</span> <span class="n">insn_subset_e</span><span class="p">;</span>
+<a id="l-71" name="l-71"></a>
+<a id="l-72" name="l-72"></a>  <span class="c1">// Opcodes (field [6:0] in the instruction), matching the RISC-V specification for the base</span>
+<a id="l-73" name="l-73"></a>  <span class="c1">// instruction subset.</span>
+<a id="l-74" name="l-74"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">6</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-75" name="l-75"></a>    <span class="n">InsnOpcodeBaseLoad</span>       <span class="o">=</span> <span class="mh">7&#39;h03</span><span class="p">,</span>
+<a id="l-76" name="l-76"></a>    <span class="n">InsnOpcodeBaseMemMisc</span>    <span class="o">=</span> <span class="mh">7&#39;h0f</span><span class="p">,</span>
+<a id="l-77" name="l-77"></a>    <span class="n">InsnOpcodeBaseOpImm</span>      <span class="o">=</span> <span class="mh">7&#39;h13</span><span class="p">,</span>
+<a id="l-78" name="l-78"></a>    <span class="n">InsnOpcodeBaseAuipc</span>      <span class="o">=</span> <span class="mh">7&#39;h17</span><span class="p">,</span>
+<a id="l-79" name="l-79"></a>    <span class="n">InsnOpcodeBaseStore</span>      <span class="o">=</span> <span class="mh">7&#39;h23</span><span class="p">,</span>
+<a id="l-80" name="l-80"></a>    <span class="n">InsnOpcodeBaseOp</span>         <span class="o">=</span> <span class="mh">7&#39;h33</span><span class="p">,</span>
+<a id="l-81" name="l-81"></a>    <span class="n">InsnOpcodeBaseLui</span>        <span class="o">=</span> <span class="mh">7&#39;h37</span><span class="p">,</span>
+<a id="l-82" name="l-82"></a>    <span class="n">InsnOpcodeBaseBranch</span>     <span class="o">=</span> <span class="mh">7&#39;h63</span><span class="p">,</span>
+<a id="l-83" name="l-83"></a>    <span class="n">InsnOpcodeBaseJalr</span>       <span class="o">=</span> <span class="mh">7&#39;h67</span><span class="p">,</span>
+<a id="l-84" name="l-84"></a>    <span class="n">InsnOpcodeBaseJal</span>        <span class="o">=</span> <span class="mh">7&#39;h6f</span><span class="p">,</span>
+<a id="l-85" name="l-85"></a>    <span class="n">InsnOpcodeBaseSystem</span>     <span class="o">=</span> <span class="mh">7&#39;h73</span><span class="p">,</span>
+<a id="l-86" name="l-86"></a>    <span class="n">InsnOpcodeBignumMisc</span>     <span class="o">=</span> <span class="mh">7&#39;h0B</span><span class="p">,</span>
+<a id="l-87" name="l-87"></a>    <span class="n">InsnOpcodeBignumArith</span>    <span class="o">=</span> <span class="mh">7&#39;h2B</span><span class="p">,</span>
+<a id="l-88" name="l-88"></a>    <span class="n">InsnOpcodeBignumMulqacc</span>  <span class="o">=</span> <span class="mh">7&#39;h3B</span><span class="p">,</span>
+<a id="l-89" name="l-89"></a>    <span class="n">InsnOpcodeBignumBaseMisc</span> <span class="o">=</span> <span class="mh">7&#39;h7B</span>
+<a id="l-90" name="l-90"></a>  <span class="p">}</span> <span class="n">insn_opcode_e</span><span class="p">;</span>
+<a id="l-91" name="l-91"></a>
+<a id="l-92" name="l-92"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-93" name="l-93"></a>    <span class="n">AluOpBaseAdd</span><span class="p">,</span>
+<a id="l-94" name="l-94"></a>    <span class="n">AluOpBaseSub</span><span class="p">,</span>
+<a id="l-95" name="l-95"></a>
+<a id="l-96" name="l-96"></a>    <span class="n">AluOpBaseXor</span><span class="p">,</span>
+<a id="l-97" name="l-97"></a>    <span class="n">AluOpBaseOr</span><span class="p">,</span>
+<a id="l-98" name="l-98"></a>    <span class="n">AluOpBaseAnd</span><span class="p">,</span>
+<a id="l-99" name="l-99"></a>    <span class="n">AluOpBaseNot</span><span class="p">,</span>
+<a id="l-100" name="l-100"></a>
+<a id="l-101" name="l-101"></a>    <span class="n">AluOpBaseSra</span><span class="p">,</span>
+<a id="l-102" name="l-102"></a>    <span class="n">AluOpBaseSrl</span><span class="p">,</span>
+<a id="l-103" name="l-103"></a>    <span class="n">AluOpBaseSll</span>
+<a id="l-104" name="l-104"></a>  <span class="p">}</span> <span class="n">alu_op_base_e</span><span class="p">;</span>
+<a id="l-105" name="l-105"></a>
+<a id="l-106" name="l-106"></a>  <span class="c1">// TODO: Can we arrange this to simplify decoding logic?</span>
+<a id="l-107" name="l-107"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">3</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-108" name="l-108"></a>    <span class="n">AluOpBignumAdd</span><span class="p">,</span>
+<a id="l-109" name="l-109"></a>    <span class="n">AluOpBignumAddc</span><span class="p">,</span>
+<a id="l-110" name="l-110"></a>    <span class="n">AluOpBignumAddm</span><span class="p">,</span>
+<a id="l-111" name="l-111"></a>
+<a id="l-112" name="l-112"></a>    <span class="n">AluOpBignumSub</span><span class="p">,</span>
+<a id="l-113" name="l-113"></a>    <span class="n">AluOpBignumSubb</span><span class="p">,</span>
+<a id="l-114" name="l-114"></a>    <span class="n">AluOpBignumSubm</span><span class="p">,</span>
+<a id="l-115" name="l-115"></a>
+<a id="l-116" name="l-116"></a>    <span class="n">AluOpBignumRshi</span><span class="p">,</span>
+<a id="l-117" name="l-117"></a>
+<a id="l-118" name="l-118"></a>    <span class="n">AluOpBignumXor</span><span class="p">,</span>
+<a id="l-119" name="l-119"></a>    <span class="n">AluOpBignumOr</span><span class="p">,</span>
+<a id="l-120" name="l-120"></a>    <span class="n">AluOpBignumAnd</span><span class="p">,</span>
+<a id="l-121" name="l-121"></a>    <span class="n">AluOpBignumNot</span><span class="p">,</span>
+<a id="l-122" name="l-122"></a>
+<a id="l-123" name="l-123"></a>    <span class="n">AluOpBignumSel</span><span class="p">,</span>
+<a id="l-124" name="l-124"></a>    <span class="n">AluOpBignumMov</span>
+<a id="l-125" name="l-125"></a>  <span class="p">}</span> <span class="n">alu_op_bignum_e</span><span class="p">;</span>
+<a id="l-126" name="l-126"></a>
+<a id="l-127" name="l-127"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
+<a id="l-128" name="l-128"></a>    <span class="n">ComparisonOpBaseEq</span><span class="p">,</span>
+<a id="l-129" name="l-129"></a>    <span class="n">ComparisonOpBaseNeq</span>
+<a id="l-130" name="l-130"></a>  <span class="p">}</span> <span class="n">comparison_op_base_e</span><span class="p">;</span>
+<a id="l-131" name="l-131"></a>
+<a id="l-132" name="l-132"></a>  <span class="c1">// Operand a source selection</span>
+<a id="l-133" name="l-133"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-134" name="l-134"></a>    <span class="n">OpASelRegister</span>  <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
+<a id="l-135" name="l-135"></a>    <span class="n">OpASelZero</span> <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
+<a id="l-136" name="l-136"></a>    <span class="n">OpASelCurrPc</span> <span class="o">=</span> <span class="mi">&#39;d2</span>
+<a id="l-137" name="l-137"></a>  <span class="p">}</span> <span class="n">op_a_sel_e</span><span class="p">;</span>
+<a id="l-138" name="l-138"></a>
+<a id="l-139" name="l-139"></a>  <span class="c1">// Operand b source selection</span>
+<a id="l-140" name="l-140"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
+<a id="l-141" name="l-141"></a>    <span class="n">OpBSelRegister</span>  <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
+<a id="l-142" name="l-142"></a>    <span class="n">OpBSelImmediate</span> <span class="o">=</span> <span class="mi">&#39;d1</span>
+<a id="l-143" name="l-143"></a>  <span class="p">}</span> <span class="n">op_b_sel_e</span><span class="p">;</span>
+<a id="l-144" name="l-144"></a>
+<a id="l-145" name="l-145"></a>  <span class="c1">// Immediate b selection for base ISA</span>
+<a id="l-146" name="l-146"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-147" name="l-147"></a>    <span class="n">ImmBaseBI</span><span class="p">,</span>
+<a id="l-148" name="l-148"></a>    <span class="n">ImmBaseBS</span><span class="p">,</span>
+<a id="l-149" name="l-149"></a>    <span class="n">ImmBaseBB</span><span class="p">,</span>
+<a id="l-150" name="l-150"></a>    <span class="n">ImmBaseBU</span><span class="p">,</span>
+<a id="l-151" name="l-151"></a>    <span class="n">ImmBaseBJ</span><span class="p">,</span>
+<a id="l-152" name="l-152"></a>    <span class="n">ImmBaseBL</span><span class="p">,</span>
+<a id="l-153" name="l-153"></a>    <span class="n">ImmBaseBX</span>
+<a id="l-154" name="l-154"></a>  <span class="p">}</span> <span class="n">imm_b_sel_base_e</span><span class="p">;</span>
+<a id="l-155" name="l-155"></a>
+<a id="l-156" name="l-156"></a>  <span class="c1">// Shift amount select for bignum ISA</span>
+<a id="l-157" name="l-157"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-158" name="l-158"></a>    <span class="n">ShamtSelBignumA</span><span class="p">,</span>
+<a id="l-159" name="l-159"></a>    <span class="n">ShamtSelBignumS</span><span class="p">,</span>
+<a id="l-160" name="l-160"></a>    <span class="n">ShamtSelBignumZero</span>
+<a id="l-161" name="l-161"></a>  <span class="p">}</span> <span class="n">shamt_sel_bignum_e</span><span class="p">;</span>
+<a id="l-162" name="l-162"></a>
+<a id="l-163" name="l-163"></a>  <span class="c1">// Regfile write data selection</span>
+<a id="l-164" name="l-164"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-165" name="l-165"></a>    <span class="n">RfWdSelEx</span><span class="p">,</span>
+<a id="l-166" name="l-166"></a>    <span class="n">RfWdSelNextPc</span><span class="p">,</span>
+<a id="l-167" name="l-167"></a>    <span class="n">RfWdSelLsu</span><span class="p">,</span>
+<a id="l-168" name="l-168"></a>    <span class="n">RfWdSelIspr</span><span class="p">,</span>
+<a id="l-169" name="l-169"></a>    <span class="n">RfWdSelIncr</span><span class="p">,</span>
+<a id="l-170" name="l-170"></a>    <span class="n">RfWdSelMac</span>
+<a id="l-171" name="l-171"></a>  <span class="p">}</span> <span class="n">rf_wd_sel_e</span><span class="p">;</span>
+<a id="l-172" name="l-172"></a>
+<a id="l-173" name="l-173"></a>  <span class="c1">// Control and Status Registers (CSRs)</span>
+<a id="l-174" name="l-174"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">CsrNumWidth</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span>
+<a id="l-175" name="l-175"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">CsrNumWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-176" name="l-176"></a>    <span class="n">CsrFg0</span>         <span class="o">=</span> <span class="mh">12&#39;h7C0</span><span class="p">,</span>
+<a id="l-177" name="l-177"></a>    <span class="n">CsrFg1</span>         <span class="o">=</span> <span class="mh">12&#39;h7C1</span><span class="p">,</span>
+<a id="l-178" name="l-178"></a>    <span class="n">CsrFlags</span>       <span class="o">=</span> <span class="mh">12&#39;h7C8</span><span class="p">,</span>
+<a id="l-179" name="l-179"></a>    <span class="n">CsrMod0</span>        <span class="o">=</span> <span class="mh">12&#39;h7D0</span><span class="p">,</span>
+<a id="l-180" name="l-180"></a>    <span class="n">CsrMod1</span>        <span class="o">=</span> <span class="mh">12&#39;h7D1</span><span class="p">,</span>
+<a id="l-181" name="l-181"></a>    <span class="n">CsrMod2</span>        <span class="o">=</span> <span class="mh">12&#39;h7D2</span><span class="p">,</span>
+<a id="l-182" name="l-182"></a>    <span class="n">CsrMod3</span>        <span class="o">=</span> <span class="mh">12&#39;h7D3</span><span class="p">,</span>
+<a id="l-183" name="l-183"></a>    <span class="n">CsrMod4</span>        <span class="o">=</span> <span class="mh">12&#39;h7D4</span><span class="p">,</span>
+<a id="l-184" name="l-184"></a>    <span class="n">CsrMod5</span>        <span class="o">=</span> <span class="mh">12&#39;h7D5</span><span class="p">,</span>
+<a id="l-185" name="l-185"></a>    <span class="n">CsrMod6</span>        <span class="o">=</span> <span class="mh">12&#39;h7D6</span><span class="p">,</span>
+<a id="l-186" name="l-186"></a>    <span class="n">CsrMod7</span>        <span class="o">=</span> <span class="mh">12&#39;h7D7</span><span class="p">,</span>
+<a id="l-187" name="l-187"></a>    <span class="n">CsrRnd</span>         <span class="o">=</span> <span class="mh">12&#39;hFC0</span><span class="p">,</span>
+<a id="l-188" name="l-188"></a>    <span class="n">CsrRndPrefetch</span> <span class="o">=</span> <span class="mh">12&#39;hFC1</span><span class="p">,</span>
+<a id="l-189" name="l-189"></a>    <span class="n">CsrUrnd</span>        <span class="o">=</span> <span class="mh">12&#39;hFC2</span>
+<a id="l-190" name="l-190"></a>  <span class="p">}</span> <span class="n">csr_e</span><span class="p">;</span>
+<a id="l-191" name="l-191"></a>
+<a id="l-192" name="l-192"></a>  <span class="c1">// Wide Special Purpose Registers (WSRs)</span>
+<a id="l-193" name="l-193"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NWsr</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// Number of WSRs</span>
+<a id="l-194" name="l-194"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">WsrNumWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NWsr</span><span class="p">);</span>
+<a id="l-195" name="l-195"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">WsrNumWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-196" name="l-196"></a>    <span class="n">WsrMod</span>   <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
+<a id="l-197" name="l-197"></a>    <span class="n">WsrRnd</span>   <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
+<a id="l-198" name="l-198"></a>    <span class="n">WsrAcc</span>   <span class="o">=</span> <span class="mi">&#39;d2</span><span class="p">,</span>
+<a id="l-199" name="l-199"></a>    <span class="n">WsrUrnd</span>  <span class="o">=</span> <span class="mi">&#39;d3</span>
+<a id="l-200" name="l-200"></a>  <span class="p">}</span> <span class="n">wsr_e</span><span class="p">;</span>
+<a id="l-201" name="l-201"></a>
+<a id="l-202" name="l-202"></a>  <span class="c1">// Internal Special Purpose Registers (ISPRs)</span>
+<a id="l-203" name="l-203"></a>  <span class="c1">// CSRs and WSRs have some overlap into what they map into. ISPRs are the actual registers in the</span>
+<a id="l-204" name="l-204"></a>  <span class="c1">// design which CSRs and WSRs are mapped on to.</span>
+<a id="l-205" name="l-205"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">NIspr</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<a id="l-206" name="l-206"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">IsprNumWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NIspr</span><span class="p">);</span>
+<a id="l-207" name="l-207"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">IsprNumWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-208" name="l-208"></a>    <span class="n">IsprMod</span>   <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
+<a id="l-209" name="l-209"></a>    <span class="n">IsprRnd</span>   <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
+<a id="l-210" name="l-210"></a>    <span class="n">IsprAcc</span>   <span class="o">=</span> <span class="mi">&#39;d2</span><span class="p">,</span>
+<a id="l-211" name="l-211"></a>    <span class="n">IsprFlags</span> <span class="o">=</span> <span class="mi">&#39;d3</span><span class="p">,</span>
+<a id="l-212" name="l-212"></a>    <span class="n">IsprUrnd</span>  <span class="o">=</span> <span class="mi">&#39;d4</span>
+<a id="l-213" name="l-213"></a>  <span class="p">}</span> <span class="n">ispr_e</span><span class="p">;</span>
+<a id="l-214" name="l-214"></a>
+<a id="l-215" name="l-215"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NFlagGroups</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">flag_group_t</span><span class="p">;</span>
+<a id="l-216" name="l-216"></a>
+<a id="l-217" name="l-217"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-218" name="l-218"></a>    <span class="kt">logic</span> <span class="n">Z</span><span class="p">;</span>
+<a id="l-219" name="l-219"></a>    <span class="kt">logic</span> <span class="n">L</span><span class="p">;</span>
+<a id="l-220" name="l-220"></a>    <span class="kt">logic</span> <span class="n">M</span><span class="p">;</span>
+<a id="l-221" name="l-221"></a>    <span class="kt">logic</span> <span class="n">C</span><span class="p">;</span>
+<a id="l-222" name="l-222"></a>  <span class="p">}</span> <span class="n">flags_t</span><span class="p">;</span>
+<a id="l-223" name="l-223"></a>
+<a id="l-224" name="l-224"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">FlagsWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">bits</span><span class="p">(</span><span class="n">flags_t</span><span class="p">);</span>
+<a id="l-225" name="l-225"></a>
+<a id="l-226" name="l-226"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">FlagsWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-227" name="l-227"></a>    <span class="n">FlagC</span> <span class="o">=</span> <span class="mi">&#39;d0</span><span class="p">,</span>
+<a id="l-228" name="l-228"></a>    <span class="n">FlagM</span> <span class="o">=</span> <span class="mi">&#39;d1</span><span class="p">,</span>
+<a id="l-229" name="l-229"></a>    <span class="n">FlagL</span> <span class="o">=</span> <span class="mi">&#39;d2</span><span class="p">,</span>
+<a id="l-230" name="l-230"></a>    <span class="n">FlagZ</span> <span class="o">=</span> <span class="mi">&#39;d3</span>
+<a id="l-231" name="l-231"></a>  <span class="p">}</span> <span class="n">flag_e</span><span class="p">;</span>
+<a id="l-232" name="l-232"></a>
+<a id="l-233" name="l-233"></a>  <span class="c1">// TODO: Figure out how to add assertions for the enum type width; initial blocks, as produced by</span>
+<a id="l-234" name="l-234"></a>  <span class="c1">// ASSERT_INIT, aren&#39;t allowed in packages.</span>
+<a id="l-235" name="l-235"></a>  <span class="c1">//`ASSERT_INIT(WsrESizeMatchesParameter_A, $bits(wsr_e) == WsrNumWidth)</span>
+<a id="l-236" name="l-236"></a>
+<a id="l-237" name="l-237"></a>  <span class="c1">// Structures for decoded instructions, grouped into three:</span>
+<a id="l-238" name="l-238"></a>  <span class="c1">// - insn_dec_shared_t - Anything that applies to both bignum and base microarchitecture</span>
+<a id="l-239" name="l-239"></a>  <span class="c1">// - insn_dec_base_t - Anything that only applies to the base side microarchitecture</span>
+<a id="l-240" name="l-240"></a>  <span class="c1">// - insn_dec_bignum_t - Anything that only applies to bignum side microarchitecture</span>
+<a id="l-241" name="l-241"></a>  <span class="c1">//</span>
+<a id="l-242" name="l-242"></a>  <span class="c1">// TODO: The variable names are rather short, especially &quot;i&quot; is confusing. Think about renaming.</span>
+<a id="l-243" name="l-243"></a>  <span class="c1">//</span>
+<a id="l-244" name="l-244"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-245" name="l-245"></a>    <span class="n">insn_subset_e</span>   <span class="n">subset</span><span class="p">;</span>
+<a id="l-246" name="l-246"></a>    <span class="kt">logic</span>           <span class="n">ecall_insn</span><span class="p">;</span>
+<a id="l-247" name="l-247"></a>    <span class="kt">logic</span>           <span class="n">ld_insn</span><span class="p">;</span>
+<a id="l-248" name="l-248"></a>    <span class="kt">logic</span>           <span class="n">st_insn</span><span class="p">;</span>
+<a id="l-249" name="l-249"></a>    <span class="kt">logic</span>           <span class="n">branch_insn</span><span class="p">;</span>
+<a id="l-250" name="l-250"></a>    <span class="kt">logic</span>           <span class="n">jump_insn</span><span class="p">;</span>
+<a id="l-251" name="l-251"></a>    <span class="kt">logic</span>           <span class="n">loop_insn</span><span class="p">;</span>
+<a id="l-252" name="l-252"></a>    <span class="kt">logic</span>           <span class="n">ispr_rd_insn</span><span class="p">;</span>
+<a id="l-253" name="l-253"></a>    <span class="kt">logic</span>           <span class="n">ispr_wr_insn</span><span class="p">;</span>
+<a id="l-254" name="l-254"></a>    <span class="kt">logic</span>           <span class="n">ispr_rs_insn</span><span class="p">;</span>
+<a id="l-255" name="l-255"></a>  <span class="p">}</span> <span class="n">insn_dec_shared_t</span><span class="p">;</span>
+<a id="l-256" name="l-256"></a>
+<a id="l-257" name="l-257"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-258" name="l-258"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">d</span><span class="p">;</span>             <span class="c1">// Destination register</span>
+<a id="l-259" name="l-259"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">a</span><span class="p">;</span>             <span class="c1">// First source register</span>
+<a id="l-260" name="l-260"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>          <span class="n">b</span><span class="p">;</span>             <span class="c1">// Second source register</span>
+<a id="l-261" name="l-261"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">i</span><span class="p">;</span>             <span class="c1">// Immediate</span>
+<a id="l-262" name="l-262"></a>    <span class="n">alu_op_base_e</span>        <span class="n">alu_op</span><span class="p">;</span>
+<a id="l-263" name="l-263"></a>    <span class="n">comparison_op_base_e</span> <span class="n">comparison_op</span><span class="p">;</span>
+<a id="l-264" name="l-264"></a>    <span class="n">op_a_sel_e</span>           <span class="n">op_a_sel</span><span class="p">;</span>
+<a id="l-265" name="l-265"></a>    <span class="n">op_b_sel_e</span>           <span class="n">op_b_sel</span><span class="p">;</span>
+<a id="l-266" name="l-266"></a>    <span class="kt">logic</span>                <span class="n">rf_ren_a</span><span class="p">;</span>
+<a id="l-267" name="l-267"></a>    <span class="kt">logic</span>                <span class="n">rf_ren_b</span><span class="p">;</span>
+<a id="l-268" name="l-268"></a>    <span class="kt">logic</span>                <span class="n">rf_we</span><span class="p">;</span>
+<a id="l-269" name="l-269"></a>    <span class="n">rf_wd_sel_e</span>          <span class="n">rf_wdata_sel</span><span class="p">;</span>
+<a id="l-270" name="l-270"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">loop_bodysize</span><span class="p">;</span>
+<a id="l-271" name="l-271"></a>    <span class="kt">logic</span>                <span class="n">loop_immediate</span><span class="p">;</span>
+<a id="l-272" name="l-272"></a>  <span class="p">}</span> <span class="n">insn_dec_base_t</span><span class="p">;</span>
+<a id="l-273" name="l-273"></a>
+<a id="l-274" name="l-274"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-275" name="l-275"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WdrAw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">d</span><span class="p">;</span>           <span class="c1">// Destination register</span>
+<a id="l-276" name="l-276"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WdrAw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">a</span><span class="p">;</span>           <span class="c1">// First source register</span>
+<a id="l-277" name="l-277"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WdrAw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">b</span><span class="p">;</span>           <span class="c1">// Second source register</span>
+<a id="l-278" name="l-278"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">i</span><span class="p">;</span>           <span class="c1">// Immediate</span>
+<a id="l-279" name="l-279"></a>
+<a id="l-280" name="l-280"></a>    <span class="kt">logic</span>                    <span class="n">rf_a_indirect</span><span class="p">;</span> <span class="c1">// Indirect lookup, bignum register index a comes from</span>
+<a id="l-281" name="l-281"></a>                                            <span class="c1">// base register a read</span>
+<a id="l-282" name="l-282"></a>    <span class="kt">logic</span>                    <span class="n">rf_b_indirect</span><span class="p">;</span> <span class="c1">// Indirect lookup, bignum register index b comes from</span>
+<a id="l-283" name="l-283"></a>                                            <span class="c1">// base register b read</span>
+<a id="l-284" name="l-284"></a>    <span class="kt">logic</span>                    <span class="n">rf_d_indirect</span><span class="p">;</span> <span class="c1">// Indirect lookup, bignum register index d comes from</span>
+<a id="l-285" name="l-285"></a>                                            <span class="c1">// base register b read using d in this struct</span>
+<a id="l-286" name="l-286"></a>
+<a id="l-287" name="l-287"></a>    <span class="kt">logic</span>                    <span class="n">d_inc</span><span class="p">;</span>           <span class="c1">// Increment destination register index in base</span>
+<a id="l-288" name="l-288"></a>                                              <span class="c1">// register file</span>
+<a id="l-289" name="l-289"></a>    <span class="kt">logic</span>                    <span class="n">a_inc</span><span class="p">;</span>           <span class="c1">// Increment source register index a in base register</span>
+<a id="l-290" name="l-290"></a>                                              <span class="c1">// file</span>
+<a id="l-291" name="l-291"></a>    <span class="kt">logic</span>                    <span class="n">a_wlen_word_inc</span><span class="p">;</span> <span class="c1">// Increment source register a in base register file</span>
+<a id="l-292" name="l-292"></a>                                              <span class="c1">// by WLEN word size</span>
+<a id="l-293" name="l-293"></a>    <span class="kt">logic</span>                    <span class="n">b_inc</span><span class="p">;</span>           <span class="c1">// Increment source register index b in base register</span>
+<a id="l-294" name="l-294"></a>                                              <span class="c1">// file</span>
+<a id="l-295" name="l-295"></a>
+<a id="l-296" name="l-296"></a>    <span class="c1">// Shifting only applies to a subset of ALU operations</span>
+<a id="l-297" name="l-297"></a>    <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">WLEN</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">alu_shift_amt</span><span class="p">;</span>   <span class="c1">// Shift amount</span>
+<a id="l-298" name="l-298"></a>    <span class="kt">logic</span>                    <span class="n">alu_shift_right</span><span class="p">;</span> <span class="c1">// Shift right if set otherwise left</span>
+<a id="l-299" name="l-299"></a>
+<a id="l-300" name="l-300"></a>    <span class="n">flag_group_t</span>             <span class="n">alu_flag_group</span><span class="p">;</span>
+<a id="l-301" name="l-301"></a>    <span class="n">flag_e</span>                   <span class="n">alu_sel_flag</span><span class="p">;</span>
+<a id="l-302" name="l-302"></a>    <span class="kt">logic</span>                    <span class="n">alu_flag_en</span><span class="p">;</span>
+<a id="l-303" name="l-303"></a>    <span class="kt">logic</span>                    <span class="n">mac_flag_en</span><span class="p">;</span>
+<a id="l-304" name="l-304"></a>    <span class="n">alu_op_bignum_e</span>          <span class="n">alu_op</span><span class="p">;</span>
+<a id="l-305" name="l-305"></a>    <span class="n">op_b_sel_e</span>               <span class="n">alu_op_b_sel</span><span class="p">;</span>
+<a id="l-306" name="l-306"></a>
+<a id="l-307" name="l-307"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">mac_op_a_qw_sel</span><span class="p">;</span>
+<a id="l-308" name="l-308"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">mac_op_b_qw_sel</span><span class="p">;</span>
+<a id="l-309" name="l-309"></a>    <span class="kt">logic</span>                    <span class="n">mac_wr_hw_sel_upper</span><span class="p">;</span>
+<a id="l-310" name="l-310"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>              <span class="n">mac_pre_acc_shift</span><span class="p">;</span>
+<a id="l-311" name="l-311"></a>    <span class="kt">logic</span>                    <span class="n">mac_zero_acc</span><span class="p">;</span>
+<a id="l-312" name="l-312"></a>    <span class="kt">logic</span>                    <span class="n">mac_shift_out</span><span class="p">;</span>
+<a id="l-313" name="l-313"></a>    <span class="kt">logic</span>                    <span class="n">mac_en</span><span class="p">;</span>
+<a id="l-314" name="l-314"></a>
+<a id="l-315" name="l-315"></a>    <span class="kt">logic</span>                    <span class="n">rf_we</span><span class="p">;</span>
+<a id="l-316" name="l-316"></a>    <span class="n">rf_wd_sel_e</span>              <span class="n">rf_wdata_sel</span><span class="p">;</span>
+<a id="l-317" name="l-317"></a>    <span class="kt">logic</span>                    <span class="n">rf_ren_a</span><span class="p">;</span>
+<a id="l-318" name="l-318"></a>    <span class="kt">logic</span>                    <span class="n">rf_ren_b</span><span class="p">;</span>
+<a id="l-319" name="l-319"></a>  <span class="p">}</span> <span class="n">insn_dec_bignum_t</span><span class="p">;</span>
+<a id="l-320" name="l-320"></a>
+<a id="l-321" name="l-321"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-322" name="l-322"></a>    <span class="n">alu_op_base_e</span>     <span class="n">op</span><span class="p">;</span>
+<a id="l-323" name="l-323"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_a</span><span class="p">;</span>
+<a id="l-324" name="l-324"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_b</span><span class="p">;</span>
+<a id="l-325" name="l-325"></a>  <span class="p">}</span> <span class="n">alu_base_operation_t</span><span class="p">;</span>
+<a id="l-326" name="l-326"></a>
+<a id="l-327" name="l-327"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-328" name="l-328"></a>    <span class="n">comparison_op_base_e</span> <span class="n">op</span><span class="p">;</span>
+<a id="l-329" name="l-329"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_a</span><span class="p">;</span>
+<a id="l-330" name="l-330"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">31</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_b</span><span class="p">;</span>
+<a id="l-331" name="l-331"></a>  <span class="p">}</span> <span class="n">alu_base_comparison_t</span><span class="p">;</span>
+<a id="l-332" name="l-332"></a>
+<a id="l-333" name="l-333"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-334" name="l-334"></a>    <span class="n">alu_op_bignum_e</span> <span class="n">op</span><span class="p">;</span>
+<a id="l-335" name="l-335"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">operand_a</span><span class="p">;</span>
+<a id="l-336" name="l-336"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>         <span class="n">operand_b</span><span class="p">;</span>
+<a id="l-337" name="l-337"></a>    <span class="kt">logic</span>                    <span class="n">shift_right</span><span class="p">;</span>
+<a id="l-338" name="l-338"></a>    <span class="kt">logic</span> <span class="p">[$</span><span class="n">clog2</span><span class="p">(</span><span class="n">WLEN</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">shift_amt</span><span class="p">;</span>
+<a id="l-339" name="l-339"></a>    <span class="n">flag_group_t</span>             <span class="n">flag_group</span><span class="p">;</span>
+<a id="l-340" name="l-340"></a>    <span class="n">flag_e</span>                   <span class="n">sel_flag</span><span class="p">;</span>
+<a id="l-341" name="l-341"></a>    <span class="kt">logic</span>                    <span class="n">alu_flag_en</span><span class="p">;</span>
+<a id="l-342" name="l-342"></a>    <span class="kt">logic</span>                    <span class="n">mac_flag_en</span><span class="p">;</span>
+<a id="l-343" name="l-343"></a>  <span class="p">}</span> <span class="n">alu_bignum_operation_t</span><span class="p">;</span>
+<a id="l-344" name="l-344"></a>
+<a id="l-345" name="l-345"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-346" name="l-346"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_a</span><span class="p">;</span>
+<a id="l-347" name="l-347"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">WLEN</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">operand_b</span><span class="p">;</span>
+<a id="l-348" name="l-348"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">operand_a_qw_sel</span><span class="p">;</span>
+<a id="l-349" name="l-349"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">operand_b_qw_sel</span><span class="p">;</span>
+<a id="l-350" name="l-350"></a>    <span class="kt">logic</span>            <span class="n">wr_hw_sel_upper</span><span class="p">;</span>
+<a id="l-351" name="l-351"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>      <span class="n">pre_acc_shift_imm</span><span class="p">;</span>
+<a id="l-352" name="l-352"></a>    <span class="kt">logic</span>            <span class="n">zero_acc</span><span class="p">;</span>
+<a id="l-353" name="l-353"></a>    <span class="kt">logic</span>            <span class="n">shift_acc</span><span class="p">;</span>
+<a id="l-354" name="l-354"></a>  <span class="p">}</span> <span class="n">mac_bignum_operation_t</span><span class="p">;</span>
+<a id="l-355" name="l-355"></a>
+<a id="l-356" name="l-356"></a>  <span class="c1">// States for controller state machine</span>
+<a id="l-357" name="l-357"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-358" name="l-358"></a>    <span class="n">OtbnStateHalt</span><span class="p">,</span>
+<a id="l-359" name="l-359"></a>    <span class="n">OtbnStateUrndRefresh</span><span class="p">,</span>
+<a id="l-360" name="l-360"></a>    <span class="n">OtbnStateRun</span><span class="p">,</span>
+<a id="l-361" name="l-361"></a>    <span class="n">OtbnStateStall</span>
+<a id="l-362" name="l-362"></a>  <span class="p">}</span> <span class="n">otbn_state_e</span><span class="p">;</span>
+<a id="l-363" name="l-363"></a>
+<a id="l-364" name="l-364"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-365" name="l-365"></a>    <span class="n">OtbnStartStopStateHalt</span><span class="p">,</span>
+<a id="l-366" name="l-366"></a>    <span class="n">OtbnStartStopStateUrndRefresh</span><span class="p">,</span>
+<a id="l-367" name="l-367"></a>    <span class="n">OtbnStartStopStateRunning</span>
+<a id="l-368" name="l-368"></a>  <span class="p">}</span> <span class="n">otbn_start_stop_state_e</span><span class="p">;</span>
+<a id="l-369" name="l-369"></a>
+<a id="l-370" name="l-370"></a>  <span class="c1">// URNG PRNG default LFSR seed and permutation</span>
+<a id="l-371" name="l-371"></a>  <span class="c1">// A single default seed is split into 64 bit chunks, a seperate LFSR is used for each chunk. All</span>
+<a id="l-372" name="l-372"></a>  <span class="c1">// LFSR chunks use the same permutation.</span>
+<a id="l-373" name="l-373"></a>  <span class="c1">// These LFSR parameters have been generated with</span>
+<a id="l-374" name="l-374"></a>  <span class="c1">// $ ./util/design/gen-lfsr-seed.py --width 256 --seed 2840984437 --prefix &quot;Urnd&quot;</span>
+<a id="l-375" name="l-375"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">UrndLfsrWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+<a id="l-376" name="l-376"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">UrndLfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">urnd_lfsr_seed_t</span><span class="p">;</span>
+<a id="l-377" name="l-377"></a>  <span class="k">parameter</span> <span class="n">urnd_lfsr_seed_t</span> <span class="n">RndCnstUrndLfsrSeedDefault</span> <span class="o">=</span>
+<a id="l-378" name="l-378"></a>      <span class="mh">256&#39;h84ddfadaf7e1134d70aa1c59de6197ff25a4fe335d095f1e2cba89acbe4a07e9</span><span class="p">;</span>
+<a id="l-379" name="l-379"></a>
+<a id="l-380" name="l-380"></a>  <span class="c1">// These LFSR parameters have been generated with</span>
+<a id="l-381" name="l-381"></a>  <span class="c1">// $ ./util/design/gen-lfsr-seed.py --width 64 --seed 2840984437 --prefix &quot;UrndChunk&quot;</span>
+<a id="l-382" name="l-382"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">UrndChunkLfsrWidth</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+<a id="l-383" name="l-383"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">UrndChunkLfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][$</span><span class="n">clog2</span><span class="p">(</span><span class="n">UrndChunkLfsrWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">urnd_chunk_lfsr_perm_t</span><span class="p">;</span>
+<a id="l-384" name="l-384"></a>  <span class="k">parameter</span> <span class="n">urnd_chunk_lfsr_perm_t</span> <span class="n">RndCnstUrndChunkLfsrPermDefault</span> <span class="o">=</span> <span class="p">{</span>
+<a id="l-385" name="l-385"></a>    <span class="mh">128&#39;h911992e063cafd4f3b13ee5682b969be</span><span class="p">,</span>
+<a id="l-386" name="l-386"></a>    <span class="mh">256&#39;h86c701ecc39d9d483bdcacb5a15340b0988e2336e955ddd0dc01ab17e173726e</span>
+<a id="l-387" name="l-387"></a>  <span class="p">};</span>
+<a id="l-388" name="l-388"></a>
+<a id="l-389" name="l-389"></a><span class="k">endpackage</span>
 </pre></div>
 </td></tr></table>
   </body>

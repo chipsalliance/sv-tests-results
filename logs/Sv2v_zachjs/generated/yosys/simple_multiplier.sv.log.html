@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/yosys/simple_multiplier.sv.html" target="file-frame">tests/generated/yosys/simple_multiplier.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/multiplier.v.html" target="file-frame">third_party/tools/yosys/tests/simple/multiplier.v</a>
 defines: 
-completed: 2021-04-29 12:57:48
-time_elapsed: 0.037s
-ram usage: 32880 KB
+completed: 2021-05-04 10:37:04
+time_elapsed: 0.042s
+ram usage: 32996 KB
 </pre>
 <pre class="log">
 
@@ -47,7 +47,7 @@ module Multiplier_flat (
 			assign gA = {A &amp; {M {B[i]}}, {i {1&#39;b0}}};
 			assign gB = PP[((i - 1) * (i + (2 * M))) / 2+:M + i];
 			assign PP[(i * ((i + 1) + (2 * M))) / 2+:(M + i) + 1] = {Cout, gS};
-			RippleCarryAdder #(M + i) adder(
+			RippleCarryAdder #(.N(M + i)) adder(
 				.A(gA),
 				.B(gB),
 				.S(gS),
@@ -80,7 +80,7 @@ module Multiplier_2D (
 			assign gA = {A &amp; {M {B[i]}}, {i {1&#39;b0}}};
 			assign gB = PP[i - 1][(M + i) - 1:0];
 			assign PP[i] = {{N - i {1&#39;b0}}, Cout, gS};
-			RippleCarryAdder #(M + i) adder(
+			RippleCarryAdder #(.N(M + i)) adder(
 				.A(gA),
 				.B(gB),
 				.S(gS),
@@ -110,11 +110,11 @@ module RippleCarryAdder (
 	generate
 		for (i = 0; i &lt; N; i = i + 1) begin : addbit
 			FullAdder unit(
-				A[i],
-				B[i],
-				CC[i],
-				S[i],
-				CC[i + 1]
+				.A(A[i]),
+				.B(B[i]),
+				.Cin(CC[i]),
+				.S(S[i]),
+				.Cout(CC[i + 1])
 			);
 		end
 	endgenerate

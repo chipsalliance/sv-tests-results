@@ -117,118 +117,118 @@
 <span class="normal"><a href="#l-109">109</a></span>
 <span class="normal"><a href="#l-110">110</a></span>
 <span class="normal"><a href="#l-111">111</a></span>
-<span class="normal"><a href="#l-112">112</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
-<a name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
-<a name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
-<a name="l-4"></a>
-<a name="l-5"></a><span class="c1">// Include FCOV RTL by default. Disable it for synthesis and where explicitly requested (by defining</span>
-<a name="l-6"></a><span class="c1">// DV_FCOV_DISABLE).</span>
-<a name="l-7"></a><span class="no">`ifdef</span> <span class="n">SYNTHESIS</span>
-<a name="l-8"></a><span class="cp">  `define DV_FCOV_DISABLE</span>
-<a name="l-9"></a><span class="no">`elsif</span> <span class="n">YOSYS</span>
-<a name="l-10"></a><span class="cp">  `define DV_FCOV_DISABLE</span>
-<a name="l-11"></a><span class="no">`endif</span>
-<a name="l-12"></a>
-<a name="l-13"></a><span class="c1">// Disable instantiations of FCOV coverpoints or covergroups.</span>
-<a name="l-14"></a><span class="no">`ifdef</span> <span class="n">VERILATOR</span>
-<a name="l-15"></a><span class="cp">  `define DV_FCOV_DISABLE_CP</span>
-<a name="l-16"></a><span class="no">`elsif</span> <span class="n">DV_FCOV_DISABLE</span>
-<a name="l-17"></a><span class="cp">  `define DV_FCOV_DISABLE_CP</span>
-<a name="l-18"></a><span class="no">`endif</span>
-<a name="l-19"></a>
-<a name="l-20"></a><span class="c1">// Instantiates a covergroup in an interface or module.</span>
-<a name="l-21"></a><span class="c1">//</span>
-<a name="l-22"></a><span class="c1">// This macro assumes that a covergroup of the same name as the NAME_ arg is defined in the</span>
-<a name="l-23"></a><span class="c1">// interface or module. It just adds some extra signals and logic to control the creation of the</span>
-<a name="l-24"></a><span class="c1">// covergroup instance with ~bit en_&lt;cg_name&gt;~. This defaults to 0. It is ORed with the external</span>
-<a name="l-25"></a><span class="c1">// COND_ signal. The testbench can modify it at t = 0 based on the test being run.</span>
-<a name="l-26"></a><span class="c1">// NOTE: This is not meant to be invoked inside a class.</span>
-<a name="l-27"></a><span class="c1">//</span>
-<a name="l-28"></a><span class="c1">// NAME_ : Name of the covergroup.</span>
-<a name="l-29"></a><span class="c1">// COND_ : External condition / expr that controls the creation of the covergroup.</span>
-<a name="l-30"></a><span class="c1">// ARGS_ : Arguments to covergroup instance, if any. Args MUST BE wrapped in (..).</span>
-<a name="l-31"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_INSTANTIATE_CG</span>
-<a name="l-32"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE_CP</span>
-<a name="l-33"></a><span class="cp">  `define DV_FCOV_INSTANTIATE_CG(NAME_, COND_ = 1&#39;b1, ARGS_ = ())</span>
-<a name="l-34"></a><span class="no">`else</span>
-<a name="l-35"></a><span class="cp">  `define DV_FCOV_INSTANTIATE_CG(NAME_, COND_ = 1&#39;b1, ARGS_ = ()) \</span>
-<a name="l-36"></a><span class="cp">    bit en_``NAME_ = 1&#39;b0; \</span>
-<a name="l-37"></a><span class="cp">    NAME_ NAME_``_inst; \</span>
-<a name="l-38"></a><span class="cp">    initial begin \</span>
-<a name="l-39"></a><span class="cp">      </span><span class="cm">/* The #1 delay below allows any part of the tb to control the conditions first at t = 0. */</span><span class="cp"> \</span>
-<a name="l-40"></a><span class="cp">      #1; \</span>
-<a name="l-41"></a><span class="cp">      if ((en_``NAME_) || (COND_)) begin \</span>
-<a name="l-42"></a><span class="cp">        $display(&quot;%0t: (%0s:%0d) [%m] %0s&quot;, $time, `__FILE__, `__LINE__, \</span>
-<a name="l-43"></a><span class="cp">                 {&quot;Creating covergroup &quot;, `&quot;NAME_`&quot;}); \</span>
-<a name="l-44"></a><span class="cp">        NAME_``_inst = new``ARGS_; \</span>
-<a name="l-45"></a><span class="cp">      end \</span>
-<a name="l-46"></a><span class="cp">    end</span>
-<a name="l-47"></a><span class="no">`endif</span>
-<a name="l-48"></a><span class="no">`endif</span>
-<a name="l-49"></a>
-<a name="l-50"></a><span class="c1">// Creates a coverpoint for an expression where only the expression true case is of interest for</span>
-<a name="l-51"></a><span class="c1">// coverage (e.g. where the expression indicates an event has occured).</span>
-<a name="l-52"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_EXPR_SEEN</span>
-<a name="l-53"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE_CP</span>
-<a name="l-54"></a><span class="cp">  `define DV_FCOV_EXPR_SEEN(NAME_, EXPR_)</span>
-<a name="l-55"></a><span class="no">`else</span>
-<a name="l-56"></a><span class="cp">  `define DV_FCOV_EXPR_SEEN(NAME_, EXPR_) cp_``NAME_: coverpoint EXPR_ { bins seen = {1}; }</span>
-<a name="l-57"></a><span class="no">`endif</span>
-<a name="l-58"></a><span class="no">`endif</span>
-<a name="l-59"></a>
-<a name="l-60"></a><span class="c1">// Creates a SVA cover that can be used in a covergroup.</span>
-<a name="l-61"></a><span class="c1">//</span>
-<a name="l-62"></a><span class="c1">// This macro creates an unnamed SVA cover from the property (or an expression) `PROP_` and an event</span>
-<a name="l-63"></a><span class="c1">// with the name `EV_NAME_`. When the SVA cover is hit, the event is triggered. A coverpoint can</span>
-<a name="l-64"></a><span class="c1">// cover the `triggered` property of the event.</span>
-<a name="l-65"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_SVA</span>
-<a name="l-66"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE</span>
-<a name="l-67"></a><span class="cp">  `define DV_FCOV_SVA(EV_NAME_, PROP_, CLK_ = clk_i, RST_ = rst_ni)</span>
-<a name="l-68"></a><span class="no">`else</span>
-<a name="l-69"></a><span class="cp">  `define DV_FCOV_SVA(EV_NAME_, PROP_, CLK_ = clk_i, RST_ = rst_ni) \</span>
-<a name="l-70"></a><span class="cp">    event EV_NAME_; \</span>
-<a name="l-71"></a><span class="cp">    cover property (@(posedge CLK_) disable iff (RST_ == 0) (PROP_)) begin \</span>
-<a name="l-72"></a><span class="cp">      -&gt; EV_NAME_; \</span>
-<a name="l-73"></a><span class="cp">    end</span>
-<a name="l-74"></a><span class="no">`endif</span>
-<a name="l-75"></a><span class="no">`endif</span>
-<a name="l-76"></a>
-<a name="l-77"></a><span class="c1">// Coverage support is not always available but it&#39;s useful to include extra fcov signals for</span>
-<a name="l-78"></a><span class="c1">// linting purposes. They need to be marked as unused to avoid warnings.</span>
-<a name="l-79"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_MARK_UNUSED</span>
-<a name="l-80"></a><span class="cp">  `define DV_FCOV_MARK_UNUSED(TYPE_, NAME_) \</span>
-<a name="l-81"></a><span class="cp">    TYPE_ unused_fcov_``NAME_; \</span>
-<a name="l-82"></a><span class="cp">    assign unused_fcov_``NAME_ = fcov_``NAME_;</span>
-<a name="l-83"></a><span class="no">`endif</span>
-<a name="l-84"></a>
-<a name="l-85"></a><span class="c1">// Define a signal and expression in the design for capture in functional coverage</span>
-<a name="l-86"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_SIGNAL</span>
-<a name="l-87"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE</span>
-<a name="l-88"></a><span class="cp">  `define DV_FCOV_SIGNAL(TYPE_, NAME_, EXPR_)</span>
-<a name="l-89"></a><span class="no">`else</span>
-<a name="l-90"></a><span class="cp">  `define DV_FCOV_SIGNAL(TYPE_, NAME_, EXPR_) \</span>
-<a name="l-91"></a><span class="cp">    TYPE_ fcov_``NAME_; \</span>
-<a name="l-92"></a><span class="cp">    assign fcov_``NAME_ = EXPR_; \</span>
-<a name="l-93"></a><span class="cp">    `DV_FCOV_MARK_UNUSED(TYPE_, NAME_)</span>
-<a name="l-94"></a><span class="no">`endif</span>
-<a name="l-95"></a><span class="no">`endif</span>
-<a name="l-96"></a>
-<a name="l-97"></a><span class="c1">// Define a signal and expression in the design for capture in functional coverage depending on</span>
-<a name="l-98"></a><span class="c1">// design configuration. The input GEN_COND_ must be a constant or parameter.</span>
-<a name="l-99"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_SIGNAL_GEN_IF</span>
-<a name="l-100"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE</span>
-<a name="l-101"></a><span class="cp">  `define DV_FCOV_SIGNAL_GEN_IF(TYPE_, NAME_, EXPR_, GEN_COND_, DEFAULT_ = &#39;0)</span>
-<a name="l-102"></a><span class="no">`else</span>
-<a name="l-103"></a><span class="cp">  `define DV_FCOV_SIGNAL_GEN_IF(TYPE_, NAME_, EXPR_, GEN_COND_, DEFAULT_ = &#39;0) \</span>
-<a name="l-104"></a><span class="cp">    TYPE_ fcov_``NAME_; \</span>
-<a name="l-105"></a><span class="cp">    if (GEN_COND_) begin : g_fcov_``NAME_ \</span>
-<a name="l-106"></a><span class="cp">      assign fcov_``NAME_ = EXPR_; \</span>
-<a name="l-107"></a><span class="cp">    end else begin : g_no_fcov_``NAME_ \</span>
-<a name="l-108"></a><span class="cp">      assign fcov_``NAME_ = DEFAULT_; \</span>
-<a name="l-109"></a><span class="cp">    end \</span>
-<a name="l-110"></a><span class="cp">    `DV_FCOV_MARK_UNUSED(TYPE_, NAME_)</span>
-<a name="l-111"></a><span class="no">`endif</span>
-<a name="l-112"></a><span class="no">`endif</span>
+<span class="normal"><a href="#l-112">112</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
+<a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
+<a id="l-4" name="l-4"></a>
+<a id="l-5" name="l-5"></a><span class="c1">// Include FCOV RTL by default. Disable it for synthesis and where explicitly requested (by defining</span>
+<a id="l-6" name="l-6"></a><span class="c1">// DV_FCOV_DISABLE).</span>
+<a id="l-7" name="l-7"></a><span class="no">`ifdef</span> <span class="n">SYNTHESIS</span>
+<a id="l-8" name="l-8"></a><span class="cp">  `define DV_FCOV_DISABLE</span>
+<a id="l-9" name="l-9"></a><span class="no">`elsif</span> <span class="n">YOSYS</span>
+<a id="l-10" name="l-10"></a><span class="cp">  `define DV_FCOV_DISABLE</span>
+<a id="l-11" name="l-11"></a><span class="no">`endif</span>
+<a id="l-12" name="l-12"></a>
+<a id="l-13" name="l-13"></a><span class="c1">// Disable instantiations of FCOV coverpoints or covergroups.</span>
+<a id="l-14" name="l-14"></a><span class="no">`ifdef</span> <span class="n">VERILATOR</span>
+<a id="l-15" name="l-15"></a><span class="cp">  `define DV_FCOV_DISABLE_CP</span>
+<a id="l-16" name="l-16"></a><span class="no">`elsif</span> <span class="n">DV_FCOV_DISABLE</span>
+<a id="l-17" name="l-17"></a><span class="cp">  `define DV_FCOV_DISABLE_CP</span>
+<a id="l-18" name="l-18"></a><span class="no">`endif</span>
+<a id="l-19" name="l-19"></a>
+<a id="l-20" name="l-20"></a><span class="c1">// Instantiates a covergroup in an interface or module.</span>
+<a id="l-21" name="l-21"></a><span class="c1">//</span>
+<a id="l-22" name="l-22"></a><span class="c1">// This macro assumes that a covergroup of the same name as the NAME_ arg is defined in the</span>
+<a id="l-23" name="l-23"></a><span class="c1">// interface or module. It just adds some extra signals and logic to control the creation of the</span>
+<a id="l-24" name="l-24"></a><span class="c1">// covergroup instance with ~bit en_&lt;cg_name&gt;~. This defaults to 0. It is ORed with the external</span>
+<a id="l-25" name="l-25"></a><span class="c1">// COND_ signal. The testbench can modify it at t = 0 based on the test being run.</span>
+<a id="l-26" name="l-26"></a><span class="c1">// NOTE: This is not meant to be invoked inside a class.</span>
+<a id="l-27" name="l-27"></a><span class="c1">//</span>
+<a id="l-28" name="l-28"></a><span class="c1">// NAME_ : Name of the covergroup.</span>
+<a id="l-29" name="l-29"></a><span class="c1">// COND_ : External condition / expr that controls the creation of the covergroup.</span>
+<a id="l-30" name="l-30"></a><span class="c1">// ARGS_ : Arguments to covergroup instance, if any. Args MUST BE wrapped in (..).</span>
+<a id="l-31" name="l-31"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_INSTANTIATE_CG</span>
+<a id="l-32" name="l-32"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE_CP</span>
+<a id="l-33" name="l-33"></a><span class="cp">  `define DV_FCOV_INSTANTIATE_CG(NAME_, COND_ = 1&#39;b1, ARGS_ = ())</span>
+<a id="l-34" name="l-34"></a><span class="no">`else</span>
+<a id="l-35" name="l-35"></a><span class="cp">  `define DV_FCOV_INSTANTIATE_CG(NAME_, COND_ = 1&#39;b1, ARGS_ = ()) \</span>
+<a id="l-36" name="l-36"></a><span class="cp">    bit en_``NAME_ = 1&#39;b0; \</span>
+<a id="l-37" name="l-37"></a><span class="cp">    NAME_ NAME_``_inst; \</span>
+<a id="l-38" name="l-38"></a><span class="cp">    initial begin \</span>
+<a id="l-39" name="l-39"></a><span class="cp">      </span><span class="cm">/* The #1 delay below allows any part of the tb to control the conditions first at t = 0. */</span><span class="cp"> \</span>
+<a id="l-40" name="l-40"></a><span class="cp">      #1; \</span>
+<a id="l-41" name="l-41"></a><span class="cp">      if ((en_``NAME_) || (COND_)) begin \</span>
+<a id="l-42" name="l-42"></a><span class="cp">        $display(&quot;%0t: (%0s:%0d) [%m] %0s&quot;, $time, `__FILE__, `__LINE__, \</span>
+<a id="l-43" name="l-43"></a><span class="cp">                 {&quot;Creating covergroup &quot;, `&quot;NAME_`&quot;}); \</span>
+<a id="l-44" name="l-44"></a><span class="cp">        NAME_``_inst = new``ARGS_; \</span>
+<a id="l-45" name="l-45"></a><span class="cp">      end \</span>
+<a id="l-46" name="l-46"></a><span class="cp">    end</span>
+<a id="l-47" name="l-47"></a><span class="no">`endif</span>
+<a id="l-48" name="l-48"></a><span class="no">`endif</span>
+<a id="l-49" name="l-49"></a>
+<a id="l-50" name="l-50"></a><span class="c1">// Creates a coverpoint for an expression where only the expression true case is of interest for</span>
+<a id="l-51" name="l-51"></a><span class="c1">// coverage (e.g. where the expression indicates an event has occured).</span>
+<a id="l-52" name="l-52"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_EXPR_SEEN</span>
+<a id="l-53" name="l-53"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE_CP</span>
+<a id="l-54" name="l-54"></a><span class="cp">  `define DV_FCOV_EXPR_SEEN(NAME_, EXPR_)</span>
+<a id="l-55" name="l-55"></a><span class="no">`else</span>
+<a id="l-56" name="l-56"></a><span class="cp">  `define DV_FCOV_EXPR_SEEN(NAME_, EXPR_) cp_``NAME_: coverpoint EXPR_ { bins seen = {1}; }</span>
+<a id="l-57" name="l-57"></a><span class="no">`endif</span>
+<a id="l-58" name="l-58"></a><span class="no">`endif</span>
+<a id="l-59" name="l-59"></a>
+<a id="l-60" name="l-60"></a><span class="c1">// Creates a SVA cover that can be used in a covergroup.</span>
+<a id="l-61" name="l-61"></a><span class="c1">//</span>
+<a id="l-62" name="l-62"></a><span class="c1">// This macro creates an unnamed SVA cover from the property (or an expression) `PROP_` and an event</span>
+<a id="l-63" name="l-63"></a><span class="c1">// with the name `EV_NAME_`. When the SVA cover is hit, the event is triggered. A coverpoint can</span>
+<a id="l-64" name="l-64"></a><span class="c1">// cover the `triggered` property of the event.</span>
+<a id="l-65" name="l-65"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_SVA</span>
+<a id="l-66" name="l-66"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE</span>
+<a id="l-67" name="l-67"></a><span class="cp">  `define DV_FCOV_SVA(EV_NAME_, PROP_, CLK_ = clk_i, RST_ = rst_ni)</span>
+<a id="l-68" name="l-68"></a><span class="no">`else</span>
+<a id="l-69" name="l-69"></a><span class="cp">  `define DV_FCOV_SVA(EV_NAME_, PROP_, CLK_ = clk_i, RST_ = rst_ni) \</span>
+<a id="l-70" name="l-70"></a><span class="cp">    event EV_NAME_; \</span>
+<a id="l-71" name="l-71"></a><span class="cp">    cover property (@(posedge CLK_) disable iff (RST_ == 0) (PROP_)) begin \</span>
+<a id="l-72" name="l-72"></a><span class="cp">      -&gt; EV_NAME_; \</span>
+<a id="l-73" name="l-73"></a><span class="cp">    end</span>
+<a id="l-74" name="l-74"></a><span class="no">`endif</span>
+<a id="l-75" name="l-75"></a><span class="no">`endif</span>
+<a id="l-76" name="l-76"></a>
+<a id="l-77" name="l-77"></a><span class="c1">// Coverage support is not always available but it&#39;s useful to include extra fcov signals for</span>
+<a id="l-78" name="l-78"></a><span class="c1">// linting purposes. They need to be marked as unused to avoid warnings.</span>
+<a id="l-79" name="l-79"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_MARK_UNUSED</span>
+<a id="l-80" name="l-80"></a><span class="cp">  `define DV_FCOV_MARK_UNUSED(TYPE_, NAME_) \</span>
+<a id="l-81" name="l-81"></a><span class="cp">    TYPE_ unused_fcov_``NAME_; \</span>
+<a id="l-82" name="l-82"></a><span class="cp">    assign unused_fcov_``NAME_ = fcov_``NAME_;</span>
+<a id="l-83" name="l-83"></a><span class="no">`endif</span>
+<a id="l-84" name="l-84"></a>
+<a id="l-85" name="l-85"></a><span class="c1">// Define a signal and expression in the design for capture in functional coverage</span>
+<a id="l-86" name="l-86"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_SIGNAL</span>
+<a id="l-87" name="l-87"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE</span>
+<a id="l-88" name="l-88"></a><span class="cp">  `define DV_FCOV_SIGNAL(TYPE_, NAME_, EXPR_)</span>
+<a id="l-89" name="l-89"></a><span class="no">`else</span>
+<a id="l-90" name="l-90"></a><span class="cp">  `define DV_FCOV_SIGNAL(TYPE_, NAME_, EXPR_) \</span>
+<a id="l-91" name="l-91"></a><span class="cp">    TYPE_ fcov_``NAME_; \</span>
+<a id="l-92" name="l-92"></a><span class="cp">    assign fcov_``NAME_ = EXPR_; \</span>
+<a id="l-93" name="l-93"></a><span class="cp">    `DV_FCOV_MARK_UNUSED(TYPE_, NAME_)</span>
+<a id="l-94" name="l-94"></a><span class="no">`endif</span>
+<a id="l-95" name="l-95"></a><span class="no">`endif</span>
+<a id="l-96" name="l-96"></a>
+<a id="l-97" name="l-97"></a><span class="c1">// Define a signal and expression in the design for capture in functional coverage depending on</span>
+<a id="l-98" name="l-98"></a><span class="c1">// design configuration. The input GEN_COND_ must be a constant or parameter.</span>
+<a id="l-99" name="l-99"></a><span class="no">`ifndef</span> <span class="n">DV_FCOV_SIGNAL_GEN_IF</span>
+<a id="l-100" name="l-100"></a><span class="no">`ifdef</span> <span class="n">DV_FCOV_DISABLE</span>
+<a id="l-101" name="l-101"></a><span class="cp">  `define DV_FCOV_SIGNAL_GEN_IF(TYPE_, NAME_, EXPR_, GEN_COND_, DEFAULT_ = &#39;0)</span>
+<a id="l-102" name="l-102"></a><span class="no">`else</span>
+<a id="l-103" name="l-103"></a><span class="cp">  `define DV_FCOV_SIGNAL_GEN_IF(TYPE_, NAME_, EXPR_, GEN_COND_, DEFAULT_ = &#39;0) \</span>
+<a id="l-104" name="l-104"></a><span class="cp">    TYPE_ fcov_``NAME_; \</span>
+<a id="l-105" name="l-105"></a><span class="cp">    if (GEN_COND_) begin : g_fcov_``NAME_ \</span>
+<a id="l-106" name="l-106"></a><span class="cp">      assign fcov_``NAME_ = EXPR_; \</span>
+<a id="l-107" name="l-107"></a><span class="cp">    end else begin : g_no_fcov_``NAME_ \</span>
+<a id="l-108" name="l-108"></a><span class="cp">      assign fcov_``NAME_ = DEFAULT_; \</span>
+<a id="l-109" name="l-109"></a><span class="cp">    end \</span>
+<a id="l-110" name="l-110"></a><span class="cp">    `DV_FCOV_MARK_UNUSED(TYPE_, NAME_)</span>
+<a id="l-111" name="l-111"></a><span class="no">`endif</span>
+<a id="l-112" name="l-112"></a><span class="no">`endif</span>
 </pre></div>
 </td></tr></table>
   </body>
