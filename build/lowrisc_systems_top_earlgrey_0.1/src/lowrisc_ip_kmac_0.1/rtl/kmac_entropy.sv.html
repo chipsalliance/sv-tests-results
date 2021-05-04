@@ -598,7 +598,16 @@
 <span class="normal"><a href="#l-590">590</a></span>
 <span class="normal"><a href="#l-591">591</a></span>
 <span class="normal"><a href="#l-592">592</a></span>
-<span class="normal"><a href="#l-593">593</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-593">593</a></span>
+<span class="normal"><a href="#l-594">594</a></span>
+<span class="normal"><a href="#l-595">595</a></span>
+<span class="normal"><a href="#l-596">596</a></span>
+<span class="normal"><a href="#l-597">597</a></span>
+<span class="normal"><a href="#l-598">598</a></span>
+<span class="normal"><a href="#l-599">599</a></span>
+<span class="normal"><a href="#l-600">600</a></span>
+<span class="normal"><a href="#l-601">601</a></span>
+<span class="normal"><a href="#l-602">602</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -1101,96 +1110,105 @@
 <a id="l-501" name="l-501"></a>
 <a id="l-502" name="l-502"></a>          <span class="n">storage_idx_clear</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
 <a id="l-503" name="l-503"></a>          <span class="c1">// TODO: check fips?</span>
-<a id="l-504" name="l-504"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-505" name="l-505"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandEdn</span><span class="p">;</span>
-<a id="l-506" name="l-506"></a>        <span class="k">end</span>
-<a id="l-507" name="l-507"></a>      <span class="k">end</span>
-<a id="l-508" name="l-508"></a>
-<a id="l-509" name="l-509"></a>      <span class="nl">StSwSeedWait:</span> <span class="k">begin</span>
-<a id="l-510" name="l-510"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">seed_update_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-511" name="l-511"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandExpand</span><span class="p">;</span>
-<a id="l-512" name="l-512"></a>
-<a id="l-513" name="l-513"></a>          <span class="n">lfsr_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-514" name="l-514"></a>          <span class="n">lfsr_seed_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-515" name="l-515"></a>
-<a id="l-516" name="l-516"></a>          <span class="n">rand_valid_clear</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-504" name="l-504"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">rand_consumed_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-505" name="l-505"></a>          <span class="c1">// Somehow, while waiting the EDN entropy, the KMAC or SHA3 logic</span>
+<a id="l-506" name="l-506"></a>          <span class="c1">// consumed the remained entropy. This can happen when the previous</span>
+<a id="l-507" name="l-507"></a>          <span class="c1">// SHA3/ KMAC op completed and this Entropy FSM has moved to this</span>
+<a id="l-508" name="l-508"></a>          <span class="c1">// state to refresh the entropy and the SW initiates another hash</span>
+<a id="l-509" name="l-509"></a>          <span class="c1">// operation while waiting for the EDN response.</span>
+<a id="l-510" name="l-510"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandEdn</span><span class="p">;</span>
+<a id="l-511" name="l-511"></a>
+<a id="l-512" name="l-512"></a>          <span class="n">rand_valid_clear</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-513" name="l-513"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-514" name="l-514"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandEdn</span><span class="p">;</span>
+<a id="l-515" name="l-515"></a>        <span class="k">end</span>
+<a id="l-516" name="l-516"></a>      <span class="k">end</span>
 <a id="l-517" name="l-517"></a>
-<a id="l-518" name="l-518"></a>          <span class="n">storage_idx_clear</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-519" name="l-519"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-520" name="l-520"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StSwSeedWait</span><span class="p">;</span>
-<a id="l-521" name="l-521"></a>        <span class="k">end</span>
-<a id="l-522" name="l-522"></a>      <span class="k">end</span>
-<a id="l-523" name="l-523"></a>
-<a id="l-524" name="l-524"></a>      <span class="nl">StRandExpand:</span> <span class="k">begin</span>
-<a id="l-525" name="l-525"></a>        <span class="n">lfsr_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-526" name="l-526"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">storage_filled</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-527" name="l-527"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandReady</span><span class="p">;</span>
-<a id="l-528" name="l-528"></a>
-<a id="l-529" name="l-529"></a>          <span class="n">storage_update</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-530" name="l-530"></a>
-<a id="l-531" name="l-531"></a>          <span class="n">rand_valid_set</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-518" name="l-518"></a>      <span class="nl">StSwSeedWait:</span> <span class="k">begin</span>
+<a id="l-519" name="l-519"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">seed_update_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-520" name="l-520"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandExpand</span><span class="p">;</span>
+<a id="l-521" name="l-521"></a>
+<a id="l-522" name="l-522"></a>          <span class="n">lfsr_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-523" name="l-523"></a>          <span class="n">lfsr_seed_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-524" name="l-524"></a>
+<a id="l-525" name="l-525"></a>          <span class="n">rand_valid_clear</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-526" name="l-526"></a>
+<a id="l-527" name="l-527"></a>          <span class="n">storage_idx_clear</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-528" name="l-528"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-529" name="l-529"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StSwSeedWait</span><span class="p">;</span>
+<a id="l-530" name="l-530"></a>        <span class="k">end</span>
+<a id="l-531" name="l-531"></a>      <span class="k">end</span>
 <a id="l-532" name="l-532"></a>
-<a id="l-533" name="l-533"></a>          <span class="c1">// Based on the timer value, either reset the timer or just move</span>
-<a id="l-534" name="l-534"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">mode_i</span> <span class="o">==</span> <span class="n">EntropyModeEdn</span> <span class="o">&amp;&amp;</span> <span class="o">|</span><span class="n">entropy_timer_limit_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-535" name="l-535"></a>            <span class="n">timer_sel</span> <span class="o">=</span> <span class="n">EntropyTimer</span><span class="p">;</span>
-<a id="l-536" name="l-536"></a>            <span class="n">timer_update</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-537" name="l-537"></a>          <span class="k">end</span>
-<a id="l-538" name="l-538"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-539" name="l-539"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandExpand</span><span class="p">;</span>
-<a id="l-540" name="l-540"></a>
-<a id="l-541" name="l-541"></a>          <span class="n">storage_update</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-542" name="l-542"></a>        <span class="k">end</span>
-<a id="l-543" name="l-543"></a>      <span class="k">end</span>
-<a id="l-544" name="l-544"></a>
-<a id="l-545" name="l-545"></a>      <span class="nl">StRandErrWaitExpired:</span> <span class="k">begin</span>
-<a id="l-546" name="l-546"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandErr</span><span class="p">;</span>
-<a id="l-547" name="l-547"></a>
-<a id="l-548" name="l-548"></a>        <span class="n">err_o</span> <span class="o">=</span> <span class="p">&#39;{</span> <span class="nl">valid:</span> <span class="mb">1&#39;b 1</span><span class="p">,</span>
-<a id="l-549" name="l-549"></a>                   <span class="nl">code:</span> <span class="n">ErrWaitTimerExpired</span><span class="p">,</span>
-<a id="l-550" name="l-550"></a>                   <span class="nl">info:</span> <span class="mi">24</span><span class="p">&#39;(</span><span class="n">timer_value</span><span class="p">)</span>
-<a id="l-551" name="l-551"></a>                 <span class="p">};</span>
+<a id="l-533" name="l-533"></a>      <span class="nl">StRandExpand:</span> <span class="k">begin</span>
+<a id="l-534" name="l-534"></a>        <span class="n">lfsr_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-535" name="l-535"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">storage_filled</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-536" name="l-536"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandReady</span><span class="p">;</span>
+<a id="l-537" name="l-537"></a>
+<a id="l-538" name="l-538"></a>          <span class="n">storage_update</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-539" name="l-539"></a>
+<a id="l-540" name="l-540"></a>          <span class="n">rand_valid_set</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-541" name="l-541"></a>
+<a id="l-542" name="l-542"></a>          <span class="c1">// Based on the timer value, either reset the timer or just move</span>
+<a id="l-543" name="l-543"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">mode_i</span> <span class="o">==</span> <span class="n">EntropyModeEdn</span> <span class="o">&amp;&amp;</span> <span class="o">|</span><span class="n">entropy_timer_limit_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-544" name="l-544"></a>            <span class="n">timer_sel</span> <span class="o">=</span> <span class="n">EntropyTimer</span><span class="p">;</span>
+<a id="l-545" name="l-545"></a>            <span class="n">timer_update</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-546" name="l-546"></a>          <span class="k">end</span>
+<a id="l-547" name="l-547"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-548" name="l-548"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandExpand</span><span class="p">;</span>
+<a id="l-549" name="l-549"></a>
+<a id="l-550" name="l-550"></a>          <span class="n">storage_update</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-551" name="l-551"></a>        <span class="k">end</span>
 <a id="l-552" name="l-552"></a>      <span class="k">end</span>
 <a id="l-553" name="l-553"></a>
-<a id="l-554" name="l-554"></a>      <span class="nl">StRandErrIncorrectMode:</span> <span class="k">begin</span>
+<a id="l-554" name="l-554"></a>      <span class="nl">StRandErrWaitExpired:</span> <span class="k">begin</span>
 <a id="l-555" name="l-555"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandErr</span><span class="p">;</span>
 <a id="l-556" name="l-556"></a>
 <a id="l-557" name="l-557"></a>        <span class="n">err_o</span> <span class="o">=</span> <span class="p">&#39;{</span> <span class="nl">valid:</span> <span class="mb">1&#39;b 1</span><span class="p">,</span>
-<a id="l-558" name="l-558"></a>                   <span class="nl">code:</span> <span class="n">ErrIncorrectEntropyMode</span><span class="p">,</span>
-<a id="l-559" name="l-559"></a>                   <span class="nl">info:</span> <span class="mi">24</span><span class="p">&#39;(</span><span class="n">mode_i</span><span class="p">)</span>
+<a id="l-558" name="l-558"></a>                   <span class="nl">code:</span> <span class="n">ErrWaitTimerExpired</span><span class="p">,</span>
+<a id="l-559" name="l-559"></a>                   <span class="nl">info:</span> <span class="mi">24</span><span class="p">&#39;(</span><span class="n">timer_value</span><span class="p">)</span>
 <a id="l-560" name="l-560"></a>                 <span class="p">};</span>
 <a id="l-561" name="l-561"></a>      <span class="k">end</span>
 <a id="l-562" name="l-562"></a>
-<a id="l-563" name="l-563"></a>      <span class="nl">StRandErr:</span> <span class="k">begin</span>
-<a id="l-564" name="l-564"></a>        <span class="c1">// Keep entropy signal valid to complete current hashing even with error</span>
-<a id="l-565" name="l-565"></a>        <span class="n">rand_valid_set</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-566" name="l-566"></a>
-<a id="l-567" name="l-567"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">err_processed_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-568" name="l-568"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandReset</span><span class="p">;</span>
-<a id="l-569" name="l-569"></a>
-<a id="l-570" name="l-570"></a>          <span class="c1">// TODO: Reset as much as</span>
-<a id="l-571" name="l-571"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-572" name="l-572"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandErr</span><span class="p">;</span>
-<a id="l-573" name="l-573"></a>        <span class="k">end</span>
-<a id="l-574" name="l-574"></a>
-<a id="l-575" name="l-575"></a>      <span class="k">end</span>
-<a id="l-576" name="l-576"></a>
-<a id="l-577" name="l-577"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a id="l-578" name="l-578"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandReset</span><span class="p">;</span>
-<a id="l-579" name="l-579"></a>      <span class="k">end</span>
-<a id="l-580" name="l-580"></a>    <span class="k">endcase</span>
-<a id="l-581" name="l-581"></a>  <span class="k">end</span>
-<a id="l-582" name="l-582"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">RandStKnown_A</span><span class="p">,</span> <span class="n">st</span><span class="p">)</span>
+<a id="l-563" name="l-563"></a>      <span class="nl">StRandErrIncorrectMode:</span> <span class="k">begin</span>
+<a id="l-564" name="l-564"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandErr</span><span class="p">;</span>
+<a id="l-565" name="l-565"></a>
+<a id="l-566" name="l-566"></a>        <span class="n">err_o</span> <span class="o">=</span> <span class="p">&#39;{</span> <span class="nl">valid:</span> <span class="mb">1&#39;b 1</span><span class="p">,</span>
+<a id="l-567" name="l-567"></a>                   <span class="nl">code:</span> <span class="n">ErrIncorrectEntropyMode</span><span class="p">,</span>
+<a id="l-568" name="l-568"></a>                   <span class="nl">info:</span> <span class="mi">24</span><span class="p">&#39;(</span><span class="n">mode_i</span><span class="p">)</span>
+<a id="l-569" name="l-569"></a>                 <span class="p">};</span>
+<a id="l-570" name="l-570"></a>      <span class="k">end</span>
+<a id="l-571" name="l-571"></a>
+<a id="l-572" name="l-572"></a>      <span class="nl">StRandErr:</span> <span class="k">begin</span>
+<a id="l-573" name="l-573"></a>        <span class="c1">// Keep entropy signal valid to complete current hashing even with error</span>
+<a id="l-574" name="l-574"></a>        <span class="n">rand_valid_set</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-575" name="l-575"></a>
+<a id="l-576" name="l-576"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">err_processed_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-577" name="l-577"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandReset</span><span class="p">;</span>
+<a id="l-578" name="l-578"></a>
+<a id="l-579" name="l-579"></a>          <span class="c1">// TODO: Reset as much as</span>
+<a id="l-580" name="l-580"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-581" name="l-581"></a>          <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandErr</span><span class="p">;</span>
+<a id="l-582" name="l-582"></a>        <span class="k">end</span>
 <a id="l-583" name="l-583"></a>
-<a id="l-584" name="l-584"></a>  <span class="c1">////////////////</span>
-<a id="l-585" name="l-585"></a>  <span class="c1">// Assertions //</span>
-<a id="l-586" name="l-586"></a>  <span class="c1">////////////////</span>
-<a id="l-587" name="l-587"></a>
-<a id="l-588" name="l-588"></a>  <span class="c1">// entropy storage cannot be exceed the Entry number.</span>
-<a id="l-589" name="l-589"></a>  <span class="c1">// filled is asserted when the storage index meets the Entry number.</span>
-<a id="l-590" name="l-590"></a>  <span class="c1">// So, if filled, no update signal shall be asserted</span>
-<a id="l-591" name="l-591"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">StorageIdxInBound_A</span><span class="p">,</span> <span class="n">storage_filled</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="n">storage_update</span><span class="p">)</span>
+<a id="l-584" name="l-584"></a>      <span class="k">end</span>
+<a id="l-585" name="l-585"></a>
+<a id="l-586" name="l-586"></a>      <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a id="l-587" name="l-587"></a>        <span class="n">st_d</span> <span class="o">=</span> <span class="n">StRandReset</span><span class="p">;</span>
+<a id="l-588" name="l-588"></a>      <span class="k">end</span>
+<a id="l-589" name="l-589"></a>    <span class="k">endcase</span>
+<a id="l-590" name="l-590"></a>  <span class="k">end</span>
+<a id="l-591" name="l-591"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">RandStKnown_A</span><span class="p">,</span> <span class="n">st</span><span class="p">)</span>
 <a id="l-592" name="l-592"></a>
-<a id="l-593" name="l-593"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">kmac_entropy</span>
+<a id="l-593" name="l-593"></a>  <span class="c1">////////////////</span>
+<a id="l-594" name="l-594"></a>  <span class="c1">// Assertions //</span>
+<a id="l-595" name="l-595"></a>  <span class="c1">////////////////</span>
+<a id="l-596" name="l-596"></a>
+<a id="l-597" name="l-597"></a>  <span class="c1">// entropy storage cannot be exceed the Entry number.</span>
+<a id="l-598" name="l-598"></a>  <span class="c1">// filled is asserted when the storage index meets the Entry number.</span>
+<a id="l-599" name="l-599"></a>  <span class="c1">// So, if filled, no update signal shall be asserted</span>
+<a id="l-600" name="l-600"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">StorageIdxInBound_A</span><span class="p">,</span> <span class="n">storage_filled</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="n">storage_update</span><span class="p">)</span>
+<a id="l-601" name="l-601"></a>
+<a id="l-602" name="l-602"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">kmac_entropy</span>
 </pre></div>
 </td></tr></table>
   </body>

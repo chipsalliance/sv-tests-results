@@ -886,7 +886,26 @@
 <span class="normal"><a href="#l-878">878</a></span>
 <span class="normal"><a href="#l-879">879</a></span>
 <span class="normal"><a href="#l-880">880</a></span>
-<span class="normal"><a href="#l-881">881</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
+<span class="normal"><a href="#l-881">881</a></span>
+<span class="normal"><a href="#l-882">882</a></span>
+<span class="normal"><a href="#l-883">883</a></span>
+<span class="normal"><a href="#l-884">884</a></span>
+<span class="normal"><a href="#l-885">885</a></span>
+<span class="normal"><a href="#l-886">886</a></span>
+<span class="normal"><a href="#l-887">887</a></span>
+<span class="normal"><a href="#l-888">888</a></span>
+<span class="normal"><a href="#l-889">889</a></span>
+<span class="normal"><a href="#l-890">890</a></span>
+<span class="normal"><a href="#l-891">891</a></span>
+<span class="normal"><a href="#l-892">892</a></span>
+<span class="normal"><a href="#l-893">893</a></span>
+<span class="normal"><a href="#l-894">894</a></span>
+<span class="normal"><a href="#l-895">895</a></span>
+<span class="normal"><a href="#l-896">896</a></span>
+<span class="normal"><a href="#l-897">897</a></span>
+<span class="normal"><a href="#l-898">898</a></span>
+<span class="normal"><a href="#l-899">899</a></span>
+<span class="normal"><a href="#l-900">900</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
 <a id="l-2" name="l-2"></a><span class="c1">/// @file       &lt;scr1_pipe_hdu.sv&gt;</span>
 <a id="l-3" name="l-3"></a><span class="c1">/// @brief      HART Debug Unit (HDU)</span>
 <a id="l-4" name="l-4"></a><span class="c1">///</span>
@@ -1218,555 +1237,574 @@
 <a id="l-330" name="l-330"></a><span class="k">end</span>
 <a id="l-331" name="l-331"></a>
 <a id="l-332" name="l-332"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-333" name="l-333"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-334" name="l-334"></a>        <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-335" name="l-335"></a>        <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-336" name="l-336"></a>        <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-337" name="l-337"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-338" name="l-338"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dbg_state</span><span class="p">)</span>
-<a id="l-339" name="l-339"></a>            <span class="nl">SCR1_HDU_DBGSTATE_RESET:</span> <span class="k">begin</span>
-<a id="l-340" name="l-340"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-341" name="l-341"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-342" name="l-342"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="n">pipe2hdu_init_pc_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
-<a id="l-343" name="l-343"></a>            <span class="k">end</span>
-<a id="l-344" name="l-344"></a>
-<a id="l-345" name="l-345"></a>            <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">,</span>
-<a id="l-346" name="l-346"></a>            <span class="nl">SCR1_HDU_DBGSTATE_DRUN:</span> <span class="k">begin</span>
-<a id="l-347" name="l-347"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">?</span> <span class="n">hart_halt_pnd</span> <span class="o">:</span> <span class="n">dfsm_trans</span><span class="p">;</span>
-<a id="l-348" name="l-348"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">hart_halt_ack</span><span class="p">;</span>
-<a id="l-349" name="l-349"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="n">dfsm_update</span><span class="p">;</span>
-<a id="l-350" name="l-350"></a>            <span class="k">end</span>
-<a id="l-351" name="l-351"></a>
-<a id="l-352" name="l-352"></a>            <span class="nl">SCR1_HDU_DBGSTATE_DHALTED:</span> <span class="k">begin</span>
-<a id="l-353" name="l-353"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">?</span> <span class="o">~</span><span class="n">dfsm_trans</span> <span class="o">&amp;</span> <span class="n">dm_run_req</span>
-<a id="l-354" name="l-354"></a>                                                <span class="o">:</span> <span class="n">dfsm_trans</span><span class="p">;</span>
-<a id="l-355" name="l-355"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">dfsm_trans</span><span class="p">;</span>
-<a id="l-356" name="l-356"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="n">dfsm_update</span><span class="p">;</span>
-<a id="l-357" name="l-357"></a>            <span class="k">end</span>
-<a id="l-358" name="l-358"></a>        <span class="k">endcase</span>
-<a id="l-359" name="l-359"></a>    <span class="k">end</span>
-<a id="l-360" name="l-360"></a><span class="k">end</span>
-<a id="l-361" name="l-361"></a>
-<a id="l-362" name="l-362"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-363" name="l-363"></a><span class="c1">// HART Control logic</span>
-<a id="l-364" name="l-364"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-365" name="l-365"></a><span class="c1">//</span>
-<a id="l-366" name="l-366"></a> <span class="c1">// HART Control logic consists of the following functional units:</span>
-<a id="l-367" name="l-367"></a> <span class="c1">// - Control signals</span>
-<a id="l-368" name="l-368"></a> <span class="c1">// - HART Run Control register</span>
-<a id="l-369" name="l-369"></a> <span class="c1">// - HART Halt Request Time-Out counter</span>
-<a id="l-370" name="l-370"></a><span class="c1">//</span>
+<a id="l-333" name="l-333"></a>    <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-334" name="l-334"></a>    <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-335" name="l-335"></a>    <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-336" name="l-336"></a>
+<a id="l-337" name="l-337"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-338" name="l-338"></a>        <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-339" name="l-339"></a>        <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-340" name="l-340"></a>        <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-341" name="l-341"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-342" name="l-342"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dbg_state</span><span class="p">)</span>
+<a id="l-343" name="l-343"></a>            <span class="nl">SCR1_HDU_DBGSTATE_RESET:</span> <span class="k">begin</span>
+<a id="l-344" name="l-344"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-345" name="l-345"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-346" name="l-346"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="n">pipe2hdu_init_pc_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
+<a id="l-347" name="l-347"></a>            <span class="k">end</span>
+<a id="l-348" name="l-348"></a>
+<a id="l-349" name="l-349"></a>            <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">,</span>
+<a id="l-350" name="l-350"></a>            <span class="nl">SCR1_HDU_DBGSTATE_DRUN:</span> <span class="k">begin</span>
+<a id="l-351" name="l-351"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">?</span> <span class="n">hart_halt_pnd</span> <span class="o">:</span> <span class="n">dfsm_trans</span><span class="p">;</span>
+<a id="l-352" name="l-352"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">hart_halt_ack</span><span class="p">;</span>
+<a id="l-353" name="l-353"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="n">dfsm_update</span><span class="p">;</span>
+<a id="l-354" name="l-354"></a>            <span class="k">end</span>
+<a id="l-355" name="l-355"></a>
+<a id="l-356" name="l-356"></a>            <span class="nl">SCR1_HDU_DBGSTATE_DHALTED:</span> <span class="k">begin</span>
+<a id="l-357" name="l-357"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">?</span> <span class="o">~</span><span class="n">dfsm_trans</span> <span class="o">&amp;</span> <span class="n">dm_run_req</span>
+<a id="l-358" name="l-358"></a>                                                <span class="o">:</span> <span class="n">dfsm_trans</span><span class="p">;</span>
+<a id="l-359" name="l-359"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">dfsm_trans</span><span class="p">;</span>
+<a id="l-360" name="l-360"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="n">dfsm_update</span><span class="p">;</span>
+<a id="l-361" name="l-361"></a>            <span class="k">end</span>
+<a id="l-362" name="l-362"></a>
+<a id="l-363" name="l-363"></a>            <span class="k">default</span> <span class="o">:</span> <span class="k">begin</span>
+<a id="l-364" name="l-364"></a>                <span class="n">dfsm_trans_next</span>  <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>
+<a id="l-365" name="l-365"></a>                <span class="n">dfsm_update_next</span> <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>
+<a id="l-366" name="l-366"></a>                <span class="n">dfsm_event_next</span>  <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>
+<a id="l-367" name="l-367"></a>            <span class="k">end</span>
+<a id="l-368" name="l-368"></a>        <span class="k">endcase</span>
+<a id="l-369" name="l-369"></a>    <span class="k">end</span>
+<a id="l-370" name="l-370"></a><span class="k">end</span>
 <a id="l-371" name="l-371"></a>
-<a id="l-372" name="l-372"></a><span class="c1">// Control logic</span>
-<a id="l-373" name="l-373"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-374" name="l-374"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-375" name="l-375"></a>        <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-376" name="l-376"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-377" name="l-377"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dbg_state</span><span class="p">)</span>
-<a id="l-378" name="l-378"></a>            <span class="n">SCR1_HDU_DBGSTATE_RESET</span>  <span class="o">:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
-<a id="l-379" name="l-379"></a>            <span class="nl">SCR1_HDU_DBGSTATE_DHALTED:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">dfsm_update</span> <span class="o">|</span> <span class="n">dfsm_trans</span><span class="p">);</span>
-<a id="l-380" name="l-380"></a>            <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">,</span>
-<a id="l-381" name="l-381"></a>            <span class="n">SCR1_HDU_DBGSTATE_DRUN</span>   <span class="o">:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">dfsm_trans</span><span class="p">;</span>
-<a id="l-382" name="l-382"></a>        <span class="k">endcase</span>
-<a id="l-383" name="l-383"></a>    <span class="k">end</span>
-<a id="l-384" name="l-384"></a><span class="k">end</span>
+<a id="l-372" name="l-372"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-373" name="l-373"></a><span class="c1">// HART Control logic</span>
+<a id="l-374" name="l-374"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-375" name="l-375"></a><span class="c1">//</span>
+<a id="l-376" name="l-376"></a> <span class="c1">// HART Control logic consists of the following functional units:</span>
+<a id="l-377" name="l-377"></a> <span class="c1">// - Control signals</span>
+<a id="l-378" name="l-378"></a> <span class="c1">// - HART Run Control register</span>
+<a id="l-379" name="l-379"></a> <span class="c1">// - HART Halt Request Time-Out counter</span>
+<a id="l-380" name="l-380"></a><span class="c1">//</span>
+<a id="l-381" name="l-381"></a>
+<a id="l-382" name="l-382"></a><span class="c1">// Control logic</span>
+<a id="l-383" name="l-383"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-384" name="l-384"></a>    <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
 <a id="l-385" name="l-385"></a>
-<a id="l-386" name="l-386"></a><span class="k">assign</span> <span class="n">hart_halt_req</span>   <span class="o">=</span> <span class="n">dm_cmd_dhalted</span> <span class="o">&amp;</span> <span class="n">hart_cmd_req</span><span class="p">;</span>
-<a id="l-387" name="l-387"></a><span class="k">assign</span> <span class="n">hart_resume_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">dm_cmd_run</span> <span class="o">|</span> <span class="n">dm_cmd_drun</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">hart_cmd_req</span><span class="p">;</span>
-<a id="l-388" name="l-388"></a>
-<a id="l-389" name="l-389"></a><span class="c1">// HART Run Control register</span>
-<a id="l-390" name="l-390"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-391" name="l-391"></a>
-<a id="l-392" name="l-392"></a><span class="k">assign</span> <span class="n">hart_runctrl_clr</span> <span class="o">=</span> <span class="p">(</span><span class="n">dbg_state_run</span> <span class="o">|</span> <span class="n">dbg_state_drun</span><span class="p">)</span>
-<a id="l-393" name="l-393"></a>                        <span class="o">&amp;</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">);</span>
-<a id="l-394" name="l-394"></a><span class="k">assign</span> <span class="n">hart_runctrl_upd</span> <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="n">dfsm_trans_next</span><span class="p">;</span>
-<a id="l-395" name="l-395"></a>
-<a id="l-396" name="l-396"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-397" name="l-397"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-398" name="l-398"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span>      <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-399" name="l-399"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span>     <span class="o">&lt;=</span> <span class="n">SCR1_HDU_FETCH_SRC_NORMAL</span><span class="p">;</span>
-<a id="l-400" name="l-400"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-401" name="l-401"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-402" name="l-402"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-403" name="l-403"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-404" name="l-404"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">hart_runctrl_clr</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-405" name="l-405"></a>            <span class="n">hart_runctrl</span>           <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-406" name="l-406"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-407" name="l-407"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">hart_runctrl_upd</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-408" name="l-408"></a>                <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dm_cmd_drun</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-409" name="l-409"></a>                    <span class="c1">// Case : resume to RUN state</span>
-<a id="l-410" name="l-410"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span>        <span class="o">&lt;=</span> <span class="n">csr_dcsr_step</span> <span class="o">?</span> <span class="o">~</span><span class="n">csr_dcsr_stepie</span> <span class="o">:</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-411" name="l-411"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span>       <span class="o">&lt;=</span> <span class="n">SCR1_HDU_FETCH_SRC_NORMAL</span><span class="p">;</span>
-<a id="l-412" name="l-412"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span>   <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-413" name="l-413"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-414" name="l-414"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span>  <span class="o">&lt;=</span> <span class="n">csr_dcsr_step</span><span class="p">;</span>
-<a id="l-415" name="l-415"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">ebreak</span> <span class="o">&lt;=</span> <span class="n">csr_dcsr_ebreakm</span><span class="p">;</span>
-<a id="l-416" name="l-416"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-417" name="l-417"></a>                    <span class="c1">// Case : resume to DRUN state</span>
-<a id="l-418" name="l-418"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-419" name="l-419"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span>       <span class="o">&lt;=</span> <span class="n">SCR1_HDU_FETCH_SRC_PBUF</span><span class="p">;</span>
-<a id="l-420" name="l-420"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span>   <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-421" name="l-421"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-422" name="l-422"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-423" name="l-423"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">ebreak</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-424" name="l-424"></a>                <span class="k">end</span>
-<a id="l-425" name="l-425"></a>            <span class="k">end</span>
-<a id="l-426" name="l-426"></a>        <span class="k">end</span>
-<a id="l-427" name="l-427"></a>    <span class="k">end</span>
-<a id="l-428" name="l-428"></a><span class="k">end</span>
-<a id="l-429" name="l-429"></a>
-<a id="l-430" name="l-430"></a><span class="c1">// HART Halt Request Time-Out counter</span>
-<a id="l-431" name="l-431"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-432" name="l-432"></a><span class="c1">// HART goes into halt state only if the halt request is present for timeout period</span>
-<a id="l-433" name="l-433"></a><span class="c1">// of time</span>
-<a id="l-434" name="l-434"></a>
-<a id="l-435" name="l-435"></a><span class="k">assign</span> <span class="n">halt_req_timeout_cnt_en</span> <span class="o">=</span> <span class="n">hdu2exu_dbg_halt2run_o</span>
-<a id="l-436" name="l-436"></a>                               <span class="o">|</span> <span class="p">(</span><span class="n">hart_halt_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hdu2exu_dbg_run2halt_o</span><span class="p">);</span>
-<a id="l-437" name="l-437"></a>
-<a id="l-438" name="l-438"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-439" name="l-439"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-440" name="l-440"></a>        <span class="n">halt_req_timeout_cnt</span> <span class="o">&lt;=</span> <span class="m">&#39;1</span><span class="p">;</span>
-<a id="l-441" name="l-441"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">halt_req_timeout_cnt_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-442" name="l-442"></a>        <span class="n">halt_req_timeout_cnt</span> <span class="o">&lt;=</span> <span class="n">halt_req_timeout_cnt_next</span><span class="p">;</span>
-<a id="l-443" name="l-443"></a>    <span class="k">end</span>
-<a id="l-444" name="l-444"></a><span class="k">end</span>
-<a id="l-445" name="l-445"></a>
-<a id="l-446" name="l-446"></a><span class="k">assign</span> <span class="n">halt_req_timeout_cnt_next</span> <span class="o">=</span> <span class="n">hdu2exu_dbg_halt2run_o</span>                    <span class="o">?</span> <span class="m">&#39;1</span>
-<a id="l-447" name="l-447"></a>                                 <span class="o">:</span> <span class="p">(</span><span class="n">hart_halt_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hdu2exu_dbg_run2halt_o</span><span class="p">)</span> <span class="o">?</span> <span class="n">halt_req_timeout_cnt</span> <span class="o">-</span> <span class="mb">1&#39;b1</span>
-<a id="l-448" name="l-448"></a>                                                                             <span class="o">:</span> <span class="n">halt_req_timeout_cnt</span><span class="p">;</span>
-<a id="l-449" name="l-449"></a>
-<a id="l-450" name="l-450"></a><span class="k">assign</span> <span class="n">halt_req_timeout_flag</span> <span class="o">=</span> <span class="o">~|</span><span class="n">halt_req_timeout_cnt</span><span class="p">;</span>
-<a id="l-451" name="l-451"></a>
-<a id="l-452" name="l-452"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-453" name="l-453"></a><span class="c1">// HART Status logic</span>
-<a id="l-454" name="l-454"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-455" name="l-455"></a><span class="c1">//</span>
-<a id="l-456" name="l-456"></a> <span class="c1">// HART Status logic consists of the following functional units:</span>
-<a id="l-457" name="l-457"></a> <span class="c1">// - Debug mode cause decoder</span>
-<a id="l-458" name="l-458"></a> <span class="c1">// - Hart halt status cause encoder</span>
-<a id="l-459" name="l-459"></a> <span class="c1">// - Hart halt status register</span>
-<a id="l-460" name="l-460"></a><span class="c1">//</span>
-<a id="l-461" name="l-461"></a>
-<a id="l-462" name="l-462"></a><span class="c1">// Debug mode cause decoder</span>
-<a id="l-463" name="l-463"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-386" name="l-386"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-387" name="l-387"></a>        <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-388" name="l-388"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-389" name="l-389"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dbg_state</span><span class="p">)</span>
+<a id="l-390" name="l-390"></a>            <span class="n">SCR1_HDU_DBGSTATE_RESET</span>  <span class="o">:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
+<a id="l-391" name="l-391"></a>            <span class="nl">SCR1_HDU_DBGSTATE_DHALTED:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">dfsm_update</span> <span class="o">|</span> <span class="n">dfsm_trans</span><span class="p">);</span>
+<a id="l-392" name="l-392"></a>            <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">,</span>
+<a id="l-393" name="l-393"></a>            <span class="n">SCR1_HDU_DBGSTATE_DRUN</span>   <span class="o">:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="o">~</span><span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">dfsm_trans</span><span class="p">;</span>
+<a id="l-394" name="l-394"></a>            <span class="k">default</span>                  <span class="o">:</span> <span class="n">hart_cmd_req</span> <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>        
+<a id="l-395" name="l-395"></a>        <span class="k">endcase</span>
+<a id="l-396" name="l-396"></a>    <span class="k">end</span>
+<a id="l-397" name="l-397"></a><span class="k">end</span>
+<a id="l-398" name="l-398"></a>
+<a id="l-399" name="l-399"></a><span class="k">assign</span> <span class="n">hart_halt_req</span>   <span class="o">=</span> <span class="n">dm_cmd_dhalted</span> <span class="o">&amp;</span> <span class="n">hart_cmd_req</span><span class="p">;</span>
+<a id="l-400" name="l-400"></a><span class="k">assign</span> <span class="n">hart_resume_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">dm_cmd_run</span> <span class="o">|</span> <span class="n">dm_cmd_drun</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">hart_cmd_req</span><span class="p">;</span>
+<a id="l-401" name="l-401"></a>
+<a id="l-402" name="l-402"></a><span class="c1">// HART Run Control register</span>
+<a id="l-403" name="l-403"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-404" name="l-404"></a>
+<a id="l-405" name="l-405"></a><span class="k">assign</span> <span class="n">hart_runctrl_clr</span> <span class="o">=</span> <span class="p">(</span><span class="n">dbg_state_run</span> <span class="o">|</span> <span class="n">dbg_state_drun</span><span class="p">)</span>
+<a id="l-406" name="l-406"></a>                        <span class="o">&amp;</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">);</span>
+<a id="l-407" name="l-407"></a><span class="k">assign</span> <span class="n">hart_runctrl_upd</span> <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="n">dfsm_trans_next</span><span class="p">;</span>
+<a id="l-408" name="l-408"></a>
+<a id="l-409" name="l-409"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-410" name="l-410"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-411" name="l-411"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span>      <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-412" name="l-412"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span>     <span class="o">&lt;=</span> <span class="n">SCR1_HDU_FETCH_SRC_NORMAL</span><span class="p">;</span>
+<a id="l-413" name="l-413"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-414" name="l-414"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-415" name="l-415"></a>        <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span>      <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-416" name="l-416"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-417" name="l-417"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">hart_runctrl_clr</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-418" name="l-418"></a>            <span class="n">hart_runctrl</span>           <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-419" name="l-419"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-420" name="l-420"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">hart_runctrl_upd</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-421" name="l-421"></a>                <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dm_cmd_drun</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-422" name="l-422"></a>                    <span class="c1">// Case : resume to RUN state</span>
+<a id="l-423" name="l-423"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span>        <span class="o">&lt;=</span> <span class="n">csr_dcsr_step</span> <span class="o">?</span> <span class="o">~</span><span class="n">csr_dcsr_stepie</span> <span class="o">:</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-424" name="l-424"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span>       <span class="o">&lt;=</span> <span class="n">SCR1_HDU_FETCH_SRC_NORMAL</span><span class="p">;</span>
+<a id="l-425" name="l-425"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span>   <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-426" name="l-426"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-427" name="l-427"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span>  <span class="o">&lt;=</span> <span class="n">csr_dcsr_step</span><span class="p">;</span>
+<a id="l-428" name="l-428"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">ebreak</span> <span class="o">&lt;=</span> <span class="n">csr_dcsr_ebreakm</span><span class="p">;</span>
+<a id="l-429" name="l-429"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-430" name="l-430"></a>                    <span class="c1">// Case : resume to DRUN state</span>
+<a id="l-431" name="l-431"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-432" name="l-432"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span>       <span class="o">&lt;=</span> <span class="n">SCR1_HDU_FETCH_SRC_PBUF</span><span class="p">;</span>
+<a id="l-433" name="l-433"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span>   <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-434" name="l-434"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span>    <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-435" name="l-435"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span>  <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-436" name="l-436"></a>                    <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">ebreak</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-437" name="l-437"></a>                <span class="k">end</span>
+<a id="l-438" name="l-438"></a>            <span class="k">end</span>
+<a id="l-439" name="l-439"></a>        <span class="k">end</span>
+<a id="l-440" name="l-440"></a>    <span class="k">end</span>
+<a id="l-441" name="l-441"></a><span class="k">end</span>
+<a id="l-442" name="l-442"></a>
+<a id="l-443" name="l-443"></a><span class="c1">// HART Halt Request Time-Out counter</span>
+<a id="l-444" name="l-444"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-445" name="l-445"></a><span class="c1">// HART goes into halt state only if the halt request is present for timeout period</span>
+<a id="l-446" name="l-446"></a><span class="c1">// of time</span>
+<a id="l-447" name="l-447"></a>
+<a id="l-448" name="l-448"></a><span class="k">assign</span> <span class="n">halt_req_timeout_cnt_en</span> <span class="o">=</span> <span class="n">hdu2exu_dbg_halt2run_o</span>
+<a id="l-449" name="l-449"></a>                               <span class="o">|</span> <span class="p">(</span><span class="n">hart_halt_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hdu2exu_dbg_run2halt_o</span><span class="p">);</span>
+<a id="l-450" name="l-450"></a>
+<a id="l-451" name="l-451"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-452" name="l-452"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-453" name="l-453"></a>        <span class="n">halt_req_timeout_cnt</span> <span class="o">&lt;=</span> <span class="m">&#39;1</span><span class="p">;</span>
+<a id="l-454" name="l-454"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">halt_req_timeout_cnt_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-455" name="l-455"></a>        <span class="n">halt_req_timeout_cnt</span> <span class="o">&lt;=</span> <span class="n">halt_req_timeout_cnt_next</span><span class="p">;</span>
+<a id="l-456" name="l-456"></a>    <span class="k">end</span>
+<a id="l-457" name="l-457"></a><span class="k">end</span>
+<a id="l-458" name="l-458"></a>
+<a id="l-459" name="l-459"></a><span class="k">assign</span> <span class="n">halt_req_timeout_cnt_next</span> <span class="o">=</span> <span class="n">hdu2exu_dbg_halt2run_o</span>                    <span class="o">?</span> <span class="m">&#39;1</span>
+<a id="l-460" name="l-460"></a>                                 <span class="o">:</span> <span class="p">(</span><span class="n">hart_halt_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hdu2exu_dbg_run2halt_o</span><span class="p">)</span> <span class="o">?</span> <span class="n">halt_req_timeout_cnt</span> <span class="o">-</span> <span class="mb">1&#39;b1</span>
+<a id="l-461" name="l-461"></a>                                                                             <span class="o">:</span> <span class="n">halt_req_timeout_cnt</span><span class="p">;</span>
+<a id="l-462" name="l-462"></a>
+<a id="l-463" name="l-463"></a><span class="k">assign</span> <span class="n">halt_req_timeout_flag</span> <span class="o">=</span> <span class="o">~|</span><span class="n">halt_req_timeout_cnt</span><span class="p">;</span>
 <a id="l-464" name="l-464"></a>
-<a id="l-465" name="l-465"></a><span class="k">assign</span> <span class="n">dmode_cause_sstep</span>  <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_instret_i</span><span class="p">;</span>
-<a id="l-466" name="l-466"></a><span class="k">assign</span> <span class="n">dmode_cause_except</span> <span class="o">=</span> <span class="n">dbg_state_drun</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_exu_exc_req_i</span>
-<a id="l-467" name="l-467"></a>                          <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2hdu_brkpt_i</span>
-<a id="l-468" name="l-468"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
-<a id="l-469" name="l-469"></a>                          <span class="o">&amp;</span> <span class="o">~</span><span class="n">exu2hdu_ibrkpt_hw_i</span>
-<a id="l-470" name="l-470"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
-<a id="l-471" name="l-471"></a>                          <span class="p">;</span>
-<a id="l-472" name="l-472"></a><span class="k">assign</span> <span class="n">dmode_cause_ebreak</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">ebreak</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_brkpt_i</span><span class="p">;</span>
-<a id="l-473" name="l-473"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
-<a id="l-474" name="l-474"></a><span class="k">assign</span> <span class="n">dmode_cause_tmreq</span>  <span class="o">=</span> <span class="n">tdu2hdu_dmode_req_i</span> <span class="o">&amp;</span> <span class="n">exu2hdu_ibrkpt_hw_i</span><span class="p">;</span>
-<a id="l-475" name="l-475"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
-<a id="l-476" name="l-476"></a>
-<a id="l-477" name="l-477"></a><span class="k">assign</span> <span class="n">dmode_cause_any</span> <span class="o">=</span> <span class="n">dmode_cause_sstep</span> <span class="o">|</span> <span class="n">dmode_cause_ebreak</span> <span class="o">|</span> <span class="n">dmode_cause_except</span>
-<a id="l-478" name="l-478"></a>                       <span class="o">|</span> <span class="n">hart_halt_req</span>
-<a id="l-479" name="l-479"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
-<a id="l-480" name="l-480"></a>                       <span class="o">|</span> <span class="n">dmode_cause_tmreq</span>
-<a id="l-481" name="l-481"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
-<a id="l-482" name="l-482"></a>                       <span class="p">;</span>
-<a id="l-483" name="l-483"></a>
-<a id="l-484" name="l-484"></a><span class="c1">// HART halt cause encoder</span>
-<a id="l-485" name="l-485"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-486" name="l-486"></a>
-<a id="l-487" name="l-487"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-488" name="l-488"></a>    <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-489" name="l-489"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
-<a id="l-490" name="l-490"></a>        <span class="n">dmode_cause_tmreq</span>   <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_TMREQ</span><span class="p">;</span>
-<a id="l-491" name="l-491"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
-<a id="l-492" name="l-492"></a>        <span class="n">dmode_cause_ebreak</span>  <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_EBREAK</span><span class="p">;</span>
-<a id="l-493" name="l-493"></a>        <span class="n">hart_halt_req</span>       <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_DMREQ</span><span class="p">;</span>
-<a id="l-494" name="l-494"></a>        <span class="n">dmode_cause_sstep</span>   <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_SSTEP</span><span class="p">;</span>
-<a id="l-495" name="l-495"></a>        <span class="k">default</span>             <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_NONE</span><span class="p">;</span>
-<a id="l-496" name="l-496"></a>    <span class="k">endcase</span>
-<a id="l-497" name="l-497"></a><span class="k">end</span>
-<a id="l-498" name="l-498"></a>
-<a id="l-499" name="l-499"></a><span class="c1">// HART halt status register</span>
-<a id="l-500" name="l-500"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-501" name="l-501"></a>
-<a id="l-502" name="l-502"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-503" name="l-503"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-504" name="l-504"></a>        <span class="n">hart_haltstatus</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-505" name="l-505"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">hart_halt_ack</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-506" name="l-506"></a>        <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">except</span> <span class="o">&lt;=</span> <span class="n">dmode_cause_except</span><span class="p">;</span>
-<a id="l-507" name="l-507"></a>        <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">cause</span>  <span class="o">&lt;=</span> <span class="n">hart_haltcause</span><span class="p">;</span>
-<a id="l-508" name="l-508"></a>    <span class="k">end</span>
-<a id="l-509" name="l-509"></a><span class="k">end</span>
-<a id="l-510" name="l-510"></a>
-<a id="l-511" name="l-511"></a><span class="k">assign</span> <span class="n">hart_halt_pnd</span> <span class="o">=</span> <span class="p">(</span><span class="n">dfsm_trans</span> <span class="o">|</span> <span class="n">dm_dhalt_req</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hart_halt_ack</span><span class="p">;</span>
-<a id="l-512" name="l-512"></a><span class="k">assign</span> <span class="n">hart_halt_ack</span> <span class="o">=</span> <span class="o">~</span><span class="n">hdu2exu_dbg_halted_o</span>
-<a id="l-513" name="l-513"></a>                     <span class="o">&amp;</span> <span class="p">(</span><span class="n">halt_req_timeout_flag</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_exu_busy_i</span> <span class="o">&amp;</span> <span class="n">dmode_cause_any</span><span class="p">));</span>
+<a id="l-465" name="l-465"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-466" name="l-466"></a><span class="c1">// HART Status logic</span>
+<a id="l-467" name="l-467"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-468" name="l-468"></a><span class="c1">//</span>
+<a id="l-469" name="l-469"></a> <span class="c1">// HART Status logic consists of the following functional units:</span>
+<a id="l-470" name="l-470"></a> <span class="c1">// - Debug mode cause decoder</span>
+<a id="l-471" name="l-471"></a> <span class="c1">// - Hart halt status cause encoder</span>
+<a id="l-472" name="l-472"></a> <span class="c1">// - Hart halt status register</span>
+<a id="l-473" name="l-473"></a><span class="c1">//</span>
+<a id="l-474" name="l-474"></a>
+<a id="l-475" name="l-475"></a><span class="c1">// Debug mode cause decoder</span>
+<a id="l-476" name="l-476"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-477" name="l-477"></a>
+<a id="l-478" name="l-478"></a><span class="k">assign</span> <span class="n">dmode_cause_sstep</span>  <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_instret_i</span><span class="p">;</span>
+<a id="l-479" name="l-479"></a><span class="k">assign</span> <span class="n">dmode_cause_except</span> <span class="o">=</span> <span class="n">dbg_state_drun</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_exu_exc_req_i</span>
+<a id="l-480" name="l-480"></a>                          <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2hdu_brkpt_i</span>
+<a id="l-481" name="l-481"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
+<a id="l-482" name="l-482"></a>                          <span class="o">&amp;</span> <span class="o">~</span><span class="n">exu2hdu_ibrkpt_hw_i</span>
+<a id="l-483" name="l-483"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
+<a id="l-484" name="l-484"></a>                          <span class="p">;</span>
+<a id="l-485" name="l-485"></a><span class="k">assign</span> <span class="n">dmode_cause_ebreak</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">ebreak</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_brkpt_i</span><span class="p">;</span>
+<a id="l-486" name="l-486"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
+<a id="l-487" name="l-487"></a><span class="k">assign</span> <span class="n">dmode_cause_tmreq</span>  <span class="o">=</span> <span class="n">tdu2hdu_dmode_req_i</span> <span class="o">&amp;</span> <span class="n">exu2hdu_ibrkpt_hw_i</span><span class="p">;</span>
+<a id="l-488" name="l-488"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
+<a id="l-489" name="l-489"></a>
+<a id="l-490" name="l-490"></a><span class="k">assign</span> <span class="n">dmode_cause_any</span> <span class="o">=</span> <span class="n">dmode_cause_sstep</span> <span class="o">|</span> <span class="n">dmode_cause_ebreak</span> <span class="o">|</span> <span class="n">dmode_cause_except</span>
+<a id="l-491" name="l-491"></a>                       <span class="o">|</span> <span class="n">hart_halt_req</span>
+<a id="l-492" name="l-492"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
+<a id="l-493" name="l-493"></a>                       <span class="o">|</span> <span class="n">dmode_cause_tmreq</span>
+<a id="l-494" name="l-494"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
+<a id="l-495" name="l-495"></a>                       <span class="p">;</span>
+<a id="l-496" name="l-496"></a>
+<a id="l-497" name="l-497"></a><span class="c1">// HART halt cause encoder</span>
+<a id="l-498" name="l-498"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-499" name="l-499"></a>
+<a id="l-500" name="l-500"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-501" name="l-501"></a>    <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-502" name="l-502"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
+<a id="l-503" name="l-503"></a>        <span class="n">dmode_cause_tmreq</span>   <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_TMREQ</span><span class="p">;</span>
+<a id="l-504" name="l-504"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
+<a id="l-505" name="l-505"></a>        <span class="n">dmode_cause_ebreak</span>  <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_EBREAK</span><span class="p">;</span>
+<a id="l-506" name="l-506"></a>        <span class="n">hart_halt_req</span>       <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_DMREQ</span><span class="p">;</span>
+<a id="l-507" name="l-507"></a>        <span class="n">dmode_cause_sstep</span>   <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_SSTEP</span><span class="p">;</span>
+<a id="l-508" name="l-508"></a>        <span class="k">default</span>             <span class="o">:</span> <span class="n">hart_haltcause</span> <span class="o">=</span> <span class="n">SCR1_HDU_HALTCAUSE_NONE</span><span class="p">;</span>
+<a id="l-509" name="l-509"></a>    <span class="k">endcase</span>
+<a id="l-510" name="l-510"></a><span class="k">end</span>
+<a id="l-511" name="l-511"></a>
+<a id="l-512" name="l-512"></a><span class="c1">// HART halt status register</span>
+<a id="l-513" name="l-513"></a><span class="c1">//------------------------------------------------------------------------------</span>
 <a id="l-514" name="l-514"></a>
-<a id="l-515" name="l-515"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-516" name="l-516"></a><span class="c1">// Program Buffer (PBUF) logic</span>
-<a id="l-517" name="l-517"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-518" name="l-518"></a><span class="c1">//</span>
-<a id="l-519" name="l-519"></a> <span class="c1">// Program Buffer allows to execute small programs in debug mode</span>
-<a id="l-520" name="l-520"></a><span class="c1">//</span>
-<a id="l-521" name="l-521"></a>
-<a id="l-522" name="l-522"></a><span class="c1">// To terminate Program Buffer execution exception should be raised. There are 2</span>
-<a id="l-523" name="l-523"></a><span class="c1">// cases:</span>
-<a id="l-524" name="l-524"></a><span class="c1">// - One of PBUF instructions raise an exception</span>
-<a id="l-525" name="l-525"></a><span class="c1">// - No PBUF instruction raise an exception before the last PBUF instruction has</span>
-<a id="l-526" name="l-526"></a><span class="c1">// been issued. In this case FSM goes into EXCINJECT state and an &quot;Instruction</span>
-<a id="l-527" name="l-527"></a><span class="c1">// fetch access fault&quot; exception is injected</span>
-<a id="l-528" name="l-528"></a>
-<a id="l-529" name="l-529"></a><span class="c1">// PBUF FSM</span>
+<a id="l-515" name="l-515"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-516" name="l-516"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-517" name="l-517"></a>        <span class="n">hart_haltstatus</span>        <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-518" name="l-518"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">hart_halt_ack</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-519" name="l-519"></a>        <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">except</span> <span class="o">&lt;=</span> <span class="n">dmode_cause_except</span><span class="p">;</span>
+<a id="l-520" name="l-520"></a>        <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">cause</span>  <span class="o">&lt;=</span> <span class="n">hart_haltcause</span><span class="p">;</span>
+<a id="l-521" name="l-521"></a>    <span class="k">end</span>
+<a id="l-522" name="l-522"></a><span class="k">end</span>
+<a id="l-523" name="l-523"></a>
+<a id="l-524" name="l-524"></a><span class="k">assign</span> <span class="n">hart_halt_pnd</span> <span class="o">=</span> <span class="p">(</span><span class="n">dfsm_trans</span> <span class="o">|</span> <span class="n">dm_dhalt_req</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hart_halt_ack</span><span class="p">;</span>
+<a id="l-525" name="l-525"></a><span class="k">assign</span> <span class="n">hart_halt_ack</span> <span class="o">=</span> <span class="o">~</span><span class="n">hdu2exu_dbg_halted_o</span>
+<a id="l-526" name="l-526"></a>                     <span class="o">&amp;</span> <span class="p">(</span><span class="n">halt_req_timeout_flag</span> <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_exu_busy_i</span> <span class="o">&amp;</span> <span class="n">dmode_cause_any</span><span class="p">));</span>
+<a id="l-527" name="l-527"></a>
+<a id="l-528" name="l-528"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-529" name="l-529"></a><span class="c1">// Program Buffer (PBUF) logic</span>
 <a id="l-530" name="l-530"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-531" name="l-531"></a>
-<a id="l-532" name="l-532"></a><span class="k">assign</span> <span class="n">ifu_handshake_done</span> <span class="o">=</span> <span class="n">hdu2ifu_pbuf_instr_vd_o</span> <span class="o">&amp;</span> <span class="n">ifu2hdu_pbuf_instr_rdy_i</span><span class="p">;</span>
-<a id="l-533" name="l-533"></a><span class="k">assign</span> <span class="n">pbuf_addr_end</span>      <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_addr_ff</span> <span class="o">==</span> <span class="p">(</span><span class="n">SCR1_HDU_PBUF_ADDR_SPAN</span><span class="o">-</span><span class="mi">1</span><span class="p">));</span>
+<a id="l-531" name="l-531"></a><span class="c1">//</span>
+<a id="l-532" name="l-532"></a> <span class="c1">// Program Buffer allows to execute small programs in debug mode</span>
+<a id="l-533" name="l-533"></a><span class="c1">//</span>
 <a id="l-534" name="l-534"></a>
-<a id="l-535" name="l-535"></a><span class="k">assign</span> <span class="n">pbuf_start_fetch</span> <span class="o">=</span> <span class="n">dbg_state_dhalted</span>      <span class="o">&amp;</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DRUN</span><span class="p">);</span>
-<a id="l-536" name="l-536"></a><span class="k">assign</span> <span class="n">pbuf_exc_inj_req</span> <span class="o">=</span> <span class="n">ifu_handshake_done</span>     <span class="o">&amp;</span> <span class="n">pbuf_addr_end</span><span class="p">;</span>
-<a id="l-537" name="l-537"></a><span class="k">assign</span> <span class="n">pbuf_exc_inj_end</span> <span class="o">=</span> <span class="n">pipe2hdu_exu_exc_req_i</span> <span class="o">|</span> <span class="n">ifu_handshake_done</span><span class="p">;</span>
-<a id="l-538" name="l-538"></a>
-<a id="l-539" name="l-539"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-540" name="l-540"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-541" name="l-541"></a>        <span class="n">pbuf_fsm_curr</span> <span class="o">&lt;=</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span><span class="p">;</span>
-<a id="l-542" name="l-542"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-543" name="l-543"></a>        <span class="n">pbuf_fsm_curr</span> <span class="o">&lt;=</span> <span class="n">pbuf_fsm_next</span><span class="p">;</span>
-<a id="l-544" name="l-544"></a>    <span class="k">end</span>
-<a id="l-545" name="l-545"></a><span class="k">end</span>
-<a id="l-546" name="l-546"></a>
-<a id="l-547" name="l-547"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-548" name="l-548"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span><span class="p">)</span>
-<a id="l-549" name="l-549"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_IDLE:</span> <span class="k">begin</span>
-<a id="l-550" name="l-550"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">pbuf_start_fetch</span>       <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_FETCH</span>
-<a id="l-551" name="l-551"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span><span class="p">;</span>
-<a id="l-552" name="l-552"></a>        <span class="k">end</span>
-<a id="l-553" name="l-553"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_FETCH:</span> <span class="k">begin</span>
-<a id="l-554" name="l-554"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">pipe2hdu_exu_exc_req_i</span> <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_WAIT4END</span>
-<a id="l-555" name="l-555"></a>                          <span class="o">:</span> <span class="n">pbuf_exc_inj_req</span>       <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_EXCINJECT</span>
-<a id="l-556" name="l-556"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_FETCH</span><span class="p">;</span>
-<a id="l-557" name="l-557"></a>        <span class="k">end</span>
-<a id="l-558" name="l-558"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_EXCINJECT:</span> <span class="k">begin</span>
-<a id="l-559" name="l-559"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">pbuf_exc_inj_end</span>       <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_WAIT4END</span>
-<a id="l-560" name="l-560"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_EXCINJECT</span><span class="p">;</span>
-<a id="l-561" name="l-561"></a>        <span class="k">end</span>
-<a id="l-562" name="l-562"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_WAIT4END:</span> <span class="k">begin</span>
-<a id="l-563" name="l-563"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">hdu2exu_dbg_halted_o</span>   <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span>
-<a id="l-564" name="l-564"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_WAIT4END</span><span class="p">;</span>
+<a id="l-535" name="l-535"></a><span class="c1">// To terminate Program Buffer execution exception should be raised. There are 2</span>
+<a id="l-536" name="l-536"></a><span class="c1">// cases:</span>
+<a id="l-537" name="l-537"></a><span class="c1">// - One of PBUF instructions raise an exception</span>
+<a id="l-538" name="l-538"></a><span class="c1">// - No PBUF instruction raise an exception before the last PBUF instruction has</span>
+<a id="l-539" name="l-539"></a><span class="c1">// been issued. In this case FSM goes into EXCINJECT state and an &quot;Instruction</span>
+<a id="l-540" name="l-540"></a><span class="c1">// fetch access fault&quot; exception is injected</span>
+<a id="l-541" name="l-541"></a>
+<a id="l-542" name="l-542"></a><span class="c1">// PBUF FSM</span>
+<a id="l-543" name="l-543"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-544" name="l-544"></a>
+<a id="l-545" name="l-545"></a><span class="k">assign</span> <span class="n">ifu_handshake_done</span> <span class="o">=</span> <span class="n">hdu2ifu_pbuf_instr_vd_o</span> <span class="o">&amp;</span> <span class="n">ifu2hdu_pbuf_instr_rdy_i</span><span class="p">;</span>
+<a id="l-546" name="l-546"></a><span class="k">assign</span> <span class="n">pbuf_addr_end</span>      <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_addr_ff</span> <span class="o">==</span> <span class="p">(</span><span class="n">SCR1_HDU_PBUF_ADDR_SPAN</span><span class="o">-</span><span class="mi">1</span><span class="p">));</span>
+<a id="l-547" name="l-547"></a>
+<a id="l-548" name="l-548"></a><span class="k">assign</span> <span class="n">pbuf_start_fetch</span> <span class="o">=</span> <span class="n">dbg_state_dhalted</span>      <span class="o">&amp;</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DRUN</span><span class="p">);</span>
+<a id="l-549" name="l-549"></a><span class="k">assign</span> <span class="n">pbuf_exc_inj_req</span> <span class="o">=</span> <span class="n">ifu_handshake_done</span>     <span class="o">&amp;</span> <span class="n">pbuf_addr_end</span><span class="p">;</span>
+<a id="l-550" name="l-550"></a><span class="k">assign</span> <span class="n">pbuf_exc_inj_end</span> <span class="o">=</span> <span class="n">pipe2hdu_exu_exc_req_i</span> <span class="o">|</span> <span class="n">ifu_handshake_done</span><span class="p">;</span>
+<a id="l-551" name="l-551"></a>
+<a id="l-552" name="l-552"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-553" name="l-553"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-554" name="l-554"></a>        <span class="n">pbuf_fsm_curr</span> <span class="o">&lt;=</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span><span class="p">;</span>
+<a id="l-555" name="l-555"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-556" name="l-556"></a>        <span class="n">pbuf_fsm_curr</span> <span class="o">&lt;=</span> <span class="n">pbuf_fsm_next</span><span class="p">;</span>
+<a id="l-557" name="l-557"></a>    <span class="k">end</span>
+<a id="l-558" name="l-558"></a><span class="k">end</span>
+<a id="l-559" name="l-559"></a>
+<a id="l-560" name="l-560"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-561" name="l-561"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span><span class="p">)</span>
+<a id="l-562" name="l-562"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_IDLE:</span> <span class="k">begin</span>
+<a id="l-563" name="l-563"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">pbuf_start_fetch</span>       <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_FETCH</span>
+<a id="l-564" name="l-564"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span><span class="p">;</span>
 <a id="l-565" name="l-565"></a>        <span class="k">end</span>
-<a id="l-566" name="l-566"></a>    <span class="k">endcase</span>
-<a id="l-567" name="l-567"></a><span class="k">end</span>
-<a id="l-568" name="l-568"></a>
-<a id="l-569" name="l-569"></a><span class="k">assign</span> <span class="n">pbuf_fsm_idle</span>   <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span> <span class="o">==</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span><span class="p">);</span>
-<a id="l-570" name="l-570"></a><span class="k">assign</span> <span class="n">pbuf_fsm_fetch</span>  <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span> <span class="o">==</span> <span class="n">SCR1_HDU_PBUFSTATE_FETCH</span><span class="p">);</span>
-<a id="l-571" name="l-571"></a><span class="k">assign</span> <span class="n">pbuf_fsm_excinj</span> <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span> <span class="o">==</span> <span class="n">SCR1_HDU_PBUFSTATE_EXCINJECT</span><span class="p">);</span>
-<a id="l-572" name="l-572"></a>
-<a id="l-573" name="l-573"></a><span class="c1">// Program Buffer address register</span>
-<a id="l-574" name="l-574"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-575" name="l-575"></a>
-<a id="l-576" name="l-576"></a><span class="k">assign</span> <span class="n">pbuf_addr_next_vd</span> <span class="o">=</span> <span class="n">pbuf_fsm_fetch</span>          <span class="o">&amp;</span> <span class="n">ifu_handshake_done</span>
-<a id="l-577" name="l-577"></a>                         <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2hdu_exu_exc_req_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pbuf_addr_end</span><span class="p">;</span>
-<a id="l-578" name="l-578"></a>
-<a id="l-579" name="l-579"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-580" name="l-580"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-581" name="l-581"></a>        <span class="n">pbuf_addr_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-582" name="l-582"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-583" name="l-583"></a>        <span class="n">pbuf_addr_ff</span> <span class="o">&lt;=</span> <span class="n">pbuf_addr_next</span><span class="p">;</span>
-<a id="l-584" name="l-584"></a>    <span class="k">end</span>
-<a id="l-585" name="l-585"></a><span class="k">end</span>
-<a id="l-586" name="l-586"></a>
-<a id="l-587" name="l-587"></a><span class="k">assign</span> <span class="n">pbuf_addr_next</span> <span class="o">=</span> <span class="n">pbuf_fsm_idle</span>     <span class="o">?</span> <span class="m">&#39;0</span>
-<a id="l-588" name="l-588"></a>                      <span class="o">:</span> <span class="n">pbuf_addr_next_vd</span> <span class="o">?</span> <span class="n">pbuf_addr_ff</span> <span class="o">+</span> <span class="mb">1&#39;b1</span>
-<a id="l-589" name="l-589"></a>                                          <span class="o">:</span> <span class="n">pbuf_addr_ff</span><span class="p">;</span>
-<a id="l-590" name="l-590"></a>
-<a id="l-591" name="l-591"></a><span class="c1">// Pass instruction from debug program buffer to cpu pipeline with two options:</span>
-<a id="l-592" name="l-592"></a><span class="c1">// - through register, better for frequency</span>
-<a id="l-593" name="l-593"></a><span class="c1">// - through wires, better for area</span>
-<a id="l-594" name="l-594"></a><span class="k">generate</span> <span class="k">if</span> <span class="p">(</span><span class="n">HART_PBUF_INSTR_REGOUT_EN</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-595" name="l-595"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-596" name="l-596"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-597" name="l-597"></a>            <span class="n">pbuf_instr_wait_latching</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-598" name="l-598"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-599" name="l-599"></a>            <span class="n">pbuf_instr_wait_latching</span> <span class="o">&lt;=</span> <span class="n">ifu_handshake_done</span><span class="p">;</span>
-<a id="l-600" name="l-600"></a>        <span class="k">end</span>
-<a id="l-601" name="l-601"></a>    <span class="k">end</span>
-<a id="l-602" name="l-602"></a><span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-603" name="l-603"></a>    <span class="k">assign</span> <span class="n">pbuf_instr_wait_latching</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-604" name="l-604"></a><span class="k">end</span> <span class="k">endgenerate</span>
-<a id="l-605" name="l-605"></a>
-<a id="l-606" name="l-606"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-607" name="l-607"></a><span class="c1">// Debug CSRs</span>
-<a id="l-608" name="l-608"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-609" name="l-609"></a>
-<a id="l-610" name="l-610"></a><span class="k">assign</span> <span class="n">csr_upd_on_halt</span> <span class="o">=</span> <span class="p">(</span><span class="n">dbg_state_reset</span> <span class="o">|</span> <span class="n">dbg_state_run</span><span class="p">)</span>
-<a id="l-611" name="l-611"></a>                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">);</span>
-<a id="l-612" name="l-612"></a>
-<a id="l-613" name="l-613"></a><span class="c1">// CSRs select logic</span>
-<a id="l-614" name="l-614"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-615" name="l-615"></a>
-<a id="l-616" name="l-616"></a><span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">csr_if_regsel</span>
-<a id="l-617" name="l-617"></a>    <span class="n">csr_dcsr_sel</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-618" name="l-618"></a>    <span class="n">csr_dpc_sel</span>         <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-619" name="l-619"></a>    <span class="n">csr_dscratch0_sel</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-620" name="l-620"></a>    <span class="c1">//csr_dscratch1_sel   = 1&#39;b0;</span>
-<a id="l-621" name="l-621"></a>
-<a id="l-622" name="l-622"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">csr2hdu_req_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-623" name="l-623"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">csr2hdu_addr_i</span><span class="p">)</span>
-<a id="l-624" name="l-624"></a>            <span class="n">SCR1_HDU_DBGCSR_OFFS_DCSR</span>     <span class="o">:</span> <span class="n">csr_dcsr_sel</span>      <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-625" name="l-625"></a>            <span class="n">SCR1_HDU_DBGCSR_OFFS_DPC</span>      <span class="o">:</span> <span class="n">csr_dpc_sel</span>       <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-626" name="l-626"></a>            <span class="nl">SCR1_HDU_DBGCSR_OFFS_DSCRATCH0:</span> <span class="n">csr_dscratch0_sel</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-627" name="l-627"></a>            <span class="k">default</span> <span class="o">:</span> <span class="k">begin</span>
-<a id="l-628" name="l-628"></a>                                            <span class="n">csr_dcsr_sel</span>      <span class="o">=</span> <span class="mb">1&#39;bX</span><span class="p">;</span>
-<a id="l-629" name="l-629"></a>                                            <span class="n">csr_dpc_sel</span>       <span class="o">=</span> <span class="mb">1&#39;bX</span><span class="p">;</span>
-<a id="l-630" name="l-630"></a>                                            <span class="n">csr_dscratch0_sel</span> <span class="o">=</span> <span class="mb">1&#39;bX</span><span class="p">;</span>
-<a id="l-631" name="l-631"></a>            <span class="k">end</span>
-<a id="l-632" name="l-632"></a>        <span class="k">endcase</span>
-<a id="l-633" name="l-633"></a>    <span class="k">end</span>
-<a id="l-634" name="l-634"></a><span class="k">end</span> <span class="o">:</span> <span class="n">csr_if_regsel</span>
-<a id="l-635" name="l-635"></a>
-<a id="l-636" name="l-636"></a><span class="c1">// CSRs read interface</span>
-<a id="l-637" name="l-637"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-638" name="l-638"></a>
-<a id="l-639" name="l-639"></a><span class="k">assign</span> <span class="n">csr_rd_data</span> <span class="o">=</span> <span class="n">csr_dcsr_out</span> <span class="o">|</span> <span class="n">csr_dpc_out</span> <span class="o">|</span> <span class="n">csr_dscratch0_out</span><span class="p">;</span>
-<a id="l-640" name="l-640"></a>
-<a id="l-641" name="l-641"></a><span class="c1">// CSRs write interface</span>
-<a id="l-642" name="l-642"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-643" name="l-643"></a>
-<a id="l-644" name="l-644"></a><span class="k">assign</span> <span class="n">csr_wr</span> <span class="o">=</span> <span class="n">csr2hdu_req_i</span><span class="p">;</span>
-<a id="l-645" name="l-645"></a>
-<a id="l-646" name="l-646"></a><span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">csr_if_write</span>
-<a id="l-647" name="l-647"></a>    <span class="n">csr_wr_data</span>     <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-566" name="l-566"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_FETCH:</span> <span class="k">begin</span>
+<a id="l-567" name="l-567"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">pipe2hdu_exu_exc_req_i</span> <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_WAIT4END</span>
+<a id="l-568" name="l-568"></a>                          <span class="o">:</span> <span class="n">pbuf_exc_inj_req</span>       <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_EXCINJECT</span>
+<a id="l-569" name="l-569"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_FETCH</span><span class="p">;</span>
+<a id="l-570" name="l-570"></a>        <span class="k">end</span>
+<a id="l-571" name="l-571"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_EXCINJECT:</span> <span class="k">begin</span>
+<a id="l-572" name="l-572"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">pbuf_exc_inj_end</span>       <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_WAIT4END</span>
+<a id="l-573" name="l-573"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_EXCINJECT</span><span class="p">;</span>
+<a id="l-574" name="l-574"></a>        <span class="k">end</span>
+<a id="l-575" name="l-575"></a>        <span class="nl">SCR1_HDU_PBUFSTATE_WAIT4END:</span> <span class="k">begin</span>
+<a id="l-576" name="l-576"></a>            <span class="n">pbuf_fsm_next</span> <span class="o">=</span> <span class="n">hdu2exu_dbg_halted_o</span>   <span class="o">?</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span>
+<a id="l-577" name="l-577"></a>                                                   <span class="o">:</span> <span class="n">SCR1_HDU_PBUFSTATE_WAIT4END</span><span class="p">;</span>
+<a id="l-578" name="l-578"></a>        <span class="k">end</span>
+<a id="l-579" name="l-579"></a>    <span class="k">endcase</span>
+<a id="l-580" name="l-580"></a><span class="k">end</span>
+<a id="l-581" name="l-581"></a>
+<a id="l-582" name="l-582"></a><span class="k">assign</span> <span class="n">pbuf_fsm_idle</span>   <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span> <span class="o">==</span> <span class="n">SCR1_HDU_PBUFSTATE_IDLE</span><span class="p">);</span>
+<a id="l-583" name="l-583"></a><span class="k">assign</span> <span class="n">pbuf_fsm_fetch</span>  <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span> <span class="o">==</span> <span class="n">SCR1_HDU_PBUFSTATE_FETCH</span><span class="p">);</span>
+<a id="l-584" name="l-584"></a><span class="k">assign</span> <span class="n">pbuf_fsm_excinj</span> <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_curr</span> <span class="o">==</span> <span class="n">SCR1_HDU_PBUFSTATE_EXCINJECT</span><span class="p">);</span>
+<a id="l-585" name="l-585"></a>
+<a id="l-586" name="l-586"></a><span class="c1">// Program Buffer address register</span>
+<a id="l-587" name="l-587"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-588" name="l-588"></a>
+<a id="l-589" name="l-589"></a><span class="k">assign</span> <span class="n">pbuf_addr_next_vd</span> <span class="o">=</span> <span class="n">pbuf_fsm_fetch</span>          <span class="o">&amp;</span> <span class="n">ifu_handshake_done</span>
+<a id="l-590" name="l-590"></a>                         <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2hdu_exu_exc_req_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pbuf_addr_end</span><span class="p">;</span>
+<a id="l-591" name="l-591"></a>
+<a id="l-592" name="l-592"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-593" name="l-593"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-594" name="l-594"></a>        <span class="n">pbuf_addr_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-595" name="l-595"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-596" name="l-596"></a>        <span class="n">pbuf_addr_ff</span> <span class="o">&lt;=</span> <span class="n">pbuf_addr_next</span><span class="p">;</span>
+<a id="l-597" name="l-597"></a>    <span class="k">end</span>
+<a id="l-598" name="l-598"></a><span class="k">end</span>
+<a id="l-599" name="l-599"></a>
+<a id="l-600" name="l-600"></a><span class="k">assign</span> <span class="n">pbuf_addr_next</span> <span class="o">=</span> <span class="n">pbuf_fsm_idle</span>     <span class="o">?</span> <span class="m">&#39;0</span>
+<a id="l-601" name="l-601"></a>                      <span class="o">:</span> <span class="n">pbuf_addr_next_vd</span> <span class="o">?</span> <span class="n">pbuf_addr_ff</span> <span class="o">+</span> <span class="mb">1&#39;b1</span>
+<a id="l-602" name="l-602"></a>                                          <span class="o">:</span> <span class="n">pbuf_addr_ff</span><span class="p">;</span>
+<a id="l-603" name="l-603"></a>
+<a id="l-604" name="l-604"></a><span class="c1">// Pass instruction from debug program buffer to cpu pipeline with two options:</span>
+<a id="l-605" name="l-605"></a><span class="c1">// - through register, better for frequency</span>
+<a id="l-606" name="l-606"></a><span class="c1">// - through wires, better for area</span>
+<a id="l-607" name="l-607"></a><span class="k">generate</span> <span class="k">if</span> <span class="p">(</span><span class="n">HART_PBUF_INSTR_REGOUT_EN</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-608" name="l-608"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-609" name="l-609"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-610" name="l-610"></a>            <span class="n">pbuf_instr_wait_latching</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-611" name="l-611"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-612" name="l-612"></a>            <span class="n">pbuf_instr_wait_latching</span> <span class="o">&lt;=</span> <span class="n">ifu_handshake_done</span><span class="p">;</span>
+<a id="l-613" name="l-613"></a>        <span class="k">end</span>
+<a id="l-614" name="l-614"></a>    <span class="k">end</span>
+<a id="l-615" name="l-615"></a><span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-616" name="l-616"></a>    <span class="k">assign</span> <span class="n">pbuf_instr_wait_latching</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-617" name="l-617"></a><span class="k">end</span> <span class="k">endgenerate</span>
+<a id="l-618" name="l-618"></a>
+<a id="l-619" name="l-619"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-620" name="l-620"></a><span class="c1">// Debug CSRs</span>
+<a id="l-621" name="l-621"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-622" name="l-622"></a>
+<a id="l-623" name="l-623"></a><span class="k">assign</span> <span class="n">csr_upd_on_halt</span> <span class="o">=</span> <span class="p">(</span><span class="n">dbg_state_reset</span> <span class="o">|</span> <span class="n">dbg_state_run</span><span class="p">)</span>
+<a id="l-624" name="l-624"></a>                       <span class="o">&amp;</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">);</span>
+<a id="l-625" name="l-625"></a>
+<a id="l-626" name="l-626"></a><span class="c1">// CSRs select logic</span>
+<a id="l-627" name="l-627"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-628" name="l-628"></a>
+<a id="l-629" name="l-629"></a><span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">csr_if_regsel</span>
+<a id="l-630" name="l-630"></a>    <span class="n">csr_dcsr_sel</span>        <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-631" name="l-631"></a>    <span class="n">csr_dpc_sel</span>         <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-632" name="l-632"></a>    <span class="n">csr_dscratch0_sel</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-633" name="l-633"></a>    <span class="c1">//csr_dscratch1_sel   = 1&#39;b0;</span>
+<a id="l-634" name="l-634"></a>
+<a id="l-635" name="l-635"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">csr2hdu_req_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-636" name="l-636"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">csr2hdu_addr_i</span><span class="p">)</span>
+<a id="l-637" name="l-637"></a>            <span class="n">SCR1_HDU_DBGCSR_OFFS_DCSR</span>     <span class="o">:</span> <span class="n">csr_dcsr_sel</span>      <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-638" name="l-638"></a>            <span class="n">SCR1_HDU_DBGCSR_OFFS_DPC</span>      <span class="o">:</span> <span class="n">csr_dpc_sel</span>       <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-639" name="l-639"></a>            <span class="nl">SCR1_HDU_DBGCSR_OFFS_DSCRATCH0:</span> <span class="n">csr_dscratch0_sel</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-640" name="l-640"></a>            <span class="k">default</span> <span class="o">:</span> <span class="k">begin</span>
+<a id="l-641" name="l-641"></a>                                            <span class="n">csr_dcsr_sel</span>      <span class="o">=</span> <span class="mb">1&#39;bX</span><span class="p">;</span>
+<a id="l-642" name="l-642"></a>                                            <span class="n">csr_dpc_sel</span>       <span class="o">=</span> <span class="mb">1&#39;bX</span><span class="p">;</span>
+<a id="l-643" name="l-643"></a>                                            <span class="n">csr_dscratch0_sel</span> <span class="o">=</span> <span class="mb">1&#39;bX</span><span class="p">;</span>
+<a id="l-644" name="l-644"></a>            <span class="k">end</span>
+<a id="l-645" name="l-645"></a>        <span class="k">endcase</span>
+<a id="l-646" name="l-646"></a>    <span class="k">end</span>
+<a id="l-647" name="l-647"></a><span class="k">end</span> <span class="o">:</span> <span class="n">csr_if_regsel</span>
 <a id="l-648" name="l-648"></a>
-<a id="l-649" name="l-649"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">csr2hdu_req_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-650" name="l-650"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">csr2hdu_cmd_i</span><span class="p">)</span>
-<a id="l-651" name="l-651"></a>            <span class="n">SCR1_CSR_CMD_WRITE</span> <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="n">csr2hdu_wdata_i</span><span class="p">;</span>
-<a id="l-652" name="l-652"></a>            <span class="n">SCR1_CSR_CMD_SET</span>   <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="n">csr_rd_data</span> <span class="o">|</span> <span class="n">csr2hdu_wdata_i</span><span class="p">;</span>
-<a id="l-653" name="l-653"></a>            <span class="n">SCR1_CSR_CMD_CLEAR</span> <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="n">csr_rd_data</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">csr2hdu_wdata_i</span><span class="p">);</span>
-<a id="l-654" name="l-654"></a>            <span class="k">default</span>            <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>
-<a id="l-655" name="l-655"></a>        <span class="k">endcase</span>
-<a id="l-656" name="l-656"></a>    <span class="k">end</span>
-<a id="l-657" name="l-657"></a><span class="k">end</span> <span class="o">:</span> <span class="n">csr_if_write</span>
+<a id="l-649" name="l-649"></a><span class="c1">// CSRs read interface</span>
+<a id="l-650" name="l-650"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-651" name="l-651"></a>
+<a id="l-652" name="l-652"></a><span class="k">assign</span> <span class="n">csr_rd_data</span> <span class="o">=</span> <span class="n">csr_dcsr_out</span> <span class="o">|</span> <span class="n">csr_dpc_out</span> <span class="o">|</span> <span class="n">csr_dscratch0_out</span><span class="p">;</span>
+<a id="l-653" name="l-653"></a>
+<a id="l-654" name="l-654"></a><span class="c1">// CSRs write interface</span>
+<a id="l-655" name="l-655"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-656" name="l-656"></a>
+<a id="l-657" name="l-657"></a><span class="k">assign</span> <span class="n">csr_wr</span> <span class="o">=</span> <span class="n">csr2hdu_req_i</span><span class="p">;</span>
 <a id="l-658" name="l-658"></a>
-<a id="l-659" name="l-659"></a><span class="c1">// Debug Control and Status register</span>
-<a id="l-660" name="l-660"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-661" name="l-661"></a><span class="c1">// Setups the HART behaviour in Debug Mode and holds Debug status information</span>
-<a id="l-662" name="l-662"></a>
-<a id="l-663" name="l-663"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-664" name="l-664"></a>    <span class="n">csr_dcsr_in</span>                 <span class="o">=</span> <span class="n">csr_wr_data</span><span class="p">;</span>
-<a id="l-665" name="l-665"></a>    <span class="n">csr_dcsr_wr</span>                 <span class="o">=</span> <span class="n">csr_wr</span> <span class="o">&amp;</span> <span class="n">csr_dcsr_sel</span><span class="p">;</span>
-<a id="l-666" name="l-666"></a>
-<a id="l-667" name="l-667"></a>    <span class="n">csr_dcsr_out</span>                <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-668" name="l-668"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">csr_dcsr_sel</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-669" name="l-669"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">xdebugver</span>  <span class="o">=</span> <span class="n">SCR1_HDU_DEBUGCSR_DCSR_XDEBUGVER</span><span class="p">;</span>
-<a id="l-670" name="l-670"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">ebreakm</span>    <span class="o">=</span> <span class="n">csr_dcsr_ebreakm</span><span class="p">;</span>
-<a id="l-671" name="l-671"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">stepie</span>     <span class="o">=</span> <span class="n">csr_dcsr_stepie</span><span class="p">;</span>
-<a id="l-672" name="l-672"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">step</span>       <span class="o">=</span> <span class="n">csr_dcsr_step</span><span class="p">;</span>
-<a id="l-673" name="l-673"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">prv</span>        <span class="o">=</span> <span class="mb">2&#39;b11</span><span class="p">;</span>
-<a id="l-674" name="l-674"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">cause</span>      <span class="o">=</span> <span class="n">csr_dcsr_cause</span><span class="p">;</span>
-<a id="l-675" name="l-675"></a>    <span class="k">end</span>
-<a id="l-676" name="l-676"></a><span class="k">end</span>
-<a id="l-677" name="l-677"></a>
-<a id="l-678" name="l-678"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-679" name="l-679"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-680" name="l-680"></a>        <span class="n">csr_dcsr_ebreakm</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-681" name="l-681"></a>        <span class="n">csr_dcsr_stepie</span>         <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-682" name="l-682"></a>        <span class="n">csr_dcsr_step</span>           <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-683" name="l-683"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-684" name="l-684"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">csr_dcsr_wr</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-685" name="l-685"></a>            <span class="n">csr_dcsr_ebreakm</span>    <span class="o">&lt;=</span> <span class="n">csr_dcsr_in</span><span class="p">.</span><span class="n">ebreakm</span><span class="p">;</span>
-<a id="l-686" name="l-686"></a>            <span class="n">csr_dcsr_stepie</span>     <span class="o">&lt;=</span> <span class="n">csr_dcsr_in</span><span class="p">.</span><span class="n">stepie</span><span class="p">;</span>
-<a id="l-687" name="l-687"></a>            <span class="n">csr_dcsr_step</span>       <span class="o">&lt;=</span> <span class="n">csr_dcsr_in</span><span class="p">.</span><span class="n">step</span><span class="p">;</span>
-<a id="l-688" name="l-688"></a>        <span class="k">end</span>
-<a id="l-689" name="l-689"></a>    <span class="k">end</span>
-<a id="l-690" name="l-690"></a><span class="k">end</span>
-<a id="l-691" name="l-691"></a>
-<a id="l-692" name="l-692"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-693" name="l-693"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-694" name="l-694"></a>        <span class="n">csr_dcsr_cause</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-695" name="l-695"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-696" name="l-696"></a>        <span class="k">if</span><span class="p">(</span><span class="n">csr_upd_on_halt</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-697" name="l-697"></a>            <span class="n">csr_dcsr_cause</span> <span class="o">&lt;=</span> <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">cause</span><span class="p">;</span>
-<a id="l-698" name="l-698"></a>        <span class="k">end</span>
-<a id="l-699" name="l-699"></a>    <span class="k">end</span>
-<a id="l-700" name="l-700"></a><span class="k">end</span>
-<a id="l-701" name="l-701"></a>
-<a id="l-702" name="l-702"></a><span class="c1">// Debug PC register</span>
-<a id="l-703" name="l-703"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-704" name="l-704"></a><span class="c1">// Saves the virtual address of the next instruction to be executed when Debug</span>
-<a id="l-705" name="l-705"></a><span class="c1">// Mode is entered. Could be changed by debugger</span>
-<a id="l-706" name="l-706"></a>
-<a id="l-707" name="l-707"></a><span class="k">assign</span> <span class="n">csr_dpc_wr</span>   <span class="o">=</span> <span class="n">csr_wr</span> <span class="o">&amp;</span> <span class="n">csr_dpc_sel</span><span class="p">;</span>
-<a id="l-708" name="l-708"></a>
-<a id="l-709" name="l-709"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-710" name="l-710"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-711" name="l-711"></a>        <span class="n">csr_dpc_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-712" name="l-712"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-713" name="l-713"></a>        <span class="n">csr_dpc_ff</span> <span class="o">&lt;=</span> <span class="n">csr_dpc_next</span><span class="p">;</span>
-<a id="l-714" name="l-714"></a>    <span class="k">end</span>
-<a id="l-715" name="l-715"></a><span class="k">end</span>
-<a id="l-716" name="l-716"></a>
-<a id="l-717" name="l-717"></a><span class="k">assign</span> <span class="n">csr_dpc_next</span> <span class="o">=</span> <span class="n">csr_upd_on_halt</span> <span class="o">?</span> <span class="n">pipe2hdu_pc_curr_i</span>
-<a id="l-718" name="l-718"></a>                    <span class="o">:</span> <span class="n">csr_dpc_wr</span>      <span class="o">?</span> <span class="n">csr_wr_data</span>
-<a id="l-719" name="l-719"></a>                                      <span class="o">:</span> <span class="n">csr_dpc_ff</span><span class="p">;</span>
-<a id="l-720" name="l-720"></a><span class="k">assign</span> <span class="n">csr_dpc_out</span>  <span class="o">=</span> <span class="n">csr_dpc_sel</span>     <span class="o">?</span> <span class="n">csr_dpc_ff</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-659" name="l-659"></a><span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">csr_if_write</span>
+<a id="l-660" name="l-660"></a>    <span class="n">csr_wr_data</span>     <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-661" name="l-661"></a>
+<a id="l-662" name="l-662"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">csr2hdu_req_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-663" name="l-663"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">csr2hdu_cmd_i</span><span class="p">)</span>
+<a id="l-664" name="l-664"></a>            <span class="n">SCR1_CSR_CMD_WRITE</span> <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="n">csr2hdu_wdata_i</span><span class="p">;</span>
+<a id="l-665" name="l-665"></a>            <span class="n">SCR1_CSR_CMD_SET</span>   <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="n">csr_rd_data</span> <span class="o">|</span> <span class="n">csr2hdu_wdata_i</span><span class="p">;</span>
+<a id="l-666" name="l-666"></a>            <span class="n">SCR1_CSR_CMD_CLEAR</span> <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="n">csr_rd_data</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">csr2hdu_wdata_i</span><span class="p">);</span>
+<a id="l-667" name="l-667"></a>            <span class="k">default</span>            <span class="o">:</span> <span class="n">csr_wr_data</span> <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>
+<a id="l-668" name="l-668"></a>        <span class="k">endcase</span>
+<a id="l-669" name="l-669"></a>    <span class="k">end</span>
+<a id="l-670" name="l-670"></a><span class="k">end</span> <span class="o">:</span> <span class="n">csr_if_write</span>
+<a id="l-671" name="l-671"></a>
+<a id="l-672" name="l-672"></a><span class="c1">// Debug Control and Status register</span>
+<a id="l-673" name="l-673"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-674" name="l-674"></a><span class="c1">// Setups the HART behaviour in Debug Mode and holds Debug status information</span>
+<a id="l-675" name="l-675"></a>
+<a id="l-676" name="l-676"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-677" name="l-677"></a>    <span class="n">csr_dcsr_in</span>                 <span class="o">=</span> <span class="n">csr_wr_data</span><span class="p">;</span>
+<a id="l-678" name="l-678"></a>    <span class="n">csr_dcsr_wr</span>                 <span class="o">=</span> <span class="n">csr_wr</span> <span class="o">&amp;</span> <span class="n">csr_dcsr_sel</span><span class="p">;</span>
+<a id="l-679" name="l-679"></a>
+<a id="l-680" name="l-680"></a>    <span class="n">csr_dcsr_out</span>                <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-681" name="l-681"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">csr_dcsr_sel</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-682" name="l-682"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">xdebugver</span>  <span class="o">=</span> <span class="n">SCR1_HDU_DEBUGCSR_DCSR_XDEBUGVER</span><span class="p">;</span>
+<a id="l-683" name="l-683"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">ebreakm</span>    <span class="o">=</span> <span class="n">csr_dcsr_ebreakm</span><span class="p">;</span>
+<a id="l-684" name="l-684"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">stepie</span>     <span class="o">=</span> <span class="n">csr_dcsr_stepie</span><span class="p">;</span>
+<a id="l-685" name="l-685"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">step</span>       <span class="o">=</span> <span class="n">csr_dcsr_step</span><span class="p">;</span>
+<a id="l-686" name="l-686"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">prv</span>        <span class="o">=</span> <span class="mb">2&#39;b11</span><span class="p">;</span>
+<a id="l-687" name="l-687"></a>        <span class="n">csr_dcsr_out</span><span class="p">.</span><span class="n">cause</span>      <span class="o">=</span> <span class="n">csr_dcsr_cause</span><span class="p">;</span>
+<a id="l-688" name="l-688"></a>    <span class="k">end</span>
+<a id="l-689" name="l-689"></a><span class="k">end</span>
+<a id="l-690" name="l-690"></a>
+<a id="l-691" name="l-691"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-692" name="l-692"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-693" name="l-693"></a>        <span class="n">csr_dcsr_ebreakm</span>        <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-694" name="l-694"></a>        <span class="n">csr_dcsr_stepie</span>         <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-695" name="l-695"></a>        <span class="n">csr_dcsr_step</span>           <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-696" name="l-696"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-697" name="l-697"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">csr_dcsr_wr</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-698" name="l-698"></a>            <span class="n">csr_dcsr_ebreakm</span>    <span class="o">&lt;=</span> <span class="n">csr_dcsr_in</span><span class="p">.</span><span class="n">ebreakm</span><span class="p">;</span>
+<a id="l-699" name="l-699"></a>            <span class="n">csr_dcsr_stepie</span>     <span class="o">&lt;=</span> <span class="n">csr_dcsr_in</span><span class="p">.</span><span class="n">stepie</span><span class="p">;</span>
+<a id="l-700" name="l-700"></a>            <span class="n">csr_dcsr_step</span>       <span class="o">&lt;=</span> <span class="n">csr_dcsr_in</span><span class="p">.</span><span class="n">step</span><span class="p">;</span>
+<a id="l-701" name="l-701"></a>        <span class="k">end</span>
+<a id="l-702" name="l-702"></a>    <span class="k">end</span>
+<a id="l-703" name="l-703"></a><span class="k">end</span>
+<a id="l-704" name="l-704"></a>
+<a id="l-705" name="l-705"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">negedge</span> <span class="n">rst_n</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-706" name="l-706"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-707" name="l-707"></a>        <span class="n">csr_dcsr_cause</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-708" name="l-708"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-709" name="l-709"></a>        <span class="k">if</span><span class="p">(</span><span class="n">csr_upd_on_halt</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-710" name="l-710"></a>            <span class="n">csr_dcsr_cause</span> <span class="o">&lt;=</span> <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">cause</span><span class="p">;</span>
+<a id="l-711" name="l-711"></a>        <span class="k">end</span>
+<a id="l-712" name="l-712"></a>    <span class="k">end</span>
+<a id="l-713" name="l-713"></a><span class="k">end</span>
+<a id="l-714" name="l-714"></a>
+<a id="l-715" name="l-715"></a><span class="c1">// Debug PC register</span>
+<a id="l-716" name="l-716"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-717" name="l-717"></a><span class="c1">// Saves the virtual address of the next instruction to be executed when Debug</span>
+<a id="l-718" name="l-718"></a><span class="c1">// Mode is entered. Could be changed by debugger</span>
+<a id="l-719" name="l-719"></a>
+<a id="l-720" name="l-720"></a><span class="k">assign</span> <span class="n">csr_dpc_wr</span>   <span class="o">=</span> <span class="n">csr_wr</span> <span class="o">&amp;</span> <span class="n">csr_dpc_sel</span><span class="p">;</span>
 <a id="l-721" name="l-721"></a>
-<a id="l-722" name="l-722"></a><span class="c1">// Debug Scratch 0 register</span>
-<a id="l-723" name="l-723"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-724" name="l-724"></a>
-<a id="l-725" name="l-725"></a><span class="k">assign</span> <span class="n">csr_dscratch0_resp</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">dm2hdu_dreg_resp_i</span> <span class="o">|</span> <span class="n">dm2hdu_dreg_fail_i</span><span class="p">)</span>
-<a id="l-726" name="l-726"></a>                          <span class="o">?</span> <span class="n">SCR1_CSR_RESP_ER</span>
-<a id="l-727" name="l-727"></a>                          <span class="o">:</span> <span class="n">SCR1_CSR_RESP_OK</span><span class="p">;</span>
-<a id="l-728" name="l-728"></a><span class="k">assign</span> <span class="n">csr_dscratch0_out</span>  <span class="o">=</span> <span class="n">csr_dscratch0_sel</span> <span class="o">?</span> <span class="n">dm2hdu_dreg_rdata_i</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-722" name="l-722"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-723" name="l-723"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-724" name="l-724"></a>        <span class="n">csr_dpc_ff</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-725" name="l-725"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">clk_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-726" name="l-726"></a>        <span class="n">csr_dpc_ff</span> <span class="o">&lt;=</span> <span class="n">csr_dpc_next</span><span class="p">;</span>
+<a id="l-727" name="l-727"></a>    <span class="k">end</span>
+<a id="l-728" name="l-728"></a><span class="k">end</span>
 <a id="l-729" name="l-729"></a>
-<a id="l-730" name="l-730"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-731" name="l-731"></a><span class="c1">// HDU &lt;-&gt; DM interface</span>
-<a id="l-732" name="l-732"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-733" name="l-733"></a>
-<a id="l-734" name="l-734"></a><span class="k">assign</span> <span class="n">hdu2dm_hart_event_o</span> <span class="o">=</span> <span class="n">dfsm_event</span><span class="p">;</span>
-<a id="l-735" name="l-735"></a>
-<a id="l-736" name="l-736"></a><span class="c1">// HART status</span>
-<a id="l-737" name="l-737"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-738" name="l-738"></a>    <span class="n">hdu2dm_hart_status_o</span>           <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-739" name="l-739"></a>    <span class="n">hdu2dm_hart_status_o</span><span class="p">.</span><span class="n">dbg_state</span> <span class="o">=</span> <span class="n">dbg_state</span><span class="p">;</span>
-<a id="l-740" name="l-740"></a>    <span class="n">hdu2dm_hart_status_o</span><span class="p">.</span><span class="n">except</span>    <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">except</span><span class="p">;</span>
-<a id="l-741" name="l-741"></a>    <span class="n">hdu2dm_hart_status_o</span><span class="p">.</span><span class="n">ebreak</span>    <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">cause</span> <span class="o">==</span> <span class="n">SCR1_HDU_HALTCAUSE_EBREAK</span><span class="p">);</span>
-<a id="l-742" name="l-742"></a><span class="k">end</span>
-<a id="l-743" name="l-743"></a>
-<a id="l-744" name="l-744"></a><span class="k">assign</span> <span class="n">hdu2dm_cmd_rcode_o</span> <span class="o">=</span> <span class="n">dbg_state_reset</span>
-<a id="l-745" name="l-745"></a>                          <span class="o">?</span> <span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">|</span> <span class="o">~</span><span class="n">pipe2hdu_init_pc_i</span> <span class="o">|</span> <span class="o">~</span><span class="n">dm2hdu_cmd_req_i</span>
-<a id="l-746" name="l-746"></a>                          <span class="o">:</span> <span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">|</span> <span class="o">~</span><span class="n">dfsm_update</span><span class="p">;</span>
-<a id="l-747" name="l-747"></a>
-<a id="l-748" name="l-748"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-749" name="l-749"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">dbg_state</span><span class="p">)</span>
-<a id="l-750" name="l-750"></a>        <span class="nl">SCR1_HDU_DBGSTATE_RESET:</span> <span class="k">begin</span>
-<a id="l-751" name="l-751"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_init_pc_i</span> <span class="o">&amp;</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
-<a id="l-752" name="l-752"></a>        <span class="k">end</span>
-<a id="l-753" name="l-753"></a>
-<a id="l-754" name="l-754"></a>        <span class="nl">SCR1_HDU_DBGSTATE_RUN:</span> <span class="k">begin</span>
-<a id="l-755" name="l-755"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
-<a id="l-756" name="l-756"></a>        <span class="k">end</span>
-<a id="l-757" name="l-757"></a>
-<a id="l-758" name="l-758"></a>        <span class="nl">SCR1_HDU_DBGSTATE_DHALTED:</span> <span class="k">begin</span>
-<a id="l-759" name="l-759"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">?</span> <span class="n">dfsm_update</span> <span class="o">:</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
-<a id="l-760" name="l-760"></a>        <span class="k">end</span>
-<a id="l-761" name="l-761"></a>
-<a id="l-762" name="l-762"></a>        <span class="nl">SCR1_HDU_DBGSTATE_DRUN:</span> <span class="k">begin</span>
-<a id="l-763" name="l-763"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">|</span> <span class="n">dfsm_update</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
-<a id="l-764" name="l-764"></a>        <span class="k">end</span>
-<a id="l-765" name="l-765"></a>    <span class="k">endcase</span>
-<a id="l-766" name="l-766"></a><span class="k">end</span>
-<a id="l-767" name="l-767"></a>
-<a id="l-768" name="l-768"></a><span class="k">assign</span> <span class="n">hdu2dm_pbuf_addr_o</span>  <span class="o">=</span> <span class="n">pbuf_addr_ff</span><span class="p">;</span>
-<a id="l-769" name="l-769"></a><span class="k">assign</span> <span class="n">hdu2dm_dreg_req_o</span>   <span class="o">=</span> <span class="n">csr_dscratch0_sel</span><span class="p">;</span>
-<a id="l-770" name="l-770"></a><span class="k">assign</span> <span class="n">hdu2dm_dreg_wr_o</span>    <span class="o">=</span> <span class="n">csr_wr</span> <span class="o">&amp;</span> <span class="n">csr_dscratch0_sel</span><span class="p">;</span>
-<a id="l-771" name="l-771"></a><span class="k">assign</span> <span class="n">hdu2dm_dreg_wdata_o</span> <span class="o">=</span> <span class="n">csr_wr_data</span><span class="p">;</span>
+<a id="l-730" name="l-730"></a><span class="k">assign</span> <span class="n">csr_dpc_next</span> <span class="o">=</span> <span class="n">csr_upd_on_halt</span> <span class="o">?</span> <span class="n">pipe2hdu_pc_curr_i</span>
+<a id="l-731" name="l-731"></a>                    <span class="o">:</span> <span class="n">csr_dpc_wr</span>      <span class="o">?</span> <span class="n">csr_wr_data</span>
+<a id="l-732" name="l-732"></a>                                      <span class="o">:</span> <span class="n">csr_dpc_ff</span><span class="p">;</span>
+<a id="l-733" name="l-733"></a><span class="k">assign</span> <span class="n">csr_dpc_out</span>  <span class="o">=</span> <span class="n">csr_dpc_sel</span>     <span class="o">?</span> <span class="n">csr_dpc_ff</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-734" name="l-734"></a>
+<a id="l-735" name="l-735"></a><span class="c1">// Debug Scratch 0 register</span>
+<a id="l-736" name="l-736"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-737" name="l-737"></a>
+<a id="l-738" name="l-738"></a><span class="k">assign</span> <span class="n">csr_dscratch0_resp</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">dm2hdu_dreg_resp_i</span> <span class="o">|</span> <span class="n">dm2hdu_dreg_fail_i</span><span class="p">)</span>
+<a id="l-739" name="l-739"></a>                          <span class="o">?</span> <span class="n">SCR1_CSR_RESP_ER</span>
+<a id="l-740" name="l-740"></a>                          <span class="o">:</span> <span class="n">SCR1_CSR_RESP_OK</span><span class="p">;</span>
+<a id="l-741" name="l-741"></a><span class="k">assign</span> <span class="n">csr_dscratch0_out</span>  <span class="o">=</span> <span class="n">csr_dscratch0_sel</span> <span class="o">?</span> <span class="n">dm2hdu_dreg_rdata_i</span> <span class="o">:</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-742" name="l-742"></a>
+<a id="l-743" name="l-743"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-744" name="l-744"></a><span class="c1">// HDU &lt;-&gt; DM interface</span>
+<a id="l-745" name="l-745"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-746" name="l-746"></a>
+<a id="l-747" name="l-747"></a><span class="k">assign</span> <span class="n">hdu2dm_hart_event_o</span> <span class="o">=</span> <span class="n">dfsm_event</span><span class="p">;</span>
+<a id="l-748" name="l-748"></a>
+<a id="l-749" name="l-749"></a><span class="c1">// HART status</span>
+<a id="l-750" name="l-750"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-751" name="l-751"></a>    <span class="n">hdu2dm_hart_status_o</span>           <span class="o">=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-752" name="l-752"></a>    <span class="n">hdu2dm_hart_status_o</span><span class="p">.</span><span class="n">dbg_state</span> <span class="o">=</span> <span class="n">dbg_state</span><span class="p">;</span>
+<a id="l-753" name="l-753"></a>    <span class="n">hdu2dm_hart_status_o</span><span class="p">.</span><span class="n">except</span>    <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">except</span><span class="p">;</span>
+<a id="l-754" name="l-754"></a>    <span class="n">hdu2dm_hart_status_o</span><span class="p">.</span><span class="n">ebreak</span>    <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">hart_haltstatus</span><span class="p">.</span><span class="n">cause</span> <span class="o">==</span> <span class="n">SCR1_HDU_HALTCAUSE_EBREAK</span><span class="p">);</span>
+<a id="l-755" name="l-755"></a><span class="k">end</span>
+<a id="l-756" name="l-756"></a>
+<a id="l-757" name="l-757"></a><span class="k">assign</span> <span class="n">hdu2dm_cmd_rcode_o</span> <span class="o">=</span> <span class="n">dbg_state_reset</span>
+<a id="l-758" name="l-758"></a>                          <span class="o">?</span> <span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">|</span> <span class="o">~</span><span class="n">pipe2hdu_init_pc_i</span> <span class="o">|</span> <span class="o">~</span><span class="n">dm2hdu_cmd_req_i</span>
+<a id="l-759" name="l-759"></a>                          <span class="o">:</span> <span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">|</span> <span class="o">~</span><span class="n">dfsm_update</span><span class="p">;</span>
+<a id="l-760" name="l-760"></a>
+<a id="l-761" name="l-761"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-762" name="l-762"></a>    <span class="n">hdu2dm_cmd_resp_o</span>   <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-763" name="l-763"></a>
+<a id="l-764" name="l-764"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">dbg_state</span><span class="p">)</span>
+<a id="l-765" name="l-765"></a>        <span class="nl">SCR1_HDU_DBGSTATE_RESET:</span> <span class="k">begin</span>
+<a id="l-766" name="l-766"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_init_pc_i</span> <span class="o">&amp;</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
+<a id="l-767" name="l-767"></a>        <span class="k">end</span>
+<a id="l-768" name="l-768"></a>
+<a id="l-769" name="l-769"></a>        <span class="nl">SCR1_HDU_DBGSTATE_RUN:</span> <span class="k">begin</span>
+<a id="l-770" name="l-770"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="n">dfsm_update</span> <span class="o">&amp;</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
+<a id="l-771" name="l-771"></a>        <span class="k">end</span>
 <a id="l-772" name="l-772"></a>
-<a id="l-773" name="l-773"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-774" name="l-774"></a><span class="c1">// HDU &lt;-&gt; EXU interface</span>
-<a id="l-775" name="l-775"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-773" name="l-773"></a>        <span class="nl">SCR1_HDU_DBGSTATE_DHALTED:</span> <span class="k">begin</span>
+<a id="l-774" name="l-774"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">?</span> <span class="n">dfsm_update</span> <span class="o">:</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
+<a id="l-775" name="l-775"></a>        <span class="k">end</span>
 <a id="l-776" name="l-776"></a>
-<a id="l-777" name="l-777"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_halted_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">)</span>
-<a id="l-778" name="l-778"></a>                               <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dbg_state_run</span><span class="p">);</span>
-<a id="l-779" name="l-779"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_run_start_o</span> <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="n">dfsm_update</span><span class="p">;</span>
-<a id="l-780" name="l-780"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_halt2run_o</span>  <span class="o">=</span> <span class="n">hdu2exu_dbg_halted_o</span> <span class="o">&amp;</span> <span class="n">hart_resume_req</span>
-<a id="l-781" name="l-781"></a><span class="no">`ifdef</span> <span class="n">SCR1_CLKCTRL_EN</span>
-<a id="l-782" name="l-782"></a>                               <span class="o">&amp;</span> <span class="n">clk_pipe_en</span>
-<a id="l-783" name="l-783"></a><span class="no">`endif</span> <span class="c1">// SCR1_CLKCTRL_EN</span>
-<a id="l-784" name="l-784"></a>                               <span class="p">;</span>
-<a id="l-785" name="l-785"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_run2halt_o</span>  <span class="o">=</span> <span class="n">hart_halt_ack</span><span class="p">;</span>
+<a id="l-777" name="l-777"></a>        <span class="nl">SCR1_HDU_DBGSTATE_DRUN:</span> <span class="k">begin</span>
+<a id="l-778" name="l-778"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">|</span> <span class="n">dfsm_update</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">dm2hdu_cmd_req_i</span><span class="p">;</span>
+<a id="l-779" name="l-779"></a>        <span class="k">end</span>
+<a id="l-780" name="l-780"></a>
+<a id="l-781" name="l-781"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a id="l-782" name="l-782"></a>            <span class="n">hdu2dm_cmd_resp_o</span>  <span class="o">=</span> <span class="m">&#39;X</span><span class="p">;</span>
+<a id="l-783" name="l-783"></a>        <span class="k">end</span>
+<a id="l-784" name="l-784"></a>    <span class="k">endcase</span>
+<a id="l-785" name="l-785"></a><span class="k">end</span>
 <a id="l-786" name="l-786"></a>
-<a id="l-787" name="l-787"></a><span class="k">assign</span> <span class="n">hdu2exu_pbuf_fetch_o</span>    <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span><span class="p">;</span>
-<a id="l-788" name="l-788"></a><span class="k">assign</span> <span class="n">hdu2exu_irq_dsbl_o</span>      <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span><span class="p">;</span>
-<a id="l-789" name="l-789"></a><span class="k">assign</span> <span class="n">hdu2exu_pc_advmt_dsbl_o</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span><span class="p">;</span>
-<a id="l-790" name="l-790"></a><span class="c1">// No change in arch. state if dmode caused by breakpoint</span>
-<a id="l-791" name="l-791"></a><span class="k">assign</span> <span class="n">hdu2exu_no_commit_o</span>     <span class="o">=</span> <span class="n">dmode_cause_ebreak</span>
-<a id="l-792" name="l-792"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
-<a id="l-793" name="l-793"></a>                               <span class="o">|</span> <span class="n">dmode_cause_tmreq</span>
-<a id="l-794" name="l-794"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
-<a id="l-795" name="l-795"></a>                               <span class="p">;</span>
-<a id="l-796" name="l-796"></a><span class="k">assign</span> <span class="n">hdu2exu_dmode_sstep_en_o</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span><span class="p">;</span>
-<a id="l-797" name="l-797"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_new_pc_o</span>     <span class="o">=</span> <span class="n">csr_dpc_ff</span><span class="p">;</span>
-<a id="l-798" name="l-798"></a>
-<a id="l-799" name="l-799"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-800" name="l-800"></a><span class="c1">// HDU &lt;-&gt; IFU interface</span>
-<a id="l-801" name="l-801"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-802" name="l-802"></a>
-<a id="l-803" name="l-803"></a><span class="k">assign</span> <span class="n">hdu2ifu_pbuf_instr_vd_o</span>  <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_fetch</span> <span class="o">|</span> <span class="n">pbuf_fsm_excinj</span><span class="p">)</span>
-<a id="l-804" name="l-804"></a>                                <span class="o">&amp;</span> <span class="o">~</span><span class="n">pbuf_instr_wait_latching</span><span class="p">;</span>
-<a id="l-805" name="l-805"></a><span class="k">assign</span> <span class="n">hdu2ifu_pbuf_instr_err_o</span> <span class="o">=</span> <span class="n">pbuf_fsm_excinj</span><span class="p">;</span>
-<a id="l-806" name="l-806"></a>
-<a id="l-807" name="l-807"></a><span class="k">generate</span> <span class="k">if</span> <span class="p">(</span><span class="n">HART_PBUF_INSTR_REGOUT_EN</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-808" name="l-808"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-809" name="l-809"></a>        <span class="n">hdu2ifu_pbuf_instr_o</span> <span class="o">&lt;=</span> <span class="n">dm2hdu_pbuf_instr_i</span><span class="p">;</span>
-<a id="l-810" name="l-810"></a>    <span class="k">end</span>
-<a id="l-811" name="l-811"></a><span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-812" name="l-812"></a>    <span class="k">assign</span> <span class="n">hdu2ifu_pbuf_instr_o</span> <span class="o">=</span> <span class="n">dm2hdu_pbuf_instr_i</span><span class="p">;</span>
-<a id="l-813" name="l-813"></a><span class="k">end</span> <span class="k">endgenerate</span>
-<a id="l-814" name="l-814"></a>
-<a id="l-815" name="l-815"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-816" name="l-816"></a><span class="c1">// HDU &lt;-&gt; CSR interface</span>
-<a id="l-817" name="l-817"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-818" name="l-818"></a>
-<a id="l-819" name="l-819"></a><span class="k">assign</span> <span class="n">csr_addr_dscratch0</span> <span class="o">=</span> <span class="p">(</span><span class="n">csr2hdu_addr_i</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGCSR_OFFS_DSCRATCH0</span><span class="p">);</span>
-<a id="l-820" name="l-820"></a>
-<a id="l-821" name="l-821"></a><span class="k">assign</span> <span class="n">hdu2csr_resp_o</span>  <span class="o">=</span> <span class="o">~</span><span class="n">dbg_state_drun</span>    <span class="o">?</span> <span class="n">SCR1_CSR_RESP_ER</span>
-<a id="l-822" name="l-822"></a>                       <span class="o">:</span> <span class="n">csr_addr_dscratch0</span> <span class="o">?</span> <span class="n">csr_dscratch0_resp</span>
-<a id="l-823" name="l-823"></a>                       <span class="o">:</span> <span class="n">csr2hdu_req_i</span>      <span class="o">?</span> <span class="n">SCR1_CSR_RESP_OK</span>
-<a id="l-824" name="l-824"></a>                                            <span class="o">:</span> <span class="n">SCR1_CSR_RESP_ER</span><span class="p">;</span>
-<a id="l-825" name="l-825"></a><span class="k">assign</span> <span class="n">hdu2csr_rdata_o</span> <span class="o">=</span> <span class="n">csr_rd_data</span><span class="p">;</span>
-<a id="l-826" name="l-826"></a>
-<a id="l-827" name="l-827"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
-<a id="l-828" name="l-828"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-829" name="l-829"></a><span class="c1">// HDU &lt;-&gt; TDU interface</span>
-<a id="l-830" name="l-830"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-831" name="l-831"></a>
-<a id="l-832" name="l-832"></a><span class="k">assign</span> <span class="n">hdu2tdu_hwbrk_dsbl_o</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span><span class="p">;</span>
-<a id="l-833" name="l-833"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
-<a id="l-834" name="l-834"></a>
-<a id="l-835" name="l-835"></a><span class="no">`ifdef</span> <span class="n">SCR1_TRGT_SIMULATION</span>
-<a id="l-836" name="l-836"></a><span class="c1">//-------------------------------------------------------------------------------</span>
-<a id="l-837" name="l-837"></a><span class="c1">// Assertion</span>
-<a id="l-838" name="l-838"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a id="l-787" name="l-787"></a><span class="k">assign</span> <span class="n">hdu2dm_pbuf_addr_o</span>  <span class="o">=</span> <span class="n">pbuf_addr_ff</span><span class="p">;</span>
+<a id="l-788" name="l-788"></a><span class="k">assign</span> <span class="n">hdu2dm_dreg_req_o</span>   <span class="o">=</span> <span class="n">csr_dscratch0_sel</span><span class="p">;</span>
+<a id="l-789" name="l-789"></a><span class="k">assign</span> <span class="n">hdu2dm_dreg_wr_o</span>    <span class="o">=</span> <span class="n">csr_wr</span> <span class="o">&amp;</span> <span class="n">csr_dscratch0_sel</span><span class="p">;</span>
+<a id="l-790" name="l-790"></a><span class="k">assign</span> <span class="n">hdu2dm_dreg_wdata_o</span> <span class="o">=</span> <span class="n">csr_wr_data</span><span class="p">;</span>
+<a id="l-791" name="l-791"></a>
+<a id="l-792" name="l-792"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-793" name="l-793"></a><span class="c1">// HDU &lt;-&gt; EXU interface</span>
+<a id="l-794" name="l-794"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-795" name="l-795"></a>
+<a id="l-796" name="l-796"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_halted_o</span>    <span class="o">=</span> <span class="p">(</span><span class="n">dbg_state_next</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">)</span>
+<a id="l-797" name="l-797"></a>                               <span class="o">|</span> <span class="p">(</span><span class="o">~</span><span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dbg_state_run</span><span class="p">);</span>
+<a id="l-798" name="l-798"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_run_start_o</span> <span class="o">=</span> <span class="n">dbg_state_dhalted</span> <span class="o">&amp;</span> <span class="n">pipe2hdu_rdc_qlfy_i</span> <span class="o">&amp;</span> <span class="n">dfsm_update</span><span class="p">;</span>
+<a id="l-799" name="l-799"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_halt2run_o</span>  <span class="o">=</span> <span class="n">hdu2exu_dbg_halted_o</span> <span class="o">&amp;</span> <span class="n">hart_resume_req</span>
+<a id="l-800" name="l-800"></a><span class="no">`ifdef</span> <span class="n">SCR1_CLKCTRL_EN</span>
+<a id="l-801" name="l-801"></a>                               <span class="o">&amp;</span> <span class="n">clk_pipe_en</span>
+<a id="l-802" name="l-802"></a><span class="no">`endif</span> <span class="c1">// SCR1_CLKCTRL_EN</span>
+<a id="l-803" name="l-803"></a>                               <span class="p">;</span>
+<a id="l-804" name="l-804"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_run2halt_o</span>  <span class="o">=</span> <span class="n">hart_halt_ack</span><span class="p">;</span>
+<a id="l-805" name="l-805"></a>
+<a id="l-806" name="l-806"></a><span class="k">assign</span> <span class="n">hdu2exu_pbuf_fetch_o</span>    <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">fetch_src</span><span class="p">;</span>
+<a id="l-807" name="l-807"></a><span class="k">assign</span> <span class="n">hdu2exu_irq_dsbl_o</span>      <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">irq_dsbl</span><span class="p">;</span>
+<a id="l-808" name="l-808"></a><span class="k">assign</span> <span class="n">hdu2exu_pc_advmt_dsbl_o</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">pc_advmt_dsbl</span><span class="p">;</span>
+<a id="l-809" name="l-809"></a><span class="c1">// No change in arch. state if dmode caused by breakpoint</span>
+<a id="l-810" name="l-810"></a><span class="k">assign</span> <span class="n">hdu2exu_no_commit_o</span>     <span class="o">=</span> <span class="n">dmode_cause_ebreak</span>
+<a id="l-811" name="l-811"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
+<a id="l-812" name="l-812"></a>                               <span class="o">|</span> <span class="n">dmode_cause_tmreq</span>
+<a id="l-813" name="l-813"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
+<a id="l-814" name="l-814"></a>                               <span class="p">;</span>
+<a id="l-815" name="l-815"></a><span class="k">assign</span> <span class="n">hdu2exu_dmode_sstep_en_o</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">redirect</span><span class="p">.</span><span class="n">sstep</span><span class="p">;</span>
+<a id="l-816" name="l-816"></a><span class="k">assign</span> <span class="n">hdu2exu_dbg_new_pc_o</span>     <span class="o">=</span> <span class="n">csr_dpc_ff</span><span class="p">;</span>
+<a id="l-817" name="l-817"></a>
+<a id="l-818" name="l-818"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-819" name="l-819"></a><span class="c1">// HDU &lt;-&gt; IFU interface</span>
+<a id="l-820" name="l-820"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-821" name="l-821"></a>
+<a id="l-822" name="l-822"></a><span class="k">assign</span> <span class="n">hdu2ifu_pbuf_instr_vd_o</span>  <span class="o">=</span> <span class="p">(</span><span class="n">pbuf_fsm_fetch</span> <span class="o">|</span> <span class="n">pbuf_fsm_excinj</span><span class="p">)</span>
+<a id="l-823" name="l-823"></a>                                <span class="o">&amp;</span> <span class="o">~</span><span class="n">pbuf_instr_wait_latching</span><span class="p">;</span>
+<a id="l-824" name="l-824"></a><span class="k">assign</span> <span class="n">hdu2ifu_pbuf_instr_err_o</span> <span class="o">=</span> <span class="n">pbuf_fsm_excinj</span><span class="p">;</span>
+<a id="l-825" name="l-825"></a>
+<a id="l-826" name="l-826"></a><span class="k">generate</span> <span class="k">if</span> <span class="p">(</span><span class="n">HART_PBUF_INSTR_REGOUT_EN</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-827" name="l-827"></a>    <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-828" name="l-828"></a>        <span class="n">hdu2ifu_pbuf_instr_o</span> <span class="o">&lt;=</span> <span class="n">dm2hdu_pbuf_instr_i</span><span class="p">;</span>
+<a id="l-829" name="l-829"></a>    <span class="k">end</span>
+<a id="l-830" name="l-830"></a><span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-831" name="l-831"></a>    <span class="k">assign</span> <span class="n">hdu2ifu_pbuf_instr_o</span> <span class="o">=</span> <span class="n">dm2hdu_pbuf_instr_i</span><span class="p">;</span>
+<a id="l-832" name="l-832"></a><span class="k">end</span> <span class="k">endgenerate</span>
+<a id="l-833" name="l-833"></a>
+<a id="l-834" name="l-834"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-835" name="l-835"></a><span class="c1">// HDU &lt;-&gt; CSR interface</span>
+<a id="l-836" name="l-836"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-837" name="l-837"></a>
+<a id="l-838" name="l-838"></a><span class="k">assign</span> <span class="n">csr_addr_dscratch0</span> <span class="o">=</span> <span class="p">(</span><span class="n">csr2hdu_addr_i</span> <span class="o">==</span> <span class="n">SCR1_HDU_DBGCSR_OFFS_DSCRATCH0</span><span class="p">);</span>
 <a id="l-839" name="l-839"></a>
-<a id="l-840" name="l-840"></a><span class="n">SVA_HDU_XCHECK_COMMON</span> <span class="o">:</span>
-<a id="l-841" name="l-841"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-842" name="l-842"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-843" name="l-843"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">rst_n</span><span class="p">,</span><span class="n">clk</span><span class="p">,</span><span class="n">clk_en</span><span class="p">,</span><span class="n">csr2hdu_req_i</span><span class="p">,</span><span class="n">pipe2hdu_rdc_qlfy_i</span><span class="p">}</span> <span class="p">)</span>
-<a id="l-844" name="l-844"></a>    <span class="p">)</span>
-<a id="l-845" name="l-845"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: common signals are in X state&quot;</span><span class="p">);</span>
-<a id="l-846" name="l-846"></a>
-<a id="l-847" name="l-847"></a><span class="n">SVA_HDU_XCHECK_CSR_INTF</span> <span class="o">:</span>
-<a id="l-848" name="l-848"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-849" name="l-849"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-850" name="l-850"></a>        <span class="n">csr2hdu_req_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">csr2hdu_cmd_i</span><span class="p">,</span><span class="n">csr2hdu_addr_i</span><span class="p">,</span><span class="n">csr2hdu_wdata_i</span><span class="p">}</span> <span class="p">)</span>
-<a id="l-851" name="l-851"></a>    <span class="p">)</span>
-<a id="l-852" name="l-852"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: CSR i/f is in X state&quot;</span><span class="p">);</span>
+<a id="l-840" name="l-840"></a><span class="k">assign</span> <span class="n">hdu2csr_resp_o</span>  <span class="o">=</span> <span class="o">~</span><span class="n">dbg_state_drun</span>    <span class="o">?</span> <span class="n">SCR1_CSR_RESP_ER</span>
+<a id="l-841" name="l-841"></a>                       <span class="o">:</span> <span class="n">csr_addr_dscratch0</span> <span class="o">?</span> <span class="n">csr_dscratch0_resp</span>
+<a id="l-842" name="l-842"></a>                       <span class="o">:</span> <span class="n">csr2hdu_req_i</span>      <span class="o">?</span> <span class="n">SCR1_CSR_RESP_OK</span>
+<a id="l-843" name="l-843"></a>                                            <span class="o">:</span> <span class="n">SCR1_CSR_RESP_ER</span><span class="p">;</span>
+<a id="l-844" name="l-844"></a><span class="k">assign</span> <span class="n">hdu2csr_rdata_o</span> <span class="o">=</span> <span class="n">csr_rd_data</span><span class="p">;</span>
+<a id="l-845" name="l-845"></a>
+<a id="l-846" name="l-846"></a><span class="no">`ifdef</span> <span class="n">SCR1_TDU_EN</span>
+<a id="l-847" name="l-847"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-848" name="l-848"></a><span class="c1">// HDU &lt;-&gt; TDU interface</span>
+<a id="l-849" name="l-849"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-850" name="l-850"></a>
+<a id="l-851" name="l-851"></a><span class="k">assign</span> <span class="n">hdu2tdu_hwbrk_dsbl_o</span> <span class="o">=</span> <span class="n">hart_runctrl</span><span class="p">.</span><span class="n">hwbrkpt_dsbl</span><span class="p">;</span>
+<a id="l-852" name="l-852"></a><span class="no">`endif</span> <span class="c1">// SCR1_TDU_EN</span>
 <a id="l-853" name="l-853"></a>
-<a id="l-854" name="l-854"></a><span class="n">SVA_HDU_XCHECK_DM_INTF</span> <span class="o">:</span>
-<a id="l-855" name="l-855"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-856" name="l-856"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-857" name="l-857"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">dm2hdu_cmd_req_i</span><span class="p">,</span><span class="n">dm2hdu_cmd_i</span><span class="p">,</span><span class="n">dm2hdu_dreg_resp_i</span><span class="p">,</span>
-<a id="l-858" name="l-858"></a>        <span class="n">dm2hdu_dreg_fail_i</span><span class="p">}</span> <span class="p">)</span>
-<a id="l-859" name="l-859"></a>    <span class="p">)</span>
-<a id="l-860" name="l-860"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: DM i/f is in X state&quot;</span><span class="p">);</span>
-<a id="l-861" name="l-861"></a>
-<a id="l-862" name="l-862"></a><span class="n">SVA_HDU_XCHECK_TDU_INTF</span> <span class="o">:</span>
-<a id="l-863" name="l-863"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-864" name="l-864"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-865" name="l-865"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">tdu2hdu_dmode_req_i</span><span class="p">,</span><span class="n">exu2hdu_ibrkpt_hw_i</span><span class="p">}</span> <span class="p">)</span>
-<a id="l-866" name="l-866"></a>    <span class="p">)</span>
-<a id="l-867" name="l-867"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: TDU i/f is in X state&quot;</span><span class="p">);</span>
-<a id="l-868" name="l-868"></a>
-<a id="l-869" name="l-869"></a><span class="n">SVA_HDU_XCHECK_HART_INTF</span> <span class="o">:</span>
-<a id="l-870" name="l-870"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-871" name="l-871"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-872" name="l-872"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">pipe2hdu_exu_busy_i</span><span class="p">,</span><span class="n">pipe2hdu_instret_i</span><span class="p">,</span><span class="n">pipe2hdu_init_pc_i</span><span class="p">,</span><span class="n">pipe2hdu_exu_exc_req_i</span><span class="p">,</span><span class="n">pipe2hdu_brkpt_i</span><span class="p">,</span>
-<a id="l-873" name="l-873"></a>        <span class="n">pipe2hdu_pc_curr_i</span><span class="p">,</span><span class="n">ifu2hdu_pbuf_instr_rdy_i</span><span class="p">}</span> <span class="p">)</span>
-<a id="l-874" name="l-874"></a>    <span class="p">)</span>
-<a id="l-875" name="l-875"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: HART i/f is in X state&quot;</span><span class="p">);</span>
-<a id="l-876" name="l-876"></a>
-<a id="l-877" name="l-877"></a><span class="no">`endif</span> <span class="c1">// SCR1_TRGT_SIMULATION</span>
-<a id="l-878" name="l-878"></a>
-<a id="l-879" name="l-879"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_pipe_hdu</span>
+<a id="l-854" name="l-854"></a><span class="no">`ifdef</span> <span class="n">SCR1_TRGT_SIMULATION</span>
+<a id="l-855" name="l-855"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a id="l-856" name="l-856"></a><span class="c1">// Assertion</span>
+<a id="l-857" name="l-857"></a><span class="c1">//-------------------------------------------------------------------------------</span>
+<a id="l-858" name="l-858"></a>
+<a id="l-859" name="l-859"></a><span class="n">SVA_HDU_XCHECK_COMMON</span> <span class="o">:</span>
+<a id="l-860" name="l-860"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-861" name="l-861"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-862" name="l-862"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">rst_n</span><span class="p">,</span><span class="n">clk</span><span class="p">,</span><span class="n">clk_en</span><span class="p">,</span><span class="n">csr2hdu_req_i</span><span class="p">,</span><span class="n">pipe2hdu_rdc_qlfy_i</span><span class="p">}</span> <span class="p">)</span>
+<a id="l-863" name="l-863"></a>    <span class="p">)</span>
+<a id="l-864" name="l-864"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: common signals are in X state&quot;</span><span class="p">);</span>
+<a id="l-865" name="l-865"></a>
+<a id="l-866" name="l-866"></a><span class="n">SVA_HDU_XCHECK_CSR_INTF</span> <span class="o">:</span>
+<a id="l-867" name="l-867"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-868" name="l-868"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-869" name="l-869"></a>        <span class="n">csr2hdu_req_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">csr2hdu_cmd_i</span><span class="p">,</span><span class="n">csr2hdu_addr_i</span><span class="p">,</span><span class="n">csr2hdu_wdata_i</span><span class="p">}</span> <span class="p">)</span>
+<a id="l-870" name="l-870"></a>    <span class="p">)</span>
+<a id="l-871" name="l-871"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: CSR i/f is in X state&quot;</span><span class="p">);</span>
+<a id="l-872" name="l-872"></a>
+<a id="l-873" name="l-873"></a><span class="n">SVA_HDU_XCHECK_DM_INTF</span> <span class="o">:</span>
+<a id="l-874" name="l-874"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-875" name="l-875"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-876" name="l-876"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">dm2hdu_cmd_req_i</span><span class="p">,</span><span class="n">dm2hdu_cmd_i</span><span class="p">,</span><span class="n">dm2hdu_dreg_resp_i</span><span class="p">,</span>
+<a id="l-877" name="l-877"></a>        <span class="n">dm2hdu_dreg_fail_i</span><span class="p">}</span> <span class="p">)</span>
+<a id="l-878" name="l-878"></a>    <span class="p">)</span>
+<a id="l-879" name="l-879"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: DM i/f is in X state&quot;</span><span class="p">);</span>
 <a id="l-880" name="l-880"></a>
-<a id="l-881" name="l-881"></a><span class="no">`endif</span> <span class="c1">// SCR1_DBG_EN</span>
+<a id="l-881" name="l-881"></a><span class="n">SVA_HDU_XCHECK_TDU_INTF</span> <span class="o">:</span>
+<a id="l-882" name="l-882"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-883" name="l-883"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-884" name="l-884"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">tdu2hdu_dmode_req_i</span><span class="p">,</span><span class="n">exu2hdu_ibrkpt_hw_i</span><span class="p">}</span> <span class="p">)</span>
+<a id="l-885" name="l-885"></a>    <span class="p">)</span>
+<a id="l-886" name="l-886"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: TDU i/f is in X state&quot;</span><span class="p">);</span>
+<a id="l-887" name="l-887"></a>
+<a id="l-888" name="l-888"></a><span class="n">SVA_HDU_XCHECK_HART_INTF</span> <span class="o">:</span>
+<a id="l-889" name="l-889"></a>    <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-890" name="l-890"></a>        <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-891" name="l-891"></a>        <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span> <span class="p">{</span><span class="n">pipe2hdu_exu_busy_i</span><span class="p">,</span><span class="n">pipe2hdu_instret_i</span><span class="p">,</span><span class="n">pipe2hdu_init_pc_i</span><span class="p">,</span><span class="n">pipe2hdu_exu_exc_req_i</span><span class="p">,</span><span class="n">pipe2hdu_brkpt_i</span><span class="p">,</span>
+<a id="l-892" name="l-892"></a>        <span class="n">pipe2hdu_pc_curr_i</span><span class="p">,</span><span class="n">ifu2hdu_pbuf_instr_rdy_i</span><span class="p">}</span> <span class="p">)</span>
+<a id="l-893" name="l-893"></a>    <span class="p">)</span>
+<a id="l-894" name="l-894"></a>    <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;HDU Error: HART i/f is in X state&quot;</span><span class="p">);</span>
+<a id="l-895" name="l-895"></a>
+<a id="l-896" name="l-896"></a><span class="no">`endif</span> <span class="c1">// SCR1_TRGT_SIMULATION</span>
+<a id="l-897" name="l-897"></a>
+<a id="l-898" name="l-898"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_pipe_hdu</span>
+<a id="l-899" name="l-899"></a>
+<a id="l-900" name="l-900"></a><span class="no">`endif</span> <span class="c1">// SCR1_DBG_EN</span>
 </pre></div>
 </td></tr></table>
   </body>
