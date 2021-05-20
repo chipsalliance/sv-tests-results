@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Verilator          |           0|         0|    0|     50|        4870|
-|Slang              |           0|         3|    0|     50|        4867|
-|Surelog            |           0|         0|    0|     50|        4870|
-|UhdmYosys          |           0|         0|    0|     31|        4525|
-|moore_parse        |           0|         0|    0|     31|        4625|
-|Verible            |           0|         0|    0|     31|        4525|
-|Sv2v_zachjs        |           0|         0|    0|     31|        4625|
-|YosysSv            |           0|         0|    0|     50|        4870|
-|Odin               |           0|         0|    0|     31|        4625|
-|sv_parser          |           0|         0|    0|     31|        4625|
-|moore              |           0|         0|    0|     31|        4625|
-|VeribleExtractor   |           0|         0|    0|     31|        4525|
-|tree_sitter_verilog|           0|         0|    0|     31|        4525|
-|Icarus             |           0|         0|    0|     31|        4525|
-|Yosys              |           0|         0|    0|     50|        4870|
-|UhdmVerilator      |           0|         0|    0|     50|        4870|
+|moore_parse        |           0|         0|    0|      5|        4620|
+|UhdmVerilator      |        1962|         0|    0|      5|        2903|
+|Sv2v_zachjs        |           0|         0|    0|      5|        4620|
+|Odin               |           0|         0|    0|      5|        4620|
+|Verilator          |           0|         3|    0|      5|        4862|
+|VeribleExtractor   |           0|         0|    0|      5|        4520|
+|YosysSv            |           0|         0|    0|      5|        4865|
+|tree_sitter_verilog|           0|         0|    0|      5|        4520|
+|Yosys              |           0|         0|    0|      5|        4865|
+|Verible            |           0|         0|    0|      5|        4520|
+|Surelog            |           0|         2|    0|      5|        4863|
+|Icarus             |           0|         0|    0|      5|        4520|
+|UhdmYosys          |           1|         0|    0|      5|        4519|
+|moore              |           0|         0|    0|      5|        4620|
+|sv_parser          |           0|         0|    0|      5|        4620|
+|Slang              |           0|         0|    0|      5|        4865|
