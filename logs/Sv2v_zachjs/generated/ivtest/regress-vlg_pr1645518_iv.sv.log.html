@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,81 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr1645518.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1645518.v</a>
 defines: 
-completed: 2021-05-20 08:54:38
-time_elapsed: 0.020s
-ram usage: 11560 KB
+completed: 2021-05-24 00:28:54
+time_elapsed: 0.023s
+ram usage: 21320 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr1645518.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1645518.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/pr1645518.v.html#l-24" target="file-frame">third_party/tests/ivtest/ivltests/pr1645518.v:24</a>:23: Parse error: unexpected token &#39;,&#39; (Sym_comma).
+module testBench;
+	wire w1;
+	wire w2;
+	wire w3;
+	wire w4;
+	wire w5;
+	binaryToESeg d(
+		.A(w1),
+		.B(w2),
+		.C(w3),
+		.D(w4),
+		.eSeg(w5)
+	);
+	test_bToESeg t(
+		.A(w1),
+		.B(w2),
+		.C(w3),
+		.D(w4),
+		.eSeg(w5)
+	);
+endmodule
+module binaryToESeg (
+	A,
+	B,
+	C,
+	D,
+	eSeg
+);
+	input A;
+	input B;
+	input C;
+	input D;
+	output eSeg;
+	wire p1;
+	nand #(1) g1 (p1, C, ~D);
+	wire p2;
+	nand g2 (p2, A, B);
+	wire p3;
+	nand g3 (p3, ~B, ~D);
+	wire p4;
+	nand g4 (p4, A, C);
+	nand g5 (eSeg, p1, p2, p3, p4);
+endmodule
+module test_bToESeg (
+	A,
+	B,
+	C,
+	D,
+	eSeg
+);
+	output reg A;
+	output reg B;
+	output reg C;
+	output reg D;
+	input eSeg;
+	initial begin
+		$monitor($time, , &#34;A = %b B = %b C = %b D = %b, eSeg = %b&#34;, A, B, C, D, eSeg);
+		#(10) A = 0;
+		B = 0;
+		C = 0;
+		D = 0;
+		#(10) D = 1;
+		#(10) C = 1;
+		D = 0;
+		#(10)
+			$finish(0);
+	end
+endmodule
 
 </pre>
 </body>

@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,220 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/concat3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/concat3.v</a>
 defines: 
-completed: 2021-05-20 08:54:46
-time_elapsed: 0.023s
-ram usage: 18924 KB
+completed: 2021-05-24 00:28:29
+time_elapsed: 0.086s
+ram usage: 68572 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/concat3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/concat3.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/concat3.v.html#l-48" target="file-frame">third_party/tests/ivtest/ivltests/concat3.v:48</a>:27: Parse error: unexpected token &#39;,&#39; (Sym_comma).
+module main;
+	reg pass;
+	reg [31:0] a_c;
+	reg [31:0] b_c;
+	reg [31:0] c_c;
+	reg [31:0] d_c;
+	reg [31:0] a_r;
+	reg [31:0] b_r;
+	reg [31:0] c_r;
+	reg [31:0] d_r;
+	reg [127:0] y_c;
+	integer seed;
+	integer fres;
+	integer sorder;
+	integer uorder;
+	function [63:0] check_64;
+		input [63:0] in;
+		check_64 = in;
+	endfunction
+	function integer ufunc;
+		input in;
+		begin
+			if (in)
+				fres = fres - 1;
+			else
+				fres = fres + 1;
+			ufunc = fres;
+		end
+	endfunction
+	initial begin
+		pass = 1&#39;b1;
+		seed = 0;
+		y_c = {$random(seed), $random(seed), $random(seed), $random(seed)};
+		a_c = y_c[31:0];
+		b_c = y_c[63:32];
+		c_c = y_c[95:64];
+		d_c = y_c[127:96];
+		seed = 0;
+		a_r = $random(seed);
+		b_r = $random(seed);
+		c_r = $random(seed);
+		d_r = $random(seed);
+		if ((((a_c === a_r) &amp;&amp; (b_c === b_r)) &amp;&amp; (c_c === c_r)) &amp;&amp; (d_c == d_r)) begin
+			$display(&#34;Concatenation of system functions is LSB -&gt; MSB.&#34;);
+			sorder = 1;
+		end
+		else if ((((a_c === d_r) &amp;&amp; (b_c === c_r)) &amp;&amp; (c_c === b_r)) &amp;&amp; (d_c == a_r)) begin
+			$display(&#34;Concatenation of system functions is MSB -&gt; LSB.&#34;);
+			sorder = 2;
+		end
+		else if (((((((a_c === a_r) || (a_c === b_r)) || (a_c === c_r)) || (a_c == d_r)) &amp;&amp; ((((b_c === a_r) || (b_c === b_r)) || (b_c === c_r)) || (b_c == d_r))) &amp;&amp; ((((c_c === a_r) || (c_c === b_r)) || (c_c === c_r)) || (c_c == d_r))) &amp;&amp; ((((d_c === a_r) || (d_c === b_r)) || (d_c === c_r)) || (d_c == d_r))) begin
+			$display(&#34;Concatenation of system functions is indeterminate.&#34;);
+			$display(&#34;  check:&#34;, , d_c, , c_c, , b_c, , a_c);
+			$display(&#34;   ref.:&#34;, , d_r, , c_r, , b_r, , a_r);
+			sorder = 3;
+		end
+		else begin
+			$display(&#34;FAILED: system function concatenation order.&#34;);
+			$display(&#34;  check:&#34;, , d_c, , c_c, , b_c, , a_c);
+			$display(&#34;   ref.:&#34;, , d_r, , c_r, , b_r, , a_r);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		y_c = {ufunc(0), ufunc(0), ufunc(0), ufunc(0)};
+		a_c = y_c[31:0];
+		b_c = y_c[63:32];
+		c_c = y_c[95:64];
+		d_c = y_c[127:96];
+		fres = 0;
+		a_r = ufunc(0);
+		b_r = ufunc(0);
+		c_r = ufunc(0);
+		d_r = ufunc(0);
+		if ((((a_c === a_r) &amp;&amp; (b_c === b_r)) &amp;&amp; (c_c === c_r)) &amp;&amp; (d_c == d_r)) begin
+			$display(&#34;Concatenation of user functions is LSB -&gt; MSB.&#34;);
+			uorder = 1;
+		end
+		else if ((((a_c === d_r) &amp;&amp; (b_c === c_r)) &amp;&amp; (c_c === b_r)) &amp;&amp; (d_c == a_r)) begin
+			$display(&#34;Concatenation of user functions is MSB -&gt; LSB.&#34;);
+			uorder = 2;
+		end
+		else if (((((((a_c === a_r) || (a_c === b_r)) || (a_c === c_r)) || (a_c == d_r)) &amp;&amp; ((((b_c === a_r) || (b_c === b_r)) || (b_c === c_r)) || (b_c == d_r))) &amp;&amp; ((((c_c === a_r) || (c_c === b_r)) || (c_c === c_r)) || (c_c == d_r))) &amp;&amp; ((((d_c === a_r) || (d_c === b_r)) || (d_c === c_r)) || (d_c == d_r))) begin
+			$display(&#34;Concatenation of user functions is indeterminate.&#34;);
+			$display(&#34;  check:&#34;, , d_c, , c_c, , b_c, , a_c);
+			$display(&#34;   ref.:&#34;, , d_r, , c_r, , b_r, , a_r);
+			uorder = 3;
+		end
+		else begin
+			$display(&#34;FAILED: user function concatenation order.&#34;);
+			$display(&#34;  check:&#34;, , d_c, , c_c, , b_c, , a_c);
+			$display(&#34;   ref.:&#34;, , d_r, , c_r, , b_r, , a_r);
+			pass = 1&#39;b0;
+		end
+		if (sorder != uorder)
+			$display(&#34;WARNING: system functions and user functions have a &#34;, &#34;different order.&#34;);
+		seed = 0;
+		c_c = {$random(seed), $random(seed), $random(seed), $random(seed), $random(seed), $random(seed)};
+		a_c = $random(seed);
+		seed = 0;
+		a_r = $random(seed);
+		a_r = $random(seed);
+		a_r = $random(seed);
+		a_r = $random(seed);
+		a_r = $random(seed);
+		a_r = $random(seed);
+		a_r = $random(seed);
+		if (a_c !== a_r) begin
+			$display(&#34;FAILED: extra system functions in a concat. are not run.&#34;);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		y_c = {ufunc(0), ufunc(0), ufunc(0), ufunc(0), ufunc(0), ufunc(0)};
+		if (fres != 6) begin
+			$display(&#34;FAILED: extra user functions in a concat. are not run.&#34;);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		y_c = check_64({ufunc(0), ufunc(0), ufunc(0)});
+		if (fres != 3) begin
+			$display(&#34;FAILED: extra ufunc in a concat. as an argument are not run.&#34;);
+			pass = 1&#39;b0;
+		end
+		seed = 0;
+		a_c = {$random(seed)};
+		a_c = $random(seed);
+		seed = 0;
+		a_r = $random(seed);
+		a_r = $random(seed);
+		a_r = $random(seed);
+		if (a_c !== a_r) begin
+			$display(&#34;FAILED: zero repl. system functions in a concat. are not run.&#34;);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		a_c = {ufunc(0)};
+		if (fres != 2) begin
+			$display(&#34;FAILED: zero repl. user functions in a concat. are not run.&#34;);
+			pass = 1&#39;b0;
+		end
+		seed = 0;
+		y_c = {4 {$random(seed)}};
+		a_c = y_c[31:0];
+		b_c = y_c[63:32];
+		c_c = y_c[95:64];
+		d_c = y_c[127:96];
+		seed = 0;
+		a_r = $random(seed);
+		b_r = a_r;
+		c_r = a_r;
+		d_r = a_r;
+		if ((((a_c !== a_r) || (b_c !== b_r)) || (c_c !== c_r)) || (d_c !== d_r)) begin
+			$display(&#34;FAILED $random() replication, each replication is different.&#34;);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		y_c = {4 {ufunc(0)}};
+		a_c = y_c[31:0];
+		b_c = y_c[63:32];
+		c_c = y_c[95:64];
+		d_c = y_c[127:96];
+		fres = 0;
+		a_r = ufunc(0);
+		b_r = a_r;
+		c_r = a_r;
+		d_r = a_r;
+		if ((((a_c !== a_r) || (b_c !== b_r)) || (c_c !== c_r)) || (d_c !== d_r)) begin
+			$display(&#34;FAILED ufunc() replication, each replication is different.&#34;);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		y_c = check_64({ufunc(1)});
+		a_c = y_c[31:0];
+		b_c = y_c[63:32];
+		c_c = y_c[95:64];
+		d_c = y_c[127:96];
+		fres = 0;
+		a_r = ufunc(1);
+		b_r = 32&#39;h00000000;
+		c_r = 32&#39;h00000000;
+		d_r = 32&#39;h00000000;
+		if ((((a_c !== a_r) || (b_c !== b_r)) || (c_c !== c_r)) || (d_c !== d_r)) begin
+			$display(&#34;FAILED padded user function concatenation.&#34;);
+			$displayh(&#34;  check:&#34;, , d_c, , c_c, , b_c, , a_c);
+			$displayh(&#34;   ref.:&#34;, , d_r, , c_r, , b_r, , a_r);
+			pass = 1&#39;b0;
+		end
+		fres = 0;
+		y_c = check_64($signed({ufunc(1)}));
+		a_c = y_c[31:0];
+		b_c = y_c[63:32];
+		c_c = y_c[95:64];
+		d_c = y_c[127:96];
+		fres = 0;
+		a_r = ufunc(1);
+		b_r = 32&#39;hffffffff;
+		c_r = 32&#39;h00000000;
+		d_r = 32&#39;h00000000;
+		if ((((a_c !== a_r) || (b_c !== b_r)) || (c_c !== c_r)) || (d_c !== d_r)) begin
+			$display(&#34;FAILED sign padded user function concatenation.&#34;);
+			$displayh(&#34;  check:&#34;, , d_c, , c_c, , b_c, , a_c);
+			$displayh(&#34;   ref.:&#34;, , d_r, , c_r, , b_r, , a_r);
+			pass = 1&#39;b0;
+		end
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+endmodule
 
 </pre>
 </body>
