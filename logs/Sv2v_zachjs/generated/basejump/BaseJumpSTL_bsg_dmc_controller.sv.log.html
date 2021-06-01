@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_dmc_controller.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_dmc_controller.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_controller.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_controller.v</a>
 defines: 
-completed: 2021-05-31 06:34:37
-time_elapsed: 0.401s
-ram usage: 140964 KB
+completed: 2021-06-01 03:22:33
+time_elapsed: 0.341s
+ram usage: 141084 KB
 </pre>
 <pre class="log">
 
@@ -68,18 +68,12 @@ module bsg_dmc_controller (
 	dfi_rddata_valid_i,
 	dmc_p_i
 );
-	parameter _sv2v_width_ui_addr_width_p = 24;
-	parameter [_sv2v_width_ui_addr_width_p - 1:0] ui_addr_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_ui_data_width_p = 24;
-	parameter [_sv2v_width_ui_data_width_p - 1:0] ui_data_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_burst_data_width_p = 24;
-	parameter [_sv2v_width_burst_data_width_p - 1:0] burst_data_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_dfi_data_width_p = 24;
-	parameter [_sv2v_width_dfi_data_width_p - 1:0] dfi_data_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_cmd_afifo_depth_p = 24;
-	parameter [_sv2v_width_cmd_afifo_depth_p - 1:0] cmd_afifo_depth_p = &#34;inv&#34;;
-	parameter _sv2v_width_cmd_sfifo_depth_p = 24;
-	parameter [_sv2v_width_cmd_sfifo_depth_p - 1:0] cmd_sfifo_depth_p = &#34;inv&#34;;
+	parameter ui_addr_width_p = &#34;inv&#34;;
+	parameter ui_data_width_p = &#34;inv&#34;;
+	parameter burst_data_width_p = &#34;inv&#34;;
+	parameter dfi_data_width_p = &#34;inv&#34;;
+	parameter cmd_afifo_depth_p = &#34;inv&#34;;
+	parameter cmd_sfifo_depth_p = &#34;inv&#34;;
 	parameter ui_burst_length_lp = burst_data_width_p / ui_data_width_p;
 	localparam ui_mask_width_lp = ui_data_width_p &gt;&gt; 3;
 	localparam dfi_mask_width_lp = dfi_data_width_p &gt;&gt; 3;
@@ -304,11 +298,7 @@ module bsg_dmc_controller (
 	assign tx_sipo_valid_li = wrdata_afifo_rvalid;
 	assign tx_sipo_data_li = wrdata_afifo_rdata;
 	localparam [3:0] bsg_dmc_pkg_WRITE = 4&#39;b0100;
-	function automatic [($clog2(ui_burst_length_lp) &gt;= 0 ? $clog2(ui_burst_length_lp) + 1 : 1 - $clog2(ui_burst_length_lp)) - 1:0] sv2v_cast_9840A;
-		input reg [($clog2(ui_burst_length_lp) &gt;= 0 ? $clog2(ui_burst_length_lp) + 1 : 1 - $clog2(ui_burst_length_lp)) - 1:0] inp;
-		sv2v_cast_9840A = inp;
-	endfunction
-	assign tx_sipo_yumi_cnt_li = sv2v_cast_9840A((shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == bsg_dmc_pkg_WRITE) ? ui_burst_length_lp : 0));
+	assign tx_sipo_yumi_cnt_li = $clog2(ui_burst_length_lp) + 1&#39;((shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == bsg_dmc_pkg_WRITE) ? ui_burst_length_lp : 0));
 	bsg_serial_in_parallel_out #(
 		.width_p(ui_data_width_p + ui_mask_width_lp),
 		.els_p(ui_burst_length_lp)
@@ -759,11 +749,7 @@ module bsg_dmc_controller (
 	);
 	assign rx_sipo_valid_li = rddata_afifo_rvalid;
 	assign rx_sipo_data_li = rddata_afifo_rdata;
-	function automatic [($clog2(dfi_burst_length_lp) &gt;= 0 ? $clog2(dfi_burst_length_lp) + 1 : 1 - $clog2(dfi_burst_length_lp)) - 1:0] sv2v_cast_31153;
-		input reg [($clog2(dfi_burst_length_lp) &gt;= 0 ? $clog2(dfi_burst_length_lp) + 1 : 1 - $clog2(dfi_burst_length_lp)) - 1:0] inp;
-		sv2v_cast_31153 = inp;
-	endfunction
-	assign rx_sipo_yumi_cnt_li = sv2v_cast_31153((&amp;rx_sipo_valid_lo ? dfi_burst_length_lp : 0));
+	assign rx_sipo_yumi_cnt_li = $clog2(dfi_burst_length_lp) + 1&#39;((&amp;rx_sipo_valid_lo ? dfi_burst_length_lp : 0));
 	bsg_serial_in_parallel_out #(
 		.width_p(dfi_data_width_p),
 		.els_p(dfi_burst_length_lp)

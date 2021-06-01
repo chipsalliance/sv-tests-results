@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_to_axi_tx.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_to_axi_tx.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_axi_tx.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_axi_tx.v</a>
 defines: 
-completed: 2021-05-31 06:34:34
-time_elapsed: 0.120s
-ram usage: 107248 KB
+completed: 2021-06-01 03:22:25
+time_elapsed: 0.110s
+ram usage: 103344 KB
 </pre>
 <pre class="log">
 
@@ -57,21 +57,14 @@ module bsg_cache_to_axi_tx (
 	axi_bvalid_i,
 	axi_bready_o
 );
-	parameter _sv2v_width_num_cache_p = 24;
-	parameter [_sv2v_width_num_cache_p - 1:0] num_cache_p = &#34;inv&#34;;
-	parameter _sv2v_width_data_width_p = 24;
-	parameter [_sv2v_width_data_width_p - 1:0] data_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_block_size_in_words_p = 24;
-	parameter [_sv2v_width_block_size_in_words_p - 1:0] block_size_in_words_p = &#34;inv&#34;;
+	parameter num_cache_p = &#34;inv&#34;;
+	parameter data_width_p = &#34;inv&#34;;
+	parameter block_size_in_words_p = &#34;inv&#34;;
 	parameter tag_fifo_els_p = num_cache_p;
-	parameter _sv2v_width_axi_id_width_p = 24;
-	parameter [_sv2v_width_axi_id_width_p - 1:0] axi_id_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_axi_addr_width_p = 24;
-	parameter [_sv2v_width_axi_addr_width_p - 1:0] axi_addr_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_axi_data_width_p = 24;
-	parameter [_sv2v_width_axi_data_width_p - 1:0] axi_data_width_p = &#34;inv&#34;;
-	parameter _sv2v_width_axi_burst_len_p = 24;
-	parameter [_sv2v_width_axi_burst_len_p - 1:0] axi_burst_len_p = &#34;inv&#34;;
+	parameter axi_id_width_p = &#34;inv&#34;;
+	parameter axi_addr_width_p = &#34;inv&#34;;
+	parameter axi_data_width_p = &#34;inv&#34;;
+	parameter axi_burst_len_p = &#34;inv&#34;;
 	parameter lg_num_cache_lp = (num_cache_p == 1 ? 1 : $clog2(num_cache_p));
 	parameter axi_strb_width_lp = axi_data_width_p &gt;&gt; 3;
 	parameter data_width_ratio_lp = axi_data_width_p / data_width_p;
@@ -128,11 +121,7 @@ module bsg_cache_to_axi_tx (
 	assign tag_fifo_v_li = v_i &amp; axi_awready_i;
 	assign axi_awid_o = {axi_id_width_p {1&#39;b0}};
 	assign axi_awaddr_o = axi_addr_i;
-	function automatic [7:0] sv2v_cast_8;
-		input reg [7:0] inp;
-		sv2v_cast_8 = inp;
-	endfunction
-	assign axi_awlen_o = sv2v_cast_8(axi_burst_len_p - 1);
+	assign axi_awlen_o = 8&#39;(axi_burst_len_p - 1);
 	function automatic signed [2:0] sv2v_cast_3_signed;
 		input reg signed [2:0] inp;
 		sv2v_cast_3_signed = inp;
@@ -171,11 +160,7 @@ module bsg_cache_to_axi_tx (
 	);
 	assign axi_wvalid_o = &amp;sipo_v_lo;
 	assign sipo_v_li = tag_fifo_v_lo &amp; dma_data_v_i[tag_lo];
-	function automatic [$clog2(data_width_ratio_lp + 1) - 1:0] sv2v_cast_1437E;
-		input reg [$clog2(data_width_ratio_lp + 1) - 1:0] inp;
-		sv2v_cast_1437E = inp;
-	endfunction
-	assign sipo_yumi_cnt_li = (axi_wvalid_o &amp; axi_wready_i ? sv2v_cast_1437E(data_width_ratio_lp) : {$clog2(data_width_ratio_lp + 1) {1&#39;sb0}});
+	assign sipo_yumi_cnt_li = (axi_wvalid_o &amp; axi_wready_i ? $clog2(data_width_ratio_lp + 1)&#39;(data_width_ratio_lp) : {$clog2(data_width_ratio_lp + 1) {1&#39;sb0}});
 	assign axi_wstrb_o = {axi_strb_width_lp {1&#39;b1}};
 	wire [(block_size_in_words_p == 1 ? 1 : $clog2(block_size_in_words_p)) - 1:0] word_count_lo;
 	reg word_up_li;
