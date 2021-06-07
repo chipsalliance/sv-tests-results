@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_link_source_sync_downstream.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_link_source_sync_downstream.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_link/bsg_link_source_sync_downstream.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_link/bsg_link_source_sync_downstream.v</a>
 defines: 
-completed: 2021-06-01 06:02:36
-time_elapsed: 0.066s
-ram usage: 63944 KB
+completed: 2021-06-07 01:50:40
+time_elapsed: 0.077s
+ram usage: 70320 KB
 </pre>
 <pre class="log">
 
@@ -42,6 +42,8 @@ module bsg_link_source_sync_downstream (
 	parameter channel_width_p = 16;
 	parameter lg_fifo_depth_p = 6;
 	parameter lg_credit_to_token_decimation_p = 3;
+	parameter bypass_twofer_fifo_p = 0;
+	parameter use_hardened_fifo_p = 0;
 	input core_clk_i;
 	input core_link_reset_i;
 	input io_link_reset_i;
@@ -53,19 +55,47 @@ module bsg_link_source_sync_downstream (
 	output core_valid_o;
 	input core_yumi_i;
 	wire io_async_fifo_full;
+	wire io_async_fifo_enq;
+	wire io_fifo_valid_lo;
+	wire io_fifo_ready_lo;
+	wire [channel_width_p - 1:0] io_async_fifo_data;
 	always @(negedge io_clk_i)
 		;
+	generate
+		if (use_hardened_fifo_p == 0) begin
+			assign io_async_fifo_enq = io_valid_i;
+			assign io_async_fifo_data = io_data_i;
+			assign io_fifo_ready_lo = ~io_async_fifo_full;
+		end
+		else begin : harden
+			assign io_async_fifo_enq = io_fifo_valid_lo &amp; ~io_async_fifo_full;
+			bsg_fifo_1r1w_small #(
+				.width_p(channel_width_p),
+				.els_p(1 &lt;&lt; lg_fifo_depth_p),
+				.harden_p(1)
+			) fifo(
+				.clk_i(io_clk_i),
+				.reset_i(io_link_reset_i),
+				.v_i(io_valid_i),
+				.ready_o(io_fifo_ready_lo),
+				.data_i(io_data_i),
+				.v_o(io_fifo_valid_lo),
+				.data_o(io_async_fifo_data),
+				.yumi_i(io_async_fifo_enq)
+			);
+		end
+	endgenerate
 	wire core_async_fifo_deque;
 	wire core_async_fifo_valid_lo;
 	wire [channel_width_p - 1:0] core_async_fifo_data_lo;
 	bsg_async_fifo #(
-		.lg_size_p(lg_fifo_depth_p),
+		.lg_size_p((use_hardened_fifo_p == 0 ? lg_fifo_depth_p : 3)),
 		.width_p(channel_width_p)
 	) baf(
 		.w_clk_i(io_clk_i),
 		.w_reset_i(io_link_reset_i),
-		.w_enq_i(io_valid_i),
-		.w_data_i(io_data_i),
+		.w_enq_i(io_async_fifo_enq),
+		.w_data_i(io_async_fifo_data),
 		.w_full_o(io_async_fifo_full),
 		.r_clk_i(core_clk_i),
 		.r_reset_i(core_link_reset_i),
@@ -73,18 +103,27 @@ module bsg_link_source_sync_downstream (
 		.r_data_o(core_async_fifo_data_lo),
 		.r_valid_o(core_async_fifo_valid_lo)
 	);
-	wire core_async_fifo_ready_li;
-	bsg_two_fifo #(.width_p(channel_width_p)) twofer(
-		.clk_i(core_clk_i),
-		.reset_i(core_link_reset_i),
-		.ready_o(core_async_fifo_ready_li),
-		.data_i(core_async_fifo_data_lo),
-		.v_i(core_async_fifo_valid_lo),
-		.v_o(core_valid_o),
-		.data_o(core_data_o),
-		.yumi_i(core_yumi_i)
-	);
-	assign core_async_fifo_deque = core_async_fifo_valid_lo &amp; core_async_fifo_ready_li;
+	generate
+		if (bypass_twofer_fifo_p == 0) begin
+			wire core_async_fifo_ready_li;
+			bsg_two_fifo #(.width_p(channel_width_p)) twofer(
+				.clk_i(core_clk_i),
+				.reset_i(core_link_reset_i),
+				.ready_o(core_async_fifo_ready_li),
+				.data_i(core_async_fifo_data_lo),
+				.v_i(core_async_fifo_valid_lo),
+				.v_o(core_valid_o),
+				.data_o(core_data_o),
+				.yumi_i(core_yumi_i)
+			);
+			assign core_async_fifo_deque = core_async_fifo_valid_lo &amp; core_async_fifo_ready_li;
+		end
+		else begin
+			assign core_valid_o = (core_link_reset_i ? 1&#39;b0 : core_async_fifo_valid_lo);
+			assign core_data_o = core_async_fifo_data_lo;
+			assign core_async_fifo_deque = core_yumi_i;
+		end
+	endgenerate
 	wire [lg_credit_to_token_decimation_p:0] core_credits_sent_r;
 	assign core_token_r_o = core_credits_sent_r[lg_credit_to_token_decimation_p];
 	bsg_counter_clear_up #(

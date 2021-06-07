@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_nonsynth_axi_mem.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_nonsynth_axi_mem.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_nonsynth_axi_mem.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_nonsynth_axi_mem.v</a>
 defines: 
-completed: 2021-06-01 06:02:28
-time_elapsed: 0.112s
-ram usage: 107616 KB
+completed: 2021-06-07 01:50:41
+time_elapsed: 0.134s
+ram usage: 110540 KB
 </pre>
 <pre class="log">
 
@@ -96,9 +96,10 @@ module bsg_nonsynth_axi_mem (
 	reg [axi_addr_width_p - 1:0] awaddr_n;
 	wire [lg_mem_els_lp - 1:0] wr_ram_idx;
 	assign wr_ram_idx = awaddr_r[((axi_data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(axi_data_width_p &gt;&gt; 3))+:lg_mem_els_lp];
-	localparam [1:0] WR_RESP = 2;
-	localparam [1:0] WR_WAIT_ADDR = 0;
-	localparam [1:0] WR_WAIT_DATA = 1;
+	localparam [1:0] WR_RESET = 0;
+	localparam [1:0] WR_RESP = 3;
+	localparam [1:0] WR_WAIT_ADDR = 1;
+	localparam [1:0] WR_WAIT_DATA = 2;
 	always @(*) begin
 		axi_awready_o = 1&#39;b0;
 		axi_wready_o = 1&#39;b0;
@@ -106,6 +107,10 @@ module bsg_nonsynth_axi_mem (
 		axi_bresp_o = {2 {1&#39;sb0}};
 		axi_bvalid_o = 1&#39;b0;
 		case (wr_state_r)
+			WR_RESET: begin
+				axi_awready_o = 1&#39;b0;
+				wr_state_n = WR_WAIT_ADDR;
+			end
 			WR_WAIT_ADDR: begin
 				axi_awready_o = 1&#39;b1;
 				awid_n = (axi_awvalid_i ? axi_awid_i : awid_r);
@@ -123,8 +128,8 @@ module bsg_nonsynth_axi_mem (
 			end
 		endcase
 	end
-	reg rd_state_r;
-	reg rd_state_n;
+	reg [1:0] rd_state_r;
+	reg [1:0] rd_state_n;
 	reg [axi_id_width_p - 1:0] arid_r;
 	reg [axi_id_width_p - 1:0] arid_n;
 	reg [axi_addr_width_p - 1:0] araddr_r;
@@ -139,8 +144,9 @@ module bsg_nonsynth_axi_mem (
 		genvar i;
 		for (i = 0; i &lt; axi_data_width_p; i = i + 1) assign axi_rdata_o[i] = (ram[rd_ram_idx][i] === 1&#39;bx ? uninit_data[i] : ram[rd_ram_idx][i]);
 	endgenerate
-	localparam [0:0] RD_SEND_DATA = 1;
-	localparam [0:0] RD_WAIT_ADDR = 0;
+	localparam [1:0] RD_RESET = 0;
+	localparam [1:0] RD_SEND_DATA = 2;
+	localparam [1:0] RD_WAIT_ADDR = 1;
 	always @(*) begin
 		axi_rvalid_o = 1&#39;b0;
 		axi_rlast_o = 1&#39;b0;
@@ -148,6 +154,10 @@ module bsg_nonsynth_axi_mem (
 		axi_rresp_o = {2 {1&#39;sb0}};
 		axi_arready_o = 1&#39;b0;
 		case (rd_state_r)
+			RD_RESET: begin
+				axi_arready_o = 1&#39;b0;
+				rd_state_n = RD_WAIT_ADDR;
+			end
 			RD_WAIT_ADDR: begin
 				axi_arready_o = 1&#39;b1;
 				arid_n = (axi_arvalid_i ? axi_arid_i : arid_r);
@@ -166,10 +176,10 @@ module bsg_nonsynth_axi_mem (
 	end
 	always @(posedge clk_i)
 		if (reset_i) begin
-			wr_state_r &lt;= WR_WAIT_ADDR;
+			wr_state_r &lt;= WR_RESET;
 			awid_r &lt;= {axi_id_width_p {1&#39;sb0}};
 			awaddr_r &lt;= {axi_addr_width_p {1&#39;sb0}};
-			rd_state_r &lt;= RD_WAIT_ADDR;
+			rd_state_r &lt;= RD_RESET;
 			arid_r &lt;= {axi_id_width_p {1&#39;sb0}};
 			araddr_r &lt;= {axi_addr_width_p {1&#39;sb0}};
 			rd_burst_r &lt;= {(axi_burst_len_p == 1 ? 1 : $clog2(axi_burst_len_p)) {1&#39;sb0}};

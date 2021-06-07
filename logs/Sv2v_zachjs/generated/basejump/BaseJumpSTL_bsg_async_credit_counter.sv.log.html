@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_async_credit_counter.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_async_credit_counter.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_async/bsg_async_credit_counter.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_async/bsg_async_credit_counter.v</a>
 defines: 
-completed: 2021-06-01 06:02:32
-time_elapsed: 0.063s
-ram usage: 66700 KB
+completed: 2021-06-07 01:50:46
+time_elapsed: 0.069s
+ram usage: 67352 KB
 </pre>
 <pre class="log">
 
@@ -77,7 +77,13 @@ module bsg_async_credit_counter (
 		.w_ptr_gray_r_rsync_o(w_counter_gray_r_rsync)
 	);
 	wire [w_counter_width_lp - 1:0] r_counter_r_hi_bits = r_counter_r[lg_credit_to_token_decimation_p+:w_counter_width_lp];
-	wire r_counter_r_lo_bits_nonzero = |r_counter_r[0+:lg_credit_to_token_decimation_p];
+	wire r_counter_r_lo_bits_nonzero;
+	generate
+		if (lg_credit_to_token_decimation_p == 0) begin
+			assign r_counter_r_lo_bits_nonzero = 1&#39;b0;
+		end
+		else assign r_counter_r_lo_bits_nonzero = |r_counter_r[0+:lg_credit_to_token_decimation_p];
+	endgenerate
 	wire [w_counter_width_lp - 1:0] r_counter_r_hi_bits_gray = (r_counter_r_hi_bits &gt;&gt; 1) ^ r_counter_r_hi_bits;
 	assign r_credits_avail_o = (r_infinite_credits_i | r_counter_r_lo_bits_nonzero) | (r_counter_r_hi_bits_gray != w_counter_gray_r_rsync);
 	bsg_gray_to_binary #(.width_p(w_counter_width_lp)) bsg_g2b(
