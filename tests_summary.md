@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|sv_parser          |         116|         0|    9|      0|        4507|
-|Yosys              |           1|         0|    9|      0|        4867|
-|Slang              |           0|        14|    9|      0|        4854|
-|moore_parse        |           0|         0|    9|      0|        4623|
-|Surelog            |           0|         1|    9|      0|        4867|
-|Sv2v_zachjs        |           1|         0|    9|      0|        4622|
-|Verilator          |           1|         0|    9|      0|        4867|
-|Icarus             |           0|         0|    9|      0|        4523|
-|UhdmYosys          |           2|         2|    9|      0|        4519|
-|VeribleExtractor   |           0|         0|    9|      0|        4523|
-|UhdmVerilator      |           0|         0|    9|      0|        4868|
-|Odin               |           0|         0|    9|      0|        4623|
-|YosysSv            |           1|         0|    9|      0|        4867|
-|moore              |           0|         0|    9|      0|        4623|
-|tree_sitter_verilog|           0|         0|    9|      0|        4523|
-|Verible            |           0|         0|    9|      0|        4523|
+|Surelog            |           0|         0|    0|      0|        4877|
+|Verible            |           0|         0|    0|      0|        4532|
+|VeribleExtractor   |           0|         0|    0|      0|        4532|
+|Odin               |           0|         0|    0|      0|        4632|
+|Slang              |           0|         4|    0|      0|        4873|
+|Verilator          |           0|         0|    0|      0|        4877|
+|UhdmVerilator      |           0|         0|    0|      0|        4877|
+|Icarus             |           0|         0|    0|      0|        4532|
+|moore              |           0|         0|    0|      0|        4632|
+|Sv2v_zachjs        |           0|         0|    0|      0|        4632|
+|YosysSv            |           0|         0|    0|      0|        4877|
+|sv_parser          |           0|       116|    0|      0|        4516|
+|tree_sitter_verilog|           0|         0|    0|      0|        4532|
+|UhdmYosys          |           0|         0|    0|      0|        4532|
+|Yosys              |           0|         0|    0|      0|        4877|
+|moore_parse        |           0|         0|    0|      0|        4632|
