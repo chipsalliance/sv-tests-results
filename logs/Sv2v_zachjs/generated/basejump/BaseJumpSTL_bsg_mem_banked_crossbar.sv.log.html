@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_mem_banked_crossbar.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_mem_banked_crossbar.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_mem/bsg_mem_banked_crossbar.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_mem/bsg_mem_banked_crossbar.v</a>
 defines: 
-completed: 2021-06-15 04:37:05
-time_elapsed: 0.145s
-ram usage: 119700 KB
+completed: 2021-07-08 00:15:26
+time_elapsed: 0.143s
+ram usage: 120760 KB
 </pre>
 <pre class="log">
 
@@ -56,7 +56,7 @@ module bsg_mem_banked_crossbar_control_o_by_i (
 	wire [(o_els_p * i_els_p) - 1:0] sel_oi_one_hot;
 	genvar i;
 	generate
-		for (i = 0; i &lt; i_els_p; i = i + 1) begin
+		for (i = 0; i &lt; i_els_p; i = i + 1) begin : genblk1
 			function automatic signed [o_els_p - 1:0] sv2v_cast_ADC2E_signed;
 				input reg signed [o_els_p - 1:0] inp;
 				sv2v_cast_ADC2E_signed = inp;
@@ -132,7 +132,9 @@ module bsg_mem_banked_crossbar_control_o_by_i (
 		.o(grants_io_one_hot)
 	);
 	generate
-		for (i = 0; i &lt; i_els_p; i = i + 1) assign yumi_o[i] = valid_i[i] &amp; |grants_io_one_hot[i * o_els_p+:o_els_p];
+		for (i = 0; i &lt; i_els_p; i = i + 1) begin : genblk3
+			assign yumi_o[i] = valid_i[i] &amp; |grants_io_one_hot[i * o_els_p+:o_els_p];
+		end
 	endgenerate
 endmodule
 module bsg_mem_banked_crossbar (
@@ -177,21 +179,29 @@ module bsg_mem_banked_crossbar (
 	reg [(num_ports_p * addr_width_lp) - 1:0] addr_r;
 	always @(posedge clk_i) addr_r &lt;= addr_i;
 	generate
-		for (i = 0; i &lt; num_ports_p; i = i + 1) if (debug_lp &gt; 1) always @(negedge clk_i) begin
-			if (v_i[i] &amp; yumi_o[i])
-				if (w_i[i])
-					$display(&#34;%m port %d [%x]=%x (mask_i=%b)&#34;, i, addr_i[i * addr_width_lp+:addr_width_lp] * debug_lp, data_i[i * data_width_p+:data_width_p], mask_i[i * mask_width_lp+:mask_width_lp]);
-				else if (debug_reads_lp)
-					$display(&#34;%m port %d           = [%x]&#34;, i, addr_i[i * addr_width_lp+:addr_width_lp] * debug_lp);
-			if (v_o[i] &amp;&amp; debug_reads_lp)
-				$display(&#34;%m port %d  %x = [%x]&#34;, i, data_o[i * data_width_p+:data_width_p], addr_r[i * addr_width_lp+:addr_width_lp] * debug_lp);
+		for (i = 0; i &lt; num_ports_p; i = i + 1) begin : genblk1
+			if (debug_lp &gt; 1) begin : genblk1
+				always @(negedge clk_i) begin
+					if (v_i[i] &amp; yumi_o[i])
+						if (w_i[i])
+							$display(&#34;%m port %d [%x]=%x (mask_i=%b)&#34;, i, addr_i[i * addr_width_lp+:addr_width_lp] * debug_lp, data_i[i * data_width_p+:data_width_p], mask_i[i * mask_width_lp+:mask_width_lp]);
+						else if (debug_reads_lp)
+							$display(&#34;%m port %d           = [%x]&#34;, i, addr_i[i * addr_width_lp+:addr_width_lp] * debug_lp);
+					if (v_o[i] &amp;&amp; debug_reads_lp)
+						$display(&#34;%m port %d  %x = [%x]&#34;, i, data_o[i * data_width_p+:data_width_p], addr_r[i * addr_width_lp+:addr_width_lp] * debug_lp);
+				end
+			end
 		end
 	endgenerate
 	generate
-		if (num_banks_p &gt; 1) begin
-			for (i = 0; i &lt; num_ports_p; i = i + 1) assign bank_reqs[i * addr_hash_width_lp+:addr_hash_width_lp] = addr_i[(i * addr_width_lp) + bank_addr_width_lp+:addr_hash_width_lp];
+		if (num_banks_p &gt; 1) begin : genblk2
+			for (i = 0; i &lt; num_ports_p; i = i + 1) begin : genblk1
+				assign bank_reqs[i * addr_hash_width_lp+:addr_hash_width_lp] = addr_i[(i * addr_width_lp) + bank_addr_width_lp+:addr_hash_width_lp];
+			end
 		end
-		else assign bank_reqs = 1&#39;b0;
+		else begin : genblk2
+			assign bank_reqs = 1&#39;b0;
+		end
 	endgenerate
 	wire [(num_banks_p * num_ports_p) - 1:0] bank_port_grants_one_hot;
 	reg [(num_banks_p * num_ports_p) - 1:0] bank_port_grants_one_hot_r;
@@ -225,7 +235,9 @@ module bsg_mem_banked_crossbar (
 	);
 	wire [(num_ports_p * bank_addr_width_lp) - 1:0] bank_req_addr;
 	generate
-		for (i = 0; i &lt; num_ports_p; i = i + 1) assign bank_req_addr[i * bank_addr_width_lp+:bank_addr_width_lp] = addr_i[i * addr_width_lp+:bank_addr_width_lp];
+		for (i = 0; i &lt; num_ports_p; i = i + 1) begin : genblk3
+			assign bank_req_addr[i * bank_addr_width_lp+:bank_addr_width_lp] = addr_i[i * addr_width_lp+:bank_addr_width_lp];
+		end
 	endgenerate
 	wire [(num_banks_p * bank_addr_width_lp) - 1:0] bank_addr;
 	bsg_crossbar_o_by_i #(
@@ -260,12 +272,14 @@ module bsg_mem_banked_crossbar (
 	);
 	generate
 		for (i = 0; i &lt; num_banks_p; i = i + 1) begin : z
-			if (debug_lp &gt; 1) always @(negedge clk_i)
-				if (bank_v[i])
-					if (bank_w[i])
-						$display(&#34;%m [%x] &lt;= %d&#34;, bank_addr[i * bank_addr_width_lp+:bank_addr_width_lp] * debug_p, bank_data[i * data_width_p+:data_width_p]);
-					else
-						$display(&#34;%m &lt;= [%x]&#34;, bank_addr[i * bank_addr_width_lp+:bank_addr_width_lp] * debug_p);
+			if (debug_lp &gt; 1) begin : genblk1
+				always @(negedge clk_i)
+					if (bank_v[i])
+						if (bank_w[i])
+							$display(&#34;%m [%x] &lt;= %d&#34;, bank_addr[i * bank_addr_width_lp+:bank_addr_width_lp] * debug_p, bank_data[i * data_width_p+:data_width_p]);
+						else
+							$display(&#34;%m &lt;= [%x]&#34;, bank_addr[i * bank_addr_width_lp+:bank_addr_width_lp] * debug_p);
+			end
 			bsg_mem_1rw_sync_mask_write_byte #(
 				.data_width_p(data_width_p),
 				.els_p(bank_size_p)

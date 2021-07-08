@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_fsb_murn_gateway.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_fsb_murn_gateway.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_fsb/bsg_fsb_murn_gateway.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_fsb/bsg_fsb_murn_gateway.v</a>
 defines: 
-completed: 2021-06-15 04:37:12
-time_elapsed: 0.097s
-ram usage: 84092 KB
+completed: 2021-07-08 00:15:26
+time_elapsed: 0.090s
+ram usage: 84376 KB
 </pre>
 <pre class="log">
 
@@ -58,14 +58,14 @@ module bsg_fsb_murn_gateway (
 	localparam [6:0] RNRESET_DISABLE_CMD = &#39;d6;
 	localparam [6:0] RNRESET_ENABLE_CMD = &#39;d5;
 	generate
-		if (snoop_p &amp; enabled_at_start_p) begin
+		if (snoop_p &amp; enabled_at_start_p) begin : genblk1
 			assign v_o = v_i;
 			assign ready_o = ready_i;
 			assign node_reset_r_o = reset_i;
 			assign node_en_r_o = 1&#39;b1;
 			wire stop_lint_unused_warning = clk_i | |data_i;
 		end
-		else begin
+		else begin : genblk1
 			reg node_en_r;
 			reg node_en_n;
 			reg node_reset_r;
@@ -84,14 +84,16 @@ module bsg_fsb_murn_gateway (
 			assign v_o = (node_en_r &amp; for_this_node) &amp; ~for_switch;
 			assign ready_o = v_i &amp; (((~node_en_r | ready_i) | for_switch) | ~for_this_node);
 			always @(posedge clk_i) node_en_r &lt;= (reset_i ? enabled_at_start_p != 0 : node_en_n);
-			if (enabled_at_start_p) begin
+			if (enabled_at_start_p) begin : genblk1
 				always @(posedge clk_i) node_reset_r &lt;= reset_i;
 			end
-			else always @(posedge clk_i)
-				if (reset_i)
-					node_reset_r &lt;= 1&#39;b1;
-				else
-					node_reset_r &lt;= node_reset_n;
+			else begin : genblk1
+				always @(posedge clk_i)
+					if (reset_i)
+						node_reset_r &lt;= 1&#39;b1;
+					else
+						node_reset_r &lt;= node_reset_n;
+			end
 			always @(*) begin
 				node_en_n = node_en_r;
 				node_reset_n = node_reset_r;

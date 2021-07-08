@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_lru_pseudo_tree_backup.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_lru_pseudo_tree_backup.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_lru_pseudo_tree_backup.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_lru_pseudo_tree_backup.v</a>
 defines: 
-completed: 2021-06-15 04:37:19
-time_elapsed: 0.062s
-ram usage: 58636 KB
+completed: 2021-07-08 00:15:25
+time_elapsed: 0.060s
+ram usage: 59072 KB
 </pre>
 <pre class="log">
 
@@ -44,12 +44,14 @@ module bsg_lru_pseudo_tree_backup (
 		end
 		else begin : lru
 			genvar i;
-			for (i = 0; i &lt; lg_ways_lp; i = i + 1) begin
+			for (i = 0; i &lt; lg_ways_lp; i = i + 1) begin : genblk1
 				wire [(2 ** (i + 1)) - 1:0] and_reduce;
 				genvar j;
-				for (j = 0; j &lt; (2 ** (i + 1)); j = j + 1) assign and_reduce[j] = &amp;disabled_ways_i[(ways_p / (2 ** (i + 1))) * j+:ways_p / (2 ** (i + 1))];
+				for (j = 0; j &lt; (2 ** (i + 1)); j = j + 1) begin : genblk1
+					assign and_reduce[j] = &amp;disabled_ways_i[(ways_p / (2 ** (i + 1))) * j+:ways_p / (2 ** (i + 1))];
+				end
 				genvar k;
-				for (k = 0; k &lt; ((2 ** (i + 1)) / 2); k = k + 1) begin
+				for (k = 0; k &lt; ((2 ** (i + 1)) / 2); k = k + 1) begin : genblk2
 					assign modify_data_o[((2 ** i) - 1) + k] = and_reduce[2 * k];
 					assign modify_mask_o[((2 ** i) - 1) + k] = |and_reduce[2 * k+:2];
 				end

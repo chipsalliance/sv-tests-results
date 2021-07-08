@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache.v</a>
 defines: 
-completed: 2021-06-15 04:37:14
-time_elapsed: 0.378s
-ram usage: 141412 KB
+completed: 2021-07-08 00:15:07
+time_elapsed: 0.446s
+ram usage: 143672 KB
 </pre>
 <pre class="log">
 
@@ -110,13 +110,15 @@ module bsg_cache (
 	assign addr_block_offset = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp];
 	wire [lg_data_mem_els_lp - 1:0] ld_data_mem_addr;
 	generate
-		if (burst_len_lp == 1) begin
+		if (burst_len_lp == 1) begin : genblk1
 			assign ld_data_mem_addr = addr_index;
 		end
-		else if (burst_len_lp == block_size_in_words_p) begin
+		else if (burst_len_lp == block_size_in_words_p) begin : genblk1
 			assign ld_data_mem_addr = {addr_index, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp]};
 		end
-		else assign ld_data_mem_addr = {addr_index, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp]};
+		else begin : genblk1
+			assign ld_data_mem_addr = {addr_index, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp]};
+		end
 	endgenerate
 	reg v_tl_r;
 	reg [20:0] decode_tl_r;
@@ -146,13 +148,15 @@ module bsg_cache (
 	assign addr_block_offset_tl = addr_tl_r[lg_data_mask_width_lp+:lg_block_size_in_words_lp];
 	wire [lg_data_mem_els_lp - 1:0] recover_data_mem_addr;
 	generate
-		if (burst_len_lp == 1) begin
+		if (burst_len_lp == 1) begin : genblk2
 			assign recover_data_mem_addr = addr_index_tl;
 		end
-		else if (burst_len_lp == block_size_in_words_p) begin
+		else if (burst_len_lp == block_size_in_words_p) begin : genblk2
 			assign recover_data_mem_addr = {addr_index_tl, addr_tl_r[lg_data_mask_width_lp+:lg_block_size_in_words_lp]};
 		end
-		else assign recover_data_mem_addr = {addr_index_tl, addr_tl_r[lg_data_mask_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]};
+		else begin : genblk2
+			assign recover_data_mem_addr = {addr_index_tl, addr_tl_r[lg_data_mask_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]};
+		end
 	endgenerate
 	wire tag_mem_v_li;
 	wire tag_mem_w_li;
@@ -179,7 +183,7 @@ module bsg_cache (
 	wire [ways_p - 1:0] lock_tl;
 	generate
 		genvar i;
-		for (i = 0; i &lt; ways_p; i = i + 1) begin
+		for (i = 0; i &lt; ways_p; i = i + 1) begin : genblk3
 			assign valid_tl[i] = tag_mem_data_lo[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)];
 			assign tag_tl[i * tag_width_lp+:tag_width_lp] = tag_mem_data_lo[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp];
 			assign lock_tl[i] = tag_mem_data_lo[(i * (2 + tag_width_lp)) + tag_width_lp];
@@ -243,7 +247,9 @@ module bsg_cache (
 	assign addr_index_v = addr_v_r[block_offset_width_lp+:lg_sets_lp];
 	assign addr_way_v = addr_v_r[block_offset_width_lp + lg_sets_lp+:lg_ways_lp];
 	generate
-		for (i = 0; i &lt; ways_p; i = i + 1) assign tag_hit_v[i] = (addr_tag_v == tag_v_r[i * tag_width_lp+:tag_width_lp]) &amp; valid_v_r[i];
+		for (i = 0; i &lt; ways_p; i = i + 1) begin : genblk4
+			assign tag_hit_v[i] = (addr_tag_v == tag_v_r[i * tag_width_lp+:tag_width_lp]) &amp; valid_v_r[i];
+		end
 	endgenerate
 	wire [lg_ways_lp - 1:0] tag_hit_way_id;
 	wire tag_hit_found;
@@ -433,19 +439,21 @@ module bsg_cache (
 	wire [(ways_p * dma_data_width_p) - 1:0] sbuf_data_mem_data;
 	wire [lg_data_mem_els_lp - 1:0] sbuf_data_mem_addr;
 	generate
-		for (i = 0; i &lt; ways_p; i = i + 1) begin
+		for (i = 0; i &lt; ways_p; i = i + 1) begin : genblk5
 			assign sbuf_data_mem_data[i * dma_data_width_p+:dma_data_width_p] = {burst_size_in_words_lp {sbuf_entry_lo[data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p))) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p)))) + 1 : (((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p))) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) + 1)]}};
 			assign sbuf_data_mem_w_mask[i * dma_data_mask_width_lp+:dma_data_mask_width_lp] = (sbuf_way_decode[i] ? sbuf_expand_mask &amp; {burst_size_in_words_lp {sbuf_entry_lo[(data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) &gt;= (ways_p == 1 ? 1 : $clog2(ways_p)) ? (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) - (ways_p == 1 ? 1 : $clog2(ways_p))) + 1 : ((ways_p == 1 ? 1 : $clog2(ways_p)) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) + 1)]}} : {dma_data_mask_width_lp {1&#39;sb0}});
 		end
 	endgenerate
 	generate
-		if (burst_len_lp == 1) begin
+		if (burst_len_lp == 1) begin : genblk6
 			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - block_offset_width_lp)+:lg_sets_lp];
 		end
-		else if (burst_len_lp == block_size_in_words_p) begin
+		else if (burst_len_lp == block_size_in_words_p) begin : genblk6
 			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp + lg_sets_lp];
 		end
-		else assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp + lg_sets_lp];
+		else begin : genblk6
+			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp + lg_sets_lp];
+		end
 	endgenerate
 	wire [(data_sel_mux_els_lp * data_width_p) - 1:0] sbuf_data_in_mux_li;
 	wire [(data_sel_mux_els_lp * data_mask_width_lp) - 1:0] sbuf_mask_in_mux_li;
@@ -515,7 +523,9 @@ module bsg_cache (
 			wire [63:0] amo64_out = atomic_alu_result;
 			assign atomic_result = (decode_v_r[19] ? amo64_out : amo32_out);
 		end
-		else assign atomic_result = atomic_alu_result;
+		else begin : genblk8
+			assign atomic_result = atomic_alu_result;
+		end
 	endgenerate
 	generate
 		for (i = 0; i &lt; data_sel_mux_els_lp; i = i + 1) begin : sbuf_in_sel
@@ -524,7 +534,9 @@ module bsg_cache (
 			if ((i == 2&#39;b10) || (i == 2&#39;b11)) begin : atomic_in_sel
 				assign slice_data = (decode_v_r[4] ? atomic_result[0+:slice_width_lp] : data_v_r[0+:slice_width_lp]);
 			end
-			else assign slice_data = data_v_r[0+:slice_width_lp];
+			else begin : genblk1
+				assign slice_data = data_v_r[0+:slice_width_lp];
+			end
 			assign sbuf_data_in_mux_li[i * data_width_p+:data_width_p] = {data_width_p / slice_width_lp {slice_data}};
 			wire [(data_width_p / slice_width_lp) - 1:0] decode_lo;
 			bsg_decode #(.num_out_p(data_width_p / slice_width_lp)) dec(
@@ -712,15 +724,17 @@ module bsg_cache (
 			if (v_v_r)
 				;
 	generate
-		if (debug_p) always @(posedge clk_i) begin
-			if (v_o &amp; yumi_i) begin
-				if (decode_v_r[16])
-					$display(&#34;&lt;VCACHE&gt; M[%4h] == %8h // %8t&#34;, addr_v_r, data_o, $time);
-				if (decode_v_r[15])
-					$display(&#34;&lt;VCACHE&gt; M[%4h] := %8h // %8t&#34;, addr_v_r, sbuf_entry_li[data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p))) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p)))) + 1 : (((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p))) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) + 1)], $time);
+		if (debug_p) begin : genblk11
+			always @(posedge clk_i) begin
+				if (v_o &amp; yumi_i) begin
+					if (decode_v_r[16])
+						$display(&#34;&lt;VCACHE&gt; M[%4h] == %8h // %8t&#34;, addr_v_r, data_o, $time);
+					if (decode_v_r[15])
+						$display(&#34;&lt;VCACHE&gt; M[%4h] := %8h // %8t&#34;, addr_v_r, sbuf_entry_li[data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p))) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p)))) + 1 : (((data_width_p &gt;&gt; 3) + (ways_p == 1 ? 1 : $clog2(ways_p))) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) + 1)], $time);
+				end
+				if (tag_mem_v_li &amp; tag_mem_w_li)
+					$display(&#34;&lt;VCACHE&gt; tag_mem_write. addr=%8h data_1=%8h data_0=%8h mask_1=%8h mask_0=%8h // %8t&#34;, tag_mem_addr_li, tag_mem_data_li[(2 + tag_width_lp) * (1 + tag_width_lp)+:(2 + tag_width_lp) * (1 + tag_width_lp)], tag_mem_data_li[0+:(2 + tag_width_lp) * (1 + tag_width_lp)], tag_mem_w_mask_li[(2 + tag_width_lp) * (1 + tag_width_lp)+:(2 + tag_width_lp) * (1 + tag_width_lp)], tag_mem_w_mask_li[0+:(2 + tag_width_lp) * (1 + tag_width_lp)], $time);
 			end
-			if (tag_mem_v_li &amp; tag_mem_w_li)
-				$display(&#34;&lt;VCACHE&gt; tag_mem_write. addr=%8h data_1=%8h data_0=%8h mask_1=%8h mask_0=%8h // %8t&#34;, tag_mem_addr_li, tag_mem_data_li[(2 + tag_width_lp) * (1 + tag_width_lp)+:(2 + tag_width_lp) * (1 + tag_width_lp)], tag_mem_data_li[0+:(2 + tag_width_lp) * (1 + tag_width_lp)], tag_mem_w_mask_li[(2 + tag_width_lp) * (1 + tag_width_lp)+:(2 + tag_width_lp) * (1 + tag_width_lp)], tag_mem_w_mask_li[0+:(2 + tag_width_lp) * (1 + tag_width_lp)], $time);
 		end
 	endgenerate
 endmodule

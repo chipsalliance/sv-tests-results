@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_router_crossbar_o_by_i.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_router_crossbar_o_by_i.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_router_crossbar_o_by_i.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_router_crossbar_o_by_i.v</a>
 defines: 
-completed: 2021-06-15 04:37:13
-time_elapsed: 0.089s
-ram usage: 77568 KB
+completed: 2021-07-08 00:15:13
+time_elapsed: 0.082s
+ram usage: 78284 KB
 </pre>
 <pre class="log">
 
@@ -113,14 +113,20 @@ module bsg_router_crossbar_o_by_i (
 		.grants_oi_one_hot_o(grants_lo)
 	);
 	generate
-		for (i = 0; i &lt; i_els_p; i = i + 1) assign ctrl_sel_io_li[i * lg_o_els_lp+:lg_o_els_lp] = fifo_data_lo[i * i_width_p+:lg_o_els_lp];
+		for (i = 0; i &lt; i_els_p; i = i + 1) begin : genblk3
+			assign ctrl_sel_io_li[i * lg_o_els_lp+:lg_o_els_lp] = fifo_data_lo[i * i_width_p+:lg_o_els_lp];
+		end
 	endgenerate
 	wire [(i_els_p * o_width_lp) - 1:0] odata;
 	generate
-		for (i = 0; i &lt; i_els_p; i = i + 1) if (drop_header_p) begin
-			assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[(i * i_width_p) + ((i_width_p - 1) &gt;= lg_o_els_lp ? i_width_p - 1 : ((i_width_p - 1) + ((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)) - 1)-:((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)];
+		for (i = 0; i &lt; i_els_p; i = i + 1) begin : genblk4
+			if (drop_header_p) begin : genblk1
+				assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[(i * i_width_p) + ((i_width_p - 1) &gt;= lg_o_els_lp ? i_width_p - 1 : ((i_width_p - 1) + ((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)) - 1)-:((i_width_p - 1) &gt;= lg_o_els_lp ? ((i_width_p - 1) - lg_o_els_lp) + 1 : (lg_o_els_lp - (i_width_p - 1)) + 1)];
+			end
+			else begin : genblk1
+				assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[i * i_width_p+:i_width_p];
+			end
 		end
-		else assign odata[i * o_width_lp+:o_width_lp] = fifo_data_lo[i * i_width_p+:i_width_p];
 	endgenerate
 	generate
 		for (i = 0; i &lt; o_els_p; i = i + 1) begin : mux

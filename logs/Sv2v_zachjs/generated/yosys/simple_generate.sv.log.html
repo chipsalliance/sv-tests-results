@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/yosys/simple_generate.sv.html" target="file-frame">tests/generated/yosys/simple_generate.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/generate.v.html" target="file-frame">third_party/tools/yosys/tests/simple/generate.v</a>
 defines: 
-completed: 2021-06-15 04:37:04
-time_elapsed: 0.064s
-ram usage: 53536 KB
+completed: 2021-07-08 00:16:14
+time_elapsed: 0.065s
+ram usage: 54460 KB
 </pre>
 <pre class="log">
 
@@ -102,18 +102,24 @@ module gen_test3 (
 	output [3:0] z;
 	genvar i;
 	generate
-		for (i = 0; i &lt; 2; i = i + 1) begin
+		for (i = 0; i &lt; 2; i = i + 1) begin : genblk1
 			assign y[i] = (sel ? a[i] : b[i]);
 			assign z[i] = (sel ? b[i] : a[i]);
 		end
-		for (i = 0; i &lt; 2; i = i + 1) begin
-			if (i == 0) begin
+		for (i = 0; i &lt; 2; i = i + 1) begin : genblk2
+			if (i == 0) begin : genblk1
 				assign y[2] = (sel ? a[2] : b[2]);
 			end
-			else assign z[2] = (sel ? a[2] : b[2]);
+			else begin : genblk1
+				assign z[2] = (sel ? a[2] : b[2]);
+			end
 			case (i)
-				default: assign z[3] = (sel ? a[3] : b[3]);
-				0: assign y[3] = (sel ? a[3] : b[3]);
+				default: begin : genblk2
+					assign z[3] = (sel ? a[3] : b[3]);
+				end
+				0: begin : genblk2
+					assign y[3] = (sel ? a[3] : b[3]);
+				end
 			endcase
 		end
 	endgenerate
@@ -129,10 +135,12 @@ module gen_test4 (
 		for (i = 0; i &lt; 3; i = i + 1) begin : foo
 			localparam PREV = i - 1;
 			wire temp;
-			if (i == 0) begin
+			if (i == 0) begin : genblk1
 				assign temp = a[0];
 			end
-			else assign temp = foo[PREV].temp &amp; a[i];
+			else begin : genblk1
+				assign temp = foo[PREV].temp &amp; a[i];
+			end
 			assign b[i] = temp;
 		end
 	endgenerate
@@ -156,13 +164,15 @@ module gen_test5 (
 				localparam LAST_START = i * CHUNK;
 				for (j = 0; j &lt; CHUNK; j = j + 1) begin : inner
 					wire temp;
-					if (step == 1) begin
+					if (step == 1) begin : genblk1
 						assign temp = input_bits[i];
 					end
-					else if (j == 0) begin
+					else if (j == 0) begin : genblk1
 						assign temp = steps[PREV].outer[LAST_START].val;
 					end
-					else assign temp = steps[step].outer[i].inner[j - 1].temp &amp; steps[PREV].outer[LAST_START + j].val;
+					else begin : genblk1
+						assign temp = steps[step].outer[i].inner[j - 1].temp &amp; steps[PREV].outer[LAST_START + j].val;
+					end
 				end
 				wire val;
 				assign val = steps[step].outer[i].inner[CHUNK - 1].temp;
@@ -175,7 +185,9 @@ module gen_test6 (o);
 	output [3:0] o;
 	generate
 		genvar i;
-		for (i = 3; i &gt;= 0; i = i - 1) assign o[i] = 1&#39;b0;
+		for (i = 3; i &gt;= 0; i = i - 1) begin : genblk1
+			assign o[i] = 1&#39;b0;
+		end
 	endgenerate
 endmodule
 module gen_test7;
@@ -183,7 +195,7 @@ module gen_test7;
 	reg [2:0] out2;
 	wire [2:0] out3;
 	generate
-		begin : cond
+		if (1) begin : cond
 			reg [2:0] sub_out1;
 			reg [2:0] sub_out2;
 			wire [2:0] sub_out3;
@@ -200,7 +212,7 @@ module gen_test7;
 				sub_out2 = x;
 			end
 			genvar x;
-			for (x = 0; x &lt; 3; x = x + 1) begin
+			for (x = 0; x &lt; 3; x = x + 1) begin : genblk1
 				assign out3[x] = 1;
 				assign sub_out3[x] = 1;
 			end
@@ -210,12 +222,12 @@ endmodule
 module gen_test8;
 	wire [1:0] x = 2&#39;b11;
 	generate
-		begin : A
+		if (1) begin : A
 			wire [1:0] x;
-			begin : B
+			if (1) begin : B
 				wire [1:0] x = 2&#39;b00;
 			end
-			begin : C
+			if (1) begin : C
 				wire [1:0] x = 2&#39;b01;
 			end
 			assign x = (B.x ^ 2&#39;b11) ^ C.x;
@@ -225,12 +237,12 @@ endmodule
 module gen_test9;
 	wire [1:0] w = 2&#39;b11;
 	generate
-		begin : A
+		if (1) begin : A
 			wire [1:0] x;
-			begin : B
+			if (1) begin : B
 				wire [1:0] y = 2&#39;b00;
 			end
-			begin : C
+			if (1) begin : C
 				wire [1:0] z = 2&#39;b01;
 			end
 			assign x = (B.y ^ 2&#39;b11) ^ C.z;

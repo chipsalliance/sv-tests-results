@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,16 +17,43 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/br_gh307.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br_gh307.v</a>
 defines: 
-completed: 2021-06-15 04:36:10
-time_elapsed: 0.013s
-ram usage: 12604 KB
+completed: 2021-07-08 00:14:45
+time_elapsed: 0.019s
+ram usage: 17896 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/br_gh307.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br_gh307.v</a>
-zachjs-sv2v: expected comma or end of decl, got: [DTIdent <a href="../../../../third_party/tests/ivtest/ivltests/br_gh307.v.html#l-19" target="file-frame">third_party/tests/ivtest/ivltests/br_gh307.v:19</a>:21 &#34;dst&#34;]
-CallStack (from HasCallStack):
-  error, called at src/Language/SystemVerilog/Parser/ParseDecl.hs:511:18 in main:Language.SystemVerilog.Parser.ParseDecl
+module simple (
+	b2in,
+	b2out
+);
+	input wire [1:0] b2in;
+	output wire [1:0] b2out;
+	assign b2out[1] = b2in[1];
+endmodule
+module main;
+	reg [1:0] src;
+	wire [1:0] dst;
+	simple copy(
+		.b2in(src),
+		.b2out(dst)
+	);
+	assign dst[-0] = src[-0];
+	initial begin
+		src[1] = 1&#39;b1;
+		src[-0] = 1&#39;b0;
+		#(1)
+			;
+		$display(&#34;src=%b (s.b. 10), dst=%b (s.b. 10)&#34;, src, dst);
+		if ((src !== 2&#39;b10) || (dst !== 2&#39;b10)) begin
+			$display(&#34;FAILED&#34;);
+			$finish;
+		end
+		$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
 
 </pre>
 </body>

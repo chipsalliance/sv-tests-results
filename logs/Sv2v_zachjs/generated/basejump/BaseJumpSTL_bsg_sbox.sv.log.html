@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_sbox.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_sbox.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_sbox.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_sbox.v</a>
 defines: 
-completed: 2021-06-15 04:37:07
-time_elapsed: 0.101s
-ram usage: 90360 KB
+completed: 2021-07-08 00:15:08
+time_elapsed: 0.107s
+ram usage: 91192 KB
 </pre>
 <pre class="log">
 
@@ -102,10 +102,14 @@ module bsg_sbox (
 				always @(posedge clk_i) fwd_sel_one_hot_r[i * num_channels_p+:num_channels_p] &lt;= 1 &lt;&lt; fwd_sel[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))];
 				assign in_v_o_int[i] = |(in_v_i &amp; fwd_sel_one_hot_r[i * num_channels_p+:num_channels_p]);
 			end
-			else assign in_v_o_int[i] = in_v_i[fwd_sel_r[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))]];
+			else begin : genblk1
+				assign in_v_o_int[i] = in_v_i[fwd_sel_r[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))]];
+			end
 			assign in_yumi_o[i] = in_yumi_i_int[bk_sel_r[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))]];
 			wire [channel_width_p - 1:0] forward [(num_channels_p - i) - 1:0];
-			for (j = 0; j &lt; (num_channels_p - i); j = j + 1) assign forward[j] = in_data_i[(i + j) * channel_width_p+:channel_width_p];
+			for (j = 0; j &lt; (num_channels_p - i); j = j + 1) begin : genblk2
+				assign forward[j] = in_data_i[(i + j) * channel_width_p+:channel_width_p];
+			end
 			assign in_data_o_int[i] = forward[fwd_dpath_sel_r[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))]];
 			assign out_me_v_o[i] = out_me_v_i_int[bk_sel_r[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))]];
 			assign out_me_ready_o_int[i] = out_me_ready_i[fwd_sel_r[i * (num_channels_p == 1 ? 1 : $clog2(num_channels_p))+:(num_channels_p == 1 ? 1 : $clog2(num_channels_p))]];

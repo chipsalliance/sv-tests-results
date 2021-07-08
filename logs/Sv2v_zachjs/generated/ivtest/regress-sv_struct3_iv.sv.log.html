@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,19 +17,33 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/struct3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/struct3.v</a>
 defines: 
-completed: 2021-06-15 04:36:28
-time_elapsed: 0.012s
-ram usage: 12460 KB
+completed: 2021-07-08 00:14:34
+time_elapsed: 0.017s
+ram usage: 17264 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/struct3.v.html" target="file-frame">third_party/tests/ivtest/ivltests/struct3.v</a>
-zachjs-sv2v: takeIdent didn&#39;t find identifier: [DTType <a href="../../../../third_party/tests/ivtest/ivltests/struct3.v.html#l-13" target="file-frame">third_party/tests/ivtest/ivltests/struct3.v:13</a>:6 struct packed {
-	logic [7:0] high;
-	logic [7:0] low;
-},DTIdent <a href="../../../../third_party/tests/ivtest/ivltests/struct3.v.html#l-13" target="file-frame">third_party/tests/ivtest/ivltests/struct3.v:13</a>:11 &#34;word2&#34;]
-CallStack (from HasCallStack):
-  error, called at src/Language/SystemVerilog/Parser/ParseDecl.hs:515:20 in main:Language.SystemVerilog.Parser.ParseDecl
+module main;
+	reg [15:0] word1;
+	wire [15:0] word2;
+	assign word2[15-:8] = word1[15-:8];
+	assign word2[7-:8] = word1[7-:8];
+	initial begin
+		word1 = 16&#39;haa55;
+		if ((word1[15-:8] !== 8&#39;haa) || (word1[7-:8] !== 8&#39;h55)) begin
+			$display(&#34;FAILED: word1 = %h, word1.high = %h, word1.low = %h&#34;, word1, word1[15-:8], word1[7-:8]);
+			$finish;
+		end
+		#(1)
+			;
+		if ((word2[15-:8] !== 8&#39;haa) || (word2[7-:8] !== 8&#39;h55)) begin
+			$display(&#34;FAILED: word2 = %h, word2.high = %h, word2.low = %h&#34;, word1, word2[15-:8], word2[7-:8]);
+			$finish;
+		end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
 
 </pre>
 </body>

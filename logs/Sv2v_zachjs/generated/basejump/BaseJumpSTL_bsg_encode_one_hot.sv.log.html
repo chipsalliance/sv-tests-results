@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_encode_one_hot.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_encode_one_hot.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_encode_one_hot.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_encode_one_hot.v</a>
 defines: 
-completed: 2021-06-15 04:37:06
-time_elapsed: 0.098s
-ram usage: 85260 KB
+completed: 2021-07-08 00:15:19
+time_elapsed: 0.093s
+ram usage: 86480 KB
 </pre>
 <pre class="log">
 
@@ -58,7 +58,7 @@ module bsg_encode_one_hot (
 			for (segment = 0; segment &lt; segments_lp; segment = segment + 1) begin : rof1
 				wire [1:0] vs = {v[((levels_lp &gt;= 0 ? level - 1 : levels_lp - (level - 1)) * aligned_width_lp) + ((segment * segment_slot_lp) + (segment_slot_lp &gt;&gt; 1))], v[((levels_lp &gt;= 0 ? level - 1 : levels_lp - (level - 1)) * aligned_width_lp) + (segment * segment_slot_lp)]};
 				assign v[((levels_lp &gt;= 0 ? level : levels_lp - level) * aligned_width_lp) + (segment * segment_slot_lp)] = |vs;
-				if (level == 1) begin
+				if (level == 1) begin : genblk1
 					assign addr[((levels_lp &gt;= 0 ? level : levels_lp - level) * aligned_width_lp) + (segment * segment_slot_lp)+:segment_width_lp] = {vs[lo_to_hi_p]};
 				end
 				else begin : fi
@@ -70,13 +70,15 @@ module bsg_encode_one_hot (
 	assign v_o = v[(levels_lp &gt;= 0 ? levels_lp : levels_lp - levels_lp) * aligned_width_lp];
 	assign addr_o = (((i - 1) &amp; i) == {((width_p &gt;= 32 ? width_p : 32) &gt;= width_p ? (width_p &gt;= 32 ? width_p : 32) : width_p) {1&#39;sb0}} ? addr[((levels_lp &gt;= 0 ? levels_lp : levels_lp - levels_lp) * aligned_width_lp) + ((width_p == 1 ? 1 : $clog2(width_p)) - 1)-:(width_p == 1 ? 1 : $clog2(width_p))] : {(width_p == 1 ? 1 : $clog2(width_p)) {1&#39;bx}});
 	generate
-		if (debug_p) always @(addr_o or v_o) begin
-			#(1) begin : sv2v_autoblock_1
-				integer k;
-				for (k = 0; k &lt;= $clog2(width_p); k = k + 1)
-					$display(&#34;%b %b&#34;, addr[(levels_lp &gt;= 0 ? k : levels_lp - k) * aligned_width_lp+:aligned_width_lp], v[(levels_lp &gt;= 0 ? k : levels_lp - k) * aligned_width_lp+:aligned_width_lp]);
+		if (debug_p) begin : genblk2
+			always @(addr_o or v_o) begin
+				#(1) begin : sv2v_autoblock_1
+					integer k;
+					for (k = 0; k &lt;= $clog2(width_p); k = k + 1)
+						$display(&#34;%b %b&#34;, addr[(levels_lp &gt;= 0 ? k : levels_lp - k) * aligned_width_lp+:aligned_width_lp], v[(levels_lp &gt;= 0 ? k : levels_lp - k) * aligned_width_lp+:aligned_width_lp]);
+				end
+				$display(&#34;addr_o=%b v_o=%b&#34;, addr_o, v_o);
 			end
-			$display(&#34;addr_o=%b v_o=%b&#34;, addr_o, v_o);
 		end
 	endgenerate
 endmodule

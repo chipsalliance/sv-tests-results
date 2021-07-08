@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_to_test_dram_tx.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_to_test_dram_tx.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_test_dram_tx.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_test_dram_tx.v</a>
 defines: 
-completed: 2021-06-15 04:37:12
+completed: 2021-07-08 00:15:07
 time_elapsed: 0.085s
-ram usage: 75648 KB
+ram usage: 76060 KB
 </pre>
 <pre class="log">
 
@@ -92,29 +92,31 @@ module bsg_cache_to_test_dram_tx (
 	wire [num_cache_p - 1:0] sipo_yumi_li;
 	generate
 		genvar i;
-		for (i = 0; i &lt; num_cache_p; i = i + 1) bsg_serial_in_parallel_out_full #(
-			.width_p(dma_data_width_p),
-			.els_p(dram_data_width_p / dma_data_width_p)
-		) sipo(
-			.clk_i(core_clk_i),
-			.reset_i(core_reset_i),
-			.v_i(sipo_v_li[i]),
-			.data_i(sipo_data_li[i * dma_data_width_p+:dma_data_width_p]),
-			.ready_o(sipo_ready_lo[i]),
-			.v_o(sipo_v_lo[i]),
-			.data_o(sipo_data_lo[i * dram_data_width_p+:dram_data_width_p]),
-			.yumi_i(sipo_yumi_li[i])
-		);
+		for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk1
+			bsg_serial_in_parallel_out_full #(
+				.width_p(dma_data_width_p),
+				.els_p(dram_data_width_p / dma_data_width_p)
+			) sipo(
+				.clk_i(core_clk_i),
+				.reset_i(core_reset_i),
+				.v_i(sipo_v_li[i]),
+				.data_i(sipo_data_li[i * dma_data_width_p+:dma_data_width_p]),
+				.ready_o(sipo_ready_lo[i]),
+				.v_o(sipo_v_lo[i]),
+				.data_o(sipo_data_lo[i * dram_data_width_p+:dram_data_width_p]),
+				.yumi_i(sipo_yumi_li[i])
+			);
+		end
 	endgenerate
 	generate
-		if (num_req_lp == 1) begin
+		if (num_req_lp == 1) begin : genblk2
 			assign sipo_v_li = dma_data_v_i;
 			assign sipo_data_li = dma_data_i;
 			assign dma_data_yumi_o = dma_data_v_i &amp; sipo_ready_lo;
 		end
-		else begin
+		else begin : genblk2
 			wire [num_cache_p - 1:0] fifo_ready_lo;
-			for (i = 0; i &lt; num_cache_p; i = i + 1) begin
+			for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk1
 				bsg_fifo_1r1w_small #(
 					.width_p(dma_data_width_p),
 					.els_p((block_size_in_words_p * data_width_p) / dma_data_width_p)

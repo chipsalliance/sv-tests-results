@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_async_ptr_gray.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_async_ptr_gray.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_async/bsg_async_ptr_gray.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_async/bsg_async_ptr_gray.v</a>
 defines: 
-completed: 2021-06-15 04:37:10
-time_elapsed: 0.096s
-ram usage: 84604 KB
+completed: 2021-07-08 00:15:09
+time_elapsed: 0.086s
+ram usage: 84640 KB
 </pre>
 <pre class="log">
 
@@ -60,7 +60,7 @@ module bsg_async_ptr_gray (
 	assign w_ptr_gray_n = (w_inc_i ? (w_ptr_p1_r &gt;&gt; 1) ^ w_ptr_p1_r : w_ptr_gray_r);
 	generate
 		if (use_async_reset_p == 0) begin : sync
-			if (use_negedge_for_launch_p) begin
+			if (use_negedge_for_launch_p) begin : genblk1
 				always @(negedge w_clk_i)
 					if (w_reset_i) begin
 						w_ptr_r &lt;= 0;
@@ -71,15 +71,17 @@ module bsg_async_ptr_gray (
 						w_ptr_p1_r &lt;= w_ptr_p1_n;
 					end
 			end
-			else always @(posedge w_clk_i)
-				if (w_reset_i) begin
-					w_ptr_r &lt;= 0;
-					w_ptr_p1_r &lt;= 1;
-				end
-				else begin
-					w_ptr_r &lt;= w_ptr_n;
-					w_ptr_p1_r &lt;= w_ptr_p1_n;
-				end
+			else begin : genblk1
+				always @(posedge w_clk_i)
+					if (w_reset_i) begin
+						w_ptr_r &lt;= 0;
+						w_ptr_p1_r &lt;= 1;
+					end
+					else begin
+						w_ptr_r &lt;= w_ptr_n;
+						w_ptr_p1_r &lt;= w_ptr_p1_n;
+					end
+			end
 		end
 		else begin : async
 			if (use_negedge_for_launch_p) begin : BSG_NO_CLOCK_GATE_1

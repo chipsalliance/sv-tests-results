@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_dma.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_dma.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_dma.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_dma.v</a>
 defines: 
-completed: 2021-06-15 04:37:14
-time_elapsed: 0.131s
-ram usage: 112180 KB
+completed: 2021-07-08 00:15:08
+time_elapsed: 0.127s
+ram usage: 111868 KB
 </pre>
 <pre class="log">
 
@@ -155,10 +155,12 @@ module bsg_cache_dma (
 		.o(data_mem_w_mask_o)
 	);
 	generate
-		if (burst_len_lp == 1) begin
+		if (burst_len_lp == 1) begin : genblk1
 			assign data_mem_addr_o = dma_addr_i[block_offset_width_lp+:lg_sets_lp];
 		end
-		else assign data_mem_addr_o = {dma_addr_i[block_offset_width_lp+:lg_sets_lp], counter_r[0+:lg_burst_len_lp]};
+		else begin : genblk1
+			assign data_mem_addr_o = {dma_addr_i[block_offset_width_lp+:lg_sets_lp], counter_r[0+:lg_burst_len_lp]};
+		end
 	endgenerate
 	assign data_mem_data_o = {ways_p {in_fifo_data_lo}};
 	bsg_mux #(
@@ -254,13 +256,15 @@ module bsg_cache_dma (
 	wire [data_width_p - 1:0] snoop_word_n;
 	assign snoop_word_offset = dma_addr_i[byte_offset_width_lp+:lg_burst_size_in_words_lp];
 	generate
-		if (burst_len_lp == 1) begin
+		if (burst_len_lp == 1) begin : genblk2
 			assign snoop_word_we = (dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo;
 		end
-		else if (burst_len_lp == block_size_in_words_p) begin
+		else if (burst_len_lp == block_size_in_words_p) begin : genblk2
 			assign snoop_word_we = ((dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp+:lg_burst_len_lp]);
 		end
-		else assign snoop_word_we = ((dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]);
+		else begin : genblk2
+			assign snoop_word_we = ((dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]);
+		end
 	endgenerate
 	bsg_mux #(
 		.width_p(data_width_p),

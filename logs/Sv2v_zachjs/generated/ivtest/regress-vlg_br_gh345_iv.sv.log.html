@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/br_gh345.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br_gh345.v</a>
 defines: 
-completed: 2021-06-15 04:35:47
-time_elapsed: 0.033s
-ram usage: 31600 KB
+completed: 2021-07-08 00:14:29
+time_elapsed: 0.035s
+ram usage: 32368 KB
 </pre>
 <pre class="log">
 
@@ -40,18 +40,30 @@ module Example (
 		flip = ~inp;
 	endfunction
 	generate
-		if (flip(OUTPUT) == flip(&#34;BAR&#34;)) begin
+		if (flip(OUTPUT) == flip(&#34;BAR&#34;)) begin : genblk1
 			assign outA = OUTPUT;
 		end
-		else assign outA = 0;
+		else begin : genblk1
+			assign outA = 0;
+		end
 		case (flip(OUTPUT))
-			flip(&#34;FOO&#34;): assign outB = OUTPUT;
-			flip(&#34;BAR&#34;): assign outB = 0;
-			flip(&#34;BAZ&#34;): assign outB = &#34;HI&#34;;
+			flip(&#34;FOO&#34;): begin : genblk2
+				assign outB = OUTPUT;
+			end
+			flip(&#34;BAR&#34;): begin : genblk2
+				assign outB = 0;
+			end
+			flip(&#34;BAZ&#34;): begin : genblk2
+				assign outB = &#34;HI&#34;;
+			end
 		endcase
 		genvar i;
 		initial outC = 0;
-		for (i = 0; i != flip(flip(OUTPUT[15:8])); i = i + 1) if ((i + 1) == flip(flip(&#34;O&#34;))) initial #(1) outC = 1;
+		for (i = 0; i != flip(flip(OUTPUT[15:8])); i = i + 1) begin : genblk3
+			if ((i + 1) == flip(flip(&#34;O&#34;))) begin : genblk1
+				initial #(1) outC = 1;
+			end
+		end
 	endgenerate
 	integer j;
 	initial begin

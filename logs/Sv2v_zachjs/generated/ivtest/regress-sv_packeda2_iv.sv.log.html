@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /tmpfs/src/github/sv-tests/third_party/tests/ivtest /tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,16 +17,44 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/packeda2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/packeda2.v</a>
 defines: 
-completed: 2021-06-15 04:36:17
-time_elapsed: 0.015s
-ram usage: 12336 KB
+completed: 2021-07-08 00:14:26
+time_elapsed: 0.021s
+ram usage: 17200 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest -I/tmpfs/src/github/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/packeda2.v.html" target="file-frame">third_party/tests/ivtest/ivltests/packeda2.v</a>
-zachjs-sv2v: takeIdent didn&#39;t find identifier: [DTType <a href="../../../../third_party/tests/ivtest/ivltests/packeda2.v.html#l-3" target="file-frame">third_party/tests/ivtest/ivltests/packeda2.v:3</a>:15 logic,DTRange <a href="../../../../third_party/tests/ivtest/ivltests/packeda2.v.html#l-3" target="file-frame">third_party/tests/ivtest/ivltests/packeda2.v:3</a>:20 (:,(3,0)),DTRange <a href="../../../../third_party/tests/ivtest/ivltests/packeda2.v.html#l-3" target="file-frame">third_party/tests/ivtest/ivltests/packeda2.v:3</a>:26 (:,(7,0)),DTIdent <a href="../../../../third_party/tests/ivtest/ivltests/packeda2.v.html#l-3" target="file-frame">third_party/tests/ivtest/ivltests/packeda2.v:3</a>:29 &#34;foo&#34;]
-CallStack (from HasCallStack):
-  error, called at src/Language/SystemVerilog/Parser/ParseDecl.hs:515:20 in main:Language.SystemVerilog.Parser.ParseDecl
+module main;
+	wire [31:0] foo;
+	genvar idx;
+	generate
+		for (idx = 0; idx &lt;= 3; idx = idx + 1) begin : test
+			test dut(
+				.sum(foo[idx * 8+:8]),
+				.a(idx)
+			);
+		end
+	endgenerate
+	reg [7:0] tmp;
+	initial begin
+		#(0)
+			;
+		for (tmp = 0; tmp &lt;= 3; tmp = tmp + 1)
+			if (foo[tmp * 8+:8] !== (tmp + 8&#39;d5)) begin
+				$display(&#34;FAILED -- foo[%d] = %b&#34;, tmp, foo[tmp * 8+:8]);
+				$finish;
+			end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
+module test (
+	sum,
+	a
+);
+	output wire [7:0] sum;
+	input wire [7:0] a;
+	assign sum = a + 8&#39;d5;
+endmodule
 
 </pre>
 </body>
