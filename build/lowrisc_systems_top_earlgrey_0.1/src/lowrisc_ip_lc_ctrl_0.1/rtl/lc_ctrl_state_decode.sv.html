@@ -131,7 +131,9 @@
 <span class="normal"><a href="#l-123">123</a></span>
 <span class="normal"><a href="#l-124">124</a></span>
 <span class="normal"><a href="#l-125">125</a></span>
-<span class="normal"><a href="#l-126">126</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-126">126</a></span>
+<span class="normal"><a href="#l-127">127</a></span>
+<span class="normal"><a href="#l-128">128</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -144,8 +146,8 @@
 <a id="l-11" name="l-11"></a>  <span class="c1">// Life cycle state vector.</span>
 <a id="l-12" name="l-12"></a>  <span class="k">input</span>  <span class="kt">logic</span>              <span class="n">lc_state_valid_i</span><span class="p">,</span>
 <a id="l-13" name="l-13"></a>  <span class="k">input</span>  <span class="n">lc_state_e</span>         <span class="n">lc_state_i</span><span class="p">,</span>
-<a id="l-14" name="l-14"></a>  <span class="k">input</span>  <span class="n">lc_id_state_e</span>      <span class="n">lc_id_state_i</span><span class="p">,</span>
-<a id="l-15" name="l-15"></a>  <span class="k">input</span>  <span class="n">lc_cnt_e</span>           <span class="n">lc_cnt_i</span><span class="p">,</span>
+<a id="l-14" name="l-14"></a>  <span class="k">input</span>  <span class="n">lc_cnt_e</span>           <span class="n">lc_cnt_i</span><span class="p">,</span>
+<a id="l-15" name="l-15"></a>  <span class="k">input</span>  <span class="n">lc_tx_t</span>            <span class="n">secrets_valid_i</span><span class="p">,</span>
 <a id="l-16" name="l-16"></a>  <span class="c1">// Main FSM state.</span>
 <a id="l-17" name="l-17"></a>  <span class="k">input</span>  <span class="n">fsm_state_e</span>        <span class="n">fsm_state_i</span><span class="p">,</span>
 <a id="l-18" name="l-18"></a>  <span class="c1">// Decoded state vector.</span>
@@ -225,38 +227,40 @@
 <a id="l-92" name="l-92"></a>          <span class="k">default</span><span class="o">:</span>  <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
 <a id="l-93" name="l-93"></a>        <span class="k">endcase</span> <span class="c1">// lc_cnt_i</span>
 <a id="l-94" name="l-94"></a>
-<a id="l-95" name="l-95"></a>        <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">lc_id_state_i</span><span class="p">)</span>
-<a id="l-96" name="l-96"></a>          <span class="nl">LcIdBlank:</span>        <span class="n">dec_lc_id_state_o</span> <span class="o">=</span> <span class="n">DecLcIdBlank</span><span class="p">;</span>
-<a id="l-97" name="l-97"></a>          <span class="nl">LcIdPersonalized:</span> <span class="n">dec_lc_id_state_o</span> <span class="o">=</span> <span class="n">DecLcIdPersonalized</span><span class="p">;</span>
-<a id="l-98" name="l-98"></a>          <span class="k">default</span><span class="o">:</span>          <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-99" name="l-99"></a>        <span class="k">endcase</span> <span class="c1">// lc_id_state_i</span>
-<a id="l-100" name="l-100"></a>
-<a id="l-101" name="l-101"></a>        <span class="c1">// Require that any non-raw state has a valid, nonzero</span>
-<a id="l-102" name="l-102"></a>        <span class="c1">// transition count.</span>
-<a id="l-103" name="l-103"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">lc_state_i</span> <span class="o">!=</span> <span class="n">LcStRaw</span> <span class="o">&amp;&amp;</span> <span class="n">lc_cnt_i</span> <span class="o">==</span> <span class="n">LcCnt0</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-104" name="l-104"></a>          <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-105" name="l-105"></a>        <span class="k">end</span>
-<a id="l-106" name="l-106"></a>
-<a id="l-107" name="l-107"></a>        <span class="c1">// We can&#39;t have a personalized device that is</span>
-<a id="l-108" name="l-108"></a>        <span class="c1">// still in RAW or any of the test states.</span>
-<a id="l-109" name="l-109"></a>        <span class="k">if</span> <span class="p">((</span><span class="n">lc_id_state_i</span> <span class="o">==</span> <span class="n">LcIdPersonalized</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-<a id="l-110" name="l-110"></a>            <span class="o">!</span><span class="p">(</span><span class="n">lc_state_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">LcStDev</span><span class="p">,</span>
-<a id="l-111" name="l-111"></a>                                 <span class="n">LcStProd</span><span class="p">,</span>
-<a id="l-112" name="l-112"></a>                                 <span class="n">LcStProdEnd</span><span class="p">,</span>
-<a id="l-113" name="l-113"></a>                                 <span class="n">LcStRma</span><span class="p">,</span>
-<a id="l-114" name="l-114"></a>                                 <span class="n">LcStScrap</span><span class="p">}))</span> <span class="k">begin</span>
-<a id="l-115" name="l-115"></a>          <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-116" name="l-116"></a>        <span class="k">end</span>
-<a id="l-117" name="l-117"></a>      <span class="k">end</span>
-<a id="l-118" name="l-118"></a>    <span class="k">endcase</span> <span class="c1">// lc_id_state_i</span>
-<a id="l-119" name="l-119"></a>  <span class="k">end</span>
-<a id="l-120" name="l-120"></a>
-<a id="l-121" name="l-121"></a>  <span class="c1">////////////////</span>
-<a id="l-122" name="l-122"></a>  <span class="c1">// Assertions //</span>
+<a id="l-95" name="l-95"></a>        <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">secrets_valid_i</span><span class="p">)</span>
+<a id="l-96" name="l-96"></a>          <span class="c1">// If the secrets have not been provisioned, the ID state is &quot;blank&quot;.</span>
+<a id="l-97" name="l-97"></a>          <span class="nl">Off:</span>  <span class="n">dec_lc_id_state_o</span> <span class="o">=</span> <span class="n">DecLcIdBlank</span><span class="p">;</span>
+<a id="l-98" name="l-98"></a>          <span class="c1">// If the secrets have been provisioned, the ID state is &quot;personalized&quot;.</span>
+<a id="l-99" name="l-99"></a>          <span class="nl">On:</span>   <span class="n">dec_lc_id_state_o</span> <span class="o">=</span> <span class="n">DecLcIdPersonalized</span><span class="p">;</span>
+<a id="l-100" name="l-100"></a>          <span class="k">default</span><span class="o">:</span> <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-101" name="l-101"></a>        <span class="k">endcase</span> <span class="c1">// secrets_valid_i</span>
+<a id="l-102" name="l-102"></a>
+<a id="l-103" name="l-103"></a>        <span class="c1">// Require that any non-raw state has a valid, nonzero</span>
+<a id="l-104" name="l-104"></a>        <span class="c1">// transition count.</span>
+<a id="l-105" name="l-105"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">lc_state_i</span> <span class="o">!=</span> <span class="n">LcStRaw</span> <span class="o">&amp;&amp;</span> <span class="n">lc_cnt_i</span> <span class="o">==</span> <span class="n">LcCnt0</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-106" name="l-106"></a>          <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-107" name="l-107"></a>        <span class="k">end</span>
+<a id="l-108" name="l-108"></a>
+<a id="l-109" name="l-109"></a>        <span class="c1">// We can&#39;t have a personalized device that is</span>
+<a id="l-110" name="l-110"></a>        <span class="c1">// still in RAW or any of the test states.</span>
+<a id="l-111" name="l-111"></a>        <span class="k">if</span> <span class="p">((</span><span class="n">secrets_valid_i</span> <span class="o">==</span> <span class="n">On</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+<a id="l-112" name="l-112"></a>            <span class="o">!</span><span class="p">(</span><span class="n">lc_state_i</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">LcStDev</span><span class="p">,</span>
+<a id="l-113" name="l-113"></a>                                 <span class="n">LcStProd</span><span class="p">,</span>
+<a id="l-114" name="l-114"></a>                                 <span class="n">LcStProdEnd</span><span class="p">,</span>
+<a id="l-115" name="l-115"></a>                                 <span class="n">LcStRma</span><span class="p">,</span>
+<a id="l-116" name="l-116"></a>                                 <span class="n">LcStScrap</span><span class="p">}))</span> <span class="k">begin</span>
+<a id="l-117" name="l-117"></a>          <span class="n">state_invalid_error_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-118" name="l-118"></a>        <span class="k">end</span>
+<a id="l-119" name="l-119"></a>      <span class="k">end</span>
+<a id="l-120" name="l-120"></a>    <span class="k">endcase</span> <span class="c1">// lc_id_state_i</span>
+<a id="l-121" name="l-121"></a>  <span class="k">end</span>
+<a id="l-122" name="l-122"></a>
 <a id="l-123" name="l-123"></a>  <span class="c1">////////////////</span>
-<a id="l-124" name="l-124"></a>
-<a id="l-125" name="l-125"></a>
-<a id="l-126" name="l-126"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">lc_ctrl_state_decode</span>
+<a id="l-124" name="l-124"></a>  <span class="c1">// Assertions //</span>
+<a id="l-125" name="l-125"></a>  <span class="c1">////////////////</span>
+<a id="l-126" name="l-126"></a>
+<a id="l-127" name="l-127"></a>
+<a id="l-128" name="l-128"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">lc_ctrl_state_decode</span>
 </pre></div>
 </td></tr></table>
   </body>
