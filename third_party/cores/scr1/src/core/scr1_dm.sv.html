@@ -1432,8 +1432,7 @@
 <span class="normal"><a href="#l-1424">1424</a></span>
 <span class="normal"><a href="#l-1425">1425</a></span>
 <span class="normal"><a href="#l-1426">1426</a></span>
-<span class="normal"><a href="#l-1427">1427</a></span>
-<span class="normal"><a href="#l-1428">1428</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
+<span class="normal"><a href="#l-1427">1427</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">/// Copyright by Syntacore LLC © 2016-2020. See LICENSE for details</span>
 <a id="l-2" name="l-2"></a><span class="c1">/// @file       &lt;scr1_dm.sv&gt;</span>
 <a id="l-3" name="l-3"></a><span class="c1">/// @brief      Debug Module (DM)</span>
 <a id="l-4" name="l-4"></a><span class="c1">///</span>
@@ -2236,631 +2235,630 @@
 <a id="l-801" name="l-801"></a>    <span class="k">end</span>
 <a id="l-802" name="l-802"></a><span class="k">end</span>
 <a id="l-803" name="l-803"></a>
-<a id="l-804" name="l-804"></a>
-<a id="l-805" name="l-805"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-806" name="l-806"></a><span class="c1">// Abstract command FSM</span>
-<a id="l-807" name="l-807"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-808" name="l-808"></a>
-<a id="l-809" name="l-809"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-810" name="l-810"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-811" name="l-811"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-812" name="l-812"></a>            <span class="n">abs_fsm_ff</span> <span class="o">&lt;=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-813" name="l-813"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-814" name="l-814"></a>            <span class="n">abs_fsm_ff</span> <span class="o">&lt;=</span> <span class="n">abs_fsm_next</span><span class="p">;</span>
-<a id="l-815" name="l-815"></a>        <span class="k">end</span>
-<a id="l-816" name="l-816"></a>    <span class="k">end</span>
-<a id="l-817" name="l-817"></a><span class="k">end</span>
-<a id="l-818" name="l-818"></a>
-<a id="l-819" name="l-819"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-820" name="l-820"></a>    <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">abs_fsm_ff</span><span class="p">;</span>
-<a id="l-821" name="l-821"></a>
-<a id="l-822" name="l-822"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-823" name="l-823"></a>        <span class="nl">ABS_STATE_IDLE:</span> <span class="k">begin</span>
-<a id="l-824" name="l-824"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">command_wr_req</span> <span class="o">|</span> <span class="n">dmi_rpt_command</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-825" name="l-825"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-826" name="l-826"></a>                    <span class="nl">abs_cmd_csr_ro_access_vd:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_CSR_RO</span><span class="p">;</span>
-<a id="l-827" name="l-827"></a>                    <span class="nl">abs_cmd_csr_rw_access_vd:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">ABS_STATE_CSR_SAVE_XREG</span> <span class="o">:</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-828" name="l-828"></a>                    <span class="n">abs_cmd_mprf_access_vd</span>  <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">ABS_STATE_XREG_RW</span>       <span class="o">:</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-829" name="l-829"></a>                    <span class="n">abs_cmd_execprogbuf_req</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
-<a id="l-830" name="l-830"></a>                    <span class="n">abs_cmd_mem_access_vd</span>   <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_SAVE_XREG</span> <span class="o">:</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-831" name="l-831"></a>                    <span class="k">default</span>                 <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-832" name="l-832"></a>                <span class="k">endcase</span>
-<a id="l-833" name="l-833"></a>            <span class="k">end</span>
-<a id="l-834" name="l-834"></a>        <span class="k">end</span>
-<a id="l-835" name="l-835"></a>
-<a id="l-836" name="l-836"></a>        <span class="nl">ABS_STATE_EXEC:</span> <span class="k">begin</span>
-<a id="l-837" name="l-837"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-838" name="l-838"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp_exc</span> <span class="o">|</span> <span class="n">abs_err_acc_busy_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-839" name="l-839"></a>                    <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-840" name="l-840"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-841" name="l-841"></a>                    <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-842" name="l-842"></a>                <span class="k">end</span>
-<a id="l-843" name="l-843"></a>            <span class="k">end</span>
-<a id="l-844" name="l-844"></a>        <span class="k">end</span>
-<a id="l-845" name="l-845"></a>
-<a id="l-846" name="l-846"></a>        <span class="nl">ABS_STATE_XREG_RW:</span> <span class="k">begin</span>
-<a id="l-847" name="l-847"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-848" name="l-848"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-849" name="l-849"></a>                    <span class="nl">abs_err_acc_busy_ff:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-850" name="l-850"></a>                    <span class="nl">abs_cmd_postexec_ff:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
-<a id="l-851" name="l-851"></a>                    <span class="k">default</span>            <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-852" name="l-852"></a>                <span class="k">endcase</span>
-<a id="l-853" name="l-853"></a>            <span class="k">end</span>
-<a id="l-854" name="l-854"></a>        <span class="k">end</span>
-<a id="l-855" name="l-855"></a>
-<a id="l-856" name="l-856"></a>        <span class="n">ABS_STATE_CSR_RO</span>       <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">abs_err_acc_busy_ff</span> <span class="o">?</span> <span class="n">ABS_STATE_ERR</span>             <span class="o">:</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-857" name="l-857"></a>        <span class="nl">ABS_STATE_CSR_SAVE_XREG:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span>            <span class="o">?</span> <span class="n">ABS_STATE_CSR_RW</span>          <span class="o">:</span> <span class="n">ABS_STATE_CSR_SAVE_XREG</span><span class="p">;</span>
-<a id="l-858" name="l-858"></a>        <span class="n">ABS_STATE_CSR_RW</span>       <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span>            <span class="o">?</span> <span class="n">ABS_STATE_CSR_RETURN_XREG</span> <span class="o">:</span> <span class="n">ABS_STATE_CSR_RW</span><span class="p">;</span>
-<a id="l-859" name="l-859"></a>
-<a id="l-860" name="l-860"></a>        <span class="nl">ABS_STATE_CSR_RETURN_XREG:</span> <span class="k">begin</span>
-<a id="l-861" name="l-861"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-862" name="l-862"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-863" name="l-863"></a>                    <span class="n">abs_err_exc_ff</span>      <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-864" name="l-864"></a>                    <span class="n">abs_err_acc_busy_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-865" name="l-865"></a>                    <span class="n">abs_cmd_postexec_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
-<a id="l-866" name="l-866"></a>                    <span class="k">default</span>             <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-867" name="l-867"></a>                <span class="k">endcase</span>
-<a id="l-868" name="l-868"></a>            <span class="k">end</span>
-<a id="l-869" name="l-869"></a>        <span class="k">end</span>
-<a id="l-870" name="l-870"></a>
-<a id="l-871" name="l-871"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>         <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>   <span class="o">:</span> <span class="n">ABS_STATE_MEM_SAVE_XREG</span><span class="p">;</span>
-<a id="l-872" name="l-872"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_RW</span>                  <span class="o">:</span> <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span><span class="p">;</span>
-<a id="l-873" name="l-873"></a>        <span class="n">ABS_STATE_MEM_RW</span>                <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_RETURN_XREG</span>         <span class="o">:</span> <span class="n">ABS_STATE_MEM_RW</span><span class="p">;</span>
-<a id="l-874" name="l-874"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span>       <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_RETURN_XREG_FORADDR</span> <span class="o">:</span> <span class="n">ABS_STATE_MEM_RETURN_XREG</span><span class="p">;</span>
-<a id="l-875" name="l-875"></a>
-<a id="l-876" name="l-876"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="k">begin</span>
-<a id="l-877" name="l-877"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-878" name="l-878"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-879" name="l-879"></a>                    <span class="nl">abs_err_exc_ff:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-880" name="l-880"></a>                    <span class="n">abs_err_acc_busy_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-881" name="l-881"></a>                    <span class="n">abs_cmd_postexec_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
-<a id="l-882" name="l-882"></a>                    <span class="k">default</span>             <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-883" name="l-883"></a>                <span class="k">endcase</span>
-<a id="l-884" name="l-884"></a>            <span class="k">end</span>
-<a id="l-885" name="l-885"></a>        <span class="k">end</span>
-<a id="l-886" name="l-886"></a>
-<a id="l-887" name="l-887"></a>        <span class="nl">ABS_STATE_ERR:</span> <span class="k">begin</span>
-<a id="l-888" name="l-888"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">abstractcs_wr_req</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">abstractcs_cmderr_next</span> <span class="o">==</span> <span class="mb">3&#39;b0</span><span class="p">))</span> <span class="k">begin</span>
-<a id="l-889" name="l-889"></a>                <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
-<a id="l-890" name="l-890"></a>            <span class="k">end</span>
-<a id="l-891" name="l-891"></a>        <span class="k">end</span>
-<a id="l-892" name="l-892"></a>    <span class="k">endcase</span>
-<a id="l-893" name="l-893"></a>
-<a id="l-894" name="l-894"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">hart_state_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-895" name="l-895"></a>        <span class="n">abs_fsm_next</span>    <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
-<a id="l-896" name="l-896"></a>    <span class="k">end</span>
-<a id="l-897" name="l-897"></a><span class="k">end</span>
-<a id="l-898" name="l-898"></a>
-<a id="l-899" name="l-899"></a><span class="k">assign</span> <span class="n">abs_fsm_idle</span>     <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_IDLE</span><span class="p">);</span>
-<a id="l-900" name="l-900"></a><span class="k">assign</span> <span class="n">abs_fsm_exec</span>     <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_EXEC</span><span class="p">);</span>
-<a id="l-901" name="l-901"></a><span class="k">assign</span> <span class="n">abs_fsm_csr_ro</span>   <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_CSR_RO</span><span class="p">);</span>
-<a id="l-902" name="l-902"></a><span class="k">assign</span> <span class="n">abs_fsm_err</span>      <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_ERR</span><span class="p">);</span>
-<a id="l-903" name="l-903"></a><span class="k">assign</span> <span class="n">abs_fsm_use_addr</span> <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span><span class="p">)</span>
-<a id="l-904" name="l-904"></a>                        <span class="o">|</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_MEM_RETURN_XREG_FORADDR</span><span class="p">);</span>
-<a id="l-905" name="l-905"></a>
-<a id="l-906" name="l-906"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-907" name="l-907"></a><span class="c1">// Abstract command status logic</span>
-<a id="l-908" name="l-908"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-909" name="l-909"></a>
-<a id="l-910" name="l-910"></a><span class="c1">// Abstract command access busy error register</span>
-<a id="l-911" name="l-911"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-912" name="l-912"></a>
-<a id="l-913" name="l-913"></a><span class="k">assign</span> <span class="n">abs_err_acc_busy_upd</span> <span class="o">=</span> <span class="n">clk_en_abs</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">abs_fsm_idle</span> <span class="o">|</span> <span class="n">dmi_req_any</span><span class="p">);</span>
-<a id="l-914" name="l-914"></a>
-<a id="l-915" name="l-915"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-916" name="l-916"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_acc_busy_upd</span><span class="p">)</span> <span class="n">abs_err_acc_busy_ff</span> <span class="o">&lt;=</span> <span class="n">abs_err_acc_busy_next</span><span class="p">;</span>
-<a id="l-917" name="l-917"></a><span class="k">end</span>
-<a id="l-918" name="l-918"></a>
-<a id="l-919" name="l-919"></a><span class="k">assign</span> <span class="n">abs_err_acc_busy_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">dmi_req_any</span><span class="p">;</span>
-<a id="l-920" name="l-920"></a>
-<a id="l-921" name="l-921"></a><span class="c1">// Abstract command access exception error register</span>
-<a id="l-922" name="l-922"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-923" name="l-923"></a>
-<a id="l-924" name="l-924"></a><span class="k">assign</span> <span class="n">abs_err_exc_upd</span> <span class="o">=</span> <span class="n">clk_en_abs</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">abs_fsm_idle</span> <span class="o">|</span> <span class="p">(</span><span class="n">dhi_resp</span> <span class="o">&amp;</span> <span class="n">dhi_resp_exc</span><span class="p">));</span>
-<a id="l-925" name="l-925"></a>
-<a id="l-926" name="l-926"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-927" name="l-927"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_exc_upd</span><span class="p">)</span> <span class="n">abs_err_exc_ff</span> <span class="o">&lt;=</span> <span class="n">abs_err_exc_next</span><span class="p">;</span>
-<a id="l-928" name="l-928"></a><span class="k">end</span>
-<a id="l-929" name="l-929"></a>
-<a id="l-930" name="l-930"></a><span class="k">assign</span> <span class="n">abs_err_exc_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">dhi_resp</span> <span class="o">&amp;</span> <span class="n">dhi_resp_exc</span><span class="p">;</span>
-<a id="l-931" name="l-931"></a>
-<a id="l-932" name="l-932"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-933" name="l-933"></a><span class="c1">// Abstract Instruction logic</span>
-<a id="l-934" name="l-934"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-935" name="l-935"></a><span class="c1">//</span>
-<a id="l-936" name="l-936"></a> <span class="c1">// Cosists of the following functional units:</span>
-<a id="l-937" name="l-937"></a> <span class="c1">// - Instruction execution request register</span>
-<a id="l-938" name="l-938"></a> <span class="c1">// - Instruction memory FUNCT3 field multiplexer</span>
-<a id="l-939" name="l-939"></a> <span class="c1">// - Instruction RS1 multiplexer</span>
-<a id="l-940" name="l-940"></a> <span class="c1">// - Instruction RD multiplexer</span>
-<a id="l-941" name="l-941"></a> <span class="c1">// - Abstract Instruction register</span>
-<a id="l-942" name="l-942"></a>
-<a id="l-943" name="l-943"></a><span class="c1">// Abstract instruction execution request register</span>
-<a id="l-944" name="l-944"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-945" name="l-945"></a>
-<a id="l-946" name="l-946"></a><span class="k">assign</span> <span class="n">abs_exec_req_next</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">abs_fsm_idle</span> <span class="o">|</span> <span class="n">abs_fsm_csr_ro</span> <span class="o">|</span> <span class="n">abs_fsm_err</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dhi_resp</span><span class="p">;</span>
-<a id="l-947" name="l-947"></a>
-<a id="l-948" name="l-948"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-949" name="l-949"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-950" name="l-950"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-951" name="l-951"></a>            <span class="n">abs_exec_req_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-952" name="l-952"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-953" name="l-953"></a>            <span class="n">abs_exec_req_ff</span> <span class="o">&lt;=</span> <span class="n">abs_exec_req_next</span><span class="p">;</span>
-<a id="l-954" name="l-954"></a>        <span class="k">end</span>
-<a id="l-955" name="l-955"></a>    <span class="k">end</span>
-<a id="l-956" name="l-956"></a><span class="k">end</span>
-<a id="l-957" name="l-957"></a>
-<a id="l-958" name="l-958"></a><span class="c1">// Abstract instruction memory FUNCT3 field multiplexer</span>
-<a id="l-959" name="l-959"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-960" name="l-960"></a>
-<a id="l-961" name="l-961"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-962" name="l-962"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_cmd_size_ff</span><span class="p">)</span>
-<a id="l-963" name="l-963"></a>        <span class="mb">2&#39;b00</span>  <span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">SCR1_FUNCT3_SB</span> <span class="o">:</span> <span class="n">SCR1_FUNCT3_LBU</span><span class="p">;</span>
-<a id="l-964" name="l-964"></a>        <span class="mb">2&#39;b01</span>  <span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">SCR1_FUNCT3_SH</span> <span class="o">:</span> <span class="n">SCR1_FUNCT3_LHU</span><span class="p">;</span>
-<a id="l-965" name="l-965"></a>        <span class="mb">2&#39;b10</span>  <span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">SCR1_FUNCT3_SW</span> <span class="o">:</span> <span class="n">SCR1_FUNCT3_LW</span><span class="p">;</span>
-<a id="l-966" name="l-966"></a>        <span class="k">default</span><span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">SCR1_FUNCT3_SB</span><span class="p">;</span>
-<a id="l-967" name="l-967"></a>    <span class="k">endcase</span>
-<a id="l-968" name="l-968"></a><span class="k">end</span>
-<a id="l-969" name="l-969"></a>
-<a id="l-970" name="l-970"></a><span class="c1">// Abstract instruction RS1 multiplexer</span>
-<a id="l-971" name="l-971"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-972" name="l-972"></a>
-<a id="l-973" name="l-973"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-974" name="l-974"></a>    <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
-<a id="l-975" name="l-975"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-976" name="l-976"></a>        <span class="n">ABS_STATE_XREG_RW</span>                <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h0</span> <span class="o">:</span> <span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a id="l-977" name="l-977"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-978" name="l-978"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-979" name="l-979"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-980" name="l-980"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-981" name="l-981"></a>        <span class="n">ABS_STATE_CSR_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h5</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
-<a id="l-982" name="l-982"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>  <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
-<a id="l-983" name="l-983"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
-<a id="l-984" name="l-984"></a>        <span class="n">ABS_STATE_MEM_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
-<a id="l-985" name="l-985"></a>        <span class="k">default</span>                          <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
-<a id="l-986" name="l-986"></a>    <span class="k">endcase</span>
-<a id="l-987" name="l-987"></a><span class="k">end</span>
-<a id="l-988" name="l-988"></a>
-<a id="l-989" name="l-989"></a><span class="k">assign</span> <span class="n">abs_instr_rs2</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-990" name="l-990"></a>
-<a id="l-991" name="l-991"></a><span class="c1">// Abstract instruction RD multiplexer</span>
-<a id="l-992" name="l-992"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-993" name="l-993"></a>
-<a id="l-994" name="l-994"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-995" name="l-995"></a>    <span class="n">abs_instr_rd</span>  <span class="o">=</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
-<a id="l-996" name="l-996"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-997" name="l-997"></a>        <span class="n">ABS_STATE_XREG_RW</span>                <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
-<a id="l-998" name="l-998"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h5</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
-<a id="l-999" name="l-999"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h5</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
-<a id="l-1000" name="l-1000"></a>        <span class="n">ABS_STATE_CSR_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h0</span> <span class="o">:</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-1001" name="l-1001"></a>        <span class="n">ABS_STATE_MEM_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h0</span> <span class="o">:</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-1002" name="l-1002"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-1003" name="l-1003"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
-<a id="l-1004" name="l-1004"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>  <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
-<a id="l-1005" name="l-1005"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
-<a id="l-1006" name="l-1006"></a>        <span class="k">default</span>                          <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
-<a id="l-1007" name="l-1007"></a>    <span class="k">endcase</span>
-<a id="l-1008" name="l-1008"></a><span class="k">end</span>
-<a id="l-1009" name="l-1009"></a>
-<a id="l-1010" name="l-1010"></a><span class="c1">// Abstract instruction register</span>
-<a id="l-1011" name="l-1011"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1012" name="l-1012"></a>
-<a id="l-1013" name="l-1013"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1014" name="l-1014"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1015" name="l-1015"></a>        <span class="n">abs_exec_instr_ff</span> <span class="o">&lt;=</span> <span class="n">abs_exec_instr_next</span><span class="p">;</span>
-<a id="l-1016" name="l-1016"></a>    <span class="k">end</span>
-<a id="l-1017" name="l-1017"></a><span class="k">end</span>
-<a id="l-1018" name="l-1018"></a>
-<a id="l-1019" name="l-1019"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1020" name="l-1020"></a>    <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="n">abs_exec_instr_ff</span><span class="p">;</span>
-<a id="l-1021" name="l-1021"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-1022" name="l-1022"></a>        <span class="n">ABS_STATE_XREG_RW</span><span class="p">,</span>
-<a id="l-1023" name="l-1023"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span><span class="p">,</span>
-<a id="l-1024" name="l-1024"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span><span class="p">,</span>
-<a id="l-1025" name="l-1025"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span><span class="p">,</span>
-<a id="l-1026" name="l-1026"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span><span class="p">,</span>
-<a id="l-1027" name="l-1027"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span><span class="p">,</span>
-<a id="l-1028" name="l-1028"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="k">begin</span>
-<a id="l-1029" name="l-1029"></a>            <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="p">{</span><span class="n">SCR1_HDU_DBGCSR_ADDR_DSCRATCH0</span><span class="p">,</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">SCR1_FUNCT3_CSRRW</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_SYSTEM</span><span class="p">};</span>
-<a id="l-1030" name="l-1030"></a>        <span class="k">end</span>
-<a id="l-1031" name="l-1031"></a>
-<a id="l-1032" name="l-1032"></a>        <span class="nl">ABS_STATE_CSR_RW:</span> <span class="k">begin</span>
-<a id="l-1033" name="l-1033"></a>            <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span>
-<a id="l-1034" name="l-1034"></a>                                <span class="o">?</span> <span class="p">{</span><span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">SCR1_FUNCT3_CSRRW</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_SYSTEM</span><span class="p">}</span>
-<a id="l-1035" name="l-1035"></a>                                <span class="o">:</span> <span class="p">{</span><span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">SCR1_FUNCT3_CSRRS</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_SYSTEM</span><span class="p">};</span>
-<a id="l-1036" name="l-1036"></a>        <span class="k">end</span>
-<a id="l-1037" name="l-1037"></a>
-<a id="l-1038" name="l-1038"></a>        <span class="nl">ABS_STATE_MEM_RW:</span> <span class="k">begin</span>
-<a id="l-1039" name="l-1039"></a>            <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span>
-<a id="l-1040" name="l-1040"></a>                                <span class="o">?</span> <span class="p">{</span><span class="mh">7&#39;h0</span><span class="p">,</span>  <span class="n">abs_instr_rs2</span><span class="p">,</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">abs_instr_mem_funct3</span><span class="p">,</span> <span class="mh">5&#39;h0</span><span class="p">,</span>         <span class="n">SCR1_OP_STORE</span><span class="p">}</span>
-<a id="l-1041" name="l-1041"></a>                                <span class="o">:</span> <span class="p">{</span><span class="mh">12&#39;h0</span><span class="p">,</span>                <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">abs_instr_mem_funct3</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_LOAD</span><span class="p">};</span>
-<a id="l-1042" name="l-1042"></a>        <span class="k">end</span>
-<a id="l-1043" name="l-1043"></a>
-<a id="l-1044" name="l-1044"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
-<a id="l-1045" name="l-1045"></a>    <span class="k">endcase</span>
-<a id="l-1046" name="l-1046"></a><span class="k">end</span>
-<a id="l-1047" name="l-1047"></a>
-<a id="l-1048" name="l-1048"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1049" name="l-1049"></a><span class="c1">// Abstract registers</span>
-<a id="l-1050" name="l-1050"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1051" name="l-1051"></a><span class="c1">//</span>
-<a id="l-1052" name="l-1052"></a> <span class="c1">// Registers:</span>
-<a id="l-1053" name="l-1053"></a> <span class="c1">// - ABSTRACTCS register</span>
-<a id="l-1054" name="l-1054"></a> <span class="c1">// - COMMAND register</span>
-<a id="l-1055" name="l-1055"></a> <span class="c1">// - ABSTRACTAUTO register</span>
-<a id="l-1056" name="l-1056"></a> <span class="c1">// - PROGBUF0..5 registers</span>
-<a id="l-1057" name="l-1057"></a> <span class="c1">// - DATA0..1 registers</span>
-<a id="l-1058" name="l-1058"></a>
-<a id="l-1059" name="l-1059"></a><span class="c1">// ABSTRACTCS register</span>
-<a id="l-1060" name="l-1060"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1061" name="l-1061"></a>
-<a id="l-1062" name="l-1062"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1063" name="l-1063"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1064" name="l-1064"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1065" name="l-1065"></a>            <span class="n">abstractcs_cmderr_ff</span> <span class="o">&lt;=</span> <span class="n">ABS_ERR_NONE</span><span class="p">;</span>
-<a id="l-1066" name="l-1066"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-1067" name="l-1067"></a>            <span class="n">abstractcs_cmderr_ff</span> <span class="o">&lt;=</span> <span class="n">abstractcs_cmderr_next</span><span class="p">;</span>
-<a id="l-1068" name="l-1068"></a>        <span class="k">end</span>
-<a id="l-1069" name="l-1069"></a>    <span class="k">end</span>
-<a id="l-1070" name="l-1070"></a><span class="k">end</span>
-<a id="l-1071" name="l-1071"></a>
-<a id="l-1072" name="l-1072"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1073" name="l-1073"></a>    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
-<a id="l-1074" name="l-1074"></a>
-<a id="l-1075" name="l-1075"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-1076" name="l-1076"></a>        <span class="nl">ABS_STATE_IDLE:</span> <span class="k">begin</span>
-<a id="l-1077" name="l-1077"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">command_wr_req</span> <span class="o">|</span> <span class="n">dmi_rpt_command</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1078" name="l-1078"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">abs_cmd_hartreg_vd</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1079" name="l-1079"></a>                    <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-1080" name="l-1080"></a>                        <span class="n">abs_cmd_reg_access_req</span> <span class="o">:</span> <span class="k">begin</span>
-<a id="l-1081" name="l-1081"></a>                            <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-1082" name="l-1082"></a>                                <span class="nl">abs_cmd_csr_rw_access_vd:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span>
-<a id="l-1083" name="l-1083"></a>                                                                                 <span class="o">?</span> <span class="n">abstractcs_cmderr_ff</span>
-<a id="l-1084" name="l-1084"></a>                                                                                 <span class="o">:</span> <span class="n">ABS_ERR_NOHALT</span><span class="p">;</span>
-<a id="l-1085" name="l-1085"></a>                                <span class="n">abs_cmd_mprf_access_vd</span>  <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span>
-<a id="l-1086" name="l-1086"></a>                                                                                 <span class="o">?</span> <span class="n">abstractcs_cmderr_ff</span>
-<a id="l-1087" name="l-1087"></a>                                                                                 <span class="o">:</span> <span class="n">ABS_ERR_NOHALT</span><span class="p">;</span>
-<a id="l-1088" name="l-1088"></a>                                <span class="nl">abs_cmd_csr_ro_access_vd:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
-<a id="l-1089" name="l-1089"></a>                                <span class="k">default</span>                 <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_CMD</span><span class="p">;</span>
-<a id="l-1090" name="l-1090"></a>                            <span class="k">endcase</span>
-<a id="l-1091" name="l-1091"></a>                        <span class="k">end</span>
-<a id="l-1092" name="l-1092"></a>                        <span class="n">abs_cmd_execprogbuf_req</span>         <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
-<a id="l-1093" name="l-1093"></a>                        <span class="k">default</span>                         <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_CMD</span><span class="p">;</span>
-<a id="l-1094" name="l-1094"></a>                    <span class="k">endcase</span>
-<a id="l-1095" name="l-1095"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">abs_cmd_hartmem_vd</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1096" name="l-1096"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_cmd_memsize_vd</span> <span class="o">?</span> <span class="n">ABS_ERR_CMD</span>
-<a id="l-1097" name="l-1097"></a>                                           <span class="o">:</span> <span class="o">~</span><span class="n">hart_state_dhalt</span>   <span class="o">?</span> <span class="n">ABS_ERR_NOHALT</span>
-<a id="l-1098" name="l-1098"></a>                                                                 <span class="o">:</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
-<a id="l-1099" name="l-1099"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-1100" name="l-1100"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_CMD</span><span class="p">;</span>
-<a id="l-1101" name="l-1101"></a>                <span class="k">end</span>
-<a id="l-1102" name="l-1102"></a>            <span class="k">end</span>
-<a id="l-1103" name="l-1103"></a>        <span class="k">end</span>
-<a id="l-1104" name="l-1104"></a>
-<a id="l-1105" name="l-1105"></a>        <span class="nl">ABS_STATE_EXEC:</span> <span class="k">begin</span>
-<a id="l-1106" name="l-1106"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1107" name="l-1107"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp_exc</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1108" name="l-1108"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_EXCEPTION</span><span class="p">;</span>
-<a id="l-1109" name="l-1109"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_acc_busy_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1110" name="l-1110"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_BUSY</span><span class="p">;</span>
-<a id="l-1111" name="l-1111"></a>                <span class="k">end</span>
-<a id="l-1112" name="l-1112"></a>            <span class="k">end</span>
-<a id="l-1113" name="l-1113"></a>        <span class="k">end</span>
-<a id="l-1114" name="l-1114"></a>
-<a id="l-1115" name="l-1115"></a>        <span class="n">ABS_STATE_XREG_RW</span><span class="p">,</span>
-<a id="l-1116" name="l-1116"></a>        <span class="nl">ABS_STATE_CSR_RO:</span> <span class="k">begin</span>
-<a id="l-1117" name="l-1117"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_acc_busy_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1118" name="l-1118"></a>                <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_BUSY</span><span class="p">;</span>
-<a id="l-1119" name="l-1119"></a>            <span class="k">end</span>
-<a id="l-1120" name="l-1120"></a>        <span class="k">end</span>
-<a id="l-1121" name="l-1121"></a>
-<a id="l-1122" name="l-1122"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span><span class="p">,</span>
-<a id="l-1123" name="l-1123"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="k">begin</span>
-<a id="l-1124" name="l-1124"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1125" name="l-1125"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-1126" name="l-1126"></a>                    <span class="n">abs_err_exc_ff</span>     <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_EXCEPTION</span><span class="p">;</span>
-<a id="l-1127" name="l-1127"></a>                    <span class="nl">abs_err_acc_busy_ff:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_BUSY</span><span class="p">;</span>
-<a id="l-1128" name="l-1128"></a>                    <span class="k">default</span><span class="o">:</span>             <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
-<a id="l-1129" name="l-1129"></a>                <span class="k">endcase</span>
-<a id="l-1130" name="l-1130"></a>            <span class="k">end</span>
-<a id="l-1131" name="l-1131"></a>        <span class="k">end</span>
-<a id="l-1132" name="l-1132"></a>
-<a id="l-1133" name="l-1133"></a>        <span class="nl">ABS_STATE_ERR:</span> <span class="k">begin</span>
-<a id="l-1134" name="l-1134"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dmi_req_abstractcs</span> <span class="o">&amp;</span> <span class="n">dmi2dm_wr_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1135" name="l-1135"></a>                <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">type_scr1_abs_err_e</span><span class="p">&#39;(</span><span class="kt">logic</span><span class="p">&#39;(</span><span class="n">abstractcs_cmderr_ff</span><span class="p">)</span>
-<a id="l-1136" name="l-1136"></a>                                       <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">dmi2dm_wdata_i</span><span class="p">[</span><span class="nl">SCR1_DBG_ABSTRACTCS_CMDERR_HI:</span>
-<a id="l-1137" name="l-1137"></a>                                                          <span class="n">SCR1_DBG_ABSTRACTCS_CMDERR_LO</span><span class="p">]));</span>
-<a id="l-1138" name="l-1138"></a>            <span class="k">end</span>
-<a id="l-1139" name="l-1139"></a>        <span class="k">end</span>
-<a id="l-1140" name="l-1140"></a>
-<a id="l-1141" name="l-1141"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
-<a id="l-1142" name="l-1142"></a>        <span class="k">end</span>
-<a id="l-1143" name="l-1143"></a>    <span class="k">endcase</span>
-<a id="l-1144" name="l-1144"></a>
-<a id="l-1145" name="l-1145"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">hart_state_reset</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1146" name="l-1146"></a>        <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_EXCEPTION</span><span class="p">;</span>
-<a id="l-1147" name="l-1147"></a>    <span class="k">end</span>
-<a id="l-1148" name="l-1148"></a><span class="k">end</span>
-<a id="l-1149" name="l-1149"></a>
-<a id="l-1150" name="l-1150"></a><span class="k">assign</span> <span class="n">abstractcs_busy</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">abs_fsm_err</span><span class="p">;</span>
-<a id="l-1151" name="l-1151"></a>
-<a id="l-1152" name="l-1152"></a><span class="c1">// Abstract COMMAND register</span>
-<a id="l-1153" name="l-1153"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1154" name="l-1154"></a>
-<a id="l-1155" name="l-1155"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1156" name="l-1156"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="n">abs_command_ff</span> <span class="o">&lt;=</span> <span class="n">abs_command_next</span><span class="p">;</span>
-<a id="l-1157" name="l-1157"></a><span class="k">end</span>
-<a id="l-1158" name="l-1158"></a>
-<a id="l-1159" name="l-1159"></a><span class="k">assign</span> <span class="n">abs_command_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span>          <span class="o">?</span> <span class="m">&#39;0</span>
-<a id="l-1160" name="l-1160"></a>                        <span class="o">:</span> <span class="p">(</span><span class="n">command_wr_req</span> <span class="o">&amp;</span> <span class="n">abs_fsm_idle</span><span class="p">)</span> <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span>
-<a id="l-1161" name="l-1161"></a>                                                          <span class="o">:</span> <span class="n">abs_command_ff</span><span class="p">;</span>
-<a id="l-1162" name="l-1162"></a>
-<a id="l-1163" name="l-1163"></a><span class="c1">// Abstract ABSTRACTAUTO register</span>
-<a id="l-1164" name="l-1164"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1165" name="l-1165"></a>
-<a id="l-1166" name="l-1166"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1167" name="l-1167"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="n">abs_autoexec_ff</span> <span class="o">&lt;=</span> <span class="n">abs_autoexec_next</span><span class="p">;</span>
-<a id="l-1168" name="l-1168"></a><span class="k">end</span>
-<a id="l-1169" name="l-1169"></a>
-<a id="l-1170" name="l-1170"></a><span class="k">assign</span> <span class="n">abs_autoexec_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span>           <span class="o">?</span> <span class="mb">1&#39;b0</span>
-<a id="l-1171" name="l-1171"></a>                         <span class="o">:</span> <span class="p">(</span><span class="n">autoexec_wr_req</span> <span class="o">&amp;</span> <span class="n">abs_fsm_idle</span><span class="p">)</span> <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<a id="l-1172" name="l-1172"></a>                                                            <span class="o">:</span> <span class="n">abs_autoexec_ff</span><span class="p">;</span>
-<a id="l-1173" name="l-1173"></a>
-<a id="l-1174" name="l-1174"></a><span class="c1">// Program Buffer registers</span>
-<a id="l-1175" name="l-1175"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1176" name="l-1176"></a>
-<a id="l-1177" name="l-1177"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1178" name="l-1178"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span> <span class="o">&amp;</span> <span class="n">abs_fsm_idle</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1179" name="l-1179"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf0_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf0_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
-<a id="l-1180" name="l-1180"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf1_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf1_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
-<a id="l-1181" name="l-1181"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf2_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf2_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
-<a id="l-1182" name="l-1182"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf3_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf3_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
-<a id="l-1183" name="l-1183"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf4_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf4_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
-<a id="l-1184" name="l-1184"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf5_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf5_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
-<a id="l-1185" name="l-1185"></a>    <span class="k">end</span>
-<a id="l-1186" name="l-1186"></a><span class="k">end</span>
-<a id="l-1187" name="l-1187"></a>
-<a id="l-1188" name="l-1188"></a><span class="c1">// Data 0 register</span>
-<a id="l-1189" name="l-1189"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1190" name="l-1190"></a>
-<a id="l-1191" name="l-1191"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1192" name="l-1192"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1193" name="l-1193"></a>        <span class="n">abs_data0_ff</span> <span class="o">&lt;=</span> <span class="n">abs_data0_next</span><span class="p">;</span>
-<a id="l-1194" name="l-1194"></a>    <span class="k">end</span>
-<a id="l-1195" name="l-1195"></a><span class="k">end</span>
-<a id="l-1196" name="l-1196"></a>
-<a id="l-1197" name="l-1197"></a><span class="k">assign</span> <span class="n">data0_xreg_save</span> <span class="o">=</span> <span class="n">dreg_wr_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">abs_cmd_wr_ff</span><span class="p">;</span>
-<a id="l-1198" name="l-1198"></a>
-<a id="l-1199" name="l-1199"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1200" name="l-1200"></a>    <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1201" name="l-1201"></a>
-<a id="l-1202" name="l-1202"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-1203" name="l-1203"></a>        <span class="n">ABS_STATE_IDLE</span>           <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">data0_wr_req</span>    <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span>       <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1204" name="l-1204"></a>        <span class="n">ABS_STATE_EXEC</span>           <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1205" name="l-1205"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1206" name="l-1206"></a>        <span class="nl">ABS_STATE_CSR_RETURN_XREG:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1207" name="l-1207"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1208" name="l-1208"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1209" name="l-1209"></a>        <span class="n">ABS_STATE_XREG_RW</span>        <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">data0_xreg_save</span> <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1210" name="l-1210"></a>
-<a id="l-1211" name="l-1211"></a>        <span class="nl">ABS_STATE_CSR_RO:</span> <span class="k">begin</span>
-<a id="l-1212" name="l-1212"></a>            <span class="k">case</span> <span class="p">(</span><span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">])</span>
-<a id="l-1213" name="l-1213"></a>                <span class="n">SCR1_CSR_ADDR_MISA</span>     <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MISA</span><span class="p">;</span>
-<a id="l-1214" name="l-1214"></a>                <span class="nl">SCR1_CSR_ADDR_MVENDORID:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MVENDORID</span><span class="p">;</span>
-<a id="l-1215" name="l-1215"></a>                <span class="n">SCR1_CSR_ADDR_MARCHID</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MARCHID</span><span class="p">;</span>
-<a id="l-1216" name="l-1216"></a>                <span class="n">SCR1_CSR_ADDR_MIMPID</span>   <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MIMPID</span><span class="p">;</span>
-<a id="l-1217" name="l-1217"></a>                <span class="n">SCR1_CSR_ADDR_MHARTID</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">soc2dm_fuse_mhartid_i</span><span class="p">;</span>
-<a id="l-1218" name="l-1218"></a>                <span class="k">default</span>                <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">pipe2dm_pc_sample_i</span><span class="p">;</span>
-<a id="l-1219" name="l-1219"></a>            <span class="k">endcase</span>
-<a id="l-1220" name="l-1220"></a>        <span class="k">end</span>
-<a id="l-1221" name="l-1221"></a>
-<a id="l-1222" name="l-1222"></a>        <span class="k">default</span> <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
-<a id="l-1223" name="l-1223"></a>    <span class="k">endcase</span>
-<a id="l-1224" name="l-1224"></a><span class="k">end</span>
-<a id="l-1225" name="l-1225"></a>
-<a id="l-1226" name="l-1226"></a><span class="c1">// Data 1 register</span>
-<a id="l-1227" name="l-1227"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1228" name="l-1228"></a>
-<a id="l-1229" name="l-1229"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1230" name="l-1230"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1231" name="l-1231"></a>        <span class="n">abs_data1_ff</span> <span class="o">&lt;=</span> <span class="n">abs_data1_next</span><span class="p">;</span>
-<a id="l-1232" name="l-1232"></a>    <span class="k">end</span>
-<a id="l-1233" name="l-1233"></a><span class="k">end</span>
-<a id="l-1234" name="l-1234"></a>
-<a id="l-1235" name="l-1235"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1236" name="l-1236"></a>    <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
-<a id="l-1237" name="l-1237"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
-<a id="l-1238" name="l-1238"></a>        <span class="n">ABS_STATE_IDLE</span>                   <span class="o">:</span> <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">data1_wr_req</span> <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span>       <span class="o">:</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
-<a id="l-1239" name="l-1239"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>  <span class="o">:</span> <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>  <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
-<a id="l-1240" name="l-1240"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>  <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
-<a id="l-1241" name="l-1241"></a>        <span class="k">default</span>                          <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
-<a id="l-1242" name="l-1242"></a>    <span class="k">endcase</span>
-<a id="l-1243" name="l-1243"></a><span class="k">end</span>
-<a id="l-1244" name="l-1244"></a>
-<a id="l-1245" name="l-1245"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1246" name="l-1246"></a><span class="c1">// Debug Hart Interface : control</span>
-<a id="l-1247" name="l-1247"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1248" name="l-1248"></a>
-<a id="l-1249" name="l-1249"></a><span class="k">assign</span> <span class="n">cmd_resp_ok</span>    <span class="o">=</span> <span class="n">pipe2dm_cmd_resp_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2dm_cmd_rcode_i</span><span class="p">;</span>
-<a id="l-1250" name="l-1250"></a><span class="k">assign</span> <span class="n">hart_rst_unexp</span> <span class="o">=</span> <span class="o">~</span><span class="n">dhi_fsm_idle</span>      <span class="o">&amp;</span> <span class="o">~</span><span class="n">dhi_fsm_halt_req</span> <span class="o">&amp;</span> <span class="n">hart_state_reset</span><span class="p">;</span>
-<a id="l-1251" name="l-1251"></a>
-<a id="l-1252" name="l-1252"></a><span class="k">assign</span> <span class="n">halt_req_vd</span>    <span class="o">=</span> <span class="n">dmcontrol_haltreq_ff</span>   <span class="o">&amp;</span> <span class="o">~</span><span class="n">hart_state_dhalt</span><span class="p">;</span>
-<a id="l-1253" name="l-1253"></a><span class="k">assign</span> <span class="n">resume_req_vd</span>  <span class="o">=</span> <span class="n">dmcontrol_resumereq_ff</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dmstatus_allany_resumeack_ff</span>
-<a id="l-1254" name="l-1254"></a>                      <span class="o">&amp;</span> <span class="n">hart_state_dhalt</span><span class="p">;</span>
-<a id="l-1255" name="l-1255"></a>
-<a id="l-1256" name="l-1256"></a><span class="c1">// DHI fsm</span>
-<a id="l-1257" name="l-1257"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1258" name="l-1258"></a>
-<a id="l-1259" name="l-1259"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1260" name="l-1260"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1261" name="l-1261"></a>        <span class="n">dhi_fsm_ff</span>   <span class="o">&lt;=</span> <span class="n">DHI_STATE_IDLE</span><span class="p">;</span>
-<a id="l-1262" name="l-1262"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1263" name="l-1263"></a>        <span class="n">dhi_fsm_ff</span> <span class="o">&lt;=</span> <span class="n">dhi_fsm_next</span><span class="p">;</span>
-<a id="l-1264" name="l-1264"></a>    <span class="k">end</span>
-<a id="l-1265" name="l-1265"></a><span class="k">end</span>
-<a id="l-1266" name="l-1266"></a>
-<a id="l-1267" name="l-1267"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1268" name="l-1268"></a>    <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">dhi_fsm_ff</span><span class="p">;</span>
-<a id="l-1269" name="l-1269"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">hart_rst_unexp</span> <span class="o">&amp;</span> <span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1270" name="l-1270"></a>        <span class="c1">// Normal work</span>
-<a id="l-1271" name="l-1271"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span><span class="p">)</span>
-<a id="l-1272" name="l-1272"></a>            <span class="n">DHI_STATE_IDLE</span>      <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">dhi_req</span><span class="p">;</span>
-<a id="l-1273" name="l-1273"></a>            <span class="n">DHI_STATE_EXEC</span>      <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">cmd_resp_ok</span>      <span class="o">?</span> <span class="n">DHI_STATE_EXEC_RUN</span>   <span class="o">:</span> <span class="n">DHI_STATE_EXEC</span><span class="p">;</span>
-<a id="l-1274" name="l-1274"></a>            <span class="n">DHI_STATE_EXEC_RUN</span>  <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_drun</span>  <span class="o">?</span> <span class="n">DHI_STATE_EXEC_HALT</span>  <span class="o">:</span> <span class="n">DHI_STATE_EXEC_RUN</span><span class="p">;</span>
-<a id="l-1275" name="l-1275"></a>            <span class="n">DHI_STATE_HALT_REQ</span>  <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">cmd_resp_ok</span>      <span class="o">?</span> <span class="n">DHI_STATE_EXEC_HALT</span>  <span class="o">:</span> <span class="n">DHI_STATE_HALT_REQ</span><span class="p">;</span>
-<a id="l-1276" name="l-1276"></a>            <span class="n">DHI_STATE_EXEC_HALT</span> <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">DHI_STATE_IDLE</span>       <span class="o">:</span> <span class="n">DHI_STATE_EXEC_HALT</span><span class="p">;</span>
-<a id="l-1277" name="l-1277"></a>            <span class="nl">DHI_STATE_RESUME_REQ:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">cmd_resp_ok</span>      <span class="o">?</span> <span class="n">DHI_STATE_RESUME_RUN</span> <span class="o">:</span> <span class="n">DHI_STATE_RESUME_REQ</span><span class="p">;</span>
-<a id="l-1278" name="l-1278"></a>            <span class="nl">DHI_STATE_RESUME_RUN:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_run</span>   <span class="o">?</span> <span class="n">DHI_STATE_IDLE</span>       <span class="o">:</span> <span class="n">DHI_STATE_RESUME_RUN</span><span class="p">;</span>
-<a id="l-1279" name="l-1279"></a>            <span class="k">default</span>             <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">dhi_fsm_ff</span><span class="p">;</span>
-<a id="l-1280" name="l-1280"></a>        <span class="k">endcase</span>
-<a id="l-1281" name="l-1281"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-1282" name="l-1282"></a>        <span class="c1">// In case of DM reset or core unexpected reset</span>
-<a id="l-1283" name="l-1283"></a>        <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">DHI_STATE_IDLE</span><span class="p">;</span>
-<a id="l-1284" name="l-1284"></a>    <span class="k">end</span>
-<a id="l-1285" name="l-1285"></a><span class="k">end</span>
-<a id="l-1286" name="l-1286"></a>
-<a id="l-1287" name="l-1287"></a><span class="k">assign</span> <span class="n">dhi_fsm_idle</span>       <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_IDLE</span><span class="p">);</span>
-<a id="l-1288" name="l-1288"></a><span class="k">assign</span> <span class="n">dhi_fsm_halt_req</span>   <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_HALT_REQ</span><span class="p">);</span>
-<a id="l-1289" name="l-1289"></a><span class="k">assign</span> <span class="n">dhi_fsm_exec</span>       <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_EXEC</span><span class="p">);</span>
-<a id="l-1290" name="l-1290"></a><span class="k">assign</span> <span class="n">dhi_fsm_exec_halt</span>  <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_EXEC_HALT</span><span class="p">);</span>
-<a id="l-1291" name="l-1291"></a><span class="k">assign</span> <span class="n">dhi_fsm_resume_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_RESUME_REQ</span><span class="p">);</span>
-<a id="l-1292" name="l-1292"></a>
-<a id="l-1293" name="l-1293"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1294" name="l-1294"></a>    <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
-<a id="l-1295" name="l-1295"></a>        <span class="nl">abs_exec_req_ff:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_EXEC</span><span class="p">;</span>
-<a id="l-1296" name="l-1296"></a>        <span class="n">halt_req_vd</span>    <span class="o">:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_HALT_REQ</span><span class="p">;</span>
-<a id="l-1297" name="l-1297"></a>        <span class="n">resume_req_vd</span>  <span class="o">:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_RESUME_REQ</span><span class="p">;</span>
-<a id="l-1298" name="l-1298"></a>        <span class="k">default</span>        <span class="o">:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_IDLE</span><span class="p">;</span>
-<a id="l-1299" name="l-1299"></a>    <span class="k">endcase</span>
-<a id="l-1300" name="l-1300"></a><span class="k">end</span>
-<a id="l-1301" name="l-1301"></a>
-<a id="l-1302" name="l-1302"></a><span class="k">assign</span> <span class="n">dhi_resp</span>     <span class="o">=</span> <span class="n">dhi_fsm_exec_halt</span>    <span class="o">&amp;</span> <span class="n">hart_state_dhalt</span><span class="p">;</span>
-<a id="l-1303" name="l-1303"></a><span class="k">assign</span> <span class="n">dhi_resp_exc</span> <span class="o">=</span> <span class="n">pipe2dm_hart_event_i</span> <span class="o">&amp;</span> <span class="n">pipe2dm_hart_status_i</span><span class="p">.</span><span class="n">except</span>
-<a id="l-1304" name="l-1304"></a>                                           <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2dm_hart_status_i</span><span class="p">.</span><span class="n">ebreak</span><span class="p">;</span>
-<a id="l-1305" name="l-1305"></a>
-<a id="l-1306" name="l-1306"></a><span class="c1">// HART command registers</span>
-<a id="l-1307" name="l-1307"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1308" name="l-1308"></a>
-<a id="l-1309" name="l-1309"></a><span class="c1">// HART command request register</span>
-<a id="l-1310" name="l-1310"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1311" name="l-1311"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1312" name="l-1312"></a>        <span class="n">hart_cmd_req_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-1313" name="l-1313"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1314" name="l-1314"></a>        <span class="n">hart_cmd_req_ff</span> <span class="o">&lt;=</span> <span class="n">hart_cmd_req_next</span><span class="p">;</span>
-<a id="l-1315" name="l-1315"></a>    <span class="k">end</span>
-<a id="l-1316" name="l-1316"></a><span class="k">end</span>
-<a id="l-1317" name="l-1317"></a>
-<a id="l-1318" name="l-1318"></a><span class="k">assign</span> <span class="n">hart_cmd_req_next</span> <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_exec</span> <span class="o">|</span> <span class="n">dhi_fsm_halt_req</span> <span class="o">|</span> <span class="n">dhi_fsm_resume_req</span><span class="p">)</span>
-<a id="l-1319" name="l-1319"></a>                         <span class="o">&amp;</span> <span class="o">~</span><span class="n">cmd_resp_ok</span> <span class="o">&amp;</span> <span class="n">dmcontrol_dmactive_ff</span><span class="p">;</span>
-<a id="l-1320" name="l-1320"></a>
-<a id="l-1321" name="l-1321"></a><span class="c1">// HART command register</span>
-<a id="l-1322" name="l-1322"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1323" name="l-1323"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1324" name="l-1324"></a>        <span class="n">hart_cmd_ff</span> <span class="o">&lt;=</span> <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">;</span>
-<a id="l-1325" name="l-1325"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1326" name="l-1326"></a>        <span class="n">hart_cmd_ff</span> <span class="o">&lt;=</span> <span class="n">hart_cmd_next</span><span class="p">;</span>
-<a id="l-1327" name="l-1327"></a>    <span class="k">end</span>
-<a id="l-1328" name="l-1328"></a><span class="k">end</span>
-<a id="l-1329" name="l-1329"></a>
-<a id="l-1330" name="l-1330"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1331" name="l-1331"></a>    <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">;</span>
-<a id="l-1332" name="l-1332"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1333" name="l-1333"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span><span class="p">)</span>
-<a id="l-1334" name="l-1334"></a>            <span class="n">DHI_STATE_EXEC</span>      <span class="o">:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_DRUN</span><span class="p">;</span>
-<a id="l-1335" name="l-1335"></a>            <span class="n">DHI_STATE_HALT_REQ</span>  <span class="o">:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">;</span>
-<a id="l-1336" name="l-1336"></a>            <span class="nl">DHI_STATE_RESUME_REQ:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">;</span>
-<a id="l-1337" name="l-1337"></a>            <span class="k">default</span>             <span class="o">:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">dm2pipe_cmd_o</span><span class="p">;</span>
-<a id="l-1338" name="l-1338"></a>        <span class="k">endcase</span>
-<a id="l-1339" name="l-1339"></a>    <span class="k">end</span>
-<a id="l-1340" name="l-1340"></a><span class="k">end</span>
-<a id="l-1341" name="l-1341"></a>
-<a id="l-1342" name="l-1342"></a><span class="k">assign</span> <span class="n">dm2pipe_cmd_req_o</span> <span class="o">=</span> <span class="n">hart_cmd_req_ff</span><span class="p">;</span>
-<a id="l-1343" name="l-1343"></a><span class="k">assign</span> <span class="n">dm2pipe_cmd_o</span>     <span class="o">=</span> <span class="n">hart_cmd_ff</span><span class="p">;</span>
-<a id="l-1344" name="l-1344"></a>
-<a id="l-1345" name="l-1345"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1346" name="l-1346"></a><span class="c1">// Debug Hart Interface : program buffer</span>
-<a id="l-1347" name="l-1347"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1348" name="l-1348"></a>
-<a id="l-1349" name="l-1349"></a><span class="c1">// Program Buffer execution EBREAK flag</span>
-<a id="l-1350" name="l-1350"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1351" name="l-1351"></a>
-<a id="l-1352" name="l-1352"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1353" name="l-1353"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="n">hart_pbuf_ebreak_ff</span> <span class="o">&lt;=</span> <span class="n">hart_pbuf_ebreak_next</span><span class="p">;</span>
-<a id="l-1354" name="l-1354"></a><span class="k">end</span>
-<a id="l-1355" name="l-1355"></a>
-<a id="l-1356" name="l-1356"></a><span class="k">assign</span> <span class="n">hart_pbuf_ebreak_next</span> <span class="o">=</span> <span class="n">abs_fsm_exec</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">==</span> <span class="n">ABS_EXEC_EBREAK</span><span class="p">);</span>
-<a id="l-1357" name="l-1357"></a>
-<a id="l-1358" name="l-1358"></a><span class="c1">// Program Buffer instruction multiplexer</span>
-<a id="l-1359" name="l-1359"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1360" name="l-1360"></a>
-<a id="l-1361" name="l-1361"></a><span class="k">always_comb</span> <span class="k">begin</span>
-<a id="l-1362" name="l-1362"></a>    <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">ABS_EXEC_EBREAK</span><span class="p">;</span>
-<a id="l-1363" name="l-1363"></a>
-<a id="l-1364" name="l-1364"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">abs_fsm_exec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hart_pbuf_ebreak_ff</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1365" name="l-1365"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">pipe2dm_pbuf_addr_i</span><span class="p">)</span>
-<a id="l-1366" name="l-1366"></a>            <span class="mh">3&#39;h0</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf0_ff</span><span class="p">;</span>
-<a id="l-1367" name="l-1367"></a>            <span class="mh">3&#39;h1</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf1_ff</span><span class="p">;</span>
-<a id="l-1368" name="l-1368"></a>            <span class="mh">3&#39;h2</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf2_ff</span><span class="p">;</span>
-<a id="l-1369" name="l-1369"></a>            <span class="mh">3&#39;h3</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf3_ff</span><span class="p">;</span>
-<a id="l-1370" name="l-1370"></a>            <span class="mh">3&#39;h4</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf4_ff</span><span class="p">;</span>
-<a id="l-1371" name="l-1371"></a>            <span class="mh">3&#39;h5</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf5_ff</span><span class="p">;</span>
-<a id="l-1372" name="l-1372"></a>            <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
-<a id="l-1373" name="l-1373"></a>        <span class="k">endcase</span>
-<a id="l-1374" name="l-1374"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pipe2dm_pbuf_addr_i</span> <span class="o">==</span> <span class="mb">3&#39;b0</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-1375" name="l-1375"></a>        <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_exec_instr_ff</span><span class="p">;</span>
-<a id="l-1376" name="l-1376"></a>    <span class="k">end</span>
-<a id="l-1377" name="l-1377"></a><span class="k">end</span>
-<a id="l-1378" name="l-1378"></a>
-<a id="l-1379" name="l-1379"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1380" name="l-1380"></a><span class="c1">// Debug Hart Interface : abstract command data</span>
-<a id="l-1381" name="l-1381"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1382" name="l-1382"></a>
-<a id="l-1383" name="l-1383"></a><span class="k">assign</span> <span class="n">dm2pipe_dreg_resp_o</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-1384" name="l-1384"></a><span class="k">assign</span> <span class="n">dm2pipe_dreg_fail_o</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-1385" name="l-1385"></a><span class="k">assign</span> <span class="n">dm2pipe_dreg_rdata_o</span> <span class="o">=</span> <span class="n">abs_fsm_use_addr</span> <span class="o">?</span> <span class="n">abs_data1_ff</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
-<a id="l-1386" name="l-1386"></a>
-<a id="l-1387" name="l-1387"></a><span class="no">`ifdef</span> <span class="n">SCR1_TRGT_SIMULATION</span>
-<a id="l-1388" name="l-1388"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1389" name="l-1389"></a><span class="c1">// Assertions</span>
-<a id="l-1390" name="l-1390"></a><span class="c1">//------------------------------------------------------------------------------</span>
-<a id="l-1391" name="l-1391"></a>
-<a id="l-1392" name="l-1392"></a><span class="n">SVA_DM_X_CONTROL</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-1393" name="l-1393"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-1394" name="l-1394"></a>    <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">rst_n</span><span class="p">,</span> <span class="n">clk</span><span class="p">,</span> <span class="n">dmi2dm_req_i</span><span class="p">,</span> <span class="n">pipe2dm_dreg_req_i</span><span class="p">,</span> <span class="n">pipe2dm_cmd_resp_i</span><span class="p">,</span>
-<a id="l-1395" name="l-1395"></a>                 <span class="n">pipe2dm_hart_event_i</span><span class="p">})</span>
-<a id="l-1396" name="l-1396"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: control signals is X - %0b&quot;</span><span class="p">,</span> <span class="p">{</span><span class="n">rst_n</span><span class="p">,</span> <span class="n">clk</span><span class="p">,</span> <span class="n">dmi2dm_req_i</span><span class="p">,</span>
-<a id="l-1397" name="l-1397"></a>              <span class="n">pipe2dm_dreg_req_i</span><span class="p">,</span> <span class="n">pipe2dm_cmd_resp_i</span><span class="p">,</span> <span class="n">pipe2dm_hart_event_i</span><span class="p">});</span>
-<a id="l-1398" name="l-1398"></a>
-<a id="l-1399" name="l-1399"></a><span class="n">SVA_DM_X_DMI</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-1400" name="l-1400"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-1401" name="l-1401"></a>    <span class="n">dmi2dm_req_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">dmi2dm_wr_i</span><span class="p">,</span> <span class="n">dmi2dm_addr_i</span><span class="p">,</span> <span class="n">dmi2dm_wdata_i</span><span class="p">})</span>
-<a id="l-1402" name="l-1402"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on dmi&quot;</span><span class="p">);</span>
-<a id="l-1403" name="l-1403"></a>
-<a id="l-1404" name="l-1404"></a><span class="n">SVA_DM_X_HART_PBUF</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-1405" name="l-1405"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-1406" name="l-1406"></a>    <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span> <span class="p">(</span><span class="n">pipe2dm_pbuf_addr_i</span><span class="p">)</span>
-<a id="l-1407" name="l-1407"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on hart_pbuf&quot;</span><span class="p">);</span>
-<a id="l-1408" name="l-1408"></a>
-<a id="l-1409" name="l-1409"></a><span class="n">SVA_DM_X_HART_DREG</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-1410" name="l-1410"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-1411" name="l-1411"></a>    <span class="n">pipe2dm_dreg_req_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">pipe2dm_dreg_wr_i</span><span class="p">,</span> <span class="n">pipe2dm_dreg_wdata_i</span><span class="p">})</span>
-<a id="l-1412" name="l-1412"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on hart_dreg&quot;</span><span class="p">);</span>
-<a id="l-1413" name="l-1413"></a>
-<a id="l-1414" name="l-1414"></a><span class="n">SVA_DM_X_HART_CMD</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-1415" name="l-1415"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-1416" name="l-1416"></a>    <span class="n">pipe2dm_cmd_resp_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">pipe2dm_cmd_rcode_i</span><span class="p">})</span>
-<a id="l-1417" name="l-1417"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on dm2pipe_cmd_o&quot;</span><span class="p">);</span>
-<a id="l-1418" name="l-1418"></a>
-<a id="l-1419" name="l-1419"></a><span class="n">SVA_DM_X_HART_EVENT</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
-<a id="l-1420" name="l-1420"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
-<a id="l-1421" name="l-1421"></a>    <span class="n">pipe2dm_hart_event_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span><span class="n">pipe2dm_hart_status_i</span><span class="p">)</span>
-<a id="l-1422" name="l-1422"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on pipe2dm_hart_event_i&quot;</span><span class="p">);</span>
-<a id="l-1423" name="l-1423"></a>
-<a id="l-1424" name="l-1424"></a><span class="no">`endif</span> <span class="c1">// SCR1_TRGT_SIMULATION</span>
-<a id="l-1425" name="l-1425"></a>
-<a id="l-1426" name="l-1426"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_dm</span>
-<a id="l-1427" name="l-1427"></a>
-<a id="l-1428" name="l-1428"></a><span class="no">`endif</span> <span class="c1">// SCR1_DBG_EN</span>
+<a id="l-804" name="l-804"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-805" name="l-805"></a><span class="c1">// Abstract command FSM</span>
+<a id="l-806" name="l-806"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-807" name="l-807"></a>
+<a id="l-808" name="l-808"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-809" name="l-809"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-810" name="l-810"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-811" name="l-811"></a>            <span class="n">abs_fsm_ff</span> <span class="o">&lt;=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-812" name="l-812"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-813" name="l-813"></a>            <span class="n">abs_fsm_ff</span> <span class="o">&lt;=</span> <span class="n">abs_fsm_next</span><span class="p">;</span>
+<a id="l-814" name="l-814"></a>        <span class="k">end</span>
+<a id="l-815" name="l-815"></a>    <span class="k">end</span>
+<a id="l-816" name="l-816"></a><span class="k">end</span>
+<a id="l-817" name="l-817"></a>
+<a id="l-818" name="l-818"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-819" name="l-819"></a>    <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">abs_fsm_ff</span><span class="p">;</span>
+<a id="l-820" name="l-820"></a>
+<a id="l-821" name="l-821"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-822" name="l-822"></a>        <span class="nl">ABS_STATE_IDLE:</span> <span class="k">begin</span>
+<a id="l-823" name="l-823"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">command_wr_req</span> <span class="o">|</span> <span class="n">dmi_rpt_command</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-824" name="l-824"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-825" name="l-825"></a>                    <span class="nl">abs_cmd_csr_ro_access_vd:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_CSR_RO</span><span class="p">;</span>
+<a id="l-826" name="l-826"></a>                    <span class="nl">abs_cmd_csr_rw_access_vd:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">ABS_STATE_CSR_SAVE_XREG</span> <span class="o">:</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-827" name="l-827"></a>                    <span class="n">abs_cmd_mprf_access_vd</span>  <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">ABS_STATE_XREG_RW</span>       <span class="o">:</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-828" name="l-828"></a>                    <span class="n">abs_cmd_execprogbuf_req</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
+<a id="l-829" name="l-829"></a>                    <span class="n">abs_cmd_mem_access_vd</span>   <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_SAVE_XREG</span> <span class="o">:</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-830" name="l-830"></a>                    <span class="k">default</span>                 <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-831" name="l-831"></a>                <span class="k">endcase</span>
+<a id="l-832" name="l-832"></a>            <span class="k">end</span>
+<a id="l-833" name="l-833"></a>        <span class="k">end</span>
+<a id="l-834" name="l-834"></a>
+<a id="l-835" name="l-835"></a>        <span class="nl">ABS_STATE_EXEC:</span> <span class="k">begin</span>
+<a id="l-836" name="l-836"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-837" name="l-837"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp_exc</span> <span class="o">|</span> <span class="n">abs_err_acc_busy_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-838" name="l-838"></a>                    <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-839" name="l-839"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-840" name="l-840"></a>                    <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-841" name="l-841"></a>                <span class="k">end</span>
+<a id="l-842" name="l-842"></a>            <span class="k">end</span>
+<a id="l-843" name="l-843"></a>        <span class="k">end</span>
+<a id="l-844" name="l-844"></a>
+<a id="l-845" name="l-845"></a>        <span class="nl">ABS_STATE_XREG_RW:</span> <span class="k">begin</span>
+<a id="l-846" name="l-846"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-847" name="l-847"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-848" name="l-848"></a>                    <span class="nl">abs_err_acc_busy_ff:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-849" name="l-849"></a>                    <span class="nl">abs_cmd_postexec_ff:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
+<a id="l-850" name="l-850"></a>                    <span class="k">default</span>            <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-851" name="l-851"></a>                <span class="k">endcase</span>
+<a id="l-852" name="l-852"></a>            <span class="k">end</span>
+<a id="l-853" name="l-853"></a>        <span class="k">end</span>
+<a id="l-854" name="l-854"></a>
+<a id="l-855" name="l-855"></a>        <span class="n">ABS_STATE_CSR_RO</span>       <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">abs_err_acc_busy_ff</span> <span class="o">?</span> <span class="n">ABS_STATE_ERR</span>             <span class="o">:</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-856" name="l-856"></a>        <span class="nl">ABS_STATE_CSR_SAVE_XREG:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span>            <span class="o">?</span> <span class="n">ABS_STATE_CSR_RW</span>          <span class="o">:</span> <span class="n">ABS_STATE_CSR_SAVE_XREG</span><span class="p">;</span>
+<a id="l-857" name="l-857"></a>        <span class="n">ABS_STATE_CSR_RW</span>       <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span>            <span class="o">?</span> <span class="n">ABS_STATE_CSR_RETURN_XREG</span> <span class="o">:</span> <span class="n">ABS_STATE_CSR_RW</span><span class="p">;</span>
+<a id="l-858" name="l-858"></a>
+<a id="l-859" name="l-859"></a>        <span class="nl">ABS_STATE_CSR_RETURN_XREG:</span> <span class="k">begin</span>
+<a id="l-860" name="l-860"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-861" name="l-861"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-862" name="l-862"></a>                    <span class="n">abs_err_exc_ff</span>      <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-863" name="l-863"></a>                    <span class="n">abs_err_acc_busy_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-864" name="l-864"></a>                    <span class="n">abs_cmd_postexec_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
+<a id="l-865" name="l-865"></a>                    <span class="k">default</span>             <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-866" name="l-866"></a>                <span class="k">endcase</span>
+<a id="l-867" name="l-867"></a>            <span class="k">end</span>
+<a id="l-868" name="l-868"></a>        <span class="k">end</span>
+<a id="l-869" name="l-869"></a>
+<a id="l-870" name="l-870"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>         <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>   <span class="o">:</span> <span class="n">ABS_STATE_MEM_SAVE_XREG</span><span class="p">;</span>
+<a id="l-871" name="l-871"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_RW</span>                  <span class="o">:</span> <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span><span class="p">;</span>
+<a id="l-872" name="l-872"></a>        <span class="n">ABS_STATE_MEM_RW</span>                <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_RETURN_XREG</span>         <span class="o">:</span> <span class="n">ABS_STATE_MEM_RW</span><span class="p">;</span>
+<a id="l-873" name="l-873"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span>       <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">dhi_resp</span> <span class="o">?</span> <span class="n">ABS_STATE_MEM_RETURN_XREG_FORADDR</span> <span class="o">:</span> <span class="n">ABS_STATE_MEM_RETURN_XREG</span><span class="p">;</span>
+<a id="l-874" name="l-874"></a>
+<a id="l-875" name="l-875"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="k">begin</span>
+<a id="l-876" name="l-876"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-877" name="l-877"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-878" name="l-878"></a>                    <span class="nl">abs_err_exc_ff:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-879" name="l-879"></a>                    <span class="n">abs_err_acc_busy_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-880" name="l-880"></a>                    <span class="n">abs_cmd_postexec_ff</span> <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_EXEC</span><span class="p">;</span>
+<a id="l-881" name="l-881"></a>                    <span class="k">default</span>             <span class="o">:</span> <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-882" name="l-882"></a>                <span class="k">endcase</span>
+<a id="l-883" name="l-883"></a>            <span class="k">end</span>
+<a id="l-884" name="l-884"></a>        <span class="k">end</span>
+<a id="l-885" name="l-885"></a>
+<a id="l-886" name="l-886"></a>        <span class="nl">ABS_STATE_ERR:</span> <span class="k">begin</span>
+<a id="l-887" name="l-887"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">abstractcs_wr_req</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">abstractcs_cmderr_next</span> <span class="o">==</span> <span class="mb">3&#39;b0</span><span class="p">))</span> <span class="k">begin</span>
+<a id="l-888" name="l-888"></a>                <span class="n">abs_fsm_next</span> <span class="o">=</span> <span class="n">ABS_STATE_IDLE</span><span class="p">;</span>
+<a id="l-889" name="l-889"></a>            <span class="k">end</span>
+<a id="l-890" name="l-890"></a>        <span class="k">end</span>
+<a id="l-891" name="l-891"></a>    <span class="k">endcase</span>
+<a id="l-892" name="l-892"></a>
+<a id="l-893" name="l-893"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">hart_state_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-894" name="l-894"></a>        <span class="n">abs_fsm_next</span>    <span class="o">=</span> <span class="n">ABS_STATE_ERR</span><span class="p">;</span>
+<a id="l-895" name="l-895"></a>    <span class="k">end</span>
+<a id="l-896" name="l-896"></a><span class="k">end</span>
+<a id="l-897" name="l-897"></a>
+<a id="l-898" name="l-898"></a><span class="k">assign</span> <span class="n">abs_fsm_idle</span>     <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_IDLE</span><span class="p">);</span>
+<a id="l-899" name="l-899"></a><span class="k">assign</span> <span class="n">abs_fsm_exec</span>     <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_EXEC</span><span class="p">);</span>
+<a id="l-900" name="l-900"></a><span class="k">assign</span> <span class="n">abs_fsm_csr_ro</span>   <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_CSR_RO</span><span class="p">);</span>
+<a id="l-901" name="l-901"></a><span class="k">assign</span> <span class="n">abs_fsm_err</span>      <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_ERR</span><span class="p">);</span>
+<a id="l-902" name="l-902"></a><span class="k">assign</span> <span class="n">abs_fsm_use_addr</span> <span class="o">=</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span><span class="p">)</span>
+<a id="l-903" name="l-903"></a>                        <span class="o">|</span> <span class="p">(</span><span class="n">abs_fsm_ff</span> <span class="o">==</span> <span class="n">ABS_STATE_MEM_RETURN_XREG_FORADDR</span><span class="p">);</span>
+<a id="l-904" name="l-904"></a>
+<a id="l-905" name="l-905"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-906" name="l-906"></a><span class="c1">// Abstract command status logic</span>
+<a id="l-907" name="l-907"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-908" name="l-908"></a>
+<a id="l-909" name="l-909"></a><span class="c1">// Abstract command access busy error register</span>
+<a id="l-910" name="l-910"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-911" name="l-911"></a>
+<a id="l-912" name="l-912"></a><span class="k">assign</span> <span class="n">abs_err_acc_busy_upd</span> <span class="o">=</span> <span class="n">clk_en_abs</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">abs_fsm_idle</span> <span class="o">|</span> <span class="n">dmi_req_any</span><span class="p">);</span>
+<a id="l-913" name="l-913"></a>
+<a id="l-914" name="l-914"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-915" name="l-915"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_acc_busy_upd</span><span class="p">)</span> <span class="n">abs_err_acc_busy_ff</span> <span class="o">&lt;=</span> <span class="n">abs_err_acc_busy_next</span><span class="p">;</span>
+<a id="l-916" name="l-916"></a><span class="k">end</span>
+<a id="l-917" name="l-917"></a>
+<a id="l-918" name="l-918"></a><span class="k">assign</span> <span class="n">abs_err_acc_busy_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">dmi_req_any</span><span class="p">;</span>
+<a id="l-919" name="l-919"></a>
+<a id="l-920" name="l-920"></a><span class="c1">// Abstract command access exception error register</span>
+<a id="l-921" name="l-921"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-922" name="l-922"></a>
+<a id="l-923" name="l-923"></a><span class="k">assign</span> <span class="n">abs_err_exc_upd</span> <span class="o">=</span> <span class="n">clk_en_abs</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">abs_fsm_idle</span> <span class="o">|</span> <span class="p">(</span><span class="n">dhi_resp</span> <span class="o">&amp;</span> <span class="n">dhi_resp_exc</span><span class="p">));</span>
+<a id="l-924" name="l-924"></a>
+<a id="l-925" name="l-925"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-926" name="l-926"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_exc_upd</span><span class="p">)</span> <span class="n">abs_err_exc_ff</span> <span class="o">&lt;=</span> <span class="n">abs_err_exc_next</span><span class="p">;</span>
+<a id="l-927" name="l-927"></a><span class="k">end</span>
+<a id="l-928" name="l-928"></a>
+<a id="l-929" name="l-929"></a><span class="k">assign</span> <span class="n">abs_err_exc_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">dhi_resp</span> <span class="o">&amp;</span> <span class="n">dhi_resp_exc</span><span class="p">;</span>
+<a id="l-930" name="l-930"></a>
+<a id="l-931" name="l-931"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-932" name="l-932"></a><span class="c1">// Abstract Instruction logic</span>
+<a id="l-933" name="l-933"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-934" name="l-934"></a><span class="c1">//</span>
+<a id="l-935" name="l-935"></a> <span class="c1">// Cosists of the following functional units:</span>
+<a id="l-936" name="l-936"></a> <span class="c1">// - Instruction execution request register</span>
+<a id="l-937" name="l-937"></a> <span class="c1">// - Instruction memory FUNCT3 field multiplexer</span>
+<a id="l-938" name="l-938"></a> <span class="c1">// - Instruction RS1 multiplexer</span>
+<a id="l-939" name="l-939"></a> <span class="c1">// - Instruction RD multiplexer</span>
+<a id="l-940" name="l-940"></a> <span class="c1">// - Abstract Instruction register</span>
+<a id="l-941" name="l-941"></a>
+<a id="l-942" name="l-942"></a><span class="c1">// Abstract instruction execution request register</span>
+<a id="l-943" name="l-943"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-944" name="l-944"></a>
+<a id="l-945" name="l-945"></a><span class="k">assign</span> <span class="n">abs_exec_req_next</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">abs_fsm_idle</span> <span class="o">|</span> <span class="n">abs_fsm_csr_ro</span> <span class="o">|</span> <span class="n">abs_fsm_err</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dhi_resp</span><span class="p">;</span>
+<a id="l-946" name="l-946"></a>
+<a id="l-947" name="l-947"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-948" name="l-948"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-949" name="l-949"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-950" name="l-950"></a>            <span class="n">abs_exec_req_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-951" name="l-951"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-952" name="l-952"></a>            <span class="n">abs_exec_req_ff</span> <span class="o">&lt;=</span> <span class="n">abs_exec_req_next</span><span class="p">;</span>
+<a id="l-953" name="l-953"></a>        <span class="k">end</span>
+<a id="l-954" name="l-954"></a>    <span class="k">end</span>
+<a id="l-955" name="l-955"></a><span class="k">end</span>
+<a id="l-956" name="l-956"></a>
+<a id="l-957" name="l-957"></a><span class="c1">// Abstract instruction memory FUNCT3 field multiplexer</span>
+<a id="l-958" name="l-958"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-959" name="l-959"></a>
+<a id="l-960" name="l-960"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-961" name="l-961"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_cmd_size_ff</span><span class="p">)</span>
+<a id="l-962" name="l-962"></a>        <span class="mb">2&#39;b00</span>  <span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">SCR1_FUNCT3_SB</span> <span class="o">:</span> <span class="n">SCR1_FUNCT3_LBU</span><span class="p">;</span>
+<a id="l-963" name="l-963"></a>        <span class="mb">2&#39;b01</span>  <span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">SCR1_FUNCT3_SH</span> <span class="o">:</span> <span class="n">SCR1_FUNCT3_LHU</span><span class="p">;</span>
+<a id="l-964" name="l-964"></a>        <span class="mb">2&#39;b10</span>  <span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">SCR1_FUNCT3_SW</span> <span class="o">:</span> <span class="n">SCR1_FUNCT3_LW</span><span class="p">;</span>
+<a id="l-965" name="l-965"></a>        <span class="k">default</span><span class="o">:</span> <span class="n">abs_instr_mem_funct3</span> <span class="o">=</span> <span class="n">SCR1_FUNCT3_SB</span><span class="p">;</span>
+<a id="l-966" name="l-966"></a>    <span class="k">endcase</span>
+<a id="l-967" name="l-967"></a><span class="k">end</span>
+<a id="l-968" name="l-968"></a>
+<a id="l-969" name="l-969"></a><span class="c1">// Abstract instruction RS1 multiplexer</span>
+<a id="l-970" name="l-970"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-971" name="l-971"></a>
+<a id="l-972" name="l-972"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-973" name="l-973"></a>    <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
+<a id="l-974" name="l-974"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-975" name="l-975"></a>        <span class="n">ABS_STATE_XREG_RW</span>                <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h0</span> <span class="o">:</span> <span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a id="l-976" name="l-976"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-977" name="l-977"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-978" name="l-978"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-979" name="l-979"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-980" name="l-980"></a>        <span class="n">ABS_STATE_CSR_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h5</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
+<a id="l-981" name="l-981"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>  <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
+<a id="l-982" name="l-982"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
+<a id="l-983" name="l-983"></a>        <span class="n">ABS_STATE_MEM_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rs1</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
+<a id="l-984" name="l-984"></a>        <span class="k">default</span>                          <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a id="l-985" name="l-985"></a>    <span class="k">endcase</span>
+<a id="l-986" name="l-986"></a><span class="k">end</span>
+<a id="l-987" name="l-987"></a>
+<a id="l-988" name="l-988"></a><span class="k">assign</span> <span class="n">abs_instr_rs2</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-989" name="l-989"></a>
+<a id="l-990" name="l-990"></a><span class="c1">// Abstract instruction RD multiplexer</span>
+<a id="l-991" name="l-991"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-992" name="l-992"></a>
+<a id="l-993" name="l-993"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-994" name="l-994"></a>    <span class="n">abs_instr_rd</span>  <span class="o">=</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
+<a id="l-995" name="l-995"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-996" name="l-996"></a>        <span class="n">ABS_STATE_XREG_RW</span>                <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">4</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
+<a id="l-997" name="l-997"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h5</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
+<a id="l-998" name="l-998"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>          <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h5</span> <span class="o">:</span> <span class="mh">5&#39;h0</span><span class="p">;</span>
+<a id="l-999" name="l-999"></a>        <span class="n">ABS_STATE_CSR_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h0</span> <span class="o">:</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-1000" name="l-1000"></a>        <span class="n">ABS_STATE_MEM_RW</span>                 <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span> <span class="o">?</span> <span class="mh">5&#39;h0</span> <span class="o">:</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-1001" name="l-1001"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-1002" name="l-1002"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span>        <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h5</span><span class="p">;</span>
+<a id="l-1003" name="l-1003"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>  <span class="o">:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
+<a id="l-1004" name="l-1004"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="n">abs_instr_rd</span> <span class="o">=</span> <span class="mh">5&#39;h6</span><span class="p">;</span>
+<a id="l-1005" name="l-1005"></a>        <span class="k">default</span>                          <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a id="l-1006" name="l-1006"></a>    <span class="k">endcase</span>
+<a id="l-1007" name="l-1007"></a><span class="k">end</span>
+<a id="l-1008" name="l-1008"></a>
+<a id="l-1009" name="l-1009"></a><span class="c1">// Abstract instruction register</span>
+<a id="l-1010" name="l-1010"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1011" name="l-1011"></a>
+<a id="l-1012" name="l-1012"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1013" name="l-1013"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1014" name="l-1014"></a>        <span class="n">abs_exec_instr_ff</span> <span class="o">&lt;=</span> <span class="n">abs_exec_instr_next</span><span class="p">;</span>
+<a id="l-1015" name="l-1015"></a>    <span class="k">end</span>
+<a id="l-1016" name="l-1016"></a><span class="k">end</span>
+<a id="l-1017" name="l-1017"></a>
+<a id="l-1018" name="l-1018"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1019" name="l-1019"></a>    <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="n">abs_exec_instr_ff</span><span class="p">;</span>
+<a id="l-1020" name="l-1020"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-1021" name="l-1021"></a>        <span class="n">ABS_STATE_XREG_RW</span><span class="p">,</span>
+<a id="l-1022" name="l-1022"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span><span class="p">,</span>
+<a id="l-1023" name="l-1023"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span><span class="p">,</span>
+<a id="l-1024" name="l-1024"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span><span class="p">,</span>
+<a id="l-1025" name="l-1025"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span><span class="p">,</span>
+<a id="l-1026" name="l-1026"></a>        <span class="n">ABS_STATE_MEM_RETURN_XREG</span><span class="p">,</span>
+<a id="l-1027" name="l-1027"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="k">begin</span>
+<a id="l-1028" name="l-1028"></a>            <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="p">{</span><span class="n">SCR1_HDU_DBGCSR_ADDR_DSCRATCH0</span><span class="p">,</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">SCR1_FUNCT3_CSRRW</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_SYSTEM</span><span class="p">};</span>
+<a id="l-1029" name="l-1029"></a>        <span class="k">end</span>
+<a id="l-1030" name="l-1030"></a>
+<a id="l-1031" name="l-1031"></a>        <span class="nl">ABS_STATE_CSR_RW:</span> <span class="k">begin</span>
+<a id="l-1032" name="l-1032"></a>            <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span>
+<a id="l-1033" name="l-1033"></a>                                <span class="o">?</span> <span class="p">{</span><span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">SCR1_FUNCT3_CSRRW</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_SYSTEM</span><span class="p">}</span>
+<a id="l-1034" name="l-1034"></a>                                <span class="o">:</span> <span class="p">{</span><span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">],</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">SCR1_FUNCT3_CSRRS</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_SYSTEM</span><span class="p">};</span>
+<a id="l-1035" name="l-1035"></a>        <span class="k">end</span>
+<a id="l-1036" name="l-1036"></a>
+<a id="l-1037" name="l-1037"></a>        <span class="nl">ABS_STATE_MEM_RW:</span> <span class="k">begin</span>
+<a id="l-1038" name="l-1038"></a>            <span class="n">abs_exec_instr_next</span> <span class="o">=</span> <span class="n">abs_cmd_wr_ff</span>
+<a id="l-1039" name="l-1039"></a>                                <span class="o">?</span> <span class="p">{</span><span class="mh">7&#39;h0</span><span class="p">,</span>  <span class="n">abs_instr_rs2</span><span class="p">,</span> <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">abs_instr_mem_funct3</span><span class="p">,</span> <span class="mh">5&#39;h0</span><span class="p">,</span>         <span class="n">SCR1_OP_STORE</span><span class="p">}</span>
+<a id="l-1040" name="l-1040"></a>                                <span class="o">:</span> <span class="p">{</span><span class="mh">12&#39;h0</span><span class="p">,</span>                <span class="n">abs_instr_rs1</span><span class="p">,</span> <span class="n">abs_instr_mem_funct3</span><span class="p">,</span> <span class="n">abs_instr_rd</span><span class="p">,</span> <span class="n">SCR1_OP_LOAD</span><span class="p">};</span>
+<a id="l-1041" name="l-1041"></a>        <span class="k">end</span>
+<a id="l-1042" name="l-1042"></a>
+<a id="l-1043" name="l-1043"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a id="l-1044" name="l-1044"></a>    <span class="k">endcase</span>
+<a id="l-1045" name="l-1045"></a><span class="k">end</span>
+<a id="l-1046" name="l-1046"></a>
+<a id="l-1047" name="l-1047"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1048" name="l-1048"></a><span class="c1">// Abstract registers</span>
+<a id="l-1049" name="l-1049"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1050" name="l-1050"></a><span class="c1">//</span>
+<a id="l-1051" name="l-1051"></a> <span class="c1">// Registers:</span>
+<a id="l-1052" name="l-1052"></a> <span class="c1">// - ABSTRACTCS register</span>
+<a id="l-1053" name="l-1053"></a> <span class="c1">// - COMMAND register</span>
+<a id="l-1054" name="l-1054"></a> <span class="c1">// - ABSTRACTAUTO register</span>
+<a id="l-1055" name="l-1055"></a> <span class="c1">// - PROGBUF0..5 registers</span>
+<a id="l-1056" name="l-1056"></a> <span class="c1">// - DATA0..1 registers</span>
+<a id="l-1057" name="l-1057"></a>
+<a id="l-1058" name="l-1058"></a><span class="c1">// ABSTRACTCS register</span>
+<a id="l-1059" name="l-1059"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1060" name="l-1060"></a>
+<a id="l-1061" name="l-1061"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1062" name="l-1062"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1063" name="l-1063"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1064" name="l-1064"></a>            <span class="n">abstractcs_cmderr_ff</span> <span class="o">&lt;=</span> <span class="n">ABS_ERR_NONE</span><span class="p">;</span>
+<a id="l-1065" name="l-1065"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-1066" name="l-1066"></a>            <span class="n">abstractcs_cmderr_ff</span> <span class="o">&lt;=</span> <span class="n">abstractcs_cmderr_next</span><span class="p">;</span>
+<a id="l-1067" name="l-1067"></a>        <span class="k">end</span>
+<a id="l-1068" name="l-1068"></a>    <span class="k">end</span>
+<a id="l-1069" name="l-1069"></a><span class="k">end</span>
+<a id="l-1070" name="l-1070"></a>
+<a id="l-1071" name="l-1071"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1072" name="l-1072"></a>    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
+<a id="l-1073" name="l-1073"></a>
+<a id="l-1074" name="l-1074"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-1075" name="l-1075"></a>        <span class="nl">ABS_STATE_IDLE:</span> <span class="k">begin</span>
+<a id="l-1076" name="l-1076"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">command_wr_req</span> <span class="o">|</span> <span class="n">dmi_rpt_command</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1077" name="l-1077"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">abs_cmd_hartreg_vd</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1078" name="l-1078"></a>                    <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-1079" name="l-1079"></a>                        <span class="n">abs_cmd_reg_access_req</span> <span class="o">:</span> <span class="k">begin</span>
+<a id="l-1080" name="l-1080"></a>                            <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-1081" name="l-1081"></a>                                <span class="nl">abs_cmd_csr_rw_access_vd:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span>
+<a id="l-1082" name="l-1082"></a>                                                                                 <span class="o">?</span> <span class="n">abstractcs_cmderr_ff</span>
+<a id="l-1083" name="l-1083"></a>                                                                                 <span class="o">:</span> <span class="n">ABS_ERR_NOHALT</span><span class="p">;</span>
+<a id="l-1084" name="l-1084"></a>                                <span class="n">abs_cmd_mprf_access_vd</span>  <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span>
+<a id="l-1085" name="l-1085"></a>                                                                                 <span class="o">?</span> <span class="n">abstractcs_cmderr_ff</span>
+<a id="l-1086" name="l-1086"></a>                                                                                 <span class="o">:</span> <span class="n">ABS_ERR_NOHALT</span><span class="p">;</span>
+<a id="l-1087" name="l-1087"></a>                                <span class="nl">abs_cmd_csr_ro_access_vd:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
+<a id="l-1088" name="l-1088"></a>                                <span class="k">default</span>                 <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_CMD</span><span class="p">;</span>
+<a id="l-1089" name="l-1089"></a>                            <span class="k">endcase</span>
+<a id="l-1090" name="l-1090"></a>                        <span class="k">end</span>
+<a id="l-1091" name="l-1091"></a>                        <span class="n">abs_cmd_execprogbuf_req</span>         <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
+<a id="l-1092" name="l-1092"></a>                        <span class="k">default</span>                         <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_CMD</span><span class="p">;</span>
+<a id="l-1093" name="l-1093"></a>                    <span class="k">endcase</span>
+<a id="l-1094" name="l-1094"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">abs_cmd_hartmem_vd</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1095" name="l-1095"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_cmd_memsize_vd</span> <span class="o">?</span> <span class="n">ABS_ERR_CMD</span>
+<a id="l-1096" name="l-1096"></a>                                           <span class="o">:</span> <span class="o">~</span><span class="n">hart_state_dhalt</span>   <span class="o">?</span> <span class="n">ABS_ERR_NOHALT</span>
+<a id="l-1097" name="l-1097"></a>                                                                 <span class="o">:</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
+<a id="l-1098" name="l-1098"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-1099" name="l-1099"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_CMD</span><span class="p">;</span>
+<a id="l-1100" name="l-1100"></a>                <span class="k">end</span>
+<a id="l-1101" name="l-1101"></a>            <span class="k">end</span>
+<a id="l-1102" name="l-1102"></a>        <span class="k">end</span>
+<a id="l-1103" name="l-1103"></a>
+<a id="l-1104" name="l-1104"></a>        <span class="nl">ABS_STATE_EXEC:</span> <span class="k">begin</span>
+<a id="l-1105" name="l-1105"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1106" name="l-1106"></a>                <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp_exc</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1107" name="l-1107"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_EXCEPTION</span><span class="p">;</span>
+<a id="l-1108" name="l-1108"></a>                <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_acc_busy_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1109" name="l-1109"></a>                    <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_BUSY</span><span class="p">;</span>
+<a id="l-1110" name="l-1110"></a>                <span class="k">end</span>
+<a id="l-1111" name="l-1111"></a>            <span class="k">end</span>
+<a id="l-1112" name="l-1112"></a>        <span class="k">end</span>
+<a id="l-1113" name="l-1113"></a>
+<a id="l-1114" name="l-1114"></a>        <span class="n">ABS_STATE_XREG_RW</span><span class="p">,</span>
+<a id="l-1115" name="l-1115"></a>        <span class="nl">ABS_STATE_CSR_RO:</span> <span class="k">begin</span>
+<a id="l-1116" name="l-1116"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">abs_err_acc_busy_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1117" name="l-1117"></a>                <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_BUSY</span><span class="p">;</span>
+<a id="l-1118" name="l-1118"></a>            <span class="k">end</span>
+<a id="l-1119" name="l-1119"></a>        <span class="k">end</span>
+<a id="l-1120" name="l-1120"></a>
+<a id="l-1121" name="l-1121"></a>        <span class="n">ABS_STATE_CSR_RETURN_XREG</span><span class="p">,</span>
+<a id="l-1122" name="l-1122"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="k">begin</span>
+<a id="l-1123" name="l-1123"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dhi_resp</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1124" name="l-1124"></a>                <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-1125" name="l-1125"></a>                    <span class="n">abs_err_exc_ff</span>     <span class="o">:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_EXCEPTION</span><span class="p">;</span>
+<a id="l-1126" name="l-1126"></a>                    <span class="nl">abs_err_acc_busy_ff:</span> <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_BUSY</span><span class="p">;</span>
+<a id="l-1127" name="l-1127"></a>                    <span class="k">default</span><span class="o">:</span>             <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">abstractcs_cmderr_ff</span><span class="p">;</span>
+<a id="l-1128" name="l-1128"></a>                <span class="k">endcase</span>
+<a id="l-1129" name="l-1129"></a>            <span class="k">end</span>
+<a id="l-1130" name="l-1130"></a>        <span class="k">end</span>
+<a id="l-1131" name="l-1131"></a>
+<a id="l-1132" name="l-1132"></a>        <span class="nl">ABS_STATE_ERR:</span> <span class="k">begin</span>
+<a id="l-1133" name="l-1133"></a>            <span class="k">if</span> <span class="p">(</span><span class="n">dmi_req_abstractcs</span> <span class="o">&amp;</span> <span class="n">dmi2dm_wr_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1134" name="l-1134"></a>                <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">type_scr1_abs_err_e</span><span class="p">&#39;(</span><span class="kt">logic</span><span class="p">&#39;(</span><span class="n">abstractcs_cmderr_ff</span><span class="p">)</span>
+<a id="l-1135" name="l-1135"></a>                                       <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">dmi2dm_wdata_i</span><span class="p">[</span><span class="nl">SCR1_DBG_ABSTRACTCS_CMDERR_HI:</span>
+<a id="l-1136" name="l-1136"></a>                                                          <span class="n">SCR1_DBG_ABSTRACTCS_CMDERR_LO</span><span class="p">]));</span>
+<a id="l-1137" name="l-1137"></a>            <span class="k">end</span>
+<a id="l-1138" name="l-1138"></a>        <span class="k">end</span>
+<a id="l-1139" name="l-1139"></a>
+<a id="l-1140" name="l-1140"></a>        <span class="k">default</span><span class="o">:</span> <span class="k">begin</span>
+<a id="l-1141" name="l-1141"></a>        <span class="k">end</span>
+<a id="l-1142" name="l-1142"></a>    <span class="k">endcase</span>
+<a id="l-1143" name="l-1143"></a>
+<a id="l-1144" name="l-1144"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="n">hart_state_reset</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1145" name="l-1145"></a>        <span class="n">abstractcs_cmderr_next</span> <span class="o">=</span> <span class="n">ABS_ERR_EXCEPTION</span><span class="p">;</span>
+<a id="l-1146" name="l-1146"></a>    <span class="k">end</span>
+<a id="l-1147" name="l-1147"></a><span class="k">end</span>
+<a id="l-1148" name="l-1148"></a>
+<a id="l-1149" name="l-1149"></a><span class="k">assign</span> <span class="n">abstractcs_busy</span> <span class="o">=</span> <span class="o">~</span><span class="n">abs_fsm_idle</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">abs_fsm_err</span><span class="p">;</span>
+<a id="l-1150" name="l-1150"></a>
+<a id="l-1151" name="l-1151"></a><span class="c1">// Abstract COMMAND register</span>
+<a id="l-1152" name="l-1152"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1153" name="l-1153"></a>
+<a id="l-1154" name="l-1154"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1155" name="l-1155"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="n">abs_command_ff</span> <span class="o">&lt;=</span> <span class="n">abs_command_next</span><span class="p">;</span>
+<a id="l-1156" name="l-1156"></a><span class="k">end</span>
+<a id="l-1157" name="l-1157"></a>
+<a id="l-1158" name="l-1158"></a><span class="k">assign</span> <span class="n">abs_command_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span>          <span class="o">?</span> <span class="m">&#39;0</span>
+<a id="l-1159" name="l-1159"></a>                        <span class="o">:</span> <span class="p">(</span><span class="n">command_wr_req</span> <span class="o">&amp;</span> <span class="n">abs_fsm_idle</span><span class="p">)</span> <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span>
+<a id="l-1160" name="l-1160"></a>                                                          <span class="o">:</span> <span class="n">abs_command_ff</span><span class="p">;</span>
+<a id="l-1161" name="l-1161"></a>
+<a id="l-1162" name="l-1162"></a><span class="c1">// Abstract ABSTRACTAUTO register</span>
+<a id="l-1163" name="l-1163"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1164" name="l-1164"></a>
+<a id="l-1165" name="l-1165"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1166" name="l-1166"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="n">abs_autoexec_ff</span> <span class="o">&lt;=</span> <span class="n">abs_autoexec_next</span><span class="p">;</span>
+<a id="l-1167" name="l-1167"></a><span class="k">end</span>
+<a id="l-1168" name="l-1168"></a>
+<a id="l-1169" name="l-1169"></a><span class="k">assign</span> <span class="n">abs_autoexec_next</span> <span class="o">=</span> <span class="o">~</span><span class="n">dmcontrol_dmactive_ff</span>           <span class="o">?</span> <span class="mb">1&#39;b0</span>
+<a id="l-1170" name="l-1170"></a>                         <span class="o">:</span> <span class="p">(</span><span class="n">autoexec_wr_req</span> <span class="o">&amp;</span> <span class="n">abs_fsm_idle</span><span class="p">)</span> <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="l-1171" name="l-1171"></a>                                                            <span class="o">:</span> <span class="n">abs_autoexec_ff</span><span class="p">;</span>
+<a id="l-1172" name="l-1172"></a>
+<a id="l-1173" name="l-1173"></a><span class="c1">// Program Buffer registers</span>
+<a id="l-1174" name="l-1174"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1175" name="l-1175"></a>
+<a id="l-1176" name="l-1176"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1177" name="l-1177"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span> <span class="o">&amp;</span> <span class="n">abs_fsm_idle</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1178" name="l-1178"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf0_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf0_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
+<a id="l-1179" name="l-1179"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf1_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf1_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
+<a id="l-1180" name="l-1180"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf2_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf2_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
+<a id="l-1181" name="l-1181"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf3_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf3_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
+<a id="l-1182" name="l-1182"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf4_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf4_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
+<a id="l-1183" name="l-1183"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">progbuf5_wr_req</span><span class="p">)</span> <span class="n">abs_progbuf5_ff</span> <span class="o">&lt;=</span> <span class="n">dmi2dm_wdata_i</span><span class="p">;</span>
+<a id="l-1184" name="l-1184"></a>    <span class="k">end</span>
+<a id="l-1185" name="l-1185"></a><span class="k">end</span>
+<a id="l-1186" name="l-1186"></a>
+<a id="l-1187" name="l-1187"></a><span class="c1">// Data 0 register</span>
+<a id="l-1188" name="l-1188"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1189" name="l-1189"></a>
+<a id="l-1190" name="l-1190"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1191" name="l-1191"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1192" name="l-1192"></a>        <span class="n">abs_data0_ff</span> <span class="o">&lt;=</span> <span class="n">abs_data0_next</span><span class="p">;</span>
+<a id="l-1193" name="l-1193"></a>    <span class="k">end</span>
+<a id="l-1194" name="l-1194"></a><span class="k">end</span>
+<a id="l-1195" name="l-1195"></a>
+<a id="l-1196" name="l-1196"></a><span class="k">assign</span> <span class="n">data0_xreg_save</span> <span class="o">=</span> <span class="n">dreg_wr_req</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">abs_cmd_wr_ff</span><span class="p">;</span>
+<a id="l-1197" name="l-1197"></a>
+<a id="l-1198" name="l-1198"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1199" name="l-1199"></a>    <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1200" name="l-1200"></a>
+<a id="l-1201" name="l-1201"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-1202" name="l-1202"></a>        <span class="n">ABS_STATE_IDLE</span>           <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">data0_wr_req</span>    <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span>       <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1203" name="l-1203"></a>        <span class="n">ABS_STATE_EXEC</span>           <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1204" name="l-1204"></a>        <span class="n">ABS_STATE_CSR_SAVE_XREG</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1205" name="l-1205"></a>        <span class="nl">ABS_STATE_CSR_RETURN_XREG:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1206" name="l-1206"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1207" name="l-1207"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>     <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1208" name="l-1208"></a>        <span class="n">ABS_STATE_XREG_RW</span>        <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">data0_xreg_save</span> <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1209" name="l-1209"></a>
+<a id="l-1210" name="l-1210"></a>        <span class="nl">ABS_STATE_CSR_RO:</span> <span class="k">begin</span>
+<a id="l-1211" name="l-1211"></a>            <span class="k">case</span> <span class="p">(</span><span class="n">abs_cmd_regno_ff</span><span class="p">[</span><span class="mi">11</span><span class="o">:</span><span class="mi">0</span><span class="p">])</span>
+<a id="l-1212" name="l-1212"></a>                <span class="n">SCR1_CSR_ADDR_MISA</span>     <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MISA</span><span class="p">;</span>
+<a id="l-1213" name="l-1213"></a>                <span class="nl">SCR1_CSR_ADDR_MVENDORID:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MVENDORID</span><span class="p">;</span>
+<a id="l-1214" name="l-1214"></a>                <span class="n">SCR1_CSR_ADDR_MARCHID</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MARCHID</span><span class="p">;</span>
+<a id="l-1215" name="l-1215"></a>                <span class="n">SCR1_CSR_ADDR_MIMPID</span>   <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">SCR1_CSR_MIMPID</span><span class="p">;</span>
+<a id="l-1216" name="l-1216"></a>                <span class="n">SCR1_CSR_ADDR_MHARTID</span>  <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">soc2dm_fuse_mhartid_i</span><span class="p">;</span>
+<a id="l-1217" name="l-1217"></a>                <span class="k">default</span>                <span class="o">:</span> <span class="n">abs_data0_next</span> <span class="o">=</span> <span class="n">pipe2dm_pc_sample_i</span><span class="p">;</span>
+<a id="l-1218" name="l-1218"></a>            <span class="k">endcase</span>
+<a id="l-1219" name="l-1219"></a>        <span class="k">end</span>
+<a id="l-1220" name="l-1220"></a>
+<a id="l-1221" name="l-1221"></a>        <span class="k">default</span> <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a id="l-1222" name="l-1222"></a>    <span class="k">endcase</span>
+<a id="l-1223" name="l-1223"></a><span class="k">end</span>
+<a id="l-1224" name="l-1224"></a>
+<a id="l-1225" name="l-1225"></a><span class="c1">// Data 1 register</span>
+<a id="l-1226" name="l-1226"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1227" name="l-1227"></a>
+<a id="l-1228" name="l-1228"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1229" name="l-1229"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_abs</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1230" name="l-1230"></a>        <span class="n">abs_data1_ff</span> <span class="o">&lt;=</span> <span class="n">abs_data1_next</span><span class="p">;</span>
+<a id="l-1231" name="l-1231"></a>    <span class="k">end</span>
+<a id="l-1232" name="l-1232"></a><span class="k">end</span>
+<a id="l-1233" name="l-1233"></a>
+<a id="l-1234" name="l-1234"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1235" name="l-1235"></a>    <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
+<a id="l-1236" name="l-1236"></a>    <span class="k">case</span> <span class="p">(</span><span class="n">abs_fsm_ff</span><span class="p">)</span>
+<a id="l-1237" name="l-1237"></a>        <span class="n">ABS_STATE_IDLE</span>                   <span class="o">:</span> <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">data1_wr_req</span> <span class="o">?</span> <span class="n">dmi2dm_wdata_i</span>       <span class="o">:</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
+<a id="l-1238" name="l-1238"></a>        <span class="n">ABS_STATE_MEM_SAVE_XREG_FORADDR</span>  <span class="o">:</span> <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>  <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
+<a id="l-1239" name="l-1239"></a>        <span class="nl">ABS_STATE_MEM_RETURN_XREG_FORADDR:</span> <span class="n">abs_data1_next</span> <span class="o">=</span> <span class="n">dreg_wr_req</span>  <span class="o">?</span> <span class="n">pipe2dm_dreg_wdata_i</span> <span class="o">:</span> <span class="n">abs_data1_ff</span><span class="p">;</span>
+<a id="l-1240" name="l-1240"></a>        <span class="k">default</span>                          <span class="o">:</span> <span class="k">begin</span> <span class="k">end</span>
+<a id="l-1241" name="l-1241"></a>    <span class="k">endcase</span>
+<a id="l-1242" name="l-1242"></a><span class="k">end</span>
+<a id="l-1243" name="l-1243"></a>
+<a id="l-1244" name="l-1244"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1245" name="l-1245"></a><span class="c1">// Debug Hart Interface : control</span>
+<a id="l-1246" name="l-1246"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1247" name="l-1247"></a>
+<a id="l-1248" name="l-1248"></a><span class="k">assign</span> <span class="n">cmd_resp_ok</span>    <span class="o">=</span> <span class="n">pipe2dm_cmd_resp_i</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2dm_cmd_rcode_i</span><span class="p">;</span>
+<a id="l-1249" name="l-1249"></a><span class="k">assign</span> <span class="n">hart_rst_unexp</span> <span class="o">=</span> <span class="o">~</span><span class="n">dhi_fsm_idle</span>      <span class="o">&amp;</span> <span class="o">~</span><span class="n">dhi_fsm_halt_req</span> <span class="o">&amp;</span> <span class="n">hart_state_reset</span><span class="p">;</span>
+<a id="l-1250" name="l-1250"></a>
+<a id="l-1251" name="l-1251"></a><span class="k">assign</span> <span class="n">halt_req_vd</span>    <span class="o">=</span> <span class="n">dmcontrol_haltreq_ff</span>   <span class="o">&amp;</span> <span class="o">~</span><span class="n">hart_state_dhalt</span><span class="p">;</span>
+<a id="l-1252" name="l-1252"></a><span class="k">assign</span> <span class="n">resume_req_vd</span>  <span class="o">=</span> <span class="n">dmcontrol_resumereq_ff</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">dmstatus_allany_resumeack_ff</span>
+<a id="l-1253" name="l-1253"></a>                      <span class="o">&amp;</span> <span class="n">hart_state_dhalt</span><span class="p">;</span>
+<a id="l-1254" name="l-1254"></a>
+<a id="l-1255" name="l-1255"></a><span class="c1">// DHI fsm</span>
+<a id="l-1256" name="l-1256"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1257" name="l-1257"></a>
+<a id="l-1258" name="l-1258"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1259" name="l-1259"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1260" name="l-1260"></a>        <span class="n">dhi_fsm_ff</span>   <span class="o">&lt;=</span> <span class="n">DHI_STATE_IDLE</span><span class="p">;</span>
+<a id="l-1261" name="l-1261"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1262" name="l-1262"></a>        <span class="n">dhi_fsm_ff</span> <span class="o">&lt;=</span> <span class="n">dhi_fsm_next</span><span class="p">;</span>
+<a id="l-1263" name="l-1263"></a>    <span class="k">end</span>
+<a id="l-1264" name="l-1264"></a><span class="k">end</span>
+<a id="l-1265" name="l-1265"></a>
+<a id="l-1266" name="l-1266"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1267" name="l-1267"></a>    <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">dhi_fsm_ff</span><span class="p">;</span>
+<a id="l-1268" name="l-1268"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">hart_rst_unexp</span> <span class="o">&amp;</span> <span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1269" name="l-1269"></a>        <span class="c1">// Normal work</span>
+<a id="l-1270" name="l-1270"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span><span class="p">)</span>
+<a id="l-1271" name="l-1271"></a>            <span class="n">DHI_STATE_IDLE</span>      <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">dhi_req</span><span class="p">;</span>
+<a id="l-1272" name="l-1272"></a>            <span class="n">DHI_STATE_EXEC</span>      <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">cmd_resp_ok</span>      <span class="o">?</span> <span class="n">DHI_STATE_EXEC_RUN</span>   <span class="o">:</span> <span class="n">DHI_STATE_EXEC</span><span class="p">;</span>
+<a id="l-1273" name="l-1273"></a>            <span class="n">DHI_STATE_EXEC_RUN</span>  <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_drun</span>  <span class="o">?</span> <span class="n">DHI_STATE_EXEC_HALT</span>  <span class="o">:</span> <span class="n">DHI_STATE_EXEC_RUN</span><span class="p">;</span>
+<a id="l-1274" name="l-1274"></a>            <span class="n">DHI_STATE_HALT_REQ</span>  <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">cmd_resp_ok</span>      <span class="o">?</span> <span class="n">DHI_STATE_EXEC_HALT</span>  <span class="o">:</span> <span class="n">DHI_STATE_HALT_REQ</span><span class="p">;</span>
+<a id="l-1275" name="l-1275"></a>            <span class="n">DHI_STATE_EXEC_HALT</span> <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_dhalt</span> <span class="o">?</span> <span class="n">DHI_STATE_IDLE</span>       <span class="o">:</span> <span class="n">DHI_STATE_EXEC_HALT</span><span class="p">;</span>
+<a id="l-1276" name="l-1276"></a>            <span class="nl">DHI_STATE_RESUME_REQ:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">cmd_resp_ok</span>      <span class="o">?</span> <span class="n">DHI_STATE_RESUME_RUN</span> <span class="o">:</span> <span class="n">DHI_STATE_RESUME_REQ</span><span class="p">;</span>
+<a id="l-1277" name="l-1277"></a>            <span class="nl">DHI_STATE_RESUME_RUN:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">hart_state_run</span>   <span class="o">?</span> <span class="n">DHI_STATE_IDLE</span>       <span class="o">:</span> <span class="n">DHI_STATE_RESUME_RUN</span><span class="p">;</span>
+<a id="l-1278" name="l-1278"></a>            <span class="k">default</span>             <span class="o">:</span> <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">dhi_fsm_ff</span><span class="p">;</span>
+<a id="l-1279" name="l-1279"></a>        <span class="k">endcase</span>
+<a id="l-1280" name="l-1280"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-1281" name="l-1281"></a>        <span class="c1">// In case of DM reset or core unexpected reset</span>
+<a id="l-1282" name="l-1282"></a>        <span class="n">dhi_fsm_next</span> <span class="o">=</span> <span class="n">DHI_STATE_IDLE</span><span class="p">;</span>
+<a id="l-1283" name="l-1283"></a>    <span class="k">end</span>
+<a id="l-1284" name="l-1284"></a><span class="k">end</span>
+<a id="l-1285" name="l-1285"></a>
+<a id="l-1286" name="l-1286"></a><span class="k">assign</span> <span class="n">dhi_fsm_idle</span>       <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_IDLE</span><span class="p">);</span>
+<a id="l-1287" name="l-1287"></a><span class="k">assign</span> <span class="n">dhi_fsm_halt_req</span>   <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_HALT_REQ</span><span class="p">);</span>
+<a id="l-1288" name="l-1288"></a><span class="k">assign</span> <span class="n">dhi_fsm_exec</span>       <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_EXEC</span><span class="p">);</span>
+<a id="l-1289" name="l-1289"></a><span class="k">assign</span> <span class="n">dhi_fsm_exec_halt</span>  <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_EXEC_HALT</span><span class="p">);</span>
+<a id="l-1290" name="l-1290"></a><span class="k">assign</span> <span class="n">dhi_fsm_resume_req</span> <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span> <span class="o">==</span> <span class="n">DHI_STATE_RESUME_REQ</span><span class="p">);</span>
+<a id="l-1291" name="l-1291"></a>
+<a id="l-1292" name="l-1292"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1293" name="l-1293"></a>    <span class="k">case</span> <span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">)</span>
+<a id="l-1294" name="l-1294"></a>        <span class="nl">abs_exec_req_ff:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_EXEC</span><span class="p">;</span>
+<a id="l-1295" name="l-1295"></a>        <span class="n">halt_req_vd</span>    <span class="o">:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_HALT_REQ</span><span class="p">;</span>
+<a id="l-1296" name="l-1296"></a>        <span class="n">resume_req_vd</span>  <span class="o">:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_RESUME_REQ</span><span class="p">;</span>
+<a id="l-1297" name="l-1297"></a>        <span class="k">default</span>        <span class="o">:</span> <span class="n">dhi_req</span> <span class="o">=</span> <span class="n">DHI_STATE_IDLE</span><span class="p">;</span>
+<a id="l-1298" name="l-1298"></a>    <span class="k">endcase</span>
+<a id="l-1299" name="l-1299"></a><span class="k">end</span>
+<a id="l-1300" name="l-1300"></a>
+<a id="l-1301" name="l-1301"></a><span class="k">assign</span> <span class="n">dhi_resp</span>     <span class="o">=</span> <span class="n">dhi_fsm_exec_halt</span>    <span class="o">&amp;</span> <span class="n">hart_state_dhalt</span><span class="p">;</span>
+<a id="l-1302" name="l-1302"></a><span class="k">assign</span> <span class="n">dhi_resp_exc</span> <span class="o">=</span> <span class="n">pipe2dm_hart_event_i</span> <span class="o">&amp;</span> <span class="n">pipe2dm_hart_status_i</span><span class="p">.</span><span class="n">except</span>
+<a id="l-1303" name="l-1303"></a>                                           <span class="o">&amp;</span> <span class="o">~</span><span class="n">pipe2dm_hart_status_i</span><span class="p">.</span><span class="n">ebreak</span><span class="p">;</span>
+<a id="l-1304" name="l-1304"></a>
+<a id="l-1305" name="l-1305"></a><span class="c1">// HART command registers</span>
+<a id="l-1306" name="l-1306"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1307" name="l-1307"></a>
+<a id="l-1308" name="l-1308"></a><span class="c1">// HART command request register</span>
+<a id="l-1309" name="l-1309"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1310" name="l-1310"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1311" name="l-1311"></a>        <span class="n">hart_cmd_req_ff</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-1312" name="l-1312"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1313" name="l-1313"></a>        <span class="n">hart_cmd_req_ff</span> <span class="o">&lt;=</span> <span class="n">hart_cmd_req_next</span><span class="p">;</span>
+<a id="l-1314" name="l-1314"></a>    <span class="k">end</span>
+<a id="l-1315" name="l-1315"></a><span class="k">end</span>
+<a id="l-1316" name="l-1316"></a>
+<a id="l-1317" name="l-1317"></a><span class="k">assign</span> <span class="n">hart_cmd_req_next</span> <span class="o">=</span> <span class="p">(</span><span class="n">dhi_fsm_exec</span> <span class="o">|</span> <span class="n">dhi_fsm_halt_req</span> <span class="o">|</span> <span class="n">dhi_fsm_resume_req</span><span class="p">)</span>
+<a id="l-1318" name="l-1318"></a>                         <span class="o">&amp;</span> <span class="o">~</span><span class="n">cmd_resp_ok</span> <span class="o">&amp;</span> <span class="n">dmcontrol_dmactive_ff</span><span class="p">;</span>
+<a id="l-1319" name="l-1319"></a>
+<a id="l-1320" name="l-1320"></a><span class="c1">// HART command register</span>
+<a id="l-1321" name="l-1321"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1322" name="l-1322"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1323" name="l-1323"></a>        <span class="n">hart_cmd_ff</span> <span class="o">&lt;=</span> <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">;</span>
+<a id="l-1324" name="l-1324"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1325" name="l-1325"></a>        <span class="n">hart_cmd_ff</span> <span class="o">&lt;=</span> <span class="n">hart_cmd_next</span><span class="p">;</span>
+<a id="l-1326" name="l-1326"></a>    <span class="k">end</span>
+<a id="l-1327" name="l-1327"></a><span class="k">end</span>
+<a id="l-1328" name="l-1328"></a>
+<a id="l-1329" name="l-1329"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1330" name="l-1330"></a>    <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">;</span>
+<a id="l-1331" name="l-1331"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">dmcontrol_dmactive_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1332" name="l-1332"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">dhi_fsm_ff</span><span class="p">)</span>
+<a id="l-1333" name="l-1333"></a>            <span class="n">DHI_STATE_EXEC</span>      <span class="o">:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_DRUN</span><span class="p">;</span>
+<a id="l-1334" name="l-1334"></a>            <span class="n">DHI_STATE_HALT_REQ</span>  <span class="o">:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_DHALTED</span><span class="p">;</span>
+<a id="l-1335" name="l-1335"></a>            <span class="nl">DHI_STATE_RESUME_REQ:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">SCR1_HDU_DBGSTATE_RUN</span><span class="p">;</span>
+<a id="l-1336" name="l-1336"></a>            <span class="k">default</span>             <span class="o">:</span> <span class="n">hart_cmd_next</span> <span class="o">=</span> <span class="n">dm2pipe_cmd_o</span><span class="p">;</span>
+<a id="l-1337" name="l-1337"></a>        <span class="k">endcase</span>
+<a id="l-1338" name="l-1338"></a>    <span class="k">end</span>
+<a id="l-1339" name="l-1339"></a><span class="k">end</span>
+<a id="l-1340" name="l-1340"></a>
+<a id="l-1341" name="l-1341"></a><span class="k">assign</span> <span class="n">dm2pipe_cmd_req_o</span> <span class="o">=</span> <span class="n">hart_cmd_req_ff</span><span class="p">;</span>
+<a id="l-1342" name="l-1342"></a><span class="k">assign</span> <span class="n">dm2pipe_cmd_o</span>     <span class="o">=</span> <span class="n">hart_cmd_ff</span><span class="p">;</span>
+<a id="l-1343" name="l-1343"></a>
+<a id="l-1344" name="l-1344"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1345" name="l-1345"></a><span class="c1">// Debug Hart Interface : program buffer</span>
+<a id="l-1346" name="l-1346"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1347" name="l-1347"></a>
+<a id="l-1348" name="l-1348"></a><span class="c1">// Program Buffer execution EBREAK flag</span>
+<a id="l-1349" name="l-1349"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1350" name="l-1350"></a>
+<a id="l-1351" name="l-1351"></a><span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1352" name="l-1352"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">clk_en_dm</span><span class="p">)</span> <span class="n">hart_pbuf_ebreak_ff</span> <span class="o">&lt;=</span> <span class="n">hart_pbuf_ebreak_next</span><span class="p">;</span>
+<a id="l-1353" name="l-1353"></a><span class="k">end</span>
+<a id="l-1354" name="l-1354"></a>
+<a id="l-1355" name="l-1355"></a><span class="k">assign</span> <span class="n">hart_pbuf_ebreak_next</span> <span class="o">=</span> <span class="n">abs_fsm_exec</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">==</span> <span class="n">ABS_EXEC_EBREAK</span><span class="p">);</span>
+<a id="l-1356" name="l-1356"></a>
+<a id="l-1357" name="l-1357"></a><span class="c1">// Program Buffer instruction multiplexer</span>
+<a id="l-1358" name="l-1358"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1359" name="l-1359"></a>
+<a id="l-1360" name="l-1360"></a><span class="k">always_comb</span> <span class="k">begin</span>
+<a id="l-1361" name="l-1361"></a>    <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">ABS_EXEC_EBREAK</span><span class="p">;</span>
+<a id="l-1362" name="l-1362"></a>
+<a id="l-1363" name="l-1363"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">abs_fsm_exec</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">hart_pbuf_ebreak_ff</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1364" name="l-1364"></a>        <span class="k">case</span> <span class="p">(</span><span class="n">pipe2dm_pbuf_addr_i</span><span class="p">)</span>
+<a id="l-1365" name="l-1365"></a>            <span class="mh">3&#39;h0</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf0_ff</span><span class="p">;</span>
+<a id="l-1366" name="l-1366"></a>            <span class="mh">3&#39;h1</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf1_ff</span><span class="p">;</span>
+<a id="l-1367" name="l-1367"></a>            <span class="mh">3&#39;h2</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf2_ff</span><span class="p">;</span>
+<a id="l-1368" name="l-1368"></a>            <span class="mh">3&#39;h3</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf3_ff</span><span class="p">;</span>
+<a id="l-1369" name="l-1369"></a>            <span class="mh">3&#39;h4</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf4_ff</span><span class="p">;</span>
+<a id="l-1370" name="l-1370"></a>            <span class="mh">3&#39;h5</span><span class="o">:</span> <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_progbuf5_ff</span><span class="p">;</span>
+<a id="l-1371" name="l-1371"></a>            <span class="k">default</span><span class="o">:</span> <span class="p">;</span>
+<a id="l-1372" name="l-1372"></a>        <span class="k">endcase</span>
+<a id="l-1373" name="l-1373"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">pipe2dm_pbuf_addr_i</span> <span class="o">==</span> <span class="mb">3&#39;b0</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1374" name="l-1374"></a>        <span class="n">dm2pipe_pbuf_instr_o</span> <span class="o">=</span> <span class="n">abs_exec_instr_ff</span><span class="p">;</span>
+<a id="l-1375" name="l-1375"></a>    <span class="k">end</span>
+<a id="l-1376" name="l-1376"></a><span class="k">end</span>
+<a id="l-1377" name="l-1377"></a>
+<a id="l-1378" name="l-1378"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1379" name="l-1379"></a><span class="c1">// Debug Hart Interface : abstract command data</span>
+<a id="l-1380" name="l-1380"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1381" name="l-1381"></a>
+<a id="l-1382" name="l-1382"></a><span class="k">assign</span> <span class="n">dm2pipe_dreg_resp_o</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-1383" name="l-1383"></a><span class="k">assign</span> <span class="n">dm2pipe_dreg_fail_o</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-1384" name="l-1384"></a><span class="k">assign</span> <span class="n">dm2pipe_dreg_rdata_o</span> <span class="o">=</span> <span class="n">abs_fsm_use_addr</span> <span class="o">?</span> <span class="n">abs_data1_ff</span> <span class="o">:</span> <span class="n">abs_data0_ff</span><span class="p">;</span>
+<a id="l-1385" name="l-1385"></a>
+<a id="l-1386" name="l-1386"></a><span class="no">`ifdef</span> <span class="n">SCR1_TRGT_SIMULATION</span>
+<a id="l-1387" name="l-1387"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1388" name="l-1388"></a><span class="c1">// Assertions</span>
+<a id="l-1389" name="l-1389"></a><span class="c1">//------------------------------------------------------------------------------</span>
+<a id="l-1390" name="l-1390"></a>
+<a id="l-1391" name="l-1391"></a><span class="n">SVA_DM_X_CONTROL</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-1392" name="l-1392"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-1393" name="l-1393"></a>    <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">dmi2dm_req_i</span><span class="p">,</span> <span class="n">pipe2dm_dreg_req_i</span><span class="p">,</span> <span class="n">pipe2dm_cmd_resp_i</span><span class="p">,</span>
+<a id="l-1394" name="l-1394"></a>                 <span class="n">pipe2dm_hart_event_i</span><span class="p">})</span>
+<a id="l-1395" name="l-1395"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: control signals is X - %0b&quot;</span><span class="p">,</span> <span class="p">{</span><span class="n">dmi2dm_req_i</span><span class="p">,</span>
+<a id="l-1396" name="l-1396"></a>              <span class="n">pipe2dm_dreg_req_i</span><span class="p">,</span> <span class="n">pipe2dm_cmd_resp_i</span><span class="p">,</span> <span class="n">pipe2dm_hart_event_i</span><span class="p">});</span>
+<a id="l-1397" name="l-1397"></a>
+<a id="l-1398" name="l-1398"></a><span class="n">SVA_DM_X_DMI</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-1399" name="l-1399"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-1400" name="l-1400"></a>    <span class="n">dmi2dm_req_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">dmi2dm_wr_i</span><span class="p">,</span> <span class="n">dmi2dm_addr_i</span><span class="p">,</span> <span class="n">dmi2dm_wdata_i</span><span class="p">})</span>
+<a id="l-1401" name="l-1401"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on dmi&quot;</span><span class="p">);</span>
+<a id="l-1402" name="l-1402"></a>
+<a id="l-1403" name="l-1403"></a><span class="n">SVA_DM_X_HART_PBUF</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-1404" name="l-1404"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-1405" name="l-1405"></a>    <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span> <span class="p">(</span><span class="n">pipe2dm_pbuf_addr_i</span><span class="p">)</span>
+<a id="l-1406" name="l-1406"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on hart_pbuf&quot;</span><span class="p">);</span>
+<a id="l-1407" name="l-1407"></a>
+<a id="l-1408" name="l-1408"></a><span class="n">SVA_DM_X_HART_DREG</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-1409" name="l-1409"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-1410" name="l-1410"></a>    <span class="n">pipe2dm_dreg_req_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">pipe2dm_dreg_wr_i</span><span class="p">,</span> <span class="n">pipe2dm_dreg_wdata_i</span><span class="p">})</span>
+<a id="l-1411" name="l-1411"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on hart_dreg&quot;</span><span class="p">);</span>
+<a id="l-1412" name="l-1412"></a>
+<a id="l-1413" name="l-1413"></a><span class="n">SVA_DM_X_HART_CMD</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-1414" name="l-1414"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-1415" name="l-1415"></a>    <span class="n">pipe2dm_cmd_resp_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">({</span><span class="n">pipe2dm_cmd_rcode_i</span><span class="p">})</span>
+<a id="l-1416" name="l-1416"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on dm2pipe_cmd_o&quot;</span><span class="p">);</span>
+<a id="l-1417" name="l-1417"></a>
+<a id="l-1418" name="l-1418"></a><span class="n">SVA_DM_X_HART_EVENT</span> <span class="o">:</span> <span class="k">assert</span> <span class="k">property</span> <span class="p">(</span>
+<a id="l-1419" name="l-1419"></a>    <span class="p">@(</span><span class="k">negedge</span> <span class="n">clk</span><span class="p">)</span> <span class="k">disable</span> <span class="k">iff</span> <span class="p">(</span><span class="o">~</span><span class="n">rst_n</span><span class="p">)</span>
+<a id="l-1420" name="l-1420"></a>    <span class="n">pipe2dm_hart_event_i</span> <span class="o">|-&gt;</span> <span class="o">!</span><span class="p">$</span><span class="n">isunknown</span><span class="p">(</span><span class="n">pipe2dm_hart_status_i</span><span class="p">)</span>
+<a id="l-1421" name="l-1421"></a><span class="p">)</span> <span class="k">else</span> <span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;DM error: data signals is X on pipe2dm_hart_event_i&quot;</span><span class="p">);</span>
+<a id="l-1422" name="l-1422"></a>
+<a id="l-1423" name="l-1423"></a><span class="no">`endif</span> <span class="c1">// SCR1_TRGT_SIMULATION</span>
+<a id="l-1424" name="l-1424"></a>
+<a id="l-1425" name="l-1425"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">scr1_dm</span>
+<a id="l-1426" name="l-1426"></a>
+<a id="l-1427" name="l-1427"></a><span class="no">`endif</span> <span class="c1">// SCR1_DBG_EN</span>
 </pre></div>
 </td></tr></table>
   </body>

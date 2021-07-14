@@ -416,7 +416,7 @@
 <a id="l-95" name="l-95"></a>    <span class="c1">// Req: ready-&gt;valid</span>
 <a id="l-96" name="l-96"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">lce_req_msg_width_lp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>        <span class="n">lce_req_o</span>
 <a id="l-97" name="l-97"></a>    <span class="p">,</span> <span class="k">output</span> <span class="kt">logic</span>                                   <span class="n">lce_req_v_o</span>
-<a id="l-98" name="l-98"></a>    <span class="p">,</span> <span class="k">input</span>                                          <span class="n">lce_req_ready_i</span>
+<a id="l-98" name="l-98"></a>    <span class="p">,</span> <span class="k">input</span>                                          <span class="n">lce_req_ready_then_i</span>
 <a id="l-99" name="l-99"></a>  <span class="p">);</span>
 <a id="l-100" name="l-100"></a>
 <a id="l-101" name="l-101"></a>  <span class="no">`declare_bp_bedrock_lce_if</span><span class="p">(</span><span class="n">paddr_width_p</span><span class="p">,</span> <span class="n">cce_block_width_p</span><span class="p">,</span> <span class="n">lce_id_width_p</span><span class="p">,</span> <span class="n">cce_id_width_p</span><span class="p">,</span> <span class="n">lce_assoc_p</span><span class="p">,</span> <span class="n">lce</span><span class="p">);</span>
@@ -487,7 +487,7 @@
 <a id="l-166" name="l-166"></a>  <span class="c1">// Outstanding request credit counter</span>
 <a id="l-167" name="l-167"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="no">`BSG_WIDTH</span><span class="p">(</span><span class="n">credits_p</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">credit_count_lo</span><span class="p">;</span>
 <a id="l-168" name="l-168"></a>  <span class="kt">wire</span> <span class="n">credit_v_li</span> <span class="o">=</span> <span class="n">lce_req_v_o</span><span class="p">;</span>
-<a id="l-169" name="l-169"></a>  <span class="kt">wire</span> <span class="n">credit_ready_li</span> <span class="o">=</span> <span class="n">lce_req_ready_i</span><span class="p">;</span>
+<a id="l-169" name="l-169"></a>  <span class="kt">wire</span> <span class="n">credit_ready_li</span> <span class="o">=</span> <span class="n">lce_req_ready_then_i</span><span class="p">;</span>
 <a id="l-170" name="l-170"></a>  <span class="kt">wire</span> <span class="n">credit_returned_li</span> <span class="o">=</span> <span class="n">cache_req_complete_i</span> <span class="o">|</span> <span class="n">uc_store_req_complete_i</span><span class="p">;</span>
 <a id="l-171" name="l-171"></a>  <span class="n">bsg_flow_counter</span>
 <a id="l-172" name="l-172"></a>    <span class="p">#(.</span><span class="n">els_p</span><span class="p">(</span><span class="n">credits_p</span><span class="p">))</span>
@@ -533,9 +533,9 @@
 <a id="l-212" name="l-212"></a>
 <a id="l-213" name="l-213"></a>      <span class="c1">// Ready for new request</span>
 <a id="l-214" name="l-214"></a>      <span class="nl">e_ready:</span> <span class="k">begin</span>
-<a id="l-215" name="l-215"></a>        <span class="n">ready_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">credits_full_o</span> <span class="o">&amp;</span> <span class="n">lce_req_ready_i</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">lce_mode_i</span> <span class="o">==</span> <span class="n">e_lce_mode_uncached</span><span class="p">)</span> <span class="o">||</span> <span class="n">sync_done_i</span><span class="p">);</span>
+<a id="l-215" name="l-215"></a>        <span class="n">ready_o</span> <span class="o">=</span> <span class="o">~</span><span class="n">credits_full_o</span> <span class="o">&amp;</span> <span class="n">lce_req_ready_then_i</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">lce_mode_i</span> <span class="o">==</span> <span class="n">e_lce_mode_uncached</span><span class="p">)</span> <span class="o">||</span> <span class="n">sync_done_i</span><span class="p">);</span>
 <a id="l-216" name="l-216"></a>
-<a id="l-217" name="l-217"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ready_o</span><span class="p">)</span>
+<a id="l-217" name="l-217"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">ready_o</span> <span class="o">&amp;</span> <span class="n">cache_req_v_i</span><span class="p">)</span>
 <a id="l-218" name="l-218"></a>          <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">cache_req</span><span class="p">.</span><span class="n">msg_type</span><span class="p">)</span>
 <a id="l-219" name="l-219"></a>            <span class="n">e_miss_store</span>
 <a id="l-220" name="l-220"></a>            <span class="p">,</span><span class="nl">e_miss_load:</span> <span class="k">begin</span>
@@ -543,7 +543,7 @@
 <a id="l-222" name="l-222"></a>              <span class="n">state_n</span> <span class="o">=</span> <span class="n">cache_req_yumi_o</span> <span class="o">?</span> <span class="n">e_send_cached_req</span> <span class="o">:</span> <span class="n">e_ready</span><span class="p">;</span>
 <a id="l-223" name="l-223"></a>            <span class="k">end</span>
 <a id="l-224" name="l-224"></a>            <span class="nl">e_uc_store:</span> <span class="k">begin</span>
-<a id="l-225" name="l-225"></a>              <span class="n">lce_req_v_o</span> <span class="o">=</span> <span class="n">lce_req_ready_i</span> <span class="o">&amp;</span> <span class="n">cache_req_v_i</span><span class="p">;</span>
+<a id="l-225" name="l-225"></a>              <span class="n">lce_req_v_o</span> <span class="o">=</span> <span class="n">lce_req_ready_then_i</span> <span class="o">&amp;</span> <span class="n">cache_req_v_i</span><span class="p">;</span>
 <a id="l-226" name="l-226"></a>
 <a id="l-227" name="l-227"></a>              <span class="n">lce_req</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">dword_width_gp</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache_req</span><span class="p">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">dword_width_gp</span><span class="p">];</span>
 <a id="l-228" name="l-228"></a>              <span class="n">lce_req</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">bp_bedrock_msg_size_e</span><span class="p">&#39;(</span><span class="n">cache_req</span><span class="p">.</span><span class="n">size</span><span class="p">);</span>
@@ -568,7 +568,7 @@
 <a id="l-247" name="l-247"></a>        <span class="c1">// valid cache request arrived last cycle (or earlier) and is held in cache_req_r</span>
 <a id="l-248" name="l-248"></a>
 <a id="l-249" name="l-249"></a>        <span class="c1">// send when port is ready and metadata has arrived</span>
-<a id="l-250" name="l-250"></a>        <span class="n">lce_req_v_o</span> <span class="o">=</span> <span class="n">lce_req_ready_i</span> <span class="o">&amp;</span> <span class="n">cache_req_metadata_v_r</span><span class="p">;</span>
+<a id="l-250" name="l-250"></a>        <span class="n">lce_req_v_o</span> <span class="o">=</span> <span class="n">lce_req_ready_then_i</span> <span class="o">&amp;</span> <span class="n">cache_req_metadata_v_r</span><span class="p">;</span>
 <a id="l-251" name="l-251"></a>
 <a id="l-252" name="l-252"></a>        <span class="n">lce_req</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">req_block_size_lp</span><span class="p">;</span>
 <a id="l-253" name="l-253"></a>        <span class="n">lce_req</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">cache_req_r</span><span class="p">.</span><span class="n">addr</span><span class="p">;</span>
@@ -596,7 +596,7 @@
 <a id="l-275" name="l-275"></a>        <span class="c1">// valid cache request arrived last cycle (or earlier) and is held in cache_req_r</span>
 <a id="l-276" name="l-276"></a>
 <a id="l-277" name="l-277"></a>        <span class="c1">// send when port is ready and metadata has arrived</span>
-<a id="l-278" name="l-278"></a>        <span class="n">lce_req_v_o</span> <span class="o">=</span> <span class="n">lce_req_ready_i</span><span class="p">;</span>
+<a id="l-278" name="l-278"></a>        <span class="n">lce_req_v_o</span> <span class="o">=</span> <span class="n">lce_req_ready_then_i</span><span class="p">;</span>
 <a id="l-279" name="l-279"></a>
 <a id="l-280" name="l-280"></a>        <span class="n">lce_req</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">bp_bedrock_msg_size_e</span><span class="p">&#39;(</span><span class="n">cache_req_r</span><span class="p">.</span><span class="n">size</span><span class="p">);</span>
 <a id="l-281" name="l-281"></a>        <span class="n">lce_req</span><span class="p">.</span><span class="n">header</span><span class="p">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">cache_req_r</span><span class="p">.</span><span class="n">addr</span><span class="p">;</span>

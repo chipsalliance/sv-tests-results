@@ -192,7 +192,22 @@
 <span class="normal"><a href="#l-184">184</a></span>
 <span class="normal"><a href="#l-185">185</a></span>
 <span class="normal"><a href="#l-186">186</a></span>
-<span class="normal"><a href="#l-187">187</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-187">187</a></span>
+<span class="normal"><a href="#l-188">188</a></span>
+<span class="normal"><a href="#l-189">189</a></span>
+<span class="normal"><a href="#l-190">190</a></span>
+<span class="normal"><a href="#l-191">191</a></span>
+<span class="normal"><a href="#l-192">192</a></span>
+<span class="normal"><a href="#l-193">193</a></span>
+<span class="normal"><a href="#l-194">194</a></span>
+<span class="normal"><a href="#l-195">195</a></span>
+<span class="normal"><a href="#l-196">196</a></span>
+<span class="normal"><a href="#l-197">197</a></span>
+<span class="normal"><a href="#l-198">198</a></span>
+<span class="normal"><a href="#l-199">199</a></span>
+<span class="normal"><a href="#l-200">200</a></span>
+<span class="normal"><a href="#l-201">201</a></span>
+<span class="normal"><a href="#l-202">202</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -202,183 +217,198 @@
 <a id="l-8" name="l-8"></a><span class="kn">package</span> <span class="n">keymgr_pkg</span><span class="p">;</span>
 <a id="l-9" name="l-9"></a>
 <a id="l-10" name="l-10"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KeyWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
-<a id="l-11" name="l-11"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">DigestWidth</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>     <span class="c1">// uses truncated hash</span>
-<a id="l-12" name="l-12"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KmacDataIfWidth</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>  <span class="c1">// KMAC interface data width</span>
-<a id="l-13" name="l-13"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KeyMgrStages</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>      <span class="c1">// Number of key manager stages (creator, ownerInt, owner)</span>
-<a id="l-14" name="l-14"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">SwBindingWidth</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="n">keymgr_reg_pkg</span><span class="o">::</span><span class="n">NumSwBindingReg</span><span class="p">;</span>
-<a id="l-15" name="l-15"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">SaltWidth</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="n">keymgr_reg_pkg</span><span class="o">::</span><span class="n">NumSaltReg</span><span class="p">;</span>
-<a id="l-16" name="l-16"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">Shares</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// number of key shares</span>
-<a id="l-17" name="l-17"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">EdnWidth</span> <span class="o">=</span> <span class="n">edn_pkg</span><span class="o">::</span><span class="n">ENDPOINT_BUS_WIDTH</span><span class="p">;</span>
-<a id="l-18" name="l-18"></a>
-<a id="l-19" name="l-19"></a>  <span class="c1">// These should be defined in another module&#39;s package</span>
-<a id="l-20" name="l-20"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">HealthStateWidth</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
-<a id="l-21" name="l-21"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">DevIdWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
-<a id="l-22" name="l-22"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">MaxWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
-<a id="l-23" name="l-23"></a>
-<a id="l-24" name="l-24"></a>  <span class="c1">// Default seeds</span>
-<a id="l-25" name="l-25"></a>  <span class="c1">// These are generated using random.org byte dumper</span>
-<a id="l-26" name="l-26"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">seed_t</span><span class="p">;</span>
-<a id="l-27" name="l-27"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstRevisionSeedDefault</span> <span class="o">=</span>
-<a id="l-28" name="l-28"></a>    <span class="mh">256&#39;h3a0a6d73cd50897de4d744bd65ebdb3837ea77087d878651c517c18a5742b2f9</span><span class="p">;</span>
-<a id="l-29" name="l-29"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstCreatorIdentitySeedDefault</span> <span class="o">=</span>
-<a id="l-30" name="l-30"></a>    <span class="mh">256&#39;h6d234651d535ebb0dce4d82f503096614355fc7b84595e4f67a866177d421df6</span><span class="p">;</span>
-<a id="l-31" name="l-31"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstOwnerIntIdentitySeedDefault</span> <span class="o">=</span>
-<a id="l-32" name="l-32"></a>    <span class="mh">256&#39;hdba98db4fb1413b32fd5a4deac3ce546966a4bc2761235643358c8e76083d382</span><span class="p">;</span>
-<a id="l-33" name="l-33"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstOwnerIdentitySeedDefault</span> <span class="o">=</span>
-<a id="l-34" name="l-34"></a>    <span class="mh">256&#39;h8c0a27ef53e0e0bf5f5f5e26a30a0d0db10761ed802c6d2fd22873209976021e</span><span class="p">;</span>
-<a id="l-35" name="l-35"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstSoftOutputSeedDefault</span> <span class="o">=</span>
-<a id="l-36" name="l-36"></a>    <span class="mh">256&#39;h99cadb2c2d9b438591d943a89bc64dbb3bc2abc842eeea5faf74d27f7a7c99b6</span><span class="p">;</span>
-<a id="l-37" name="l-37"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstHardOutputSeedDefault</span> <span class="o">=</span>
-<a id="l-38" name="l-38"></a>    <span class="mh">256&#39;hd551b351decbb6f687c7f5c845363f12d6411fae812e16b23bc8ae59885a56b1</span><span class="p">;</span>
-<a id="l-39" name="l-39"></a>
-<a id="l-40" name="l-40"></a>  <span class="c1">// Target based deriviation seeds</span>
-<a id="l-41" name="l-41"></a>  <span class="c1">// These are used during the generation stages for sideload</span>
-<a id="l-42" name="l-42"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstNoneSeedDefault</span> <span class="o">=</span>
-<a id="l-43" name="l-43"></a>    <span class="mh">256&#39;h6EECBF9FC3C64230421DA1EAEC48F871070A3582E71AD4059D5D550784E9B9DE</span><span class="p">;</span>
-<a id="l-44" name="l-44"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstAesSeedDefault</span> <span class="o">=</span>
-<a id="l-45" name="l-45"></a>    <span class="mh">256&#39;hC1104CD94EBA084FA6438188038006489F3DF38771214AE0BBA65CEB9BC2366F</span><span class="p">;</span>
-<a id="l-46" name="l-46"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstHmacSeedDefault</span> <span class="o">=</span>
-<a id="l-47" name="l-47"></a>    <span class="mh">256&#39;h075CF7939313EEC797019BD0036D9500374A8FD9121CC8E78E1E3359D5F77C4E</span><span class="p">;</span>
-<a id="l-48" name="l-48"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstKmacSeedDefault</span> <span class="o">=</span>
-<a id="l-49" name="l-49"></a>    <span class="mh">256&#39;h0A5CCCD9627BF6169B3A765D3D6D0CD89DBDCB7B6DF8D3C03746D60A0145D3ED</span><span class="p">;</span>
-<a id="l-50" name="l-50"></a>
-<a id="l-51" name="l-51"></a>  <span class="c1">// Default Lfsr configurations</span>
-<a id="l-52" name="l-52"></a>  <span class="c1">// These LFSR parameters have been generated with</span>
-<a id="l-53" name="l-53"></a>  <span class="c1">// $ util/design/gen-lfsr-seed.py --width 64 --seed 691876113 --prefix &quot;&quot;</span>
-<a id="l-54" name="l-54"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">LfsrWidth</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
-<a id="l-55" name="l-55"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">LfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lfsr_seed_t</span><span class="p">;</span>
-<a id="l-56" name="l-56"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">LfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][$</span><span class="n">clog2</span><span class="p">(</span><span class="n">LfsrWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lfsr_perm_t</span><span class="p">;</span>
-<a id="l-57" name="l-57"></a>  <span class="k">parameter</span> <span class="n">lfsr_seed_t</span> <span class="n">RndCnstLfsrSeedDefault</span> <span class="o">=</span> <span class="mh">64&#39;h22d326255bd24320</span><span class="p">;</span>
-<a id="l-58" name="l-58"></a>  <span class="k">parameter</span> <span class="n">lfsr_perm_t</span> <span class="n">RndCnstLfsrPermDefault</span> <span class="o">=</span> <span class="p">{</span>
-<a id="l-59" name="l-59"></a>    <span class="mh">128&#39;h16108c9f9008aa37e5118d1ec1df64a7</span><span class="p">,</span>
-<a id="l-60" name="l-60"></a>    <span class="mh">256&#39;h24f3f1b73537f42d38383ee8f897286df81d49ab54b6bbbb666cbd1a16c41252</span>
-<a id="l-61" name="l-61"></a>  <span class="p">};</span>
-<a id="l-62" name="l-62"></a>
-<a id="l-63" name="l-63"></a>  <span class="c1">// Random permutation</span>
-<a id="l-64" name="l-64"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">RandWidth</span> <span class="o">=</span> <span class="n">LfsrWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
-<a id="l-65" name="l-65"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">RandWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][$</span><span class="n">clog2</span><span class="p">(</span><span class="n">RandWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rand_perm_t</span><span class="p">;</span>
-<a id="l-66" name="l-66"></a>  <span class="k">parameter</span> <span class="n">rand_perm_t</span> <span class="n">RndCnstRandPermDefault</span> <span class="o">=</span> <span class="p">{</span>
-<a id="l-67" name="l-67"></a>    <span class="mh">160&#39;h62089181d2a6be2ce145e2e27099ededbd7dceb0</span>
-<a id="l-68" name="l-68"></a>  <span class="p">};</span>
-<a id="l-69" name="l-69"></a>
-<a id="l-70" name="l-70"></a>  <span class="c1">// Width calculations</span>
-<a id="l-71" name="l-71"></a>  <span class="c1">// These are the largest calculations in use across all stages</span>
-<a id="l-72" name="l-72"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">AdvDataWidth</span> <span class="o">=</span> <span class="n">SwBindingWidth</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">KeyWidth</span> <span class="o">+</span> <span class="n">DevIdWidth</span> <span class="o">+</span> <span class="n">HealthStateWidth</span><span class="p">;</span>
-<a id="l-73" name="l-73"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">IdDataWidth</span> <span class="o">=</span> <span class="n">KeyWidth</span><span class="p">;</span>
-<a id="l-74" name="l-74"></a>  <span class="c1">// key version + salt + key ID + constant</span>
-<a id="l-75" name="l-75"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">GenDataWidth</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">SaltWidth</span> <span class="o">+</span> <span class="n">KeyWidth</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
-<a id="l-76" name="l-76"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">StageWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">KeyMgrStages</span><span class="p">);</span>
-<a id="l-77" name="l-77"></a>
-<a id="l-78" name="l-78"></a>  <span class="c1">// Max Payload Width to derivation function</span>
-<a id="l-79" name="l-79"></a>  <span class="c1">// see security strength description https://keccak.team/keccak.html</span>
-<a id="l-80" name="l-80"></a>  <span class="c1">// The max width here is chosen arbitrarily to ensure we do not get out of hand.</span>
-<a id="l-81" name="l-81"></a>  <span class="c1">// Since KMAC is a MAC operation, the data can be as long as we need.</span>
-<a id="l-82" name="l-82"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KDFMaxWidth</span> <span class="o">=</span> <span class="mi">1600</span><span class="p">;</span>
-<a id="l-83" name="l-83"></a>
-<a id="l-84" name="l-84"></a>  <span class="c1">// Enumeration for operations</span>
-<a id="l-85" name="l-85"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-86" name="l-86"></a>    <span class="n">Creator</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<a id="l-87" name="l-87"></a>    <span class="n">OwnerInt</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<a id="l-88" name="l-88"></a>    <span class="n">Owner</span>     <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<a id="l-89" name="l-89"></a>    <span class="n">Disable</span>   <span class="o">=</span> <span class="mi">3</span>
-<a id="l-90" name="l-90"></a>  <span class="p">}</span> <span class="n">keymgr_stage_e</span><span class="p">;</span>
-<a id="l-91" name="l-91"></a>
-<a id="l-92" name="l-92"></a>  <span class="c1">// Enumeration for sideload sel</span>
-<a id="l-93" name="l-93"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-94" name="l-94"></a>    <span class="n">None</span><span class="p">,</span>
-<a id="l-95" name="l-95"></a>    <span class="n">Aes</span><span class="p">,</span>
-<a id="l-96" name="l-96"></a>    <span class="n">Hmac</span><span class="p">,</span>
-<a id="l-97" name="l-97"></a>    <span class="n">Kmac</span>
-<a id="l-98" name="l-98"></a>  <span class="p">}</span> <span class="n">keymgr_key_dest_e</span><span class="p">;</span>
-<a id="l-99" name="l-99"></a>
-<a id="l-100" name="l-100"></a>  <span class="c1">// Enumeration for key select</span>
-<a id="l-101" name="l-101"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
-<a id="l-102" name="l-102"></a>    <span class="n">HwKey</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<a id="l-103" name="l-103"></a>    <span class="n">SwKey</span> <span class="o">=</span> <span class="mi">1</span>
-<a id="l-104" name="l-104"></a>  <span class="p">}</span> <span class="n">keymgr_gen_out_e</span><span class="p">;</span>
+<a id="l-11" name="l-11"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">CDIs</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// 2 different CDIs, sealing / attestation</span>
+<a id="l-12" name="l-12"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">CdiWidth</span> <span class="o">=</span> <span class="n">prim_util_pkg</span><span class="o">::</span><span class="n">vbits</span><span class="p">(</span><span class="n">CDIs</span><span class="p">);</span>
+<a id="l-13" name="l-13"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">OtbnKeyWidth</span> <span class="o">=</span> <span class="mi">384</span><span class="p">;</span>
+<a id="l-14" name="l-14"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">DigestWidth</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>     <span class="c1">// uses truncated hash</span>
+<a id="l-15" name="l-15"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KmacDataIfWidth</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>  <span class="c1">// KMAC interface data width</span>
+<a id="l-16" name="l-16"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KeyMgrStages</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>      <span class="c1">// Number of key manager stages (creator, ownerInt, owner)</span>
+<a id="l-17" name="l-17"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">SwBindingWidth</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="n">keymgr_reg_pkg</span><span class="o">::</span><span class="n">NumSwBindingReg</span><span class="p">;</span>
+<a id="l-18" name="l-18"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">SaltWidth</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="n">keymgr_reg_pkg</span><span class="o">::</span><span class="n">NumSaltReg</span><span class="p">;</span>
+<a id="l-19" name="l-19"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">Shares</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// number of key shares</span>
+<a id="l-20" name="l-20"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">EdnWidth</span> <span class="o">=</span> <span class="n">edn_pkg</span><span class="o">::</span><span class="n">ENDPOINT_BUS_WIDTH</span><span class="p">;</span>
+<a id="l-21" name="l-21"></a>
+<a id="l-22" name="l-22"></a>  <span class="c1">// These should be defined in another module&#39;s package</span>
+<a id="l-23" name="l-23"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">HealthStateWidth</span> <span class="o">=</span> <span class="mi">128</span><span class="p">;</span>
+<a id="l-24" name="l-24"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">DevIdWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+<a id="l-25" name="l-25"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">MaxWidth</span> <span class="o">=</span> <span class="mi">256</span><span class="p">;</span>
+<a id="l-26" name="l-26"></a>
+<a id="l-27" name="l-27"></a>  <span class="c1">// Default seeds</span>
+<a id="l-28" name="l-28"></a>  <span class="c1">// These are generated using random.org byte dumper</span>
+<a id="l-29" name="l-29"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">seed_t</span><span class="p">;</span>
+<a id="l-30" name="l-30"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstRevisionSeedDefault</span> <span class="o">=</span>
+<a id="l-31" name="l-31"></a>    <span class="mh">256&#39;h3a0a6d73cd50897de4d744bd65ebdb3837ea77087d878651c517c18a5742b2f9</span><span class="p">;</span>
+<a id="l-32" name="l-32"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstCreatorIdentitySeedDefault</span> <span class="o">=</span>
+<a id="l-33" name="l-33"></a>    <span class="mh">256&#39;h6d234651d535ebb0dce4d82f503096614355fc7b84595e4f67a866177d421df6</span><span class="p">;</span>
+<a id="l-34" name="l-34"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstOwnerIntIdentitySeedDefault</span> <span class="o">=</span>
+<a id="l-35" name="l-35"></a>    <span class="mh">256&#39;hdba98db4fb1413b32fd5a4deac3ce546966a4bc2761235643358c8e76083d382</span><span class="p">;</span>
+<a id="l-36" name="l-36"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstOwnerIdentitySeedDefault</span> <span class="o">=</span>
+<a id="l-37" name="l-37"></a>    <span class="mh">256&#39;h8c0a27ef53e0e0bf5f5f5e26a30a0d0db10761ed802c6d2fd22873209976021e</span><span class="p">;</span>
+<a id="l-38" name="l-38"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstSoftOutputSeedDefault</span> <span class="o">=</span>
+<a id="l-39" name="l-39"></a>    <span class="mh">256&#39;h99cadb2c2d9b438591d943a89bc64dbb3bc2abc842eeea5faf74d27f7a7c99b6</span><span class="p">;</span>
+<a id="l-40" name="l-40"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstHardOutputSeedDefault</span> <span class="o">=</span>
+<a id="l-41" name="l-41"></a>    <span class="mh">256&#39;hd551b351decbb6f687c7f5c845363f12d6411fae812e16b23bc8ae59885a56b1</span><span class="p">;</span>
+<a id="l-42" name="l-42"></a>
+<a id="l-43" name="l-43"></a>  <span class="c1">// Target based deriviation seeds</span>
+<a id="l-44" name="l-44"></a>  <span class="c1">// These are used during the generation stages for sideload</span>
+<a id="l-45" name="l-45"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstNoneSeedDefault</span> <span class="o">=</span>
+<a id="l-46" name="l-46"></a>    <span class="mh">256&#39;h6EECBF9FC3C64230421DA1EAEC48F871070A3582E71AD4059D5D550784E9B9DE</span><span class="p">;</span>
+<a id="l-47" name="l-47"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstAesSeedDefault</span> <span class="o">=</span>
+<a id="l-48" name="l-48"></a>    <span class="mh">256&#39;hC1104CD94EBA084FA6438188038006489F3DF38771214AE0BBA65CEB9BC2366F</span><span class="p">;</span>
+<a id="l-49" name="l-49"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstHmacSeedDefault</span> <span class="o">=</span>
+<a id="l-50" name="l-50"></a>    <span class="mh">256&#39;h075CF7939313EEC797019BD0036D9500374A8FD9121CC8E78E1E3359D5F77C4E</span><span class="p">;</span>
+<a id="l-51" name="l-51"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstKmacSeedDefault</span> <span class="o">=</span>
+<a id="l-52" name="l-52"></a>    <span class="mh">256&#39;h0A5CCCD9627BF6169B3A765D3D6D0CD89DBDCB7B6DF8D3C03746D60A0145D3ED</span><span class="p">;</span>
+<a id="l-53" name="l-53"></a>  <span class="k">parameter</span> <span class="n">seed_t</span> <span class="n">RndCnstOtbnSeedDefault</span> <span class="o">=</span>
+<a id="l-54" name="l-54"></a>    <span class="mh">256&#39;h17B0AF865F8ACDDFC7580C2B7BC3FB33FC9BB5A4B292216C123ACF99A7861F96</span><span class="p">;</span>
+<a id="l-55" name="l-55"></a>
+<a id="l-56" name="l-56"></a>  <span class="c1">// Default Lfsr configurations</span>
+<a id="l-57" name="l-57"></a>  <span class="c1">// These LFSR parameters have been generated with</span>
+<a id="l-58" name="l-58"></a>  <span class="c1">// $ util/design/gen-lfsr-seed.py --width 64 --seed 691876113 --prefix &quot;&quot;</span>
+<a id="l-59" name="l-59"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">LfsrWidth</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+<a id="l-60" name="l-60"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">LfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lfsr_seed_t</span><span class="p">;</span>
+<a id="l-61" name="l-61"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">LfsrWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][$</span><span class="n">clog2</span><span class="p">(</span><span class="n">LfsrWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">lfsr_perm_t</span><span class="p">;</span>
+<a id="l-62" name="l-62"></a>  <span class="k">parameter</span> <span class="n">lfsr_seed_t</span> <span class="n">RndCnstLfsrSeedDefault</span> <span class="o">=</span> <span class="mh">64&#39;h22d326255bd24320</span><span class="p">;</span>
+<a id="l-63" name="l-63"></a>  <span class="k">parameter</span> <span class="n">lfsr_perm_t</span> <span class="n">RndCnstLfsrPermDefault</span> <span class="o">=</span> <span class="p">{</span>
+<a id="l-64" name="l-64"></a>    <span class="mh">128&#39;h16108c9f9008aa37e5118d1ec1df64a7</span><span class="p">,</span>
+<a id="l-65" name="l-65"></a>    <span class="mh">256&#39;h24f3f1b73537f42d38383ee8f897286df81d49ab54b6bbbb666cbd1a16c41252</span>
+<a id="l-66" name="l-66"></a>  <span class="p">};</span>
+<a id="l-67" name="l-67"></a>
+<a id="l-68" name="l-68"></a>  <span class="c1">// Random permutation</span>
+<a id="l-69" name="l-69"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">RandWidth</span> <span class="o">=</span> <span class="n">LfsrWidth</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+<a id="l-70" name="l-70"></a>  <span class="k">typedef</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">RandWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][$</span><span class="n">clog2</span><span class="p">(</span><span class="n">RandWidth</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">rand_perm_t</span><span class="p">;</span>
+<a id="l-71" name="l-71"></a>  <span class="k">parameter</span> <span class="n">rand_perm_t</span> <span class="n">RndCnstRandPermDefault</span> <span class="o">=</span> <span class="p">{</span>
+<a id="l-72" name="l-72"></a>    <span class="mh">160&#39;h62089181d2a6be2ce145e2e27099ededbd7dceb0</span>
+<a id="l-73" name="l-73"></a>  <span class="p">};</span>
+<a id="l-74" name="l-74"></a>
+<a id="l-75" name="l-75"></a>  <span class="c1">// Width calculations</span>
+<a id="l-76" name="l-76"></a>  <span class="c1">// These are the largest calculations in use across all stages</span>
+<a id="l-77" name="l-77"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">AdvDataWidth</span> <span class="o">=</span> <span class="n">SwBindingWidth</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">KeyWidth</span> <span class="o">+</span> <span class="n">DevIdWidth</span> <span class="o">+</span> <span class="n">HealthStateWidth</span><span class="p">;</span>
+<a id="l-78" name="l-78"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">IdDataWidth</span> <span class="o">=</span> <span class="n">KeyWidth</span><span class="p">;</span>
+<a id="l-79" name="l-79"></a>  <span class="c1">// key version + salt + key ID + constant</span>
+<a id="l-80" name="l-80"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">GenDataWidth</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">SaltWidth</span> <span class="o">+</span> <span class="n">KeyWidth</span><span class="o">*</span><span class="mi">2</span><span class="p">;</span>
+<a id="l-81" name="l-81"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">StageWidth</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">KeyMgrStages</span><span class="p">);</span>
+<a id="l-82" name="l-82"></a>
+<a id="l-83" name="l-83"></a>  <span class="c1">// Max Payload Width to derivation function</span>
+<a id="l-84" name="l-84"></a>  <span class="c1">// see security strength description https://keccak.team/keccak.html</span>
+<a id="l-85" name="l-85"></a>  <span class="c1">// The max width here is chosen arbitrarily to ensure we do not get out of hand.</span>
+<a id="l-86" name="l-86"></a>  <span class="c1">// Since KMAC is a MAC operation, the data can be as long as we need.</span>
+<a id="l-87" name="l-87"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">KDFMaxWidth</span> <span class="o">=</span> <span class="mi">1600</span><span class="p">;</span>
+<a id="l-88" name="l-88"></a>
+<a id="l-89" name="l-89"></a>  <span class="c1">// Enumeration for operations</span>
+<a id="l-90" name="l-90"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-91" name="l-91"></a>    <span class="n">Creator</span>   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<a id="l-92" name="l-92"></a>    <span class="n">OwnerInt</span>  <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<a id="l-93" name="l-93"></a>    <span class="n">Owner</span>     <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<a id="l-94" name="l-94"></a>    <span class="n">Disable</span>   <span class="o">=</span> <span class="mi">3</span>
+<a id="l-95" name="l-95"></a>  <span class="p">}</span> <span class="n">keymgr_stage_e</span><span class="p">;</span>
+<a id="l-96" name="l-96"></a>
+<a id="l-97" name="l-97"></a>  <span class="c1">// Enumeration for sideload sel</span>
+<a id="l-98" name="l-98"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-99" name="l-99"></a>    <span class="n">None</span><span class="p">,</span>
+<a id="l-100" name="l-100"></a>    <span class="n">Aes</span><span class="p">,</span>
+<a id="l-101" name="l-101"></a>    <span class="n">Hmac</span><span class="p">,</span>
+<a id="l-102" name="l-102"></a>    <span class="n">Kmac</span><span class="p">,</span>
+<a id="l-103" name="l-103"></a>    <span class="n">Otbn</span>
+<a id="l-104" name="l-104"></a>  <span class="p">}</span> <span class="n">keymgr_key_dest_e</span><span class="p">;</span>
 <a id="l-105" name="l-105"></a>
-<a id="l-106" name="l-106"></a>  <span class="c1">// Enumeration for operation</span>
-<a id="l-107" name="l-107"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-108" name="l-108"></a>    <span class="n">OpAdvance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<a id="l-109" name="l-109"></a>    <span class="n">OpGenId</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<a id="l-110" name="l-110"></a>    <span class="n">OpGenSwOut</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<a id="l-111" name="l-111"></a>    <span class="n">OpGenHwOut</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-<a id="l-112" name="l-112"></a>    <span class="n">OpDisable</span> <span class="o">=</span> <span class="mi">4</span>
-<a id="l-113" name="l-113"></a>  <span class="p">}</span> <span class="n">keymgr_ops_e</span><span class="p">;</span>
-<a id="l-114" name="l-114"></a>
-<a id="l-115" name="l-115"></a>  <span class="c1">// Enumeration for working state exposed to software</span>
-<a id="l-116" name="l-116"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-117" name="l-117"></a>    <span class="n">StReset</span><span class="p">,</span>
-<a id="l-118" name="l-118"></a>    <span class="n">StInit</span><span class="p">,</span>
-<a id="l-119" name="l-119"></a>    <span class="n">StCreatorRootKey</span><span class="p">,</span>
-<a id="l-120" name="l-120"></a>    <span class="n">StOwnerIntKey</span><span class="p">,</span>
-<a id="l-121" name="l-121"></a>    <span class="n">StOwnerKey</span><span class="p">,</span>
-<a id="l-122" name="l-122"></a>    <span class="n">StDisabled</span><span class="p">,</span>
-<a id="l-123" name="l-123"></a>    <span class="n">StInvalid</span>
-<a id="l-124" name="l-124"></a>  <span class="p">}</span> <span class="n">keymgr_working_state_e</span><span class="p">;</span>
-<a id="l-125" name="l-125"></a>
-<a id="l-126" name="l-126"></a>  <span class="c1">// Enumeration for operation status</span>
-<a id="l-127" name="l-127"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-128" name="l-128"></a>    <span class="n">OpIdle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-<a id="l-129" name="l-129"></a>    <span class="n">OpWip</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<a id="l-130" name="l-130"></a>    <span class="n">OpDoneSuccess</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<a id="l-131" name="l-131"></a>    <span class="n">OpDoneFail</span> <span class="o">=</span> <span class="mi">3</span>
-<a id="l-132" name="l-132"></a>  <span class="p">}</span> <span class="n">keymgr_op_status_e</span><span class="p">;</span>
-<a id="l-133" name="l-133"></a>
-<a id="l-134" name="l-134"></a>  <span class="c1">// Bit position of error code</span>
-<a id="l-135" name="l-135"></a>  <span class="c1">// Error is encoded as 1 error per bit</span>
-<a id="l-136" name="l-136"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-137" name="l-137"></a>    <span class="n">ErrInvalidOp</span><span class="p">,</span>
-<a id="l-138" name="l-138"></a>    <span class="n">ErrInvalidCmd</span><span class="p">,</span>
-<a id="l-139" name="l-139"></a>    <span class="n">ErrInvalidIn</span><span class="p">,</span>
-<a id="l-140" name="l-140"></a>    <span class="n">ErrInvalidOut</span><span class="p">,</span>
-<a id="l-141" name="l-141"></a>    <span class="n">ErrLastPos</span>
-<a id="l-142" name="l-142"></a>  <span class="p">}</span> <span class="n">keymgr_err_pos_e</span><span class="p">;</span>
-<a id="l-143" name="l-143"></a>
-<a id="l-144" name="l-144"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-145" name="l-145"></a>    <span class="n">KeyUpdateIdle</span><span class="p">,</span>
-<a id="l-146" name="l-146"></a>    <span class="n">KeyUpdateRandom</span><span class="p">,</span>
-<a id="l-147" name="l-147"></a>    <span class="n">KeyUpdateRoot</span><span class="p">,</span>
-<a id="l-148" name="l-148"></a>    <span class="n">KeyUpdateKmac</span><span class="p">,</span>
-<a id="l-149" name="l-149"></a>    <span class="n">KeyUpdateInvalid</span><span class="p">,</span>
-<a id="l-150" name="l-150"></a>    <span class="n">KeyUpdateWipe</span>
-<a id="l-151" name="l-151"></a>  <span class="p">}</span> <span class="n">keymgr_key_update_e</span><span class="p">;</span>
-<a id="l-152" name="l-152"></a>
-<a id="l-153" name="l-153"></a>  <span class="c1">// Key connection to various modules</span>
-<a id="l-154" name="l-154"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
-<a id="l-155" name="l-155"></a>    <span class="kt">logic</span> <span class="n">valid</span><span class="p">;</span>
-<a id="l-156" name="l-156"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">key_share0</span><span class="p">;</span>
-<a id="l-157" name="l-157"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">key_share1</span><span class="p">;</span>
-<a id="l-158" name="l-158"></a>  <span class="p">}</span> <span class="n">hw_key_req_t</span><span class="p">;</span>
-<a id="l-159" name="l-159"></a>
-<a id="l-160" name="l-160"></a>  <span class="k">parameter</span> <span class="n">hw_key_req_t</span> <span class="n">HW_KEY_REQ_DEFAULT</span> <span class="o">=</span> <span class="p">&#39;{</span>
-<a id="l-161" name="l-161"></a>    <span class="nl">valid:</span> <span class="mb">1&#39;b0</span><span class="p">,</span>
-<a id="l-162" name="l-162"></a>    <span class="nl">key_share0:</span> <span class="n">KeyWidth</span><span class="p">&#39;(</span><span class="mh">32&#39;hDEADBEEF</span><span class="p">),</span>
-<a id="l-163" name="l-163"></a>    <span class="nl">key_share1:</span> <span class="n">KeyWidth</span><span class="p">&#39;(</span><span class="mh">32&#39;hFACEBEEF</span><span class="p">)</span>
-<a id="l-164" name="l-164"></a>  <span class="p">};</span>
-<a id="l-165" name="l-165"></a>
-<a id="l-166" name="l-166"></a>  <span class="c1">// The following structs should be sourced from other modules</span>
-<a id="l-167" name="l-167"></a>  <span class="c1">// defined here temporarily</span>
-<a id="l-168" name="l-168"></a>
-<a id="l-169" name="l-169"></a>  <span class="c1">// lc keymgr enable usage</span>
-<a id="l-170" name="l-170"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
-<a id="l-171" name="l-171"></a>    <span class="n">KeyMgrEnCtrl</span><span class="p">,</span>
-<a id="l-172" name="l-172"></a>    <span class="n">KeyMgrEnCfgEn</span><span class="p">,</span>
-<a id="l-173" name="l-173"></a>    <span class="n">KeyMgrEnSwBindingEn</span><span class="p">,</span>
-<a id="l-174" name="l-174"></a>    <span class="n">KeyMgrEnLast</span>
-<a id="l-175" name="l-175"></a>  <span class="p">}</span> <span class="n">keymgr_lc_en_usage_e</span><span class="p">;</span>
-<a id="l-176" name="l-176"></a>
-<a id="l-177" name="l-177"></a>  <span class="c1">// perm_data</span>
-<a id="l-178" name="l-178"></a>  <span class="k">function</span> <span class="k">automatic</span> <span class="kt">logic</span><span class="p">[</span><span class="n">RandWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">perm_data</span> <span class="p">(</span><span class="kt">logic</span> <span class="p">[</span><span class="n">RandWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data</span><span class="p">,</span>
-<a id="l-179" name="l-179"></a>    <span class="n">rand_perm_t</span> <span class="n">perm_sel</span><span class="p">);</span>
+<a id="l-106" name="l-106"></a>  <span class="c1">// Enumeration for key select</span>
+<a id="l-107" name="l-107"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">{</span>
+<a id="l-108" name="l-108"></a>    <span class="n">HwKey</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<a id="l-109" name="l-109"></a>    <span class="n">SwKey</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="l-110" name="l-110"></a>  <span class="p">}</span> <span class="n">keymgr_gen_out_e</span><span class="p">;</span>
+<a id="l-111" name="l-111"></a>
+<a id="l-112" name="l-112"></a>  <span class="c1">// Enumeration for operation</span>
+<a id="l-113" name="l-113"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-114" name="l-114"></a>    <span class="n">OpAdvance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<a id="l-115" name="l-115"></a>    <span class="n">OpGenId</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<a id="l-116" name="l-116"></a>    <span class="n">OpGenSwOut</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<a id="l-117" name="l-117"></a>    <span class="n">OpGenHwOut</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+<a id="l-118" name="l-118"></a>    <span class="n">OpDisable</span> <span class="o">=</span> <span class="mi">4</span>
+<a id="l-119" name="l-119"></a>  <span class="p">}</span> <span class="n">keymgr_ops_e</span><span class="p">;</span>
+<a id="l-120" name="l-120"></a>
+<a id="l-121" name="l-121"></a>  <span class="c1">// Enumeration for working state exposed to software</span>
+<a id="l-122" name="l-122"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-123" name="l-123"></a>    <span class="n">StReset</span><span class="p">,</span>
+<a id="l-124" name="l-124"></a>    <span class="n">StInit</span><span class="p">,</span>
+<a id="l-125" name="l-125"></a>    <span class="n">StCreatorRootKey</span><span class="p">,</span>
+<a id="l-126" name="l-126"></a>    <span class="n">StOwnerIntKey</span><span class="p">,</span>
+<a id="l-127" name="l-127"></a>    <span class="n">StOwnerKey</span><span class="p">,</span>
+<a id="l-128" name="l-128"></a>    <span class="n">StDisabled</span><span class="p">,</span>
+<a id="l-129" name="l-129"></a>    <span class="n">StInvalid</span>
+<a id="l-130" name="l-130"></a>  <span class="p">}</span> <span class="n">keymgr_working_state_e</span><span class="p">;</span>
+<a id="l-131" name="l-131"></a>
+<a id="l-132" name="l-132"></a>  <span class="c1">// Enumeration for operation status</span>
+<a id="l-133" name="l-133"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-134" name="l-134"></a>    <span class="n">OpIdle</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<a id="l-135" name="l-135"></a>    <span class="n">OpWip</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<a id="l-136" name="l-136"></a>    <span class="n">OpDoneSuccess</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<a id="l-137" name="l-137"></a>    <span class="n">OpDoneFail</span> <span class="o">=</span> <span class="mi">3</span>
+<a id="l-138" name="l-138"></a>  <span class="p">}</span> <span class="n">keymgr_op_status_e</span><span class="p">;</span>
+<a id="l-139" name="l-139"></a>
+<a id="l-140" name="l-140"></a>  <span class="c1">// Bit position of error code</span>
+<a id="l-141" name="l-141"></a>  <span class="c1">// Error is encoded as 1 error per bit</span>
+<a id="l-142" name="l-142"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-143" name="l-143"></a>    <span class="n">ErrInvalidOp</span><span class="p">,</span>
+<a id="l-144" name="l-144"></a>    <span class="n">ErrInvalidCmd</span><span class="p">,</span>
+<a id="l-145" name="l-145"></a>    <span class="n">ErrInvalidIn</span><span class="p">,</span>
+<a id="l-146" name="l-146"></a>    <span class="n">ErrInvalidOut</span><span class="p">,</span>
+<a id="l-147" name="l-147"></a>    <span class="n">ErrLastPos</span>
+<a id="l-148" name="l-148"></a>  <span class="p">}</span> <span class="n">keymgr_err_pos_e</span><span class="p">;</span>
+<a id="l-149" name="l-149"></a>
+<a id="l-150" name="l-150"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-151" name="l-151"></a>    <span class="n">KeyUpdateIdle</span><span class="p">,</span>
+<a id="l-152" name="l-152"></a>    <span class="n">KeyUpdateRandom</span><span class="p">,</span>
+<a id="l-153" name="l-153"></a>    <span class="n">KeyUpdateRoot</span><span class="p">,</span>
+<a id="l-154" name="l-154"></a>    <span class="n">KeyUpdateKmac</span><span class="p">,</span>
+<a id="l-155" name="l-155"></a>    <span class="n">KeyUpdateInvalid</span><span class="p">,</span>
+<a id="l-156" name="l-156"></a>    <span class="n">KeyUpdateWipe</span>
+<a id="l-157" name="l-157"></a>  <span class="p">}</span> <span class="n">keymgr_key_update_e</span><span class="p">;</span>
+<a id="l-158" name="l-158"></a>
+<a id="l-159" name="l-159"></a>  <span class="c1">// Key connection to various symmetric modules</span>
+<a id="l-160" name="l-160"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-161" name="l-161"></a>    <span class="kt">logic</span> <span class="n">valid</span><span class="p">;</span>
+<a id="l-162" name="l-162"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">Shares</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">KeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">key</span><span class="p">;</span>
+<a id="l-163" name="l-163"></a>  <span class="p">}</span> <span class="n">hw_key_req_t</span><span class="p">;</span>
+<a id="l-164" name="l-164"></a>
+<a id="l-165" name="l-165"></a>  <span class="c1">// Key connection to otbn</span>
+<a id="l-166" name="l-166"></a>  <span class="k">typedef</span> <span class="k">struct</span> <span class="k">packed</span> <span class="p">{</span>
+<a id="l-167" name="l-167"></a>    <span class="kt">logic</span> <span class="n">valid</span><span class="p">;</span>
+<a id="l-168" name="l-168"></a>    <span class="kt">logic</span> <span class="p">[</span><span class="n">Shares</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">OtbnKeyWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">key</span><span class="p">;</span>
+<a id="l-169" name="l-169"></a>  <span class="p">}</span> <span class="n">otbn_key_req_t</span><span class="p">;</span>
+<a id="l-170" name="l-170"></a>
+<a id="l-171" name="l-171"></a>  <span class="k">parameter</span> <span class="n">hw_key_req_t</span> <span class="n">HW_KEY_REQ_DEFAULT</span> <span class="o">=</span> <span class="p">&#39;{</span>
+<a id="l-172" name="l-172"></a>    <span class="nl">valid:</span> <span class="mb">1&#39;b0</span><span class="p">,</span>
+<a id="l-173" name="l-173"></a>    <span class="nl">key:</span> <span class="p">{</span><span class="n">Shares</span><span class="p">{</span><span class="n">KeyWidth</span><span class="p">&#39;(</span><span class="mh">32&#39;hDEADBEEF</span><span class="p">)}}</span>
+<a id="l-174" name="l-174"></a>  <span class="p">};</span>
+<a id="l-175" name="l-175"></a>
+<a id="l-176" name="l-176"></a>  <span class="k">parameter</span> <span class="n">otbn_key_req_t</span> <span class="n">OTBN_KEY_REQ_DEFAULT</span> <span class="o">=</span> <span class="p">&#39;{</span>
+<a id="l-177" name="l-177"></a>    <span class="nl">valid:</span> <span class="mb">1&#39;b0</span><span class="p">,</span>
+<a id="l-178" name="l-178"></a>    <span class="nl">key:</span> <span class="p">{</span><span class="n">Shares</span><span class="p">{</span><span class="n">OtbnKeyWidth</span><span class="p">&#39;(</span><span class="mh">32&#39;hDEADBEEF</span><span class="p">)}}</span>
+<a id="l-179" name="l-179"></a>  <span class="p">};</span>
 <a id="l-180" name="l-180"></a>
-<a id="l-181" name="l-181"></a>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_data_loop</span>
-<a id="l-182" name="l-182"></a>      <span class="n">perm_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">perm_sel</span><span class="p">[</span><span class="n">k</span><span class="p">]];</span>
-<a id="l-183" name="l-183"></a>    <span class="k">end</span>
-<a id="l-184" name="l-184"></a>
-<a id="l-185" name="l-185"></a>  <span class="k">endfunction</span>
-<a id="l-186" name="l-186"></a>
-<a id="l-187" name="l-187"></a><span class="k">endpackage</span> <span class="o">:</span> <span class="n">keymgr_pkg</span>
+<a id="l-181" name="l-181"></a>  <span class="c1">// The following structs should be sourced from other modules</span>
+<a id="l-182" name="l-182"></a>  <span class="c1">// defined here temporarily</span>
+<a id="l-183" name="l-183"></a>
+<a id="l-184" name="l-184"></a>  <span class="c1">// lc keymgr enable usage</span>
+<a id="l-185" name="l-185"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+<a id="l-186" name="l-186"></a>    <span class="n">KeyMgrEnCtrl</span><span class="p">,</span>
+<a id="l-187" name="l-187"></a>    <span class="n">KeyMgrEnCfgEn</span><span class="p">,</span>
+<a id="l-188" name="l-188"></a>    <span class="n">KeyMgrEnSwBindingEn</span><span class="p">,</span>
+<a id="l-189" name="l-189"></a>    <span class="n">KeyMgrEnLast</span>
+<a id="l-190" name="l-190"></a>  <span class="p">}</span> <span class="n">keymgr_lc_en_usage_e</span><span class="p">;</span>
+<a id="l-191" name="l-191"></a>
+<a id="l-192" name="l-192"></a>  <span class="c1">// perm_data</span>
+<a id="l-193" name="l-193"></a>  <span class="k">function</span> <span class="k">automatic</span> <span class="kt">logic</span><span class="p">[</span><span class="n">RandWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">perm_data</span> <span class="p">(</span><span class="kt">logic</span> <span class="p">[</span><span class="n">RandWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">data</span><span class="p">,</span>
+<a id="l-194" name="l-194"></a>    <span class="n">rand_perm_t</span> <span class="n">perm_sel</span><span class="p">);</span>
+<a id="l-195" name="l-195"></a>
+<a id="l-196" name="l-196"></a>    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">;</span> <span class="n">k</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_data_loop</span>
+<a id="l-197" name="l-197"></a>      <span class="n">perm_data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">perm_sel</span><span class="p">[</span><span class="n">k</span><span class="p">]];</span>
+<a id="l-198" name="l-198"></a>    <span class="k">end</span>
+<a id="l-199" name="l-199"></a>
+<a id="l-200" name="l-200"></a>  <span class="k">endfunction</span>
+<a id="l-201" name="l-201"></a>
+<a id="l-202" name="l-202"></a><span class="k">endpackage</span> <span class="o">:</span> <span class="n">keymgr_pkg</span>
 </pre></div>
 </td></tr></table>
   </body>

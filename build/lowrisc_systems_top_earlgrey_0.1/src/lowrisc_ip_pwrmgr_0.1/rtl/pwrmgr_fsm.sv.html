@@ -517,8 +517,8 @@
 <a id="l-102" name="l-102"></a>  <span class="kt">logic</span> <span class="n">lc_init</span><span class="p">;</span>
 <a id="l-103" name="l-103"></a>  <span class="kt">logic</span> <span class="n">low_power_q</span><span class="p">,</span> <span class="n">low_power_d</span><span class="p">;</span>
 <a id="l-104" name="l-104"></a>
-<a id="l-105" name="l-105"></a>  <span class="k">assign</span> <span class="n">pd_n_rsts_asserted</span> <span class="o">=</span> <span class="n">pwr_rst_i</span><span class="p">.</span><span class="n">rst_lc_src_n</span><span class="p">[</span><span class="n">PowerDomains</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="m">&#39;0</span> <span class="o">&amp;</span>
-<a id="l-106" name="l-106"></a>                              <span class="n">pwr_rst_i</span><span class="p">.</span><span class="n">rst_sys_src_n</span><span class="p">[</span><span class="n">PowerDomains</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-105" name="l-105"></a>  <span class="k">assign</span> <span class="n">pd_n_rsts_asserted</span> <span class="o">=</span> <span class="n">pwr_rst_i</span><span class="p">.</span><span class="n">rst_lc_src_n</span><span class="p">[</span><span class="n">PowerDomains</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">OffDomainSelStart</span><span class="p">]</span> <span class="o">==</span> <span class="m">&#39;0</span> <span class="o">&amp;</span>
+<a id="l-106" name="l-106"></a>                              <span class="n">pwr_rst_i</span><span class="p">.</span><span class="n">rst_sys_src_n</span><span class="p">[</span><span class="n">PowerDomains</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="n">OffDomainSelStart</span><span class="p">]</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">;</span>
 <a id="l-107" name="l-107"></a>
 <a id="l-108" name="l-108"></a>  <span class="k">assign</span> <span class="n">all_rsts_asserted</span> <span class="o">=</span> <span class="n">pwr_rst_i</span><span class="p">.</span><span class="n">rst_lc_src_n</span> <span class="o">==</span> <span class="m">&#39;0</span> <span class="o">&amp;</span>
 <a id="l-109" name="l-109"></a>                             <span class="n">pwr_rst_i</span><span class="p">.</span><span class="n">rst_sys_src_n</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">;</span>
@@ -688,54 +688,54 @@
 <a id="l-273" name="l-273"></a>        <span class="k">end</span>
 <a id="l-274" name="l-274"></a>      <span class="k">end</span>
 <a id="l-275" name="l-275"></a>
-<a id="l-276" name="l-276"></a>
-<a id="l-277" name="l-277"></a>      <span class="nl">FastPwrStateActive:</span> <span class="k">begin</span>
-<a id="l-278" name="l-278"></a>        <span class="c1">// only in active state, allow processor to execute</span>
-<a id="l-279" name="l-279"></a>        <span class="n">fetch_en_d</span> <span class="o">=</span> <span class="n">lc_ctrl_pkg</span><span class="o">::</span><span class="n">On</span><span class="p">;</span>
-<a id="l-280" name="l-280"></a>
-<a id="l-281" name="l-281"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reset_req</span> <span class="o">||</span> <span class="n">low_power_entry_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-282" name="l-282"></a>          <span class="n">reset_cause_d</span> <span class="o">=</span> <span class="n">ResetUndefined</span><span class="p">;</span>
-<a id="l-283" name="l-283"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateDisClks</span><span class="p">;</span>
-<a id="l-284" name="l-284"></a>        <span class="k">end</span>
-<a id="l-285" name="l-285"></a>      <span class="k">end</span>
-<a id="l-286" name="l-286"></a>
-<a id="l-287" name="l-287"></a>      <span class="nl">FastPwrStateDisClks:</span> <span class="k">begin</span>
-<a id="l-288" name="l-288"></a>        <span class="n">ip_clk_en_d</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-289" name="l-289"></a>
-<a id="l-290" name="l-290"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">clk_en_status_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-291" name="l-291"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">reset_req</span> <span class="o">?</span> <span class="n">FastPwrStateNvmShutDown</span> <span class="o">:</span> <span class="n">FastPwrStateFallThrough</span><span class="p">;</span>
-<a id="l-292" name="l-292"></a>          <span class="n">low_power_d</span> <span class="o">=</span> <span class="o">~</span><span class="n">reset_req</span><span class="p">;</span>
-<a id="l-293" name="l-293"></a>        <span class="k">end</span>
-<a id="l-294" name="l-294"></a>      <span class="k">end</span>
-<a id="l-295" name="l-295"></a>
-<a id="l-296" name="l-296"></a>      <span class="c1">// Low Power Path</span>
-<a id="l-297" name="l-297"></a>      <span class="nl">FastPwrStateFallThrough:</span> <span class="k">begin</span>
-<a id="l-298" name="l-298"></a>        <span class="n">clr_hint_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-299" name="l-299"></a>
-<a id="l-300" name="l-300"></a>        <span class="c1">// The processor was interrupted after it asserted WFI and is executing again</span>
-<a id="l-301" name="l-301"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">low_power_entry_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-302" name="l-302"></a>          <span class="n">ip_clk_en_d</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-303" name="l-303"></a>          <span class="n">wkup_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-304" name="l-304"></a>          <span class="n">fall_through_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-305" name="l-305"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateActive</span><span class="p">;</span>
-<a id="l-306" name="l-306"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-307" name="l-307"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateNvmIdleChk</span><span class="p">;</span>
-<a id="l-308" name="l-308"></a>        <span class="k">end</span>
-<a id="l-309" name="l-309"></a>      <span class="k">end</span>
-<a id="l-310" name="l-310"></a>
-<a id="l-311" name="l-311"></a>      <span class="nl">FastPwrStateNvmIdleChk:</span> <span class="k">begin</span>
-<a id="l-312" name="l-312"></a>
-<a id="l-313" name="l-313"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">otp_idle_i</span> <span class="o">&amp;&amp;</span> <span class="n">lc_idle_i</span> <span class="o">&amp;&amp;</span> <span class="n">flash_idle_i</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-314" name="l-314"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateLowPowerPrep</span><span class="p">;</span>
-<a id="l-315" name="l-315"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-316" name="l-316"></a>          <span class="n">ip_clk_en_d</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-317" name="l-317"></a>          <span class="n">wkup_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-318" name="l-318"></a>          <span class="n">abort_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-319" name="l-319"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateActive</span><span class="p">;</span>
-<a id="l-320" name="l-320"></a>        <span class="k">end</span>
-<a id="l-321" name="l-321"></a>      <span class="k">end</span>
-<a id="l-322" name="l-322"></a>
-<a id="l-323" name="l-323"></a>      <span class="nl">FastPwrStateLowPowerPrep:</span> <span class="k">begin</span>
+<a id="l-276" name="l-276"></a>      <span class="nl">FastPwrStateActive:</span> <span class="k">begin</span>
+<a id="l-277" name="l-277"></a>        <span class="c1">// only in active state, allow processor to execute</span>
+<a id="l-278" name="l-278"></a>        <span class="n">fetch_en_d</span> <span class="o">=</span> <span class="n">lc_ctrl_pkg</span><span class="o">::</span><span class="n">On</span><span class="p">;</span>
+<a id="l-279" name="l-279"></a>
+<a id="l-280" name="l-280"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">reset_req</span> <span class="o">||</span> <span class="n">low_power_entry_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-281" name="l-281"></a>          <span class="n">reset_cause_d</span> <span class="o">=</span> <span class="n">ResetUndefined</span><span class="p">;</span>
+<a id="l-282" name="l-282"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateDisClks</span><span class="p">;</span>
+<a id="l-283" name="l-283"></a>        <span class="k">end</span>
+<a id="l-284" name="l-284"></a>      <span class="k">end</span>
+<a id="l-285" name="l-285"></a>
+<a id="l-286" name="l-286"></a>      <span class="nl">FastPwrStateDisClks:</span> <span class="k">begin</span>
+<a id="l-287" name="l-287"></a>        <span class="n">ip_clk_en_d</span> <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-288" name="l-288"></a>
+<a id="l-289" name="l-289"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">clk_en_status_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-290" name="l-290"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">reset_req</span> <span class="o">?</span> <span class="n">FastPwrStateNvmShutDown</span> <span class="o">:</span> <span class="n">FastPwrStateFallThrough</span><span class="p">;</span>
+<a id="l-291" name="l-291"></a>          <span class="n">low_power_d</span> <span class="o">=</span> <span class="o">~</span><span class="n">reset_req</span><span class="p">;</span>
+<a id="l-292" name="l-292"></a>        <span class="k">end</span>
+<a id="l-293" name="l-293"></a>      <span class="k">end</span>
+<a id="l-294" name="l-294"></a>
+<a id="l-295" name="l-295"></a>      <span class="c1">// Low Power Path</span>
+<a id="l-296" name="l-296"></a>      <span class="nl">FastPwrStateFallThrough:</span> <span class="k">begin</span>
+<a id="l-297" name="l-297"></a>        <span class="n">clr_hint_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-298" name="l-298"></a>
+<a id="l-299" name="l-299"></a>        <span class="c1">// The processor was interrupted after it asserted WFI and is executing again</span>
+<a id="l-300" name="l-300"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">low_power_entry_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-301" name="l-301"></a>          <span class="n">ip_clk_en_d</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-302" name="l-302"></a>          <span class="n">wkup_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-303" name="l-303"></a>          <span class="n">fall_through_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-304" name="l-304"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateRomCheck</span><span class="p">;</span>
+<a id="l-305" name="l-305"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-306" name="l-306"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateNvmIdleChk</span><span class="p">;</span>
+<a id="l-307" name="l-307"></a>        <span class="k">end</span>
+<a id="l-308" name="l-308"></a>      <span class="k">end</span>
+<a id="l-309" name="l-309"></a>
+<a id="l-310" name="l-310"></a>      <span class="nl">FastPwrStateNvmIdleChk:</span> <span class="k">begin</span>
+<a id="l-311" name="l-311"></a>
+<a id="l-312" name="l-312"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">otp_idle_i</span> <span class="o">&amp;&amp;</span> <span class="n">lc_idle_i</span> <span class="o">&amp;&amp;</span> <span class="n">flash_idle_i</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-313" name="l-313"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateLowPowerPrep</span><span class="p">;</span>
+<a id="l-314" name="l-314"></a>        <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-315" name="l-315"></a>          <span class="n">ip_clk_en_d</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-316" name="l-316"></a>          <span class="n">wkup_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-317" name="l-317"></a>          <span class="n">abort_o</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
+<a id="l-318" name="l-318"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">FastPwrStateRomCheck</span><span class="p">;</span>
+<a id="l-319" name="l-319"></a>        <span class="k">end</span>
+<a id="l-320" name="l-320"></a>      <span class="k">end</span>
+<a id="l-321" name="l-321"></a>
+<a id="l-322" name="l-322"></a>      <span class="nl">FastPwrStateLowPowerPrep:</span> <span class="k">begin</span>
+<a id="l-323" name="l-323"></a>        <span class="c1">// reset cause is set only if main power domain will be turned off</span>
 <a id="l-324" name="l-324"></a>        <span class="n">reset_cause_d</span> <span class="o">=</span> <span class="n">LowPwrEntry</span><span class="p">;</span>
 <a id="l-325" name="l-325"></a>
 <a id="l-326" name="l-326"></a>        <span class="c1">// reset non-always-on domains if requested</span>
