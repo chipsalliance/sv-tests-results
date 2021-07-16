@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_dma.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_dma.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_dma.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_dma.v</a>
 defines: 
-completed: 2021-07-16 01:36:06
-time_elapsed: 0.089s
-ram usage: 77524 KB
+completed: 2021-07-16 17:51:05
+time_elapsed: 0.083s
+ram usage: 77624 KB
 </pre>
 <pre class="log">
 
@@ -171,14 +171,6 @@ module bsg_cache_dma (
 		.sel_i(dma_way_i),
 		.data_o(out_fifo_data_li)
 	);
-	localparam [1:0] GET_FILL_DATA = 1;
-	localparam [1:0] IDLE = 0;
-	localparam [1:0] SEND_EVICT_DATA = 2;
-	localparam [3:0] bsg_cache_pkg_e_dma_get_fill_data = 4&#39;b0100;
-	localparam [3:0] bsg_cache_pkg_e_dma_nop = 4&#39;b0000;
-	localparam [3:0] bsg_cache_pkg_e_dma_send_evict_addr = 4&#39;b0010;
-	localparam [3:0] bsg_cache_pkg_e_dma_send_evict_data = 4&#39;b1000;
-	localparam [3:0] bsg_cache_pkg_e_dma_send_fill_addr = 4&#39;b0001;
 	always @(*) begin
 		done_o = 1&#39;b0;
 		dma_pkt_v_o = 1&#39;b0;
@@ -187,51 +179,51 @@ module bsg_cache_dma (
 		data_mem_v_o = 1&#39;b0;
 		data_mem_w_o = 1&#39;b0;
 		in_fifo_yumi_li = 1&#39;b0;
-		dma_state_n = IDLE;
+		dma_state_n = 2&#39;d0;
 		out_fifo_v_li = 1&#39;b0;
 		counter_clear = 1&#39;b0;
 		counter_up = 1&#39;b0;
 		dma_evict_o = 1&#39;b0;
 		case (dma_state_r)
-			IDLE: begin
+			2&#39;d0: begin
 				counter_clear = 1&#39;b0;
 				counter_up = 1&#39;b0;
 				data_mem_v_o = 1&#39;b0;
 				dma_pkt_v_o = 1&#39;b0;
 				dma_pkt[addr_width_p] = 1&#39;b0;
 				done_o = 1&#39;b0;
-				dma_state_n = IDLE;
+				dma_state_n = 2&#39;d0;
 				case (dma_cmd_i)
-					bsg_cache_pkg_e_dma_send_fill_addr: begin
+					4&#39;b0001: begin
 						dma_pkt_v_o = 1&#39;b1;
 						dma_pkt[addr_width_p] = 1&#39;b0;
 						done_o = dma_pkt_yumi_i;
-						dma_state_n = IDLE;
+						dma_state_n = 2&#39;d0;
 					end
-					bsg_cache_pkg_e_dma_send_evict_addr: begin
+					4&#39;b0010: begin
 						dma_pkt_v_o = 1&#39;b1;
 						dma_pkt[addr_width_p] = 1&#39;b1;
 						done_o = dma_pkt_yumi_i;
-						dma_state_n = IDLE;
+						dma_state_n = 2&#39;d0;
 					end
-					bsg_cache_pkg_e_dma_get_fill_data: begin
+					4&#39;b0100: begin
 						counter_clear = 1&#39;b1;
-						dma_state_n = GET_FILL_DATA;
+						dma_state_n = 2&#39;d1;
 					end
-					bsg_cache_pkg_e_dma_send_evict_data: begin
+					4&#39;b1000: begin
 						counter_clear = 1&#39;b1;
 						counter_up = 1&#39;b1;
 						data_mem_v_o = 1&#39;b1;
-						dma_state_n = SEND_EVICT_DATA;
+						dma_state_n = 2&#39;d2;
 					end
-					bsg_cache_pkg_e_dma_nop:
+					4&#39;b0000:
 						;
 					default:
 						;
 				endcase
 			end
-			GET_FILL_DATA: begin
-				dma_state_n = (counter_fill_max &amp; in_fifo_v_lo ? IDLE : GET_FILL_DATA);
+			2&#39;d1: begin
+				dma_state_n = (counter_fill_max &amp; in_fifo_v_lo ? 2&#39;d0 : 2&#39;d1);
 				data_mem_v_o = in_fifo_v_lo;
 				data_mem_w_o = in_fifo_v_lo;
 				in_fifo_yumi_li = in_fifo_v_lo;
@@ -239,8 +231,8 @@ module bsg_cache_dma (
 				counter_clear = in_fifo_v_lo &amp; counter_fill_max;
 				done_o = counter_fill_max &amp; in_fifo_v_lo;
 			end
-			SEND_EVICT_DATA: begin
-				dma_state_n = (counter_evict_max &amp; out_fifo_ready_lo ? IDLE : SEND_EVICT_DATA);
+			2&#39;d2: begin
+				dma_state_n = (counter_evict_max &amp; out_fifo_ready_lo ? 2&#39;d0 : 2&#39;d2);
 				counter_up = out_fifo_ready_lo &amp; ~counter_evict_max;
 				counter_clear = out_fifo_ready_lo &amp; counter_evict_max;
 				out_fifo_v_li = 1&#39;b1;
@@ -248,7 +240,7 @@ module bsg_cache_dma (
 				done_o = counter_evict_max &amp; out_fifo_ready_lo;
 				dma_evict_o = 1&#39;b1;
 			end
-			default: dma_state_n = IDLE;
+			default: dma_state_n = 2&#39;d0;
 		endcase
 	end
 	wire [lg_burst_size_in_words_lp - 1:0] snoop_word_offset;
@@ -257,13 +249,13 @@ module bsg_cache_dma (
 	assign snoop_word_offset = dma_addr_i[byte_offset_width_lp+:lg_burst_size_in_words_lp];
 	generate
 		if (burst_len_lp == 1) begin : genblk2
-			assign snoop_word_we = (dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo;
+			assign snoop_word_we = (dma_state_r == 2&#39;d1) &amp; in_fifo_v_lo;
 		end
 		else if (burst_len_lp == block_size_in_words_p) begin : genblk2
-			assign snoop_word_we = ((dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp+:lg_burst_len_lp]);
+			assign snoop_word_we = ((dma_state_r == 2&#39;d1) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp+:lg_burst_len_lp]);
 		end
 		else begin : genblk2
-			assign snoop_word_we = ((dma_state_r == GET_FILL_DATA) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]);
+			assign snoop_word_we = ((dma_state_r == 2&#39;d1) &amp; in_fifo_v_lo) &amp; (counter_r[0+:lg_burst_len_lp] == dma_addr_i[byte_offset_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]);
 		end
 	endgenerate
 	bsg_mux #(
@@ -276,7 +268,7 @@ module bsg_cache_dma (
 	);
 	always @(posedge clk_i)
 		if (reset_i)
-			dma_state_r &lt;= IDLE;
+			dma_state_r &lt;= 2&#39;d0;
 		else begin
 			dma_state_r &lt;= dma_state_n;
 			if (snoop_word_we)

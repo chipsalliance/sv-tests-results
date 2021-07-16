@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_tag_master_decentralized.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_tag_master_decentralized.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_master_decentralized.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_master_decentralized.v</a>
 defines: 
-completed: 2021-07-16 01:36:14
-time_elapsed: 0.088s
-ram usage: 77124 KB
+completed: 2021-07-16 17:51:12
+time_elapsed: 0.082s
+ram usage: 75348 KB
 </pre>
 <pre class="log">
 
@@ -76,12 +76,11 @@ module bsg_tag_master_decentralized (
 	reg [3:0] bsg_tag_n;
 	reg [1:0] state_r;
 	reg [1:0] state_n;
-	localparam [1:0] eStart = 0;
 	always @(posedge clk_i)
 		if (tag_reset_req &amp; ~data_i_r) begin
 			if (debug_level_lp &gt; 2)
 				$display(&#34;## bsg_tag_master RESET time %t (%m)&#34;, $time);
-			state_r &lt;= eStart;
+			state_r &lt;= 2&#39;d0;
 			hdr_ptr_r &lt;= 0;
 		end
 		else begin
@@ -93,9 +92,6 @@ module bsg_tag_master_decentralized (
 		if (state_n != state_r)
 			if (debug_level_lp &gt; 1)
 				$display(&#34;## bsg_tag_master STATE CHANGE  # %s --&gt; %s #&#34;, state_r.name(), state_n.name());
-	localparam [1:0] eHeader = 1;
-	localparam [1:0] eStuck = 3;
-	localparam [1:0] eTransfer = 2;
 	function automatic signed [lg_width_p - 1:0] sv2v_cast_F1B67_signed;
 		input reg signed [lg_width_p - 1:0] inp;
 		sv2v_cast_F1B67_signed = inp;
@@ -108,44 +104,44 @@ module bsg_tag_master_decentralized (
 		bsg_tag_n[2] = 1&#39;b0;
 		bsg_tag_n[1] = 1&#39;b0;
 		case (state_r)
-			eStart: begin
+			2&#39;d0: begin
 				if (data_i_r)
-					state_n = eHeader;
+					state_n = 2&#39;d1;
 				hdr_ptr_n = 0;
 				hdr_n = 0;
 			end
-			eHeader: begin
+			2&#39;d1: begin
 				if (debug_level_lp &gt; 1)
 					$display(&#34;## bsg_tag_master RECEIVING HEADER (%m) (%d) = %b&#34;, hdr_ptr_r, data_i_r);
 				hdr_n = {data_i_r, hdr_r[1+:(((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1]};
 				hdr_ptr_n = hdr_ptr_r + 1&#39;b1;
 				if (hdr_ptr_r == lg_max_packet_len_lp&#39;((((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1))
 					if (hdr_n[lg_width_p - 1-:lg_width_p] == 0) begin
-						state_n = eStart;
+						state_n = 2&#39;d0;
 						$display(&#34;## bsg_tag_master NULL PACKET, len=0 (%m)&#34;);
 					end
 					else begin
 						if (debug_level_lp &gt; 1)
 							$display(&#34;## bsg_tag_master PACKET HEADER RECEIVED (length=%b,data_not_reset=%b,nodeID=%b) (%m) &#34;, hdr_n[lg_width_p - 1-:lg_width_p], hdr_n[lg_width_p], hdr_n[(els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p-:(((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p) &gt;= (1 + lg_width_p) ? (((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p) - (1 + lg_width_p)) + 1 : ((1 + lg_width_p) - ((els_p == 1 ? 1 : $clog2(els_p)) + lg_width_p)) + 1)]);
-						state_n = eTransfer;
+						state_n = 2&#39;d2;
 					end
 			end
-			eTransfer: begin
+			2&#39;d2: begin
 				v_n = 1&#39;b1;
 				bsg_tag_n[2] = hdr_r[lg_width_p];
 				bsg_tag_n[1] = data_i_r;
 				if (debug_level_lp &gt; 2)
 					$display(&#34;## bsg_tag_master PACKET TRANSFER op,param=&lt;%b,%b&gt; (%m)&#34;, bsg_tag_n[2], bsg_tag_n[1]);
 				if (hdr_r[lg_width_p - 1-:lg_width_p] == sv2v_cast_F1B67_signed(1)) begin
-					state_n = eStart;
+					state_n = 2&#39;d0;
 					if (debug_level_lp &gt; 1)
 						$display(&#34;## bsg_tag_master PACKET END (%m)&#34;);
 				end
 				hdr_n[lg_width_p - 1-:lg_width_p] = hdr_r[lg_width_p - 1-:lg_width_p] - 1;
 			end
-			eStuck: state_n = eStuck;
+			2&#39;d3: state_n = 2&#39;d3;
 			default: begin
-				state_n = eStuck;
+				state_n = 2&#39;d3;
 				$display(&#34;## bsg_tag_master transitioning to error state; be sure to run gate-level netlist to avoid sim/synth mismatch (%m)&#34;);
 			end
 		endcase

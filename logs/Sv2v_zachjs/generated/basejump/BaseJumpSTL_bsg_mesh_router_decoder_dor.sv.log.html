@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_mesh_router_decoder_dor.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_mesh_router_decoder_dor.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_decoder_dor.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_decoder_dor.v</a>
 defines: 
-completed: 2021-07-16 01:36:10
-time_elapsed: 0.098s
-ram usage: 75480 KB
+completed: 2021-07-16 17:51:08
+time_elapsed: 0.093s
+ram usage: 77144 KB
 </pre>
 <pre class="log">
 
@@ -66,16 +66,7 @@ module bsg_mesh_router_decoder_dor (
 	wire y_lt = ~y_gt &amp; ~y_eq;
 	wire [dirs_lp - 1:0] req;
 	assign req_o = req;
-	localparam [2:0] bsg_noc_pkg_P = 3&#39;d0;
-	assign req[bsg_noc_pkg_P] = x_eq &amp; y_eq;
-	localparam [3:0] bsg_mesh_router_pkg_RE = 4&#39;d6;
-	localparam [3:0] bsg_mesh_router_pkg_RN = 4&#39;d7;
-	localparam [3:0] bsg_mesh_router_pkg_RS = 4&#39;d8;
-	localparam [3:0] bsg_mesh_router_pkg_RW = 4&#39;d5;
-	localparam [2:0] bsg_noc_pkg_E = 3&#39;d0 + 2;
-	localparam [2:0] bsg_noc_pkg_N = 3&#39;d0 + 3;
-	localparam [2:0] bsg_noc_pkg_S = 3&#39;d0 + 4;
-	localparam [2:0] bsg_noc_pkg_W = 3&#39;d0 + 1;
+	assign req[3&#39;d0] = x_eq &amp; y_eq;
 	generate
 		if (ruche_factor_X_p &gt; 0) begin : genblk1
 			if (XY_order_p) begin : genblk1
@@ -90,62 +81,110 @@ module bsg_mesh_router_decoder_dor (
 				endfunction
 				wire send_rw = (my_x_i &gt; sv2v_cast_F48B3_signed(ruche_factor_X_p)) &amp; (x_dirs_i &lt; (my_x_i - sv2v_cast_F48B3_signed(ruche_factor_X_p)));
 				wire send_re = ~re_cord[x_cord_width_p] &amp; (x_dirs_i &gt; re_cord[0+:x_cord_width_p]);
-				assign req[bsg_noc_pkg_W] = x_lt &amp; ~send_rw;
-				assign req[bsg_mesh_router_pkg_RW] = send_rw;
-				assign req[bsg_noc_pkg_E] = x_gt &amp; ~send_re;
-				assign req[bsg_mesh_router_pkg_RE] = send_re;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				assign req[sv2v_cast_3(3&#39;d0 + 1)] = x_lt &amp; ~send_rw;
+				assign req[4&#39;d5] = send_rw;
+				assign req[sv2v_cast_3(3&#39;d0 + 2)] = x_gt &amp; ~send_re;
+				assign req[4&#39;d6] = send_re;
 			end
 			else begin : genblk1
-				if ((from_p[bsg_noc_pkg_S] | from_p[bsg_noc_pkg_N]) | from_p[bsg_noc_pkg_P]) begin : genblk1
-					assign req[bsg_noc_pkg_W] = y_eq &amp; x_lt;
-					assign req[bsg_mesh_router_pkg_RW] = 1&#39;b0;
-					assign req[bsg_noc_pkg_E] = y_eq &amp; x_gt;
-					assign req[bsg_mesh_router_pkg_RE] = 1&#39;b0;
-				end
-				else if (from_p[bsg_noc_pkg_W]) begin : genblk1
-					function automatic [x_cord_width_p - 1:0] sv2v_cast_F48B3;
-						input reg [x_cord_width_p - 1:0] inp;
-						sv2v_cast_F48B3 = inp;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				if ((from_p[sv2v_cast_3(3&#39;d0 + 4)] | from_p[sv2v_cast_3(3&#39;d0 + 3)]) | from_p[3&#39;d0]) begin : genblk1
+					function automatic [2:0] sv2v_cast_3;
+						input reg [2:0] inp;
+						sv2v_cast_3 = inp;
 					endfunction
-					wire [x_cord_width_p - 1:0] dx = sv2v_cast_F48B3((x_dirs_i - my_x_i) % ruche_factor_X_p);
-					assign req[bsg_mesh_router_pkg_RE] = (y_eq &amp; x_gt) &amp; (dx == {x_cord_width_p {1&#39;sb0}});
-					assign req[bsg_noc_pkg_E] = (y_eq &amp; x_gt) &amp; (dx != {x_cord_width_p {1&#39;sb0}});
-					assign req[bsg_mesh_router_pkg_RW] = 1&#39;b0;
-					assign req[bsg_noc_pkg_W] = 1&#39;b0;
+					assign req[sv2v_cast_3(3&#39;d0 + 1)] = y_eq &amp; x_lt;
+					assign req[4&#39;d5] = 1&#39;b0;
+					assign req[sv2v_cast_3(3&#39;d0 + 2)] = y_eq &amp; x_gt;
+					assign req[4&#39;d6] = 1&#39;b0;
 				end
-				else if (from_p[bsg_noc_pkg_E]) begin : genblk1
-					function automatic [x_cord_width_p - 1:0] sv2v_cast_F48B3;
-						input reg [x_cord_width_p - 1:0] inp;
-						sv2v_cast_F48B3 = inp;
+				else generate
+					function automatic [2:0] sv2v_cast_3;
+						input reg [2:0] inp;
+						sv2v_cast_3 = inp;
 					endfunction
-					wire [x_cord_width_p - 1:0] dx = sv2v_cast_F48B3((my_x_i - x_dirs_i) % ruche_factor_X_p);
-					assign req[bsg_mesh_router_pkg_RE] = 1&#39;b0;
-					assign req[bsg_noc_pkg_E] = 1&#39;b0;
-					assign req[bsg_mesh_router_pkg_RW] = (y_eq &amp; x_lt) &amp; (dx == {x_cord_width_p {1&#39;sb0}});
-					assign req[bsg_noc_pkg_W] = (y_eq &amp; x_lt) &amp; (dx != {x_cord_width_p {1&#39;sb0}});
-				end
-				else if (from_p[bsg_mesh_router_pkg_RW]) begin : genblk1
-					assign req[bsg_mesh_router_pkg_RE] = y_eq &amp; x_gt;
-					assign req[bsg_noc_pkg_E] = 1&#39;b0;
-					assign req[bsg_mesh_router_pkg_RW] = 1&#39;b0;
-					assign req[bsg_noc_pkg_W] = 1&#39;b0;
-				end
-				else if (from_p[bsg_mesh_router_pkg_RE]) begin : genblk1
-					assign req[bsg_mesh_router_pkg_RE] = 1&#39;b0;
-					assign req[bsg_noc_pkg_E] = 1&#39;b0;
-					assign req[bsg_mesh_router_pkg_RW] = y_eq &amp; x_lt;
-					assign req[bsg_noc_pkg_W] = 1&#39;b0;
-				end
+					if (from_p[sv2v_cast_3(3&#39;d0 + 1)]) begin : genblk1
+						function automatic [x_cord_width_p - 1:0] sv2v_cast_F48B3;
+							input reg [x_cord_width_p - 1:0] inp;
+							sv2v_cast_F48B3 = inp;
+						endfunction
+						wire [x_cord_width_p - 1:0] dx = sv2v_cast_F48B3((x_dirs_i - my_x_i) % ruche_factor_X_p);
+						assign req[4&#39;d6] = (y_eq &amp; x_gt) &amp; (dx == {x_cord_width_p {1&#39;sb0}});
+						function automatic [2:0] sv2v_cast_3;
+							input reg [2:0] inp;
+							sv2v_cast_3 = inp;
+						endfunction
+						assign req[sv2v_cast_3(3&#39;d0 + 2)] = (y_eq &amp; x_gt) &amp; (dx != {x_cord_width_p {1&#39;sb0}});
+						assign req[4&#39;d5] = 1&#39;b0;
+						assign req[sv2v_cast_3(3&#39;d0 + 1)] = 1&#39;b0;
+					end
+					else generate
+						function automatic [2:0] sv2v_cast_3;
+							input reg [2:0] inp;
+							sv2v_cast_3 = inp;
+						endfunction
+						if (from_p[sv2v_cast_3(3&#39;d0 + 2)]) begin : genblk1
+							function automatic [x_cord_width_p - 1:0] sv2v_cast_F48B3;
+								input reg [x_cord_width_p - 1:0] inp;
+								sv2v_cast_F48B3 = inp;
+							endfunction
+							wire [x_cord_width_p - 1:0] dx = sv2v_cast_F48B3((my_x_i - x_dirs_i) % ruche_factor_X_p);
+							assign req[4&#39;d6] = 1&#39;b0;
+							function automatic [2:0] sv2v_cast_3;
+								input reg [2:0] inp;
+								sv2v_cast_3 = inp;
+							endfunction
+							assign req[sv2v_cast_3(3&#39;d0 + 2)] = 1&#39;b0;
+							assign req[4&#39;d5] = (y_eq &amp; x_lt) &amp; (dx == {x_cord_width_p {1&#39;sb0}});
+							assign req[sv2v_cast_3(3&#39;d0 + 1)] = (y_eq &amp; x_lt) &amp; (dx != {x_cord_width_p {1&#39;sb0}});
+						end
+						else if (from_p[4&#39;d5]) begin : genblk1
+							assign req[4&#39;d6] = y_eq &amp; x_gt;
+							function automatic [2:0] sv2v_cast_3;
+								input reg [2:0] inp;
+								sv2v_cast_3 = inp;
+							endfunction
+							assign req[sv2v_cast_3(3&#39;d0 + 2)] = 1&#39;b0;
+							assign req[4&#39;d5] = 1&#39;b0;
+							assign req[sv2v_cast_3(3&#39;d0 + 1)] = 1&#39;b0;
+						end
+						else if (from_p[4&#39;d6]) begin : genblk1
+							assign req[4&#39;d6] = 1&#39;b0;
+							function automatic [2:0] sv2v_cast_3;
+								input reg [2:0] inp;
+								sv2v_cast_3 = inp;
+							endfunction
+							assign req[sv2v_cast_3(3&#39;d0 + 2)] = 1&#39;b0;
+							assign req[4&#39;d5] = y_eq &amp; x_lt;
+							assign req[sv2v_cast_3(3&#39;d0 + 1)] = 1&#39;b0;
+						end
+					endgenerate
+				endgenerate
 			end
 		end
 		else begin : genblk1
 			if (XY_order_p) begin : genblk1
-				assign req[bsg_noc_pkg_W] = x_lt;
-				assign req[bsg_noc_pkg_E] = x_gt;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				assign req[sv2v_cast_3(3&#39;d0 + 1)] = x_lt;
+				assign req[sv2v_cast_3(3&#39;d0 + 2)] = x_gt;
 			end
 			else begin : genblk1
-				assign req[bsg_noc_pkg_W] = y_eq &amp; x_lt;
-				assign req[bsg_noc_pkg_E] = y_eq &amp; x_gt;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				assign req[sv2v_cast_3(3&#39;d0 + 1)] = y_eq &amp; x_lt;
+				assign req[sv2v_cast_3(3&#39;d0 + 2)] = y_eq &amp; x_gt;
 			end
 		end
 		if (ruche_factor_Y_p &gt; 0) begin : genblk2
@@ -161,62 +200,110 @@ module bsg_mesh_router_decoder_dor (
 				endfunction
 				wire send_rn = (my_y_i &gt; sv2v_cast_28942_signed(ruche_factor_Y_p)) &amp; (y_dirs_i &lt; (my_y_i - sv2v_cast_28942_signed(ruche_factor_Y_p)));
 				wire send_rs = ~rs_cord[y_cord_width_p] &amp; (y_dirs_i &gt; rs_cord[0+:y_cord_width_p]);
-				assign req[bsg_noc_pkg_N] = y_lt &amp; ~send_rn;
-				assign req[bsg_mesh_router_pkg_RN] = send_rn;
-				assign req[bsg_noc_pkg_S] = y_gt &amp; ~send_rs;
-				assign req[bsg_mesh_router_pkg_RS] = send_rs;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				assign req[sv2v_cast_3(3&#39;d0 + 3)] = y_lt &amp; ~send_rn;
+				assign req[4&#39;d7] = send_rn;
+				assign req[sv2v_cast_3(3&#39;d0 + 4)] = y_gt &amp; ~send_rs;
+				assign req[4&#39;d8] = send_rs;
 			end
 			else begin : genblk1
-				if ((from_p[bsg_noc_pkg_E] | from_p[bsg_noc_pkg_W]) | from_p[bsg_noc_pkg_P]) begin : genblk1
-					assign req[bsg_noc_pkg_N] = x_eq &amp; y_lt;
-					assign req[bsg_mesh_router_pkg_RN] = 1&#39;b0;
-					assign req[bsg_noc_pkg_S] = x_eq &amp; y_gt;
-					assign req[bsg_mesh_router_pkg_RS] = 1&#39;b0;
-				end
-				else if (from_p[bsg_noc_pkg_N]) begin : genblk1
-					function automatic [y_cord_width_p - 1:0] sv2v_cast_28942;
-						input reg [y_cord_width_p - 1:0] inp;
-						sv2v_cast_28942 = inp;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				if ((from_p[sv2v_cast_3(3&#39;d0 + 2)] | from_p[sv2v_cast_3(3&#39;d0 + 1)]) | from_p[3&#39;d0]) begin : genblk1
+					function automatic [2:0] sv2v_cast_3;
+						input reg [2:0] inp;
+						sv2v_cast_3 = inp;
 					endfunction
-					wire [y_cord_width_p - 1:0] dy = sv2v_cast_28942((y_dirs_i - my_y_i) % ruche_factor_Y_p);
-					assign req[bsg_mesh_router_pkg_RS] = (x_eq &amp; y_gt) &amp; (dy == {y_cord_width_p {1&#39;sb0}});
-					assign req[bsg_noc_pkg_S] = (x_eq &amp; y_gt) &amp; (dy != {y_cord_width_p {1&#39;sb0}});
-					assign req[bsg_mesh_router_pkg_RN] = 1&#39;b0;
-					assign req[bsg_noc_pkg_N] = 1&#39;b0;
+					assign req[sv2v_cast_3(3&#39;d0 + 3)] = x_eq &amp; y_lt;
+					assign req[4&#39;d7] = 1&#39;b0;
+					assign req[sv2v_cast_3(3&#39;d0 + 4)] = x_eq &amp; y_gt;
+					assign req[4&#39;d8] = 1&#39;b0;
 				end
-				else if (from_p[bsg_noc_pkg_S]) begin : genblk1
-					function automatic [y_cord_width_p - 1:0] sv2v_cast_28942;
-						input reg [y_cord_width_p - 1:0] inp;
-						sv2v_cast_28942 = inp;
+				else generate
+					function automatic [2:0] sv2v_cast_3;
+						input reg [2:0] inp;
+						sv2v_cast_3 = inp;
 					endfunction
-					wire [y_cord_width_p - 1:0] dy = sv2v_cast_28942((my_y_i - y_dirs_i) % ruche_factor_Y_p);
-					assign req[bsg_mesh_router_pkg_RS] = 1&#39;b0;
-					assign req[bsg_noc_pkg_S] = 1&#39;b0;
-					assign req[bsg_mesh_router_pkg_RN] = (x_eq &amp; y_lt) &amp; (dy == {y_cord_width_p {1&#39;sb0}});
-					assign req[bsg_noc_pkg_N] = (x_eq &amp; y_lt) &amp; (dy != {y_cord_width_p {1&#39;sb0}});
-				end
-				else if (from_p[bsg_mesh_router_pkg_RN]) begin : genblk1
-					assign req[bsg_mesh_router_pkg_RS] = x_eq &amp; y_gt;
-					assign req[bsg_noc_pkg_S] = 1&#39;b0;
-					assign req[bsg_mesh_router_pkg_RN] = 1&#39;b0;
-					assign req[bsg_noc_pkg_N] = 1&#39;b0;
-				end
-				else if (from_p[bsg_mesh_router_pkg_RS]) begin : genblk1
-					assign req[bsg_mesh_router_pkg_RS] = 1&#39;b0;
-					assign req[bsg_noc_pkg_S] = 1&#39;b0;
-					assign req[bsg_mesh_router_pkg_RN] = x_eq &amp; y_lt;
-					assign req[bsg_noc_pkg_N] = 1&#39;b0;
-				end
+					if (from_p[sv2v_cast_3(3&#39;d0 + 3)]) begin : genblk1
+						function automatic [y_cord_width_p - 1:0] sv2v_cast_28942;
+							input reg [y_cord_width_p - 1:0] inp;
+							sv2v_cast_28942 = inp;
+						endfunction
+						wire [y_cord_width_p - 1:0] dy = sv2v_cast_28942((y_dirs_i - my_y_i) % ruche_factor_Y_p);
+						assign req[4&#39;d8] = (x_eq &amp; y_gt) &amp; (dy == {y_cord_width_p {1&#39;sb0}});
+						function automatic [2:0] sv2v_cast_3;
+							input reg [2:0] inp;
+							sv2v_cast_3 = inp;
+						endfunction
+						assign req[sv2v_cast_3(3&#39;d0 + 4)] = (x_eq &amp; y_gt) &amp; (dy != {y_cord_width_p {1&#39;sb0}});
+						assign req[4&#39;d7] = 1&#39;b0;
+						assign req[sv2v_cast_3(3&#39;d0 + 3)] = 1&#39;b0;
+					end
+					else generate
+						function automatic [2:0] sv2v_cast_3;
+							input reg [2:0] inp;
+							sv2v_cast_3 = inp;
+						endfunction
+						if (from_p[sv2v_cast_3(3&#39;d0 + 4)]) begin : genblk1
+							function automatic [y_cord_width_p - 1:0] sv2v_cast_28942;
+								input reg [y_cord_width_p - 1:0] inp;
+								sv2v_cast_28942 = inp;
+							endfunction
+							wire [y_cord_width_p - 1:0] dy = sv2v_cast_28942((my_y_i - y_dirs_i) % ruche_factor_Y_p);
+							assign req[4&#39;d8] = 1&#39;b0;
+							function automatic [2:0] sv2v_cast_3;
+								input reg [2:0] inp;
+								sv2v_cast_3 = inp;
+							endfunction
+							assign req[sv2v_cast_3(3&#39;d0 + 4)] = 1&#39;b0;
+							assign req[4&#39;d7] = (x_eq &amp; y_lt) &amp; (dy == {y_cord_width_p {1&#39;sb0}});
+							assign req[sv2v_cast_3(3&#39;d0 + 3)] = (x_eq &amp; y_lt) &amp; (dy != {y_cord_width_p {1&#39;sb0}});
+						end
+						else if (from_p[4&#39;d7]) begin : genblk1
+							assign req[4&#39;d8] = x_eq &amp; y_gt;
+							function automatic [2:0] sv2v_cast_3;
+								input reg [2:0] inp;
+								sv2v_cast_3 = inp;
+							endfunction
+							assign req[sv2v_cast_3(3&#39;d0 + 4)] = 1&#39;b0;
+							assign req[4&#39;d7] = 1&#39;b0;
+							assign req[sv2v_cast_3(3&#39;d0 + 3)] = 1&#39;b0;
+						end
+						else if (from_p[4&#39;d8]) begin : genblk1
+							assign req[4&#39;d8] = 1&#39;b0;
+							function automatic [2:0] sv2v_cast_3;
+								input reg [2:0] inp;
+								sv2v_cast_3 = inp;
+							endfunction
+							assign req[sv2v_cast_3(3&#39;d0 + 4)] = 1&#39;b0;
+							assign req[4&#39;d7] = x_eq &amp; y_lt;
+							assign req[sv2v_cast_3(3&#39;d0 + 3)] = 1&#39;b0;
+						end
+					endgenerate
+				endgenerate
 			end
 		end
 		else begin : genblk2
 			if (XY_order_p == 0) begin : genblk1
-				assign req[bsg_noc_pkg_N] = y_lt;
-				assign req[bsg_noc_pkg_S] = y_gt;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				assign req[sv2v_cast_3(3&#39;d0 + 3)] = y_lt;
+				assign req[sv2v_cast_3(3&#39;d0 + 4)] = y_gt;
 			end
 			else begin : genblk1
-				assign req[bsg_noc_pkg_N] = x_eq &amp; y_lt;
-				assign req[bsg_noc_pkg_S] = x_eq &amp; y_gt;
+				function automatic [2:0] sv2v_cast_3;
+					input reg [2:0] inp;
+					sv2v_cast_3 = inp;
+				endfunction
+				assign req[sv2v_cast_3(3&#39;d0 + 3)] = x_eq &amp; y_lt;
+				assign req[sv2v_cast_3(3&#39;d0 + 4)] = x_eq &amp; y_gt;
 			end
 		end
 		if (debug_p) begin : genblk3

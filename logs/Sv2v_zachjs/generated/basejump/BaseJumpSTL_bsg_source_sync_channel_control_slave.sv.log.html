@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_source_sync_channel_control_slave.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_source_sync_channel_control_slave.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_comm_link/bsg_source_sync_channel_control_slave.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_comm_link/bsg_source_sync_channel_control_slave.v</a>
 defines: 
-completed: 2021-07-16 01:36:20
-time_elapsed: 0.099s
-ram usage: 77220 KB
+completed: 2021-07-16 17:51:18
+time_elapsed: 0.085s
+ram usage: 77236 KB
 </pre>
 <pre class="log">
 
@@ -76,35 +76,27 @@ module bsg_source_sync_channel_control_slave (
 	endgenerate
 	reg [3:0] out_state_n;
 	reg [3:0] out_state_r;
-	localparam [3:0] sBegin = 0;
 	always @(posedge out_clk_i)
 		if (out_reset_i)
-			out_state_r &lt;= sBegin;
+			out_state_r &lt;= 4&#39;d0;
 		else
 			out_state_r &lt;= out_state_n;
-	localparam [3:0] sActive = 5;
-	localparam [3:0] sInactive = 6;
-	localparam [3:0] sPhase1 = 1;
-	localparam [3:0] sPhase2 = 2;
-	localparam [3:0] sPhase3 = 3;
-	localparam [3:0] sPhase4 = 4;
-	localparam [3:0] sResetClock = 7;
 	always @(*) begin
 		out_state_n = out_state_r;
-		if (out_state_r == sBegin)
+		if (out_state_r == 4&#39;d0)
 			casez (out_snoop_valid_data)
-				5&#39;b0z111: out_state_n = sResetClock;
-				5&#39;b01z10: out_state_n = sResetClock;
-				5&#39;b01011: out_state_n = sResetClock;
-				5&#39;b01101: out_state_n = sResetClock;
-				5&#39;b11111: out_state_n = sResetClock;
-				5&#39;b00100: out_state_n = sPhase1;
-				5&#39;b00101: out_state_n = sPhase2;
-				5&#39;b00010: out_state_n = sPhase3;
-				5&#39;b00011: out_state_n = sPhase4;
-				5&#39;b00110: out_state_n = (out_active_mismatch ? sInactive : sActive);
-				5&#39;b0100z: out_state_n = sInactive;
-				default: out_state_n = sPhase3;
+				5&#39;b0z111: out_state_n = 4&#39;d7;
+				5&#39;b01z10: out_state_n = 4&#39;d7;
+				5&#39;b01011: out_state_n = 4&#39;d7;
+				5&#39;b01101: out_state_n = 4&#39;d7;
+				5&#39;b11111: out_state_n = 4&#39;d7;
+				5&#39;b00100: out_state_n = 4&#39;d1;
+				5&#39;b00101: out_state_n = 4&#39;d2;
+				5&#39;b00010: out_state_n = 4&#39;d3;
+				5&#39;b00011: out_state_n = 4&#39;d4;
+				5&#39;b00110: out_state_n = (out_active_mismatch ? 4&#39;d6 : 4&#39;d5);
+				5&#39;b0100z: out_state_n = 4&#39;d6;
+				default: out_state_n = 4&#39;d3;
 			endcase
 	end
 	localparam counter_min_bits_lp = 24;
@@ -126,7 +118,7 @@ module bsg_source_sync_channel_control_slave (
 	endfunction
 	always @(posedge out_clk_i) begin
 		out_reset_r &lt;= out_reset_i;
-		out_clk_init_r_o &lt;= (~out_reset_i &amp; (out_state_n == sResetClock)) &amp; (out_state_r == sBegin);
+		out_clk_init_r_o &lt;= (~out_reset_i &amp; (out_state_n == 4&#39;d7)) &amp; (out_state_r == 4&#39;d0);
 		out_override_en_r &lt;= out_override_en_n;
 		if (out_reset_i ^ out_reset_r) begin
 			out_ctr_r &lt;= sv2v_cast_FF4D9_signed(0);
@@ -136,16 +128,16 @@ module bsg_source_sync_channel_control_slave (
 			out_ctr_r &lt;= out_ctr_n;
 			out_override_valid_data_r &lt;= out_override_valid_data_n;
 		end
-		if (out_state_r == sBegin)
+		if (out_state_r == 4&#39;d0)
 			out_rot_r &lt;= 8&#39;b10100101;
 		else
 			out_rot_r &lt;= out_rot_n;
 	end
 	always @(out_state_r)
 		$display(&#34;## Slave %m entering state %s with in_snoop_valid_data_i %b&#34;, out_state_r.name, in_snoop_valid_data_i);
-	assign out_channel_active_o = out_state_r == sActive;
-	wire out_loopback_en = (out_state_r == sPhase3) || (out_state_r == sPhase4);
-	wire out_trigger_mode_alt_en = out_state_r == sPhase4;
+	assign out_channel_active_o = out_state_r == 4&#39;d5;
+	wire out_loopback_en = (out_state_r == 4&#39;d3) || (out_state_r == 4&#39;d4);
+	wire out_trigger_mode_alt_en = out_state_r == 4&#39;d4;
 	bsg_launch_sync_sync #(.width_p(1)) out_to_core_lss(
 		.iclk_i(out_clk_i),
 		.iclk_reset_i(1&#39;b0),
@@ -172,24 +164,24 @@ module bsg_source_sync_channel_control_slave (
 		out_override_en_n = 1&#39;b0;
 		out_override_valid_data_n = {1&#39;b0, inactive_pattern[0+:width_p]};
 		case (out_state_r)
-			sBegin: begin
+			4&#39;d0: begin
 				out_ctr_n = out_ctr_r_p1;
 				out_override_en_n = 1&#39;b1;
 				if (out_ctr_r[23:lg_token_width_p] == 1&#39;b1)
 					out_override_valid_data_n = {2&#39;b11, {width_p - 1 {1&#39;b0}}};
 			end
-			sPhase1: begin
+			4&#39;d1: begin
 				out_rot_n = {out_rot_r[6:0], out_rot_r[7]};
 				out_override_en_n = 1&#39;b1;
 				out_override_valid_data_n = {width_p + 1 {out_rot_r[7]}};
 			end
-			sPhase2: begin
+			4&#39;d2: begin
 				out_ctr_n = out_ctr_r_p1;
 				out_override_en_n = 1&#39;b1;
 				out_override_valid_data_n = (out_ctr_r[0] ? out_ctr_r[1 + (width_p + 1)+:width_p + 1] : out_ctr_r[1+:width_p + 1]);
 			end
-			sPhase3: out_infinite_credits_o = 1&#39;b1;
-			sPhase4: out_infinite_credits_o = 1&#39;b1;
+			4&#39;d3: out_infinite_credits_o = 1&#39;b1;
+			4&#39;d4: out_infinite_credits_o = 1&#39;b1;
 			default:
 				;
 		endcase

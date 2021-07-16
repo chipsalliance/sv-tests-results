@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_miss.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_miss.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_miss.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_miss.v</a>
 defines: 
-completed: 2021-07-16 01:36:28
-time_elapsed: 0.134s
-ram usage: 79404 KB
+completed: 2021-07-16 17:51:25
+time_elapsed: 0.124s
+ram usage: 79300 KB
 </pre>
 <pre class="log">
 
@@ -189,20 +189,6 @@ module bsg_cache_miss (
 	wire [ways_p - 1:0] flush_way_decode;
 	assign flush_way_decode = (decode_v_i[13] ? addr_way_v_decode : tag_hit_v_i);
 	assign select_snoop_data_r_o = select_snoop_data_r;
-	localparam [3:0] DONE = 8;
-	localparam [3:0] FLUSH_OP = 1;
-	localparam [3:0] GET_FILL_DATA = 6;
-	localparam [3:0] LOCK_OP = 2;
-	localparam [3:0] RECOVER = 7;
-	localparam [3:0] SEND_EVICT_ADDR = 3;
-	localparam [3:0] SEND_EVICT_DATA = 5;
-	localparam [3:0] SEND_FILL_ADDR = 4;
-	localparam [3:0] START = 0;
-	localparam [3:0] bsg_cache_pkg_e_dma_get_fill_data = 4&#39;b0100;
-	localparam [3:0] bsg_cache_pkg_e_dma_nop = 4&#39;b0000;
-	localparam [3:0] bsg_cache_pkg_e_dma_send_evict_addr = 4&#39;b0010;
-	localparam [3:0] bsg_cache_pkg_e_dma_send_evict_data = 4&#39;b1000;
-	localparam [3:0] bsg_cache_pkg_e_dma_send_fill_addr = 4&#39;b0001;
 	always @(*) begin
 		stat_mem_v_o = 1&#39;b0;
 		stat_mem_w_o = 1&#39;b0;
@@ -215,22 +201,22 @@ module bsg_cache_miss (
 		chosen_way_n = chosen_way_r;
 		flush_way_n = flush_way_r;
 		dma_addr_o = {addr_width_p {1&#39;sb0}};
-		dma_cmd_o = bsg_cache_pkg_e_dma_nop;
+		dma_cmd_o = 4&#39;b0000;
 		recover_o = 1&#39;b0;
 		done_o = 1&#39;b0;
 		select_snoop_data_n = select_snoop_data_r;
 		case (miss_state_r)
-			START: begin
+			4&#39;d0: begin
 				stat_mem_v_o = miss_v_i;
-				miss_state_n = (miss_v_i ? (goto_flush_op ? FLUSH_OP : (goto_lock_op ? LOCK_OP : SEND_FILL_ADDR)) : START);
+				miss_state_n = (miss_v_i ? (goto_flush_op ? 4&#39;d1 : (goto_lock_op ? 4&#39;d2 : 4&#39;d4)) : 4&#39;d0);
 			end
-			SEND_FILL_ADDR: begin
+			4&#39;d4: begin
 				chosen_way_n = (invalid_exist ? invalid_way_id : lru_way_id);
-				dma_cmd_o = bsg_cache_pkg_e_dma_send_fill_addr;
+				dma_cmd_o = 4&#39;b0001;
 				dma_addr_o = {addr_tag_v, addr_index_v, {block_offset_width_lp {1&#39;b0}}};
-				miss_state_n = (dma_done_i ? (stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - chosen_way_n)] &amp; valid_v_i[chosen_way_n] ? SEND_EVICT_ADDR : GET_FILL_DATA) : SEND_FILL_ADDR);
+				miss_state_n = (dma_done_i ? (stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - chosen_way_n)] &amp; valid_v_i[chosen_way_n] ? 4&#39;d3 : 4&#39;d6) : 4&#39;d4);
 			end
-			FLUSH_OP: begin
+			4&#39;d1: begin
 				flush_way_n = (decode_v_i[13] ? addr_way_v : tag_hit_way_id_i);
 				stat_mem_v_o = 1&#39;b1;
 				stat_mem_w_o = 1&#39;b1;
@@ -252,9 +238,9 @@ module bsg_cache_miss (
 							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {1&#39;b0}};
 						end
 				end
-				miss_state_n = ((~decode_v_i[8] &amp; stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - flush_way_n)]) &amp; valid_v_i[flush_way_n] ? SEND_EVICT_ADDR : RECOVER);
+				miss_state_n = ((~decode_v_i[8] &amp; stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - flush_way_n)]) &amp; valid_v_i[flush_way_n] ? 4&#39;d3 : 4&#39;d7);
 			end
-			LOCK_OP: begin
+			4&#39;d2: begin
 				tag_mem_v_o = 1&#39;b1;
 				tag_mem_w_o = 1&#39;b1;
 				begin : sv2v_autoblock_2
@@ -269,20 +255,20 @@ module bsg_cache_miss (
 							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {1&#39;b0}};
 						end
 				end
-				miss_state_n = RECOVER;
+				miss_state_n = 4&#39;d7;
 			end
-			SEND_EVICT_ADDR: begin
-				dma_cmd_o = bsg_cache_pkg_e_dma_send_evict_addr;
+			4&#39;d3: begin
+				dma_cmd_o = 4&#39;b0010;
 				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], addr_index_v, {block_offset_width_lp {1&#39;b0}}};
-				miss_state_n = (dma_done_i ? SEND_EVICT_DATA : SEND_EVICT_ADDR);
+				miss_state_n = (dma_done_i ? 4&#39;d5 : 4&#39;d3);
 			end
-			SEND_EVICT_DATA: begin
-				dma_cmd_o = (sbuf_empty_i ? bsg_cache_pkg_e_dma_send_evict_data : bsg_cache_pkg_e_dma_nop);
+			4&#39;d5: begin
+				dma_cmd_o = (sbuf_empty_i ? 4&#39;b1000 : 4&#39;b0000);
 				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], addr_index_v, {block_offset_width_lp {1&#39;b0}}};
-				miss_state_n = (dma_done_i ? ((decode_v_i[13] | decode_v_i[9]) | decode_v_i[10] ? RECOVER : GET_FILL_DATA) : SEND_EVICT_DATA);
+				miss_state_n = (dma_done_i ? ((decode_v_i[13] | decode_v_i[9]) | decode_v_i[10] ? 4&#39;d7 : 4&#39;d6) : 4&#39;d5);
 			end
-			GET_FILL_DATA: begin
-				dma_cmd_o = (sbuf_empty_i ? bsg_cache_pkg_e_dma_get_fill_data : bsg_cache_pkg_e_dma_nop);
+			4&#39;d6: begin
+				dma_cmd_o = (sbuf_empty_i ? 4&#39;b0100 : 4&#39;b0000);
 				dma_addr_o = {addr_tag_v, addr_index_v, {block_size_in_words_p &gt; 1 {addr_block_offset_v}}, {lg_data_mask_width_lp {1&#39;b0}}};
 				stat_mem_v_o = dma_done_i;
 				stat_mem_w_o = dma_done_i;
@@ -305,23 +291,23 @@ module bsg_cache_miss (
 						end
 				end
 				select_snoop_data_n = (dma_done_i ? 1&#39;b1 : select_snoop_data_r);
-				miss_state_n = (dma_done_i ? RECOVER : GET_FILL_DATA);
+				miss_state_n = (dma_done_i ? 4&#39;d7 : 4&#39;d6);
 			end
-			RECOVER: begin
+			4&#39;d7: begin
 				recover_o = 1&#39;b1;
-				miss_state_n = DONE;
+				miss_state_n = 4&#39;d8;
 			end
-			DONE: begin
+			4&#39;d8: begin
 				done_o = 1&#39;b1;
-				miss_state_n = (ack_i ? START : DONE);
+				miss_state_n = (ack_i ? 4&#39;d0 : 4&#39;d8);
 				select_snoop_data_n = (ack_i ? 1&#39;b0 : select_snoop_data_r);
 			end
-			default: miss_state_n = START;
+			default: miss_state_n = 4&#39;d0;
 		endcase
 	end
 	always @(posedge clk_i)
 		if (reset_i) begin
-			miss_state_r &lt;= START;
+			miss_state_r &lt;= 4&#39;d0;
 			chosen_way_r &lt;= {lg_ways_lp {1&#39;sb0}};
 			flush_way_r &lt;= {lg_ways_lp {1&#39;sb0}};
 			select_snoop_data_r &lt;= 1&#39;b0;

@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/cores/fx68k/fx68k.sv.html" target="file-frame">third_party/cores/fx68k/fx68k.sv</a> <a href="../../../../third_party/cores/fx68k/fx68kAlu.sv.html" target="file-frame">third_party/cores/fx68k/fx68kAlu.sv</a> <a href="../../../../third_party/cores/fx68k/uaddrPla.sv.html" target="file-frame">third_party/cores/fx68k/uaddrPla.sv</a>
 defines: 
-completed: 2021-07-16 01:33:19
-time_elapsed: 2.869s
-ram usage: 182824 KB
+completed: 2021-07-16 17:48:26
+time_elapsed: 2.420s
+ram usage: 176672 KB
 </pre>
 <pre class="log">
 
@@ -92,35 +92,30 @@ module fx68k (
 	assign Clks[0] = enPhi2;
 	wire wClk;
 	reg [31:0] tState;
-	localparam [31:0] T4 = 4;
-	wire enT1 = (Clks[1] &amp; (tState == T4)) &amp; ~wClk;
-	localparam [31:0] T1 = 1;
-	wire enT2 = Clks[0] &amp; (tState == T1);
-	localparam [31:0] T2 = 2;
-	wire enT3 = Clks[1] &amp; (tState == T2);
-	localparam [31:0] T0 = 0;
-	localparam [31:0] T3 = 3;
-	wire enT4 = Clks[0] &amp; ((tState == T0) | (tState == T3));
+	wire enT1 = (Clks[1] &amp; (tState == 32&#39;d4)) &amp; ~wClk;
+	wire enT2 = Clks[0] &amp; (tState == 32&#39;d1);
+	wire enT3 = Clks[1] &amp; (tState == 32&#39;d2);
+	wire enT4 = Clks[0] &amp; ((tState == 32&#39;d0) | (tState == 32&#39;d3));
 	always @(posedge Clks[4])
 		if (Clks[2])
-			tState &lt;= T0;
+			tState &lt;= 32&#39;d0;
 		else
 			case (tState)
-				T0:
+				32&#39;d0:
 					if (Clks[0])
-						tState &lt;= T4;
-				T1:
+						tState &lt;= 32&#39;d4;
+				32&#39;d1:
 					if (Clks[0])
-						tState &lt;= T2;
-				T2:
+						tState &lt;= 32&#39;d2;
+				32&#39;d2:
 					if (Clks[1])
-						tState &lt;= T3;
-				T3:
+						tState &lt;= 32&#39;d3;
+				32&#39;d3:
 					if (Clks[0])
-						tState &lt;= T4;
-				T4:
+						tState &lt;= 32&#39;d4;
+				32&#39;d4:
 					if (Clks[1])
-						tState &lt;= (wClk ? T0 : T1);
+						tState &lt;= (wClk ? 32&#39;d0 : 32&#39;d1);
 			endcase
 	reg rDtack;
 	reg rBerr;
@@ -1910,57 +1905,49 @@ module busArbiter (
 	output reg BGn;
 	reg [31:0] dmaPhase;
 	reg [31:0] next;
-	localparam [31:0] D1 = 2;
-	localparam [31:0] D2 = 7;
-	localparam [31:0] D3 = 6;
-	localparam [31:0] DIDLE = 1;
-	localparam [31:0] DRESET = 0;
-	localparam [31:0] D_BA = 4;
-	localparam [31:0] D_BR = 3;
-	localparam [31:0] D_BRA = 5;
 	always @(*)
 		case (dmaPhase)
-			DRESET: next = DIDLE;
-			DIDLE:
+			32&#39;d0: next = 32&#39;d1;
+			32&#39;d1:
 				if (bgBlock)
-					next = DIDLE;
+					next = 32&#39;d1;
 				else if (~BgackI)
-					next = D_BA;
+					next = 32&#39;d4;
 				else if (~BRi)
-					next = D1;
+					next = 32&#39;d2;
 				else
-					next = DIDLE;
-			D_BA:
+					next = 32&#39;d1;
+			32&#39;d4:
 				if (~BRi &amp; !bgBlock)
-					next = D3;
+					next = 32&#39;d6;
 				else if (~BgackI &amp; !bgBlock)
-					next = D_BA;
+					next = 32&#39;d4;
 				else
-					next = DIDLE;
-			D1: next = D_BR;
-			D_BR: next = (~BRi &amp; BgackI ? D_BR : D_BA);
-			D3: next = D_BRA;
-			D_BRA:
+					next = 32&#39;d1;
+			32&#39;d2: next = 32&#39;d3;
+			32&#39;d3: next = (~BRi &amp; BgackI ? 32&#39;d3 : 32&#39;d4);
+			32&#39;d6: next = 32&#39;d5;
+			32&#39;d5:
 				case ({BgackI, BRi})
-					2&#39;b11: next = DIDLE;
-					2&#39;b10: next = D_BR;
-					2&#39;b01: next = D2;
-					2&#39;b00: next = D_BRA;
+					2&#39;b11: next = 32&#39;d1;
+					2&#39;b10: next = 32&#39;d3;
+					2&#39;b01: next = 32&#39;d7;
+					2&#39;b00: next = 32&#39;d5;
 				endcase
-			D2: next = D_BA;
-			default: next = DIDLE;
+			32&#39;d7: next = 32&#39;d4;
+			default: next = 32&#39;d1;
 		endcase
 	reg granting;
 	always @(*)
 		case (next)
-			D1, D3, D_BR, D_BRA: granting = 1&#39;b1;
+			32&#39;d2, 32&#39;d6, 32&#39;d3, 32&#39;d5: granting = 1&#39;b1;
 			default: granting = 1&#39;b0;
 		endcase
 	reg rGranted;
 	assign busAvail = ((Halti &amp; BRi) &amp; BgackI) &amp; ~rGranted;
 	always @(posedge Clks[4]) begin
 		if (Clks[3]) begin
-			dmaPhase &lt;= DRESET;
+			dmaPhase &lt;= 32&#39;d0;
 			rGranted &lt;= 1&#39;b0;
 		end
 		else if (Clks[0]) begin
@@ -2049,45 +2036,38 @@ module busControl (
 	wire busRetry = ~busAddrErr &amp; 1&#39;b0;
 	reg [31:0] busPhase;
 	reg [31:0] next;
-	localparam [31:0] SRESET = 0;
 	always @(posedge Clks[4])
 		if (Clks[3])
-			busPhase &lt;= SRESET;
+			busPhase &lt;= 32&#39;d0;
 		else if (Clks[1])
 			busPhase &lt;= next;
-	localparam [31:0] S0 = 2;
-	localparam [31:0] S2 = 3;
-	localparam [31:0] S4 = 4;
-	localparam [31:0] S6 = 5;
-	localparam [31:0] SIDLE = 1;
-	localparam [31:0] SRMC_RES = 6;
 	always @(*)
 		case (busPhase)
-			SRESET: next = SIDLE;
-			SRMC_RES: next = SIDLE;
-			S0: next = S2;
-			S2: next = S4;
-			S4: next = (busEnd ? S6 : S4);
-			S6: next = (isRcmReset ? SRMC_RES : (canStart ? S0 : SIDLE));
-			SIDLE: next = (canStart ? S0 : SIDLE);
-			default: next = SIDLE;
+			32&#39;d0: next = 32&#39;d1;
+			32&#39;d6: next = 32&#39;d1;
+			32&#39;d2: next = 32&#39;d3;
+			32&#39;d3: next = 32&#39;d4;
+			32&#39;d4: next = (busEnd ? 32&#39;d5 : 32&#39;d4);
+			32&#39;d5: next = (isRcmReset ? 32&#39;d6 : (canStart ? 32&#39;d2 : 32&#39;d1));
+			32&#39;d1: next = (canStart ? 32&#39;d2 : 32&#39;d1);
+			default: next = 32&#39;d1;
 		endcase
-	wire rmcIdle = ((busPhase == SIDLE) &amp; ~ASn) &amp; isRmcReg;
+	wire rmcIdle = ((busPhase == 32&#39;d1) &amp; ~ASn) &amp; isRmcReg;
 	assign canStart = (((busAvail | rmcIdle) &amp; (bcPend | permStart)) &amp; !busRetry) &amp; !bcReset;
-	wire busEnding = (next == SIDLE) | (next == S0);
-	assign busStarting = busPhase == S0;
+	wire busEnding = (next == 32&#39;d1) | (next == 32&#39;d2);
+	assign busStarting = busPhase == 32&#39;d2;
 	assign busEnd = ~rDtack | iStop;
-	assign bcComplete = busPhase == S6;
+	assign bcComplete = busPhase == 32&#39;d5;
 	wire bciClear = bcComplete &amp; ~busRetry;
 	assign bcReset = Clks[3] | ((addrOeDelay &amp; BeDebounced) &amp; Vpai);
 	assign waitBusCycle = wendReg &amp; !bcComplete;
-	assign bgBlock = ((busPhase == S0) &amp; ASn) | (busPhase == SRMC_RES);
+	assign bgBlock = ((busPhase == 32&#39;d2) &amp; ASn) | (busPhase == 32&#39;d6);
 	always @(posedge Clks[4]) begin
 		if (Clks[3])
 			addrOe &lt;= 1&#39;b0;
-		else if (Clks[0] &amp; (busPhase == S0))
+		else if (Clks[0] &amp; (busPhase == 32&#39;d2))
 			addrOe &lt;= 1&#39;b1;
-		else if (Clks[1] &amp; (busPhase == SRMC_RES))
+		else if (Clks[1] &amp; (busPhase == 32&#39;d6))
 			addrOe &lt;= 1&#39;b0;
 		else if ((Clks[1] &amp; ~isRmcReg) &amp; busEnding)
 			addrOe &lt;= 1&#39;b0;
@@ -2101,29 +2081,29 @@ module busControl (
 			dataOe &lt;= 1&#39;b0;
 		end
 		else begin
-			if ((Clks[0] &amp; isWriteReg) &amp; (busPhase == S2))
+			if ((Clks[0] &amp; isWriteReg) &amp; (busPhase == 32&#39;d3))
 				dataOe &lt;= 1&#39;b1;
-			else if (Clks[1] &amp; (busEnding | (busPhase == SIDLE)))
+			else if (Clks[1] &amp; (busEnding | (busPhase == 32&#39;d1)))
 				dataOe &lt;= 1&#39;b0;
 			if (Clks[1] &amp; busEnding)
 				rRWn &lt;= 1&#39;b1;
 			else if (Clks[1] &amp; isWriteReg)
-				if ((busPhase == S0) &amp; isWriteReg)
+				if ((busPhase == 32&#39;d2) &amp; isWriteReg)
 					rRWn &lt;= 1&#39;b0;
-			if (Clks[1] &amp; (busPhase == S0))
+			if (Clks[1] &amp; (busPhase == 32&#39;d2))
 				rAS &lt;= 1&#39;b0;
-			else if (Clks[0] &amp; (busPhase == SRMC_RES))
+			else if (Clks[0] &amp; (busPhase == 32&#39;d6))
 				rAS &lt;= 1&#39;b1;
-			else if ((Clks[0] &amp; bcComplete) &amp; ~SRMC_RES)
+			else if ((Clks[0] &amp; bcComplete) &amp; ~32&#39;d6)
 				if (~isRmcReg)
 					rAS &lt;= 1&#39;b1;
-			if (Clks[1] &amp; (busPhase == S0)) begin
+			if (Clks[1] &amp; (busPhase == 32&#39;d2)) begin
 				if (~isWriteReg &amp; !busAddrErr) begin
 					rUDS &lt;= ~(~bciByte | ~aob0);
 					rLDS &lt;= ~(~bciByte | aob0);
 				end
 			end
-			else if (((Clks[1] &amp; isWriteReg) &amp; (busPhase == S2)) &amp; !busAddrErr) begin
+			else if (((Clks[1] &amp; isWriteReg) &amp; (busPhase == 32&#39;d3)) &amp; !busAddrErr) begin
 				rUDS &lt;= ~(~bciByte | ~aob0);
 				rLDS &lt;= ~(~bciByte | aob0);
 			end

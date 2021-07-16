@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_fsb_node_trace_replay.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_fsb_node_trace_replay.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_fsb/bsg_fsb_node_trace_replay.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_fsb/bsg_fsb_node_trace_replay.v</a>
 defines: 
-completed: 2021-07-16 01:36:28
-time_elapsed: 0.075s
-ram usage: 77040 KB
+completed: 2021-07-16 17:51:25
+time_elapsed: 0.085s
+ram usage: 79048 KB
 </pre>
 <pre class="log">
 
@@ -89,49 +89,42 @@ module bsg_fsb_node_trace_replay (
 	assign op = rom_data_i[ring_width_p+:4];
 	reg instr_completed;
 	assign addr_n = (instr_completed ? addr_r + 1&#39;b1 : addr_r);
-	localparam [3:0] eDone = 4&#39;d3;
-	localparam [3:0] eReceive = 4&#39;d2;
-	localparam [3:0] eSend = 4&#39;d1;
 	always @(*) begin
 		v_o = 1&#39;b0;
 		ready_o = done_r;
 		done_n = done_r;
 		if ((!done_r &amp; en_i) &amp; ~reset_i)
 			case (op)
-				eSend: v_o = 1&#39;b1;
-				eReceive: ready_o = 1&#39;b1;
-				eDone: done_n = 1&#39;b1;
+				4&#39;d1: v_o = 1&#39;b1;
+				4&#39;d2: ready_o = 1&#39;b1;
+				4&#39;d3: done_n = 1&#39;b1;
 				default:
 					;
 			endcase
 	end
-	localparam [3:0] eCycleDec = 4&#39;d5;
-	localparam [3:0] eCycleInit = 4&#39;d6;
-	localparam [3:0] eFinish = 4&#39;d4;
-	localparam [3:0] eNop = 4&#39;d0;
 	always @(*) begin
 		instr_completed = 1&#39;b0;
 		error_n = error_r;
 		cycle_ctr_n = cycle_ctr_r;
 		if ((!done_r &amp; en_i) &amp; ~reset_i)
 			case (op)
-				eNop: instr_completed = 1&#39;b1;
-				eSend:
+				4&#39;d0: instr_completed = 1&#39;b1;
+				4&#39;d1:
 					if (yumi_i)
 						instr_completed = 1&#39;b1;
-				eReceive:
+				4&#39;d2:
 					if (v_i) begin
 						instr_completed = 1&#39;b1;
 						if (error_r == 0)
 							error_n = data_i != data_o;
 					end
-				eDone: instr_completed = 1&#39;b1;
-				eFinish: instr_completed = 1&#39;b1;
-				eCycleDec: begin
+				4&#39;d3: instr_completed = 1&#39;b1;
+				4&#39;d4: instr_completed = 1&#39;b1;
+				4&#39;d5: begin
 					cycle_ctr_n = cycle_ctr_r - 1&#39;b1;
 					instr_completed = ~(|cycle_ctr_r);
 				end
-				eCycleInit: begin
+				4&#39;d6: begin
 					cycle_ctr_n = rom_data_i[counter_width_p - 1:0];
 					instr_completed = 1;
 				end
@@ -142,7 +135,7 @@ module bsg_fsb_node_trace_replay (
 	always @(negedge clk_i)
 		if ((instr_completed &amp; ~reset_i) &amp; ~done_r) begin
 			case (op)
-				eSend: begin : sv2v_autoblock_1
+				4&#39;d1: begin : sv2v_autoblock_1
 					string localtime;
 					if (uptime_p) begin : sv2v_autoblock_2
 						reg signed [31:0] fd;
@@ -154,7 +147,7 @@ module bsg_fsb_node_trace_replay (
 						localtime = &#34;&#34;;
 					$display(&#34;### bsg_fsb_node_trace_replay SEND %d&#39;b%b (%m), time=%t uptime=%s&#34;, ring_width_p, data_o, $time, localtime);
 				end
-				eReceive:
+				4&#39;d2:
 					if (data_i !== data_o) begin
 						$display(&#34;############################################################################&#34;);
 						$display(&#34;### bsg_fsb_node_trace_replay RECEIVE unmatched (%m) &#34;);
@@ -167,26 +160,26 @@ module bsg_fsb_node_trace_replay (
 					end
 					else
 						$display(&#34;### bsg_fsb_node_trace_replay RECEIVE matched %h (%m)&#34;, data_o);
-				eDone: begin
+				4&#39;d3: begin
 					$display(&#34;############################################################################&#34;);
 					$display(&#34;###### bsg_fsb_node_trace_replay DONE done_o=1 (trace finished addr=%x) (%m)&#34;, rom_addr_o);
 					$display(&#34;############################################################################&#34;);
 				end
-				eFinish: begin
+				4&#39;d4: begin
 					$display(&#34;############################################################################&#34;);
 					$display(&#34;###### bsg_fsb_node_trace_replay FINISH (trace finished; CALLING $finish) (%m)&#34;);
 					$display(&#34;############################################################################&#34;);
 					$finish;
 				end
-				eCycleDec:
+				4&#39;d5:
 					$display(&#34;### bsg_fsb_node_trace_replay CYCLE DEC cycle_ctr_r = %x (%m)&#34;, cycle_ctr_r);
-				eCycleInit:
+				4&#39;d6:
 					$display(&#34;### bsg_fsb_node_trace_replay CYCLE INIT = %x (%m)&#34;, cycle_ctr_n);
 				default:
 					;
 			endcase
 			case (op)
-				eNop, eSend, eReceive, eDone, eFinish, eCycleDec, eCycleInit:
+				4&#39;d0, 4&#39;d1, 4&#39;d2, 4&#39;d3, 4&#39;d4, 4&#39;d5, 4&#39;d6:
 					;
 				default:
 					$display(&#34;### bsg_fsb_node_trace_replay UNKNOWN op %x (%m)\n&#34;, op);

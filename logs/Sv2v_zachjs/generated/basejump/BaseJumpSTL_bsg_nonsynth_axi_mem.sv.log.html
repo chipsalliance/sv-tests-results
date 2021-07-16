@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_nonsynth_axi_mem.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_nonsynth_axi_mem.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_nonsynth_axi_mem.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_nonsynth_axi_mem.v</a>
 defines: 
-completed: 2021-07-16 01:36:16
-time_elapsed: 0.083s
-ram usage: 76776 KB
+completed: 2021-07-16 17:51:14
+time_elapsed: 0.075s
+ram usage: 77064 KB
 </pre>
 <pre class="log">
 
@@ -96,10 +96,6 @@ module bsg_nonsynth_axi_mem (
 	reg [axi_addr_width_p - 1:0] awaddr_n;
 	wire [lg_mem_els_lp - 1:0] wr_ram_idx;
 	assign wr_ram_idx = awaddr_r[((axi_data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(axi_data_width_p &gt;&gt; 3))+:lg_mem_els_lp];
-	localparam [1:0] WR_RESET = 0;
-	localparam [1:0] WR_RESP = 3;
-	localparam [1:0] WR_WAIT_ADDR = 1;
-	localparam [1:0] WR_WAIT_DATA = 2;
 	always @(*) begin
 		axi_awready_o = 1&#39;b0;
 		axi_wready_o = 1&#39;b0;
@@ -107,24 +103,24 @@ module bsg_nonsynth_axi_mem (
 		axi_bresp_o = {2 {1&#39;sb0}};
 		axi_bvalid_o = 1&#39;b0;
 		case (wr_state_r)
-			WR_RESET: begin
+			2&#39;d0: begin
 				axi_awready_o = 1&#39;b0;
-				wr_state_n = WR_WAIT_ADDR;
+				wr_state_n = 2&#39;d1;
 			end
-			WR_WAIT_ADDR: begin
+			2&#39;d1: begin
 				axi_awready_o = 1&#39;b1;
 				awid_n = (axi_awvalid_i ? axi_awid_i : awid_r);
 				awaddr_n = (axi_awvalid_i ? axi_awaddr_i : awaddr_r);
-				wr_state_n = (axi_awvalid_i ? WR_WAIT_DATA : WR_WAIT_ADDR);
+				wr_state_n = (axi_awvalid_i ? 2&#39;d2 : 2&#39;d1);
 			end
-			WR_WAIT_DATA: begin
+			2&#39;d2: begin
 				axi_wready_o = 1&#39;b1;
 				awaddr_n = (axi_wvalid_i ? awaddr_r + (1 &lt;&lt; ((axi_data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(axi_data_width_p &gt;&gt; 3))) : awaddr_r);
-				wr_state_n = (axi_wvalid_i &amp; axi_wlast_i ? WR_RESP : WR_WAIT_DATA);
+				wr_state_n = (axi_wvalid_i &amp; axi_wlast_i ? 2&#39;d3 : 2&#39;d2);
 			end
-			WR_RESP: begin
+			2&#39;d3: begin
 				axi_bvalid_o = 1&#39;b1;
-				wr_state_n = (axi_bready_i ? WR_WAIT_ADDR : WR_RESP);
+				wr_state_n = (axi_bready_i ? 2&#39;d1 : 2&#39;d3);
 			end
 		endcase
 	end
@@ -146,9 +142,6 @@ module bsg_nonsynth_axi_mem (
 			assign axi_rdata_o[i] = (ram[rd_ram_idx][i] === 1&#39;bx ? uninit_data[i] : ram[rd_ram_idx][i]);
 		end
 	endgenerate
-	localparam [1:0] RD_RESET = 0;
-	localparam [1:0] RD_SEND_DATA = 2;
-	localparam [1:0] RD_WAIT_ADDR = 1;
 	always @(*) begin
 		axi_rvalid_o = 1&#39;b0;
 		axi_rlast_o = 1&#39;b0;
@@ -156,32 +149,32 @@ module bsg_nonsynth_axi_mem (
 		axi_rresp_o = {2 {1&#39;sb0}};
 		axi_arready_o = 1&#39;b0;
 		case (rd_state_r)
-			RD_RESET: begin
+			2&#39;d0: begin
 				axi_arready_o = 1&#39;b0;
-				rd_state_n = RD_WAIT_ADDR;
+				rd_state_n = 2&#39;d1;
 			end
-			RD_WAIT_ADDR: begin
+			2&#39;d1: begin
 				axi_arready_o = 1&#39;b1;
 				arid_n = (axi_arvalid_i ? axi_arid_i : arid_r);
 				araddr_n = (axi_arvalid_i ? axi_araddr_i : araddr_r);
 				rd_burst_n = (axi_arvalid_i ? {(axi_burst_len_p == 1 ? 1 : $clog2(axi_burst_len_p)) {1&#39;sb0}} : rd_burst_r);
-				rd_state_n = (axi_arvalid_i ? RD_SEND_DATA : RD_WAIT_ADDR);
+				rd_state_n = (axi_arvalid_i ? 2&#39;d2 : 2&#39;d1);
 			end
-			RD_SEND_DATA: begin
+			2&#39;d2: begin
 				axi_rvalid_o = 1&#39;b1;
 				axi_rlast_o = rd_burst_r == (axi_burst_len_p - 1);
 				rd_burst_n = (axi_rready_i ? rd_burst_r + 1 : rd_burst_r);
-				rd_state_n = ((rd_burst_r == (axi_burst_len_p - 1)) &amp; axi_rready_i ? RD_WAIT_ADDR : RD_SEND_DATA);
+				rd_state_n = ((rd_burst_r == (axi_burst_len_p - 1)) &amp; axi_rready_i ? 2&#39;d1 : 2&#39;d2);
 				araddr_n = (axi_rready_i ? araddr_r + (1 &lt;&lt; ((axi_data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(axi_data_width_p &gt;&gt; 3))) : araddr_r);
 			end
 		endcase
 	end
 	always @(posedge clk_i)
 		if (reset_i) begin
-			wr_state_r &lt;= WR_RESET;
+			wr_state_r &lt;= 2&#39;d0;
 			awid_r &lt;= {axi_id_width_p {1&#39;sb0}};
 			awaddr_r &lt;= {axi_addr_width_p {1&#39;sb0}};
-			rd_state_r &lt;= RD_RESET;
+			rd_state_r &lt;= 2&#39;d0;
 			arid_r &lt;= {axi_id_width_p {1&#39;sb0}};
 			araddr_r &lt;= {axi_addr_width_p {1&#39;sb0}};
 			rd_burst_r &lt;= {(axi_burst_len_p == 1 ? 1 : $clog2(axi_burst_len_p)) {1&#39;sb0}};
@@ -190,7 +183,7 @@ module bsg_nonsynth_axi_mem (
 			wr_state_r &lt;= wr_state_n;
 			awid_r &lt;= awid_n;
 			awaddr_r &lt;= awaddr_n;
-			if ((wr_state_r == WR_WAIT_DATA) &amp; axi_wvalid_i) begin : sv2v_autoblock_1
+			if ((wr_state_r == 2&#39;d2) &amp; axi_wvalid_i) begin : sv2v_autoblock_1
 				integer i;
 				for (i = 0; i &lt; axi_strb_width_lp; i = i + 1)
 					if (axi_wstrb_i[i])

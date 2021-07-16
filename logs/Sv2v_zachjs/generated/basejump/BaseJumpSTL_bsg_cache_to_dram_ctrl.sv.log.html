@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_cache_to_dram_ctrl.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_cache_to_dram_ctrl.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_dram_ctrl.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_dram_ctrl.v</a>
 defines: 
-completed: 2021-07-16 01:36:06
-time_elapsed: 0.093s
-ram usage: 77284 KB
+completed: 2021-07-16 17:51:05
+time_elapsed: 0.074s
+ram usage: 77024 KB
 </pre>
 <pre class="log">
 
@@ -158,13 +158,9 @@ module bsg_cache_to_dram_ctrl (
 	reg write_not_read_n;
 	reg [(num_req_lp == 1 ? 1 : $clog2(num_req_lp)) - 1:0] req_cnt_r;
 	reg [(num_req_lp == 1 ? 1 : $clog2(num_req_lp)) - 1:0] req_cnt_n;
-	localparam [0:0] SEND_REQ = 1;
-	localparam [0:0] WAIT = 0;
-	localparam [2:0] bsg_dmc_pkg_RD = 3&#39;b001;
-	localparam [2:0] bsg_dmc_pkg_WR = 3&#39;b000;
 	always @(*) begin
 		app_en_o = 1&#39;b0;
-		app_cmd_o = bsg_dmc_pkg_WR;
+		app_cmd_o = 3&#39;b000;
 		rr_yumi_li = 1&#39;b0;
 		tag_n = tag_r;
 		write_not_read_n = write_not_read_r;
@@ -174,23 +170,23 @@ module bsg_cache_to_dram_ctrl (
 		req_cnt_n = req_cnt_r;
 		addr_n = addr_r;
 		case (req_state_r)
-			WAIT:
+			1&#39;d0:
 				if (rr_v_lo) begin
 					rr_yumi_li = 1&#39;b1;
 					tag_n = rr_tag_lo;
 					addr_n = dma_pkt[addr_width_p - 1-:addr_width_p];
 					write_not_read_n = dma_pkt[addr_width_p];
 					req_cnt_n = {(num_req_lp == 1 ? 1 : $clog2(num_req_lp)) {1&#39;sb0}};
-					req_state_n = SEND_REQ;
+					req_state_n = 1&#39;d1;
 				end
-			SEND_REQ: begin
+			1&#39;d1: begin
 				app_en_o = (write_not_read_r ? tx_ready_lo : rx_ready_lo);
-				app_cmd_o = (write_not_read_r ? bsg_dmc_pkg_WR : bsg_dmc_pkg_RD);
+				app_cmd_o = (write_not_read_r ? 3&#39;b000 : 3&#39;b001);
 				rx_v_li = (~write_not_read_r &amp; rx_ready_lo) &amp; app_rdy_i;
 				tx_v_li = (write_not_read_r &amp; tx_ready_lo) &amp; app_rdy_i;
 				addr_n = (app_rdy_i &amp; app_en_o ? addr_r + (1 &lt;&lt; (((dram_ctrl_burst_len_p * data_width_p) / 8) == 1 ? 1 : $clog2((dram_ctrl_burst_len_p * data_width_p) / 8))) : addr_r);
 				req_cnt_n = (app_rdy_i &amp; app_en_o ? req_cnt_r + 1 : req_cnt_r);
-				req_state_n = ((app_rdy_i &amp; app_en_o) &amp; (req_cnt_r == (num_req_lp - 1)) ? WAIT : SEND_REQ);
+				req_state_n = ((app_rdy_i &amp; app_en_o) &amp; (req_cnt_r == (num_req_lp - 1)) ? 1&#39;d0 : 1&#39;d1);
 			end
 		endcase
 	end
@@ -209,7 +205,7 @@ module bsg_cache_to_dram_ctrl (
 		endcase
 	always @(posedge clk_i)
 		if (reset_i) begin
-			req_state_r &lt;= WAIT;
+			req_state_r &lt;= 1&#39;d0;
 			tag_r &lt;= {lg_num_cache_lp {1&#39;sb0}};
 			addr_r &lt;= {addr_width_p {1&#39;sb0}};
 			req_cnt_r &lt;= {(num_req_lp == 1 ? 1 : $clog2(num_req_lp)) {1&#39;sb0}};

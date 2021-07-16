@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/basejump/BaseJumpSTL_bsg_dmc_controller.sv.html" target="file-frame">tests/generated/basejump/BaseJumpSTL_bsg_dmc_controller.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_controller.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_controller.v</a>
 defines: 
-completed: 2021-07-16 01:36:29
-time_elapsed: 0.190s
-ram usage: 83128 KB
+completed: 2021-07-16 17:51:26
+time_elapsed: 0.178s
+ram usage: 85016 KB
 </pre>
 <pre class="log">
 
@@ -236,12 +236,10 @@ module bsg_dmc_controller (
 	assign app_ref_ack_o = app_ref_req_i &amp; ~app_wdf_end_i;
 	assign app_zq_ack_o = app_zq_req_i;
 	assign app_sr_active_o = app_sr_req_i;
-	localparam [2:0] bsg_dmc_pkg_RD = 3&#39;b001;
-	localparam [2:0] bsg_dmc_pkg_RP = 3&#39;b011;
 	always @(posedge ui_clk_i)
 		if (ui_clk_sync_rst_i)
 			rd_credit &lt;= cmd_afifo_depth_p;
-		else if ((app_en_i &amp;&amp; ((app_cmd_i == bsg_dmc_pkg_RD) || (app_cmd_i == bsg_dmc_pkg_RP))) &amp;&amp; app_rdy_o) begin
+		else if ((app_en_i &amp;&amp; ((app_cmd_i == 3&#39;b001) || (app_cmd_i == 3&#39;b011))) &amp;&amp; app_rdy_o) begin
 			if (!(app_rd_data_valid_o &amp;&amp; app_rd_data_end_o))
 				rd_credit &lt;= rd_credit - 1;
 		end
@@ -255,8 +253,7 @@ module bsg_dmc_controller (
 	assign cmd_afifo_wdata[ui_addr_width_p - 1-:ui_addr_width_p] = app_addr_i;
 	assign cmd_afifo_rclk = dfi_clk_i;
 	assign cmd_afifo_rrst = dfi_clk_sync_rst_i;
-	localparam [1:0] LDST = 3;
-	assign cmd_afifo_rinc = (cmd_afifo_rvalid &amp; cmd_sfifo_ready) &amp; ((cstate == LDST) &amp;&amp; (ldst_tick == 0));
+	assign cmd_afifo_rinc = (cmd_afifo_rvalid &amp; cmd_sfifo_ready) &amp; ((cstate == 2&#39;d3) &amp;&amp; (ldst_tick == 0));
 	bsg_async_fifo #(
 		.width_p(3 + ui_addr_width_p),
 		.lg_size_p($clog2(cmd_afifo_depth_p))
@@ -297,8 +294,7 @@ module bsg_dmc_controller (
 	);
 	assign tx_sipo_valid_li = wrdata_afifo_rvalid;
 	assign tx_sipo_data_li = wrdata_afifo_rdata;
-	localparam [3:0] bsg_dmc_pkg_WRITE = 4&#39;b0100;
-	assign tx_sipo_yumi_cnt_li = ($clog2(ui_burst_length_lp) + 1)&#39;((shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == bsg_dmc_pkg_WRITE) ? ui_burst_length_lp : 0));
+	assign tx_sipo_yumi_cnt_li = ($clog2(ui_burst_length_lp) + 1)&#39;((shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == 4&#39;b0100) ? ui_burst_length_lp : 0));
 	bsg_serial_in_parallel_out #(
 		.width_p(ui_data_width_p + ui_mask_width_lp),
 		.els_p(ui_burst_length_lp)
@@ -330,19 +326,17 @@ module bsg_dmc_controller (
 			init_calib_complete_o &lt;= 0;
 		else if (init_done)
 			init_calib_complete_o &lt;= 1;
-	localparam [1:0] IDLE = 0;
-	localparam [1:0] INIT = 1;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			init_tick &lt;= 0;
-		else if ((cstate == IDLE) &amp;&amp; (nstate == INIT))
+		else if ((cstate == 2&#39;d0) &amp;&amp; (nstate == 2&#39;d1))
 			init_tick &lt;= dmc_p_i[15-:16];
-		else if (((cstate == INIT) &amp;&amp; (init_tick != 0)) &amp;&amp; push)
+		else if (((cstate == 2&#39;d1) &amp;&amp; (init_tick != 0)) &amp;&amp; push)
 			init_tick &lt;= init_tick - 1;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			init_done &lt;= 0;
-		else if ((cstate == INIT) &amp;&amp; (nstate == IDLE))
+		else if ((cstate == 2&#39;d1) &amp;&amp; (nstate == 2&#39;d0))
 			init_done &lt;= 1;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
@@ -360,23 +354,22 @@ module bsg_dmc_controller (
 				refr_req &lt;= 0;
 			else if (ref_tick == dmc_p_i[94-:16])
 				refr_req &lt;= 1;
-	localparam [1:0] REFR = 2;
-	assign refr_ack = ((cstate == REFR) &amp; push) &amp; (refr_tick == 0);
+	assign refr_ack = ((cstate == 2&#39;d2) &amp; push) &amp; (refr_tick == 0);
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			refr_tick &lt;= 0;
-		else if ((cstate == IDLE) &amp;&amp; (nstate == REFR)) begin
+		else if ((cstate == 2&#39;d0) &amp;&amp; (nstate == 2&#39;d2)) begin
 			if (|open_bank)
 				refr_tick &lt;= 1;
 			else
 				refr_tick &lt;= 0;
 		end
-		else if (((cstate == REFR) &amp;&amp; (refr_tick != 0)) &amp;&amp; push)
+		else if (((cstate == 2&#39;d2) &amp;&amp; (refr_tick != 0)) &amp;&amp; push)
 			refr_tick &lt;= refr_tick - 1;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			ldst_tick &lt;= 0;
-		else if ((cstate == IDLE) &amp;&amp; (nstate == LDST)) begin
+		else if ((cstate == 2&#39;d0) &amp;&amp; (nstate == 2&#39;d3)) begin
 			if (open_bank[bank_addr] &amp;&amp; (open_row[bank_addr] == row_addr))
 				ldst_tick &lt;= 0;
 			else if (open_bank[bank_addr])
@@ -384,14 +377,8 @@ module bsg_dmc_controller (
 			else
 				ldst_tick &lt;= 1;
 		end
-		else if (((cstate == LDST) &amp;&amp; (ldst_tick != 0)) &amp;&amp; push)
+		else if (((cstate == 2&#39;d3) &amp;&amp; (ldst_tick != 0)) &amp;&amp; push)
 			ldst_tick &lt;= ldst_tick - 1;
-	localparam [3:0] bsg_dmc_pkg_ACT = 4&#39;b0011;
-	localparam [3:0] bsg_dmc_pkg_DESELECT = 4&#39;b1xxx;
-	localparam [3:0] bsg_dmc_pkg_LMR = 4&#39;b0000;
-	localparam [3:0] bsg_dmc_pkg_PRE = 4&#39;b0010;
-	localparam [3:0] bsg_dmc_pkg_READ = 4&#39;b0101;
-	localparam [3:0] bsg_dmc_pkg_REF = 4&#39;b0001;
 	function automatic signed [3:0] sv2v_cast_4_signed;
 		input reg signed [3:0] inp;
 		sv2v_cast_4_signed = inp;
@@ -400,54 +387,54 @@ module bsg_dmc_controller (
 		push = 1&#39;b0;
 		cmd_sfifo_wdata = {24 {1&#39;b1}};
 		case (cstate)
-			INIT: begin
+			2&#39;d1: begin
 				push = cmd_sfifo_ready;
 				case (init_tick)
 					&#39;d4: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_PRE;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0010;
 						cmd_sfifo_wdata[15-:16] = 16&#39;h0400;
 					end
 					&#39;d3: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_REF;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0001;
 						cmd_sfifo_wdata[15-:16] = 16&#39;h0000;
 					end
 					&#39;d2: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_REF;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0001;
 						cmd_sfifo_wdata[15-:16] = 16&#39;h0000;
 					end
 					&#39;d1: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_LMR;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0000;
 						cmd_sfifo_wdata[15-:16] = {8&#39;h00, dmc_p_i[38-:4], sv2v_cast_4_signed($clog2(dfi_burst_length_lp &lt;&lt; 1))};
 						cmd_sfifo_wdata[18-:3] = 4&#39;h0;
 					end
 					&#39;d0: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_LMR;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0000;
 						cmd_sfifo_wdata[15-:16] = 16&#39;h0000;
 						cmd_sfifo_wdata[18-:3] = 4&#39;h2;
 					end
-					default: cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_DESELECT;
+					default: cmd_sfifo_wdata[23-:4] = 4&#39;b1xxx;
 				endcase
 			end
-			REFR: begin
+			2&#39;d2: begin
 				push = cmd_sfifo_ready;
 				case (refr_tick)
 					&#39;d1: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_PRE;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0010;
 						cmd_sfifo_wdata[15-:16] = 16&#39;h0400;
 					end
-					&#39;d0: cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_REF;
+					&#39;d0: cmd_sfifo_wdata[23-:4] = 4&#39;b0001;
 				endcase
 			end
-			LDST: begin
+			2&#39;d3: begin
 				push = cmd_sfifo_ready;
 				case (ldst_tick)
 					&#39;d2: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_PRE;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0010;
 						cmd_sfifo_wdata[18-:3] = bank_addr;
 						cmd_sfifo_wdata[15-:16] = open_row[bank_addr];
 					end
 					&#39;d1: begin
-						cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_ACT;
+						cmd_sfifo_wdata[23-:4] = 4&#39;b0011;
 						cmd_sfifo_wdata[18-:3] = bank_addr;
 						cmd_sfifo_wdata[15-:16] = row_addr;
 					end
@@ -455,47 +442,47 @@ module bsg_dmc_controller (
 						cmd_sfifo_wdata[18-:3] = bank_addr;
 						cmd_sfifo_wdata[15-:16] = {col_addr[14:10], ap, col_addr[9:0]};
 						if (cmd_afifo_rdata[ui_addr_width_p])
-							cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_READ;
+							cmd_sfifo_wdata[23-:4] = 4&#39;b0101;
 						else
-							cmd_sfifo_wdata[23-:4] = bsg_dmc_pkg_WRITE;
+							cmd_sfifo_wdata[23-:4] = 4&#39;b0100;
 					end
 				endcase
 			end
 		endcase
 	end
 	always @(*) begin
-		nstate = IDLE;
+		nstate = 2&#39;d0;
 		case (cstate)
-			IDLE:
+			2&#39;d0:
 				if (!init_done)
-					nstate = INIT;
+					nstate = 2&#39;d1;
 				else if (refr_req)
-					nstate = REFR;
+					nstate = 2&#39;d2;
 				else if (cmd_afifo_rvalid)
-					nstate = LDST;
+					nstate = 2&#39;d3;
 				else
 					nstate = cstate;
-			INIT:
+			2&#39;d1:
 				if ((init_tick == 0) &amp;&amp; push)
-					nstate = IDLE;
+					nstate = 2&#39;d0;
 				else
 					nstate = cstate;
-			REFR:
+			2&#39;d2:
 				if ((refr_tick == 0) &amp;&amp; push)
-					nstate = IDLE;
+					nstate = 2&#39;d0;
 				else
 					nstate = cstate;
-			LDST:
+			2&#39;d3:
 				if ((ldst_tick == 0) &amp;&amp; push)
-					nstate = IDLE;
+					nstate = 2&#39;d0;
 				else
 					nstate = cstate;
-			default: nstate = IDLE;
+			default: nstate = 2&#39;d0;
 		endcase
 	end
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
-			cstate &lt;= IDLE;
+			cstate &lt;= 2&#39;d0;
 		else
 			cstate &lt;= nstate;
 	assign cmd_sfifo_winc = push;
@@ -517,31 +504,31 @@ module bsg_dmc_controller (
 	always @(*)
 		if (cmd_sfifo_valid)
 			case (c_cmd)
-				bsg_dmc_pkg_LMR: shoot = cmd_tick &gt;= dmc_p_i[78-:4];
-				bsg_dmc_pkg_REF: shoot = cmd_tick &gt;= dmc_p_i[74-:4];
-				bsg_dmc_pkg_PRE: shoot = (n_cmd == bsg_dmc_pkg_ACT ? (cmd_tick &gt;= dmc_p_i[66-:4]) &amp;&amp; (cmd_act_tick &gt;= dmc_p_i[62-:4]) : cmd_tick &gt;= dmc_p_i[66-:4]);
-				bsg_dmc_pkg_ACT:
+				4&#39;b0000: shoot = cmd_tick &gt;= dmc_p_i[78-:4];
+				4&#39;b0001: shoot = cmd_tick &gt;= dmc_p_i[74-:4];
+				4&#39;b0010: shoot = (n_cmd == 4&#39;b0011 ? (cmd_tick &gt;= dmc_p_i[66-:4]) &amp;&amp; (cmd_act_tick &gt;= dmc_p_i[62-:4]) : cmd_tick &gt;= dmc_p_i[66-:4]);
+				4&#39;b0011:
 					case (n_cmd)
-						bsg_dmc_pkg_PRE: shoot = cmd_tick &gt;= dmc_p_i[62-:4];
-						bsg_dmc_pkg_ACT: shoot = cmd_tick &gt;= dmc_p_i[58-:4];
-						bsg_dmc_pkg_WRITE: shoot = ((cmd_tick &gt;= dmc_p_i[54-:4]) &amp; (cmd_rd_tick &gt;= ((dmc_p_i[38-:4] + dfi_burst_length_lp) - 1))) &amp; &amp;tx_sipo_valid_lo;
-						bsg_dmc_pkg_READ: shoot = (cmd_tick &gt;= dmc_p_i[54-:4]) &amp; (cmd_wr_tick &gt;= dmc_p_i[46-:4]);
+						4&#39;b0010: shoot = cmd_tick &gt;= dmc_p_i[62-:4];
+						4&#39;b0011: shoot = cmd_tick &gt;= dmc_p_i[58-:4];
+						4&#39;b0100: shoot = ((cmd_tick &gt;= dmc_p_i[54-:4]) &amp; (cmd_rd_tick &gt;= ((dmc_p_i[38-:4] + dfi_burst_length_lp) - 1))) &amp; &amp;tx_sipo_valid_lo;
+						4&#39;b0101: shoot = (cmd_tick &gt;= dmc_p_i[54-:4]) &amp; (cmd_wr_tick &gt;= dmc_p_i[46-:4]);
 						default: shoot = 1&#39;b1;
 					endcase
-				bsg_dmc_pkg_WRITE:
+				4&#39;b0100:
 					case (n_cmd)
-						bsg_dmc_pkg_PRE: shoot = (cmd_tick &gt;= dmc_p_i[50-:4]) &amp; (cmd_act_tick &gt;= dmc_p_i[62-:4]);
-						bsg_dmc_pkg_WRITE: shoot = (cmd_tick &gt;= (dfi_burst_length_lp - 1)) &amp; &amp;tx_sipo_valid_lo;
-						bsg_dmc_pkg_READ: shoot = cmd_tick &gt;= dmc_p_i[46-:4];
-						bsg_dmc_pkg_ACT: shoot = (cmd_act_tick &gt;= dmc_p_i[70-:4]) &amp; (cmd_tick &gt;= (dmc_p_i[50-:4] + dmc_p_i[66-:4]));
+						4&#39;b0010: shoot = (cmd_tick &gt;= dmc_p_i[50-:4]) &amp; (cmd_act_tick &gt;= dmc_p_i[62-:4]);
+						4&#39;b0100: shoot = (cmd_tick &gt;= (dfi_burst_length_lp - 1)) &amp; &amp;tx_sipo_valid_lo;
+						4&#39;b0101: shoot = cmd_tick &gt;= dmc_p_i[46-:4];
+						4&#39;b0011: shoot = (cmd_act_tick &gt;= dmc_p_i[70-:4]) &amp; (cmd_tick &gt;= (dmc_p_i[50-:4] + dmc_p_i[66-:4]));
 						default: shoot = 1&#39;b1;
 					endcase
-				bsg_dmc_pkg_READ:
+				4&#39;b0101:
 					case (n_cmd)
-						bsg_dmc_pkg_PRE: shoot = (cmd_tick &gt;= dmc_p_i[42-:4]) &amp; (cmd_act_tick &gt;= dmc_p_i[62-:4]);
-						bsg_dmc_pkg_WRITE: shoot = (cmd_tick &gt;= ((dmc_p_i[38-:4] + dfi_burst_length_lp) - 1)) &amp; &amp;tx_sipo_valid_lo;
-						bsg_dmc_pkg_READ: shoot = cmd_tick &gt;= (dfi_burst_length_lp - 1);
-						bsg_dmc_pkg_ACT: shoot = (cmd_act_tick &gt;= dmc_p_i[70-:4]) &amp; (cmd_tick &gt;= (dmc_p_i[42-:4] + dmc_p_i[66-:4]));
+						4&#39;b0010: shoot = (cmd_tick &gt;= dmc_p_i[42-:4]) &amp; (cmd_act_tick &gt;= dmc_p_i[62-:4]);
+						4&#39;b0100: shoot = (cmd_tick &gt;= ((dmc_p_i[38-:4] + dfi_burst_length_lp) - 1)) &amp; &amp;tx_sipo_valid_lo;
+						4&#39;b0101: shoot = cmd_tick &gt;= (dfi_burst_length_lp - 1);
+						4&#39;b0011: shoot = (cmd_act_tick &gt;= dmc_p_i[70-:4]) &amp; (cmd_tick &gt;= (dmc_p_i[42-:4] + dmc_p_i[66-:4]));
 						default: shoot = 1&#39;b1;
 					endcase
 				default: shoot = 1&#39;b1;
@@ -558,28 +545,27 @@ module bsg_dmc_controller (
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			cmd_act_tick &lt;= 0;
-		else if (shoot &amp;&amp; (n_cmd == bsg_dmc_pkg_ACT))
+		else if (shoot &amp;&amp; (n_cmd == 4&#39;b0011))
 			cmd_act_tick &lt;= 0;
 		else if (cmd_act_tick != 8&#39;h0f)
 			cmd_act_tick &lt;= cmd_act_tick + 1;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			cmd_wr_tick &lt;= 0;
-		else if (shoot &amp;&amp; (n_cmd == bsg_dmc_pkg_WRITE))
+		else if (shoot &amp;&amp; (n_cmd == 4&#39;b0100))
 			cmd_wr_tick &lt;= 0;
 		else if (cmd_wr_tick != 8&#39;h0f)
 			cmd_wr_tick &lt;= cmd_wr_tick + 1;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
 			cmd_rd_tick &lt;= 0;
-		else if (shoot &amp;&amp; (n_cmd == bsg_dmc_pkg_READ))
+		else if (shoot &amp;&amp; (n_cmd == 4&#39;b0101))
 			cmd_rd_tick &lt;= 0;
 		else if (cmd_rd_tick != 8&#39;h0f)
 			cmd_rd_tick &lt;= cmd_rd_tick + 1;
-	localparam [3:0] bsg_dmc_pkg_NOP = 4&#39;b0111;
 	always @(posedge dfi_clk_i)
 		if (dfi_clk_sync_rst_i)
-			c_cmd &lt;= bsg_dmc_pkg_NOP;
+			c_cmd &lt;= 4&#39;b0111;
 		else if (shoot)
 			c_cmd &lt;= n_cmd;
 	assign n_cmd = cmd_sfifo_rdata[23-:4];
@@ -588,7 +574,7 @@ module bsg_dmc_controller (
 			cwd_tick &lt;= 0;
 			cwd_valid &lt;= 0;
 		end
-		else if (shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == bsg_dmc_pkg_WRITE)) begin
+		else if (shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == 4&#39;b0100)) begin
 			cwd_tick &lt;= dmc_p_i[38-:4] - 2;
 			cwd_valid &lt;= 1;
 		end
@@ -602,7 +588,7 @@ module bsg_dmc_controller (
 			wburst_tick &lt;= 0;
 			wburst_valid &lt;= 0;
 		end
-		else if (shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == bsg_dmc_pkg_WRITE)) begin
+		else if (shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == 4&#39;b0100)) begin
 			wburst_tick &lt;= dfi_burst_length_lp - 1;
 			wburst_valid &lt;= 1;
 		end
@@ -616,7 +602,7 @@ module bsg_dmc_controller (
 			cas_tick &lt;= 0;
 			cas_valid &lt;= 0;
 		end
-		else if (shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == bsg_dmc_pkg_READ)) begin
+		else if (shoot &amp;&amp; (cmd_sfifo_rdata[23:20] == 4&#39;b0101)) begin
 			cas_tick &lt;= dmc_p_i[38-:4] - 1;
 			cas_valid &lt;= 1;
 		end
@@ -667,12 +653,12 @@ module bsg_dmc_controller (
 			open_bank &lt;= 0;
 		else if (cmd_sfifo_winc)
 			case (cmd_sfifo_wdata[23:20])
-				bsg_dmc_pkg_ACT: begin
+				4&#39;b0011: begin
 					open_bank[cmd_sfifo_wdata[18:16]] &lt;= 1&#39;b1;
 					open_row[cmd_sfifo_wdata[18:16]] &lt;= cmd_sfifo_wdata[15:0];
 				end
-				bsg_dmc_pkg_WRITE, bsg_dmc_pkg_READ: open_bank[cmd_sfifo_wdata[18:16]] &lt;= ~ap;
-				bsg_dmc_pkg_PRE:
+				4&#39;b0100, 4&#39;b0101: open_bank[cmd_sfifo_wdata[18:16]] &lt;= ~ap;
+				4&#39;b0010:
 					if (cmd_sfifo_wdata[10])
 						open_bank &lt;= 0;
 					else
