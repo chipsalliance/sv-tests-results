@@ -1,0 +1,171 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/ice40
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv</a>
+defines: 
+completed: 2021-09-20 13:27:18
+time_elapsed: 0.026s
+ram usage: 28332 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv</a>
+`default_nettype none
+module top_life (
+	clk_12m,
+	btn_rst,
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
+);
+	input wire clk_12m;
+	input wire btn_rst;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
+	localparam GEN_FRAMES = 15;
+	localparam SEED_FILE = &#34;simple_64x48.mem&#34;;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_12m),
+		.rst(btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire line;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(),
+		.sy(),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line(line)
+	);
+	reg life_start;
+	wire life_alive;
+	wire life_changed;
+	reg [3:0] cnt_frames;
+	always @(posedge clk_pix) begin
+		life_start &lt;= 0;
+		if (frame)
+			if (cnt_frames == 14) begin
+				life_start &lt;= 1;
+				cnt_frames &lt;= 0;
+			end
+			else
+				cnt_frames &lt;= cnt_frames + 1;
+	end
+	localparam FB_WIDTH = 64;
+	localparam FB_HEIGHT = 48;
+	localparam FB_CIDXW = 2;
+	localparam FB_CHANW = 4;
+	localparam FB_SCALE = 10;
+	localparam FB_IMAGE = &#34;&#34;;
+	localparam FB_PALETTE = &#34;../res/life_palette.mem&#34;;
+	wire fb_we;
+	wire signed [15:0] fbx;
+	wire signed [15:0] fby;
+	reg [1:0] fb_cidx;
+	wire fb_busy;
+	wire [3:0] fb_red;
+	wire [3:0] fb_green;
+	wire [3:0] fb_blue;
+	framebuffer_bram #(
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.CIDXW(FB_CIDXW),
+		.CHANW(FB_CHANW),
+		.SCALE(FB_SCALE),
+		.F_IMAGE(FB_IMAGE),
+		.F_PALETTE(FB_PALETTE)
+	) fb_inst(
+		.clk_sys(clk_pix),
+		.clk_pix(clk_pix),
+		.rst_sys(1&#39;b0),
+		.rst_pix(1&#39;b0),
+		.de(de),
+		.frame(frame),
+		.line(line),
+		.we(fb_we),
+		.x(fbx),
+		.y(fby),
+		.cidx(fb_cidx),
+		.busy(fb_busy),
+		.clip(),
+		.red(fb_red),
+		.green(fb_green),
+		.blue(fb_blue)
+	);
+	always @(*) fb_cidx = {1&#39;b0, life_alive};
+	life #(
+		.CORDW(CORDW),
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.F_INIT({&#34;../res/seed/&#34;, SEED_FILE})
+	) life_inst(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(life_start),
+		.ready(fb_we),
+		.alive(life_alive),
+		.changed(life_changed),
+		.x(fbx),
+		.y(fby),
+		.running(),
+		.done()
+	);
+	reg hsync_p1;
+	reg vsync_p1;
+	reg de_p1;
+	always @(posedge clk_pix) begin
+		hsync_p1 &lt;= hsync;
+		vsync_p1 &lt;= vsync;
+		de_p1 &lt;= de;
+	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
+		.D_OUT_1()
+	);
+endmodule
+
+</pre>
+</body>

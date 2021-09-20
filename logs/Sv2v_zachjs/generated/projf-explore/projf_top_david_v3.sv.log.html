@@ -1,0 +1,198 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/ice40
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_top_david_v3.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_david_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david_v3.sv</a>
+defines: 
+completed: 2021-09-20 13:27:23
+time_elapsed: 0.031s
+ram usage: 35028 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_david_v3.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_david_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david_v3.sv</a>
+`default_nettype none
+module top_david_v3 (
+	clk_12m,
+	btn_rst,
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
+);
+	input wire clk_12m;
+	input wire btn_rst;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_12m),
+		.rst(btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line()
+	);
+	localparam FB_WIDTH = 160;
+	localparam FB_HEIGHT = 120;
+	localparam FB_PIXELS = 19200;
+	localparam FB_ADDRW = 15;
+	localparam FB_DATAW = 4;
+	localparam FB_IMAGE = &#34;../res/david/david.mem&#34;;
+	localparam FB_PALETTE = &#34;../res/david/david_palette.mem&#34;;
+	reg fb_we;
+	reg [14:0] fb_addr_write;
+	reg [14:0] fb_addr_read;
+	reg [3:0] fb_cidx_write;
+	wire [3:0] fb_cidx_read;
+	bram_sdp #(
+		.WIDTH(FB_DATAW),
+		.DEPTH(FB_PIXELS),
+		.INIT_F(FB_IMAGE)
+	) bram_inst(
+		.clk_write(clk_pix),
+		.clk_read(clk_pix),
+		.we(fb_we),
+		.addr_write(fb_addr_write),
+		.addr_read(fb_addr_read),
+		.data_in(fb_cidx_write),
+		.data_out(fb_cidx_read)
+	);
+	reg [7:0] cnt_draw;
+	reg [31:0] state;
+	always @(posedge clk_pix) begin
+		case (state)
+			32&#39;d1:
+				if (cnt_draw &lt; 159) begin
+					fb_addr_write &lt;= fb_addr_write + 1;
+					cnt_draw &lt;= cnt_draw + 1;
+				end
+				else begin
+					cnt_draw &lt;= 0;
+					state &lt;= 32&#39;d2;
+				end
+			32&#39;d2:
+				if (cnt_draw &lt; 119) begin
+					fb_addr_write &lt;= fb_addr_write + FB_WIDTH;
+					cnt_draw &lt;= cnt_draw + 1;
+				end
+				else begin
+					fb_addr_write &lt;= 0;
+					cnt_draw &lt;= 0;
+					state &lt;= 32&#39;d4;
+				end
+			32&#39;d4:
+				if (cnt_draw &lt; 119) begin
+					fb_addr_write &lt;= fb_addr_write + FB_WIDTH;
+					cnt_draw &lt;= cnt_draw + 1;
+				end
+				else begin
+					cnt_draw &lt;= 0;
+					state &lt;= 32&#39;d3;
+				end
+			32&#39;d3:
+				if (cnt_draw &lt; 159) begin
+					fb_addr_write &lt;= fb_addr_write + 1;
+					cnt_draw &lt;= cnt_draw + 1;
+				end
+				else begin
+					fb_we &lt;= 0;
+					state &lt;= 32&#39;d5;
+				end
+			32&#39;d0:
+				if (frame) begin
+					fb_cidx_write &lt;= 4&#39;h0;
+					fb_we &lt;= 1;
+					cnt_draw &lt;= 0;
+					state &lt;= 32&#39;d1;
+				end
+			default: state &lt;= 32&#39;d5;
+		endcase
+		if (!clk_locked)
+			state &lt;= 32&#39;d0;
+	end
+	reg paint;
+	always @(*) paint = de;
+	always @(posedge clk_pix)
+		if (paint)
+			fb_addr_read &lt;= (FB_WIDTH * (sy / 4)) + (sx / 4);
+	reg [3:0] fb_cidx_read_p1;
+	always @(posedge clk_pix) fb_cidx_read_p1 &lt;= fb_cidx_read;
+	wire [11:0] clut_colr;
+	rom_async #(
+		.WIDTH(12),
+		.DEPTH(16),
+		.INIT_F(FB_PALETTE)
+	) clut(
+		.addr(fb_cidx_read_p1),
+		.data(clut_colr)
+	);
+	localparam LAT = 3;
+	reg [2:0] paint_sr;
+	reg [2:0] hsync_sr;
+	reg [2:0] vsync_sr;
+	reg [2:0] de_sr;
+	always @(posedge clk_pix) begin
+		paint_sr &lt;= {paint, paint_sr[2:1]};
+		hsync_sr &lt;= {hsync, hsync_sr[2:1]};
+		vsync_sr &lt;= {vsync, vsync_sr[2:1]};
+		de_sr &lt;= {de, de_sr[2:1]};
+	end
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) {red, green, blue} = (paint_sr[0] ? clut_colr : 12&#39;h000);
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync_sr[0], vsync_sr[0], de_sr[0], red, green, blue}),
+		.D_OUT_1()
+	);
+endmodule
+
+</pre>
+</body>

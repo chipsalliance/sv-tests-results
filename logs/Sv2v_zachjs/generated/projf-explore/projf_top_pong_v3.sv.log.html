@@ -1,0 +1,182 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/ice40
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_top_pong_v3.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v3.sv</a>
+defines: 
+completed: 2021-09-20 13:27:18
+time_elapsed: 0.036s
+ram usage: 39160 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_pong_v3.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v3.sv</a>
+`default_nettype none
+module top_pong_v3 (
+	clk_12m,
+	btn_rst,
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
+);
+	input wire clk_12m;
+	input wire btn_rst;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_12m),
+		.rst(btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 10;
+	wire [9:0] sx;
+	wire [9:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
+	simple_display_timings_480p display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de)
+	);
+	localparam H_RES_FULL = 800;
+	localparam V_RES_FULL = 525;
+	localparam H_RES = 640;
+	localparam V_RES = 480;
+	reg animate;
+	always @(*) animate = (sy == V_RES) &amp;&amp; (sx == 0);
+	localparam B_SIZE = 8;
+	reg [9:0] bx;
+	reg [9:0] by;
+	reg dx;
+	reg dy;
+	reg [9:0] spx = 6;
+	reg [9:0] spy = 4;
+	reg b_draw;
+	localparam P_H = 40;
+	localparam P_W = 10;
+	localparam P_SP = 4;
+	localparam P_OFFS = 32;
+	reg [9:0] p1y;
+	reg [9:0] p2y;
+	reg p1_draw;
+	reg p2_draw;
+	reg p1_col;
+	reg p2_col;
+	always @(posedge clk_pix)
+		if (animate) begin
+			if ((p1y + 22) &lt; (by + 4)) begin
+				if (p1y &lt; 438)
+					p1y &lt;= p1y + P_SP;
+			end
+			else if ((p1y + 20) &gt; (by + 6))
+				if (p1y &gt; P_SP)
+					p1y &lt;= p1y - P_SP;
+			if ((p2y + 22) &lt; (by + 4)) begin
+				if (p2y &lt; 438)
+					p2y &lt;= p2y + P_SP;
+			end
+			else if ((p2y + 20) &gt; (by + 6))
+				if (p2y &gt; P_SP)
+					p2y &lt;= p2y - P_SP;
+		end
+	always @(*) begin
+		p1_draw = (((sx &gt;= P_OFFS) &amp;&amp; (sx &lt; 42)) &amp;&amp; (sy &gt;= p1y)) &amp;&amp; (sy &lt; (p1y + P_H));
+		p2_draw = (((sx &gt;= 598) &amp;&amp; (sx &lt; 608)) &amp;&amp; (sy &gt;= p2y)) &amp;&amp; (sy &lt; (p2y + P_H));
+	end
+	always @(posedge clk_pix)
+		if (animate) begin
+			p1_col &lt;= 0;
+			p2_col &lt;= 0;
+		end
+		else if (b_draw) begin
+			if (p1_draw)
+				p1_col &lt;= 1;
+			if (p2_draw)
+				p2_col &lt;= 1;
+		end
+	always @(posedge clk_pix)
+		if (animate) begin
+			if (p1_col) begin
+				dx &lt;= 0;
+				bx &lt;= bx + spx;
+			end
+			else if (p2_col) begin
+				dx &lt;= 1;
+				bx &lt;= bx - spx;
+			end
+			else if (bx &gt;= (H_RES - (spx + B_SIZE))) begin
+				dx &lt;= 1;
+				bx &lt;= bx - spx;
+			end
+			else if (bx &lt; spx) begin
+				dx &lt;= 0;
+				bx &lt;= bx + spx;
+			end
+			else
+				bx &lt;= (dx ? bx - spx : bx + spx);
+			if (by &gt;= (V_RES - (spy + B_SIZE))) begin
+				dy &lt;= 1;
+				by &lt;= by - spy;
+			end
+			else if (by &lt; spy) begin
+				dy &lt;= 0;
+				by &lt;= by + spy;
+			end
+			else
+				by &lt;= (dy ? by - spy : by + spy);
+		end
+	always @(*) b_draw = (((sx &gt;= bx) &amp;&amp; (sx &lt; (bx + B_SIZE))) &amp;&amp; (sy &gt;= by)) &amp;&amp; (sy &lt; (by + B_SIZE));
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) begin
+		red = (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+		green = (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+		blue = (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync, vsync, de, red, green, blue}),
+		.D_OUT_1()
+	);
+endmodule
+
+</pre>
+</body>

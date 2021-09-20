@@ -1,0 +1,196 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_linebuffer_tb.sv.html" target="file-frame">tests/generated/projf-explore/projf_linebuffer_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv</a>
+defines: 
+completed: 2021-09-20 13:27:20
+time_elapsed: 0.042s
+ram usage: 40120 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7 <a href="../../../../tests/generated/projf-explore/projf_linebuffer_tb.sv.html" target="file-frame">tests/generated/projf-explore/projf_linebuffer_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv</a>
+`default_nettype none
+module linebuffer_tb;
+	parameter CLK_PERIOD_100M = 10;
+	parameter CLK_PERIOD_25M = 40;
+	reg clk_25m;
+	reg clk_100m;
+	reg rst_in;
+	reg rst_out;
+	parameter LB_SCALE = 2;
+	parameter LB_LEN = 3;
+	parameter LB_BPC = 4;
+	parameter PIXEL_CNT = 6;
+	reg [LB_BPC - 1:0] ch0 [0:PIXEL_CNT - 1];
+	reg [LB_BPC - 1:0] ch1 [0:PIXEL_CNT - 1];
+	reg [LB_BPC - 1:0] ch2 [0:PIXEL_CNT - 1];
+	wire data_req;
+	reg en_in;
+	reg en_out;
+	reg frame;
+	reg line;
+	reg [LB_BPC - 1:0] din_0;
+	reg [LB_BPC - 1:0] din_1;
+	reg [LB_BPC - 1:0] din_2;
+	wire [LB_BPC - 1:0] dout_0;
+	wire [LB_BPC - 1:0] dout_1;
+	wire [LB_BPC - 1:0] dout_2;
+	reg [$clog2(PIXEL_CNT) - 1:0] read_addr;
+	reg [$clog2(LB_LEN + 1) - 1:0] cnt_h;
+	always @(posedge clk_100m) begin
+		if (data_req) begin
+			cnt_h &lt;= 0;
+			en_in &lt;= 1;
+		end
+		else if (cnt_h &lt; LB_LEN) begin
+			cnt_h &lt;= cnt_h + 1;
+			read_addr &lt;= (read_addr == (PIXEL_CNT - 1) ? 0 : read_addr + 1);
+		end
+		if (cnt_h == (LB_LEN - 1))
+			en_in &lt;= 0;
+		if (frame)
+			read_addr &lt;= 0;
+		if (rst_in) begin
+			read_addr &lt;= 0;
+			cnt_h &lt;= 0;
+			en_in &lt;= 0;
+		end
+	end
+	linebuffer #(
+		.WIDTH(LB_BPC),
+		.LEN(LB_LEN),
+		.SCALE(LB_SCALE)
+	) lb_inst(
+		.clk_in(clk_100m),
+		.clk_out(clk_25m),
+		.rst_in(rst_in),
+		.rst_out(rst_out),
+		.data_req(data_req),
+		.en_in(en_in),
+		.en_out(en_out),
+		.frame(frame),
+		.line(line),
+		.din_0(din_0),
+		.din_1(din_1),
+		.din_2(din_2),
+		.dout_0(dout_0),
+		.dout_1(dout_1),
+		.dout_2(dout_2)
+	);
+	always #(CLK_PERIOD_100M / 2) clk_100m = ~clk_100m;
+	always #(CLK_PERIOD_25M / 2) clk_25m = ~clk_25m;
+	initial begin
+		ch0[0] = 4&#39;b1010;
+		ch1[0] = 4&#39;b0101;
+		ch2[0] = 4&#39;b1111;
+		ch0[1] = 4&#39;b1000;
+		ch1[1] = 4&#39;b0100;
+		ch2[1] = 4&#39;b0010;
+		ch0[2] = 4&#39;b0000;
+		ch1[2] = 4&#39;b0010;
+		ch2[2] = 4&#39;b0001;
+		ch0[3] = 4&#39;b0101;
+		ch1[3] = 4&#39;b1010;
+		ch2[3] = 4&#39;b0000;
+		ch0[4] = 4&#39;b0000;
+		ch1[4] = 4&#39;b0010;
+		ch2[4] = 4&#39;b0001;
+		ch0[5] = 4&#39;b1000;
+		ch1[5] = 4&#39;b0100;
+		ch2[5] = 4&#39;b0010;
+	end
+	always @(*) begin
+		din_0 = ch0[read_addr];
+		din_1 = ch1[read_addr];
+		din_2 = ch2[read_addr];
+	end
+	initial begin
+		clk_100m = 1;
+		rst_in = 1;
+		frame = 0;
+		#(100) rst_in = 0;
+		#(240) frame = 1;
+		#(40) frame = 0;
+		#(1800) frame = 1;
+		#(40) frame = 0;
+		#(1800) frame = 1;
+		#(40) frame = 0;
+		#(1800) frame = 1;
+		#(40) frame = 0;
+	end
+	initial begin
+		clk_25m = 1;
+		rst_out = 1;
+		en_out = 0;
+		line = 0;
+		#(100) rst_out = 0;
+		#(300) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(160) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(160) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(80) line = 1;
+		#(40) line = 0;
+		#(80) en_out = 1;
+		#(240) en_out = 0;
+		#(1000)
+			$finish;
+	end
+endmodule
+
+</pre>
+</body>

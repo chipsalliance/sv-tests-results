@@ -1,0 +1,94 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_sprite_v2_tb.sv.html" target="file-frame">tests/generated/projf-explore/projf_sprite_v2_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7/sprite_v2_tb.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7/sprite_v2_tb.sv</a>
+defines: 
+completed: 2021-09-20 13:27:20
+time_elapsed: 0.016s
+ram usage: 19632 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7 <a href="../../../../tests/generated/projf-explore/projf_sprite_v2_tb.sv.html" target="file-frame">tests/generated/projf-explore/projf_sprite_v2_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7/sprite_v2_tb.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7/sprite_v2_tb.sv</a>
+`default_nettype none
+module sprite_v2_tb;
+	parameter CLK_PERIOD = 40;
+	reg rst;
+	reg clk_25m;
+	localparam H_RES_FULL = 40;
+	localparam V_RES_FULL = 27;
+	localparam H_RES = 32;
+	localparam V_RES = 24;
+	localparam CORDW = 6;
+	reg [5:0] sx;
+	reg [5:0] sy;
+	reg de;
+	always @(posedge clk_25m) begin
+		if (sx == 39) begin
+			sx &lt;= 0;
+			sy &lt;= (sy == 26 ? 0 : sy + 1);
+		end
+		else
+			sx &lt;= sx + 1;
+		if (rst) begin
+			sx &lt;= 0;
+			sy &lt;= 0;
+		end
+	end
+	always @(*) de = (sx &lt; H_RES) &amp;&amp; (sy &lt; V_RES);
+	localparam SPR_WIDTH = 8;
+	localparam SPR_HEIGHT = 8;
+	localparam SPR_SCALE_X = 3;
+	localparam SPR_SCALE_Y = 2;
+	localparam SPR_FILE = &#34;letter_f.mem&#34;;
+	reg spr_start;
+	wire spr_pix;
+	localparam DRAW_X = 0;
+	localparam DRAW_Y = 0;
+	reg [5:0] draw_y_cor;
+	always @(*) begin
+		draw_y_cor = 26;
+		spr_start = (sy == draw_y_cor) &amp;&amp; (sx == H_RES);
+	end
+	sprite_v2 #(
+		.WIDTH(SPR_WIDTH),
+		.HEIGHT(SPR_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.CORDW(CORDW),
+		.H_RES_FULL(H_RES_FULL),
+		.SPR_FILE(SPR_FILE)
+	) spr_instance(
+		.clk(clk_25m),
+		.rst(rst),
+		.start(spr_start),
+		.sx(sx),
+		.sprx(DRAW_X),
+		.pix(spr_pix)
+	);
+	always #(CLK_PERIOD / 2) clk_25m = ~clk_25m;
+	initial begin
+		rst = 1;
+		clk_25m = 1;
+		#(100) rst = 0;
+		#(100000)
+			$finish;
+	end
+endmodule
+
+</pre>
+</body>

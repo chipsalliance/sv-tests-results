@@ -1,0 +1,319 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_top_rotate.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_rotate.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_rotate.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_rotate.sv</a>
+defines: 
+completed: 2021-09-20 13:27:21
+time_elapsed: 0.039s
+ram usage: 45448 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_rotate.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_rotate.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_rotate.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_rotate.sv</a>
+`default_nettype none
+module top_rotate (
+	clk_100m,
+	btn_rst,
+	btn_inc,
+	btn_dec,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	input wire btn_inc;
+	input wire btn_dec;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire frame;
+	wire line;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(),
+		.frame(frame),
+		.line(line)
+	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
+	wire sig_inc;
+	wire sig_dec;
+	debounce deb_inc(
+		.clk(clk_100m),
+		.in(btn_inc),
+		.out(),
+		.ondn(),
+		.onup(sig_inc)
+	);
+	debounce deb_dec(
+		.clk(clk_100m),
+		.in(btn_dec),
+		.out(),
+		.ondn(),
+		.onup(sig_dec)
+	);
+	localparam FB_WIDTH = 320;
+	localparam FB_HEIGHT = 180;
+	localparam FB_CIDXW = 4;
+	localparam FB_CHANW = 4;
+	localparam FB_SCALE = 2;
+	localparam FB_IMAGE = &#34;&#34;;
+	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
+	localparam FB_BGIDX = 4&#39;h1;
+	reg fb_we;
+	wire fb_busy;
+	wire fb_wready;
+	reg signed [15:0] fbx;
+	reg signed [15:0] fby;
+	reg [3:0] fb_cidx;
+	wire [3:0] fb_red;
+	wire [3:0] fb_green;
+	wire [3:0] fb_blue;
+	framebuffer_bram_db #(
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.CIDXW(FB_CIDXW),
+		.CHANW(FB_CHANW),
+		.SCALE(FB_SCALE),
+		.F_IMAGE(FB_IMAGE),
+		.F_PALETTE(FB_PALETTE)
+	) fb_inst(
+		.clk_sys(clk_100m),
+		.clk_pix(clk_pix),
+		.rst_sys(1&#39;b0),
+		.rst_pix(1&#39;b0),
+		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
+		.frame(frame),
+		.line(line),
+		.we(fb_we),
+		.x(fbx),
+		.y(fby),
+		.cidx(fb_cidx),
+		.bgidx(FB_BGIDX),
+		.clear(1&#39;b1),
+		.busy(fb_busy),
+		.wready(fb_wready),
+		.clip(),
+		.red(fb_red),
+		.green(fb_green),
+		.blue(fb_blue)
+	);
+	localparam ANGLEW = 8;
+	reg [7:0] angle;
+	reg [15:0] rot_xi;
+	reg [15:0] rot_yi;
+	wire [15:0] rot_x;
+	wire [15:0] rot_y;
+	reg rot_start;
+	wire rot_done;
+	always @(posedge clk_100m) begin
+		if (sig_inc)
+			angle &lt;= angle + 2;
+		if (sig_dec)
+			angle &lt;= angle - 2;
+	end
+	rotate_xy #(
+		.CORDW(CORDW),
+		.ANGLEW(ANGLEW)
+	) rotate_xy_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(rot_start),
+		.angle(angle),
+		.xi(rot_xi),
+		.yi(rot_yi),
+		.x(rot_x),
+		.y(rot_y),
+		.done(rot_done)
+	);
+	reg signed [15:0] vx0;
+	reg signed [15:0] vy0;
+	reg signed [15:0] vx1;
+	reg signed [15:0] vy1;
+	reg signed [15:0] vx2;
+	reg signed [15:0] vy2;
+	reg signed [15:0] offs_x;
+	reg signed [15:0] offs_y;
+	wire signed [15:0] fbx_fill;
+	wire signed [15:0] fby_fill;
+	wire signed [15:0] fbx_outline;
+	wire signed [15:0] fby_outline;
+	reg drawing;
+	reg draw_done;
+	reg draw_start_fill;
+	wire drawing_fill;
+	wire draw_done_fill;
+	reg draw_start_outline;
+	wire drawing_outline;
+	wire draw_done_outline;
+	reg [31:0] state;
+	always @(posedge clk_100m) begin
+		rot_start &lt;= 0;
+		case (state)
+			32&#39;d1:
+				if (fb_wready) begin
+					state &lt;= 32&#39;d2;
+					vx0 &lt;= 0;
+					vy0 &lt;= -40;
+					vx1 &lt;= -30;
+					vy1 &lt;= 20;
+					vx2 &lt;= 45;
+					vy2 &lt;= 70;
+					offs_x &lt;= 160;
+					offs_y &lt;= 90;
+					fb_cidx &lt;= 4&#39;h9;
+				end
+			32&#39;d2: begin
+				rot_xi &lt;= vx0;
+				rot_yi &lt;= vy0;
+				rot_start &lt;= 1;
+				state &lt;= 32&#39;d3;
+			end
+			32&#39;d3:
+				if (rot_done) begin
+					vx0 &lt;= rot_x + offs_x;
+					vy0 &lt;= rot_y + offs_y;
+					rot_xi &lt;= vx1;
+					rot_yi &lt;= vy1;
+					rot_start &lt;= 1;
+					state &lt;= 32&#39;d4;
+				end
+			32&#39;d4:
+				if (rot_done) begin
+					vx1 &lt;= rot_x + offs_x;
+					vy1 &lt;= rot_y + offs_y;
+					rot_xi &lt;= vx2;
+					rot_yi &lt;= vy2;
+					rot_start &lt;= 1;
+					state &lt;= 32&#39;d5;
+				end
+			32&#39;d5:
+				if (rot_done) begin
+					vx2 &lt;= rot_x + offs_x;
+					vy2 &lt;= rot_y + offs_y;
+					draw_start_fill &lt;= 1;
+					state &lt;= 32&#39;d6;
+				end
+			32&#39;d6: begin
+				draw_start_fill &lt;= 0;
+				if (draw_done_fill) begin
+					state &lt;= 32&#39;d7;
+					draw_start_outline &lt;= 1;
+					fb_cidx &lt;= 4&#39;h8;
+				end
+			end
+			32&#39;d7: begin
+				draw_start_outline &lt;= 0;
+				if (draw_done_outline)
+					state &lt;= 32&#39;d8;
+			end
+			32&#39;d8: state &lt;= 32&#39;d0;
+			default:
+				if (frame_sys)
+					state &lt;= 32&#39;d1;
+		endcase
+	end
+	always @(*) begin
+		drawing = drawing_fill || drawing_outline;
+		draw_done = draw_done_fill || draw_done_outline;
+	end
+	draw_triangle_fill #(.CORDW(CORDW)) draw_triangle_fill_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(draw_start_fill),
+		.oe(!fb_busy),
+		.x0(vx0),
+		.y0(vy0),
+		.x1(vx1),
+		.y1(vy1),
+		.x2(vx2),
+		.y2(vy2),
+		.x(fbx_fill),
+		.y(fby_fill),
+		.drawing(drawing_fill),
+		.busy(),
+		.done(draw_done_fill)
+	);
+	draw_triangle #(.CORDW(CORDW)) draw_triangle_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(draw_start_outline),
+		.oe(!fb_busy),
+		.x0(vx0),
+		.y0(vy0),
+		.x1(vx1),
+		.y1(vy1),
+		.x2(vx2),
+		.y2(vy2),
+		.x(fbx_outline),
+		.y(fby_outline),
+		.drawing(drawing_outline),
+		.busy(),
+		.done(draw_done_outline)
+	);
+	always @(posedge clk_100m) begin
+		fb_we &lt;= drawing;
+		fbx &lt;= (drawing_fill ? fbx_fill : fbx_outline);
+		fby &lt;= (drawing_fill ? fby_fill : fby_outline);
+	end
+	reg hsync_p1;
+	reg vsync_p1;
+	always @(posedge clk_pix) begin
+		hsync_p1 &lt;= hsync;
+		vsync_p1 &lt;= vsync;
+	end
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync_p1;
+		vga_vsync &lt;= vsync_p1;
+		vga_r &lt;= fb_red;
+		vga_g &lt;= fb_green;
+		vga_b &lt;= fb_blue;
+	end
+endmodule
+
+</pre>
+</body>

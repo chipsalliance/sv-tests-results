@@ -1,0 +1,185 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/projf_framebuffer_bram_db_tb.sv.html" target="file-frame">tests/generated/projf-explore/projf_framebuffer_bram_db_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv</a>
+defines: 
+completed: 2021-09-20 13:27:19
+time_elapsed: 0.028s
+ram usage: 32016 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7 <a href="../../../../tests/generated/projf-explore/projf_framebuffer_bram_db_tb.sv.html" target="file-frame">tests/generated/projf-explore/projf_framebuffer_bram_db_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv</a>
+`default_nettype none
+module framebuffer_bram_db_tb;
+	parameter CLK_PERIOD_100M = 10;
+	parameter CLK_PERIOD_25M = 40;
+	reg clk_25m;
+	reg clk_100m;
+	reg rst_sys;
+	reg rst_pix;
+	reg disp_hsync;
+	reg disp_vsync;
+	reg disp_de;
+	reg [3:0] disp_r;
+	reg [3:0] disp_g;
+	reg [3:0] disp_b;
+	localparam H_RES = 24;
+	localparam V_RES = 18;
+	localparam CORDW = 16;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire line;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	display_timings_24x18 display_timings_inst(
+		.clk_pix(clk_25m),
+		.rst(rst_pix),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line(line)
+	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_25m),
+		.clk_o(clk_100m),
+		.rst_i(rst_pix),
+		.rst_o(rst_sys),
+		.i(frame),
+		.o(frame_sys)
+	);
+	localparam FB_WIDTH = 12;
+	localparam FB_HEIGHT = 9;
+	localparam FB_CIDXW = 4;
+	localparam FB_CHANW = 4;
+	localparam FB_IMAGE = &#34;test_box_db_12x9.mem&#34;;
+	localparam FB_PALETTE = &#34;test_palette.mem&#34;;
+	localparam FB_SCALE = 2;
+	reg fb_we;
+	reg fb_clear;
+	wire fb_busy;
+	wire fb_wready;
+	wire fb_clip;
+	reg signed [15:0] fbx;
+	reg signed [15:0] fby;
+	reg [3:0] fb_cidx;
+	reg [3:0] fb_bgidx;
+	wire [3:0] fb_red;
+	wire [3:0] fb_green;
+	wire [3:0] fb_blue;
+	reg fb_active;
+	always @(*) fb_active = de;
+	framebuffer_bram_db #(
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.CIDXW(FB_CIDXW),
+		.CHANW(FB_CHANW),
+		.SCALE(FB_SCALE),
+		.F_IMAGE(FB_IMAGE),
+		.F_PALETTE(FB_PALETTE)
+	) fb_inst(
+		.clk_sys(clk_100m),
+		.clk_pix(clk_25m),
+		.rst_sys(rst_sys),
+		.rst_pix(rst_pix),
+		.de(fb_active),
+		.frame(frame),
+		.line(line),
+		.we(fb_we),
+		.x(fbx),
+		.y(fby),
+		.cidx(fb_cidx),
+		.bgidx(fb_bgidx),
+		.clear(fb_clear),
+		.wready(fb_wready),
+		.busy(fb_busy),
+		.clip(fb_clip),
+		.red(fb_red),
+		.green(fb_green),
+		.blue(fb_blue)
+	);
+	reg [31:0] state;
+	always @(posedge clk_100m) begin
+		case (state)
+			32&#39;d1:
+				if (fb_wready) begin
+					fb_cidx &lt;= 4&#39;h7;
+					fb_we &lt;= 1;
+					fbx &lt;= 0;
+					fby &lt;= ((fby &gt; 1) &amp;&amp; (fby &lt; 6) ? fby + 1 : 2);
+					state &lt;= 32&#39;d2;
+				end
+			32&#39;d2:
+				if (!fb_busy)
+					if (fbx &lt; 11)
+						fbx &lt;= fbx + 1;
+					else begin
+						fb_we &lt;= 0;
+						state &lt;= 32&#39;d3;
+					end
+			default:
+				if (frame_sys)
+					state &lt;= 32&#39;d1;
+		endcase
+		if (rst_sys) begin
+			fb_we &lt;= 0;
+			fbx &lt;= 0;
+			fby &lt;= 0;
+			state &lt;= 32&#39;d0;
+		end
+	end
+	reg hsync_p1;
+	reg vsync_p1;
+	reg de_p1;
+	always @(posedge clk_25m) begin
+		hsync_p1 &lt;= hsync;
+		vsync_p1 &lt;= vsync;
+		de_p1 &lt;= de;
+	end
+	always @(posedge clk_25m) begin
+		disp_hsync &lt;= hsync_p1;
+		disp_vsync &lt;= vsync_p1;
+		disp_de &lt;= de_p1;
+		disp_r &lt;= fb_red;
+		disp_g &lt;= fb_green;
+		disp_b &lt;= fb_blue;
+	end
+	always #(CLK_PERIOD_100M / 2) clk_100m = ~clk_100m;
+	always #(CLK_PERIOD_25M / 2) clk_25m = ~clk_25m;
+	initial begin
+		clk_100m = 1;
+		clk_25m = 1;
+		rst_sys = 1;
+		rst_pix = 1;
+		fb_bgidx = 4&#39;h1;
+		fb_clear = 0;
+		#(100) rst_sys = 0;
+		rst_pix = 0;
+		#(28140) fb_clear = 1;
+		#(120000)
+			$finish;
+	end
+endmodule
+
+</pre>
+</body>
