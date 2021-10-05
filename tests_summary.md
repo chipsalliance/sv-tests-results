@@ -1,18 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Slang              |           0|         0|    0|      0|        4992|
-|Sv2v_zachjs        |           0|         0|    0|      0|        4748|
-|UhdmYosys          |           0|         0|    0|      0|        4648|
-|Surelog            |          97|        26|    0|      0|        4869|
-|moore              |           0|         0|    0|      0|        4748|
-|moore_parse        |           0|         0|    0|      0|        4748|
-|Icarus             |           0|         0|    0|      0|        4648|
-|tree_sitter_verilog|           0|         0|    0|      0|        4648|
-|VeribleExtractor   |           0|         0|    0|      0|        4648|
-|Verible            |           0|         0|    0|      0|        4648|
-|Yosys              |           0|         0|    0|      0|        4992|
-|Verilator          |           0|         0|    0|      0|        4992|
-|sv_parser          |           0|         0|    0|      0|        4748|
-|UhdmVerilator      |           0|         6|    0|      0|        4986|
-|Odin               |           0|         0|    0|      0|        4748|
+|Sv2v_zachjs        |           0|         1|   68|      3|        4744|
+|Icarus             |           3|         0|   10|      3|        4642|
+|Slang              |           0|        10|    1|    180|        4802|
+|moore              |           3|         0|    1|      3|        4742|
+|UhdmVerilator      |           2|      1215|    1|      4|        3771|
+|Surelog            |         114|         9|    1|    180|        4689|
+|sv_parser          |           0|         3|    1|      3|        4742|
+|Yosys              |           4|      1164|    1|    180|        3644|
+|VeribleExtractor   |           3|         0|   10|      3|        4642|
+|Verilator          |          17|        34|    1|      4|        4937|
+|Verible            |           3|         0|   10|      3|        4642|
+|UhdmYosys          |           2|      1944|  168|      3|        2699|
+|Odin               |           3|         0|    1|      3|        4742|
+|tree_sitter_verilog|           3|         0|   10|      3|        4642|
