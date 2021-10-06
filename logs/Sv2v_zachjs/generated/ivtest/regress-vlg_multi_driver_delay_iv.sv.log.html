@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,48 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/multi_driver_delay.v.html" target="file-frame">third_party/tests/ivtest/ivltests/multi_driver_delay.v</a>
 defines: 
-completed: 2021-10-05 13:44:52
-time_elapsed: 0.010s
-ram usage: 12836 KB
+completed: 2021-10-06 05:56:58
+time_elapsed: 0.012s
+ram usage: 15700 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/multi_driver_delay.v.html" target="file-frame">third_party/tests/ivtest/ivltests/multi_driver_delay.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/multi_driver_delay.v.html#l-17" target="file-frame">third_party/tests/ivtest/ivltests/multi_driver_delay.v:17</a>:6: Parse error: unexpected token &#39;0.9&#39; (Lit_real)
+module top;
+	reg pass = 1;
+	reg [3:0] ia = 4&#39;d1;
+	reg [3:0] ib = 4&#39;d2;
+	wire [2:0] icon;
+	wire [2:0] irep;
+	assign #(1) icon = {ib[1:0], ia[0]};
+	assign #(1) irep = {3 {ia[0]}};
+	initial begin
+		#(0.9)
+			;
+		if (icon !== 3&#39;bxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Failed: concatenation is not delayed, expected 3&#39;bx got %b.&#34;, icon);
+		end
+		if (irep !== 3&#39;bxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Failed: replication is not delayed, expected 3&#39;bx got %b.&#34;, irep);
+		end
+		#(0.1)
+			;
+		#(0)
+			;
+		if (icon !== 3&#39;d5) begin
+			pass = 1&#39;b0;
+			$display(&#34;Failed: concatenation has incorrect value, expected 3&#39;d5 got %b.&#34;, icon);
+		end
+		if (irep !== 3&#39;d7) begin
+			pass = 1&#39;b0;
+			$display(&#34;Failed: replication has incorrect value, expected 3&#39;d7 got %b.&#34;, irep);
+		end
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+endmodule
 
 </pre>
 </body>

@@ -17,14 +17,77 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr528.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr528.v</a>
 defines: 
-completed: 2021-10-05 13:40:08
-time_elapsed: 0.002s
-ram usage: 9352 KB
+completed: 2021-10-06 05:33:50
+time_elapsed: 0.006s
+ram usage: 10100 KB
 </pre>
 <pre class="log">
 
 moore -I /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests -e tester <a href="../../../../third_party/tests/ivtest/ivltests/pr528.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr528.v</a>
-moore: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.29&#39; not found (required by moore)
+error: unknown system task `$monitor`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr528.v.html#l-13" target="file-frame">third_party/tests/ivtest/ivltests/pr528.v:13</a>:13-64:
+   | 
+   |     initial $monitor( &#34;%T %b %b %b&#34;, $time, clk, clko1, clko2 );
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr528.v.html#l-14" target="file-frame">third_party/tests/ivtest/ivltests/pr528.v:14</a>:20-30:
+   | 
+   |     initial #50001 $finish(0);
+   |                    ^^^^^^^^^^ 
+
+proc %tester.initial.43.0 () -&gt; (i1$ %clk) {
+0:
+    %1 = const i1 0
+    %2 = const time 0s 1e
+    drv i1$ %clk, %1, %2
+    halt
+}
+
+proc %tester.always.60.0 () -&gt; (i1$ %clk) {
+0:
+    %1 = prb i1$ %clk
+    %clk.shadow = var i1 %1
+    %2 = const i32 5000
+    wait %3 for %2
+3:
+    %4 = prb i1$ %clk
+    st i1* %clk.shadow, %4
+    %clk.shadow.ld = ld i1* %clk.shadow
+    %5 = not i1 %clk.shadow.ld
+    %6 = const time 0s 1e
+    drv i1$ %clk, %5, %6
+    st i1* %clk.shadow, %5
+    br %0
+}
+
+proc %tester.initial.89.0 () -&gt; () {
+0:
+    halt
+}
+
+proc %tester.initial.100.0 () -&gt; () {
+0:
+    %1 = const i32 50001
+    wait %2 for %1
+2:
+    halt
+}
+
+entity @tester () -&gt; () {
+    %0 = const i1 0
+    %clko1 = sig i1 %0
+    %clko2 = sig i1 %0
+    %clk = sig i1 %0
+    %1 = const time 0s 1e
+    %clk.prb = prb i1$ %clk
+    drv i1$ %clko1, %clk.prb, %1
+    drv i1$ %clko2, %clk.prb, %1
+    inst %tester.initial.43.0 () -&gt; (i1$ %clk)
+    inst %tester.always.60.0 () -&gt; (i1$ %clk)
+    inst %tester.initial.89.0 () -&gt; ()
+    inst %tester.initial.100.0 () -&gt; ()
+}
 
 </pre>
 </body>

@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,58 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr1603313.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1603313.v</a>
 defines: 
-completed: 2021-10-05 13:45:11
-time_elapsed: 0.014s
-ram usage: 13132 KB
+completed: 2021-10-06 05:57:56
+time_elapsed: 0.015s
+ram usage: 16844 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr1603313.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1603313.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/pr1603313.v.html#l-11" target="file-frame">third_party/tests/ivtest/ivltests/pr1603313.v:11</a>:14: Parse error: unexpected token &#39;0.5&#39; (Lit_real)
+module TestMultiplier;
+	reg clk;
+	initial begin
+		clk = 0;
+		forever #(0.5) clk = ~clk;
+	end
+	reg [5:0] left;
+	reg [5:0] right;
+	wire [2:0] exp;
+	Multiplier mul(
+		.clk(clk),
+		.left(left),
+		.right(right),
+		.exp(exp)
+	);
+	parameter ONE = 6&#39;b011000;
+	always @(posedge clk) begin
+		left = ONE;
+		right = ONE;
+		#(10)
+			if (exp !== 3&#39;b011)
+				$display(&#34;FAIL: expected %b, got %b&#34;, 3&#39;b011, exp);
+			else
+				$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+module Multiplier (
+	clk,
+	left,
+	right,
+	exp
+);
+	input clk;
+	input [5:0] left;
+	input [5:0] right;
+	output reg [2:0] exp;
+	wire signed [2:0] expl = left[5:3] - 3;
+	wire signed [2:0] expr = right[5:3] - 3;
+	reg signed [3:0] sumExp;
+	always @(posedge clk) begin
+		sumExp &lt;= ((expl + expr) &lt; -2 ? -3 : expl + expr);
+		exp[2:0] &lt;= sumExp + 3;
+	end
+endmodule
 
 </pre>
 </body>

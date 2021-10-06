@@ -11,47 +11,51 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v4.sv</a>
 defines: 
-completed: 2021-10-05 13:44:11
-time_elapsed: 0.038s
-ram usage: 42808 KB
+completed: 2021-10-06 05:55:36
+time_elapsed: 0.039s
+ram usage: 45948 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv</a>
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/ice40/top_pong_v4.sv</a>
 `default_nettype none
 module top_pong_v4 (
-	clk_100m,
+	clk_12m,
 	btn_rst,
 	btn_up,
 	btn_ctrl,
 	btn_dn,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
 );
-	input wire clk_100m;
+	input wire clk_12m;
 	input wire btn_rst;
 	input wire btn_up;
 	input wire btn_ctrl;
 	input wire btn_dn;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
+		.clk(clk_12m),
+		.rst(btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
@@ -199,13 +203,26 @@ module top_pong_v4 (
 				by &lt;= (dy ? by - spy : by + spy);
 		end
 	always @(*) b_draw = (((sx &gt;= bx) &amp;&amp; (sx &lt; (bx + B_SIZE))) &amp;&amp; (sy &gt;= by)) &amp;&amp; (sy &lt; (by + B_SIZE));
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync;
-		vga_vsync &lt;= vsync;
-		vga_r &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-		vga_g &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-		vga_b &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) begin
+		red = (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+		green = (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+		blue = (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
 	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync, vsync, de, red, green, blue}),
+		.D_OUT_1()
+	);
 endmodule
 
 </pre>

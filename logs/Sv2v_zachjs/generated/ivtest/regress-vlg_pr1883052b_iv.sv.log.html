@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,81 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr1883052b.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1883052b.v</a>
 defines: 
-completed: 2021-10-05 13:45:34
-time_elapsed: 0.013s
-ram usage: 17956 KB
+completed: 2021-10-06 05:57:26
+time_elapsed: 0.021s
+ram usage: 22344 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr1883052b.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1883052b.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/pr1883052b.v.html#l-23" target="file-frame">third_party/tests/ivtest/ivltests/pr1883052b.v:23</a>:6: Parse error: unexpected token &#39;0.9&#39; (Lit_real)
+module top;
+	reg pass = 1&#39;b1;
+	reg [3:0] ia = 4&#39;d1;
+	wire signed [3:0] iconstp;
+	wire signed [3:0] iconstm;
+	wire signed [3:0] isfunc;
+	wire signed [3:0] iufunc;
+	wire [7:0] istring;
+	assign #(1) iconstp = 2;
+	assign #(1) iconstm = -2;
+	assign #(1) istring = &#34;0&#34;;
+	assign #(1) isfunc = $rtoi(2.0);
+	function [31:0] int_func;
+		input [31:0] in;
+		int_func = in * 2;
+	endfunction
+	assign #(1) iufunc = int_func(ia);
+	initial begin
+		#(0.9)
+			;
+		if (iconstp !== 4&#39;bxxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: constant (positive) value not delayed.&#34;);
+		end
+		if (iconstm !== 4&#39;bxxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: constant (negative) value not delayed.&#34;);
+		end
+		if (istring !== 8&#39;bxxxxxxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: string value not delayed.&#34;);
+		end
+		if (isfunc !== 4&#39;bxxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: system function value not delayed.&#34;);
+		end
+		if (iufunc !== 4&#39;bxxxx) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: user function value not delayed.&#34;);
+		end
+		#(0.1)
+			;
+		#(0)
+			;
+		if (iconstp !== 2) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: constant (positive) value not delayed correctly.&#34;);
+		end
+		if (iconstm !== -2) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: constant (negative) value not delayed correctly.&#34;);
+		end
+		if (istring !== &#34;0&#34;) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: string value not delayed correctly.&#34;);
+		end
+		if (isfunc !== 2) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: system function value not delayed correctly.&#34;);
+		end
+		if (iufunc !== 2) begin
+			pass = 1&#39;b0;
+			$display(&#34;Integer: user function value not delayed correctly.&#34;);
+		end
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+endmodule
 
 </pre>
 </body>

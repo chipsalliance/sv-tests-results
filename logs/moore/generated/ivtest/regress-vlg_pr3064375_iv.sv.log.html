@@ -17,14 +17,147 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr3064375.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr3064375.v</a>
 defines: 
-completed: 2021-10-05 13:40:20
-time_elapsed: 0.002s
-ram usage: 9212 KB
+completed: 2021-10-06 05:34:34
+time_elapsed: 0.006s
+ram usage: 10116 KB
 </pre>
 <pre class="log">
 
 moore -I /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests -e pr3064375 <a href="../../../../third_party/tests/ivtest/ivltests/pr3064375.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr3064375.v</a>
-moore: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.29&#39; not found (required by moore)
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr3064375.v.html#l-22" target="file-frame">third_party/tests/ivtest/ivltests/pr3064375.v:22</a>:3-13:
+   | 
+   |   $finish(0);
+   |   ^^^^^^^^^^ 
+
+error: unknown system task `$monitor`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr3064375.v.html#l-40" target="file-frame">third_party/tests/ivtest/ivltests/pr3064375.v:40</a>:3-66:
+   | 
+   |   $monitor(&#34;CLK %b RST %b Reg1 %b Reg2 %b&#34;, CLK, RST, Reg1, Reg2);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+proc %pr3064375.initial.57.0 () -&gt; (i1$ %CLK) {
+0:
+    %1 = const i1 0
+    %2 = const time 0s 1e
+    drv i1$ %CLK, %1, %2
+    br %loop_body
+loop_body:
+    %3 = const i32 5
+    wait %4 for %3
+4:
+    %5 = const i1 1
+    %6 = const time 0s 1e
+    drv i1$ %CLK, %5, %6
+    %7 = const i32 5
+    wait %8 for %7
+8:
+    %9 = const i1 0
+    %10 = const time 0s 1e
+    drv i1$ %CLK, %9, %10
+    br %loop_body
+}
+
+proc %pr3064375.initial.93.0 () -&gt; (i1$ %RST) {
+0:
+    %1 = const i1 1
+    %2 = const time 0s 1e
+    drv i1$ %RST, %1, %2
+    %3 = const i32 20
+    wait %4 for %3
+4:
+    %5 = const i1 0
+    %6 = const time 0s 1e
+    drv i1$ %RST, %5, %6
+    %7 = const i32 101
+    wait %8 for %7
+8:
+    halt
+}
+
+proc %pr3064375.always.130.0 (i1$ %CLK, i1$ %RST) -&gt; (i1$ %Reg1) {
+0:
+    %1 = prb i1$ %Reg1
+    %Reg1.shadow = var i1 %1
+    br %init
+init:
+    %CLK.prb = prb i1$ %CLK
+    %RST.prb = prb i1$ %RST
+    wait %check, %CLK, %RST
+check:
+    %2 = prb i1$ %Reg1
+    st i1* %Reg1.shadow, %2
+    %CLK.prb1 = prb i1$ %CLK
+    %3 = const i1 0
+    %4 = eq i1 %CLK.prb, %3
+    %5 = neq i1 %CLK.prb1, %3
+    %posedge = and i1 %4, %5
+    %RST.prb1 = prb i1$ %RST
+    %6 = eq i1 %RST.prb, %3
+    %7 = neq i1 %RST.prb1, %3
+    %posedge1 = and i1 %6, %7
+    %event_or = or i1 %posedge, %posedge1
+    br %event_or, %init, %event
+event:
+    %8 = const time 0s 1d
+    br %7, %if_false, %if_true
+if_true:
+    drv i1$ %Reg1, %3, %8
+    br %0
+if_false:
+    %Reg1.shadow.ld = ld i1* %Reg1.shadow
+    %9 = neq i1 %Reg1.shadow.ld, %3
+    %10 = not i1 %9
+    drv i1$ %Reg1, %10, %8
+    br %0
+}
+
+proc %pr3064375.always.166.0 (i1$ %CLK, i1$ %RST, i1$ %Reg1) -&gt; (i1$ %Reg2) {
+init:
+    %CLK.prb = prb i1$ %CLK
+    %RST.prb = prb i1$ %RST
+    wait %check, %CLK, %RST
+check:
+    %CLK.prb1 = prb i1$ %CLK
+    %0 = const i1 0
+    %1 = neq i1 %CLK.prb, %0
+    %2 = eq i1 %CLK.prb1, %0
+    %negedge = and i1 %2, %1
+    %RST.prb1 = prb i1$ %RST
+    %3 = eq i1 %RST.prb, %0
+    %4 = neq i1 %RST.prb1, %0
+    %posedge = and i1 %3, %4
+    %event_or = or i1 %negedge, %posedge
+    br %event_or, %init, %event
+event:
+    %5 = const time 0s 1d
+    br %4, %if_false, %if_true
+if_true:
+    drv i1$ %Reg2, %0, %5
+    br %init
+if_false:
+    %Reg1.prb = prb i1$ %Reg1
+    drv i1$ %Reg2, %Reg1.prb, %5
+    br %init
+}
+
+proc %pr3064375.initial.200.0 () -&gt; () {
+0:
+    halt
+}
+
+entity @pr3064375 () -&gt; () {
+    %0 = const i1 0
+    %CLK = sig i1 %0
+    %RST = sig i1 %0
+    %Reg1 = sig i1 %0
+    %Reg2 = sig i1 %0
+    inst %pr3064375.initial.57.0 () -&gt; (i1$ %CLK)
+    inst %pr3064375.initial.93.0 () -&gt; (i1$ %RST)
+    inst %pr3064375.always.130.0 (i1$ %CLK, i1$ %RST) -&gt; (i1$ %Reg1)
+    inst %pr3064375.always.166.0 (i1$ %CLK, i1$ %RST, i1$ %Reg1) -&gt; (i1$ %Reg2)
+    inst %pr3064375.initial.200.0 () -&gt; ()
+}
 
 </pre>
 </body>

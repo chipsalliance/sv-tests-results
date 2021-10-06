@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,37 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2801662.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2801662.v</a>
 defines: 
-completed: 2021-10-05 13:44:54
-time_elapsed: 0.012s
-ram usage: 12356 KB
+completed: 2021-10-06 05:57:48
+time_elapsed: 0.014s
+ram usage: 17876 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2801662.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2801662.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/pr2801662.v.html#l-12" target="file-frame">third_party/tests/ivtest/ivltests/pr2801662.v:12</a>:6: Parse error: unexpected token &#39;1.999&#39; (Lit_real)
+module test;
+	reg in;
+	reg pass;
+	wire out;
+	assign #(2) out = in;
+	initial begin
+		pass = 1&#39;b1;
+		in = 1&#39;b0;
+		#(1.999)
+			;
+		if (out !== 1&#39;bx) begin
+			$display(&#34;Failed signal at begining, expected 1&#39;bx, got %b&#34;, out);
+			pass = 1&#39;b0;
+		end
+		#(0.002)
+			;
+		if (out !== in) begin
+			$display(&#34;Failed signal at end, expected %b, got %b&#34;, in, out);
+			pass = 1&#39;b0;
+		end
+		if (pass)
+			$display(&#34;PASSED&#34;);
+	end
+endmodule
 
 </pre>
 </body>

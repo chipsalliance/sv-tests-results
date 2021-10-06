@@ -17,14 +17,66 @@ type: parsing
 mode: parsing
 files: <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v</a>
 defines: 
-completed: 2021-10-05 13:40:13
-time_elapsed: 0.002s
-ram usage: 9304 KB
+completed: 2021-10-06 05:35:26
+time_elapsed: 0.006s
+ram usage: 10080 KB
 </pre>
 <pre class="log">
 
 moore -I /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests -e mul_test <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v</a>
-moore: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.29&#39; not found (required by moore)
+warning: unsupported: system task `$display`; ignored
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html#l-18" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v:18</a>:10-67:
+   | 
+   |       #5 $display(&#34;op1 = %h, op2 = %h, prod = %h&#34;, op1, op2, prod);
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
+
+error: unknown system task `$finish`
+  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/pr1855504.v.html#l-19" target="file-frame">third_party/tests/ivtest/ivltests/pr1855504.v:19</a>:10-20:
+   | 
+   |       #5 $finish(0);
+   |          ^^^^^^^^^^ 
+
+proc %mul_test.initial.52.0 () -&gt; (i16$ %prod, i8$ %op2, i16$ %op1) {
+0:
+    %1 = const i16 3488
+    %2 = const time 0s 1e
+    drv i16$ %op1, %1, %2
+    %3 = const i8 10
+    drv i8$ %op2, %3, %2
+    %4 = const i16 0
+    drv i16$ %prod, %4, %2
+    halt
+}
+
+proc %mul_test.always.113.0 (i8$ %op2, i16$ %op1) -&gt; (i16$ %prod) {
+0:
+    %1 = const time 0s 1d
+    %2 = const i16 0
+    %op1.prb = prb i16$ %op1
+    %3 = exts i8, i16 %op1.prb, 0, 8
+    %zext = inss i16 %2, i8 %3, 0, 8
+    %op2.prb = prb i8$ %op2
+    %zext1 = inss i16 %2, i8 %op2.prb, 0, 8
+    %4 = umul i16 %zext, %zext1
+    drv i16$ %prod, %4, %1
+    %5 = const i32 5
+    wait %6 for %5
+6:
+    %7 = const i32 5
+    wait %8 for %7
+8:
+    br %0
+}
+
+entity @mul_test () -&gt; () {
+    %0 = const i16 0
+    %prod = sig i16 %0
+    %1 = const i8 0
+    %op2 = sig i8 %1
+    %op1 = sig i16 %0
+    inst %mul_test.initial.52.0 () -&gt; (i16$ %prod, i8$ %op2, i16$ %op1)
+    inst %mul_test.always.113.0 (i8$ %op2, i16$ %op1) -&gt; (i16$ %prod)
+}
 
 </pre>
 </body>

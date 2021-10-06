@@ -11,41 +11,45 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_hello_jp.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hello_jp.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_hello_jp.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_hello_jp.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_hello_jp.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hello_jp.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/ice40/top_hello_jp.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/ice40/top_hello_jp.sv</a>
 defines: 
-completed: 2021-10-05 13:44:15
-time_elapsed: 0.031s
-ram usage: 34960 KB
+completed: 2021-10-06 05:55:40
+time_elapsed: 0.039s
+ram usage: 45104 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_hello_jp.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hello_jp.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_hello_jp.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_hello_jp.sv</a>
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_hello_jp.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hello_jp.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/ice40/top_hello_jp.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/ice40/top_hello_jp.sv</a>
 `default_nettype none
 module top_hello_jp (
-	clk_100m,
+	clk_12m,
 	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
 );
-	input wire clk_100m;
+	input wire clk_12m;
 	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
+		.clk(clk_12m),
+		.rst(btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
@@ -71,7 +75,7 @@ module top_hello_jp (
 	localparam FONT_HEIGHT = 16;
 	localparam FONT_GLYPHS = 86;
 	localparam F_ROM_DEPTH = 1376;
-	localparam FONT_FILE = &#34;font_unscii_16x16_hiragana.mem&#34;;
+	localparam FONT_FILE = &#34;../res/font_unscii_16x16_hiragana.mem&#34;;
 	reg [10:0] font_rom_addr;
 	wire [15:0] font_rom_data;
 	rom_sync #(
@@ -108,44 +112,133 @@ module top_hello_jp (
 		spr_cp_norm[4] = &#39;h2e;
 	end
 	integer i;
-	wire [3:0] spr_glyph_line [0:4];
+	wire [3:0] spr_glyph_line_0;
+	wire [3:0] spr_glyph_line_1;
+	wire [3:0] spr_glyph_line_2;
+	wire [3:0] spr_glyph_line_3;
+	wire [3:0] spr_glyph_line_4;
 	reg [4:0] spr_fdma;
 	always @(*) begin
 		font_rom_addr = 0;
 		for (i = 0; i &lt; SPR_CNT; i = i + 1)
-			begin
-				spr_fdma[i] = sx == (SPR_DMA + i);
-				if (spr_fdma[i])
-					font_rom_addr = (FONT_HEIGHT * spr_cp_norm[i]) + spr_glyph_line[i];
-			end
+			spr_fdma[i] = sx == (SPR_DMA + i);
+		if (spr_fdma[0])
+			font_rom_addr = (FONT_HEIGHT * spr_cp_norm[0]) + spr_glyph_line_0;
+		if (spr_fdma[1])
+			font_rom_addr = (FONT_HEIGHT * spr_cp_norm[1]) + spr_glyph_line_1;
+		if (spr_fdma[2])
+			font_rom_addr = (FONT_HEIGHT * spr_cp_norm[2]) + spr_glyph_line_2;
+		if (spr_fdma[3])
+			font_rom_addr = (FONT_HEIGHT * spr_cp_norm[3]) + spr_glyph_line_3;
+		if (spr_fdma[4])
+			font_rom_addr = (FONT_HEIGHT * spr_cp_norm[4]) + spr_glyph_line_4;
 	end
 	wire [4:0] spr_pix;
-	genvar m;
-	generate
-		for (m = 0; m &lt; SPR_CNT; m = m + 1) begin : sprite_gen
-			sprite #(
-				.WIDTH(FONT_WIDTH),
-				.HEIGHT(FONT_HEIGHT),
-				.SCALE_X(SPR_SCALE_X),
-				.SCALE_Y(SPR_SCALE_Y),
-				.LSB(0),
-				.CORDW(CORDW),
-				.ADDRW(4)
-			) spr0(
-				.clk(clk_pix),
-				.rst(!clk_locked),
-				.start(spr_start),
-				.dma_avail(spr_fdma[m]),
-				.sx(sx),
-				.sprx(spr_x[m]),
-				.data_in(font_rom_data),
-				.pos(spr_glyph_line[m]),
-				.pix(spr_pix[m]),
-				.drawing(),
-				.done()
-			);
-		end
-	endgenerate
+	sprite #(
+		.WIDTH(FONT_WIDTH),
+		.HEIGHT(FONT_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.LSB(0),
+		.CORDW(CORDW),
+		.ADDRW(4)
+	) spr0(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.dma_avail(spr_fdma[0]),
+		.sx(sx),
+		.sprx(spr_x[0]),
+		.data_in(font_rom_data),
+		.pos(spr_glyph_line_0),
+		.pix(spr_pix[0]),
+		.drawing(),
+		.done()
+	);
+	sprite #(
+		.WIDTH(FONT_WIDTH),
+		.HEIGHT(FONT_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.LSB(0),
+		.CORDW(CORDW),
+		.ADDRW(4)
+	) spr1(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.dma_avail(spr_fdma[1]),
+		.sx(sx),
+		.sprx(spr_x[1]),
+		.data_in(font_rom_data),
+		.pos(spr_glyph_line_1),
+		.pix(spr_pix[1]),
+		.drawing(),
+		.done()
+	);
+	sprite #(
+		.WIDTH(FONT_WIDTH),
+		.HEIGHT(FONT_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.LSB(0),
+		.CORDW(CORDW),
+		.ADDRW(4)
+	) spr2(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.dma_avail(spr_fdma[2]),
+		.sx(sx),
+		.sprx(spr_x[2]),
+		.data_in(font_rom_data),
+		.pos(spr_glyph_line_2),
+		.pix(spr_pix[2]),
+		.drawing(),
+		.done()
+	);
+	sprite #(
+		.WIDTH(FONT_WIDTH),
+		.HEIGHT(FONT_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.LSB(0),
+		.CORDW(CORDW),
+		.ADDRW(4)
+	) spr3(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.dma_avail(spr_fdma[3]),
+		.sx(sx),
+		.sprx(spr_x[3]),
+		.data_in(font_rom_data),
+		.pos(spr_glyph_line_3),
+		.pix(spr_pix[3]),
+		.drawing(),
+		.done()
+	);
+	sprite #(
+		.WIDTH(FONT_WIDTH),
+		.HEIGHT(FONT_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.LSB(0),
+		.CORDW(CORDW),
+		.ADDRW(4)
+	) spr4(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.dma_avail(spr_fdma[4]),
+		.sx(sx),
+		.sprx(spr_x[4]),
+		.data_in(font_rom_data),
+		.pos(spr_glyph_line_4),
+		.pix(spr_pix[4]),
+		.drawing(),
+		.done()
+	);
 	wire sf1_on;
 	wire sf2_on;
 	wire sf3_on;
@@ -190,13 +283,26 @@ module top_hello_jp (
 		{red_spr, green_spr, blue_spr} = (spr_pix != 0 ? 12&#39;hfc0 : 12&#39;h000);
 		starlight = (sf1_on ? sf1_star[7:4] : (sf2_on ? sf2_star[7:4] : (sf3_on ? sf3_star[7:4] : 4&#39;h0)));
 	end
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync;
-		vga_vsync &lt;= vsync;
-		vga_r &lt;= (de ? (spr_pix != 0 ? red_spr : starlight) : 4&#39;h0);
-		vga_g &lt;= (de ? (spr_pix != 0 ? green_spr : starlight) : 4&#39;h0);
-		vga_b &lt;= (de ? (spr_pix != 0 ? blue_spr : starlight) : 4&#39;h0);
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) begin
+		red = (de ? (spr_pix != 0 ? red_spr : starlight) : 4&#39;h0);
+		green = (de ? (spr_pix != 0 ? green_spr : starlight) : 4&#39;h0);
+		blue = (de ? (spr_pix != 0 ? blue_spr : starlight) : 4&#39;h0);
 	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync, vsync, de, red, green, blue}),
+		.D_OUT_1()
+	);
 endmodule
 
 </pre>
