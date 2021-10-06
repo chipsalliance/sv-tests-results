@@ -1,17 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|moore              |          10|      1654|    0|      0|        3082|
-|Odin               |           0|         0|    0|      0|        4746|
-|Sv2v_zachjs        |           9|        84|    0|      0|        4720|
-|UhdmYosys          |           2|         1|    0|      0|        4810|
-|Icarus             |           0|         0|    0|      0|        4655|
-|Slang              |           0|         0|    0|      0|        4813|
-|Yosys              |           3|         0|    0|      0|        4810|
-|Surelog            |           2|         1|    0|      0|        4810|
-|Verilator          |           3|         0|    0|      0|        4986|
-|UhdmVerilator      |          94|        18|    0|      0|        4877|
-|tree_sitter_verilog|           0|         0|    0|      0|        4655|
-|VeribleExtractor   |           9|      3950|    0|      0|         696|
-|Verible            |           9|      4100|    0|      0|         546|
+|VeribleExtractor   |           0|         0|    0|      0|        4655|
+|Yosys              |           1|         4|    0|      0|        4808|
 |sv_parser          |           0|         0|    0|      0|        4746|
+|Surelog            |           2|         3|    0|      0|        4808|
+|Icarus             |           0|         0|    0|      0|        4655|
+|Verible            |           0|         0|    0|      0|        4655|
+|Verilator          |           1|         4|    0|      0|        4984|
+|Slang              |           0|         0|    0|      0|        4813|
+|UhdmYosys          |           2|         3|    0|      0|        4808|
+|tree_sitter_verilog|           0|         0|    0|      0|        4655|
+|Odin               |           0|         0|    0|      0|        4746|
+|moore              |           0|         0|    0|      0|        4746|
+|UhdmVerilator      |           1|         3|    0|      0|        4985|
+|Sv2v_zachjs        |           1|         4|    0|      0|        4808|
