@@ -1,17 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|VeribleExtractor   |           0|         0|    0|      0|        4655|
-|moore              |           0|         0|    0|      0|        4746|
-|Sv2v_zachjs        |           1|         4|    0|      0|        4808|
-|Surelog            |           2|         3|    0|      0|        4808|
-|Odin               |           0|         0|    0|      0|        4746|
-|Slang              |           0|         0|    0|      0|        4813|
-|Yosys              |           1|         4|    0|      0|        4808|
-|tree_sitter_verilog|           0|         0|    0|      0|        4655|
-|Verilator          |           1|         4|    0|      0|        4984|
-|Verible            |           0|         0|    0|      0|        4655|
-|UhdmVerilator      |           1|         6|    0|      0|        4982|
-|UhdmYosys          |           2|         3|    0|      0|        4808|
+|Sv2v_zachjs        |           0|         0|  176|     15|        4798|
 |Icarus             |           0|         0|    0|      0|        4655|
+|tree_sitter_verilog|           0|         0|    0|      0|        4655|
+|Odin               |           0|         0|    0|      0|        4746|
+|Verible            |           0|         0|    0|      0|        4655|
+|UhdmVerilator      |         730|         0|    0|      0|        4259|
+|VeribleExtractor   |           0|         0|    0|      0|        4655|
+|Slang              |           6|         0|  176|     15|        4792|
+|Yosys              |         892|         0|  176|     15|        3906|
+|Surelog            |          44|         0|  176|     15|        4754|
+|UhdmYosys          |        1547|         0|  176|     15|        3251|
+|Verilator          |           0|         0|    0|      0|        4989|
 |sv_parser          |           0|         0|    0|      0|        4746|
+|moore              |           0|         0|    0|      0|        4746|

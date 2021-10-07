@@ -1,0 +1,88 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-failed">
+description: Test imported from ivtest
+rc: 0 (means success: 1)
+should_fail_because: this test was imported from ivtest and is designed to fail
+tags: ivtest
+incdirs: /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest /home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
+top_module: 
+type: simulation elaboration
+mode: elaboration
+files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2728812c.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2728812c.v</a>
+defines: 
+completed: 2021-10-07 06:42:59
+time_elapsed: 0.014s
+ram usage: 17208 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest -I/home/runner/work/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2728812c.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2728812c.v</a>
+module sum_test;
+	reg clk;
+	wire [10:0] s;
+	initial begin
+		clk = 0;
+		forever #(10) clk = ~clk;
+	end
+	sum #(
+		.n(5),
+		.width(8)
+	) sum(
+		.clk(clk),
+		.addends(40&#39;h0a141e2832),
+		.s(s)
+	);
+	initial begin
+		$display(&#34;Starting...&#34;);
+		repeat (50) @(posedge clk)
+			;
+		$display(&#34;sum = %d&#34;, s);
+		if (s !== 150)
+			$display(&#34;FAILED: expected 150, received %0d&#34;, s);
+		else
+			$display(&#34;PASSED&#34;);
+		$finish;
+	end
+endmodule
+module sum (
+	clk,
+	addends,
+	s
+);
+	parameter n = 4;
+	parameter width = 8;
+	parameter log_n = $clog2(n);
+	input clk;
+	input [(n * width) - 1:0] addends;
+	output reg [(log_n + width) - 1:0] s;
+	wire [($clog2(n / 2) + width) - 1:0] a1;
+	wire [($clog2(n - (n / 2)) + width) - 1:0] a2;
+	sum #(
+		.n(n / 2),
+		.width(width)
+	) s0(
+		.clk(clk),
+		.addends(addends[((n / 2) * width) - 1:0]),
+		.s(a1)
+	);
+	sum #(
+		.n(n - (n / 2)),
+		.width(width)
+	) s1(
+		.clk(clk),
+		.addends(addends[(n * width) - 1:(n / 2) * width]),
+		.s(a2)
+	);
+	always @(posedge clk) s &lt;= a1 + a2;
+endmodule
+
+</pre>
+</body>
