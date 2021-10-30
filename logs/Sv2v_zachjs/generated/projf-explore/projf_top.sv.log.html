@@ -11,46 +11,41 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/I
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/G
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/I/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/I/top.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/G/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/G/top.sv</a>
 defines: 
-completed: 2021-10-29 03:35:14
-time_elapsed: 0.017s
-ram usage: 13816 KB
+completed: 2021-10-30 03:33:18
+time_elapsed: 0.012s
+ram usage: 14892 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/I <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/I/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/I/top.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/G <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/G/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/G/top.sv</a>
 `default_nettype none
 module top (
 	clk,
 	led
 );
 	input wire clk;
-	output wire [3:0] led;
-	pwm pwm_led_0(
-		.clk(clk),
-		.duty(4),
-		.pwm_out(led[0])
-	);
-	pwm pwm_led_1(
-		.clk(clk),
-		.duty(16),
-		.pwm_out(led[1])
-	);
-	pwm pwm_led_2(
-		.clk(clk),
-		.duty(64),
-		.pwm_out(led[2])
-	);
-	pwm pwm_led_3(
-		.clk(clk),
-		.duty(255),
-		.pwm_out(led[3])
-	);
+	output reg [3:0] led;
+	localparam DIV_BY = 27&#39;d100000000;
+	reg stb;
+	reg [26:0] cnt = 0;
+	always @(posedge clk)
+		if (cnt != (DIV_BY - 1)) begin
+			stb &lt;= 0;
+			cnt &lt;= cnt + 1;
+		end
+		else begin
+			stb &lt;= 1;
+			cnt &lt;= 0;
+		end
+	always @(posedge clk)
+		if (stb)
+			led &lt;= led + 1;
 endmodule
 
 </pre>
