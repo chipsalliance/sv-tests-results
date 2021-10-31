@@ -11,29 +11,64 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/A
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/H
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/A/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/A/top.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/H/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/H/top.sv</a>
 defines: 
-completed: 2021-10-30 03:32:55
-time_elapsed: 0.005s
-ram usage: 9916 KB
+completed: 2021-10-31 02:34:38
+time_elapsed: 0.006s
+ram usage: 10052 KB
 </pre>
 <pre class="log">
 
-moore -I /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/A -e top <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/A/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/A/top.sv</a>
-proc %top.always_comb.24.0 (i1$ %sw) -&gt; (i1$ %led) {
-body:
-    %sw.prb = prb i1$ %sw
-    %0 = const time 0s 1e
-    drv i1$ %led, %sw.prb, %0
-    wait %body, %sw
+moore -I /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/H -e top <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/H/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/H/top.sv</a>
+proc %top.always_ff.81.0 (i1$ %clk, i8$ %duty) -&gt; (i4$ %led, i8$ %cnt) {
+0:
+    %1 = prb i8$ %cnt
+    %cnt.shadow = var i8 %1
+    br %init
+init:
+    %clk.prb = prb i1$ %clk
+    wait %check, %clk
+check:
+    %2 = prb i8$ %cnt
+    st i8* %cnt.shadow, %2
+    %clk.prb1 = prb i1$ %clk
+    %3 = const i1 0
+    %4 = eq i1 %clk.prb, %3
+    %5 = neq i1 %clk.prb1, %3
+    %posedge = and i1 %4, %5
+    br %posedge, %init, %event
+event:
+    %6 = const time 0s 1d
+    %7 = const i32 0
+    %cnt.shadow.ld = ld i8* %cnt.shadow
+    %zext = inss i32 %7, i8 %cnt.shadow.ld, 0, 8
+    %8 = const i32 1
+    %9 = add i32 %zext, %8
+    %10 = exts i8, i32 %9, 0, 8
+    drv i8$ %cnt, %10, %6
+    %11 = exts i4$, i4$ %led, 0, 4
+    %cnt.shadow.ld1 = ld i8* %cnt.shadow
+    %duty.prb = prb i8$ %duty
+    %12 = ult i8 %cnt.shadow.ld1, %duty.prb
+    %13 = neq i1 %12, %3
+    %14 = const i4 15
+    %15 = const i4 0
+    %16 = [i4 %15, %14]
+    %17 = mux [2 x i4] %16, i1 %13
+    drv i4$ %11, %17, %6
+    br %0
 }
 
-entity @top (i1$ %sw) -&gt; (i1$ %led) {
-    inst %top.always_comb.24.0 (i1$ %sw) -&gt; (i1$ %led)
+entity @top (i1$ %clk) -&gt; (i4$ %led) {
+    %0 = const i8 0
+    %cnt = sig i8 %0
+    %1 = const i8 5
+    %duty = sig i8 %1
+    inst %top.always_ff.81.0 (i1$ %clk, i8$ %duty) -&gt; (i4$ %led, i8$ %cnt)
 }
 
 </pre>

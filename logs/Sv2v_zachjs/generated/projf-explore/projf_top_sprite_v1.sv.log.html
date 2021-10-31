@@ -11,51 +11,47 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_sprite_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_sprite_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v1.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_sprite_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_sprite_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_sprite_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_sprite_v1.sv</a>
 defines: 
-completed: 2021-10-30 03:33:20
+completed: 2021-10-31 02:43:24
 time_elapsed: 0.022s
-ram usage: 25268 KB
+ram usage: 22172 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_sprite_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_sprite_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v1.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_sprite_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_sprite_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_sprite_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_sprite_v1.sv</a>
 `default_nettype none
 module top_sprite_v1 (
-	clk_100m,
+	clk_12m,
 	btn_rst,
-	hdmi_tx_ch0_p,
-	hdmi_tx_ch0_n,
-	hdmi_tx_ch1_p,
-	hdmi_tx_ch1_n,
-	hdmi_tx_ch2_p,
-	hdmi_tx_ch2_n,
-	hdmi_tx_clk_p,
-	hdmi_tx_clk_n
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
 );
-	input wire clk_100m;
+	input wire clk_12m;
 	input wire btn_rst;
-	output wire hdmi_tx_ch0_p;
-	output wire hdmi_tx_ch0_n;
-	output wire hdmi_tx_ch1_p;
-	output wire hdmi_tx_ch1_n;
-	output wire hdmi_tx_ch2_p;
-	output wire hdmi_tx_ch2_n;
-	output wire hdmi_tx_clk_p;
-	output wire hdmi_tx_clk_n;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
 	wire clk_pix;
-	wire clk_pix_5x;
-	wire clk_pix_locked;
-	clock_gen_720p clock_pix_inst(
-		.clk_100m(clk_100m),
-		.rst(!btn_rst),
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_12m),
+		.rst(btn_rst),
 		.clk_pix(clk_pix),
-		.clk_pix_5x(clk_pix_5x),
-		.clk_pix_locked(clk_pix_locked)
+		.clk_locked(clk_locked)
 	);
 	localparam CORDW = 16;
 	wire signed [15:0] sx;
@@ -64,9 +60,9 @@ module top_sprite_v1 (
 	wire vsync;
 	wire de;
 	wire line;
-	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_pix_locked),
+		.rst(!clk_locked),
 		.sx(sx),
 		.sy(sy),
 		.hsync(hsync),
@@ -77,7 +73,7 @@ module top_sprite_v1 (
 	);
 	localparam SPR_WIDTH = 8;
 	localparam SPR_HEIGHT = 8;
-	localparam SPR_FILE = &#34;letter_f.mem&#34;;
+	localparam SPR_FILE = &#34;../res/simple/letter_f.mem&#34;;
 	reg spr_start;
 	wire spr_pix;
 	localparam DRAW_X = 16;
@@ -89,65 +85,31 @@ module top_sprite_v1 (
 		.SPR_FILE(SPR_FILE)
 	) spr_instance(
 		.clk(clk_pix),
-		.rst(!clk_pix_locked),
+		.rst(!clk_locked),
 		.start(spr_start),
 		.sx(sx),
 		.sprx(DRAW_X),
 		.pix(spr_pix)
 	);
-	reg [7:0] dvi_red;
-	reg [7:0] dvi_green;
-	reg [7:0] dvi_blue;
-	reg dvi_hsync;
-	reg dvi_vsync;
-	reg dvi_de;
-	always @(posedge clk_pix) begin
-		dvi_hsync &lt;= hsync;
-		dvi_vsync &lt;= vsync;
-		dvi_de &lt;= de;
-		dvi_red &lt;= (de &amp;&amp; spr_pix ? 8&#39;hff : 8&#39;h00);
-		dvi_green &lt;= (de &amp;&amp; spr_pix ? 8&#39;hcc : 8&#39;h00);
-		dvi_blue &lt;= (de &amp;&amp; spr_pix ? 8&#39;h00 : 8&#39;h00);
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) begin
+		red = (de &amp;&amp; spr_pix ? 4&#39;hf : 4&#39;h0);
+		green = (de &amp;&amp; spr_pix ? 4&#39;hc : 4&#39;h0);
+		blue = (de &amp;&amp; spr_pix ? 4&#39;h0 : 4&#39;h0);
 	end
-	wire tmds_ch0_serial;
-	wire tmds_ch1_serial;
-	wire tmds_ch2_serial;
-	wire tmds_clk_serial;
-	dvi_generator dvi_out(
-		.clk_pix(clk_pix),
-		.clk_pix_5x(clk_pix_5x),
-		.rst(!clk_pix_locked),
-		.de(dvi_de),
-		.data_in_ch0(dvi_blue),
-		.data_in_ch1(dvi_green),
-		.data_in_ch2(dvi_red),
-		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
-		.ctrl_in_ch1(2&#39;b00),
-		.ctrl_in_ch2(2&#39;b00),
-		.tmds_ch0_serial(tmds_ch0_serial),
-		.tmds_ch1_serial(tmds_ch1_serial),
-		.tmds_ch2_serial(tmds_ch2_serial),
-		.tmds_clk_serial(tmds_clk_serial)
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
 	);
-	tmds_out tmds_ch0(
-		.tmds(tmds_ch0_serial),
-		.pin_p(hdmi_tx_ch0_p),
-		.pin_n(hdmi_tx_ch0_n)
-	);
-	tmds_out tmds_ch1(
-		.tmds(tmds_ch1_serial),
-		.pin_p(hdmi_tx_ch1_p),
-		.pin_n(hdmi_tx_ch1_n)
-	);
-	tmds_out tmds_ch2(
-		.tmds(tmds_ch2_serial),
-		.pin_p(hdmi_tx_ch2_p),
-		.pin_n(hdmi_tx_ch2_n)
-	);
-	tmds_out tmds_clk(
-		.tmds(tmds_clk_serial),
-		.pin_p(hdmi_tx_clk_p),
-		.pin_n(hdmi_tx_clk_n)
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync, vsync, de, red, green, blue}),
+		.D_OUT_1()
 	);
 endmodule
 

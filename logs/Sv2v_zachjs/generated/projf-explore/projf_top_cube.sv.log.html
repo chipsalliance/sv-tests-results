@@ -11,53 +11,51 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/simple-3d/xc7
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/simple-3d/xc7/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/simple-3d/xc7/top_cube.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_cube.sv</a>
 defines: 
-completed: 2021-10-30 03:33:17
-time_elapsed: 0.059s
-ram usage: 48696 KB
+completed: 2021-10-31 02:43:25
+time_elapsed: 0.046s
+ram usage: 44576 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/simple-3d/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/simple-3d/xc7/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/simple-3d/xc7/top_cube.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_cube.sv</a>
 `default_nettype none
 module top_cube (
-	clk_100m,
+	clk_12m,
 	btn_rst,
-	btn_inc,
-	btn_dec,
-	btn_axis,
-	btn_view,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
 );
-	input wire clk_100m;
+	input wire clk_12m;
 	input wire btn_rst;
-	input wire btn_inc;
-	input wire btn_dec;
-	input wire btn_axis;
-	input wire btn_view;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
+		.clk(clk_12m),
+		.rst(btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
 	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
 	wire hsync;
 	wire vsync;
 	wire de;
@@ -66,71 +64,30 @@ module top_cube (
 	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
 		.rst(!clk_locked),
-		.sx(),
-		.sy(),
+		.sx(sx),
+		.sy(sy),
 		.hsync(hsync),
 		.vsync(vsync),
 		.de(de),
 		.frame(frame),
 		.line(line)
 	);
-	wire frame_sys;
-	xd xd_frame(
-		.clk_i(clk_pix),
-		.clk_o(clk_100m),
-		.rst_i(1&#39;b0),
-		.rst_o(1&#39;b0),
-		.i(frame),
-		.o(frame_sys)
-	);
-	wire sig_inc;
-	wire sig_dec;
-	wire sig_axis;
-	wire sig_view;
-	debounce deb_inc(
-		.clk(clk_100m),
-		.in(btn_inc),
-		.out(),
-		.ondn(),
-		.onup(sig_inc)
-	);
-	debounce deb_dec(
-		.clk(clk_100m),
-		.in(btn_dec),
-		.out(),
-		.ondn(),
-		.onup(sig_dec)
-	);
-	debounce deb_axis(
-		.clk(clk_100m),
-		.in(btn_axis),
-		.out(),
-		.ondn(),
-		.onup(sig_axis)
-	);
-	debounce deb_view(
-		.clk(clk_100m),
-		.in(btn_view),
-		.out(),
-		.ondn(),
-		.onup(sig_view)
-	);
 	localparam FB_WIDTH = 320;
-	localparam FB_HEIGHT = 240;
+	localparam FB_HEIGHT = 180;
 	localparam FB_CIDXW = 4;
 	localparam FB_CHANW = 4;
 	localparam FB_SCALE = 2;
 	localparam FB_IMAGE = &#34;&#34;;
-	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
+	localparam FB_PALETTE = &#34;../res/palette/16_colr_4bit_palette.mem&#34;;
 	reg fb_we;
-	wire fb_wready;
-	wire signed [15:0] fbx;
-	wire signed [15:0] fby;
+	reg signed [15:0] fbx;
+	reg signed [15:0] fby;
 	reg [3:0] fb_cidx;
+	wire fb_busy;
 	wire [3:0] fb_red;
 	wire [3:0] fb_green;
 	wire [3:0] fb_blue;
-	framebuffer_bram_db #(
+	framebuffer_spram #(
 		.WIDTH(FB_WIDTH),
 		.HEIGHT(FB_HEIGHT),
 		.CIDXW(FB_CIDXW),
@@ -139,203 +96,195 @@ module top_cube (
 		.F_IMAGE(FB_IMAGE),
 		.F_PALETTE(FB_PALETTE)
 	) fb_inst(
-		.clk_sys(clk_100m),
+		.clk_sys(clk_pix),
 		.clk_pix(clk_pix),
 		.rst_sys(1&#39;b0),
 		.rst_pix(1&#39;b0),
-		.de(de),
+		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
 		.frame(frame),
 		.line(line),
 		.we(fb_we),
 		.x(fbx),
 		.y(fby),
 		.cidx(fb_cidx),
-		.bgidx(4&#39;h0),
-		.clear(1),
-		.wready(fb_wready),
 		.clip(),
+		.busy(fb_busy),
 		.red(fb_red),
 		.green(fb_green),
 		.blue(fb_blue)
 	);
-	localparam MODEL_FILE = &#34;cube.mem&#34;;
-	localparam LINE_CNT = 12;
-	localparam ROM_WIDTH = 48;
-	localparam ROM_CORDW = 8;
+	localparam LINE_CNT = 9;
 	reg [3:0] line_id;
-	wire [47:0] rom_data;
-	rom_sync #(
-		.WIDTH(ROM_WIDTH),
-		.DEPTH(LINE_CNT),
-		.INIT_F(MODEL_FILE)
-	) model_rom(
-		.clk(clk_100m),
-		.addr(line_id),
-		.data(rom_data)
-	);
-	localparam ANGLEW = 8;
-	reg [7:0] angle;
-	reg [1:0] axis;
-	reg [1:0] view;
-	reg [15:0] rot_x;
-	reg [15:0] rot_y;
-	reg [15:0] rot_z;
-	wire [15:0] rot_xr;
-	wire [15:0] rot_yr;
-	wire [15:0] rot_zr;
-	reg rot_start;
-	wire rot_done;
-	rotate #(
-		.CORDW(CORDW),
-		.ANGLEW(ANGLEW)
-	) rotate_inst(
-		.clk(clk_100m),
-		.rst(1&#39;b0),
-		.start(rot_start),
-		.axis(axis),
-		.angle(angle),
-		.x(rot_x),
-		.y(rot_y),
-		.z(rot_z),
-		.xr(rot_xr),
-		.yr(rot_yr),
-		.zr(rot_zr),
-		.done(rot_done)
-	);
-	reg [7:0] lx0;
-	reg [7:0] ly0;
-	reg [7:0] lz0;
-	reg [7:0] lx1;
-	reg [7:0] ly1;
-	reg [7:0] lz1;
-	reg [15:0] x0;
-	reg [15:0] y0;
-	reg [15:0] z0;
-	reg [15:0] x1;
-	reg [15:0] y1;
-	reg [15:0] z1;
-	reg [15:0] xv0;
-	reg [15:0] yv0;
-	reg [15:0] xv1;
-	reg [15:0] yv1;
+	reg signed [15:0] vx0;
+	reg signed [15:0] vy0;
+	reg signed [15:0] vx1;
+	reg signed [15:0] vy1;
 	reg draw_start;
 	wire drawing;
 	wire draw_done;
-	always @(posedge clk_100m) begin
-		if (sig_axis)
-			axis &lt;= (axis == 2&#39;b10 ? 2&#39;b00 : axis + 1);
-		if (sig_view)
-			view &lt;= (view == 2&#39;b10 ? 2&#39;b00 : view + 1);
-		if (sig_inc)
-			angle &lt;= angle + 1;
-		if (sig_dec)
-			angle &lt;= angle - 1;
-	end
+	reg signed [15:0] fbx_clear;
+	reg signed [15:0] fby_clear;
+	reg clearing;
 	reg [31:0] state;
-	always @(posedge clk_100m) begin
-		draw_start &lt;= 0;
-		rot_start &lt;= 0;
+	always @(posedge clk_pix) begin
 		case (state)
 			32&#39;d1: begin
-				fb_cidx &lt;= 4&#39;h9;
-				line_id &lt;= 0;
-				state &lt;= 32&#39;d2;
-			end
-			32&#39;d2: state &lt;= 32&#39;d3;
-			32&#39;d3: begin
-				{lx0, ly0, lz0, lx1, ly1, lz1} &lt;= rom_data;
-				state &lt;= 32&#39;d7;
-			end
-			32&#39;d7: begin
-				rot_x &lt;= {lx0, 8&#39;b00000000};
-				rot_y &lt;= {ly0, 8&#39;b00000000};
-				rot_z &lt;= {lz0, 8&#39;b00000000};
-				rot_start &lt;= 1;
-				state &lt;= 32&#39;d8;
-			end
-			32&#39;d8:
-				if (rot_done) begin
-					x0 &lt;= rot_xr &gt;&gt;&gt; 8;
-					y0 &lt;= rot_yr &gt;&gt;&gt; 8;
-					z0 &lt;= rot_zr &gt;&gt;&gt; 8;
-					rot_x &lt;= {lx1, 8&#39;b00000000};
-					rot_y &lt;= {ly1, 8&#39;b00000000};
-					rot_z &lt;= {lz1, 8&#39;b00000000};
-					rot_start &lt;= 1;
-					state &lt;= 32&#39;d9;
-				end
-			32&#39;d9:
-				if (rot_done) begin
-					x1 &lt;= rot_xr &gt;&gt;&gt; 8;
-					y1 &lt;= rot_yr &gt;&gt;&gt; 8;
-					z1 &lt;= rot_zr &gt;&gt;&gt; 8;
-					state &lt;= 32&#39;d4;
-				end
-			32&#39;d4: begin
-				draw_start &lt;= 1;
-				state &lt;= 32&#39;d5;
-				case (view)
-					2&#39;b00: begin
-						xv0 &lt;= x0;
-						yv0 &lt;= FB_HEIGHT - y0;
-						xv1 &lt;= x1;
-						yv1 &lt;= FB_HEIGHT - y1;
+				fb_cidx &lt;= 4&#39;h0;
+				if (!fb_busy)
+					if ((fby_clear == 179) &amp;&amp; (fbx_clear == 319)) begin
+						clearing &lt;= 0;
+						state &lt;= 32&#39;d2;
 					end
-					2&#39;b01: begin
-						xv0 &lt;= FB_HEIGHT - y0;
-						yv0 &lt;= z0;
-						xv1 &lt;= FB_HEIGHT - y1;
-						yv1 &lt;= z1;
+					else if (clearing == 1) begin
+						if (fbx_clear == 319) begin
+							fbx_clear &lt;= 0;
+							fby_clear &lt;= fby_clear + 1;
+						end
+						else
+							fbx_clear &lt;= fbx_clear + 1;
+					end
+					else
+						clearing &lt;= 1;
+			end
+			32&#39;d2: begin
+				draw_start &lt;= 1;
+				state &lt;= 32&#39;d3;
+				fb_cidx &lt;= 4&#39;h8;
+				case (line_id)
+					4&#39;d0: begin
+						vx0 &lt;= 130;
+						vy0 &lt;= 60;
+						vx1 &lt;= 230;
+						vy1 &lt;= 60;
+					end
+					4&#39;d1: begin
+						vx0 &lt;= 230;
+						vy0 &lt;= 60;
+						vx1 &lt;= 230;
+						vy1 &lt;= 160;
+					end
+					4&#39;d2: begin
+						vx0 &lt;= 230;
+						vy0 &lt;= 160;
+						vx1 &lt;= 130;
+						vy1 &lt;= 160;
+					end
+					4&#39;d3: begin
+						vx0 &lt;= 130;
+						vy0 &lt;= 160;
+						vx1 &lt;= 130;
+						vy1 &lt;= 60;
+					end
+					4&#39;d4: begin
+						vx0 &lt;= 130;
+						vy0 &lt;= 160;
+						vx1 &lt;= 90;
+						vy1 &lt;= 120;
+					end
+					4&#39;d5: begin
+						vx0 &lt;= 90;
+						vy0 &lt;= 120;
+						vx1 &lt;= 90;
+						vy1 &lt;= 20;
+					end
+					4&#39;d6: begin
+						vx0 &lt;= 90;
+						vy0 &lt;= 20;
+						vx1 &lt;= 130;
+						vy1 &lt;= 60;
+					end
+					4&#39;d7: begin
+						vx0 &lt;= 90;
+						vy0 &lt;= 20;
+						vx1 &lt;= 190;
+						vy1 &lt;= 20;
+					end
+					4&#39;d8: begin
+						vx0 &lt;= 190;
+						vy0 &lt;= 20;
+						vx1 &lt;= 230;
+						vy1 &lt;= 60;
 					end
 					default: begin
-						xv0 &lt;= z0;
-						yv0 &lt;= x0;
-						xv1 &lt;= z1;
-						yv1 &lt;= x1;
+						vx0 &lt;= 0;
+						vy0 &lt;= 0;
+						vx1 &lt;= 0;
+						vy1 &lt;= 0;
 					end
 				endcase
 			end
-			32&#39;d5:
+			32&#39;d3: begin
+				draw_start &lt;= 0;
 				if (draw_done)
-					if (line_id == 11)
-						state &lt;= 32&#39;d6;
+					if (line_id == 8)
+						state &lt;= 32&#39;d4;
 					else begin
 						line_id &lt;= line_id + 1;
 						state &lt;= 32&#39;d2;
 					end
+			end
+			32&#39;d4: state &lt;= 32&#39;d4;
 			default:
-				if (frame_sys)
+				if (frame)
 					state &lt;= 32&#39;d1;
 		endcase
+		if (!clk_locked)
+			state &lt;= 32&#39;d0;
 	end
+	localparam FRAME_WAIT = 300;
+	reg [8:0] cnt_frame_wait;
+	reg draw_req;
+	always @(posedge clk_pix) begin
+		if (!fb_busy)
+			draw_req &lt;= 0;
+		if (frame)
+			if (cnt_frame_wait != 299)
+				cnt_frame_wait &lt;= cnt_frame_wait + 1;
+			else
+				draw_req &lt;= 1;
+	end
+	wire signed [15:0] fbx_draw;
+	wire signed [15:0] fby_draw;
 	draw_line #(.CORDW(CORDW)) draw_line_inst(
-		.clk(clk_100m),
-		.rst(1&#39;b0),
+		.clk(clk_pix),
+		.rst(!clk_locked),
 		.start(draw_start),
-		.oe(fb_wready),
-		.x0(xv0),
-		.y0(yv0),
-		.x1(xv1),
-		.y1(yv1),
-		.x(fbx),
-		.y(fby),
+		.oe(draw_req &amp;&amp; !fb_busy),
+		.x0(vx0),
+		.y0(vy0),
+		.x1(vx1),
+		.y1(vy1),
+		.x(fbx_draw),
+		.y(fby_draw),
 		.drawing(drawing),
+		.busy(),
 		.done(draw_done)
 	);
-	always @(*) fb_we = drawing;
+	always @(posedge clk_pix) begin
+		fb_we &lt;= drawing || clearing;
+		fbx &lt;= (clearing ? fbx_clear : fbx_draw);
+		fby &lt;= (clearing ? fby_clear : fby_draw);
+	end
 	reg hsync_p1;
 	reg vsync_p1;
+	reg de_p1;
 	always @(posedge clk_pix) begin
 		hsync_p1 &lt;= hsync;
 		vsync_p1 &lt;= vsync;
+		de_p1 &lt;= de;
 	end
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync_p1;
-		vga_vsync &lt;= vsync_p1;
-		vga_r &lt;= fb_red;
-		vga_g &lt;= fb_green;
-		vga_b &lt;= fb_blue;
-	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
+		.D_OUT_1()
+	);
 endmodule
 
 </pre>
