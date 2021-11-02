@@ -11,83 +11,94 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/ice40
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_rectangles.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_rectangles.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_rectangles.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_rectangles.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_rectangles.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_rectangles.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd/top_rectangles.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd/top_rectangles.sv</a>
 defines: 
-completed: 2021-11-01 02:34:50
-time_elapsed: 0.041s
-ram usage: 39464 KB
+completed: 2021-11-02 02:46:31
+time_elapsed: 0.044s
+ram usage: 39076 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_rectangles.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_rectangles.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_rectangles.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_rectangles.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_rectangles.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_rectangles.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd/top_rectangles.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd/top_rectangles.sv</a>
 `default_nettype none
 module top_rectangles (
-	clk_12m,
+	clk_100m,
 	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
 );
-	input wire clk_12m;
+	input wire clk_100m;
 	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
 	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
+		.rst(!btn_rst),
 		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
 	);
 	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
 	wire hsync;
 	wire vsync;
 	wire de;
 	wire frame;
 	wire line;
-	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(sx),
-		.sy(sy),
+		.rst(!clk_pix_locked),
+		.sx(),
+		.sy(),
 		.hsync(hsync),
 		.vsync(vsync),
 		.de(de),
 		.frame(frame),
 		.line(line)
 	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
 	localparam FB_WIDTH = 320;
 	localparam FB_HEIGHT = 180;
 	localparam FB_CIDXW = 4;
 	localparam FB_CHANW = 4;
-	localparam FB_SCALE = 2;
+	localparam FB_SCALE = 4;
 	localparam FB_IMAGE = &#34;&#34;;
-	localparam FB_PALETTE = &#34;../res/palette/16_colr_4bit_palette.mem&#34;;
+	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
 	reg fb_we;
-	reg signed [15:0] fbx;
-	reg signed [15:0] fby;
+	wire signed [15:0] fbx;
+	wire signed [15:0] fby;
 	reg [3:0] fb_cidx;
 	wire fb_busy;
 	wire [3:0] fb_red;
 	wire [3:0] fb_green;
 	wire [3:0] fb_blue;
-	framebuffer_spram #(
+	framebuffer_bram #(
 		.WIDTH(FB_WIDTH),
 		.HEIGHT(FB_HEIGHT),
 		.CIDXW(FB_CIDXW),
@@ -96,11 +107,11 @@ module top_rectangles (
 		.F_IMAGE(FB_IMAGE),
 		.F_PALETTE(FB_PALETTE)
 	) fb_inst(
-		.clk_sys(clk_pix),
+		.clk_sys(clk_100m),
 		.clk_pix(clk_pix),
 		.rst_sys(1&#39;b0),
 		.rst_pix(1&#39;b0),
-		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
+		.de(de),
 		.frame(frame),
 		.line(line),
 		.we(fb_we),
@@ -114,7 +125,7 @@ module top_rectangles (
 		.blue(fb_blue)
 	);
 	localparam SHAPE_CNT = 64;
-	reg [6:0] shape_id;
+	reg [5:0] shape_id;
 	reg signed [15:0] vx0;
 	reg signed [15:0] vy0;
 	reg signed [15:0] vx1;
@@ -122,65 +133,41 @@ module top_rectangles (
 	reg draw_start;
 	wire drawing;
 	wire draw_done;
-	reg signed [15:0] fbx_clear;
-	reg signed [15:0] fby_clear;
-	reg clearing;
 	reg [31:0] state;
-	always @(posedge clk_pix) begin
+	always @(posedge clk_100m)
 		case (state)
 			32&#39;d1: begin
-				fb_cidx &lt;= 4&#39;h0;
-				if (!fb_busy)
-					if ((fby_clear == 179) &amp;&amp; (fbx_clear == 319)) begin
-						clearing &lt;= 0;
-						state &lt;= 32&#39;d2;
-					end
-					else if (clearing == 1) begin
-						if (fbx_clear == 319) begin
-							fbx_clear &lt;= 0;
-							fby_clear &lt;= fby_clear + 1;
-						end
-						else
-							fbx_clear &lt;= fbx_clear + 1;
-					end
-					else
-						clearing &lt;= 1;
-			end
-			32&#39;d2: begin
 				draw_start &lt;= 1;
-				state &lt;= 32&#39;d3;
+				state &lt;= 32&#39;d2;
 				vx0 &lt;= 60 + shape_id;
 				vy0 &lt;= 15 + shape_id;
 				vx1 &lt;= 260 - shape_id;
 				vy1 &lt;= 165 - shape_id;
 				fb_cidx &lt;= shape_id[3:0];
 			end
-			32&#39;d3: begin
+			32&#39;d2: begin
 				draw_start &lt;= 0;
 				if (draw_done)
 					if (shape_id == 63)
-						state &lt;= 32&#39;d4;
+						state &lt;= 32&#39;d3;
 					else begin
 						shape_id &lt;= shape_id + 1;
-						state &lt;= 32&#39;d2;
+						state &lt;= 32&#39;d1;
 					end
 			end
-			32&#39;d4: state &lt;= 32&#39;d4;
+			32&#39;d3: state &lt;= 32&#39;d3;
 			default:
-				if (frame)
+				if (frame_sys)
 					state &lt;= 32&#39;d1;
 		endcase
-		if (!clk_locked)
-			state &lt;= 32&#39;d0;
-	end
 	localparam FRAME_WAIT = 300;
 	localparam PIX_FRAME = 200;
 	reg [8:0] cnt_frame_wait;
 	reg [7:0] cnt_pix_frame;
 	reg draw_req;
-	always @(posedge clk_pix) begin
+	always @(posedge clk_100m) begin
 		draw_req &lt;= 0;
-		if (frame) begin
+		if (frame_sys) begin
 			if (cnt_frame_wait != 299)
 				cnt_frame_wait &lt;= cnt_frame_wait + 1;
 			cnt_pix_frame &lt;= 0;
@@ -191,28 +178,22 @@ module top_rectangles (
 				cnt_pix_frame &lt;= cnt_pix_frame + 1;
 			end
 	end
-	wire signed [15:0] fbx_draw;
-	wire signed [15:0] fby_draw;
 	draw_rectangle #(.CORDW(CORDW)) draw_rectangle_inst(
-		.clk(clk_pix),
-		.rst(!clk_locked),
+		.clk(clk_100m),
+		.rst(1&#39;b0),
 		.start(draw_start),
 		.oe(draw_req &amp;&amp; !fb_busy),
 		.x0(vx0),
 		.y0(vy0),
 		.x1(vx1),
 		.y1(vy1),
-		.x(fbx_draw),
-		.y(fby_draw),
+		.x(fbx),
+		.y(fby),
 		.drawing(drawing),
 		.busy(),
 		.done(draw_done)
 	);
-	always @(posedge clk_pix) begin
-		fb_we &lt;= drawing || clearing;
-		fbx &lt;= (clearing ? fbx_clear : fbx_draw);
-		fby &lt;= (clearing ? fby_clear : fby_draw);
-	end
+	always @(*) fb_we = drawing;
 	reg hsync_p1;
 	reg vsync_p1;
 	reg de_p1;
@@ -221,17 +202,59 @@ module top_rectangles (
 		vsync_p1 &lt;= vsync;
 		de_p1 &lt;= de;
 	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync_p1;
+		dvi_vsync &lt;= vsync_p1;
+		dvi_de &lt;= de_p1;
+		dvi_red &lt;= {2 {fb_red}};
+		dvi_green &lt;= {2 {fb_green}};
+		dvi_blue &lt;= {2 {fb_blue}};
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
 	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
-		.D_OUT_1()
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
 	);
 endmodule
 
