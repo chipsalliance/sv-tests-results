@@ -11,51 +11,43 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7-hd
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_greet.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_greet.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_greet.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_greet.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_greet.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_greet.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_greet.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_greet.sv</a>
 defines: 
-completed: 2021-11-02 02:46:30
-time_elapsed: 0.063s
-ram usage: 55024 KB
+completed: 2021-11-03 02:41:08
+time_elapsed: 0.057s
+ram usage: 47808 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_greet.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_greet.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_greet.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_greet.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_greet.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_greet.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_greet.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_greet.sv</a>
 `default_nettype none
 module top_greet (
 	clk_100m,
 	btn_rst,
-	hdmi_tx_ch0_p,
-	hdmi_tx_ch0_n,
-	hdmi_tx_ch1_p,
-	hdmi_tx_ch1_n,
-	hdmi_tx_ch2_p,
-	hdmi_tx_ch2_n,
-	hdmi_tx_clk_p,
-	hdmi_tx_clk_n
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
 );
 	input wire clk_100m;
 	input wire btn_rst;
-	output wire hdmi_tx_ch0_p;
-	output wire hdmi_tx_ch0_n;
-	output wire hdmi_tx_ch1_p;
-	output wire hdmi_tx_ch1_n;
-	output wire hdmi_tx_ch2_p;
-	output wire hdmi_tx_ch2_n;
-	output wire hdmi_tx_clk_p;
-	output wire hdmi_tx_clk_n;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
 	wire clk_pix;
-	wire clk_pix_5x;
-	wire clk_pix_locked;
-	clock_gen_720p clock_pix_inst(
-		.clk_100m(clk_100m),
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
 		.rst(!btn_rst),
 		.clk_pix(clk_pix),
-		.clk_pix_5x(clk_pix_5x),
-		.clk_pix_locked(clk_pix_locked)
+		.clk_locked(clk_locked)
 	);
 	localparam CORDW = 16;
 	wire signed [15:0] sx;
@@ -63,11 +55,11 @@ module top_greet (
 	wire hsync;
 	wire vsync;
 	wire de;
-	wire frame;
 	wire line;
-	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
+	wire frame;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_pix_locked),
+		.rst(!clk_locked),
 		.sx(sx),
 		.sy(sy),
 		.hsync(hsync),
@@ -120,25 +112,25 @@ module top_greet (
 		.addr(font_rom_addr),
 		.data(font_rom_data)
 	);
-	localparam V_RES = 720;
+	localparam V_RES = 480;
 	localparam SPR_CNT = 8;
-	localparam LINE2 = 360;
-	localparam SPR_SCALE_X = 16;
-	localparam SPR_SCALE_Y = 16;
+	localparam LINE2 = 240;
+	localparam SPR_SCALE_X = 8;
+	localparam SPR_SCALE_Y = 8;
 	localparam SPR_DMA = -16;
 	reg signed [15:0] spr_x [0:7];
 	reg signed [15:0] spr_y [0:1];
 	initial begin
-		spr_x[0] = 128;
-		spr_x[1] = 256;
-		spr_x[2] = 384;
-		spr_x[3] = 512;
-		spr_x[4] = 640;
-		spr_x[5] = 768;
-		spr_x[6] = 896;
-		spr_x[7] = 1024;
-		spr_y[0] = 225;
-		spr_y[1] = 375;
+		spr_x[0] = 64;
+		spr_x[1] = 128;
+		spr_x[2] = 192;
+		spr_x[3] = 256;
+		spr_x[4] = 320;
+		spr_x[5] = 384;
+		spr_x[6] = 448;
+		spr_x[7] = 512;
+		spr_y[0] = 150;
+		spr_y[1] = 250;
 	end
 	reg spr_start;
 	always @(*) spr_start = (sy &lt; LINE2 ? line &amp;&amp; (sy == spr_y[0]) : line &amp;&amp; (sy == spr_y[1]));
@@ -183,7 +175,7 @@ module top_greet (
 				.ADDRW(3)
 			) spr0(
 				.clk(clk_pix),
-				.rst(!clk_pix_locked),
+				.rst(!clk_locked),
 				.start(spr_start),
 				.dma_avail(spr_fdma[m]),
 				.sx(sx),
@@ -203,50 +195,44 @@ module top_greet (
 	wire [7:0] sf2_star;
 	wire [7:0] sf3_star;
 	starfield #(
-		.H(1650),
-		.V(750),
 		.INC(-1),
 		.SEED(21&#39;h09a9a9)
 	) sf1(
 		.clk(clk_pix),
 		.en(1&#39;b1),
-		.rst(!clk_pix_locked),
+		.rst(!clk_locked),
 		.sf_on(sf1_on),
 		.sf_star(sf1_star)
 	);
 	starfield #(
-		.H(1650),
-		.V(750),
 		.INC(-2),
 		.SEED(21&#39;h0a9a9a)
 	) sf2(
 		.clk(clk_pix),
 		.en(1&#39;b1),
-		.rst(!clk_pix_locked),
+		.rst(!clk_locked),
 		.sf_on(sf2_on),
 		.sf_star(sf2_star)
 	);
 	starfield #(
-		.H(1650),
-		.V(750),
 		.INC(-4),
 		.MASK(21&#39;h0007ff)
 	) sf3(
 		.clk(clk_pix),
 		.en(1&#39;b1),
-		.rst(!clk_pix_locked),
+		.rst(!clk_locked),
 		.sf_on(sf3_on),
 		.sf_star(sf3_star)
 	);
 	localparam COLR_A = &#39;h125;
 	localparam COLR_B = &#39;h421;
-	localparam SLIN_1A = &#39;d225;
-	localparam SLIN_1B = &#39;d281;
-	localparam SLIN_2A = &#39;d375;
-	localparam SLIN_2B = &#39;d431;
-	localparam LINE_INC = 6;
+	localparam SLIN_1A = &#39;d150;
+	localparam SLIN_1B = &#39;d178;
+	localparam SLIN_2A = &#39;d250;
+	localparam SLIN_2B = &#39;d278;
+	localparam LINE_INC = 3;
 	reg [11:0] font_colr;
-	reg [2:0] cnt_line;
+	reg [1:0] cnt_line;
 	always @(posedge clk_pix)
 		if (line)
 			if ((sy == SLIN_1A) || (sy == SLIN_2A)) begin
@@ -259,7 +245,7 @@ module top_greet (
 			end
 			else begin
 				cnt_line &lt;= cnt_line + 1;
-				if (cnt_line == 5) begin
+				if (cnt_line == 2) begin
 					cnt_line &lt;= 0;
 					font_colr &lt;= font_colr + &#39;h111;
 				end
@@ -272,68 +258,13 @@ module top_greet (
 		{red_spr, green_spr, blue_spr} = (spr_pix != 0 ? font_colr : 12&#39;h000);
 		starlight = (sf1_on ? sf1_star[7:4] : (sf2_on ? sf2_star[7:4] : (sf3_on ? sf3_star[7:4] : 4&#39;h0)));
 	end
-	reg [3:0] red;
-	reg [3:0] green;
-	reg [3:0] blue;
-	always @(*) begin
-		red = (de ? (spr_pix != 0 ? red_spr : starlight) : 4&#39;h0);
-		green = (de ? (spr_pix != 0 ? green_spr : starlight) : 4&#39;h0);
-		blue = (de ? (spr_pix != 0 ? blue_spr : starlight) : 4&#39;h0);
-	end
-	reg [7:0] dvi_red;
-	reg [7:0] dvi_green;
-	reg [7:0] dvi_blue;
-	reg dvi_hsync;
-	reg dvi_vsync;
-	reg dvi_de;
 	always @(posedge clk_pix) begin
-		dvi_hsync &lt;= hsync;
-		dvi_vsync &lt;= vsync;
-		dvi_de &lt;= de;
-		dvi_red &lt;= {red, red};
-		dvi_green &lt;= {green, green};
-		dvi_blue &lt;= {blue, blue};
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= (de ? (spr_pix != 0 ? red_spr : starlight) : 4&#39;h0);
+		vga_g &lt;= (de ? (spr_pix != 0 ? green_spr : starlight) : 4&#39;h0);
+		vga_b &lt;= (de ? (spr_pix != 0 ? blue_spr : starlight) : 4&#39;h0);
 	end
-	wire tmds_ch0_serial;
-	wire tmds_ch1_serial;
-	wire tmds_ch2_serial;
-	wire tmds_clk_serial;
-	dvi_generator dvi_out(
-		.clk_pix(clk_pix),
-		.clk_pix_5x(clk_pix_5x),
-		.rst(!clk_pix_locked),
-		.de(dvi_de),
-		.data_in_ch0(dvi_blue),
-		.data_in_ch1(dvi_green),
-		.data_in_ch2(dvi_red),
-		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
-		.ctrl_in_ch1(2&#39;b00),
-		.ctrl_in_ch2(2&#39;b00),
-		.tmds_ch0_serial(tmds_ch0_serial),
-		.tmds_ch1_serial(tmds_ch1_serial),
-		.tmds_ch2_serial(tmds_ch2_serial),
-		.tmds_clk_serial(tmds_clk_serial)
-	);
-	tmds_out tmds_ch0(
-		.tmds(tmds_ch0_serial),
-		.pin_p(hdmi_tx_ch0_p),
-		.pin_n(hdmi_tx_ch0_n)
-	);
-	tmds_out tmds_ch1(
-		.tmds(tmds_ch1_serial),
-		.pin_p(hdmi_tx_ch1_p),
-		.pin_n(hdmi_tx_ch1_n)
-	);
-	tmds_out tmds_ch2(
-		.tmds(tmds_ch2_serial),
-		.pin_p(hdmi_tx_ch2_p),
-		.pin_n(hdmi_tx_ch2_n)
-	);
-	tmds_out tmds_clk(
-		.tmds(tmds_clk_serial),
-		.pin_p(hdmi_tx_clk_p),
-		.pin_n(hdmi_tx_clk_n)
-	);
 endmodule
 
 </pre>
