@@ -11,46 +11,61 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/verilator
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_beam.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_beam.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_beam.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_beam.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_beam.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_beam.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_beam.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_beam.sv</a>
 defines: 
-completed: 2021-11-03 02:41:10
-time_elapsed: 0.020s
-ram usage: 20100 KB
+completed: 2021-11-04 02:32:34
+time_elapsed: 0.024s
+ram usage: 23716 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/verilator <a href="../../../../tests/generated/projf-explore/projf_top_beam.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_beam.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_beam.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_beam.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_beam.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_beam.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_beam.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_beam.sv</a>
 `default_nettype none
 module top_beam (
-	clk_pix,
-	rst,
-	sx,
-	sy,
-	de,
-	sdl_r,
-	sdl_g,
-	sdl_b
+	clk_12m,
+	btn_rst,
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
 );
-	parameter CORDW = 10;
-	input wire clk_pix;
-	input wire rst;
-	output wire [CORDW - 1:0] sx;
-	output wire [CORDW - 1:0] sy;
-	output wire de;
-	output reg [7:0] sdl_r;
-	output reg [7:0] sdl_g;
-	output reg [7:0] sdl_b;
+	input wire clk_12m;
+	input wire btn_rst;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_12m),
+		.rst(btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 10;
+	wire [9:0] sx;
+	wire [9:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
 	simple_display_timings_480p display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(rst),
+		.rst(!clk_locked),
 		.sx(sx),
 		.sy(sy),
-		.hsync(),
-		.vsync(),
+		.hsync(hsync),
+		.vsync(vsync),
 		.de(de)
 	);
 	localparam H_RES_FULL = 800;
@@ -61,8 +76,8 @@ module top_beam (
 	always @(*) animate = (sy == V_RES) &amp;&amp; (sx == 0);
 	localparam Q_SIZE = 32;
 	localparam Q_SPEED = 4;
-	reg [CORDW - 1:0] qx;
-	reg [CORDW - 1:0] qy;
+	reg [9:0] qx;
+	reg [9:0] qy;
 	always @(posedge clk_pix)
 		if (animate)
 			if (qx &gt;= 768) begin
@@ -73,11 +88,26 @@ module top_beam (
 				qx &lt;= qx + Q_SPEED;
 	reg q_draw;
 	always @(*) q_draw = (((sx &gt;= qx) &amp;&amp; (sx &lt; (qx + Q_SIZE))) &amp;&amp; (sy &gt;= qy)) &amp;&amp; (sy &lt; (qy + Q_SIZE));
-	always @(posedge clk_pix) begin
-		sdl_r &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;hff : 8&#39;h00));
-		sdl_g &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;h88 : 8&#39;h88));
-		sdl_b &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;h00 : 8&#39;hff));
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) begin
+		red = (!de ? 4&#39;h0 : (q_draw ? 4&#39;hf : 4&#39;h0));
+		green = (!de ? 4&#39;h0 : (q_draw ? 4&#39;h8 : 4&#39;h8));
+		blue = (!de ? 4&#39;h0 : (q_draw ? 4&#39;h0 : 4&#39;hf));
 	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync, vsync, de, red, green, blue}),
+		.D_OUT_1()
+	);
 endmodule
 
 </pre>
