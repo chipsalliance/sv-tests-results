@@ -11,47 +11,43 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/ice40
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/xc7
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/xc7/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/xc7/top_life.sv</a>
 defines: 
-completed: 2021-11-05 02:37:40
+completed: 2021-11-06 02:34:20
 time_elapsed: 0.026s
-ram usage: 27860 KB
+ram usage: 27080 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/ice40/top_life.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/xc7/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/xc7/top_life.sv</a>
 `default_nettype none
 module top_life (
-	clk_12m,
+	clk_100m,
 	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
 );
-	input wire clk_12m;
+	input wire clk_100m;
 	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
 	localparam GEN_FRAMES = 15;
 	localparam SEED_FILE = &#34;simple_64x48.mem&#34;;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
+		.clk(clk_100m),
+		.rst(!btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
@@ -72,13 +68,22 @@ module top_life (
 		.frame(frame),
 		.line(line)
 	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
 	reg life_start;
 	wire life_alive;
 	wire life_changed;
 	reg [3:0] cnt_frames;
-	always @(posedge clk_pix) begin
+	always @(posedge clk_100m) begin
 		life_start &lt;= 0;
-		if (frame)
+		if (frame_sys)
 			if (cnt_frames == 14) begin
 				life_start &lt;= 1;
 				cnt_frames &lt;= 0;
@@ -92,7 +97,7 @@ module top_life (
 	localparam FB_CHANW = 4;
 	localparam FB_SCALE = 10;
 	localparam FB_IMAGE = &#34;&#34;;
-	localparam FB_PALETTE = &#34;../res/life_palette.mem&#34;;
+	localparam FB_PALETTE = &#34;life_palette.mem&#34;;
 	wire fb_we;
 	wire signed [15:0] fbx;
 	wire signed [15:0] fby;
@@ -110,7 +115,7 @@ module top_life (
 		.F_IMAGE(FB_IMAGE),
 		.F_PALETTE(FB_PALETTE)
 	) fb_inst(
-		.clk_sys(clk_pix),
+		.clk_sys(clk_100m),
 		.clk_pix(clk_pix),
 		.rst_sys(1&#39;b0),
 		.rst_pix(1&#39;b0),
@@ -132,10 +137,10 @@ module top_life (
 		.CORDW(CORDW),
 		.WIDTH(FB_WIDTH),
 		.HEIGHT(FB_HEIGHT),
-		.F_INIT({&#34;../res/seed/&#34;, SEED_FILE})
+		.F_INIT(SEED_FILE)
 	) life_inst(
-		.clk(clk_pix),
-		.rst(!clk_locked),
+		.clk(clk_100m),
+		.rst(1&#39;b0),
 		.start(life_start),
 		.ready(fb_we),
 		.alive(life_alive),
@@ -147,24 +152,17 @@ module top_life (
 	);
 	reg hsync_p1;
 	reg vsync_p1;
-	reg de_p1;
 	always @(posedge clk_pix) begin
 		hsync_p1 &lt;= hsync;
 		vsync_p1 &lt;= vsync;
-		de_p1 &lt;= de;
 	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
-	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
-		.D_OUT_1()
-	);
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync_p1;
+		vga_vsync &lt;= vsync_p1;
+		vga_r &lt;= fb_red;
+		vga_g &lt;= fb_green;
+		vga_b &lt;= fb_blue;
+	end
 endmodule
 
 </pre>

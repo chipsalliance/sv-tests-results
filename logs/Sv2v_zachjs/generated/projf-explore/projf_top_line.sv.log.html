@@ -11,56 +11,50 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/ice40
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_line.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv</a>
 defines: 
-completed: 2021-11-05 02:37:40
-time_elapsed: 0.033s
-ram usage: 34484 KB
+completed: 2021-11-06 02:34:20
+time_elapsed: 0.025s
+ram usage: 26396 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/ice40/top_line.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv</a>
 `default_nettype none
 module top_line (
-	clk_12m,
+	clk_100m,
 	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
 );
-	input wire clk_12m;
+	input wire clk_100m;
 	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
+		.clk(clk_100m),
+		.rst(!btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
 	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
 	wire hsync;
 	wire vsync;
-	wire de;
 	wire frame;
-	wire line;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
 	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
 		.rst(!clk_locked),
@@ -68,146 +62,77 @@ module top_line (
 		.sy(sy),
 		.hsync(hsync),
 		.vsync(vsync),
-		.de(de),
+		.de(),
 		.frame(frame),
-		.line(line)
+		.line()
 	);
-	localparam FB_WIDTH = 320;
-	localparam FB_HEIGHT = 180;
-	localparam FB_CIDXW = 4;
-	localparam FB_CHANW = 4;
-	localparam FB_SCALE = 2;
-	localparam FB_IMAGE = &#34;&#34;;
-	localparam FB_PALETTE = &#34;../res/palette/16_colr_4bit_palette.mem&#34;;
+	localparam FB_WIDTH = 160;
+	localparam FB_HEIGHT = 120;
+	localparam FB_PIXELS = 19200;
+	localparam FB_ADDRW = 15;
+	localparam FB_DATAW = 1;
 	reg fb_we;
-	reg signed [15:0] fbx;
-	reg signed [15:0] fby;
-	reg [3:0] fb_cidx;
-	wire fb_busy;
-	wire [3:0] fb_red;
-	wire [3:0] fb_green;
-	wire [3:0] fb_blue;
-	framebuffer_spram #(
-		.WIDTH(FB_WIDTH),
-		.HEIGHT(FB_HEIGHT),
-		.CIDXW(FB_CIDXW),
-		.CHANW(FB_CHANW),
-		.SCALE(FB_SCALE),
-		.F_IMAGE(FB_IMAGE),
-		.F_PALETTE(FB_PALETTE)
-	) fb_inst(
-		.clk_sys(clk_pix),
-		.clk_pix(clk_pix),
-		.rst_sys(1&#39;b0),
-		.rst_pix(1&#39;b0),
-		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
-		.frame(frame),
-		.line(line),
+	reg [14:0] fb_addr_write;
+	reg [14:0] fb_addr_read;
+	reg [0:0] fb_colr_write;
+	wire [0:0] fb_colr_read;
+	bram_sdp #(
+		.WIDTH(FB_DATAW),
+		.DEPTH(FB_PIXELS)
+	) bram_inst(
+		.clk_write(clk_pix),
+		.clk_read(clk_pix),
 		.we(fb_we),
-		.x(fbx),
-		.y(fby),
-		.cidx(fb_cidx),
-		.clip(),
-		.busy(fb_busy),
-		.red(fb_red),
-		.green(fb_green),
-		.blue(fb_blue)
+		.addr_write(fb_addr_write),
+		.addr_read(fb_addr_read),
+		.data_in(fb_colr_write),
+		.data_out(fb_colr_read)
 	);
-	reg signed [15:0] vx0;
-	reg signed [15:0] vy0;
-	reg signed [15:0] vx1;
-	reg signed [15:0] vy1;
-	reg draw_start;
-	wire drawing;
-	wire draw_done;
-	reg signed [15:0] fbx_clear;
-	reg signed [15:0] fby_clear;
-	reg clearing;
+	reg [7:0] cnt_draw;
 	reg [31:0] state;
-	always @(posedge clk_pix) begin
+	always @(posedge clk_pix)
 		case (state)
-			32&#39;d1: begin
-				fb_cidx &lt;= 4&#39;h0;
-				if (!fb_busy)
-					if ((fby_clear == 179) &amp;&amp; (fbx_clear == 319)) begin
-						clearing &lt;= 0;
-						state &lt;= 32&#39;d2;
-					end
-					else if (clearing == 1) begin
-						if (fbx_clear == 319) begin
-							fbx_clear &lt;= 0;
-							fby_clear &lt;= fby_clear + 1;
-						end
-						else
-							fbx_clear &lt;= fbx_clear + 1;
-					end
-					else
-						clearing &lt;= 1;
-			end
-			32&#39;d2: begin
-				vx0 &lt;= 70;
-				vy0 &lt;= 0;
-				vx1 &lt;= 249;
-				vy1 &lt;= 179;
-				fb_cidx &lt;= 4&#39;h9;
-				draw_start &lt;= 1;
-				state &lt;= 32&#39;d3;
-			end
-			32&#39;d3: begin
-				draw_start &lt;= 0;
-				if (draw_done)
-					state &lt;= 32&#39;d4;
-			end
-			32&#39;d4: state &lt;= 32&#39;d4;
-			default:
-				if (frame)
+			32&#39;d1:
+				if (cnt_draw &lt; 159) begin
+					fb_addr_write &lt;= fb_addr_write + 1;
+					cnt_draw &lt;= cnt_draw + 1;
+				end
+				else begin
+					fb_we &lt;= 0;
+					state &lt;= 32&#39;d2;
+				end
+			32&#39;d0:
+				if (frame) begin
+					fb_colr_write &lt;= 1;
+					fb_we &lt;= 1;
+					fb_addr_write &lt;= 9600;
+					cnt_draw &lt;= 0;
 					state &lt;= 32&#39;d1;
+				end
+			default: state &lt;= 32&#39;d2;
 		endcase
-		if (!clk_locked)
-			state &lt;= 32&#39;d0;
-	end
-	wire signed [15:0] fbx_draw;
-	wire signed [15:0] fby_draw;
-	draw_line #(.CORDW(CORDW)) draw_line_inst(
-		.clk(clk_pix),
-		.rst(!clk_locked),
-		.start(draw_start),
-		.oe(!fb_busy),
-		.x0(vx0),
-		.y0(vy0),
-		.x1(vx1),
-		.y1(vy1),
-		.x(fbx_draw),
-		.y(fby_draw),
-		.drawing(drawing),
-		.busy(),
-		.done(draw_done)
-	);
-	always @(posedge clk_pix) begin
-		fb_we &lt;= drawing || clearing;
-		fbx &lt;= (clearing ? fbx_clear : fbx_draw);
-		fby &lt;= (clearing ? fby_clear : fby_draw);
-	end
+	reg paint;
+	always @(*) paint = (((sy &gt;= 0) &amp;&amp; (sy &lt; FB_HEIGHT)) &amp;&amp; (sx &gt;= 0)) &amp;&amp; (sx &lt; FB_WIDTH);
+	always @(posedge clk_pix)
+		if (frame)
+			fb_addr_read &lt;= 0;
+		else if (paint)
+			fb_addr_read &lt;= fb_addr_read + 1;
+	reg paint_p1;
 	reg hsync_p1;
 	reg vsync_p1;
-	reg de_p1;
 	always @(posedge clk_pix) begin
+		paint_p1 &lt;= paint;
 		hsync_p1 &lt;= hsync;
 		vsync_p1 &lt;= vsync;
-		de_p1 &lt;= de;
 	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
-	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
-		.D_OUT_1()
-	);
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync_p1;
+		vga_vsync &lt;= vsync_p1;
+		vga_r &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);
+		vga_g &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);
+		vga_b &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);
+	end
 endmodule
 
 </pre>

@@ -11,45 +11,41 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/ice40
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/xc7
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_square.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_square.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_square.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_square.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_square.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_square.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_square.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_square.sv</a>
 defines: 
-completed: 2021-11-05 02:37:39
-time_elapsed: 0.019s
-ram usage: 20044 KB
+completed: 2021-11-06 02:34:21
+time_elapsed: 0.015s
+ram usage: 18028 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_square.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_square.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_square.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/ice40/top_square.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_square.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_square.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_square.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_square.sv</a>
 `default_nettype none
 module top_square (
-	clk_12m,
+	clk_100m,
 	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
 );
-	input wire clk_12m;
+	input wire clk_100m;
 	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
+		.clk(clk_100m),
+		.rst(!btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
@@ -70,26 +66,13 @@ module top_square (
 	);
 	reg q_draw;
 	always @(*) q_draw = ((sx &lt; 32) &amp;&amp; (sy &lt; 32) ? 1 : 0);
-	reg [3:0] red;
-	reg [3:0] green;
-	reg [3:0] blue;
-	always @(*) begin
-		red = (!de ? 4&#39;h0 : (q_draw ? 4&#39;hf : 4&#39;h0));
-		green = (!de ? 4&#39;h0 : (q_draw ? 4&#39;h8 : 4&#39;h8));
-		blue = (!de ? 4&#39;h0 : (q_draw ? 4&#39;h0 : 4&#39;hf));
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= (!de ? 4&#39;h0 : (q_draw ? 4&#39;hf : 4&#39;h0));
+		vga_g &lt;= (!de ? 4&#39;h0 : (q_draw ? 4&#39;h8 : 4&#39;h8));
+		vga_b &lt;= (!de ? 4&#39;h0 : (q_draw ? 4&#39;h0 : 4&#39;hf));
 	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
-	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync, vsync, de, red, green, blue}),
-		.D_OUT_1()
-	);
 endmodule
 
 </pre>

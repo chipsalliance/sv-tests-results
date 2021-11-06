@@ -11,45 +11,41 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/ice40
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/xc7
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_cube_fill.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube_fill.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_cube_fill.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_cube_fill.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_cube_fill.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube_fill.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_cube_fill.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_cube_fill.sv</a>
 defines: 
-completed: 2021-11-05 02:37:25
-time_elapsed: 0.055s
-ram usage: 44272 KB
+completed: 2021-11-06 02:34:22
+time_elapsed: 0.039s
+ram usage: 38280 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_cube_fill.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube_fill.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_cube_fill.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/ice40/top_cube_fill.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_cube_fill.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_cube_fill.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_cube_fill.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_cube_fill.sv</a>
 `default_nettype none
 module top_cube_fill (
-	clk_12m,
+	clk_100m,
 	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
 );
-	input wire clk_12m;
+	input wire clk_100m;
 	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
+		.clk(clk_100m),
+		.rst(!btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
@@ -58,7 +54,6 @@ module top_cube_fill (
 	wire signed [15:0] sy;
 	wire hsync;
 	wire vsync;
-	wire de;
 	wire frame;
 	wire line;
 	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
@@ -68,9 +63,18 @@ module top_cube_fill (
 		.sy(sy),
 		.hsync(hsync),
 		.vsync(vsync),
-		.de(de),
+		.de(),
 		.frame(frame),
 		.line(line)
+	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
 	);
 	localparam FB_WIDTH = 320;
 	localparam FB_HEIGHT = 180;
@@ -78,16 +82,16 @@ module top_cube_fill (
 	localparam FB_CHANW = 4;
 	localparam FB_SCALE = 2;
 	localparam FB_IMAGE = &#34;&#34;;
-	localparam FB_PALETTE = &#34;../res/palette/16_colr_4bit_palette.mem&#34;;
+	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
 	reg fb_we;
-	reg signed [15:0] fbx;
-	reg signed [15:0] fby;
+	wire signed [15:0] fbx;
+	wire signed [15:0] fby;
 	reg [3:0] fb_cidx;
 	wire fb_busy;
 	wire [3:0] fb_red;
 	wire [3:0] fb_green;
 	wire [3:0] fb_blue;
-	framebuffer_spram #(
+	framebuffer_bram #(
 		.WIDTH(FB_WIDTH),
 		.HEIGHT(FB_HEIGHT),
 		.CIDXW(FB_CIDXW),
@@ -96,7 +100,7 @@ module top_cube_fill (
 		.F_IMAGE(FB_IMAGE),
 		.F_PALETTE(FB_PALETTE)
 	) fb_inst(
-		.clk_sys(clk_pix),
+		.clk_sys(clk_100m),
 		.clk_pix(clk_pix),
 		.rst_sys(1&#39;b0),
 		.rst_pix(1&#39;b0),
@@ -124,33 +128,12 @@ module top_cube_fill (
 	reg draw_start;
 	wire drawing;
 	wire draw_done;
-	reg signed [15:0] fbx_clear;
-	reg signed [15:0] fby_clear;
-	reg clearing;
 	reg [31:0] state;
-	always @(posedge clk_pix) begin
+	always @(posedge clk_100m)
 		case (state)
 			32&#39;d1: begin
-				fb_cidx &lt;= 4&#39;h0;
-				if (!fb_busy)
-					if ((fby_clear == 179) &amp;&amp; (fbx_clear == 319)) begin
-						clearing &lt;= 0;
-						state &lt;= 32&#39;d2;
-					end
-					else if (clearing == 1) begin
-						if (fbx_clear == 319) begin
-							fbx_clear &lt;= 0;
-							fby_clear &lt;= fby_clear + 1;
-						end
-						else
-							fbx_clear &lt;= fbx_clear + 1;
-					end
-					else
-						clearing &lt;= 1;
-			end
-			32&#39;d2: begin
 				draw_start &lt;= 1;
-				state &lt;= 32&#39;d3;
+				state &lt;= 32&#39;d2;
 				case (shape_id)
 					3&#39;d0: begin
 						vx0 &lt;= 130;
@@ -217,29 +200,24 @@ module top_cube_fill (
 					end
 				endcase
 			end
-			32&#39;d3: begin
+			32&#39;d2: begin
 				draw_start &lt;= 0;
 				if (draw_done)
 					if (shape_id == 5)
-						state &lt;= 32&#39;d4;
+						state &lt;= 32&#39;d3;
 					else begin
 						shape_id &lt;= shape_id + 1;
-						state &lt;= 32&#39;d2;
+						state &lt;= 32&#39;d1;
 					end
 			end
-			32&#39;d4: state &lt;= 32&#39;d4;
+			32&#39;d3: state &lt;= 32&#39;d3;
 			default:
-				if (frame)
+				if (frame_sys)
 					state &lt;= 32&#39;d1;
 		endcase
-		if (!clk_locked)
-			state &lt;= 32&#39;d0;
-	end
-	wire signed [15:0] fbx_draw;
-	wire signed [15:0] fby_draw;
 	draw_triangle_fill #(.CORDW(CORDW)) draw_triangle_inst(
-		.clk(clk_pix),
-		.rst(!clk_locked),
+		.clk(clk_100m),
+		.rst(1&#39;b0),
 		.start(draw_start),
 		.oe(!fb_busy),
 		.x0(vx0),
@@ -248,37 +226,26 @@ module top_cube_fill (
 		.y1(vy1),
 		.x2(vx2),
 		.y2(vy2),
-		.x(fbx_draw),
-		.y(fby_draw),
+		.x(fbx),
+		.y(fby),
 		.drawing(drawing),
 		.busy(),
 		.done(draw_done)
 	);
-	always @(posedge clk_pix) begin
-		fb_we &lt;= drawing || clearing;
-		fbx &lt;= (clearing ? fbx_clear : fbx_draw);
-		fby &lt;= (clearing ? fby_clear : fby_draw);
-	end
+	always @(*) fb_we = drawing;
 	reg hsync_p1;
 	reg vsync_p1;
-	reg de_p1;
 	always @(posedge clk_pix) begin
 		hsync_p1 &lt;= hsync;
 		vsync_p1 &lt;= vsync;
-		de_p1 &lt;= de;
 	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
-	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
-		.D_OUT_1()
-	);
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync_p1;
+		vga_vsync &lt;= vsync_p1;
+		vga_r &lt;= fb_red;
+		vga_g &lt;= fb_green;
+		vga_b &lt;= fb_blue;
+	end
 endmodule
 
 </pre>
