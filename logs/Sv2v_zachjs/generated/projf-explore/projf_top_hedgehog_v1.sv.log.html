@@ -11,41 +11,45 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_hedgehog_v1.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv</a>
 defines: 
-completed: 2021-11-06 02:34:20
-time_elapsed: 0.032s
-ram usage: 29588 KB
+completed: 2021-11-07 02:43:09
+time_elapsed: 0.031s
+ram usage: 30340 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_hedgehog_v1.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv</a>
 `default_nettype none
 module top_hedgehog_v1 (
-	clk_100m,
+	clk_12m,
 	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	dvi_clk,
+	dvi_hsync,
+	dvi_vsync,
+	dvi_de,
+	dvi_r,
+	dvi_g,
+	dvi_b
 );
-	input wire clk_100m;
+	input wire clk_12m;
 	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire dvi_clk;
+	output wire dvi_hsync;
+	output wire dvi_vsync;
+	output wire dvi_de;
+	output wire [3:0] dvi_r;
+	output wire [3:0] dvi_g;
+	output wire [3:0] dvi_b;
 	wire clk_pix;
 	wire clk_locked;
 	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
+		.clk(clk_12m),
+		.rst(btn_rst),
 		.clk_pix(clk_pix),
 		.clk_locked(clk_locked)
 	);
@@ -75,8 +79,8 @@ module top_hedgehog_v1 (
 	localparam COLR_BITS = 4;
 	localparam SPR_TRANS = 9;
 	localparam SPR_FRAMES = 1;
-	localparam SPR_FILE = &#34;hedgehog.mem&#34;;
-	localparam SPR_PALETTE = &#34;hedgehog_palette.mem&#34;;
+	localparam SPR_FILE = &#34;../res/hedgehog/hedgehog.mem&#34;;
+	localparam SPR_PALETTE = &#34;../res/hedgehog/hedgehog_palette.mem&#34;;
 	localparam SPR_PIXELS = 640;
 	localparam SPR_DEPTH = 640;
 	localparam SPR_ADDRW = 10;
@@ -153,13 +157,18 @@ module top_hedgehog_v1 (
 		green = (spr_drawing &amp;&amp; !spr_trans ? green_spr : green_bg);
 		blue = (spr_drawing &amp;&amp; !spr_trans ? blue_spr : blue_bg);
 	end
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync;
-		vga_vsync &lt;= vsync;
-		vga_r &lt;= (de ? red : 4&#39;h0);
-		vga_g &lt;= (de ? green : 4&#39;h0);
-		vga_b &lt;= (de ? blue : 4&#39;h0);
-	end
+	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
+		.PACKAGE_PIN(dvi_clk),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0(1&#39;b0),
+		.D_OUT_1(1&#39;b1)
+	);
+	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
+		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
+		.OUTPUT_CLK(clk_pix),
+		.D_OUT_0({hsync, vsync, de, red, green, blue}),
+		.D_OUT_1()
+	);
 endmodule
 
 </pre>

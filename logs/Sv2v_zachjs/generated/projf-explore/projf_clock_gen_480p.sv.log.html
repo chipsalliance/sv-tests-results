@@ -11,19 +11,19 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/clock/xc7
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/clock/ice40
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_clock_gen_480p.sv.html" target="file-frame">tests/generated/projf-explore/projf_clock_gen_480p.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/clock/xc7/clock_gen_480p.sv.html" target="file-frame">third_party/tests/projf-explore/lib/clock/xc7/clock_gen_480p.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_clock_gen_480p.sv.html" target="file-frame">tests/generated/projf-explore/projf_clock_gen_480p.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/clock/ice40/clock_gen_480p.sv.html" target="file-frame">third_party/tests/projf-explore/lib/clock/ice40/clock_gen_480p.sv</a>
 defines: 
-completed: 2021-11-06 02:34:20
+completed: 2021-11-07 02:43:10
 time_elapsed: 0.014s
-ram usage: 17036 KB
+ram usage: 15980 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/clock/xc7 <a href="../../../../tests/generated/projf-explore/projf_clock_gen_480p.sv.html" target="file-frame">tests/generated/projf-explore/projf_clock_gen_480p.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/clock/xc7/clock_gen_480p.sv.html" target="file-frame">third_party/tests/projf-explore/lib/clock/xc7/clock_gen_480p.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/clock/ice40 <a href="../../../../tests/generated/projf-explore/projf_clock_gen_480p.sv.html" target="file-frame">tests/generated/projf-explore/projf_clock_gen_480p.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/clock/ice40/clock_gen_480p.sv.html" target="file-frame">third_party/tests/projf-explore/lib/clock/ice40/clock_gen_480p.sv</a>
 `default_nettype none
 module clock_gen_480p (
 	clk,
@@ -31,46 +31,28 @@ module clock_gen_480p (
 	clk_pix,
 	clk_locked
 );
-	parameter MULT_MASTER = 31.5;
-	parameter DIV_MASTER = 5;
-	parameter DIV_PIX = 25;
-	parameter IN_PERIOD = 10.0;
+	parameter FEEDBACK_PATH = &#34;SIMPLE&#34;;
+	parameter DIVR = 4&#39;b0000;
+	parameter DIVF = 7&#39;b1000010;
+	parameter DIVQ = 3&#39;b101;
+	parameter FILTER_RANGE = 3&#39;b001;
 	input wire clk;
 	input wire rst;
 	output wire clk_pix;
 	output reg clk_locked;
-	wire clk_fb;
-	wire clk_pix_unbuf;
 	wire locked;
-	MMCME2_BASE #(
-		.CLKFBOUT_MULT_F(MULT_MASTER),
-		.CLKIN1_PERIOD(IN_PERIOD),
-		.CLKOUT0_DIVIDE_F(DIV_PIX),
-		.CLKOUT1_DIVIDE(1),
-		.DIVCLK_DIVIDE(DIV_MASTER)
-	) MMCME2_BASE_inst(
-		.CLKIN1(clk),
-		.RST(rst),
-		.CLKOUT0(clk_pix_unbuf),
-		.LOCKED(locked),
-		.CLKFBOUT(clk_fb),
-		.CLKFBIN(clk_fb),
-		.CLKOUT0B(),
-		.CLKOUT1(),
-		.CLKOUT1B(),
-		.CLKOUT2(),
-		.CLKOUT2B(),
-		.CLKOUT3(),
-		.CLKOUT3B(),
-		.CLKOUT4(),
-		.CLKOUT5(),
-		.CLKOUT6(),
-		.CLKFBOUTB(),
-		.PWRDWN()
-	);
-	BUFG bufg_clk(
-		.I(clk_pix_unbuf),
-		.O(clk_pix)
+	SB_PLL40_PAD #(
+		.FEEDBACK_PATH(FEEDBACK_PATH),
+		.DIVR(DIVR),
+		.DIVF(DIVF),
+		.DIVQ(DIVQ),
+		.FILTER_RANGE(FILTER_RANGE)
+	) SB_PLL40_PAD_inst(
+		.PACKAGEPIN(clk),
+		.PLLOUTGLOBAL(clk_pix),
+		.RESETB(rst),
+		.BYPASS(1&#39;b0),
+		.LOCK(locked)
 	);
 	reg locked_sync_0;
 	always @(posedge clk_pix) begin
