@@ -11,72 +11,87 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/ice40
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7-hd
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_david.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_david.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_david.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_david.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david.sv</a>
 defines: 
-completed: 2021-11-07 02:43:03
-time_elapsed: 0.029s
-ram usage: 28788 KB
+completed: 2021-11-08 02:41:22
+time_elapsed: 0.033s
+ram usage: 33932 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/ice40 <a href="../../../../tests/generated/projf-explore/projf_top_david.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_david.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/ice40/top_david.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_david.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_david.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david.sv</a>
 `default_nettype none
 module top_david (
-	clk_12m,
+	clk_100m,
 	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
 );
-	input wire clk_12m;
+	input wire clk_100m;
 	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
 	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
+		.rst(!btn_rst),
 		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
 	);
 	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
 	wire hsync;
 	wire vsync;
 	wire de;
 	wire frame;
 	wire line;
-	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(),
-		.sy(),
+		.rst(!clk_pix_locked),
+		.sx(sx),
+		.sy(sy),
 		.hsync(hsync),
 		.vsync(vsync),
 		.de(de),
 		.frame(frame),
 		.line(line)
 	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
 	localparam FB_WIDTH = 160;
 	localparam FB_HEIGHT = 120;
 	localparam FB_CIDXW = 4;
 	localparam FB_CHANW = 4;
-	localparam FB_SCALE = 4;
-	localparam FB_IMAGE = &#34;../res/david/david.mem&#34;;
-	localparam FB_PALETTE = &#34;../res/david/david_palette.mem&#34;;
+	localparam FB_SCALE = 6;
+	localparam FB_IMAGE = &#34;david.mem&#34;;
+	localparam FB_PALETTE = &#34;david_palette.mem&#34;;
 	reg fb_we;
 	reg signed [15:0] fbx;
 	reg signed [15:0] fby;
@@ -93,11 +108,11 @@ module top_david (
 		.F_IMAGE(FB_IMAGE),
 		.F_PALETTE(FB_PALETTE)
 	) fb_inst(
-		.clk_sys(clk_pix),
+		.clk_sys(clk_100m),
 		.clk_pix(clk_pix),
 		.rst_sys(1&#39;b0),
 		.rst_pix(1&#39;b0),
-		.de(de),
+		.de(((sy &gt;= 0) &amp;&amp; (sx &gt;= 160)) &amp;&amp; (sx &lt; 1120)),
 		.frame(frame),
 		.line(line),
 		.we(fb_we),
@@ -111,7 +126,7 @@ module top_david (
 		.blue(fb_blue)
 	);
 	reg [31:0] state;
-	always @(posedge clk_pix) begin
+	always @(posedge clk_100m)
 		case (state)
 			32&#39;d1:
 				if (fbx &lt; 159)
@@ -139,7 +154,7 @@ module top_david (
 					state &lt;= 32&#39;d5;
 				end
 			32&#39;d0:
-				if (frame) begin
+				if (frame_sys) begin
 					fbx &lt;= 0;
 					fby &lt;= 0;
 					fb_cidx &lt;= 4&#39;h0;
@@ -148,9 +163,6 @@ module top_david (
 				end
 			default: state &lt;= 32&#39;d5;
 		endcase
-		if (!clk_locked)
-			state &lt;= 32&#39;d0;
-	end
 	reg hsync_p1;
 	reg vsync_p1;
 	reg de_p1;
@@ -159,17 +171,59 @@ module top_david (
 		vsync_p1 &lt;= vsync;
 		de_p1 &lt;= de;
 	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync_p1;
+		dvi_vsync &lt;= vsync_p1;
+		dvi_de &lt;= de_p1;
+		dvi_red &lt;= {2 {fb_red}};
+		dvi_green &lt;= {2 {fb_green}};
+		dvi_blue &lt;= {2 {fb_blue}};
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
 	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync_p1, vsync_p1, de_p1, fb_red, fb_green, fb_blue}),
-		.D_OUT_1()
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
 	);
 endmodule
 
