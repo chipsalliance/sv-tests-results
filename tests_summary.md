@@ -1,17 +1,16 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Slang              |           0|         0|    0|      0|        4974|
-|moore              |           0|         0|    0|      0|        4746|
-|UhdmYosys          |           0|         1|    0|      0|        4973|
-|Verilator          |           2|         2|    0|      0|        4985|
-|UhdmVerilator      |           1|         1|    0|      0|        4987|
-|Surelog            |           1|         3|    0|      0|        4970|
-|VeribleExtractor   |           0|         0|    0|      0|        4655|
-|Sv2v_zachjs        |           2|         0|    0|      0|        4972|
 |Verible            |           0|         0|    0|      0|        4655|
-|Icarus             |           0|         1|    0|      0|        4654|
-|tree_sitter_verilog|           0|         0|    0|      0|        4655|
-|Odin               |           0|         0|    0|      0|        4746|
+|tree_sitter_verilog|         125|        12|    0|      0|        4518|
+|Sv2v_zachjs        |           0|         3|    0|      0|        4971|
+|Slang              |           1|         0|    0|      0|        4973|
+|moore              |           0|         0|    0|      0|        4746|
+|Icarus             |           0|        17|    0|      0|        4638|
+|UhdmVerilator      |          58|       276|    0|      0|        4655|
+|Surelog            |          36|       250|    0|      0|        4688|
 |sv_parser          |           0|         0|    0|      0|        4746|
-|Yosys              |           2|         1|    0|      0|        4971|
+|VeribleExtractor   |           0|         0|    0|      0|        4655|
+|Verilator          |           2|         4|    0|      0|        4983|
+|Yosys              |           7|         4|    0|      0|        4963|
+|Odin               |           0|         0|    0|      0|        4746|

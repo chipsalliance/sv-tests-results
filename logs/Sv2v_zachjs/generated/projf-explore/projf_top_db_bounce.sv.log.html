@@ -11,59 +11,66 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_db_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_db_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_db_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_db_bounce.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_db_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_db_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_db_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_db_bounce.sv</a>
 defines: 
-completed: 2021-11-09 02:40:24
-time_elapsed: 0.035s
-ram usage: 34132 KB
+completed: 2021-11-09 12:55:08
+time_elapsed: 0.039s
+ram usage: 38212 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_db_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_db_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_db_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7/top_db_bounce.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_db_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_db_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_db_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_db_bounce.sv</a>
 `default_nettype none
 module top_db_bounce (
 	clk_100m,
 	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
 );
 	input wire clk_100m;
 	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
 	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
 		.rst(!btn_rst),
 		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
 	);
 	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
 	wire hsync;
 	wire vsync;
+	wire de;
 	wire frame;
 	wire line;
-	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(sx),
-		.sy(sy),
+		.rst(!clk_pix_locked),
+		.sx(),
+		.sy(),
 		.hsync(hsync),
 		.vsync(vsync),
-		.de(),
+		.de(de),
 		.frame(frame),
 		.line(line)
 	);
@@ -80,10 +87,9 @@ module top_db_bounce (
 	localparam FB_HEIGHT = 180;
 	localparam FB_CIDXW = 4;
 	localparam FB_CHANW = 4;
-	localparam FB_SCALE = 2;
+	localparam FB_SCALE = 4;
 	localparam FB_IMAGE = &#34;&#34;;
 	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
-	localparam FB_BGIDX = 4&#39;h1;
 	reg fb_we;
 	wire fb_busy;
 	wire fb_wready;
@@ -106,14 +112,14 @@ module top_db_bounce (
 		.clk_pix(clk_pix),
 		.rst_sys(1&#39;b0),
 		.rst_pix(1&#39;b0),
-		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
+		.de(de),
 		.frame(frame),
 		.line(line),
 		.we(fb_we),
 		.x(fbx),
 		.y(fby),
 		.cidx(fb_cidx),
-		.bgidx(FB_BGIDX),
+		.bgidx(4&#39;h0),
 		.clear(1&#39;b1),
 		.busy(fb_busy),
 		.wready(fb_wready),
@@ -199,17 +205,66 @@ module top_db_bounce (
 	always @(*) fb_we = drawing;
 	reg hsync_p1;
 	reg vsync_p1;
+	reg de_p1;
 	always @(posedge clk_pix) begin
 		hsync_p1 &lt;= hsync;
 		vsync_p1 &lt;= vsync;
+		de_p1 &lt;= de;
 	end
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
 	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync_p1;
-		vga_vsync &lt;= vsync_p1;
-		vga_r &lt;= fb_red;
-		vga_g &lt;= fb_green;
-		vga_b &lt;= fb_blue;
+		dvi_hsync &lt;= hsync_p1;
+		dvi_vsync &lt;= vsync_p1;
+		dvi_de &lt;= de_p1;
+		dvi_red &lt;= {2 {fb_red}};
+		dvi_green &lt;= {2 {fb_green}};
+		dvi_blue &lt;= {2 {fb_blue}};
 	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
 endmodule
 
 </pre>
