@@ -11,19 +11,19 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/E
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/G
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/E/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/E/top.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/G/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/G/top.sv</a>
 defines: 
-completed: 2021-11-09 12:55:07
-time_elapsed: 0.017s
-ram usage: 13540 KB
+completed: 2021-11-10 02:37:14
+time_elapsed: 0.013s
+ram usage: 14656 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-nexys/E <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-nexys/E/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-nexys/E/top.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/G <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/G/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/G/top.sv</a>
 `default_nettype none
 module top (
 	clk,
@@ -31,11 +31,21 @@ module top (
 );
 	input wire clk;
 	output reg [3:0] led;
-	reg [31:0] cnt = 0;
-	always @(posedge clk) begin
-		cnt &lt;= cnt + 1;
-		led[0] &lt;= cnt[26];
-	end
+	localparam DIV_BY = 27&#39;d100000000;
+	reg stb;
+	reg [26:0] cnt = 0;
+	always @(posedge clk)
+		if (cnt != (DIV_BY - 1)) begin
+			stb &lt;= 0;
+			cnt &lt;= cnt + 1;
+		end
+		else begin
+			stb &lt;= 1;
+			cnt &lt;= 0;
+		end
+	always @(posedge clk)
+		if (stb)
+			led &lt;= led + 1;
 endmodule
 
 </pre>
