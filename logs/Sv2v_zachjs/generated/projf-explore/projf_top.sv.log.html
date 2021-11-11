@@ -11,150 +11,27 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/L
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/A
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/L/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/L/top.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/A/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/A/top.sv</a>
 defines: 
-completed: 2021-11-10 11:19:03
-time_elapsed: 0.030s
-ram usage: 28816 KB
+completed: 2021-11-11 02:37:27
+time_elapsed: 0.015s
+ram usage: 13080 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/L <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/L/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/L/top.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/hello/hello-arty/A <a href="../../../../tests/generated/projf-explore/projf_top.sv.html" target="file-frame">tests/generated/projf-explore/projf_top.sv</a> <a href="../../../../third_party/tests/projf-explore/hello/hello-arty/A/top.sv.html" target="file-frame">third_party/tests/projf-explore/hello/hello-arty/A/top.sv</a>
 `default_nettype none
 module top (
-	clk,
-	led_main_r,
-	led_main_g,
-	led_side_r,
-	led_side_g
+	sw,
+	led
 );
-	input wire clk;
-	output wire led_main_r;
-	output wire led_main_g;
-	output wire led_side_r;
-	output wire led_side_g;
-	localparam T_RED = 1;
-	localparam T_RED_AMBER = 1;
-	localparam T_GREEN_MAIN = 10;
-	localparam T_GREEN_SIDE = 4;
-	localparam T_AMBER = 2;
-	reg [3:0] cnt_phase;
-	reg light_set;
-	localparam DIV_BY = 27&#39;d100000000;
-	reg stb;
-	reg [$clog2(27&#39;d100000000) - 1:0] cnt_stb;
-	always @(posedge clk)
-		if (cnt_stb != (DIV_BY - 1)) begin
-			stb &lt;= 0;
-			cnt_stb &lt;= cnt_stb + 1;
-		end
-		else begin
-			stb &lt;= 1;
-			cnt_stb &lt;= 0;
-		end
-	reg [31:0] state;
-	always @(posedge clk)
-		case (state)
-			32&#39;d0: state &lt;= 32&#39;d1;
-			32&#39;d1: begin
-				state &lt;= 32&#39;d2;
-				cnt_phase &lt;= T_RED;
-				light_set &lt;= 0;
-			end
-			32&#39;d2:
-				if (cnt_phase == 0) begin
-					state &lt;= 32&#39;d3;
-					cnt_phase &lt;= T_RED_AMBER;
-				end
-				else if (stb)
-					cnt_phase &lt;= cnt_phase - 1;
-			32&#39;d3:
-				if (cnt_phase == 0) begin
-					state &lt;= 32&#39;d4;
-					cnt_phase &lt;= (light_set == 1 ? T_GREEN_SIDE : T_GREEN_MAIN);
-				end
-				else if (stb)
-					cnt_phase &lt;= cnt_phase - 1;
-			32&#39;d4:
-				if (cnt_phase == 0) begin
-					state &lt;= 32&#39;d5;
-					cnt_phase &lt;= T_AMBER;
-				end
-				else if (stb)
-					cnt_phase &lt;= cnt_phase - 1;
-			32&#39;d5:
-				if (cnt_phase == 0) begin
-					state &lt;= 32&#39;d2;
-					cnt_phase &lt;= T_RED;
-					light_set &lt;= ~light_set;
-				end
-				else if (stb)
-					cnt_phase &lt;= cnt_phase - 1;
-			default: state &lt;= 32&#39;d0;
-		endcase
-	reg [7:0] duty_main_r;
-	reg [7:0] duty_main_g;
-	reg [7:0] duty_side_r;
-	reg [7:0] duty_side_g;
-	pwm pwm_main_r(
-		.clk(clk),
-		.duty(duty_main_r),
-		.pwm_out(led_main_r)
-	);
-	pwm pwm_main_g(
-		.clk(clk),
-		.duty(duty_main_g),
-		.pwm_out(led_main_g)
-	);
-	pwm pwm_side_r(
-		.clk(clk),
-		.duty(duty_side_r),
-		.pwm_out(led_side_r)
-	);
-	pwm pwm_side_g(
-		.clk(clk),
-		.duty(duty_side_g),
-		.pwm_out(led_side_g)
-	);
-	always @(posedge clk) begin
-		duty_main_r &lt;= 8&#39;d64;
-		duty_main_g &lt;= 8&#39;d0;
-		duty_side_r &lt;= 8&#39;d64;
-		duty_side_g &lt;= 8&#39;d0;
-		case (state)
-			32&#39;d3:
-				if (light_set == 0) begin
-					duty_main_r &lt;= 8&#39;d56;
-					duty_main_g &lt;= 8&#39;d8;
-				end
-				else if (light_set == 1) begin
-					duty_side_r &lt;= 8&#39;d56;
-					duty_side_g &lt;= 8&#39;d8;
-				end
-			32&#39;d4:
-				if (light_set == 0) begin
-					duty_main_r &lt;= 8&#39;d0;
-					duty_main_g &lt;= 8&#39;d64;
-				end
-				else if (light_set == 1) begin
-					duty_side_r &lt;= 8&#39;d0;
-					duty_side_g &lt;= 8&#39;d64;
-				end
-			32&#39;d5:
-				if (light_set == 0) begin
-					duty_main_r &lt;= 8&#39;d48;
-					duty_main_g &lt;= 8&#39;d16;
-				end
-				else if (light_set == 1) begin
-					duty_side_r &lt;= 8&#39;d48;
-					duty_side_g &lt;= 8&#39;d16;
-				end
-		endcase
-	end
+	input wire sw;
+	output reg led;
+	always @(*) led = sw;
 endmodule
 
 </pre>
