@@ -11,43 +11,51 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7-hd
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_space_f.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_space_f.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_space_f.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_space_f.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_space_f.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_space_f.sv</a>
 defines: 
-completed: 2021-11-15 02:37:08
-time_elapsed: 0.028s
-ram usage: 28340 KB
+completed: 2021-11-15 15:34:07
+time_elapsed: 0.034s
+ram usage: 34680 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_space_f.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_space_f.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_space_f.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_space_f.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_space_f.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7-hd/top_space_f.sv</a>
 `default_nettype none
 module top_space_f (
 	clk_100m,
 	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
 );
 	input wire clk_100m;
 	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
 	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
 		.rst(!btn_rst),
 		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
 	);
 	localparam CORDW = 16;
 	wire signed [15:0] sx;
@@ -56,9 +64,9 @@ module top_space_f (
 	wire vsync;
 	wire de;
 	wire line;
-	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_locked),
+		.rst(!clk_pix_locked),
 		.sx(sx),
 		.sy(sy),
 		.hsync(hsync),
@@ -83,10 +91,10 @@ module top_space_f (
 		.addr(font_rom_addr),
 		.data(font_rom_data)
 	);
-	localparam SPR_SCALE_X = 32;
-	localparam SPR_SCALE_Y = 32;
-	localparam SPR_X = 192;
-	localparam SPR_Y = 112;
+	localparam SPR_SCALE_X = 64;
+	localparam SPR_SCALE_Y = 64;
+	localparam SPR_X = 384;
+	localparam SPR_Y = 104;
 	reg spr_start;
 	always @(*) spr_start = line &amp;&amp; (sy == SPR_Y);
 	localparam SPR_GLYPH_ADDR = 304;
@@ -108,7 +116,7 @@ module top_space_f (
 		.ADDRW(3)
 	) spr(
 		.clk(clk_pix),
-		.rst(!clk_locked),
+		.rst(!clk_pix_locked),
 		.start(spr_start),
 		.dma_avail(spr_fdma),
 		.sx(sx),
@@ -126,32 +134,38 @@ module top_space_f (
 	wire [7:0] sf2_star;
 	wire [7:0] sf3_star;
 	starfield #(
+		.H(1650),
+		.V(750),
 		.INC(-1),
 		.SEED(21&#39;h09a9a9)
 	) sf1(
 		.clk(clk_pix),
 		.en(1&#39;b1),
-		.rst(!clk_locked),
+		.rst(!clk_pix_locked),
 		.sf_on(sf1_on),
 		.sf_star(sf1_star)
 	);
 	starfield #(
+		.H(1650),
+		.V(750),
 		.INC(-2),
 		.SEED(21&#39;h0a9a9a)
 	) sf2(
 		.clk(clk_pix),
 		.en(1&#39;b1),
-		.rst(!clk_locked),
+		.rst(!clk_pix_locked),
 		.sf_on(sf2_on),
 		.sf_star(sf2_star)
 	);
 	starfield #(
+		.H(1650),
+		.V(750),
 		.INC(-4),
 		.MASK(21&#39;h0007ff)
 	) sf3(
 		.clk(clk_pix),
 		.en(1&#39;b1),
-		.rst(!clk_locked),
+		.rst(!clk_pix_locked),
 		.sf_on(sf3_on),
 		.sf_star(sf3_star)
 	);
@@ -163,13 +177,68 @@ module top_space_f (
 		{red_spr, green_spr, blue_spr} = (spr_pix ? 12&#39;hfc0 : 12&#39;h000);
 		starlight = (sf1_on ? sf1_star[7:4] : (sf2_on ? sf2_star[7:4] : (sf3_on ? sf3_star[7:4] : 4&#39;h0)));
 	end
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync;
-		vga_vsync &lt;= vsync;
-		vga_r &lt;= (de ? (spr_pix ? red_spr : starlight) : 4&#39;h0);
-		vga_g &lt;= (de ? (spr_pix ? green_spr : starlight) : 4&#39;h0);
-		vga_b &lt;= (de ? (spr_pix ? blue_spr : starlight) : 4&#39;h0);
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) begin
+		red = (de ? (spr_pix ? red_spr : starlight) : 4&#39;h0);
+		green = (de ? (spr_pix ? green_spr : starlight) : 4&#39;h0);
+		blue = (de ? (spr_pix ? blue_spr : starlight) : 4&#39;h0);
 	end
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync;
+		dvi_vsync &lt;= vsync;
+		dvi_de &lt;= de;
+		dvi_red &lt;= {red, red};
+		dvi_green &lt;= {green, green};
+		dvi_blue &lt;= {blue, blue};
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
 endmodule
 
 </pre>

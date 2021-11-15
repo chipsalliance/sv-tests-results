@@ -11,19 +11,19 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7-hd
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7-hd/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7-hd/top_pong_v4.sv</a>
 defines: 
-completed: 2021-11-15 02:37:08
-time_elapsed: 0.044s
-ram usage: 42368 KB
+completed: 2021-11-15 15:34:11
+time_elapsed: 0.054s
+ram usage: 48448 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v4.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7-hd <a href="../../../../tests/generated/projf-explore/projf_top_pong_v4.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_pong_v4.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7-hd/top_pong_v4.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7-hd/top_pong_v4.sv</a>
 `default_nettype none
 module top_pong_v4 (
 	clk_100m,
@@ -31,49 +31,57 @@ module top_pong_v4 (
 	btn_up,
 	btn_ctrl,
 	btn_dn,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
 );
 	input wire clk_100m;
 	input wire btn_rst;
 	input wire btn_up;
 	input wire btn_ctrl;
 	input wire btn_dn;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
 	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
 		.rst(!btn_rst),
 		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
 	);
-	localparam CORDW = 10;
-	wire [9:0] sx;
-	wire [9:0] sy;
+	localparam CORDW = 12;
+	wire [11:0] sx;
+	wire [11:0] sy;
 	wire hsync;
 	wire vsync;
 	wire de;
-	simple_display_timings_480p display_timings_inst(
+	simple_display_timings_720p display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(!clk_locked),
+		.rst(!clk_pix_locked),
 		.sx(sx),
 		.sy(sy),
 		.hsync(hsync),
 		.vsync(vsync),
 		.de(de)
 	);
-	localparam H_RES_FULL = 800;
-	localparam V_RES_FULL = 525;
-	localparam H_RES = 640;
-	localparam V_RES = 480;
+	localparam H_RES_FULL = 1650;
+	localparam V_RES_FULL = 750;
+	localparam H_RES = 1280;
+	localparam V_RES = 720;
 	reg animate;
 	always @(*) animate = (sy == V_RES) &amp;&amp; (sx == 0);
 	wire sig_ctrl;
@@ -100,20 +108,20 @@ module top_pong_v4 (
 		.ondn(),
 		.onup()
 	);
-	localparam B_SIZE = 8;
-	reg [9:0] bx;
-	reg [9:0] by;
+	localparam B_SIZE = 16;
+	reg [11:0] bx;
+	reg [11:0] by;
 	reg dx;
 	reg dy;
-	reg [9:0] spx = 6;
-	reg [9:0] spy = 4;
+	reg [11:0] spx = 10;
+	reg [11:0] spy = 6;
 	reg b_draw;
-	localparam P_H = 40;
-	localparam P_W = 10;
-	localparam P_SP = 4;
-	localparam P_OFFS = 32;
-	reg [9:0] p1y;
-	reg [9:0] p2y;
+	localparam P_H = 80;
+	localparam P_W = 15;
+	localparam P_SP = 6;
+	localparam P_OFFS = 48;
+	reg [11:0] p1y;
+	reg [11:0] p2y;
 	reg p1_draw;
 	reg p2_draw;
 	reg p1_col;
@@ -134,27 +142,27 @@ module top_pong_v4 (
 					if (p1y &gt; P_SP)
 						p1y &lt;= p1y - P_SP;
 				if (move_dn)
-					if (p1y &lt; 436)
+					if (p1y &lt; 634)
 						p1y &lt;= p1y + P_SP;
 			end
-			else if ((p1y + 22) &lt; (by + 4)) begin
-				if (p1y &lt; 438)
+			else if ((p1y + 43) &lt; (by + 8)) begin
+				if (p1y &lt; 637)
 					p1y &lt;= p1y + P_SP;
 			end
-			else if ((p1y + 20) &gt; (by + 6))
+			else if ((p1y + 40) &gt; (by + 11))
 				if (p1y &gt; P_SP)
 					p1y &lt;= p1y - P_SP;
-			if ((p2y + 22) &lt; (by + 4)) begin
-				if (p2y &lt; 438)
+			if ((p2y + 43) &lt; (by + 8)) begin
+				if (p2y &lt; 637)
 					p2y &lt;= p2y + P_SP;
 			end
-			else if ((p2y + 20) &gt; (by + 6))
+			else if ((p2y + 40) &gt; (by + 11))
 				if (p2y &gt; P_SP)
 					p2y &lt;= p2y - P_SP;
 		end
 	always @(*) begin
-		p1_draw = (((sx &gt;= P_OFFS) &amp;&amp; (sx &lt; 42)) &amp;&amp; (sy &gt;= p1y)) &amp;&amp; (sy &lt; (p1y + P_H));
-		p2_draw = (((sx &gt;= 598) &amp;&amp; (sx &lt; 608)) &amp;&amp; (sy &gt;= p2y)) &amp;&amp; (sy &lt; (p2y + P_H));
+		p1_draw = (((sx &gt;= P_OFFS) &amp;&amp; (sx &lt; 63)) &amp;&amp; (sy &gt;= p1y)) &amp;&amp; (sy &lt; (p1y + P_H));
+		p2_draw = (((sx &gt;= 1217) &amp;&amp; (sx &lt; 1232)) &amp;&amp; (sy &gt;= p2y)) &amp;&amp; (sy &lt; (p2y + P_H));
 	end
 	always @(posedge clk_pix)
 		if (animate) begin
@@ -199,13 +207,60 @@ module top_pong_v4 (
 				by &lt;= (dy ? by - spy : by + spy);
 		end
 	always @(*) b_draw = (((sx &gt;= bx) &amp;&amp; (sx &lt; (bx + B_SIZE))) &amp;&amp; (sy &gt;= by)) &amp;&amp; (sy &lt; (by + B_SIZE));
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
 	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync;
-		vga_vsync &lt;= vsync;
-		vga_r &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-		vga_g &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-		vga_b &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
+		dvi_hsync &lt;= hsync;
+		dvi_vsync &lt;= vsync;
+		dvi_de &lt;= de;
+		dvi_red &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 8&#39;hff : 8&#39;h00);
+		dvi_green &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 8&#39;hff : 8&#39;h00);
+		dvi_blue &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 8&#39;hff : 8&#39;h00);
 	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
 endmodule
 
 </pre>
