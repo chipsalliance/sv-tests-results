@@ -11,48 +11,61 @@
 description: Tests imported from projf-explore
 rc: 0 (means success: 1)
 tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/verilator
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/xc7
 top_module: 
 type: parsing
 mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/projf_top_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_bounce.sv</a>
+files: <a href="../../../../tests/generated/projf-explore/projf_top_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_bounce.sv</a>
 defines: 
-completed: 2021-11-15 15:34:05
-time_elapsed: 0.029s
-ram usage: 30536 KB
+completed: 2021-11-16 02:54:04
+time_elapsed: 0.031s
+ram usage: 32144 KB
 </pre>
 <pre class="log">
 
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/verilator <a href="../../../../tests/generated/projf-explore/projf_top_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/verilator/top_bounce.sv</a>
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/fpga-graphics/xc7 <a href="../../../../tests/generated/projf-explore/projf_top_bounce.sv.html" target="file-frame">tests/generated/projf-explore/projf_top_bounce.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_bounce.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/fpga-graphics/xc7/top_bounce.sv</a>
 `default_nettype none
 module top_bounce (
-	clk_pix,
-	rst,
-	sx,
-	sy,
-	de,
-	sdl_r,
-	sdl_g,
-	sdl_b
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
 );
-	parameter CORDW = 10;
-	input wire clk_pix;
-	input wire rst;
-	output wire [CORDW - 1:0] sx;
-	output wire [CORDW - 1:0] sy;
-	output wire de;
-	output reg [7:0] sdl_r;
-	output reg [7:0] sdl_g;
-	output reg [7:0] sdl_b;
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 10;
+	wire [9:0] sx;
+	wire [9:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
 	simple_display_timings_480p display_timings_inst(
 		.clk_pix(clk_pix),
-		.rst(rst),
+		.rst(!clk_locked),
 		.sx(sx),
 		.sy(sy),
-		.hsync(),
-		.vsync(),
+		.hsync(hsync),
+		.vsync(vsync),
 		.de(de)
 	);
+	localparam H_RES_FULL = 800;
+	localparam V_RES_FULL = 525;
 	localparam H_RES = 640;
 	localparam V_RES = 480;
 	reg animate;
@@ -60,21 +73,21 @@ module top_bounce (
 	localparam Q1_SIZE = 100;
 	localparam Q2_SIZE = 150;
 	localparam Q3_SIZE = 200;
-	reg [CORDW - 1:0] q1x;
-	reg [CORDW - 1:0] q1y;
-	reg [CORDW - 1:0] q2x;
-	reg [CORDW - 1:0] q2y;
-	reg [CORDW - 1:0] q3x;
-	reg [CORDW - 1:0] q3y;
+	reg [9:0] q1x;
+	reg [9:0] q1y;
+	reg [9:0] q2x;
+	reg [9:0] q2y;
+	reg [9:0] q3x;
+	reg [9:0] q3y;
 	reg q1dx;
 	reg q1dy;
 	reg q2dx;
 	reg q2dy;
 	reg q3dx;
 	reg q3dy;
-	reg [CORDW - 1:0] q1s = 2;
-	reg [CORDW - 1:0] q2s = 1;
-	reg [CORDW - 1:0] q3s = 1;
+	reg [9:0] q1s = 2;
+	reg [9:0] q2s = 1;
+	reg [9:0] q3s = 1;
 	always @(posedge clk_pix)
 		if (animate) begin
 			if (q1x &gt;= (H_RES - (Q1_SIZE + q1s))) begin
@@ -147,9 +160,11 @@ module top_bounce (
 		q3_draw = (((sx &gt;= q3x) &amp;&amp; (sx &lt; (q3x + Q3_SIZE))) &amp;&amp; (sy &gt;= q3y)) &amp;&amp; (sy &lt; (q3y + Q3_SIZE));
 	end
 	always @(posedge clk_pix) begin
-		sdl_r &lt;= (de &amp;&amp; q1_draw ? 8&#39;hff : 8&#39;h00);
-		sdl_g &lt;= (de &amp;&amp; q2_draw ? 8&#39;hff : 8&#39;h00);
-		sdl_b &lt;= (de &amp;&amp; q3_draw ? 8&#39;hff : 8&#39;h00);
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= (de &amp;&amp; q1_draw ? 4&#39;hf : 4&#39;h0);
+		vga_g &lt;= (de &amp;&amp; q2_draw ? 4&#39;hf : 4&#39;h0);
+		vga_b &lt;= (de &amp;&amp; q3_draw ? 4&#39;hf : 4&#39;h0);
 	end
 endmodule
 

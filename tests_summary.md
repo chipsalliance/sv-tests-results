@@ -1,17 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|sv_parser          |           0|         0|    0|      0|        4746|
-|Icarus             |           0|         0|    0|      0|        4655|
-|UhdmVerilator      |           5|         0|    0|      0|        4984|
-|Sv2v_zachjs        |           3|         6|    0|      0|        4965|
-|Yosys              |           1|         0|    0|      0|        4973|
-|Verilator          |           2|         0|    0|      0|        4987|
-|Odin               |           0|         0|    0|      0|        4746|
-|tree_sitter_verilog|           0|         0|    0|      0|        4655|
+|Surelog            |           1|         4|    0|      0|        4969|
+|Sv2v_zachjs        |           3|         3|    0|      0|        4968|
+|moore              |           0|         1|    0|      0|        4745|
 |Verible            |           0|         0|    0|      0|        4655|
-|Slang              |           0|         0|    0|      0|        4974|
+|Odin               |           0|         0|    0|      0|        4746|
+|Icarus             |           0|         0|    0|      0|        4655|
+|Verilator          |           2|         0|    0|      0|        4987|
+|Yosys              |           1|         0|    0|      0|        4973|
+|UhdmVerilator      |           5|         6|    0|      0|        4978|
+|sv_parser          |           0|         0|    0|      0|        4746|
+|tree_sitter_verilog|           1|         1|    0|      0|        4653|
 |VeribleExtractor   |           0|         0|    0|      0|        4655|
-|Surelog            |         137|        33|    0|      0|        4804|
-|moore              |           1|         0|    0|      0|        4745|
-|UhdmYosys          |          75|       342|    0|      0|        4556|
+|Slang              |           0|         0|    0|      0|        4974|
+|UhdmYosys          |           5|         1|    0|      0|        4967|
