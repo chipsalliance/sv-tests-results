@@ -1,0 +1,126 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_xc7_projf_top_sprite_v2a.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_xc7_projf_top_sprite_v2a.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_sprite_v2a.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_sprite_v2a.sv</a>
+defines: 
+completed: 2021-11-17 22:38:47
+time_elapsed: 0.022s
+ram usage: 23332 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7 <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_xc7_projf_top_sprite_v2a.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_xc7_projf_top_sprite_v2a.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_sprite_v2a.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7/top_sprite_v2a.sv</a>
+`default_nettype none
+module top_sprite_v2a (
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire line;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line(line)
+	);
+	localparam SPR_WIDTH = 8;
+	localparam SPR_HEIGHT = 8;
+	localparam SPR_SCALE_X = 6;
+	localparam SPR_SCALE_Y = 6;
+	localparam SPR_FILE = &#34;saucer.mem&#34;;
+	reg spr_start;
+	wire spr_pix;
+	localparam H_RES = 640;
+	localparam SPR_SPEED_X = 4;
+	reg signed [15:0] sprx;
+	reg signed [15:0] spry;
+	reg dx;
+	always @(posedge clk_pix) begin
+		if (frame)
+			if (sprx &gt;= 588) begin
+				dx &lt;= 1;
+				sprx &lt;= sprx - SPR_SPEED_X;
+			end
+			else if (sprx &lt; SPR_SPEED_X) begin
+				dx &lt;= 0;
+				sprx &lt;= sprx + SPR_SPEED_X;
+			end
+			else
+				sprx &lt;= (dx ? sprx - SPR_SPEED_X : sprx + SPR_SPEED_X);
+		if (!clk_locked) begin
+			sprx &lt;= 296;
+			spry &lt;= 216;
+			dx &lt;= 0;
+		end
+	end
+	always @(*) spr_start = line &amp;&amp; (sy == spry);
+	sprite_v2 #(
+		.WIDTH(SPR_WIDTH),
+		.HEIGHT(SPR_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.SPR_FILE(SPR_FILE)
+	) spr_instance(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.sx(sx),
+		.sprx(sprx),
+		.pix(spr_pix)
+	);
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= (de &amp;&amp; spr_pix ? 4&#39;hf : 4&#39;h0);
+		vga_g &lt;= (de &amp;&amp; spr_pix ? 4&#39;hc : 4&#39;h0);
+		vga_b &lt;= (de &amp;&amp; spr_pix ? 4&#39;h0 : 4&#39;h0);
+	end
+endmodule
+
+</pre>
+</body>

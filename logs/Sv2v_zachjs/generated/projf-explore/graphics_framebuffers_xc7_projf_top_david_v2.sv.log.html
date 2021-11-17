@@ -1,0 +1,167 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_david_v2.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_david_v2.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_david_v2.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_david_v2.sv</a>
+defines: 
+completed: 2021-11-17 22:38:37
+time_elapsed: 0.028s
+ram usage: 29700 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7 <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_david_v2.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_david_v2.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_david_v2.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_david_v2.sv</a>
+`default_nettype none
+module top_david_v2 (
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire hsync;
+	wire vsync;
+	wire frame;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(),
+		.frame(frame),
+		.line()
+	);
+	localparam FB_WIDTH = 160;
+	localparam FB_HEIGHT = 120;
+	localparam FB_PIXELS = 19200;
+	localparam FB_ADDRW = 15;
+	localparam FB_DATAW = 4;
+	localparam FB_IMAGE = &#34;david.mem&#34;;
+	localparam FB_PALETTE = &#34;david_palette.mem&#34;;
+	reg fb_we;
+	reg [14:0] fb_addr_write;
+	reg [14:0] fb_addr_read;
+	reg [3:0] fb_cidx_write;
+	wire [3:0] fb_cidx_read;
+	bram_sdp #(
+		.WIDTH(FB_DATAW),
+		.DEPTH(FB_PIXELS),
+		.INIT_F(FB_IMAGE)
+	) bram_inst(
+		.clk_write(clk_pix),
+		.clk_read(clk_pix),
+		.we(fb_we),
+		.addr_write(fb_addr_write),
+		.addr_read(fb_addr_read),
+		.data_in(fb_cidx_write),
+		.data_out(fb_cidx_read)
+	);
+	reg lfsr_en;
+	wire [14:0] lfsr;
+	lfsr #(
+		.LEN(15),
+		.TAPS(15&#39;b110000000000000)
+	) lsfr_fz(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.en(lfsr_en),
+		.sreg(lfsr)
+	);
+	localparam FADE_WAIT = 600;
+	localparam FADE_RATE = 3200;
+	reg [9:0] cnt_wait;
+	reg [11:0] cnt_rate;
+	always @(posedge clk_pix) begin
+		if (frame)
+			cnt_wait &lt;= (cnt_wait != 599 ? cnt_wait + 1 : cnt_wait);
+		if (cnt_wait == 599)
+			if (cnt_rate == 3199) begin
+				lfsr_en &lt;= 1;
+				fb_we &lt;= 1;
+				fb_addr_write &lt;= lfsr;
+				cnt_rate &lt;= 0;
+			end
+			else begin
+				cnt_rate &lt;= cnt_rate + 1;
+				lfsr_en &lt;= 0;
+				fb_we &lt;= 0;
+			end
+		fb_cidx_write &lt;= 4&#39;hf;
+	end
+	reg paint;
+	always @(*) paint = (((sy &gt;= 0) &amp;&amp; (sy &lt; FB_HEIGHT)) &amp;&amp; (sx &gt;= 0)) &amp;&amp; (sx &lt; FB_WIDTH);
+	always @(posedge clk_pix)
+		if (frame)
+			fb_addr_read &lt;= 0;
+		else if (paint)
+			fb_addr_read &lt;= fb_addr_read + 1;
+	reg [3:0] fb_cidx_read_p1;
+	always @(posedge clk_pix) fb_cidx_read_p1 &lt;= fb_cidx_read;
+	wire [11:0] clut_colr;
+	rom_async #(
+		.WIDTH(12),
+		.DEPTH(16),
+		.INIT_F(FB_PALETTE)
+	) clut(
+		.addr(fb_cidx_read_p1),
+		.data(clut_colr)
+	);
+	localparam LAT = 2;
+	reg [1:0] paint_sr;
+	reg [1:0] hsync_sr;
+	reg [1:0] vsync_sr;
+	always @(posedge clk_pix) begin
+		paint_sr &lt;= {paint, paint_sr[1:1]};
+		hsync_sr &lt;= {hsync, hsync_sr[1:1]};
+		vsync_sr &lt;= {vsync, vsync_sr[1:1]};
+	end
+	reg [3:0] red;
+	reg [3:0] green;
+	reg [3:0] blue;
+	always @(*) {red, green, blue} = (paint_sr[0] ? clut_colr : 12&#39;h000);
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync_sr[0];
+		vga_vsync &lt;= vsync_sr[0];
+		vga_r &lt;= red;
+		vga_g &lt;= green;
+		vga_b &lt;= blue;
+	end
+endmodule
+
+</pre>
+</body>

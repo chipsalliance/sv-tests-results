@@ -1,0 +1,176 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_space_f.sv.html" target="file-frame">tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_space_f.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv</a>
+defines: 
+completed: 2021-11-17 22:38:39
+time_elapsed: 0.026s
+ram usage: 28260 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7 <a href="../../../../tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_space_f.sv.html" target="file-frame">tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_space_f.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_space_f.sv</a>
+`default_nettype none
+module top_space_f (
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire line;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(),
+		.line(line)
+	);
+	localparam FONT_WIDTH = 8;
+	localparam FONT_HEIGHT = 8;
+	localparam FONT_GLYPHS = 64;
+	localparam F_ROM_DEPTH = 512;
+	localparam FONT_FILE = &#34;font_unscii_8x8_latin_uc.mem&#34;;
+	reg [8:0] font_rom_addr;
+	wire [7:0] font_rom_data;
+	rom_sync #(
+		.WIDTH(FONT_WIDTH),
+		.DEPTH(F_ROM_DEPTH),
+		.INIT_F(FONT_FILE)
+	) font_rom(
+		.clk(clk_pix),
+		.addr(font_rom_addr),
+		.data(font_rom_data)
+	);
+	localparam SPR_SCALE_X = 32;
+	localparam SPR_SCALE_Y = 32;
+	localparam SPR_X = 192;
+	localparam SPR_Y = 112;
+	reg spr_start;
+	always @(*) spr_start = line &amp;&amp; (sy == SPR_Y);
+	localparam SPR_GLYPH_ADDR = 304;
+	wire [2:0] spr_glyph_line;
+	reg spr_fdma;
+	always @(*) begin
+		font_rom_addr = 0;
+		spr_fdma = line;
+		font_rom_addr = (spr_fdma ? SPR_GLYPH_ADDR + spr_glyph_line : 0);
+	end
+	wire spr_pix;
+	sprite #(
+		.WIDTH(FONT_WIDTH),
+		.HEIGHT(FONT_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.LSB(0),
+		.CORDW(CORDW),
+		.ADDRW(3)
+	) spr(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.start(spr_start),
+		.dma_avail(spr_fdma),
+		.sx(sx),
+		.sprx(SPR_X),
+		.data_in(font_rom_data),
+		.pos(spr_glyph_line),
+		.pix(spr_pix),
+		.drawing(),
+		.done()
+	);
+	wire sf1_on;
+	wire sf2_on;
+	wire sf3_on;
+	wire [7:0] sf1_star;
+	wire [7:0] sf2_star;
+	wire [7:0] sf3_star;
+	starfield #(
+		.INC(-1),
+		.SEED(21&#39;h09a9a9)
+	) sf1(
+		.clk(clk_pix),
+		.en(1&#39;b1),
+		.rst(!clk_locked),
+		.sf_on(sf1_on),
+		.sf_star(sf1_star)
+	);
+	starfield #(
+		.INC(-2),
+		.SEED(21&#39;h0a9a9a)
+	) sf2(
+		.clk(clk_pix),
+		.en(1&#39;b1),
+		.rst(!clk_locked),
+		.sf_on(sf2_on),
+		.sf_star(sf2_star)
+	);
+	starfield #(
+		.INC(-4),
+		.MASK(21&#39;h0007ff)
+	) sf3(
+		.clk(clk_pix),
+		.en(1&#39;b1),
+		.rst(!clk_locked),
+		.sf_on(sf3_on),
+		.sf_star(sf3_star)
+	);
+	reg [3:0] red_spr;
+	reg [3:0] green_spr;
+	reg [3:0] blue_spr;
+	reg [3:0] starlight;
+	always @(*) begin
+		{red_spr, green_spr, blue_spr} = (spr_pix ? 12&#39;hfc0 : 12&#39;h000);
+		starlight = (sf1_on ? sf1_star[7:4] : (sf2_on ? sf2_star[7:4] : (sf3_on ? sf3_star[7:4] : 4&#39;h0)));
+	end
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= (de ? (spr_pix ? red_spr : starlight) : 4&#39;h0);
+		vga_g &lt;= (de ? (spr_pix ? green_spr : starlight) : 4&#39;h0);
+		vga_b &lt;= (de ? (spr_pix ? blue_spr : starlight) : 4&#39;h0);
+	end
+endmodule
+
+</pre>
+</body>

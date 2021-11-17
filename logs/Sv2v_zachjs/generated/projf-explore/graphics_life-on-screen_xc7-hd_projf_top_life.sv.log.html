@@ -1,0 +1,228 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/xc7-hd
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_life-on-screen_xc7-hd_projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/graphics_life-on-screen_xc7-hd_projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/xc7-hd/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/xc7-hd/top_life.sv</a>
+defines: 
+completed: 2021-11-17 22:38:35
+time_elapsed: 0.031s
+ram usage: 32616 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/life-on-screen/xc7-hd <a href="../../../../tests/generated/projf-explore/graphics_life-on-screen_xc7-hd_projf_top_life.sv.html" target="file-frame">tests/generated/projf-explore/graphics_life-on-screen_xc7-hd_projf_top_life.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/life-on-screen/xc7-hd/top_life.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/life-on-screen/xc7-hd/top_life.sv</a>
+`default_nettype none
+module top_life (
+	clk_100m,
+	btn_rst,
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
+	localparam GEN_FRAMES = 15;
+	localparam SEED_FILE = &#34;simple_64x48.mem&#34;;
+	wire clk_pix;
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire line;
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_pix_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line(line)
+	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
+	reg life_start;
+	wire life_alive;
+	wire life_changed;
+	reg [3:0] cnt_frames;
+	always @(posedge clk_100m) begin
+		life_start &lt;= 0;
+		if (frame_sys)
+			if (cnt_frames == 14) begin
+				life_start &lt;= 1;
+				cnt_frames &lt;= 0;
+			end
+			else
+				cnt_frames &lt;= cnt_frames + 1;
+	end
+	localparam FB_WIDTH = 64;
+	localparam FB_HEIGHT = 48;
+	localparam FB_CIDXW = 2;
+	localparam FB_CHANW = 4;
+	localparam FB_SCALE = 15;
+	localparam FB_IMAGE = &#34;&#34;;
+	localparam FB_PALETTE = &#34;life_palette.mem&#34;;
+	wire fb_we;
+	wire signed [15:0] fbx;
+	wire signed [15:0] fby;
+	reg [1:0] fb_cidx;
+	wire fb_busy;
+	wire [3:0] fb_red;
+	wire [3:0] fb_green;
+	wire [3:0] fb_blue;
+	framebuffer_bram #(
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.CIDXW(FB_CIDXW),
+		.CHANW(FB_CHANW),
+		.SCALE(FB_SCALE),
+		.F_IMAGE(FB_IMAGE),
+		.F_PALETTE(FB_PALETTE)
+	) fb_inst(
+		.clk_sys(clk_100m),
+		.clk_pix(clk_pix),
+		.rst_sys(1&#39;b0),
+		.rst_pix(1&#39;b0),
+		.de(((sy &gt;= 0) &amp;&amp; (sx &gt;= 160)) &amp;&amp; (sx &lt; 1120)),
+		.frame(frame),
+		.line(line),
+		.we(fb_we),
+		.x(fbx),
+		.y(fby),
+		.cidx(fb_cidx),
+		.busy(fb_busy),
+		.clip(),
+		.red(fb_red),
+		.green(fb_green),
+		.blue(fb_blue)
+	);
+	always @(*) fb_cidx = {1&#39;b0, life_alive};
+	life #(
+		.CORDW(CORDW),
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.F_INIT(SEED_FILE)
+	) life_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(life_start),
+		.ready(fb_we),
+		.alive(life_alive),
+		.changed(life_changed),
+		.x(fbx),
+		.y(fby),
+		.running(),
+		.done()
+	);
+	reg hsync_p1;
+	reg vsync_p1;
+	reg de_p1;
+	always @(posedge clk_pix) begin
+		hsync_p1 &lt;= hsync;
+		vsync_p1 &lt;= vsync;
+		de_p1 &lt;= de;
+	end
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync_p1;
+		dvi_vsync &lt;= vsync_p1;
+		dvi_de &lt;= de_p1;
+		dvi_red &lt;= {2 {fb_red}};
+		dvi_green &lt;= {2 {fb_green}};
+		dvi_blue &lt;= {2 {fb_blue}};
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
+endmodule
+
+</pre>
+</body>

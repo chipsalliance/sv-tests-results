@@ -1,0 +1,206 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_2d-shapes_xc7_projf_top_rectangles_fill.sv.html" target="file-frame">tests/generated/projf-explore/graphics_2d-shapes_xc7_projf_top_rectangles_fill.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_rectangles_fill.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_rectangles_fill.sv</a>
+defines: 
+completed: 2021-11-17 22:38:48
+time_elapsed: 0.035s
+ram usage: 33292 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/2d-shapes/xc7 <a href="../../../../tests/generated/projf-explore/graphics_2d-shapes_xc7_projf_top_rectangles_fill.sv.html" target="file-frame">tests/generated/projf-explore/graphics_2d-shapes_xc7_projf_top_rectangles_fill.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_rectangles_fill.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7/top_rectangles_fill.sv</a>
+`default_nettype none
+module top_rectangles_fill (
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire frame;
+	wire line;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(),
+		.frame(frame),
+		.line(line)
+	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
+	localparam FB_WIDTH = 320;
+	localparam FB_HEIGHT = 180;
+	localparam FB_CIDXW = 4;
+	localparam FB_CHANW = 4;
+	localparam FB_SCALE = 2;
+	localparam FB_IMAGE = &#34;&#34;;
+	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
+	reg fb_we;
+	wire signed [15:0] fbx;
+	wire signed [15:0] fby;
+	reg [3:0] fb_cidx;
+	wire fb_busy;
+	wire [3:0] fb_red;
+	wire [3:0] fb_green;
+	wire [3:0] fb_blue;
+	framebuffer_bram #(
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.CIDXW(FB_CIDXW),
+		.CHANW(FB_CHANW),
+		.SCALE(FB_SCALE),
+		.F_IMAGE(FB_IMAGE),
+		.F_PALETTE(FB_PALETTE)
+	) fb_inst(
+		.clk_sys(clk_100m),
+		.clk_pix(clk_pix),
+		.rst_sys(1&#39;b0),
+		.rst_pix(1&#39;b0),
+		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
+		.frame(frame),
+		.line(line),
+		.we(fb_we),
+		.x(fbx),
+		.y(fby),
+		.cidx(fb_cidx),
+		.clip(),
+		.busy(fb_busy),
+		.red(fb_red),
+		.green(fb_green),
+		.blue(fb_blue)
+	);
+	localparam SHAPE_CNT = 15;
+	reg [3:0] shape_id;
+	reg signed [15:0] vx0;
+	reg signed [15:0] vy0;
+	reg signed [15:0] vx1;
+	reg signed [15:0] vy1;
+	reg draw_start;
+	wire drawing;
+	wire draw_done;
+	reg [31:0] state;
+	always @(posedge clk_100m)
+		case (state)
+			32&#39;d1: begin
+				draw_start &lt;= 1;
+				state &lt;= 32&#39;d2;
+				vx0 &lt;= 80 + (4 * shape_id);
+				vy0 &lt;= 20 + (4 * shape_id);
+				vx1 &lt;= 160 + (4 * shape_id);
+				vy1 &lt;= 100 + (4 * shape_id);
+				fb_cidx &lt;= shape_id + 1;
+			end
+			32&#39;d2: begin
+				draw_start &lt;= 0;
+				if (draw_done)
+					if (shape_id == 14)
+						state &lt;= 32&#39;d3;
+					else begin
+						shape_id &lt;= shape_id + 1;
+						state &lt;= 32&#39;d1;
+					end
+			end
+			32&#39;d3: state &lt;= 32&#39;d3;
+			default:
+				if (frame_sys)
+					state &lt;= 32&#39;d1;
+		endcase
+	localparam FRAME_WAIT = 300;
+	localparam PIX_FRAME = 200;
+	reg [8:0] cnt_frame_wait;
+	reg [7:0] cnt_pix_frame;
+	reg draw_req;
+	always @(posedge clk_100m) begin
+		draw_req &lt;= 0;
+		if (frame_sys) begin
+			if (cnt_frame_wait != 299)
+				cnt_frame_wait &lt;= cnt_frame_wait + 1;
+			cnt_pix_frame &lt;= 0;
+		end
+		if (!fb_busy)
+			if ((cnt_frame_wait == 299) &amp;&amp; (cnt_pix_frame != 199)) begin
+				draw_req &lt;= 1;
+				cnt_pix_frame &lt;= cnt_pix_frame + 1;
+			end
+	end
+	draw_rectangle_fill #(.CORDW(CORDW)) draw_rectangle_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(draw_start),
+		.oe(draw_req &amp;&amp; !fb_busy),
+		.x0(vx0),
+		.y0(vy0),
+		.x1(vx1),
+		.y1(vy1),
+		.x(fbx),
+		.y(fby),
+		.drawing(drawing),
+		.busy(),
+		.done(draw_done)
+	);
+	always @(*) fb_we = drawing;
+	reg hsync_p1;
+	reg vsync_p1;
+	always @(posedge clk_pix) begin
+		hsync_p1 &lt;= hsync;
+		vsync_p1 &lt;= vsync;
+	end
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync_p1;
+		vga_vsync &lt;= vsync_p1;
+		vga_r &lt;= fb_red;
+		vga_g &lt;= fb_green;
+		vga_b &lt;= fb_blue;
+	end
+endmodule
+
+</pre>
+</body>

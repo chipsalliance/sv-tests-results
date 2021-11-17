@@ -1,0 +1,93 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_lfsr.sv.html" target="file-frame">tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_lfsr.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_lfsr.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_lfsr.sv</a>
+defines: 
+completed: 2021-11-17 22:38:47
+time_elapsed: 0.018s
+ram usage: 19272 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/ad-astra/xc7 <a href="../../../../tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_lfsr.sv.html" target="file-frame">tests/generated/projf-explore/graphics_ad-astra_xc7_projf_top_lfsr.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/ad-astra/xc7/top_lfsr.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/ad-astra/xc7/top_lfsr.sv</a>
+`default_nettype none
+module top_lfsr (
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
+	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(),
+		.line()
+	);
+	reg sf_area;
+	always @(*) sf_area = (sx &lt; 512) &amp;&amp; (sy &lt; 256);
+	wire [16:0] sf_reg;
+	lfsr #(
+		.LEN(17),
+		.TAPS(17&#39;b10010000000000000)
+	) lsfr_sf(
+		.clk(clk_pix),
+		.rst(!clk_locked),
+		.en(sf_area &amp;&amp; de),
+		.sreg(sf_reg)
+	);
+	reg star;
+	always @(*) star = &amp;{sf_reg[16:9]};
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= ((de &amp;&amp; sf_area) &amp;&amp; star ? sf_reg[3:0] : 4&#39;h0);
+		vga_g &lt;= ((de &amp;&amp; sf_area) &amp;&amp; star ? sf_reg[3:0] : 4&#39;h0);
+		vga_b &lt;= ((de &amp;&amp; sf_area) &amp;&amp; star ? sf_reg[3:0] : 4&#39;h0);
+	end
+endmodule
+
+</pre>
+</body>

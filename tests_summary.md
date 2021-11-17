@@ -1,17 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|VeribleExtractor   |           0|         0|    0|      0|        4655|
-|Verilator          |           3|         0|    0|      0|        4986|
-|tree_sitter_verilog|           1|         0|    0|      0|        4654|
-|sv_parser          |           0|         0|    0|      0|        4746|
-|moore              |           0|         0|    0|      0|        4746|
-|Surelog            |           1|         1|    0|      0|        4972|
-|UhdmYosys          |           1|         5|    0|      0|        4967|
-|UhdmVerilator      |           8|         5|    0|      0|        4976|
-|Icarus             |           0|         0|    0|      0|        4655|
-|Odin               |           0|         0|    0|      0|        4746|
-|Yosys              |           3|         1|    0|      0|        4970|
-|Slang              |           0|         0|    0|      0|        4974|
-|Sv2v_zachjs        |           5|         2|    0|      0|        4967|
-|Verible            |           0|         0|    0|      0|        4655|
+|Verible            |           0|         0|  546|    438|        4217|
+|UhdmVerilator      |           2|         5|  551|    438|        4544|
+|Slang              |           0|         0|  551|    438|        4536|
+|sv_parser          |           0|         0|  546|    438|        4308|
+|VeribleExtractor   |           0|         0|  546|    438|        4217|
+|tree_sitter_verilog|           0|         0|  546|    438|        4217|
+|Icarus             |           0|         0|  546|    438|        4217|
+|Verilator          |           1|         0|  551|    438|        4550|
+|Surelog            |           2|         0|  551|    438|        4534|
+|Sv2v_zachjs        |           3|         2|  551|    438|        4531|
+|Yosys              |           1|         0|  551|    438|        4535|
+|Odin               |           0|         0|  546|    438|        4308|
+|UhdmYosys          |           1|         0|  551|    438|        4534|
+|moore              |           0|         0|  546|    438|        4308|

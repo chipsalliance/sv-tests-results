@@ -1,0 +1,181 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_xc7-hd_projf_top_sprite_v2a.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_xc7-hd_projf_top_sprite_v2a.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v2a.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v2a.sv</a>
+defines: 
+completed: 2021-11-17 22:38:45
+time_elapsed: 0.028s
+ram usage: 28256 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_xc7-hd_projf_top_sprite_v2a.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_xc7-hd_projf_top_sprite_v2a.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v2a.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/xc7-hd/top_sprite_v2a.sv</a>
+`default_nettype none
+module top_sprite_v2a (
+	clk_100m,
+	btn_rst,
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
+	wire clk_pix;
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
+	);
+	localparam CORDW = 16;
+	wire signed [15:0] sx;
+	wire signed [15:0] sy;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire line;
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_pix_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line(line)
+	);
+	localparam SPR_WIDTH = 8;
+	localparam SPR_HEIGHT = 8;
+	localparam SPR_SCALE_X = 12;
+	localparam SPR_SCALE_Y = 12;
+	localparam SPR_FILE = &#34;saucer.mem&#34;;
+	reg spr_start;
+	wire spr_pix;
+	localparam H_RES = 1280;
+	localparam SPR_SPEED_X = 8;
+	reg signed [15:0] sprx;
+	reg signed [15:0] spry;
+	reg dx;
+	always @(posedge clk_pix) begin
+		if (frame)
+			if (sprx &gt;= 1176) begin
+				dx &lt;= 1;
+				sprx &lt;= sprx - SPR_SPEED_X;
+			end
+			else if (sprx &lt; SPR_SPEED_X) begin
+				dx &lt;= 0;
+				sprx &lt;= sprx + SPR_SPEED_X;
+			end
+			else
+				sprx &lt;= (dx ? sprx - SPR_SPEED_X : sprx + SPR_SPEED_X);
+		if (!clk_pix_locked) begin
+			sprx &lt;= 592;
+			spry &lt;= 312;
+			dx &lt;= 0;
+		end
+	end
+	always @(*) spr_start = line &amp;&amp; (sy == spry);
+	sprite_v2 #(
+		.WIDTH(SPR_WIDTH),
+		.HEIGHT(SPR_HEIGHT),
+		.SCALE_X(SPR_SCALE_X),
+		.SCALE_Y(SPR_SCALE_Y),
+		.SPR_FILE(SPR_FILE)
+	) spr_instance(
+		.clk(clk_pix),
+		.rst(!clk_pix_locked),
+		.start(spr_start),
+		.sx(sx),
+		.sprx(sprx),
+		.pix(spr_pix)
+	);
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync;
+		dvi_vsync &lt;= vsync;
+		dvi_de &lt;= de;
+		dvi_red &lt;= (de &amp;&amp; spr_pix ? 8&#39;hff : 8&#39;h00);
+		dvi_green &lt;= (de &amp;&amp; spr_pix ? 8&#39;hcc : 8&#39;h00);
+		dvi_blue &lt;= (de &amp;&amp; spr_pix ? 8&#39;h00 : 8&#39;h00);
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
+endmodule
+
+</pre>
+</body>

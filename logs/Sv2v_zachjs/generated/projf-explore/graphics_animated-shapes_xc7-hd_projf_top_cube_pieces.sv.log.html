@@ -1,0 +1,341 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/graphics_animated-shapes_xc7-hd_projf_top_cube_pieces.sv.html" target="file-frame">tests/generated/projf-explore/graphics_animated-shapes_xc7-hd_projf_top_cube_pieces.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_cube_pieces.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_cube_pieces.sv</a>
+defines: 
+completed: 2021-11-17 22:38:52
+time_elapsed: 0.054s
+ram usage: 50452 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd <a href="../../../../tests/generated/projf-explore/graphics_animated-shapes_xc7-hd_projf_top_cube_pieces.sv.html" target="file-frame">tests/generated/projf-explore/graphics_animated-shapes_xc7-hd_projf_top_cube_pieces.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_cube_pieces.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/animated-shapes/xc7-hd/top_cube_pieces.sv</a>
+`default_nettype none
+module top_cube_pieces (
+	clk_100m,
+	btn_rst,
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
+	wire clk_pix;
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
+	);
+	localparam CORDW = 16;
+	wire hsync;
+	wire vsync;
+	wire de;
+	wire frame;
+	wire line;
+	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_pix_locked),
+		.sx(),
+		.sy(),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(frame),
+		.line(line)
+	);
+	wire frame_sys;
+	xd xd_frame(
+		.clk_i(clk_pix),
+		.clk_o(clk_100m),
+		.rst_i(1&#39;b0),
+		.rst_o(1&#39;b0),
+		.i(frame),
+		.o(frame_sys)
+	);
+	localparam FB_WIDTH = 320;
+	localparam FB_HEIGHT = 180;
+	localparam FB_CIDXW = 4;
+	localparam FB_CHANW = 4;
+	localparam FB_SCALE = 4;
+	localparam FB_IMAGE = &#34;&#34;;
+	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
+	reg fb_we;
+	wire fb_busy;
+	wire fb_wready;
+	wire signed [15:0] fbx;
+	wire signed [15:0] fby;
+	reg [3:0] fb_cidx;
+	wire [3:0] fb_red;
+	wire [3:0] fb_green;
+	wire [3:0] fb_blue;
+	framebuffer_bram_db #(
+		.WIDTH(FB_WIDTH),
+		.HEIGHT(FB_HEIGHT),
+		.CIDXW(FB_CIDXW),
+		.CHANW(FB_CHANW),
+		.SCALE(FB_SCALE),
+		.F_IMAGE(FB_IMAGE),
+		.F_PALETTE(FB_PALETTE)
+	) fb_inst(
+		.clk_sys(clk_100m),
+		.clk_pix(clk_pix),
+		.rst_sys(1&#39;b0),
+		.rst_pix(1&#39;b0),
+		.de(de),
+		.frame(frame),
+		.line(line),
+		.we(fb_we),
+		.x(fbx),
+		.y(fby),
+		.cidx(fb_cidx),
+		.bgidx(4&#39;h0),
+		.clear(1&#39;b1),
+		.busy(fb_busy),
+		.wready(fb_wready),
+		.clip(),
+		.red(fb_red),
+		.green(fb_green),
+		.blue(fb_blue)
+	);
+	localparam MAX_OFFS = 32;
+	localparam ANIM_SPEED = 1;
+	localparam FRAME_WAIT = 60;
+	reg [15:0] offs;
+	reg [5:0] cnt_frame_wait;
+	reg dir;
+	reg [31:0] anim_state;
+	always @(posedge clk_100m)
+		if (frame_sys)
+			case (anim_state)
+				32&#39;d1: begin
+					offs &lt;= (dir == 1 ? offs + ANIM_SPEED : offs - ANIM_SPEED);
+					if (((dir == 1) &amp;&amp; (offs &gt;= 31)) || ((dir == 0) &amp;&amp; (offs &lt;= ANIM_SPEED))) begin
+						cnt_frame_wait &lt;= 0;
+						anim_state &lt;= 32&#39;d2;
+					end
+				end
+				32&#39;d2:
+					if (cnt_frame_wait == 59) begin
+						anim_state &lt;= 32&#39;d1;
+						dir &lt;= ~dir;
+					end
+					else
+						cnt_frame_wait &lt;= cnt_frame_wait + 1;
+				default: anim_state &lt;= 32&#39;d2;
+			endcase
+	localparam SHAPE_CNT = 6;
+	reg [2:0] shape_id;
+	reg signed [15:0] vx0;
+	reg signed [15:0] vy0;
+	reg signed [15:0] vx1;
+	reg signed [15:0] vy1;
+	reg signed [15:0] vx2;
+	reg signed [15:0] vy2;
+	reg draw_start;
+	wire drawing;
+	wire draw_done;
+	reg [31:0] state;
+	always @(posedge clk_100m)
+		case (state)
+			32&#39;d1:
+				if (fb_wready) begin
+					draw_start &lt;= 1;
+					state &lt;= 32&#39;d2;
+					case (shape_id)
+						3&#39;d0: begin
+							vx0 &lt;= 130 + offs;
+							vy0 &lt;= 60;
+							vx1 &lt;= 230 + offs;
+							vy1 &lt;= 60;
+							vx2 &lt;= 230 + offs;
+							vy2 &lt;= 160;
+							fb_cidx &lt;= (offs == 0 ? 4&#39;h9 : 4&#39;ha);
+						end
+						3&#39;d1: begin
+							vx0 &lt;= 130 + offs;
+							vy0 &lt;= 60 + offs;
+							vx1 &lt;= 230 + offs;
+							vy1 &lt;= 160 + offs;
+							vx2 &lt;= 130 + offs;
+							vy2 &lt;= 160 + offs;
+							fb_cidx &lt;= (offs == 0 ? 4&#39;h9 : 4&#39;ha);
+						end
+						3&#39;d2: begin
+							vx0 &lt;= 130 - offs;
+							vy0 &lt;= 60 + offs;
+							vx1 &lt;= 90 - offs;
+							vy1 &lt;= 120 + offs;
+							vx2 &lt;= 130 - offs;
+							vy2 &lt;= 160 + offs;
+							fb_cidx &lt;= (offs == 0 ? 4&#39;h2 : 4&#39;hd);
+						end
+						3&#39;d3: begin
+							vx0 &lt;= 90 - offs;
+							vy0 &lt;= 20;
+							vx1 &lt;= 130 - offs;
+							vy1 &lt;= 60;
+							vx2 &lt;= 90 - offs;
+							vy2 &lt;= 120;
+							fb_cidx &lt;= (offs == 0 ? 4&#39;h2 : 4&#39;hd);
+						end
+						3&#39;d4: begin
+							vx0 &lt;= 90;
+							vy0 &lt;= 20 - offs;
+							vx1 &lt;= 190;
+							vy1 &lt;= 20 - offs;
+							vx2 &lt;= 130;
+							vy2 &lt;= 60 - offs;
+							fb_cidx &lt;= (offs == 0 ? 4&#39;h1 : 4&#39;hc);
+						end
+						3&#39;d5: begin
+							vx0 &lt;= 190 + offs;
+							vy0 &lt;= 20 - offs;
+							vx1 &lt;= 130 + offs;
+							vy1 &lt;= 60 - offs;
+							vx2 &lt;= 230 + offs;
+							vy2 &lt;= 60 - offs;
+							fb_cidx &lt;= (offs == 0 ? 4&#39;h1 : 4&#39;hc);
+						end
+						default: begin
+							vx0 &lt;= 10;
+							vy0 &lt;= 10;
+							vx1 &lt;= 10;
+							vy1 &lt;= 30;
+							vx2 &lt;= 20;
+							vy2 &lt;= 20;
+							fb_cidx &lt;= 4&#39;h7;
+						end
+					endcase
+				end
+			32&#39;d2: begin
+				draw_start &lt;= 0;
+				if (draw_done)
+					if (shape_id == 5)
+						state &lt;= 32&#39;d3;
+					else begin
+						shape_id &lt;= shape_id + 1;
+						state &lt;= 32&#39;d1;
+					end
+			end
+			32&#39;d3: state &lt;= 32&#39;d0;
+			default:
+				if (frame_sys) begin
+					shape_id &lt;= 0;
+					state &lt;= 32&#39;d1;
+				end
+		endcase
+	draw_triangle_fill #(.CORDW(CORDW)) draw_triangle_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(draw_start),
+		.oe(!fb_busy),
+		.x0(vx0),
+		.y0(vy0),
+		.x1(vx1),
+		.y1(vy1),
+		.x2(vx2),
+		.y2(vy2),
+		.x(fbx),
+		.y(fby),
+		.drawing(drawing),
+		.busy(),
+		.done(draw_done)
+	);
+	always @(*) fb_we = drawing;
+	reg hsync_p1;
+	reg vsync_p1;
+	reg de_p1;
+	always @(posedge clk_pix) begin
+		hsync_p1 &lt;= hsync;
+		vsync_p1 &lt;= vsync;
+		de_p1 &lt;= de;
+	end
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync_p1;
+		dvi_vsync &lt;= vsync_p1;
+		dvi_de &lt;= de_p1;
+		dvi_red &lt;= {2 {fb_red}};
+		dvi_green &lt;= {2 {fb_green}};
+		dvi_blue &lt;= {2 {fb_blue}};
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
+endmodule
+
+</pre>
+</body>
