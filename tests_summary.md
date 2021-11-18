@@ -1,17 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Verible            |           0|         0|  546|    438|        4217|
-|UhdmVerilator      |           2|         5|  551|    438|        4544|
-|Slang              |           0|         0|  551|    438|        4536|
-|sv_parser          |           0|         0|  546|    438|        4308|
-|VeribleExtractor   |           0|         0|  546|    438|        4217|
-|tree_sitter_verilog|           0|         0|  546|    438|        4217|
-|Icarus             |           0|         0|  546|    438|        4217|
-|Verilator          |           1|         0|  551|    438|        4550|
-|Surelog            |           2|         0|  551|    438|        4534|
-|Sv2v_zachjs        |           3|         2|  551|    438|        4531|
-|Yosys              |           1|         0|  551|    438|        4535|
-|Odin               |           0|         0|  546|    438|        4308|
-|UhdmYosys          |           1|         0|  551|    438|        4534|
-|moore              |           0|         0|  546|    438|        4308|
+|UhdmVerilator      |           1|         1|    0|      0|        5100|
+|sv_parser          |           0|         0|    0|      0|        4854|
+|Verilator          |           0|         0|    0|      0|        5102|
+|Odin               |           0|         0|    0|      0|        4854|
+|Verible            |           0|         0|    0|      0|        4763|
+|VeribleExtractor   |           0|         0|    0|      0|        4763|
+|moore              |           0|         0|    0|      0|        4854|
+|Sv2v_zachjs        |           1|         1|    0|      0|        5085|
+|Slang              |           0|         0|    0|      0|        5087|
+|UhdmYosys          |           3|         0|    0|      0|        5083|
+|tree_sitter_verilog|           0|         0|    0|      0|        4763|
+|Surelog            |           1|         1|    0|      0|        5085|
+|Yosys              |           0|         0|    0|      0|        5087|
+|Icarus             |           0|         0|    0|      0|        4763|
