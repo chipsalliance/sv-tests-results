@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_misc_BaseJumpSTL_bsg_counter_up_down.sv.html" target="file-frame">tests/generated/basejump/bsg_misc_BaseJumpSTL_bsg_counter_up_down.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_counter_up_down.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_counter_up_down.v</a>
 defines: 
-completed: 2021-11-25 02:52:30
-time_elapsed: 0.067s
-ram usage: 60456 KB
+completed: 2021-11-25 21:47:04
+time_elapsed: 0.059s
+ram usage: 60924 KB
 </pre>
 <pre class="log">
 
@@ -34,9 +34,9 @@ module bsg_counter_up_down (
 	down_i,
 	count_o
 );
-	parameter max_val_p = -1;
-	parameter init_val_p = -1;
-	parameter max_step_p = -1;
+	parameter max_val_p = 0;
+	parameter init_val_p = 0;
+	parameter max_step_p = 0;
 	parameter step_width_lp = $clog2(max_step_p + 1);
 	parameter ptr_width_lp = $clog2(max_val_p + 1);
 	input clk_i;
@@ -50,11 +50,14 @@ module bsg_counter_up_down (
 		else
 			count_o &lt;= (count_o - down_i) + up_i;
 	always @(negedge clk_i) begin
-		if (((count_o == max_val_p) &amp; up_i) &amp; (reset_i === 1&#39;b0))
+		if ((((count_o == max_val_p) &amp; up_i) &amp; ~down_i) &amp; (reset_i === 1&#39;b0))
 			$display(&#34;%m error: counter overflow at time %t&#34;, $time);
-		if (((count_o == 0) &amp; down_i) &amp; (reset_i === 1&#39;b0))
+		if ((((count_o == 0) &amp; down_i) &amp; ~up_i) &amp; (reset_i === 1&#39;b0))
 			$display(&#34;%m error: counter underflow at time %t&#34;, $time);
 	end
+endmodule
+module bsg_counter_up_down__abstract;
+	
 endmodule
 
 </pre>

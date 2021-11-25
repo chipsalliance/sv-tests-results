@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_tag_BaseJumpSTL_bsg_tag_client.sv.html" target="file-frame">tests/generated/basejump/bsg_tag_BaseJumpSTL_bsg_tag_client.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_client.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_client.v</a>
 defines: 
-completed: 2021-11-25 02:52:31
-time_elapsed: 0.075s
-ram usage: 73576 KB
+completed: 2021-11-25 21:47:45
+time_elapsed: 0.066s
+ram usage: 69624 KB
 </pre>
 <pre class="log">
 
@@ -30,16 +30,13 @@ endmodule
 module bsg_tag_client (
 	bsg_tag_i,
 	recv_clk_i,
-	recv_reset_i,
 	recv_new_r_o,
 	recv_data_r_o
 );
-	parameter width_p = &#34;inv&#34;;
-	parameter default_p = &#34;inv&#34;;
+	parameter width_p = 0;
 	parameter harden_p = 1;
 	input wire [3:0] bsg_tag_i;
 	input recv_clk_i;
-	input recv_reset_i;
 	output wire recv_new_r_o;
 	output wire [width_p - 1:0] recv_data_r_o;
 	localparam debug_level_lp = 1;
@@ -56,7 +53,7 @@ module bsg_tag_client (
 	wire no_op = ~op_r &amp; ~param_r;
 	wire send_now = op_r_r &amp; no_op;
 	wire [width_p - 1:0] tag_data_r;
-	reg [width_p - 1:0] recv_data_r;
+	wire [width_p - 1:0] recv_data_r;
 	wire [width_p - 1:0] tag_data_n;
 	wire [width_p - 1:0] tag_data_shift;
 	wire tag_toggle_r;
@@ -101,35 +98,22 @@ module bsg_tag_client (
 	always @(posedge recv_clk_i) begin
 		recv_toggle_r &lt;= recv_toggle_n;
 		recv_new_r &lt;= recv_new;
-		recv_new_r_r &lt;= recv_new_r | recv_reset_i;
+		recv_new_r_r &lt;= recv_new_r;
 	end
-	function automatic [width_p - 1:0] sv2v_cast_4B3A8;
-		input reg [width_p - 1:0] inp;
-		sv2v_cast_4B3A8 = inp;
-	endfunction
-	generate
-		if (default_p == 0) begin : z
-			bsg_dff_reset_en #(
-				.width_p(width_p),
-				.harden_p(harden_p)
-			) recv(
-				.clk_i(recv_clk_i),
-				.reset_i(recv_reset_i),
-				.en_i(recv_new_r),
-				.data_i(tag_data_r),
-				.data_o(recv_data_r)
-			);
-		end
-		else begin : z
-			always @(posedge recv_clk_i)
-				if (recv_reset_i)
-					recv_data_r &lt;= sv2v_cast_4B3A8(default_p);
-				else if (recv_new_r)
-					recv_data_r &lt;= tag_data_r;
-		end
-	endgenerate
+	bsg_dff_en #(
+		.width_p(width_p),
+		.harden_p(harden_p)
+	) recv(
+		.clk_i(recv_clk_i),
+		.en_i(recv_new_r),
+		.data_i(tag_data_r),
+		.data_o(recv_data_r)
+	);
 	assign recv_new_r_o = recv_new_r_r &amp; bsg_tag_i[0];
 	assign recv_data_r_o = recv_data_r;
+endmodule
+module bsg_tag_client__abstract;
+	
 endmodule
 
 </pre>

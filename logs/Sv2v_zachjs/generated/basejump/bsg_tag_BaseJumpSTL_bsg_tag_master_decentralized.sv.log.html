@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_tag_BaseJumpSTL_bsg_tag_master_decentralized.sv.html" target="file-frame">tests/generated/basejump/bsg_tag_BaseJumpSTL_bsg_tag_master_decentralized.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_master_decentralized.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_master_decentralized.v</a>
 defines: 
-completed: 2021-11-25 02:52:32
-time_elapsed: 0.109s
-ram usage: 94776 KB
+completed: 2021-11-25 21:46:35
+time_elapsed: 0.111s
+ram usage: 95100 KB
 </pre>
 <pre class="log">
 
@@ -33,9 +33,9 @@ module bsg_tag_master_decentralized (
 	node_id_offset_i,
 	clients_o
 );
-	parameter els_p = &#34;inv&#34;;
-	parameter local_els_p = &#34;inv&#34;;
-	parameter lg_width_p = &#34;inv&#34;;
+	parameter els_p = 0;
+	parameter local_els_p = 0;
+	parameter lg_width_p = 0;
 	parameter debug_level_lp = 1;
 	parameter lg_els_lp = (els_p == 1 ? 1 : $clog2(els_p));
 	parameter lg_local_els_lp = (local_els_p == 1 ? 1 : $clog2(local_els_p));
@@ -92,6 +92,10 @@ module bsg_tag_master_decentralized (
 		if (state_n != state_r)
 			if (debug_level_lp &gt; 1)
 				$display(&#34;## bsg_tag_master STATE CHANGE  # %s --&gt; %s #&#34;, state_r.name(), state_n.name());
+	function automatic signed [lg_max_packet_len_lp - 1:0] sv2v_cast_75C4A_signed;
+		input reg signed [lg_max_packet_len_lp - 1:0] inp;
+		sv2v_cast_75C4A_signed = inp;
+	endfunction
 	function automatic signed [lg_width_p - 1:0] sv2v_cast_F1B67_signed;
 		input reg signed [lg_width_p - 1:0] inp;
 		sv2v_cast_F1B67_signed = inp;
@@ -115,7 +119,7 @@ module bsg_tag_master_decentralized (
 					$display(&#34;## bsg_tag_master RECEIVING HEADER (%m) (%d) = %b&#34;, hdr_ptr_r, data_i_r);
 				hdr_n = {data_i_r, hdr_r[1+:(((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1]};
 				hdr_ptr_n = hdr_ptr_r + 1&#39;b1;
-				if (hdr_ptr_r == lg_max_packet_len_lp&#39;((((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1))
+				if (hdr_ptr_r == sv2v_cast_75C4A_signed((((els_p == 1 ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1))
 					if (hdr_n[lg_width_p - 1-:lg_width_p] == 0) begin
 						state_n = 2&#39;d0;
 						$display(&#34;## bsg_tag_master NULL PACKET, len=0 (%m)&#34;);
@@ -160,6 +164,9 @@ module bsg_tag_master_decentralized (
 			assign clients_o[i * 4] = 1&#39;b1;
 		end
 	endgenerate
+endmodule
+module bsg_tag_master_decentralized__abstract;
+	
 endmodule
 
 </pre>

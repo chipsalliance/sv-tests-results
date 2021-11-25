@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_dataflow_BaseJumpSTL_bsg_fifo_1r1w_small_hardened.sv.html" target="file-frame">tests/generated/basejump/bsg_dataflow_BaseJumpSTL_bsg_fifo_1r1w_small_hardened.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_fifo_1r1w_small_hardened.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_fifo_1r1w_small_hardened.v</a>
 defines: 
-completed: 2021-11-25 02:52:27
-time_elapsed: 0.083s
-ram usage: 67136 KB
+completed: 2021-11-25 21:47:22
+time_elapsed: 0.068s
+ram usage: 67356 KB
 </pre>
 <pre class="log">
 
@@ -69,9 +69,8 @@ module bsg_fifo_1r1w_small_hardened (
 	wire [ptr_width_lp - 1:0] rptr_n;
 	wire [width_p - 1:0] data_o_mem;
 	wire [width_p - 1:0] data_o_reg;
+	reg read_write_same_addr_r;
 	wire read_write_same_addr_n;
-	reg write_bypass_r;
-	wire write_bypass_n;
 	bsg_fifo_tracker #(.els_p(els_p)) fts(
 		.clk_i(clk_i),
 		.reset_i(reset_i),
@@ -102,13 +101,12 @@ module bsg_fifo_1r1w_small_hardened (
 	bsg_dff_en #(.width_p(width_p)) bypass_reg(
 		.clk_i(clk_i),
 		.data_i(data_i),
-		.en_i(write_bypass_n),
+		.en_i(read_write_same_addr_n),
 		.data_o(data_o_reg)
 	);
-	assign data_o = (write_bypass_r ? data_o_reg : data_o_mem);
-	assign read_write_same_addr_n = wptr_r == rptr_n;
-	assign write_bypass_n = enque &amp; read_write_same_addr_n;
-	always @(posedge clk_i) write_bypass_r &lt;= write_bypass_n;
+	assign data_o = (read_write_same_addr_r ? data_o_reg : data_o_mem);
+	always @(posedge clk_i) read_write_same_addr_r &lt;= read_write_same_addr_n;
+	assign read_write_same_addr_n = enque &amp; (wptr_r == rptr_n);
 	assign ready_lo = ~full;
 	assign ready_o = ready_lo;
 	assign v_o_tmp = ~empty;

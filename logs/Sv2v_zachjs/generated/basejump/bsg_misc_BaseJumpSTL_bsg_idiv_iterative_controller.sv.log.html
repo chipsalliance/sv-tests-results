@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_misc_BaseJumpSTL_bsg_idiv_iterative_controller.sv.html" target="file-frame">tests/generated/basejump/bsg_misc_BaseJumpSTL_bsg_idiv_iterative_controller.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_idiv_iterative_controller.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_idiv_iterative_controller.v</a>
 defines: 
-completed: 2021-11-25 02:52:24
-time_elapsed: 0.089s
-ram usage: 81324 KB
+completed: 2021-11-25 21:47:14
+time_elapsed: 0.086s
+ram usage: 83772 KB
 </pre>
 <pre class="log">
 
@@ -62,7 +62,7 @@ module bsg_idiv_iterative_controller (
 	input adder_result_is_neg_i;
 	input opA_is_neg_i;
 	input opC_is_neg_i;
-	output reg opA_sel_o;
+	output reg [1:0] opA_sel_o;
 	output reg opA_ld_o;
 	output reg opA_inv_o;
 	output reg opA_clr_l_o;
@@ -109,36 +109,37 @@ module bsg_idiv_iterative_controller (
 		else
 			state &lt;= next_state;
 	always @(*) begin
-		opA_sel_o = 1&#39;b0;
+		opA_sel_o = 2&#39;b00;
 		opA_ld_o = 1&#39;b0;
 		opA_inv_o = !add_neg_last;
 		opA_clr_l_o = 1&#39;b1;
 		opB_sel_o = 3&#39;b001;
-		opB_ld_o = 1&#39;b1;
+		opB_ld_o = 1&#39;b0;
 		opB_inv_o = 1&#39;b0;
 		opB_clr_l_o = 1&#39;b1;
 		opC_sel_o = 3&#39;b001;
-		opC_ld_o = 1&#39;b1;
+		opC_ld_o = 1&#39;b0;
 		adder_cin_o = !add_neg_last;
 		neg_ld = 1&#39;b0;
 		latch_signed_div_o = 1&#39;b0;
 		next_state = 6&#39;d0;
 		case (state)
-			6&#39;d0: begin
+			6&#39;d0:
 				if (v_i) begin
 					opA_ld_o = 1&#39;b1;
 					opC_ld_o = 1&#39;b1;
 					latch_signed_div_o = 1&#39;b1;
 					next_state = 6&#39;d1;
+					opA_sel_o = 2&#39;b10;
+					opC_sel_o = 3&#39;b100;
 				end
-				opA_sel_o = 1&#39;b1;
-				opC_sel_o = 3&#39;b100;
-			end
 			6&#39;d1: begin
 				next_state = (opC_is_neg_i &amp; signed_div_r_i ? 6&#39;d2 : 6&#39;d3);
+				opA_sel_o = 2&#39;b01;
 				opA_inv_o = 1&#39;b1;
 				opB_clr_l_o = 1&#39;b0;
 				opB_sel_o = 3&#39;b100;
+				opB_ld_o = 1&#39;b1;
 				opC_ld_o = 1&#39;b0;
 				neg_ld = 1&#39;b1;
 				adder_cin_o = 1&#39;b1;
@@ -149,17 +150,22 @@ module bsg_idiv_iterative_controller (
 				opA_clr_l_o = 1&#39;b0;
 				opB_inv_o = 1&#39;b1;
 				opB_ld_o = 1&#39;b0;
+				opC_ld_o = 1&#39;b1;
 				opC_sel_o = 3&#39;b010;
 				adder_cin_o = 1&#39;b1;
 			end
 			6&#39;d3: begin
 				next_state = 6&#39;d4;
+				opB_ld_o = 1&#39;b1;
+				opC_ld_o = 1&#39;b1;
 				opA_clr_l_o = 1&#39;b0;
 				opB_clr_l_o = 1&#39;b0;
 				adder_cin_o = 1&#39;b0;
 			end
 			6&#39;d4: begin
 				opB_sel_o = (calc_done ? 3&#39;b010 : 3&#39;b001);
+				opB_ld_o = 1&#39;b1;
+				opC_ld_o = 1&#39;b1;
 				if (calc_done) begin
 					if (adder_result_is_neg_i)
 						next_state = 6&#39;d5;
@@ -173,14 +179,17 @@ module bsg_idiv_iterative_controller (
 				next_state = 6&#39;d6;
 				opA_inv_o = 1&#39;b0;
 				opB_sel_o = 3&#39;b010;
+				opB_ld_o = 1&#39;b1;
 				opC_ld_o = 1&#39;b0;
 				adder_cin_o = 1&#39;b0;
 			end
 			6&#39;d6: begin
 				next_state = (zero_divisor_i | !q_neg ? 6&#39;d8 : 6&#39;d7);
+				opA_sel_o = 2&#39;b01;
 				opA_ld_o = 1&#39;b1;
 				opA_clr_l_o = 1&#39;b0;
 				opB_sel_o = 3&#39;b100;
+				opB_ld_o = 1&#39;b1;
 				opC_ld_o = 1&#39;b0;
 				opB_inv_o = r_neg;
 				adder_cin_o = r_neg;
@@ -190,6 +199,7 @@ module bsg_idiv_iterative_controller (
 				opA_clr_l_o = 1&#39;b0;
 				opB_inv_o = 1&#39;b1;
 				opB_ld_o = 1&#39;b0;
+				opC_ld_o = 1&#39;b1;
 				opC_sel_o = 3&#39;b010;
 				adder_cin_o = 1&#39;b1;
 			end

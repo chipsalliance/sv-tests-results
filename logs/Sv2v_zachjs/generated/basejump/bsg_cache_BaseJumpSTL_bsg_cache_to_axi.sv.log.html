@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_cache_BaseJumpSTL_bsg_cache_to_axi.sv.html" target="file-frame">tests/generated/basejump/bsg_cache_BaseJumpSTL_bsg_cache_to_axi.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_axi.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_to_axi.v</a>
 defines: 
-completed: 2021-11-25 02:52:15
-time_elapsed: 0.107s
-ram usage: 93068 KB
+completed: 2021-11-25 21:47:19
+time_elapsed: 0.098s
+ram usage: 93424 KB
 </pre>
 <pre class="log">
 
@@ -40,7 +40,8 @@ module bsg_cache_to_axi (
 	dma_data_v_i,
 	dma_data_yumi_o,
 	axi_awid_o,
-	axi_awaddr_o,
+	axi_awaddr_addr_o,
+	axi_awaddr_cache_id_o,
 	axi_awlen_o,
 	axi_awsize_o,
 	axi_awburst_o,
@@ -59,7 +60,8 @@ module bsg_cache_to_axi (
 	axi_bvalid_i,
 	axi_bready_o,
 	axi_arid_o,
-	axi_araddr_o,
+	axi_araddr_addr_o,
+	axi_araddr_cache_id_o,
 	axi_arlen_o,
 	axi_arsize_o,
 	axi_arburst_o,
@@ -75,15 +77,14 @@ module bsg_cache_to_axi (
 	axi_rvalid_i,
 	axi_rready_o
 );
-	parameter addr_width_p = &#34;inv&#34;;
-	parameter block_size_in_words_p = &#34;inv&#34;;
-	parameter data_width_p = &#34;inv&#34;;
-	parameter num_cache_p = &#34;inv&#34;;
+	parameter addr_width_p = 0;
+	parameter block_size_in_words_p = 0;
+	parameter data_width_p = 0;
+	parameter num_cache_p = 0;
 	parameter tag_fifo_els_p = num_cache_p;
-	parameter axi_id_width_p = &#34;inv&#34;;
-	parameter axi_addr_width_p = &#34;inv&#34;;
-	parameter axi_data_width_p = &#34;inv&#34;;
-	parameter axi_burst_len_p = &#34;inv&#34;;
+	parameter axi_id_width_p = 0;
+	parameter axi_data_width_p = 0;
+	parameter axi_burst_len_p = 0;
 	parameter lg_num_cache_lp = (num_cache_p == 1 ? 1 : $clog2(num_cache_p));
 	parameter dma_pkt_width_lp = 1 + addr_width_p;
 	parameter axi_strb_width_lp = axi_data_width_p &gt;&gt; 3;
@@ -99,7 +100,8 @@ module bsg_cache_to_axi (
 	input [num_cache_p - 1:0] dma_data_v_i;
 	output wire [num_cache_p - 1:0] dma_data_yumi_o;
 	output wire [axi_id_width_p - 1:0] axi_awid_o;
-	output wire [axi_addr_width_p - 1:0] axi_awaddr_o;
+	output wire [addr_width_p - 1:0] axi_awaddr_addr_o;
+	output wire [lg_num_cache_lp - 1:0] axi_awaddr_cache_id_o;
 	output wire [7:0] axi_awlen_o;
 	output wire [2:0] axi_awsize_o;
 	output wire [1:0] axi_awburst_o;
@@ -118,7 +120,8 @@ module bsg_cache_to_axi (
 	input axi_bvalid_i;
 	output wire axi_bready_o;
 	output wire [axi_id_width_p - 1:0] axi_arid_o;
-	output wire [axi_addr_width_p - 1:0] axi_araddr_o;
+	output wire [addr_width_p - 1:0] axi_araddr_addr_o;
+	output wire [lg_num_cache_lp - 1:0] axi_araddr_cache_id_o;
 	output wire [7:0] axi_arlen_o;
 	output wire [2:0] axi_arsize_o;
 	output wire [1:0] axi_arburst_o;
@@ -188,10 +191,6 @@ module bsg_cache_to_axi (
 		.tag_o(write_rr_tag_lo),
 		.yumi_i(write_rr_yumi_li)
 	);
-	wire [axi_addr_width_p - 1:0] rx_axi_addr;
-	wire [axi_addr_width_p - 1:0] tx_axi_addr;
-	assign rx_axi_addr = {{(axi_addr_width_p - lg_num_cache_lp) - addr_width_p {1&#39;b0}}, read_rr_tag_lo, read_rr_dma_pkt[addr_width_p - 1-:addr_width_p]};
-	assign tx_axi_addr = {{(axi_addr_width_p - lg_num_cache_lp) - addr_width_p {1&#39;b0}}, write_rr_tag_lo, write_rr_dma_pkt[addr_width_p - 1-:addr_width_p]};
 	generate
 		for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk3
 			assign dma_pkt_yumi_o[i] = (dma_pkt[(i * (1 + addr_width_p)) + addr_width_p] ? write_rr_yumi_lo[i] : read_rr_yumi_lo[i]);
@@ -199,11 +198,11 @@ module bsg_cache_to_axi (
 	endgenerate
 	bsg_cache_to_axi_rx #(
 		.num_cache_p(num_cache_p),
+		.addr_width_p(addr_width_p),
 		.data_width_p(data_width_p),
 		.block_size_in_words_p(block_size_in_words_p),
 		.tag_fifo_els_p(tag_fifo_els_p),
 		.axi_id_width_p(axi_id_width_p),
-		.axi_addr_width_p(axi_addr_width_p),
 		.axi_data_width_p(axi_data_width_p),
 		.axi_burst_len_p(axi_burst_len_p)
 	) axi_rx(
@@ -211,13 +210,14 @@ module bsg_cache_to_axi (
 		.reset_i(reset_i),
 		.v_i(read_rr_v_lo),
 		.yumi_o(read_rr_yumi_li),
-		.tag_i(read_rr_tag_lo),
-		.axi_addr_i(rx_axi_addr),
+		.cache_id_i(read_rr_tag_lo),
+		.addr_i(read_rr_dma_pkt[addr_width_p - 1-:addr_width_p]),
 		.dma_data_o(dma_data_o),
 		.dma_data_v_o(dma_data_v_o),
 		.dma_data_ready_i(dma_data_ready_i),
 		.axi_arid_o(axi_arid_o),
-		.axi_araddr_o(axi_araddr_o),
+		.axi_araddr_addr_o(axi_araddr_addr_o),
+		.axi_araddr_cache_id_o(axi_araddr_cache_id_o),
 		.axi_arlen_o(axi_arlen_o),
 		.axi_arsize_o(axi_arsize_o),
 		.axi_arburst_o(axi_arburst_o),
@@ -235,11 +235,11 @@ module bsg_cache_to_axi (
 	);
 	bsg_cache_to_axi_tx #(
 		.num_cache_p(num_cache_p),
+		.addr_width_p(addr_width_p),
 		.data_width_p(data_width_p),
 		.block_size_in_words_p(block_size_in_words_p),
 		.tag_fifo_els_p(tag_fifo_els_p),
 		.axi_id_width_p(axi_id_width_p),
-		.axi_addr_width_p(axi_addr_width_p),
 		.axi_data_width_p(axi_data_width_p),
 		.axi_burst_len_p(axi_burst_len_p)
 	) axi_tx(
@@ -247,13 +247,14 @@ module bsg_cache_to_axi (
 		.reset_i(reset_i),
 		.v_i(write_rr_v_lo),
 		.yumi_o(write_rr_yumi_li),
-		.tag_i(write_rr_tag_lo),
-		.axi_addr_i(tx_axi_addr),
+		.cache_id_i(write_rr_tag_lo),
+		.addr_i(write_rr_dma_pkt[addr_width_p - 1-:addr_width_p]),
 		.dma_data_i(dma_data_i),
 		.dma_data_v_i(dma_data_v_i),
 		.dma_data_yumi_o(dma_data_yumi_o),
 		.axi_awid_o(axi_awid_o),
-		.axi_awaddr_o(axi_awaddr_o),
+		.axi_awaddr_addr_o(axi_awaddr_addr_o),
+		.axi_awaddr_cache_id_o(axi_awaddr_cache_id_o),
 		.axi_awlen_o(axi_awlen_o),
 		.axi_awsize_o(axi_awsize_o),
 		.axi_awburst_o(axi_awburst_o),
@@ -272,6 +273,9 @@ module bsg_cache_to_axi (
 		.axi_bvalid_i(axi_bvalid_i),
 		.axi_bready_o(axi_bready_o)
 	);
+endmodule
+module bsg_cache_to_axi__abstract;
+	
 endmodule
 
 </pre>

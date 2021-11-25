@@ -255,18 +255,20 @@
 <span class="normal"><a href="#l-247">247</a></span>
 <span class="normal"><a href="#l-248">248</a></span>
 <span class="normal"><a href="#l-249">249</a></span>
-<span class="normal"><a href="#l-250">250</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<span class="normal"><a href="#l-250">250</a></span>
+<span class="normal"><a href="#l-251">251</a></span>
+<span class="normal"><a href="#l-252">252</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="no">`include</span> <span class="s">&quot;bsg_dmc.vh&quot;</span>
 <a id="l-2" name="l-2"></a>
 <a id="l-3" name="l-3"></a><span class="k">module</span> <span class="n">bsg_dmc</span>
 <a id="l-4" name="l-4"></a>  <span class="kn">import</span> <span class="nn">bsg_tag_pkg::*</span><span class="p">;</span>
 <a id="l-5" name="l-5"></a>  <span class="kn">import</span> <span class="nn">bsg_dmc_pkg::*</span><span class="p">;</span>
 <a id="l-6" name="l-6"></a> <span class="p">#(</span><span class="k">parameter</span>  <span class="n">num_adgs_p</span>         <span class="o">=</span> <span class="mi">1</span>
-<a id="l-7" name="l-7"></a>  <span class="p">,</span><span class="k">parameter</span>  <span class="n">ui_addr_width_p</span>    <span class="o">=</span> <span class="s">&quot;inv&quot;</span>
-<a id="l-8" name="l-8"></a>  <span class="p">,</span><span class="k">parameter</span>  <span class="n">ui_data_width_p</span>    <span class="o">=</span> <span class="s">&quot;inv&quot;</span> <span class="c1">// data width of UI interface, can be 2^n while n = [3, log2(burst_data_width_p)]</span>
-<a id="l-9" name="l-9"></a>  <span class="p">,</span><span class="k">parameter</span>  <span class="n">burst_data_width_p</span> <span class="o">=</span> <span class="s">&quot;inv&quot;</span> <span class="c1">// data width of an outstanding read/write transaction, typically data width of a cache line</span>
-<a id="l-10" name="l-10"></a>  <span class="p">,</span><span class="k">parameter</span>  <span class="n">dq_data_width_p</span>    <span class="o">=</span> <span class="s">&quot;inv&quot;</span> <span class="c1">// data width of DDR interface, consistent with packaging</span>
-<a id="l-11" name="l-11"></a>  <span class="p">,</span><span class="k">parameter</span>  <span class="n">cmd_afifo_depth_p</span>  <span class="o">=</span> <span class="s">&quot;inv&quot;</span> <span class="c1">// maximum number of outstanding read/write transactions can be queued when the controller is busy</span>
-<a id="l-12" name="l-12"></a>  <span class="p">,</span><span class="k">parameter</span>  <span class="n">cmd_sfifo_depth_p</span>  <span class="o">=</span> <span class="s">&quot;inv&quot;</span> <span class="c1">// maximum number of DRAM commands can be queued when the DDR interface is busy, no less than cmd_afifo_depth_p</span>
+<a id="l-7" name="l-7"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span> <span class="n">ui_addr_width_p</span>    <span class="p">)</span>
+<a id="l-8" name="l-8"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span> <span class="n">ui_data_width_p</span>    <span class="p">)</span> <span class="c1">// data width of UI interface, can be 2^n while n = [3, log2(burst_data_width_p)]</span>
+<a id="l-9" name="l-9"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span> <span class="n">burst_data_width_p</span> <span class="p">)</span> <span class="c1">// data width of an outstanding read/write transaction, typically data width of a cache line</span>
+<a id="l-10" name="l-10"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span> <span class="n">dq_data_width_p</span>    <span class="p">)</span> <span class="c1">// data width of DDR interface, consistent with packaging</span>
+<a id="l-11" name="l-11"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span> <span class="n">cmd_afifo_depth_p</span>  <span class="p">)</span> <span class="c1">// maximum number of outstanding read/write transactions can be queued when the controller is busy</span>
+<a id="l-12" name="l-12"></a>  <span class="p">,</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span> <span class="n">cmd_sfifo_depth_p</span>  <span class="p">)</span> <span class="c1">// maximum number of DRAM commands can be queued when the DDR interface is busy, no less than cmd_afifo_depth_p</span>
 <a id="l-13" name="l-13"></a>  <span class="p">,</span><span class="k">localparam</span> <span class="n">ui_mask_width_lp</span>   <span class="o">=</span> <span class="n">ui_data_width_p</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span>
 <a id="l-14" name="l-14"></a>  <span class="p">,</span><span class="k">localparam</span> <span class="n">dfi_data_width_lp</span>  <span class="o">=</span> <span class="n">dq_data_width_p</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
 <a id="l-15" name="l-15"></a>  <span class="p">,</span><span class="k">localparam</span> <span class="n">dfi_mask_width_lp</span>  <span class="o">=</span> <span class="p">(</span><span class="n">dq_data_width_p</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
@@ -505,6 +507,8 @@
 <a id="l-248" name="l-248"></a>    <span class="p">,.</span><span class="n">dqs_sel_cal</span>         <span class="p">(</span> <span class="n">dmc_p_i</span><span class="p">.</span><span class="n">dqs_sel_cal</span> <span class="p">));</span>
 <a id="l-249" name="l-249"></a>
 <a id="l-250" name="l-250"></a><span class="k">endmodule</span>
+<a id="l-251" name="l-251"></a>
+<a id="l-252" name="l-252"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bsg_dmc</span><span class="p">)</span>
 </pre></div>
 </td></tr></table>
   </body>

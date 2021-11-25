@@ -17,9 +17,9 @@ type: parsing
 mode: parsing
 files: <a href="../../../../tests/generated/projf-explore/graphics_2d-shapes_xc7-hd_projf_top_castle.sv.html" target="file-frame">tests/generated/projf-explore/graphics_2d-shapes_xc7-hd_projf_top_castle.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd/top_castle.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/2d-shapes/xc7-hd/top_castle.sv</a>
 defines: 
-completed: 2021-11-25 02:48:16
-time_elapsed: 0.074s
-ram usage: 69424 KB
+completed: 2021-11-25 21:49:46
+time_elapsed: 0.083s
+ram usage: 72368 KB
 </pre>
 <pre class="log">
 
@@ -64,7 +64,7 @@ module top_castle (
 	wire de;
 	wire frame;
 	wire line;
-	display_timings_720p #(.CORDW(CORDW)) display_timings_inst(
+	display_720p #(.CORDW(CORDW)) display_inst(
 		.clk_pix(clk_pix),
 		.rst(!clk_pix_locked),
 		.sx(),
@@ -84,11 +84,11 @@ module top_castle (
 		.i(frame),
 		.o(frame_sys)
 	);
-	localparam FB_WIDTH = 320;
-	localparam FB_HEIGHT = 180;
+	localparam FB_WIDTH = 640;
+	localparam FB_HEIGHT = 360;
 	localparam FB_CIDXW = 4;
 	localparam FB_CHANW = 4;
-	localparam FB_SCALE = 4;
+	localparam FB_SCALE = 2;
 	localparam FB_IMAGE = &#34;&#34;;
 	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
 	reg fb_we;
@@ -133,10 +133,13 @@ module top_castle (
 	reg signed [15:0] vy1;
 	reg signed [15:0] vx2;
 	reg signed [15:0] vy2;
+	reg signed [15:0] vr0;
 	wire signed [15:0] fbx_tri;
 	wire signed [15:0] fby_tri;
 	wire signed [15:0] fbx_rect;
 	wire signed [15:0] fby_rect;
+	wire signed [15:0] fbx_circle;
+	wire signed [15:0] fby_circle;
 	reg drawing;
 	reg draw_done;
 	reg draw_start_tri;
@@ -145,6 +148,9 @@ module top_castle (
 	reg draw_start_rect;
 	wire drawing_rect;
 	wire draw_done_rect;
+	reg draw_start_circle;
+	wire drawing_circle;
+	wire draw_done_circle;
 	reg [31:0] state;
 	always @(posedge clk_100m)
 		case (state)
@@ -153,181 +159,176 @@ module top_castle (
 				case (shape_id)
 					5&#39;d0: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 60;
-						vy0 &lt;= 70;
-						vx1 &lt;= 190;
-						vy1 &lt;= 120;
+						vx0 &lt;= 120;
+						vy0 &lt;= 140;
+						vx1 &lt;= 380;
+						vy1 &lt;= 240;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d1: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 110;
-						vy0 &lt;= 90;
-						vx1 &lt;= 140;
-						vy1 &lt;= 120;
+						vx0 &lt;= 220;
+						vy0 &lt;= 200;
+						vx1 &lt;= 280;
+						vy1 &lt;= 240;
 						fb_cidx &lt;= 4&#39;h4;
 					end
 					5&#39;d2: begin
-						draw_start_tri &lt;= 1;
-						vx0 &lt;= 110;
-						vy0 &lt;= 90;
-						vx1 &lt;= 120;
-						vy1 &lt;= 90;
-						vx2 &lt;= 110;
-						vy2 &lt;= 100;
-						fb_cidx &lt;= 4&#39;h5;
+						draw_start_circle &lt;= 1;
+						vx0 &lt;= 250;
+						vy0 &lt;= 200;
+						vr0 &lt;= 30;
+						fb_cidx &lt;= 4&#39;h4;
 					end
 					5&#39;d3: begin
-						draw_start_tri &lt;= 1;
-						vx0 &lt;= 130;
+						draw_start_rect &lt;= 1;
+						vx0 &lt;= 80;
 						vy0 &lt;= 90;
-						vx1 &lt;= 140;
-						vy1 &lt;= 90;
-						vx2 &lt;= 140;
-						vy2 &lt;= 100;
+						vx1 &lt;= 120;
+						vy1 &lt;= 240;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d4: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 40;
-						vy0 &lt;= 45;
-						vx1 &lt;= 60;
-						vy1 &lt;= 120;
+						vx0 &lt;= 220;
+						vy0 &lt;= 80;
+						vx1 &lt;= 280;
+						vy1 &lt;= 140;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d5: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 110;
-						vy0 &lt;= 40;
-						vx1 &lt;= 140;
-						vy1 &lt;= 70;
+						vx0 &lt;= 380;
+						vy0 &lt;= 90;
+						vx1 &lt;= 420;
+						vy1 &lt;= 240;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d6: begin
-						draw_start_rect &lt;= 1;
-						vx0 &lt;= 190;
-						vy0 &lt;= 45;
-						vx1 &lt;= 210;
-						vy1 &lt;= 120;
-						fb_cidx &lt;= 4&#39;h5;
+						draw_start_tri &lt;= 1;
+						vx0 &lt;= 100;
+						vy0 &lt;= 60;
+						vx1 &lt;= 130;
+						vy1 &lt;= 90;
+						vx2 &lt;= 70;
+						vy2 &lt;= 90;
+						fb_cidx &lt;= 4&#39;h2;
 					end
 					5&#39;d7: begin
 						draw_start_tri &lt;= 1;
-						vx0 &lt;= 50;
-						vy0 &lt;= 30;
-						vx1 &lt;= 65;
-						vy1 &lt;= 45;
-						vx2 &lt;= 35;
-						vy2 &lt;= 45;
+						vx0 &lt;= 250;
+						vy0 &lt;= 40;
+						vx1 &lt;= 290;
+						vy1 &lt;= 80;
+						vx2 &lt;= 210;
+						vy2 &lt;= 80;
 						fb_cidx &lt;= 4&#39;h2;
 					end
 					5&#39;d8: begin
 						draw_start_tri &lt;= 1;
-						vx0 &lt;= 125;
-						vy0 &lt;= 20;
-						vx1 &lt;= 145;
-						vy1 &lt;= 40;
-						vx2 &lt;= 105;
-						vy2 &lt;= 40;
+						vx0 &lt;= 400;
+						vy0 &lt;= 60;
+						vx1 &lt;= 430;
+						vy1 &lt;= 90;
+						vx2 &lt;= 370;
+						vy2 &lt;= 90;
 						fb_cidx &lt;= 4&#39;h2;
 					end
 					5&#39;d9: begin
-						draw_start_tri &lt;= 1;
-						vx0 &lt;= 200;
-						vy0 &lt;= 30;
-						vx1 &lt;= 215;
-						vy1 &lt;= 45;
-						vx2 &lt;= 185;
-						vy2 &lt;= 45;
-						fb_cidx &lt;= 4&#39;h2;
+						draw_start_rect &lt;= 1;
+						vx0 &lt;= 92;
+						vy0 &lt;= 100;
+						vx1 &lt;= 104;
+						vy1 &lt;= 130;
+						fb_cidx &lt;= 4&#39;h1;
 					end
 					5&#39;d10: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 46;
-						vy0 &lt;= 50;
-						vx1 &lt;= 54;
-						vy1 &lt;= 65;
+						vx0 &lt;= 240;
+						vy0 &lt;= 90;
+						vx1 &lt;= 260;
+						vy1 &lt;= 130;
 						fb_cidx &lt;= 4&#39;h1;
 					end
 					5&#39;d11: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 120;
-						vy0 &lt;= 45;
-						vx1 &lt;= 130;
-						vy1 &lt;= 65;
+						vx0 &lt;= 392;
+						vy0 &lt;= 100;
+						vx1 &lt;= 408;
+						vy1 &lt;= 130;
 						fb_cidx &lt;= 4&#39;h1;
 					end
 					5&#39;d12: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 196;
-						vy0 &lt;= 50;
-						vx1 &lt;= 204;
-						vy1 &lt;= 65;
-						fb_cidx &lt;= 4&#39;h1;
+						vx0 &lt;= 126;
+						vy0 &lt;= 124;
+						vx1 &lt;= 144;
+						vy1 &lt;= 140;
+						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d13: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 63;
-						vy0 &lt;= 62;
-						vx1 &lt;= 72;
-						vy1 &lt;= 70;
+						vx0 &lt;= 160;
+						vy0 &lt;= 124;
+						vx1 &lt;= 178;
+						vy1 &lt;= 140;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d14: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 80;
-						vy0 &lt;= 62;
-						vx1 &lt;= 89;
-						vy1 &lt;= 70;
+						vx0 &lt;= 194;
+						vy0 &lt;= 124;
+						vx1 &lt;= 212;
+						vy1 &lt;= 140;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d15: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 97;
-						vy0 &lt;= 62;
-						vx1 &lt;= 106;
-						vy1 &lt;= 70;
+						vx0 &lt;= 288;
+						vy0 &lt;= 124;
+						vx1 &lt;= 306;
+						vy1 &lt;= 140;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d16: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 144;
-						vy0 &lt;= 62;
-						vx1 &lt;= 153;
-						vy1 &lt;= 70;
+						vx0 &lt;= 322;
+						vy0 &lt;= 124;
+						vx1 &lt;= 340;
+						vy1 &lt;= 140;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d17: begin
 						draw_start_rect &lt;= 1;
-						vx0 &lt;= 161;
-						vy0 &lt;= 62;
-						vx1 &lt;= 170;
-						vy1 &lt;= 70;
+						vx0 &lt;= 356;
+						vy0 &lt;= 124;
+						vx1 &lt;= 374;
+						vy1 &lt;= 140;
 						fb_cidx &lt;= 4&#39;h5;
 					end
 					5&#39;d18: begin
-						draw_start_rect &lt;= 1;
-						vx0 &lt;= 178;
-						vy0 &lt;= 62;
-						vx1 &lt;= 187;
-						vy1 &lt;= 70;
-						fb_cidx &lt;= 4&#39;h5;
+						draw_start_circle &lt;= 1;
+						vx0 &lt;= 550;
+						vy0 &lt;= 76;
+						vr0 &lt;= 40;
+						fb_cidx &lt;= 4&#39;h9;
 					end
 					default: begin
 						draw_start_tri &lt;= 1;
-						vx0 &lt;= 10;
-						vy0 &lt;= 10;
-						vx1 &lt;= 10;
-						vy1 &lt;= 30;
-						vx2 &lt;= 20;
-						vy2 &lt;= 20;
+						vx0 &lt;= 20;
+						vy0 &lt;= 20;
+						vx1 &lt;= 20;
+						vy1 &lt;= 60;
+						vx2 &lt;= 40;
+						vy2 &lt;= 40;
 						fb_cidx &lt;= 4&#39;h7;
 					end
 				endcase
 			end
 			32&#39;d2: begin
-				draw_start_rect &lt;= 0;
 				draw_start_tri &lt;= 0;
+				draw_start_rect &lt;= 0;
+				draw_start_circle &lt;= 0;
 				if (draw_done)
 					if (shape_id == 18)
 						state &lt;= 32&#39;d3;
@@ -342,13 +343,13 @@ module top_castle (
 					state &lt;= 32&#39;d1;
 		endcase
 	always @(*) begin
-		drawing = drawing_tri || drawing_rect;
-		draw_done = draw_done_tri || draw_done_rect;
+		drawing = (drawing_tri || drawing_rect) || drawing_circle;
+		draw_done = (draw_done_tri || draw_done_rect) || draw_done_circle;
 	end
 	localparam FRAME_WAIT = 300;
-	localparam PIX_FRAME = 20;
+	localparam PIX_FRAME = 80;
 	reg [8:0] cnt_frame_wait;
-	reg [4:0] cnt_pix_frame;
+	reg [6:0] cnt_pix_frame;
 	reg draw_req;
 	always @(posedge clk_100m) begin
 		draw_req &lt;= 0;
@@ -358,7 +359,7 @@ module top_castle (
 			cnt_pix_frame &lt;= 0;
 		end
 		if (!fb_busy)
-			if ((cnt_frame_wait == 299) &amp;&amp; (cnt_pix_frame != 19)) begin
+			if ((cnt_frame_wait == 299) &amp;&amp; (cnt_pix_frame != 79)) begin
 				draw_req &lt;= 1;
 				cnt_pix_frame &lt;= cnt_pix_frame + 1;
 			end
@@ -395,10 +396,24 @@ module top_castle (
 		.busy(),
 		.done(draw_done_rect)
 	);
+	draw_circle_fill #(.CORDW(CORDW)) draw_circle_inst(
+		.clk(clk_100m),
+		.rst(1&#39;b0),
+		.start(draw_start_circle),
+		.oe(draw_req &amp;&amp; !fb_busy),
+		.x0(vx0),
+		.y0(vy0),
+		.r0(vr0),
+		.x(fbx_circle),
+		.y(fby_circle),
+		.drawing(drawing_circle),
+		.busy(),
+		.done(draw_done_circle)
+	);
 	always @(posedge clk_100m) begin
 		fb_we &lt;= drawing;
-		fbx &lt;= (drawing_tri ? fbx_tri : fbx_rect);
-		fby &lt;= (drawing_tri ? fby_tri : fby_rect);
+		fbx &lt;= (drawing_tri ? fbx_tri : (drawing_rect ? fbx_rect : fbx_circle));
+		fby &lt;= (drawing_tri ? fby_tri : (drawing_rect ? fby_rect : fby_circle));
 	end
 	reg hsync_p1;
 	reg vsync_p1;
@@ -425,7 +440,7 @@ module top_castle (
 				bg_colr &lt;= 12&#39;h29e;
 			else if (sy == 450)
 				bg_colr &lt;= 12&#39;h2bf;
-			else if (sy == 484)
+			else if (sy == 482)
 				bg_colr &lt;= 12&#39;h260;
 	reg show_bg;
 	always @(*) show_bg = de &amp;&amp; ({fb_red, fb_green, fb_blue} == 0);

@@ -1,0 +1,83 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/uart/examples
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/lib_uart_examples_projf_top_uart.sv.html" target="file-frame">tests/generated/projf-explore/lib_uart_examples_projf_top_uart.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/uart/examples/top_uart.sv.html" target="file-frame">third_party/tests/projf-explore/lib/uart/examples/top_uart.sv</a>
+defines: 
+completed: 2021-11-25 21:49:51
+time_elapsed: 0.015s
+ram usage: 17180 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/uart/examples <a href="../../../../tests/generated/projf-explore/lib_uart_examples_projf_top_uart.sv.html" target="file-frame">tests/generated/projf-explore/lib_uart_examples_projf_top_uart.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/uart/examples/top_uart.sv.html" target="file-frame">third_party/tests/projf-explore/lib/uart/examples/top_uart.sv</a>
+`default_nettype none
+module top_uart (
+	clk_100m,
+	btn_rst,
+	uart_rx,
+	uart_tx
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	input wire uart_rx;
+	output wire uart_tx;
+	localparam CNT_W = 24;
+	localparam CNT_INC = 24&#39;d25770;
+	wire stb_baud;
+	wire stb_sample;
+	uart_baud #(
+		.CNT_W(CNT_W),
+		.CNT_INC(CNT_INC)
+	) baud_gen(
+		.clk(clk_100m),
+		.rst(),
+		.stb_baud(stb_baud),
+		.stb_sample(stb_sample)
+	);
+	wire rx_done;
+	wire [7:0] received;
+	uart_rx uart_rx_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.stb_sample(stb_sample),
+		.data_in(uart_rx),
+		.data_out(received),
+		.rx_done(rx_done)
+	);
+	reg tx_start;
+	wire tx_busy;
+	wire tx_next;
+	uart_tx uart_tx_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.stb_baud(stb_baud),
+		.tx_start(tx_start),
+		.data_in(received),
+		.data_out(uart_tx),
+		.tx_busy(tx_busy),
+		.tx_next(tx_next)
+	);
+	always @(posedge clk_100m) begin
+		if (rx_done)
+			tx_start &lt;= 1;
+		if (stb_baud)
+			tx_start &lt;= 0;
+	end
+endmodule
+
+</pre>
+</body>

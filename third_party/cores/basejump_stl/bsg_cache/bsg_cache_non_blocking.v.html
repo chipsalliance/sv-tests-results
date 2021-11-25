@@ -616,7 +616,9 @@
 <span class="normal"><a href="#l-608">608</a></span>
 <span class="normal"><a href="#l-609">609</a></span>
 <span class="normal"><a href="#l-610">610</a></span>
-<span class="normal"><a href="#l-611">611</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/**</span>
+<span class="normal"><a href="#l-611">611</a></span>
+<span class="normal"><a href="#l-612">612</a></span>
+<span class="normal"><a href="#l-613">613</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/**</span>
 <a id="l-2" name="l-2"></a><span class="cm"> *    bsg_cache_non_blocking.v</span>
 <a id="l-3" name="l-3"></a><span class="cm"> *</span>
 <a id="l-4" name="l-4"></a><span class="cm"> *    Non-blocking cache.</span>
@@ -628,17 +630,17 @@
 <a id="l-10" name="l-10"></a><span class="cm"> */</span>
 <a id="l-11" name="l-11"></a>
 <a id="l-12" name="l-12"></a>
-<a id="l-13" name="l-13"></a><span class="no">`include</span> <span class="s">&quot;bsg_defines.v&quot;</span>
+<a id="l-13" name="l-13"></a><span class="no">`include</span> <span class="s">&quot;bsg_cache_non_blocking.vh&quot;</span>
 <a id="l-14" name="l-14"></a>
 <a id="l-15" name="l-15"></a><span class="k">module</span> <span class="n">bsg_cache_non_blocking</span> 
 <a id="l-16" name="l-16"></a>  <span class="k">import</span> <span class="n">bsg_cache_non_blocking_pkg</span><span class="o">::*</span><span class="p">;</span>
-<a id="l-17" name="l-17"></a>  <span class="p">#(</span><span class="k">parameter</span> <span class="n">id_width_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a id="l-18" name="l-18"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">addr_width_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a id="l-19" name="l-19"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">data_width_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a id="l-20" name="l-20"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">sets_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a id="l-21" name="l-21"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">ways_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a id="l-22" name="l-22"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">block_size_in_words_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
-<a id="l-23" name="l-23"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">miss_fifo_els_p</span><span class="o">=</span><span class="s">&quot;inv&quot;</span>
+<a id="l-17" name="l-17"></a>  <span class="p">#(</span><span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">id_width_p</span><span class="p">)</span>
+<a id="l-18" name="l-18"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">addr_width_p</span><span class="p">)</span>
+<a id="l-19" name="l-19"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">data_width_p</span><span class="p">)</span>
+<a id="l-20" name="l-20"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">sets_p</span><span class="p">)</span>
+<a id="l-21" name="l-21"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">ways_p</span><span class="p">)</span>
+<a id="l-22" name="l-22"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">block_size_in_words_p</span><span class="p">)</span>
+<a id="l-23" name="l-23"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">miss_fifo_els_p</span><span class="p">)</span>
 <a id="l-24" name="l-24"></a>    
 <a id="l-25" name="l-25"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">cache_pkt_width_lp</span><span class="o">=</span><span class="no">`bsg_cache_non_blocking_pkt_width</span><span class="p">(</span><span class="n">id_width_p</span><span class="p">,</span><span class="n">addr_width_p</span><span class="p">,</span><span class="n">data_width_p</span><span class="p">)</span>
 <a id="l-26" name="l-26"></a>    <span class="p">,</span> <span class="k">parameter</span> <span class="n">dma_pkt_width_lp</span><span class="o">=</span><span class="no">`bsg_cache_non_blocking_dma_pkt_width</span><span class="p">(</span><span class="n">addr_width_p</span><span class="p">)</span>
@@ -1227,6 +1229,8 @@
 <a id="l-609" name="l-609"></a>
 <a id="l-610" name="l-610"></a> 
 <a id="l-611" name="l-611"></a><span class="k">endmodule</span>
+<a id="l-612" name="l-612"></a>
+<a id="l-613" name="l-613"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bsg_cache_non_blocking</span><span class="p">)</span>
 </pre></div>
 </td></tr></table>
   </body>
