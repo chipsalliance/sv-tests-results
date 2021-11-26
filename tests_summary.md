@@ -1,17 +1,17 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Verible            |         222|         0|   31|     10|        4531|
-|VeribleExtractor   |         217|         0|   31|     10|        4536|
-|Icarus             |           0|         0|   31|     10|        4753|
-|Odin               |           0|         0|   31|     10|        4844|
-|Sv2v_zachjs        |           2|         0|   34|     10|        5075|
-|Verilator          |           2|         2|   34|     10|        5088|
-|UhdmYosys          |           0|         0|   34|     10|        5076|
-|tree_sitter_verilog|           0|         0|   31|     10|        4753|
-|Slang              |           2|         0|   34|     10|        5075|
-|moore              |           9|        11|   31|     10|        4824|
-|Yosys              |           0|         0|   34|     10|        5077|
-|Surelog            |           1|        18|   34|     10|        5058|
-|sv_parser          |           2|         0|   31|     10|        4842|
-|UhdmVerilator      |          11|       220|   34|     10|        4861|
+|UhdmVerilator      |           0|         2|    0|      0|        5124|
+|sv_parser          |           0|         0|    0|      0|        4875|
+|moore              |           0|         0|    0|      0|        4875|
+|Verible            |           0|         0|    0|      0|        4784|
+|Verilator          |           0|         0|    0|      0|        5126|
+|Sv2v_zachjs        |           2|         2|    0|      0|        5107|
+|Icarus             |           0|         0|    0|      0|        4784|
+|UhdmYosys          |           0|         0|    0|      0|        5110|
+|Yosys              |           0|         0|    0|      0|        5111|
+|VeribleExtractor   |           0|         0|    0|      0|        4784|
+|Slang              |           0|         0|    0|      0|        5111|
+|Surelog            |           3|         0|    0|      0|        5108|
+|tree_sitter_verilog|           0|         0|    0|      0|        4784|
+|Odin               |           0|         0|    0|      0|        4875|
