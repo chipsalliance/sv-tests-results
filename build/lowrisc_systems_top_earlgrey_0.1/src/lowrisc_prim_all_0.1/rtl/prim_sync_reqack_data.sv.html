@@ -115,7 +115,27 @@
 <span class="normal"><a href="#l-107">107</a></span>
 <span class="normal"><a href="#l-108">108</a></span>
 <span class="normal"><a href="#l-109">109</a></span>
-<span class="normal"><a href="#l-110">110</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-110">110</a></span>
+<span class="normal"><a href="#l-111">111</a></span>
+<span class="normal"><a href="#l-112">112</a></span>
+<span class="normal"><a href="#l-113">113</a></span>
+<span class="normal"><a href="#l-114">114</a></span>
+<span class="normal"><a href="#l-115">115</a></span>
+<span class="normal"><a href="#l-116">116</a></span>
+<span class="normal"><a href="#l-117">117</a></span>
+<span class="normal"><a href="#l-118">118</a></span>
+<span class="normal"><a href="#l-119">119</a></span>
+<span class="normal"><a href="#l-120">120</a></span>
+<span class="normal"><a href="#l-121">121</a></span>
+<span class="normal"><a href="#l-122">122</a></span>
+<span class="normal"><a href="#l-123">123</a></span>
+<span class="normal"><a href="#l-124">124</a></span>
+<span class="normal"><a href="#l-125">125</a></span>
+<span class="normal"><a href="#l-126">126</a></span>
+<span class="normal"><a href="#l-127">127</a></span>
+<span class="normal"><a href="#l-128">128</a></span>
+<span class="normal"><a href="#l-129">129</a></span>
+<span class="normal"><a href="#l-130">130</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -217,14 +237,34 @@
 <a id="l-100" name="l-100"></a>  <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">DataSrc2Dst</span> <span class="o">==</span> <span class="mb">1&#39;b0</span> <span class="o">&amp;&amp;</span> <span class="n">DataReg</span> <span class="o">==</span> <span class="mb">1&#39;b0</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">gen_assert_data_dst2src</span>
 <a id="l-101" name="l-101"></a>    <span class="c1">// DST domain shall not change data while waiting for SRC domain to latch it (together with</span>
 <a id="l-102" name="l-102"></a>    <span class="c1">// receiving ACK). It takes 2 SRC cycles for ACK to cross over from DST to SRC, and 1 SRC cycle</span>
-<a id="l-103" name="l-103"></a>    <span class="c1">// for the next REQ to cross over from SRC to DST. Assert that the data is stable during that</span>
-<a id="l-104" name="l-104"></a>    <span class="c1">// window, i.e. [-2,+1] SRC cycles around the SRC handshake.</span>
-<a id="l-105" name="l-105"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SyncReqAckDataHoldDst2Src</span><span class="p">,</span>
-<a id="l-106" name="l-106"></a>        <span class="n">src_req_i</span> <span class="o">&amp;&amp;</span> <span class="n">src_ack_o</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">data_o</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="n">data_o</span> <span class="o">&amp;&amp;</span> <span class="p">$</span><span class="n">stable</span><span class="p">(</span><span class="n">data_o</span><span class="p">)</span> <span class="p">[</span><span class="o">*</span><span class="mi">2</span><span class="p">],</span>
-<a id="l-107" name="l-107"></a>        <span class="n">clk_src_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span>
-<a id="l-108" name="l-108"></a>  <span class="k">end</span>
-<a id="l-109" name="l-109"></a>
-<a id="l-110" name="l-110"></a><span class="k">endmodule</span>
+<a id="l-103" name="l-103"></a>    <span class="c1">// for the next REQ to cross over from SRC to DST.</span>
+<a id="l-104" name="l-104"></a>    <span class="c1">//</span>
+<a id="l-105" name="l-105"></a>    <span class="c1">// Denote the src clock where REQ &amp; ACK as time zero. The data flowing through the CDC could be</span>
+<a id="l-106" name="l-106"></a>    <span class="c1">// corrupted if data_o was not stable over the previous 2 clock cycles (so we want to check time</span>
+<a id="l-107" name="l-107"></a>    <span class="c1">// points -2, -1 and 0). Moreover, the DST domain cannot know that it is allowed to change value</span>
+<a id="l-108" name="l-108"></a>    <span class="c1">// until at least one more SRC cycle (the time taken for REQ to cross back from SRC to DST).</span>
+<a id="l-109" name="l-109"></a>    <span class="c1">//</span>
+<a id="l-110" name="l-110"></a>    <span class="c1">// To make this assertion, we will sample at each of 4 time points (-2, -1, 0 and +1), asserting</span>
+<a id="l-111" name="l-111"></a>    <span class="c1">// that data_o is equal at each of these times. Note this won&#39;t detect glitches at intermediate</span>
+<a id="l-112" name="l-112"></a>    <span class="c1">// timepoints.</span>
+<a id="l-113" name="l-113"></a>    <span class="c1">//</span>
+<a id="l-114" name="l-114"></a>    <span class="c1">// The SVAs below are designed not to consume time, which means that they can be disabled with</span>
+<a id="l-115" name="l-115"></a>    <span class="c1">// an $assertoff(..) and won&#39;t linger to fail later. This wouldn&#39;t work properly if we used</span>
+<a id="l-116" name="l-116"></a>    <span class="c1">// something like |=&gt; instead of the $past(...) function. That means that we have to trigger at</span>
+<a id="l-117" name="l-117"></a>    <span class="c1">// the &quot;end&quot; of the window. To make sure we don&#39;t miss a situation where the value changed at</span>
+<a id="l-118" name="l-118"></a>    <span class="c1">// time -1 (causing corruption), but reset was asserted between time 0 and 1, we split the</span>
+<a id="l-119" name="l-119"></a>    <span class="c1">// assertion into two pieces. The first (SyncReqAckDataHoldDst2SrcA) checks that data doesn&#39;t</span>
+<a id="l-120" name="l-120"></a>    <span class="c1">// change in a way that could cause data corruption. The second (SyncReqAckDataHoldDst2SrcB)</span>
+<a id="l-121" name="l-121"></a>    <span class="c1">// checks that the DST side doesn&#39;t do anything that it shouldn&#39;t know is safe.</span>
+<a id="l-122" name="l-122"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SyncReqAckDataHoldDst2SrcA</span><span class="p">,</span>
+<a id="l-123" name="l-123"></a>            <span class="n">src_req_i</span> <span class="o">&amp;&amp;</span> <span class="n">src_ack_o</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">data_o</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="n">data_o</span> <span class="o">&amp;&amp;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">data_o</span><span class="p">)</span> <span class="o">==</span> <span class="n">data_o</span><span class="p">,</span>
+<a id="l-124" name="l-124"></a>            <span class="n">clk_src_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span>
+<a id="l-125" name="l-125"></a>    <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SyncReqAckDataHoldDst2SrcB</span><span class="p">,</span>
+<a id="l-126" name="l-126"></a>            <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">src_req_i</span> <span class="o">&amp;&amp;</span> <span class="n">src_ack_o</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">data_o</span><span class="p">)</span> <span class="o">==</span> <span class="n">data_o</span><span class="p">,</span>
+<a id="l-127" name="l-127"></a>            <span class="n">clk_src_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_src_ni</span><span class="p">)</span>
+<a id="l-128" name="l-128"></a>  <span class="k">end</span>
+<a id="l-129" name="l-129"></a>
+<a id="l-130" name="l-130"></a><span class="k">endmodule</span>
 </pre></div>
 </td></tr></table>
   </body>

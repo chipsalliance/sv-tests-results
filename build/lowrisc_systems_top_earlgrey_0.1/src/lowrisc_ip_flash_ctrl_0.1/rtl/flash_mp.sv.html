@@ -320,7 +320,17 @@
 <span class="normal"><a href="#l-312">312</a></span>
 <span class="normal"><a href="#l-313">313</a></span>
 <span class="normal"><a href="#l-314">314</a></span>
-<span class="normal"><a href="#l-315">315</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-315">315</a></span>
+<span class="normal"><a href="#l-316">316</a></span>
+<span class="normal"><a href="#l-317">317</a></span>
+<span class="normal"><a href="#l-318">318</a></span>
+<span class="normal"><a href="#l-319">319</a></span>
+<span class="normal"><a href="#l-320">320</a></span>
+<span class="normal"><a href="#l-321">321</a></span>
+<span class="normal"><a href="#l-322">322</a></span>
+<span class="normal"><a href="#l-323">323</a></span>
+<span class="normal"><a href="#l-324">324</a></span>
+<span class="normal"><a href="#l-325">325</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -338,7 +348,7 @@
 <a id="l-16" name="l-16"></a>
 <a id="l-17" name="l-17"></a>  <span class="c1">// configuration from sw</span>
 <a id="l-18" name="l-18"></a>  <span class="k">input</span> <span class="n">mp_region_cfg_t</span> <span class="p">[</span><span class="nl">MpRegions:</span><span class="mi">0</span><span class="p">]</span> <span class="n">region_cfgs_i</span><span class="p">,</span>
-<a id="l-19" name="l-19"></a>  <span class="k">input</span> <span class="n">flash_ctrl_reg2hw_mp_bank_cfg_mreg_t</span> <span class="p">[</span><span class="n">NumBanks</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bank_cfgs_i</span><span class="p">,</span>
+<a id="l-19" name="l-19"></a>  <span class="k">input</span> <span class="n">bank_cfg_t</span> <span class="p">[</span><span class="n">NumBanks</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bank_cfgs_i</span><span class="p">,</span>
 <a id="l-20" name="l-20"></a>  <span class="k">input</span> <span class="n">info_page_cfg_t</span> <span class="p">[</span><span class="n">NumBanks</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">InfoTypes</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">][</span><span class="n">InfosPerBank</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">info_page_cfgs_i</span><span class="p">,</span>
 <a id="l-21" name="l-21"></a>  <span class="k">input</span> <span class="n">erase_suspend_i</span><span class="p">,</span>
 <a id="l-22" name="l-22"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">erase_suspend_done_o</span><span class="p">,</span>
@@ -358,48 +368,48 @@
 <a id="l-36" name="l-36"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">prog_done_o</span><span class="p">,</span>
 <a id="l-37" name="l-37"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">erase_done_o</span><span class="p">,</span>
 <a id="l-38" name="l-38"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">error_o</span><span class="p">,</span>
-<a id="l-39" name="l-39"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="p">[</span><span class="n">AllPagesW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">err_addr_o</span><span class="p">,</span>
-<a id="l-40" name="l-40"></a>
-<a id="l-41" name="l-41"></a>  <span class="c1">// interface signals to/from flash_phy</span>
-<a id="l-42" name="l-42"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">req_o</span><span class="p">,</span>
-<a id="l-43" name="l-43"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">rd_o</span><span class="p">,</span>
-<a id="l-44" name="l-44"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">prog_o</span><span class="p">,</span>
-<a id="l-45" name="l-45"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">scramble_en_o</span><span class="p">,</span>
-<a id="l-46" name="l-46"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">ecc_en_o</span><span class="p">,</span>
-<a id="l-47" name="l-47"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">he_en_o</span><span class="p">,</span>
-<a id="l-48" name="l-48"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">pg_erase_o</span><span class="p">,</span>
-<a id="l-49" name="l-49"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">bk_erase_o</span><span class="p">,</span>
-<a id="l-50" name="l-50"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">erase_suspend_o</span><span class="p">,</span>
-<a id="l-51" name="l-51"></a>  <span class="k">input</span> <span class="n">rd_done_i</span><span class="p">,</span>
-<a id="l-52" name="l-52"></a>  <span class="k">input</span> <span class="n">prog_done_i</span><span class="p">,</span>
-<a id="l-53" name="l-53"></a>  <span class="k">input</span> <span class="n">erase_done_i</span>
-<a id="l-54" name="l-54"></a><span class="p">);</span>
-<a id="l-55" name="l-55"></a>
-<a id="l-56" name="l-56"></a>  <span class="c1">// Total number of regions including default region</span>
-<a id="l-57" name="l-57"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">TotalRegions</span> <span class="o">=</span> <span class="n">MpRegions</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
-<a id="l-58" name="l-58"></a>
-<a id="l-59" name="l-59"></a>  <span class="c1">// bank + page address</span>
-<a id="l-60" name="l-60"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">AllPagesW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bank_page_addr</span><span class="p">;</span>
-<a id="l-61" name="l-61"></a>  <span class="c1">// bank address</span>
-<a id="l-62" name="l-62"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BankW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bank_addr</span><span class="p">;</span>
-<a id="l-63" name="l-63"></a>  <span class="c1">// page address</span>
-<a id="l-64" name="l-64"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">PageW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">page_addr</span><span class="p">;</span>
-<a id="l-65" name="l-65"></a>
-<a id="l-66" name="l-66"></a>  <span class="k">assign</span> <span class="n">bank_page_addr</span> <span class="o">=</span> <span class="n">req_addr_i</span><span class="p">;</span>
-<a id="l-67" name="l-67"></a>  <span class="k">assign</span> <span class="n">bank_addr</span> <span class="o">=</span> <span class="n">req_addr_i</span><span class="p">[</span><span class="n">AllPagesW</span><span class="o">-</span><span class="mi">1</span> <span class="o">-:</span> <span class="n">BankW</span><span class="p">];</span>
-<a id="l-68" name="l-68"></a>  <span class="k">assign</span> <span class="n">page_addr</span> <span class="o">=</span> <span class="n">req_addr_i</span><span class="p">[</span><span class="n">PageW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a id="l-69" name="l-69"></a>
-<a id="l-70" name="l-70"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumBanks</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bk_erase_en</span><span class="p">;</span>
-<a id="l-71" name="l-71"></a>  <span class="kt">logic</span> <span class="n">data_rd_en</span><span class="p">;</span>
-<a id="l-72" name="l-72"></a>  <span class="kt">logic</span> <span class="n">data_prog_en</span><span class="p">;</span>
-<a id="l-73" name="l-73"></a>  <span class="kt">logic</span> <span class="n">data_pg_erase_en</span><span class="p">;</span>
-<a id="l-74" name="l-74"></a>  <span class="kt">logic</span> <span class="n">data_bk_erase_en</span><span class="p">;</span>
-<a id="l-75" name="l-75"></a>  <span class="kt">logic</span> <span class="n">data_scramble_en</span><span class="p">;</span>
-<a id="l-76" name="l-76"></a>  <span class="kt">logic</span> <span class="n">data_ecc_en</span><span class="p">;</span>
-<a id="l-77" name="l-77"></a>  <span class="kt">logic</span> <span class="n">data_he_en</span><span class="p">;</span>
-<a id="l-78" name="l-78"></a>  <span class="kt">logic</span> <span class="n">info_rd_en</span><span class="p">;</span>
-<a id="l-79" name="l-79"></a>  <span class="kt">logic</span> <span class="n">info_prog_en</span><span class="p">;</span>
-<a id="l-80" name="l-80"></a>  <span class="kt">logic</span> <span class="n">info_erase_en</span><span class="p">;</span>
+<a id="l-39" name="l-39"></a>
+<a id="l-40" name="l-40"></a>  <span class="c1">// interface signals to/from flash_phy</span>
+<a id="l-41" name="l-41"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">req_o</span><span class="p">,</span>
+<a id="l-42" name="l-42"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">rd_o</span><span class="p">,</span>
+<a id="l-43" name="l-43"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">prog_o</span><span class="p">,</span>
+<a id="l-44" name="l-44"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">scramble_en_o</span><span class="p">,</span>
+<a id="l-45" name="l-45"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">ecc_en_o</span><span class="p">,</span>
+<a id="l-46" name="l-46"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">he_en_o</span><span class="p">,</span>
+<a id="l-47" name="l-47"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">pg_erase_o</span><span class="p">,</span>
+<a id="l-48" name="l-48"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">bk_erase_o</span><span class="p">,</span>
+<a id="l-49" name="l-49"></a>  <span class="k">output</span> <span class="kt">logic</span> <span class="n">erase_suspend_o</span><span class="p">,</span>
+<a id="l-50" name="l-50"></a>  <span class="k">input</span> <span class="n">rd_done_i</span><span class="p">,</span>
+<a id="l-51" name="l-51"></a>  <span class="k">input</span> <span class="n">prog_done_i</span><span class="p">,</span>
+<a id="l-52" name="l-52"></a>  <span class="k">input</span> <span class="n">erase_done_i</span>
+<a id="l-53" name="l-53"></a><span class="p">);</span>
+<a id="l-54" name="l-54"></a>
+<a id="l-55" name="l-55"></a>  <span class="c1">// Total number of regions including default region</span>
+<a id="l-56" name="l-56"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">TotalRegions</span> <span class="o">=</span> <span class="n">MpRegions</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+<a id="l-57" name="l-57"></a>
+<a id="l-58" name="l-58"></a>  <span class="c1">// bank + page address</span>
+<a id="l-59" name="l-59"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">AllPagesW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bank_page_addr</span><span class="p">;</span>
+<a id="l-60" name="l-60"></a>  <span class="c1">// bank address</span>
+<a id="l-61" name="l-61"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">BankW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bank_addr</span><span class="p">;</span>
+<a id="l-62" name="l-62"></a>  <span class="c1">// page address</span>
+<a id="l-63" name="l-63"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">PageW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">page_addr</span><span class="p">;</span>
+<a id="l-64" name="l-64"></a>
+<a id="l-65" name="l-65"></a>  <span class="k">assign</span> <span class="n">bank_page_addr</span> <span class="o">=</span> <span class="n">req_addr_i</span><span class="p">;</span>
+<a id="l-66" name="l-66"></a>  <span class="k">assign</span> <span class="n">bank_addr</span> <span class="o">=</span> <span class="n">req_addr_i</span><span class="p">[</span><span class="n">AllPagesW</span><span class="o">-</span><span class="mi">1</span> <span class="o">-:</span> <span class="n">BankW</span><span class="p">];</span>
+<a id="l-67" name="l-67"></a>  <span class="k">assign</span> <span class="n">page_addr</span> <span class="o">=</span> <span class="n">req_addr_i</span><span class="p">[</span><span class="n">PageW</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a id="l-68" name="l-68"></a>
+<a id="l-69" name="l-69"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">NumBanks</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">bk_erase_en</span><span class="p">;</span>
+<a id="l-70" name="l-70"></a>  <span class="kt">logic</span> <span class="n">data_rd_en</span><span class="p">;</span>
+<a id="l-71" name="l-71"></a>  <span class="kt">logic</span> <span class="n">data_prog_en</span><span class="p">;</span>
+<a id="l-72" name="l-72"></a>  <span class="kt">logic</span> <span class="n">data_pg_erase_en</span><span class="p">;</span>
+<a id="l-73" name="l-73"></a>  <span class="kt">logic</span> <span class="n">data_bk_erase_en</span><span class="p">;</span>
+<a id="l-74" name="l-74"></a>  <span class="kt">logic</span> <span class="n">data_scramble_en</span><span class="p">;</span>
+<a id="l-75" name="l-75"></a>  <span class="kt">logic</span> <span class="n">data_ecc_en</span><span class="p">;</span>
+<a id="l-76" name="l-76"></a>  <span class="kt">logic</span> <span class="n">data_he_en</span><span class="p">;</span>
+<a id="l-77" name="l-77"></a>  <span class="kt">logic</span> <span class="n">info_rd_en</span><span class="p">;</span>
+<a id="l-78" name="l-78"></a>  <span class="kt">logic</span> <span class="n">info_prog_en</span><span class="p">;</span>
+<a id="l-79" name="l-79"></a>  <span class="kt">logic</span> <span class="n">info_pg_erase_en</span><span class="p">;</span>
+<a id="l-80" name="l-80"></a>  <span class="kt">logic</span> <span class="n">info_bk_erase_en</span><span class="p">;</span>
 <a id="l-81" name="l-81"></a>  <span class="kt">logic</span> <span class="n">info_scramble_en</span><span class="p">;</span>
 <a id="l-82" name="l-82"></a>  <span class="kt">logic</span> <span class="n">info_ecc_en</span><span class="p">;</span>
 <a id="l-83" name="l-83"></a>  <span class="kt">logic</span> <span class="n">info_he_en</span><span class="p">;</span>
@@ -501,7 +511,7 @@
 <a id="l-179" name="l-179"></a>  <span class="k">assign</span> <span class="n">data_rd_en</span>       <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span> <span class="n">rd_i</span>            <span class="o">&amp;</span> <span class="n">data_region_cfg</span><span class="p">.</span><span class="n">rd_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
 <a id="l-180" name="l-180"></a>  <span class="k">assign</span> <span class="n">data_prog_en</span>     <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span> <span class="n">prog_i</span>          <span class="o">&amp;</span> <span class="n">data_region_cfg</span><span class="p">.</span><span class="n">prog_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
 <a id="l-181" name="l-181"></a>  <span class="k">assign</span> <span class="n">data_pg_erase_en</span> <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span> <span class="n">pg_erase_i</span>      <span class="o">&amp;</span> <span class="n">data_region_cfg</span><span class="p">.</span><span class="n">erase_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a id="l-182" name="l-182"></a>  <span class="k">assign</span> <span class="n">data_bk_erase_en</span> <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span> <span class="n">bk_erase_i</span>      <span class="o">&amp;</span> <span class="o">|</span><span class="n">bk_erase_en</span><span class="p">;</span>
+<a id="l-182" name="l-182"></a>  <span class="k">assign</span> <span class="n">data_bk_erase_en</span> <span class="o">=</span> <span class="n">bk_erase_i</span>                <span class="o">&amp;</span> <span class="o">|</span><span class="n">bk_erase_en</span><span class="p">;</span>
 <a id="l-183" name="l-183"></a>  <span class="k">assign</span> <span class="n">data_scramble_en</span> <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_i</span> <span class="o">|</span> <span class="n">prog_i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">data_region_cfg</span><span class="p">.</span><span class="n">scramble_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
 <a id="l-184" name="l-184"></a>  <span class="k">assign</span> <span class="n">data_ecc_en</span>      <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_i</span> <span class="o">|</span> <span class="n">prog_i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">data_region_cfg</span><span class="p">.</span><span class="n">ecc_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
 <a id="l-185" name="l-185"></a>  <span class="k">assign</span> <span class="n">data_he_en</span>       <span class="o">=</span> <span class="n">data_en</span> <span class="o">&amp;</span>                   <span class="n">data_region_cfg</span><span class="p">.</span><span class="n">he_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
@@ -555,42 +565,42 @@
 <a id="l-233" name="l-233"></a>  <span class="k">assign</span> <span class="n">info_en</span>          <span class="o">=</span> <span class="n">info_part_sel</span>             <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
 <a id="l-234" name="l-234"></a>  <span class="k">assign</span> <span class="n">info_rd_en</span>       <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="n">rd_i</span>            <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">rd_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
 <a id="l-235" name="l-235"></a>  <span class="k">assign</span> <span class="n">info_prog_en</span>     <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="n">prog_i</span>          <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">prog_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a id="l-236" name="l-236"></a>  <span class="k">assign</span> <span class="n">info_erase_en</span>    <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="n">pg_erase_i</span>      <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">erase_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a id="l-237" name="l-237"></a>  <span class="k">assign</span> <span class="n">info_scramble_en</span> <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_i</span> <span class="o">|</span> <span class="n">prog_i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">scramble_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a id="l-238" name="l-238"></a>  <span class="k">assign</span> <span class="n">info_ecc_en</span>      <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_i</span> <span class="o">|</span> <span class="n">prog_i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">ecc_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a id="l-239" name="l-239"></a>  <span class="k">assign</span> <span class="n">info_he_en</span>       <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span>                   <span class="n">page_cfg</span><span class="p">.</span><span class="n">he_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
-<a id="l-240" name="l-240"></a>
-<a id="l-241" name="l-241"></a>  <span class="c1">// check for invalid transactions</span>
-<a id="l-242" name="l-242"></a>  <span class="k">assign</span> <span class="n">invalid_info_txn</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">info_part_sel</span> <span class="o">&amp;</span>
-<a id="l-243" name="l-243"></a>                            <span class="o">~</span><span class="p">(</span><span class="n">info_rd_en</span> <span class="o">|</span> <span class="n">info_prog_en</span> <span class="o">|</span> <span class="n">info_erase_en</span><span class="p">);</span>
-<a id="l-244" name="l-244"></a>
-<a id="l-245" name="l-245"></a>
-<a id="l-246" name="l-246"></a>  <span class="c1">////////////////////////////////////////</span>
-<a id="l-247" name="l-247"></a>  <span class="c1">// Combine all check results</span>
+<a id="l-236" name="l-236"></a>  <span class="k">assign</span> <span class="n">info_pg_erase_en</span> <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="n">pg_erase_i</span>      <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">erase_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a id="l-237" name="l-237"></a>  <span class="k">assign</span> <span class="n">info_bk_erase_en</span> <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="n">bk_erase_i</span>      <span class="o">&amp;</span> <span class="o">|</span><span class="n">bk_erase_en</span><span class="p">;</span>
+<a id="l-238" name="l-238"></a>  <span class="k">assign</span> <span class="n">info_scramble_en</span> <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_i</span> <span class="o">|</span> <span class="n">prog_i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">scramble_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a id="l-239" name="l-239"></a>  <span class="k">assign</span> <span class="n">info_ecc_en</span>      <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rd_i</span> <span class="o">|</span> <span class="n">prog_i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">page_cfg</span><span class="p">.</span><span class="n">ecc_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a id="l-240" name="l-240"></a>  <span class="k">assign</span> <span class="n">info_he_en</span>       <span class="o">=</span> <span class="n">info_en</span> <span class="o">&amp;</span>                   <span class="n">page_cfg</span><span class="p">.</span><span class="n">he_en</span><span class="p">.</span><span class="n">q</span><span class="p">;</span>
+<a id="l-241" name="l-241"></a>
+<a id="l-242" name="l-242"></a>  <span class="c1">// check for invalid transactions</span>
+<a id="l-243" name="l-243"></a>  <span class="k">assign</span> <span class="n">invalid_info_txn</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">info_part_sel</span> <span class="o">&amp;</span>
+<a id="l-244" name="l-244"></a>                            <span class="o">~</span><span class="p">(</span><span class="n">info_rd_en</span> <span class="o">|</span> <span class="n">info_prog_en</span> <span class="o">|</span> <span class="n">info_pg_erase_en</span> <span class="o">|</span>
+<a id="l-245" name="l-245"></a>                              <span class="n">info_bk_erase_en</span><span class="p">);</span>
+<a id="l-246" name="l-246"></a>
+<a id="l-247" name="l-247"></a>
 <a id="l-248" name="l-248"></a>  <span class="c1">////////////////////////////////////////</span>
-<a id="l-249" name="l-249"></a>  <span class="k">assign</span> <span class="n">rd_o</span>          <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_rd_en</span> <span class="o">|</span> <span class="n">info_rd_en</span><span class="p">);</span>
-<a id="l-250" name="l-250"></a>  <span class="k">assign</span> <span class="n">prog_o</span>        <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_prog_en</span> <span class="o">|</span> <span class="n">info_prog_en</span><span class="p">);</span>
-<a id="l-251" name="l-251"></a>  <span class="k">assign</span> <span class="n">pg_erase_o</span>    <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_pg_erase_en</span> <span class="o">|</span> <span class="n">info_erase_en</span><span class="p">);</span>
-<a id="l-252" name="l-252"></a>  <span class="k">assign</span> <span class="n">bk_erase_o</span>    <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">data_bk_erase_en</span><span class="p">;</span>
-<a id="l-253" name="l-253"></a>  <span class="k">assign</span> <span class="n">scramble_en_o</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_scramble_en</span> <span class="o">|</span> <span class="n">info_scramble_en</span><span class="p">);</span>
-<a id="l-254" name="l-254"></a>  <span class="k">assign</span> <span class="n">ecc_en_o</span>      <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_ecc_en</span> <span class="o">|</span> <span class="n">info_ecc_en</span><span class="p">);</span>
-<a id="l-255" name="l-255"></a>  <span class="k">assign</span> <span class="n">he_en_o</span>       <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_he_en</span> <span class="o">|</span> <span class="n">info_he_en</span><span class="p">);</span>
-<a id="l-256" name="l-256"></a>  <span class="k">assign</span> <span class="n">req_o</span>         <span class="o">=</span> <span class="n">rd_o</span> <span class="o">|</span> <span class="n">prog_o</span> <span class="o">|</span> <span class="n">pg_erase_o</span> <span class="o">|</span> <span class="n">bk_erase_o</span><span class="p">;</span>
-<a id="l-257" name="l-257"></a>
-<a id="l-258" name="l-258"></a>  <span class="kt">logic</span> <span class="n">txn_err</span><span class="p">;</span>
-<a id="l-259" name="l-259"></a>  <span class="kt">logic</span> <span class="n">no_allowed_txn</span><span class="p">;</span>
-<a id="l-260" name="l-260"></a>  <span class="k">assign</span> <span class="n">no_allowed_txn</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">addr_invalid</span> <span class="o">|</span> <span class="n">invalid_data_txn</span> <span class="o">|</span> <span class="n">invalid_info_txn</span><span class="p">);</span>
-<a id="l-261" name="l-261"></a>
-<a id="l-262" name="l-262"></a>  <span class="c1">// return done and error the next cycle</span>
-<a id="l-263" name="l-263"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-264" name="l-264"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-265" name="l-265"></a>      <span class="n">txn_err</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-266" name="l-266"></a>      <span class="n">err_addr_o</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-267" name="l-267"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">txn_err</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-268" name="l-268"></a>      <span class="n">txn_err</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-269" name="l-269"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">no_allowed_txn</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-270" name="l-270"></a>      <span class="n">txn_err</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-271" name="l-271"></a>      <span class="n">err_addr_o</span> <span class="o">&lt;=</span> <span class="n">bank_page_addr</span><span class="p">;</span>
+<a id="l-249" name="l-249"></a>  <span class="c1">// Combine all check results</span>
+<a id="l-250" name="l-250"></a>  <span class="c1">////////////////////////////////////////</span>
+<a id="l-251" name="l-251"></a>  <span class="k">assign</span> <span class="n">rd_o</span>          <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_rd_en</span> <span class="o">|</span> <span class="n">info_rd_en</span><span class="p">);</span>
+<a id="l-252" name="l-252"></a>  <span class="k">assign</span> <span class="n">prog_o</span>        <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_prog_en</span> <span class="o">|</span> <span class="n">info_prog_en</span><span class="p">);</span>
+<a id="l-253" name="l-253"></a>  <span class="k">assign</span> <span class="n">pg_erase_o</span>    <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_pg_erase_en</span> <span class="o">|</span> <span class="n">info_pg_erase_en</span><span class="p">);</span>
+<a id="l-254" name="l-254"></a>  <span class="k">assign</span> <span class="n">bk_erase_o</span>    <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_bk_erase_en</span> <span class="o">|</span> <span class="n">info_bk_erase_en</span><span class="p">);</span>
+<a id="l-255" name="l-255"></a>  <span class="k">assign</span> <span class="n">scramble_en_o</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_scramble_en</span> <span class="o">|</span> <span class="n">info_scramble_en</span><span class="p">);</span>
+<a id="l-256" name="l-256"></a>  <span class="k">assign</span> <span class="n">ecc_en_o</span>      <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_ecc_en</span> <span class="o">|</span> <span class="n">info_ecc_en</span><span class="p">);</span>
+<a id="l-257" name="l-257"></a>  <span class="k">assign</span> <span class="n">he_en_o</span>       <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_he_en</span> <span class="o">|</span> <span class="n">info_he_en</span><span class="p">);</span>
+<a id="l-258" name="l-258"></a>  <span class="k">assign</span> <span class="n">req_o</span>         <span class="o">=</span> <span class="n">rd_o</span> <span class="o">|</span> <span class="n">prog_o</span> <span class="o">|</span> <span class="n">pg_erase_o</span> <span class="o">|</span> <span class="n">bk_erase_o</span><span class="p">;</span>
+<a id="l-259" name="l-259"></a>
+<a id="l-260" name="l-260"></a>  <span class="kt">logic</span> <span class="n">txn_err</span><span class="p">;</span>
+<a id="l-261" name="l-261"></a>  <span class="kt">logic</span> <span class="n">no_allowed_txn</span><span class="p">;</span>
+<a id="l-262" name="l-262"></a>  <span class="k">assign</span> <span class="n">no_allowed_txn</span> <span class="o">=</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">addr_invalid</span> <span class="o">|</span> <span class="n">invalid_data_txn</span> <span class="o">|</span> <span class="n">invalid_info_txn</span><span class="p">);</span>
+<a id="l-263" name="l-263"></a>
+<a id="l-264" name="l-264"></a>  <span class="c1">// return done and error the next cycle</span>
+<a id="l-265" name="l-265"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-266" name="l-266"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-267" name="l-267"></a>      <span class="n">txn_err</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-268" name="l-268"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">txn_err</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-269" name="l-269"></a>      <span class="n">txn_err</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-270" name="l-270"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">no_allowed_txn</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-271" name="l-271"></a>      <span class="n">txn_err</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
 <a id="l-272" name="l-272"></a>    <span class="k">end</span>
 <a id="l-273" name="l-273"></a>  <span class="k">end</span>
 <a id="l-274" name="l-274"></a>
@@ -626,15 +636,25 @@
 <a id="l-304" name="l-304"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">InfoReqToData_a</span><span class="p">,</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">info_part_sel</span> <span class="o">|-&gt;</span> <span class="o">~|</span><span class="p">{</span><span class="n">data_en</span><span class="p">,</span>
 <a id="l-305" name="l-305"></a>                                                        <span class="n">data_rd_en</span><span class="p">,</span>
 <a id="l-306" name="l-306"></a>                                                        <span class="n">data_prog_en</span><span class="p">,</span>
-<a id="l-307" name="l-307"></a>                                                        <span class="n">data_pg_erase_en</span><span class="p">,</span>
-<a id="l-308" name="l-308"></a>                                                        <span class="n">data_bk_erase_en</span><span class="p">})</span>
-<a id="l-309" name="l-309"></a>  <span class="c1">// A data request should not lead to info requests</span>
-<a id="l-310" name="l-310"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">DataReqToInfo_a</span><span class="p">,</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">data_part_sel</span> <span class="o">|-&gt;</span> <span class="o">~|</span><span class="p">{</span><span class="n">info_en</span><span class="p">,</span>
-<a id="l-311" name="l-311"></a>                                                        <span class="n">info_rd_en</span><span class="p">,</span>
-<a id="l-312" name="l-312"></a>                                                        <span class="n">info_prog_en</span><span class="p">,</span>
-<a id="l-313" name="l-313"></a>                                                        <span class="n">info_erase_en</span><span class="p">})</span>
-<a id="l-314" name="l-314"></a>
-<a id="l-315" name="l-315"></a><span class="k">endmodule</span> <span class="c1">// flash_erase_ctrl</span>
+<a id="l-307" name="l-307"></a>                                                        <span class="n">data_pg_erase_en</span><span class="p">})</span>
+<a id="l-308" name="l-308"></a>  <span class="c1">// A data request should not lead to info requests</span>
+<a id="l-309" name="l-309"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">DataReqToInfo_a</span><span class="p">,</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">data_part_sel</span> <span class="o">|-&gt;</span>
+<a id="l-310" name="l-310"></a>    <span class="o">~|</span><span class="p">{</span><span class="n">info_en</span><span class="p">,</span>
+<a id="l-311" name="l-311"></a>    <span class="n">info_rd_en</span><span class="p">,</span>
+<a id="l-312" name="l-312"></a>    <span class="n">info_prog_en</span><span class="p">,</span>
+<a id="l-313" name="l-313"></a>    <span class="n">info_pg_erase_en</span><span class="p">,</span>
+<a id="l-314" name="l-314"></a>    <span class="n">info_bk_erase_en</span><span class="p">})</span>
+<a id="l-315" name="l-315"></a>
+<a id="l-316" name="l-316"></a>  <span class="c1">// If a bank erase request only selects data, then info should be erased</span>
+<a id="l-317" name="l-317"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">BankEraseData_a</span><span class="p">,</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">bk_erase_i</span> <span class="o">&amp;</span> <span class="n">data_part_sel</span> <span class="o">|-&gt;</span> <span class="n">data_bk_erase_en</span> <span class="o">&amp;</span>
+<a id="l-318" name="l-318"></a>          <span class="o">~</span><span class="n">info_bk_erase_en</span><span class="p">)</span>
+<a id="l-319" name="l-319"></a>
+<a id="l-320" name="l-320"></a>  <span class="c1">// If a bank erase request also selects the info partition, then both data</span>
+<a id="l-321" name="l-321"></a>  <span class="c1">// and info must be erased</span>
+<a id="l-322" name="l-322"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">BankEraseInfo_a</span><span class="p">,</span> <span class="n">req_i</span> <span class="o">&amp;</span> <span class="n">bk_erase_i</span> <span class="o">&amp;</span> <span class="n">info_part_sel</span> <span class="o">|-&gt;</span> <span class="o">&amp;</span><span class="p">{</span><span class="n">data_bk_erase_en</span><span class="p">,</span>
+<a id="l-323" name="l-323"></a>                                                                    <span class="n">info_bk_erase_en</span><span class="p">})</span>
+<a id="l-324" name="l-324"></a>
+<a id="l-325" name="l-325"></a><span class="k">endmodule</span> <span class="c1">// flash_erase_ctrl</span>
 </pre></div>
 </td></tr></table>
   </body>

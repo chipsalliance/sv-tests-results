@@ -1311,7 +1311,7 @@
 <a id="l-61" name="l-61"></a>  <span class="k">input</span> <span class="n">sys_rst_ni</span><span class="p">,</span>
 <a id="l-62" name="l-62"></a>
 <a id="l-63" name="l-63"></a>  <span class="k">input</span>                      <span class="n">scan_rst_ni</span><span class="p">,</span>
-<a id="l-64" name="l-64"></a>  <span class="k">input</span> <span class="n">lc_ctrl_pkg</span><span class="o">::</span><span class="n">lc_tx_t</span> <span class="n">scanmode_i</span><span class="p">,</span> <span class="c1">// scanmode[RstTpmSel]</span>
+<a id="l-64" name="l-64"></a>  <span class="k">input</span> <span class="n">prim_mubi_pkg</span><span class="o">::</span><span class="n">mubi4_t</span> <span class="n">scanmode_i</span><span class="p">,</span> <span class="c1">// scanmode[RstTpmSel]</span>
 <a id="l-65" name="l-65"></a>
 <a id="l-66" name="l-66"></a>  <span class="c1">// SPI interface</span>
 <a id="l-67" name="l-67"></a>  <span class="k">input</span>        <span class="n">csb_i</span><span class="p">,</span> <span class="c1">// TPM needs separate CS#</span>
@@ -1424,7 +1424,7 @@
 <a id="l-174" name="l-174"></a>  <span class="p">)</span> <span class="n">u_tpm_csb_rst_scan_mux</span> <span class="p">(</span>
 <a id="l-175" name="l-175"></a>    <span class="p">.</span><span class="n">clk0_i</span> <span class="p">(</span><span class="n">sys_rst_ni</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">csb_i</span><span class="p">),</span>
 <a id="l-176" name="l-176"></a>    <span class="p">.</span><span class="n">clk1_i</span> <span class="p">(</span><span class="n">scan_rst_ni</span><span class="p">),</span>
-<a id="l-177" name="l-177"></a>    <span class="p">.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">scanmode_i</span> <span class="o">==</span> <span class="n">lc_ctrl_pkg</span><span class="o">::</span><span class="n">On</span><span class="p">),</span>
+<a id="l-177" name="l-177"></a>    <span class="p">.</span><span class="n">sel_i</span>  <span class="p">(</span><span class="n">prim_mubi_pkg</span><span class="o">::</span><span class="n">mubi4_test_true_strict</span><span class="p">(</span><span class="n">scanmode_i</span><span class="p">)),</span>
 <a id="l-178" name="l-178"></a>    <span class="p">.</span><span class="n">clk_o</span>  <span class="p">(</span><span class="n">rst_n</span><span class="p">)</span>
 <a id="l-179" name="l-179"></a>  <span class="p">);</span>
 <a id="l-180" name="l-180"></a>
@@ -1693,148 +1693,148 @@
 <a id="l-443" name="l-443"></a>  <span class="p">}</span> <span class="n">tpm_data_sel_e</span><span class="p">;</span>
 <a id="l-444" name="l-444"></a>
 <a id="l-445" name="l-445"></a>  <span class="kt">logic</span>       <span class="n">sck_p2s_valid</span><span class="p">;</span>
-<a id="l-446" name="l-446"></a>  <span class="kt">logic</span>       <span class="n">sck_p2s_sent</span><span class="p">;</span> <span class="c1">// pulse of bit 7</span>
-<a id="l-447" name="l-447"></a>
-<a id="l-448" name="l-448"></a>  <span class="kt">logic</span>       <span class="n">isck_p2s_valid</span><span class="p">;</span>
-<a id="l-449" name="l-449"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">isck_p2s_data</span><span class="p">;</span>
-<a id="l-450" name="l-450"></a>  <span class="kt">logic</span>       <span class="n">isck_p2s_sent</span><span class="p">;</span>
-<a id="l-451" name="l-451"></a>
-<a id="l-452" name="l-452"></a>  <span class="n">tpm_data_sel_e</span> <span class="n">sck_data_sel</span><span class="p">,</span> <span class="n">isck_data_sel</span><span class="p">;</span>
-<a id="l-453" name="l-453"></a>
-<a id="l-454" name="l-454"></a>  <span class="kt">logic</span> <span class="n">isck_miso_en</span><span class="p">;</span>
-<a id="l-455" name="l-455"></a>  <span class="kt">logic</span> <span class="n">isck_miso</span><span class="p">;</span>
-<a id="l-456" name="l-456"></a>
-<a id="l-457" name="l-457"></a>  <span class="k">assign</span> <span class="n">miso_en_o</span> <span class="o">=</span> <span class="n">isck_miso_en</span><span class="p">;</span>
-<a id="l-458" name="l-458"></a>  <span class="k">assign</span> <span class="n">miso_o</span>    <span class="o">=</span> <span class="n">isck_miso</span><span class="p">;</span>
-<a id="l-459" name="l-459"></a>
-<a id="l-460" name="l-460"></a>  <span class="c1">/////////</span>
-<a id="l-461" name="l-461"></a>  <span class="c1">// CDC //</span>
-<a id="l-462" name="l-462"></a>  <span class="c1">/////////</span>
-<a id="l-463" name="l-463"></a>
-<a id="l-464" name="l-464"></a>  <span class="c1">// clk_in csb_asserted_pulse</span>
-<a id="l-465" name="l-465"></a>  <span class="n">prim_edge_detector</span> <span class="p">#(</span>
-<a id="l-466" name="l-466"></a>    <span class="p">.</span><span class="n">Width</span>      <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-<a id="l-467" name="l-467"></a>    <span class="p">.</span><span class="n">ResetValue</span> <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">),</span>
-<a id="l-468" name="l-468"></a>    <span class="p">.</span><span class="n">EnSync</span>     <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">)</span>
-<a id="l-469" name="l-469"></a>  <span class="p">)</span> <span class="n">u_sck_csb_edge</span> <span class="p">(</span>
-<a id="l-470" name="l-470"></a>    <span class="p">.</span><span class="n">clk_i</span>             <span class="p">(</span><span class="n">clk_in_i</span><span class="p">),</span>
-<a id="l-471" name="l-471"></a>    <span class="p">.</span><span class="n">rst_ni</span>            <span class="p">(</span><span class="n">rst_n</span><span class="p">),</span>
-<a id="l-472" name="l-472"></a>    <span class="p">.</span><span class="n">d_i</span>               <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span> <span class="c1">// rst_n has CSb assertion</span>
-<a id="l-473" name="l-473"></a>    <span class="p">.</span><span class="n">q_sync_o</span>          <span class="p">(),</span>
-<a id="l-474" name="l-474"></a>    <span class="p">.</span><span class="n">q_posedge_pulse_o</span> <span class="p">(),</span>
-<a id="l-475" name="l-475"></a>    <span class="p">.</span><span class="n">q_negedge_pulse_o</span> <span class="p">(</span><span class="n">sck_csb_asserted_pulse</span><span class="p">)</span>
-<a id="l-476" name="l-476"></a>  <span class="p">);</span>
-<a id="l-477" name="l-477"></a>
-<a id="l-478" name="l-478"></a>  <span class="c1">// Latch configs</span>
-<a id="l-479" name="l-479"></a>
-<a id="l-480" name="l-480"></a>  <span class="c1">// clk_out csb_asserted pulse</span>
-<a id="l-481" name="l-481"></a>  <span class="n">prim_edge_detector</span> <span class="p">#(</span>
-<a id="l-482" name="l-482"></a>    <span class="p">.</span><span class="n">Width</span>      <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
-<a id="l-483" name="l-483"></a>    <span class="p">.</span><span class="n">ResetValue</span> <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">),</span>
-<a id="l-484" name="l-484"></a>    <span class="p">.</span><span class="n">EnSync</span>     <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">)</span>
-<a id="l-485" name="l-485"></a>  <span class="p">)</span> <span class="n">u_isck_csb_edge</span> <span class="p">(</span>
-<a id="l-486" name="l-486"></a>    <span class="p">.</span><span class="n">clk_i</span>             <span class="p">(</span><span class="n">clk_out_i</span><span class="p">),</span>
-<a id="l-487" name="l-487"></a>    <span class="p">.</span><span class="n">rst_ni</span>            <span class="p">(</span><span class="n">rst_n</span><span class="p">),</span>
-<a id="l-488" name="l-488"></a>    <span class="p">.</span><span class="n">d_i</span>               <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span>
-<a id="l-489" name="l-489"></a>    <span class="p">.</span><span class="n">q_sync_o</span>          <span class="p">(),</span>
-<a id="l-490" name="l-490"></a>    <span class="p">.</span><span class="n">q_posedge_pulse_o</span> <span class="p">(),</span>
-<a id="l-491" name="l-491"></a>    <span class="p">.</span><span class="n">q_negedge_pulse_o</span> <span class="p">(</span><span class="n">isck_csb_asserted_pulse</span><span class="p">)</span>
-<a id="l-492" name="l-492"></a>  <span class="p">);</span>
-<a id="l-493" name="l-493"></a>
-<a id="l-494" name="l-494"></a>  <span class="c1">// Configuration latched into SCK</span>
-<a id="l-495" name="l-495"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-496" name="l-496"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-497" name="l-497"></a>      <span class="n">sck_tpm_cfg</span> <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="m">&#39;0</span><span class="p">};</span>
-<a id="l-498" name="l-498"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sck_csb_asserted_pulse</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-499" name="l-499"></a>      <span class="n">sck_tpm_cfg</span> <span class="o">&lt;=</span> <span class="n">sys_tpm_cfg</span><span class="p">;</span>
-<a id="l-500" name="l-500"></a>    <span class="k">end</span>
-<a id="l-501" name="l-501"></a>  <span class="k">end</span>
-<a id="l-502" name="l-502"></a>
-<a id="l-503" name="l-503"></a>  <span class="c1">// SYS register latched into the SCK (or isck?)</span>
-<a id="l-504" name="l-504"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-505" name="l-505"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-506" name="l-506"></a>      <span class="n">isck_tpm_reg</span> <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="m">&#39;0</span><span class="p">};</span>
-<a id="l-507" name="l-507"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">isck_csb_asserted_pulse</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-508" name="l-508"></a>      <span class="n">isck_tpm_reg</span> <span class="o">&lt;=</span> <span class="n">sys_tpm_reg</span><span class="p">;</span>
-<a id="l-509" name="l-509"></a>    <span class="k">end</span>
-<a id="l-510" name="l-510"></a>  <span class="k">end</span>
-<a id="l-511" name="l-511"></a>
-<a id="l-512" name="l-512"></a>  <span class="c1">// Latch activeLocality in SCK to be used in the state machine</span>
-<a id="l-513" name="l-513"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-514" name="l-514"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-515" name="l-515"></a>      <span class="n">sck_active_locality</span> <span class="o">&lt;=</span> <span class="n">NumLocality</span><span class="p">&#39;(</span><span class="mi">0</span><span class="p">);</span>
-<a id="l-516" name="l-516"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sck_csb_asserted_pulse</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-517" name="l-517"></a>      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NumLocality</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-518" name="l-518"></a>        <span class="n">sck_active_locality</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span>
-<a id="l-519" name="l-519"></a>          <span class="n">sys_tpm_reg</span><span class="p">.</span><span class="n">access</span><span class="p">[</span><span class="n">AccessRegSize</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">ActiveLocalityBitPos</span><span class="p">];</span>
-<a id="l-520" name="l-520"></a>      <span class="k">end</span>
-<a id="l-521" name="l-521"></a>    <span class="k">end</span>
-<a id="l-522" name="l-522"></a>  <span class="k">end</span>
-<a id="l-523" name="l-523"></a>
-<a id="l-524" name="l-524"></a>  <span class="c1">// data_sel (sck -&gt; isck)</span>
-<a id="l-525" name="l-525"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_out_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-526" name="l-526"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-527" name="l-527"></a>      <span class="n">isck_data_sel</span> <span class="o">&lt;=</span> <span class="n">SelWait</span><span class="p">;</span>
-<a id="l-528" name="l-528"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-529" name="l-529"></a>      <span class="n">isck_data_sel</span> <span class="o">&lt;=</span> <span class="n">sck_data_sel</span><span class="p">;</span>
-<a id="l-530" name="l-530"></a>    <span class="k">end</span>
-<a id="l-531" name="l-531"></a>  <span class="k">end</span>
-<a id="l-532" name="l-532"></a>
-<a id="l-533" name="l-533"></a>  <span class="c1">//////////////</span>
-<a id="l-534" name="l-534"></a>  <span class="c1">// Datapath //</span>
-<a id="l-535" name="l-535"></a>  <span class="c1">//////////////</span>
-<a id="l-536" name="l-536"></a>
-<a id="l-537" name="l-537"></a>  <span class="c1">// command, addr latch</span>
-<a id="l-538" name="l-538"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-539" name="l-539"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-540" name="l-540"></a>      <span class="n">cmdaddr_bitcnt</span> <span class="o">&lt;=</span> <span class="mh">5&#39;h 0</span><span class="p">;</span>
-<a id="l-541" name="l-541"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_shift_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-542" name="l-542"></a>      <span class="n">cmdaddr_bitcnt</span> <span class="o">&lt;=</span> <span class="n">cmdaddr_bitcnt</span> <span class="o">+</span> <span class="mh">5&#39;h 1</span><span class="p">;</span>
-<a id="l-543" name="l-543"></a>    <span class="k">end</span>
-<a id="l-544" name="l-544"></a>  <span class="k">end</span>
-<a id="l-545" name="l-545"></a>
-<a id="l-546" name="l-546"></a>  <span class="c1">// Push to CmdAddr buffer if the command is not processed by HW.</span>
-<a id="l-547" name="l-547"></a>  <span class="k">assign</span> <span class="n">sck_cmdaddr_wvalid</span> <span class="o">=</span> <span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 1F</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">is_hw_reg</span><span class="p">;</span>
-<a id="l-548" name="l-548"></a>
-<a id="l-549" name="l-549"></a>  <span class="c1">// Control signals:</span>
-<a id="l-550" name="l-550"></a>  <span class="c1">//  latch_cmd_type</span>
-<a id="l-551" name="l-551"></a>  <span class="k">assign</span> <span class="n">latch_cmd_type</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 0</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">sck_st_q</span> <span class="o">==</span> <span class="n">StIdle</span><span class="p">);</span>
-<a id="l-552" name="l-552"></a>
-<a id="l-553" name="l-553"></a>  <span class="k">assign</span> <span class="n">check_tpm_reg</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 0F</span><span class="p">);</span>
-<a id="l-554" name="l-554"></a>
-<a id="l-555" name="l-555"></a>  <span class="k">assign</span> <span class="n">check_hw_reg</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 1D</span><span class="p">);</span>
-<a id="l-556" name="l-556"></a>
-<a id="l-557" name="l-557"></a>  <span class="k">assign</span> <span class="n">sck_fifoaddr_latch</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 1F</span><span class="p">);</span>
-<a id="l-558" name="l-558"></a>
-<a id="l-559" name="l-559"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-560" name="l-560"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-561" name="l-561"></a>      <span class="n">sck_cmdaddr_wdata_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-562" name="l-562"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_shift_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-563" name="l-563"></a>      <span class="n">sck_cmdaddr_wdata_q</span> <span class="o">&lt;=</span> <span class="n">sck_cmdaddr_wdata_d</span><span class="p">;</span>
-<a id="l-564" name="l-564"></a>    <span class="k">end</span>
-<a id="l-565" name="l-565"></a>  <span class="k">end</span>
-<a id="l-566" name="l-566"></a>
-<a id="l-567" name="l-567"></a>  <span class="k">assign</span> <span class="n">sck_cmdaddr_wdata_d</span> <span class="o">=</span> <span class="p">{</span><span class="n">sck_cmdaddr_wdata_q</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">CmdAddrSize</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mosi_i</span><span class="p">};</span>
-<a id="l-568" name="l-568"></a>
-<a id="l-569" name="l-569"></a>  <span class="kt">logic</span>  <span class="n">unused_cmdaddr_wdata_q</span><span class="p">;</span>
-<a id="l-570" name="l-570"></a>  <span class="k">assign</span> <span class="n">unused_cmdaddr_wdata_q</span> <span class="o">=</span> <span class="n">sck_cmdaddr_wdata_q</span><span class="p">[</span><span class="n">CmdAddrSize</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
-<a id="l-571" name="l-571"></a>
-<a id="l-572" name="l-572"></a>  <span class="c1">// fifoaddr latch</span>
-<a id="l-573" name="l-573"></a>  <span class="c1">//  clk_out (iSCK)</span>
-<a id="l-574" name="l-574"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_out_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-575" name="l-575"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-576" name="l-576"></a>      <span class="n">isck_fifoaddr</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-577" name="l-577"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sck_fifoaddr_latch</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-578" name="l-578"></a>      <span class="c1">// TODO: latch sck_fifoaddr_latch into isck_fifoaddr_latch?</span>
-<a id="l-579" name="l-579"></a>      <span class="c1">// Shall assert when sck_st_q moves away from StAddr</span>
-<a id="l-580" name="l-580"></a>      <span class="n">isck_fifoaddr</span> <span class="o">&lt;=</span> <span class="n">sck_cmdaddr_wdata_d</span><span class="p">[</span><span class="n">FifoRegSize</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
-<a id="l-581" name="l-581"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">isck_fifoaddr_inc</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-582" name="l-582"></a>      <span class="n">isck_fifoaddr</span> <span class="o">&lt;=</span> <span class="n">isck_fifoaddr</span> <span class="o">+</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-583" name="l-583"></a>    <span class="k">end</span>
-<a id="l-584" name="l-584"></a>  <span class="k">end</span>
-<a id="l-585" name="l-585"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SckFifoAddrLatchCondition_A</span><span class="p">,</span>
-<a id="l-586" name="l-586"></a>          <span class="n">sck_fifoaddr_latch</span> <span class="o">|-&gt;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">sck_st_q</span><span class="p">)</span> <span class="o">==</span> <span class="n">StAddr</span>
-<a id="l-587" name="l-587"></a>                             <span class="o">&amp;&amp;</span> <span class="n">sck_st_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StWait</span><span class="p">,</span> <span class="n">StStartByte</span><span class="p">},</span>
+<a id="l-446" name="l-446"></a>
+<a id="l-447" name="l-447"></a>  <span class="kt">logic</span>       <span class="n">isck_p2s_valid</span><span class="p">;</span>
+<a id="l-448" name="l-448"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="mi">7</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">isck_p2s_data</span><span class="p">;</span>
+<a id="l-449" name="l-449"></a>  <span class="kt">logic</span>       <span class="n">isck_p2s_sent</span><span class="p">;</span>
+<a id="l-450" name="l-450"></a>
+<a id="l-451" name="l-451"></a>  <span class="n">tpm_data_sel_e</span> <span class="n">sck_data_sel</span><span class="p">,</span> <span class="n">isck_data_sel</span><span class="p">;</span>
+<a id="l-452" name="l-452"></a>
+<a id="l-453" name="l-453"></a>  <span class="kt">logic</span> <span class="n">isck_miso_en</span><span class="p">;</span>
+<a id="l-454" name="l-454"></a>  <span class="kt">logic</span> <span class="n">isck_miso</span><span class="p">;</span>
+<a id="l-455" name="l-455"></a>
+<a id="l-456" name="l-456"></a>  <span class="k">assign</span> <span class="n">miso_en_o</span> <span class="o">=</span> <span class="n">isck_miso_en</span><span class="p">;</span>
+<a id="l-457" name="l-457"></a>  <span class="k">assign</span> <span class="n">miso_o</span>    <span class="o">=</span> <span class="n">isck_miso</span><span class="p">;</span>
+<a id="l-458" name="l-458"></a>
+<a id="l-459" name="l-459"></a>  <span class="c1">/////////</span>
+<a id="l-460" name="l-460"></a>  <span class="c1">// CDC //</span>
+<a id="l-461" name="l-461"></a>  <span class="c1">/////////</span>
+<a id="l-462" name="l-462"></a>
+<a id="l-463" name="l-463"></a>  <span class="c1">// clk_in csb_asserted_pulse</span>
+<a id="l-464" name="l-464"></a>  <span class="n">prim_edge_detector</span> <span class="p">#(</span>
+<a id="l-465" name="l-465"></a>    <span class="p">.</span><span class="n">Width</span>      <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+<a id="l-466" name="l-466"></a>    <span class="p">.</span><span class="n">ResetValue</span> <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">),</span>
+<a id="l-467" name="l-467"></a>    <span class="p">.</span><span class="n">EnSync</span>     <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">)</span>
+<a id="l-468" name="l-468"></a>  <span class="p">)</span> <span class="n">u_sck_csb_edge</span> <span class="p">(</span>
+<a id="l-469" name="l-469"></a>    <span class="p">.</span><span class="n">clk_i</span>             <span class="p">(</span><span class="n">clk_in_i</span><span class="p">),</span>
+<a id="l-470" name="l-470"></a>    <span class="p">.</span><span class="n">rst_ni</span>            <span class="p">(</span><span class="n">rst_n</span><span class="p">),</span>
+<a id="l-471" name="l-471"></a>    <span class="p">.</span><span class="n">d_i</span>               <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span> <span class="c1">// rst_n has CSb assertion</span>
+<a id="l-472" name="l-472"></a>    <span class="p">.</span><span class="n">q_sync_o</span>          <span class="p">(),</span>
+<a id="l-473" name="l-473"></a>    <span class="p">.</span><span class="n">q_posedge_pulse_o</span> <span class="p">(),</span>
+<a id="l-474" name="l-474"></a>    <span class="p">.</span><span class="n">q_negedge_pulse_o</span> <span class="p">(</span><span class="n">sck_csb_asserted_pulse</span><span class="p">)</span>
+<a id="l-475" name="l-475"></a>  <span class="p">);</span>
+<a id="l-476" name="l-476"></a>
+<a id="l-477" name="l-477"></a>  <span class="c1">// Latch configs</span>
+<a id="l-478" name="l-478"></a>
+<a id="l-479" name="l-479"></a>  <span class="c1">// clk_out csb_asserted pulse</span>
+<a id="l-480" name="l-480"></a>  <span class="n">prim_edge_detector</span> <span class="p">#(</span>
+<a id="l-481" name="l-481"></a>    <span class="p">.</span><span class="n">Width</span>      <span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+<a id="l-482" name="l-482"></a>    <span class="p">.</span><span class="n">ResetValue</span> <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">),</span>
+<a id="l-483" name="l-483"></a>    <span class="p">.</span><span class="n">EnSync</span>     <span class="p">(</span><span class="mb">1&#39;b 1</span><span class="p">)</span>
+<a id="l-484" name="l-484"></a>  <span class="p">)</span> <span class="n">u_isck_csb_edge</span> <span class="p">(</span>
+<a id="l-485" name="l-485"></a>    <span class="p">.</span><span class="n">clk_i</span>             <span class="p">(</span><span class="n">clk_out_i</span><span class="p">),</span>
+<a id="l-486" name="l-486"></a>    <span class="p">.</span><span class="n">rst_ni</span>            <span class="p">(</span><span class="n">rst_n</span><span class="p">),</span>
+<a id="l-487" name="l-487"></a>    <span class="p">.</span><span class="n">d_i</span>               <span class="p">(</span><span class="mb">1&#39;b 0</span><span class="p">),</span>
+<a id="l-488" name="l-488"></a>    <span class="p">.</span><span class="n">q_sync_o</span>          <span class="p">(),</span>
+<a id="l-489" name="l-489"></a>    <span class="p">.</span><span class="n">q_posedge_pulse_o</span> <span class="p">(),</span>
+<a id="l-490" name="l-490"></a>    <span class="p">.</span><span class="n">q_negedge_pulse_o</span> <span class="p">(</span><span class="n">isck_csb_asserted_pulse</span><span class="p">)</span>
+<a id="l-491" name="l-491"></a>  <span class="p">);</span>
+<a id="l-492" name="l-492"></a>
+<a id="l-493" name="l-493"></a>  <span class="c1">// Configuration latched into SCK</span>
+<a id="l-494" name="l-494"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-495" name="l-495"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-496" name="l-496"></a>      <span class="n">sck_tpm_cfg</span> <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="m">&#39;0</span><span class="p">};</span>
+<a id="l-497" name="l-497"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sck_csb_asserted_pulse</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-498" name="l-498"></a>      <span class="n">sck_tpm_cfg</span> <span class="o">&lt;=</span> <span class="n">sys_tpm_cfg</span><span class="p">;</span>
+<a id="l-499" name="l-499"></a>    <span class="k">end</span>
+<a id="l-500" name="l-500"></a>  <span class="k">end</span>
+<a id="l-501" name="l-501"></a>
+<a id="l-502" name="l-502"></a>  <span class="c1">// SYS register latched into the SCK (or isck?)</span>
+<a id="l-503" name="l-503"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-504" name="l-504"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-505" name="l-505"></a>      <span class="n">isck_tpm_reg</span> <span class="o">&lt;=</span> <span class="p">&#39;{</span><span class="k">default</span><span class="o">:</span> <span class="m">&#39;0</span><span class="p">};</span>
+<a id="l-506" name="l-506"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">isck_csb_asserted_pulse</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-507" name="l-507"></a>      <span class="n">isck_tpm_reg</span> <span class="o">&lt;=</span> <span class="n">sys_tpm_reg</span><span class="p">;</span>
+<a id="l-508" name="l-508"></a>    <span class="k">end</span>
+<a id="l-509" name="l-509"></a>  <span class="k">end</span>
+<a id="l-510" name="l-510"></a>
+<a id="l-511" name="l-511"></a>  <span class="c1">// Latch activeLocality in SCK to be used in the state machine</span>
+<a id="l-512" name="l-512"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-513" name="l-513"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">sys_rst_ni</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-514" name="l-514"></a>      <span class="n">sck_active_locality</span> <span class="o">&lt;=</span> <span class="n">NumLocality</span><span class="p">&#39;(</span><span class="mi">0</span><span class="p">);</span>
+<a id="l-515" name="l-515"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sck_csb_asserted_pulse</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-516" name="l-516"></a>      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">NumLocality</span> <span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-517" name="l-517"></a>        <span class="n">sck_active_locality</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span>
+<a id="l-518" name="l-518"></a>          <span class="n">sys_tpm_reg</span><span class="p">.</span><span class="n">access</span><span class="p">[</span><span class="n">AccessRegSize</span><span class="o">*</span><span class="n">i</span> <span class="o">+</span> <span class="n">ActiveLocalityBitPos</span><span class="p">];</span>
+<a id="l-519" name="l-519"></a>      <span class="k">end</span>
+<a id="l-520" name="l-520"></a>    <span class="k">end</span>
+<a id="l-521" name="l-521"></a>  <span class="k">end</span>
+<a id="l-522" name="l-522"></a>
+<a id="l-523" name="l-523"></a>  <span class="c1">// data_sel (sck -&gt; isck)</span>
+<a id="l-524" name="l-524"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_out_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-525" name="l-525"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-526" name="l-526"></a>      <span class="n">isck_data_sel</span> <span class="o">&lt;=</span> <span class="n">SelWait</span><span class="p">;</span>
+<a id="l-527" name="l-527"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-528" name="l-528"></a>      <span class="n">isck_data_sel</span> <span class="o">&lt;=</span> <span class="n">sck_data_sel</span><span class="p">;</span>
+<a id="l-529" name="l-529"></a>    <span class="k">end</span>
+<a id="l-530" name="l-530"></a>  <span class="k">end</span>
+<a id="l-531" name="l-531"></a>
+<a id="l-532" name="l-532"></a>  <span class="c1">//////////////</span>
+<a id="l-533" name="l-533"></a>  <span class="c1">// Datapath //</span>
+<a id="l-534" name="l-534"></a>  <span class="c1">//////////////</span>
+<a id="l-535" name="l-535"></a>
+<a id="l-536" name="l-536"></a>  <span class="c1">// command, addr latch</span>
+<a id="l-537" name="l-537"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-538" name="l-538"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-539" name="l-539"></a>      <span class="n">cmdaddr_bitcnt</span> <span class="o">&lt;=</span> <span class="mh">5&#39;h 0</span><span class="p">;</span>
+<a id="l-540" name="l-540"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_shift_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-541" name="l-541"></a>      <span class="n">cmdaddr_bitcnt</span> <span class="o">&lt;=</span> <span class="n">cmdaddr_bitcnt</span> <span class="o">+</span> <span class="mh">5&#39;h 1</span><span class="p">;</span>
+<a id="l-542" name="l-542"></a>    <span class="k">end</span>
+<a id="l-543" name="l-543"></a>  <span class="k">end</span>
+<a id="l-544" name="l-544"></a>
+<a id="l-545" name="l-545"></a>  <span class="c1">// Push to CmdAddr buffer if the command is not processed by HW.</span>
+<a id="l-546" name="l-546"></a>  <span class="k">assign</span> <span class="n">sck_cmdaddr_wvalid</span> <span class="o">=</span> <span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 1F</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">is_hw_reg</span><span class="p">;</span>
+<a id="l-547" name="l-547"></a>
+<a id="l-548" name="l-548"></a>  <span class="c1">// Control signals:</span>
+<a id="l-549" name="l-549"></a>  <span class="c1">//  latch_cmd_type</span>
+<a id="l-550" name="l-550"></a>  <span class="k">assign</span> <span class="n">latch_cmd_type</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 0</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">sck_st_q</span> <span class="o">==</span> <span class="n">StIdle</span><span class="p">);</span>
+<a id="l-551" name="l-551"></a>
+<a id="l-552" name="l-552"></a>  <span class="k">assign</span> <span class="n">check_tpm_reg</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 0F</span><span class="p">);</span>
+<a id="l-553" name="l-553"></a>
+<a id="l-554" name="l-554"></a>  <span class="k">assign</span> <span class="n">check_hw_reg</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 1D</span><span class="p">);</span>
+<a id="l-555" name="l-555"></a>
+<a id="l-556" name="l-556"></a>  <span class="k">assign</span> <span class="n">sck_fifoaddr_latch</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 1F</span><span class="p">);</span>
+<a id="l-557" name="l-557"></a>
+<a id="l-558" name="l-558"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-559" name="l-559"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-560" name="l-560"></a>      <span class="n">sck_cmdaddr_wdata_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-561" name="l-561"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_shift_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-562" name="l-562"></a>      <span class="n">sck_cmdaddr_wdata_q</span> <span class="o">&lt;=</span> <span class="n">sck_cmdaddr_wdata_d</span><span class="p">;</span>
+<a id="l-563" name="l-563"></a>    <span class="k">end</span>
+<a id="l-564" name="l-564"></a>  <span class="k">end</span>
+<a id="l-565" name="l-565"></a>
+<a id="l-566" name="l-566"></a>  <span class="k">assign</span> <span class="n">sck_cmdaddr_wdata_d</span> <span class="o">=</span> <span class="p">{</span><span class="n">sck_cmdaddr_wdata_q</span><span class="p">[</span><span class="mi">0</span><span class="o">+:</span><span class="n">CmdAddrSize</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mosi_i</span><span class="p">};</span>
+<a id="l-567" name="l-567"></a>
+<a id="l-568" name="l-568"></a>  <span class="kt">logic</span>  <span class="n">unused_cmdaddr_wdata_q</span><span class="p">;</span>
+<a id="l-569" name="l-569"></a>  <span class="k">assign</span> <span class="n">unused_cmdaddr_wdata_q</span> <span class="o">=</span> <span class="n">sck_cmdaddr_wdata_q</span><span class="p">[</span><span class="n">CmdAddrSize</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<a id="l-570" name="l-570"></a>
+<a id="l-571" name="l-571"></a>  <span class="c1">// fifoaddr latch</span>
+<a id="l-572" name="l-572"></a>  <span class="c1">//  clk_out (iSCK)</span>
+<a id="l-573" name="l-573"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_out_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-574" name="l-574"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-575" name="l-575"></a>      <span class="n">isck_fifoaddr</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-576" name="l-576"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">sck_fifoaddr_latch</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-577" name="l-577"></a>      <span class="c1">// TODO: latch sck_fifoaddr_latch into isck_fifoaddr_latch?</span>
+<a id="l-578" name="l-578"></a>      <span class="c1">// Shall assert when sck_st_q moves away from StAddr</span>
+<a id="l-579" name="l-579"></a>      <span class="n">isck_fifoaddr</span> <span class="o">&lt;=</span> <span class="n">sck_cmdaddr_wdata_d</span><span class="p">[</span><span class="n">FifoRegSize</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">];</span>
+<a id="l-580" name="l-580"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">isck_fifoaddr_inc</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-581" name="l-581"></a>      <span class="n">isck_fifoaddr</span> <span class="o">&lt;=</span> <span class="n">isck_fifoaddr</span> <span class="o">+</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-582" name="l-582"></a>    <span class="k">end</span>
+<a id="l-583" name="l-583"></a>  <span class="k">end</span>
+<a id="l-584" name="l-584"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SckFifoAddrLatchCondition_A</span><span class="p">,</span>
+<a id="l-585" name="l-585"></a>          <span class="n">sck_fifoaddr_latch</span> <span class="o">|=&gt;</span>
+<a id="l-586" name="l-586"></a>            <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">sck_st_q</span><span class="p">)</span> <span class="o">==</span> <span class="n">StAddr</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">sck_st_q</span> <span class="ow">inside</span> <span class="p">{</span><span class="n">StWait</span><span class="p">,</span> <span class="n">StStartByte</span><span class="p">}</span>
+<a id="l-587" name="l-587"></a>                                          <span class="o">||</span> <span class="n">invalid_locality</span><span class="p">),</span>
 <a id="l-588" name="l-588"></a>          <span class="n">clk_in_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_n</span><span class="p">)</span>
 <a id="l-589" name="l-589"></a>
 <a id="l-590" name="l-590"></a>  <span class="c1">// only fifoaddr[1:0] is used in this version.</span>
@@ -1986,13 +1986,13 @@
 <a id="l-736" name="l-736"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
 <a id="l-737" name="l-737"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
 <a id="l-738" name="l-738"></a>      <span class="n">xfer_bytes_q</span> <span class="o">&lt;=</span> <span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-739" name="l-739"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">sck_p2s_sent</span> <span class="o">&amp;&amp;</span> <span class="n">sck_rddata_shift_en</span><span class="p">)</span> <span class="o">||</span>
+<a id="l-739" name="l-739"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="n">isck_p2s_sent</span> <span class="o">&amp;&amp;</span> <span class="n">sck_rddata_shift_en</span><span class="p">)</span> <span class="o">||</span>
 <a id="l-740" name="l-740"></a>      <span class="p">(</span><span class="n">sck_wrfifo_wvalid</span> <span class="o">&amp;&amp;</span> <span class="n">wrdata_shift_en</span><span class="p">))</span> <span class="k">begin</span>
 <a id="l-741" name="l-741"></a>      <span class="n">xfer_bytes_q</span> <span class="o">&lt;=</span> <span class="n">xfer_bytes_d</span><span class="p">;</span>
 <a id="l-742" name="l-742"></a>    <span class="k">end</span>
 <a id="l-743" name="l-743"></a>  <span class="k">end</span>
 <a id="l-744" name="l-744"></a>  <span class="k">assign</span> <span class="n">xfer_bytes_d</span>  <span class="o">=</span> <span class="n">xfer_bytes_q</span> <span class="o">+</span> <span class="mh">6&#39;h 1</span><span class="p">;</span>
-<a id="l-745" name="l-745"></a>  <span class="k">assign</span> <span class="n">xfer_size_met</span> <span class="o">=</span> <span class="n">xfer_bytes_d</span> <span class="o">==</span> <span class="n">xfer_size</span><span class="p">;</span>
+<a id="l-745" name="l-745"></a>  <span class="k">assign</span> <span class="n">xfer_size_met</span> <span class="o">=</span> <span class="n">xfer_bytes_q</span> <span class="o">==</span> <span class="n">xfer_size</span><span class="p">;</span>
 <a id="l-746" name="l-746"></a>
 <a id="l-747" name="l-747"></a>  <span class="c1">// Output data mux</span>
 <a id="l-748" name="l-748"></a>  <span class="k">always_comb</span> <span class="k">begin</span>
@@ -2125,109 +2125,109 @@
 <a id="l-875" name="l-875"></a>  <span class="c1">//                                        ~|isck_p2s_bitcnt</span>
 <a id="l-876" name="l-876"></a>  <span class="k">assign</span> <span class="n">isck_p2s_sent</span> <span class="o">=</span> <span class="n">isck_p2s_valid</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">isck_p2s_bitcnt</span> <span class="o">==</span> <span class="m">&#39;0</span><span class="p">);</span>
 <a id="l-877" name="l-877"></a>
-<a id="l-878" name="l-878"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-879" name="l-879"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="n">sck_p2s_sent</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-880" name="l-880"></a>    <span class="k">else</span>        <span class="n">sck_p2s_sent</span> <span class="o">&lt;=</span> <span class="n">isck_p2s_sent</span><span class="p">;</span>
+<a id="l-878" name="l-878"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_out_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-879" name="l-879"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="n">isck_p2s_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-880" name="l-880"></a>    <span class="k">else</span>        <span class="n">isck_p2s_valid</span> <span class="o">&lt;=</span> <span class="n">sck_p2s_valid</span><span class="p">;</span>
 <a id="l-881" name="l-881"></a>  <span class="k">end</span>
 <a id="l-882" name="l-882"></a>
-<a id="l-883" name="l-883"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_out_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-884" name="l-884"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="n">isck_p2s_valid</span> <span class="o">&lt;=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-885" name="l-885"></a>    <span class="k">else</span>        <span class="n">isck_p2s_valid</span> <span class="o">&lt;=</span> <span class="n">sck_p2s_valid</span><span class="p">;</span>
-<a id="l-886" name="l-886"></a>  <span class="k">end</span>
-<a id="l-887" name="l-887"></a>
-<a id="l-888" name="l-888"></a>  <span class="c1">// Decided to implement 8-to-1 mux rather than conventional shift out for</span>
-<a id="l-889" name="l-889"></a>  <span class="c1">// Parallel-to-Serial. It is to support sending StartByte in StAddr phase.</span>
-<a id="l-890" name="l-890"></a>  <span class="c1">// This logic affects the timing. If the logic cannot meet the timing</span>
-<a id="l-891" name="l-891"></a>  <span class="c1">// requirement, the FSM must not send Start Byte at the last byte of the</span>
-<a id="l-892" name="l-892"></a>  <span class="c1">// address phase and change the logic to shift out logic.</span>
-<a id="l-893" name="l-893"></a>  <span class="c1">//</span>
-<a id="l-894" name="l-894"></a>  <span class="c1">// The datapath can be reduced to use 3-to-1 mux. The condition of sending</span>
-<a id="l-895" name="l-895"></a>  <span class="c1">// Start/Wait bit is determined at the addr[2] beat. It means, the MISO data</span>
-<a id="l-896" name="l-896"></a>  <span class="c1">// comes from:</span>
-<a id="l-897" name="l-897"></a>  <span class="c1">//</span>
-<a id="l-898" name="l-898"></a>  <span class="c1">// - registered_data[7]</span>
-<a id="l-899" name="l-899"></a>  <span class="c1">// - input p2s_data[7]</span>
-<a id="l-900" name="l-900"></a>  <span class="c1">// - input p2s_data[2]</span>
-<a id="l-901" name="l-901"></a>  <span class="c1">//</span>
-<a id="l-902" name="l-902"></a>  <span class="c1">// The logic, however, introduces more limitation and gains little benefit.</span>
-<a id="l-903" name="l-903"></a>  <span class="c1">// The logic depth is just one depth less than the original implementation.</span>
-<a id="l-904" name="l-904"></a>  <span class="k">assign</span> <span class="n">isck_miso</span>    <span class="o">=</span> <span class="n">isck_p2s_data</span><span class="p">[</span><span class="n">isck_p2s_bitcnt</span><span class="p">];</span>
-<a id="l-905" name="l-905"></a>  <span class="k">assign</span> <span class="n">isck_miso_en</span> <span class="o">=</span> <span class="n">isck_p2s_valid</span><span class="p">;</span>
+<a id="l-883" name="l-883"></a>  <span class="c1">// Decided to implement 8-to-1 mux rather than conventional shift out for</span>
+<a id="l-884" name="l-884"></a>  <span class="c1">// Parallel-to-Serial. It is to support sending StartByte in StAddr phase.</span>
+<a id="l-885" name="l-885"></a>  <span class="c1">// This logic affects the timing. If the logic cannot meet the timing</span>
+<a id="l-886" name="l-886"></a>  <span class="c1">// requirement, the FSM must not send Start Byte at the last byte of the</span>
+<a id="l-887" name="l-887"></a>  <span class="c1">// address phase and change the logic to shift out logic.</span>
+<a id="l-888" name="l-888"></a>  <span class="c1">//</span>
+<a id="l-889" name="l-889"></a>  <span class="c1">// The datapath can be reduced to use 3-to-1 mux. The condition of sending</span>
+<a id="l-890" name="l-890"></a>  <span class="c1">// Start/Wait bit is determined at the addr[2] beat. It means, the MISO data</span>
+<a id="l-891" name="l-891"></a>  <span class="c1">// comes from:</span>
+<a id="l-892" name="l-892"></a>  <span class="c1">//</span>
+<a id="l-893" name="l-893"></a>  <span class="c1">// - registered_data[7]</span>
+<a id="l-894" name="l-894"></a>  <span class="c1">// - input p2s_data[7]</span>
+<a id="l-895" name="l-895"></a>  <span class="c1">// - input p2s_data[2]</span>
+<a id="l-896" name="l-896"></a>  <span class="c1">//</span>
+<a id="l-897" name="l-897"></a>  <span class="c1">// The logic, however, introduces more limitation and gains little benefit.</span>
+<a id="l-898" name="l-898"></a>  <span class="c1">// The logic depth is just one depth less than the original implementation.</span>
+<a id="l-899" name="l-899"></a>  <span class="k">assign</span> <span class="n">isck_miso</span>    <span class="o">=</span> <span class="n">isck_p2s_data</span><span class="p">[</span><span class="n">isck_p2s_bitcnt</span><span class="p">];</span>
+<a id="l-900" name="l-900"></a>  <span class="k">assign</span> <span class="n">isck_miso_en</span> <span class="o">=</span> <span class="n">isck_p2s_valid</span><span class="p">;</span>
+<a id="l-901" name="l-901"></a>
+<a id="l-902" name="l-902"></a>  <span class="c1">// rvalid -&gt; rready is OK not the opposit direction (rready -&gt; rvalid)</span>
+<a id="l-903" name="l-903"></a>  <span class="k">assign</span> <span class="n">isck_rdfifo_rready</span> <span class="o">=</span> <span class="n">isck_rdfifo_rvalid</span>
+<a id="l-904" name="l-904"></a>                            <span class="o">&amp;&amp;</span> <span class="n">isck_p2s_sent</span>
+<a id="l-905" name="l-905"></a>                            <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">isck_data_sel</span> <span class="o">==</span> <span class="n">SelRdFifo</span><span class="p">);</span>
 <a id="l-906" name="l-906"></a>
-<a id="l-907" name="l-907"></a>  <span class="c1">// rvalid -&gt; rready is OK not the opposit direction (rready -&gt; rvalid)</span>
-<a id="l-908" name="l-908"></a>  <span class="k">assign</span> <span class="n">isck_rdfifo_rready</span> <span class="o">=</span> <span class="n">isck_rdfifo_rvalid</span>
-<a id="l-909" name="l-909"></a>                            <span class="o">&amp;&amp;</span> <span class="n">isck_p2s_sent</span>
-<a id="l-910" name="l-910"></a>                            <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">isck_data_sel</span> <span class="o">==</span> <span class="n">SelRdFifo</span><span class="p">);</span>
+<a id="l-907" name="l-907"></a>
+<a id="l-908" name="l-908"></a>  <span class="c1">///////////////////</span>
+<a id="l-909" name="l-909"></a>  <span class="c1">// State Machine //</span>
+<a id="l-910" name="l-910"></a>  <span class="c1">///////////////////</span>
 <a id="l-911" name="l-911"></a>
-<a id="l-912" name="l-912"></a>
-<a id="l-913" name="l-913"></a>  <span class="c1">///////////////////</span>
-<a id="l-914" name="l-914"></a>  <span class="c1">// State Machine //</span>
-<a id="l-915" name="l-915"></a>  <span class="c1">///////////////////</span>
-<a id="l-916" name="l-916"></a>
-<a id="l-917" name="l-917"></a>  <span class="c1">// Inputs</span>
-<a id="l-918" name="l-918"></a>  <span class="c1">//  - CFG: (tpm_en, tpm_hw_reg_dis, tpm_invalid_locality)</span>
-<a id="l-919" name="l-919"></a>  <span class="c1">//  - is_hw_reg</span>
-<a id="l-920" name="l-920"></a>  <span class="c1">//</span>
-<a id="l-921" name="l-921"></a>  <span class="c1">// Outputs</span>
-<a id="l-922" name="l-922"></a>  <span class="c1">//  - latch_cmd_type</span>
-<a id="l-923" name="l-923"></a>  <span class="c1">//  - latch_xfer_size</span>
-<a id="l-924" name="l-924"></a>  <span class="c1">//  - latch_locality</span>
-<a id="l-925" name="l-925"></a>  <span class="c1">//  - check_hw_reg</span>
-<a id="l-926" name="l-926"></a>  <span class="c1">//  - check_tpm_reg</span>
-<a id="l-927" name="l-927"></a>  <span class="c1">//  - cmdaddr_shift_en</span>
-<a id="l-928" name="l-928"></a>  <span class="c1">//  - wrdata_shift_en</span>
-<a id="l-929" name="l-929"></a>  <span class="c1">//  - p2s_valid</span>
-<a id="l-930" name="l-930"></a>  <span class="c1">//  - sck_data_sel</span>
-<a id="l-931" name="l-931"></a>
-<a id="l-932" name="l-932"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-933" name="l-933"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-934" name="l-934"></a>      <span class="n">sck_st_q</span> <span class="o">&lt;=</span> <span class="n">StIdle</span><span class="p">;</span>
-<a id="l-935" name="l-935"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-936" name="l-936"></a>      <span class="n">sck_st_q</span> <span class="o">&lt;=</span> <span class="n">sck_st_d</span><span class="p">;</span>
-<a id="l-937" name="l-937"></a>    <span class="k">end</span>
-<a id="l-938" name="l-938"></a>  <span class="k">end</span>
-<a id="l-939" name="l-939"></a>
-<a id="l-940" name="l-940"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">next_state</span>
-<a id="l-941" name="l-941"></a>    <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">sck_st_q</span><span class="p">;</span>
-<a id="l-942" name="l-942"></a>
-<a id="l-943" name="l-943"></a>    <span class="c1">// Default output values</span>
-<a id="l-944" name="l-944"></a>    <span class="n">latch_xfer_size</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-945" name="l-945"></a>    <span class="n">latch_locality</span>  <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-946" name="l-946"></a>
-<a id="l-947" name="l-947"></a>    <span class="n">cmdaddr_shift_en</span>    <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-948" name="l-948"></a>    <span class="n">wrdata_shift_en</span>     <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-949" name="l-949"></a>    <span class="n">sck_rddata_shift_en</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-950" name="l-950"></a>
-<a id="l-951" name="l-951"></a>    <span class="n">sck_p2s_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
-<a id="l-952" name="l-952"></a>    <span class="n">sck_data_sel</span>  <span class="o">=</span> <span class="n">SelWait</span><span class="p">;</span>
-<a id="l-953" name="l-953"></a>
-<a id="l-954" name="l-954"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sck_st_q</span><span class="p">)</span>
-<a id="l-955" name="l-955"></a>      <span class="nl">StIdle:</span> <span class="k">begin</span>
-<a id="l-956" name="l-956"></a>        <span class="n">cmdaddr_shift_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-957" name="l-957"></a>
-<a id="l-958" name="l-958"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 7</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-959" name="l-959"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sck_tpm_cfg</span><span class="p">.</span><span class="n">tpm_en</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-960" name="l-960"></a>            <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StAddr</span><span class="p">;</span>
-<a id="l-961" name="l-961"></a>
-<a id="l-962" name="l-962"></a>            <span class="n">latch_xfer_size</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
-<a id="l-963" name="l-963"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-964" name="l-964"></a>            <span class="c1">// Stop processing and move to End state.</span>
-<a id="l-965" name="l-965"></a>            <span class="c1">// sck_tpm_cfg.tpm_en cannot be compared right after reset.  Due</span>
-<a id="l-966" name="l-966"></a>            <span class="c1">// to the absent of the SCK, the configuration cannot be</span>
-<a id="l-967" name="l-967"></a>            <span class="c1">// synchronized into SCK domain at the first 3 clock cycle.</span>
-<a id="l-968" name="l-968"></a>            <span class="c1">// So, the enable signal is checked when the state is about to</span>
-<a id="l-969" name="l-969"></a>            <span class="c1">// move to StAddr.</span>
-<a id="l-970" name="l-970"></a>            <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StEnd</span><span class="p">;</span>
-<a id="l-971" name="l-971"></a>          <span class="k">end</span>
-<a id="l-972" name="l-972"></a>        <span class="k">end</span> <span class="c1">// cmdaddr_bitcnt == 5&#39;h 7</span>
-<a id="l-973" name="l-973"></a>      <span class="k">end</span> <span class="c1">// StIdle</span>
-<a id="l-974" name="l-974"></a>
-<a id="l-975" name="l-975"></a>      <span class="nl">StAddr:</span> <span class="k">begin</span>
-<a id="l-976" name="l-976"></a>        <span class="c1">// NOTE: The coding style in this state is ugly. How can we improve?</span>
-<a id="l-977" name="l-977"></a>        <span class="n">cmdaddr_shift_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-912" name="l-912"></a>  <span class="c1">// Inputs</span>
+<a id="l-913" name="l-913"></a>  <span class="c1">//  - CFG: (tpm_en, tpm_hw_reg_dis, tpm_invalid_locality)</span>
+<a id="l-914" name="l-914"></a>  <span class="c1">//  - is_hw_reg</span>
+<a id="l-915" name="l-915"></a>  <span class="c1">//</span>
+<a id="l-916" name="l-916"></a>  <span class="c1">// Outputs</span>
+<a id="l-917" name="l-917"></a>  <span class="c1">//  - latch_cmd_type</span>
+<a id="l-918" name="l-918"></a>  <span class="c1">//  - latch_xfer_size</span>
+<a id="l-919" name="l-919"></a>  <span class="c1">//  - latch_locality</span>
+<a id="l-920" name="l-920"></a>  <span class="c1">//  - check_hw_reg</span>
+<a id="l-921" name="l-921"></a>  <span class="c1">//  - check_tpm_reg</span>
+<a id="l-922" name="l-922"></a>  <span class="c1">//  - cmdaddr_shift_en</span>
+<a id="l-923" name="l-923"></a>  <span class="c1">//  - wrdata_shift_en</span>
+<a id="l-924" name="l-924"></a>  <span class="c1">//  - p2s_valid</span>
+<a id="l-925" name="l-925"></a>  <span class="c1">//  - sck_data_sel</span>
+<a id="l-926" name="l-926"></a>
+<a id="l-927" name="l-927"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_in_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-928" name="l-928"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_n</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-929" name="l-929"></a>      <span class="n">sck_st_q</span> <span class="o">&lt;=</span> <span class="n">StIdle</span><span class="p">;</span>
+<a id="l-930" name="l-930"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-931" name="l-931"></a>      <span class="n">sck_st_q</span> <span class="o">&lt;=</span> <span class="n">sck_st_d</span><span class="p">;</span>
+<a id="l-932" name="l-932"></a>    <span class="k">end</span>
+<a id="l-933" name="l-933"></a>  <span class="k">end</span>
+<a id="l-934" name="l-934"></a>
+<a id="l-935" name="l-935"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">next_state</span>
+<a id="l-936" name="l-936"></a>    <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">sck_st_q</span><span class="p">;</span>
+<a id="l-937" name="l-937"></a>
+<a id="l-938" name="l-938"></a>    <span class="c1">// Default output values</span>
+<a id="l-939" name="l-939"></a>    <span class="n">latch_xfer_size</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-940" name="l-940"></a>    <span class="n">latch_locality</span>  <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-941" name="l-941"></a>
+<a id="l-942" name="l-942"></a>    <span class="n">cmdaddr_shift_en</span>    <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-943" name="l-943"></a>    <span class="n">wrdata_shift_en</span>     <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-944" name="l-944"></a>    <span class="n">sck_rddata_shift_en</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-945" name="l-945"></a>
+<a id="l-946" name="l-946"></a>    <span class="n">sck_p2s_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 0</span><span class="p">;</span>
+<a id="l-947" name="l-947"></a>    <span class="n">sck_data_sel</span>  <span class="o">=</span> <span class="n">SelWait</span><span class="p">;</span>
+<a id="l-948" name="l-948"></a>
+<a id="l-949" name="l-949"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">sck_st_q</span><span class="p">)</span>
+<a id="l-950" name="l-950"></a>      <span class="nl">StIdle:</span> <span class="k">begin</span>
+<a id="l-951" name="l-951"></a>        <span class="n">cmdaddr_shift_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-952" name="l-952"></a>
+<a id="l-953" name="l-953"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 7</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-954" name="l-954"></a>          <span class="k">if</span> <span class="p">(</span><span class="n">sck_tpm_cfg</span><span class="p">.</span><span class="n">tpm_en</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-955" name="l-955"></a>            <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StAddr</span><span class="p">;</span>
+<a id="l-956" name="l-956"></a>
+<a id="l-957" name="l-957"></a>            <span class="n">latch_xfer_size</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-958" name="l-958"></a>          <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
+<a id="l-959" name="l-959"></a>            <span class="c1">// Stop processing and move to End state.</span>
+<a id="l-960" name="l-960"></a>            <span class="c1">// sck_tpm_cfg.tpm_en cannot be compared right after reset.  Due</span>
+<a id="l-961" name="l-961"></a>            <span class="c1">// to the absent of the SCK, the configuration cannot be</span>
+<a id="l-962" name="l-962"></a>            <span class="c1">// synchronized into SCK domain at the first 3 clock cycle.</span>
+<a id="l-963" name="l-963"></a>            <span class="c1">// So, the enable signal is checked when the state is about to</span>
+<a id="l-964" name="l-964"></a>            <span class="c1">// move to StAddr.</span>
+<a id="l-965" name="l-965"></a>            <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StEnd</span><span class="p">;</span>
+<a id="l-966" name="l-966"></a>          <span class="k">end</span>
+<a id="l-967" name="l-967"></a>        <span class="k">end</span> <span class="c1">// cmdaddr_bitcnt == 5&#39;h 7</span>
+<a id="l-968" name="l-968"></a>      <span class="k">end</span> <span class="c1">// StIdle</span>
+<a id="l-969" name="l-969"></a>
+<a id="l-970" name="l-970"></a>      <span class="nl">StAddr:</span> <span class="k">begin</span>
+<a id="l-971" name="l-971"></a>        <span class="c1">// NOTE: The coding style in this state is ugly. How can we improve?</span>
+<a id="l-972" name="l-972"></a>        <span class="n">cmdaddr_shift_en</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-973" name="l-973"></a>
+<a id="l-974" name="l-974"></a>        <span class="c1">// Latch locality</span>
+<a id="l-975" name="l-975"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 13</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-976" name="l-976"></a>          <span class="n">latch_locality</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
+<a id="l-977" name="l-977"></a>        <span class="k">end</span>
 <a id="l-978" name="l-978"></a>
-<a id="l-979" name="l-979"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">&gt;=</span> <span class="mh">5&#39;h 17</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-980" name="l-980"></a>          <span class="c1">// TODO: Add output logic here (Send WAIT or START)</span>
+<a id="l-979" name="l-979"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">&gt;=</span> <span class="mh">5&#39;h 18</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-980" name="l-980"></a>          <span class="c1">// Send Wait byte [18h:1Fh]</span>
 <a id="l-981" name="l-981"></a>          <span class="n">sck_p2s_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
 <a id="l-982" name="l-982"></a>          <span class="n">sck_data_sel</span>  <span class="o">=</span> <span class="n">SelWait</span><span class="p">;</span>
 <a id="l-983" name="l-983"></a>        <span class="k">end</span>
@@ -2272,7 +2272,7 @@
 <a id="l-1022" name="l-1022"></a>        <span class="n">sck_data_sel</span> <span class="o">=</span> <span class="n">SelWait</span><span class="p">;</span>
 <a id="l-1023" name="l-1023"></a>
 <a id="l-1024" name="l-1024"></a>        <span class="c1">// at every LSB of a byte, check the next state condition</span>
-<a id="l-1025" name="l-1025"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sck_p2s_sent</span> <span class="o">&amp;&amp;</span>
+<a id="l-1025" name="l-1025"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">isck_p2s_sent</span> <span class="o">&amp;&amp;</span>
 <a id="l-1026" name="l-1026"></a>          <span class="p">(((</span><span class="n">cmd_type</span> <span class="o">==</span> <span class="n">Read</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">|</span><span class="n">isck_rdfifo_rdepth</span><span class="p">)</span> <span class="o">||</span>
 <a id="l-1027" name="l-1027"></a>          <span class="p">((</span><span class="n">cmd_type</span> <span class="o">==</span> <span class="n">Write</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">~|</span><span class="n">sck_wrfifo_wdepth</span><span class="p">)))</span> <span class="k">begin</span>
 <a id="l-1028" name="l-1028"></a>          <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StStartByte</span><span class="p">;</span>
@@ -2283,7 +2283,7 @@
 <a id="l-1033" name="l-1033"></a>        <span class="n">sck_p2s_valid</span> <span class="o">=</span> <span class="mb">1&#39;b 1</span><span class="p">;</span>
 <a id="l-1034" name="l-1034"></a>        <span class="n">sck_data_sel</span>  <span class="o">=</span> <span class="n">SelStart</span><span class="p">;</span>
 <a id="l-1035" name="l-1035"></a>
-<a id="l-1036" name="l-1036"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sck_p2s_sent</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1036" name="l-1036"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">isck_p2s_sent</span><span class="p">)</span> <span class="k">begin</span>
 <a id="l-1037" name="l-1037"></a>          <span class="c1">// Must move to next state as StartByte is a byte</span>
 <a id="l-1038" name="l-1038"></a>          <span class="k">if</span> <span class="p">((</span><span class="n">cmd_type</span> <span class="o">==</span> <span class="n">Read</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">is_hw_reg</span><span class="p">)</span> <span class="k">begin</span>
 <a id="l-1039" name="l-1039"></a>            <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StReadHwReg</span><span class="p">;</span>
@@ -2304,7 +2304,7 @@
 <a id="l-1054" name="l-1054"></a>        <span class="c1">// TODO: RdFifo rready (sck --&gt; isck)</span>
 <a id="l-1055" name="l-1055"></a>
 <a id="l-1056" name="l-1056"></a>        <span class="c1">// TODO: check xfer_size handling</span>
-<a id="l-1057" name="l-1057"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sck_p2s_sent</span> <span class="o">&amp;&amp;</span> <span class="n">xfer_size_met</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1057" name="l-1057"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">isck_p2s_sent</span> <span class="o">&amp;&amp;</span> <span class="n">xfer_size_met</span><span class="p">)</span> <span class="k">begin</span>
 <a id="l-1058" name="l-1058"></a>          <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StEnd</span><span class="p">;</span>
 <a id="l-1059" name="l-1059"></a>        <span class="k">end</span>
 <a id="l-1060" name="l-1060"></a>      <span class="k">end</span> <span class="c1">// StReadFifo</span>
@@ -2315,7 +2315,7 @@
 <a id="l-1065" name="l-1065"></a>
 <a id="l-1066" name="l-1066"></a>        <span class="c1">// HW Reg slice? using index</span>
 <a id="l-1067" name="l-1067"></a>
-<a id="l-1068" name="l-1068"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sck_p2s_sent</span> <span class="o">&amp;&amp;</span> <span class="n">xfer_size_met</span><span class="p">)</span> <span class="k">begin</span>
+<a id="l-1068" name="l-1068"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">isck_p2s_sent</span> <span class="o">&amp;&amp;</span> <span class="n">xfer_size_met</span><span class="p">)</span> <span class="k">begin</span>
 <a id="l-1069" name="l-1069"></a>          <span class="n">sck_st_d</span> <span class="o">=</span> <span class="n">StEnd</span><span class="p">;</span>
 <a id="l-1070" name="l-1070"></a>        <span class="k">end</span>
 <a id="l-1071" name="l-1071"></a>      <span class="k">end</span> <span class="c1">// StReadHwReg</span>
@@ -2458,7 +2458,7 @@
 <a id="l-1208" name="l-1208"></a>  <span class="c1">// If the command and the address have been shifted, the Locality, command</span>
 <a id="l-1209" name="l-1209"></a>  <span class="c1">// type should be matched with the shifted register.</span>
 <a id="l-1210" name="l-1210"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">CmdAddrInfo_A</span><span class="p">,</span>
-<a id="l-1211" name="l-1211"></a>          <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">cmdaddr_shift_en</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">csb_i</span> <span class="o">|-&gt;</span>
+<a id="l-1211" name="l-1211"></a>          <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">cmdaddr_shift_en</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">csb_i</span> <span class="o">&amp;&amp;</span> <span class="n">sck_tpm_cfg</span><span class="p">.</span><span class="n">tpm_en</span> <span class="o">|-&gt;</span>
 <a id="l-1212" name="l-1212"></a>            <span class="p">(</span><span class="n">locality</span> <span class="o">==</span> <span class="n">sck_cmdaddr_wdata_q</span><span class="p">[</span><span class="mi">15</span><span class="o">:</span><span class="mi">12</span><span class="p">])</span> <span class="o">&amp;&amp;</span>
 <a id="l-1213" name="l-1213"></a>            <span class="p">(</span><span class="n">cmd_type</span> <span class="o">==</span> <span class="n">sck_cmdaddr_wdata_q</span><span class="p">[</span><span class="mi">31</span><span class="p">]),</span>
 <a id="l-1214" name="l-1214"></a>          <span class="n">clk_in_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_n</span><span class="p">)</span>
@@ -2470,7 +2470,7 @@
 <a id="l-1220" name="l-1220"></a>
 <a id="l-1221" name="l-1221"></a>  <span class="c1">// when latch_locality, the address should have 16 bits received.</span>
 <a id="l-1222" name="l-1222"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">LocalityLatchCondition_A</span><span class="p">,</span>
-<a id="l-1223" name="l-1223"></a>          <span class="n">latch_locality</span> <span class="o">|-&gt;</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 17</span><span class="p">),</span>
+<a id="l-1223" name="l-1223"></a>          <span class="n">latch_locality</span> <span class="o">|-&gt;</span> <span class="p">(</span><span class="n">cmdaddr_bitcnt</span> <span class="o">==</span> <span class="mh">5&#39;h 13</span><span class="p">),</span>
 <a id="l-1224" name="l-1224"></a>          <span class="n">clk_in_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_n</span><span class="p">)</span>
 <a id="l-1225" name="l-1225"></a>
 <a id="l-1226" name="l-1226"></a>  <span class="c1">// when check_hw_reg is set, the address should have a word size</span>
