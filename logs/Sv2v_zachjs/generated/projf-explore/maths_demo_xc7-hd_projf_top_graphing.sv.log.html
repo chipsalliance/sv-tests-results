@@ -1,0 +1,157 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/maths/demo/xc7-hd
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/maths_demo_xc7-hd_projf_top_graphing.sv.html" target="file-frame">tests/generated/projf-explore/maths_demo_xc7-hd_projf_top_graphing.sv</a> <a href="../../../../third_party/tests/projf-explore/maths/demo/xc7-hd/top_graphing.sv.html" target="file-frame">third_party/tests/projf-explore/maths/demo/xc7-hd/top_graphing.sv</a>
+defines: 
+completed: 2021-12-12 02:37:26
+time_elapsed: 0.027s
+ram usage: 26304 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/maths/demo/xc7-hd <a href="../../../../tests/generated/projf-explore/maths_demo_xc7-hd_projf_top_graphing.sv.html" target="file-frame">tests/generated/projf-explore/maths_demo_xc7-hd_projf_top_graphing.sv</a> <a href="../../../../third_party/tests/projf-explore/maths/demo/xc7-hd/top_graphing.sv.html" target="file-frame">third_party/tests/projf-explore/maths/demo/xc7-hd/top_graphing.sv</a>
+`default_nettype none
+module top_graphing (
+	clk_100m,
+	btn_rst,
+	hdmi_tx_ch0_p,
+	hdmi_tx_ch0_n,
+	hdmi_tx_ch1_p,
+	hdmi_tx_ch1_n,
+	hdmi_tx_ch2_p,
+	hdmi_tx_ch2_n,
+	hdmi_tx_clk_p,
+	hdmi_tx_clk_n
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output wire hdmi_tx_ch0_p;
+	output wire hdmi_tx_ch0_n;
+	output wire hdmi_tx_ch1_p;
+	output wire hdmi_tx_ch1_n;
+	output wire hdmi_tx_ch2_p;
+	output wire hdmi_tx_ch2_n;
+	output wire hdmi_tx_clk_p;
+	output wire hdmi_tx_clk_n;
+	wire clk_pix;
+	wire clk_pix_5x;
+	wire clk_pix_locked;
+	clock_gen_720p clock_pix_inst(
+		.clk_100m(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.clk_pix_locked(clk_pix_locked)
+	);
+	localparam CORDW = 12;
+	wire hsync;
+	wire vsync;
+	wire [11:0] sx;
+	wire [11:0] sy;
+	wire de;
+	display_720p #(.CORDW(CORDW)) display_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_pix_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(),
+		.line()
+	);
+	wire draw;
+	reg axes;
+	reg [7:0] dvi_red;
+	reg [7:0] dvi_green;
+	reg [7:0] dvi_blue;
+	reg dvi_hsync;
+	reg dvi_vsync;
+	reg dvi_de;
+	always @(posedge clk_pix) begin
+		dvi_hsync &lt;= hsync;
+		dvi_vsync &lt;= vsync;
+		dvi_de &lt;= de;
+		dvi_red &lt;= (!de ? 8&#39;h00 : (axes ? 8&#39;hcc : (draw ? 8&#39;h33 : 8&#39;h22)));
+		dvi_green &lt;= (!de ? 8&#39;h00 : (axes ? 8&#39;hcc : (draw ? 8&#39;hbb : 8&#39;h22)));
+		dvi_blue &lt;= (!de ? 8&#39;h00 : (axes ? 8&#39;hcc : (draw ? 8&#39;hcc : 8&#39;h22)));
+	end
+	wire tmds_ch0_serial;
+	wire tmds_ch1_serial;
+	wire tmds_ch2_serial;
+	wire tmds_clk_serial;
+	dvi_generator dvi_out(
+		.clk_pix(clk_pix),
+		.clk_pix_5x(clk_pix_5x),
+		.rst(!clk_pix_locked),
+		.de(dvi_de),
+		.data_in_ch0(dvi_blue),
+		.data_in_ch1(dvi_green),
+		.data_in_ch2(dvi_red),
+		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
+		.ctrl_in_ch1(2&#39;b00),
+		.ctrl_in_ch2(2&#39;b00),
+		.tmds_ch0_serial(tmds_ch0_serial),
+		.tmds_ch1_serial(tmds_ch1_serial),
+		.tmds_ch2_serial(tmds_ch2_serial),
+		.tmds_clk_serial(tmds_clk_serial)
+	);
+	tmds_out tmds_ch0(
+		.tmds(tmds_ch0_serial),
+		.pin_p(hdmi_tx_ch0_p),
+		.pin_n(hdmi_tx_ch0_n)
+	);
+	tmds_out tmds_ch1(
+		.tmds(tmds_ch1_serial),
+		.pin_p(hdmi_tx_ch1_p),
+		.pin_n(hdmi_tx_ch1_n)
+	);
+	tmds_out tmds_ch2(
+		.tmds(tmds_ch2_serial),
+		.pin_p(hdmi_tx_ch2_p),
+		.pin_n(hdmi_tx_ch2_n)
+	);
+	tmds_out tmds_clk(
+		.tmds(tmds_clk_serial),
+		.pin_p(hdmi_tx_clk_p),
+		.pin_n(hdmi_tx_clk_n)
+	);
+	reg signed [11:0] x;
+	reg signed [11:0] y;
+	localparam X_OFFS = 640;
+	localparam Y_OFFS = 359;
+	always @(posedge clk_pix) begin
+		x &lt;= (sx - X_OFFS) + 4;
+		y &lt;= Y_OFFS - sy;
+	end
+	reg x_axis;
+	reg y_axis;
+	always @(*) begin
+		x_axis = sy == Y_OFFS;
+		y_axis = sx == X_OFFS;
+		axes = x_axis || y_axis;
+	end
+	func_squared #(.CORDW(CORDW)) func_inst(
+		.clk(clk_pix),
+		.x(x),
+		.y(y),
+		.r(draw)
+	);
+endmodule
+
+</pre>
+</body>

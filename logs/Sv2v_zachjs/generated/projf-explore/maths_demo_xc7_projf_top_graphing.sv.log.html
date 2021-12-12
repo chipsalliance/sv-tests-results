@@ -1,0 +1,102 @@
+<head>
+  <style>
+    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
+    .test-failed { background-color: #ffaaaa; }
+    .test-passed { background-color: #aaffaa; }
+  </style>
+</head>
+<body>
+<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
+<pre class="test-passed">
+description: Tests imported from projf-explore
+rc: 0 (means success: 1)
+tags: projf-explore
+incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/maths/demo/xc7
+top_module: 
+type: parsing
+mode: parsing
+files: <a href="../../../../tests/generated/projf-explore/maths_demo_xc7_projf_top_graphing.sv.html" target="file-frame">tests/generated/projf-explore/maths_demo_xc7_projf_top_graphing.sv</a> <a href="../../../../third_party/tests/projf-explore/maths/demo/xc7/top_graphing.sv.html" target="file-frame">third_party/tests/projf-explore/maths/demo/xc7/top_graphing.sv</a>
+defines: 
+completed: 2021-12-12 02:37:23
+time_elapsed: 0.019s
+ram usage: 20812 KB
+</pre>
+<pre class="log">
+
+zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/maths/demo/xc7 <a href="../../../../tests/generated/projf-explore/maths_demo_xc7_projf_top_graphing.sv.html" target="file-frame">tests/generated/projf-explore/maths_demo_xc7_projf_top_graphing.sv</a> <a href="../../../../third_party/tests/projf-explore/maths/demo/xc7/top_graphing.sv.html" target="file-frame">third_party/tests/projf-explore/maths/demo/xc7/top_graphing.sv</a>
+`default_nettype none
+module top_graphing (
+	clk_100m,
+	btn_rst,
+	vga_hsync,
+	vga_vsync,
+	vga_r,
+	vga_g,
+	vga_b
+);
+	input wire clk_100m;
+	input wire btn_rst;
+	output reg vga_hsync;
+	output reg vga_vsync;
+	output reg [3:0] vga_r;
+	output reg [3:0] vga_g;
+	output reg [3:0] vga_b;
+	wire clk_pix;
+	wire clk_locked;
+	clock_gen_480p clock_pix_inst(
+		.clk(clk_100m),
+		.rst(!btn_rst),
+		.clk_pix(clk_pix),
+		.clk_locked(clk_locked)
+	);
+	localparam CORDW = 12;
+	wire hsync;
+	wire vsync;
+	wire [11:0] sx;
+	wire [11:0] sy;
+	wire de;
+	display_480p #(.CORDW(CORDW)) display_inst(
+		.clk_pix(clk_pix),
+		.rst(!clk_locked),
+		.sx(sx),
+		.sy(sy),
+		.hsync(hsync),
+		.vsync(vsync),
+		.de(de),
+		.frame(),
+		.line()
+	);
+	wire draw;
+	reg axes;
+	always @(posedge clk_pix) begin
+		vga_hsync &lt;= hsync;
+		vga_vsync &lt;= vsync;
+		vga_r &lt;= (!de ? 4&#39;h0 : (axes ? 4&#39;hc : (draw ? 4&#39;h3 : 4&#39;h2)));
+		vga_g &lt;= (!de ? 4&#39;h0 : (axes ? 4&#39;hc : (draw ? 4&#39;hb : 4&#39;h2)));
+		vga_b &lt;= (!de ? 4&#39;h0 : (axes ? 4&#39;hc : (draw ? 4&#39;hc : 4&#39;h2)));
+	end
+	reg signed [11:0] x;
+	reg signed [11:0] y;
+	localparam X_OFFS = 320;
+	localparam Y_OFFS = 239;
+	always @(posedge clk_pix) begin
+		x &lt;= (sx - X_OFFS) + 4;
+		y &lt;= Y_OFFS - sy;
+	end
+	reg x_axis;
+	reg y_axis;
+	always @(*) begin
+		x_axis = sy == Y_OFFS;
+		y_axis = sx == X_OFFS;
+		axes = x_axis || y_axis;
+	end
+	func_squared #(.CORDW(CORDW)) func_inst(
+		.clk(clk_pix),
+		.x(x),
+		.y(y),
+		.r(draw)
+	);
+endmodule
+
+</pre>
+</body>
