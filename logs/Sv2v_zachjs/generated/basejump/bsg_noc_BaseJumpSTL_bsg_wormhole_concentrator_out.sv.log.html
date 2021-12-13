@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_noc_BaseJumpSTL_bsg_wormhole_concentrator_out.sv.html" target="file-frame">tests/generated/basejump/bsg_noc_BaseJumpSTL_bsg_wormhole_concentrator_out.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_concentrator_out.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_concentrator_out.v</a>
 defines: 
-completed: 2021-12-13 12:24:11
-time_elapsed: 0.092s
-ram usage: 80820 KB
+completed: 2021-12-13 14:38:57
+time_elapsed: 0.077s
+ram usage: 78236 KB
 </pre>
 <pre class="log">
 
@@ -43,8 +43,8 @@ module bsg_wormhole_concentrator_out (
 	parameter debug_lp = 0;
 	input clk_i;
 	input reset_i;
-	input [((flit_width_p + 1) &gt;= 0 ? (num_in_p * (flit_width_p + 2)) - 1 : (num_in_p * (1 - (flit_width_p + 1))) + flit_width_p):((flit_width_p + 1) &gt;= 0 ? 0 : flit_width_p + 1)] links_i;
-	output wire [((flit_width_p + 1) &gt;= 0 ? (num_in_p * (flit_width_p + 2)) - 1 : (num_in_p * (1 - (flit_width_p + 1))) + flit_width_p):((flit_width_p + 1) &gt;= 0 ? 0 : flit_width_p + 1)] links_o;
+	input [((flit_width_p + 1) &gt;= 0 ? (num_in_p * (flit_width_p + 2)) - 1 : (num_in_p * (1 - (flit_width_p + 1))) + (flit_width_p + 0)):((flit_width_p + 1) &gt;= 0 ? 0 : flit_width_p + 1)] links_i;
+	output wire [((flit_width_p + 1) &gt;= 0 ? (num_in_p * (flit_width_p + 2)) - 1 : (num_in_p * (1 - (flit_width_p + 1))) + (flit_width_p + 0)):((flit_width_p + 1) &gt;= 0 ? 0 : flit_width_p + 1)] links_o;
 	input [flit_width_p + 1:0] concentrated_link_i;
 	output wire [flit_width_p + 1:0] concentrated_link_o;
 	wire [(num_in_p * (2 + flit_width_p)) - 1:0] links_i_cast;
@@ -59,7 +59,7 @@ module bsg_wormhole_concentrator_out (
 	genvar j;
 	generate
 		for (i = 0; i &lt; num_in_p; i = i + 1) begin : stub
-			assign links_o_cast[(i * (2 + flit_width_p)) + flit_width_p] = 1&#39;b0;
+			assign links_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 0)] = 1&#39;b0;
 		end
 	endgenerate
 	assign concentrated_link_o_cast[flit_width_p + 1] = 1&#39;b0;
@@ -73,7 +73,7 @@ module bsg_wormhole_concentrator_out (
 	bsg_two_fifo #(.width_p(flit_width_p)) concentrated_twofer(
 		.clk_i(clk_i),
 		.reset_i(reset_i),
-		.ready_o(concentrated_link_o_cast[flit_width_p]),
+		.ready_o(concentrated_link_o_cast[flit_width_p + 0]),
 		.data_i(concentrated_link_i_cast[flit_width_p - 1-:flit_width_p]),
 		.v_i(concentrated_link_i_cast[flit_width_p + 1]),
 		.v_o(concentrated_fifo_valid_lo),
@@ -89,14 +89,14 @@ module bsg_wormhole_concentrator_out (
 	);
 	bsg_wormhole_router_input_control #(
 		.output_dirs_p(num_in_p),
-		.payload_len_bits_p(((len_width_p + (cord_width_p - 1)) &gt;= cord_width_p ? ((len_width_p + (cord_width_p - 1)) - cord_width_p) + 1 : (cord_width_p - (len_width_p + (cord_width_p - 1))) + 1))
+		.payload_len_bits_p(((len_width_p + (cord_width_p - 1)) &gt;= (cord_width_p + 0) ? ((len_width_p + (cord_width_p - 1)) - (cord_width_p + 0)) + 1 : ((cord_width_p + 0) - (len_width_p + (cord_width_p - 1))) + 1) * 1)
 	) concentrated_wic(
 		.clk_i(clk_i),
 		.reset_i(reset_i),
 		.fifo_v_i(concentrated_fifo_valid_lo),
 		.fifo_yumi_i(concentrated_any_yumi),
 		.fifo_decoded_dest_i(concentrated_decoded_dest_lo),
-		.fifo_payload_len_i(concentrated_hdr[len_width_p + (cord_width_p - 1)-:((len_width_p + (cord_width_p - 1)) &gt;= cord_width_p ? ((len_width_p + (cord_width_p - 1)) - cord_width_p) + 1 : (cord_width_p - (len_width_p + (cord_width_p - 1))) + 1)]),
+		.fifo_payload_len_i(concentrated_hdr[len_width_p + (cord_width_p - 1)-:((len_width_p + (cord_width_p - 1)) &gt;= (cord_width_p + 0) ? ((len_width_p + (cord_width_p - 1)) - (cord_width_p + 0)) + 1 : ((cord_width_p + 0) - (len_width_p + (cord_width_p - 1))) + 1)]),
 		.reqs_o(concentrated_reqs),
 		.release_o(concentrated_releases),
 		.detected_header_o()
@@ -110,7 +110,7 @@ module bsg_wormhole_concentrator_out (
 				.release_i(concentrated_releases),
 				.valid_i(concentrated_fifo_valid_lo),
 				.yumi_o(concentrated_yumis[i]),
-				.ready_i(links_i_cast[(i * (2 + flit_width_p)) + flit_width_p]),
+				.ready_i(links_i_cast[(i * (2 + flit_width_p)) + (flit_width_p + 0)]),
 				.valid_o(links_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]),
 				.data_sel_o()
 			);

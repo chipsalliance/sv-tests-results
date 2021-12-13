@@ -17,9 +17,9 @@ type: parsing elaboration
 mode: elaboration
 files: <a href="../../../../tests/generated/basejump/bsg_dataflow_BaseJumpSTL_bsg_round_robin_fifo_to_fifo.sv.html" target="file-frame">tests/generated/basejump/bsg_dataflow_BaseJumpSTL_bsg_round_robin_fifo_to_fifo.sv</a> <a href="../../../../third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_test/bsg_dramsim3_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_tag/bsg_tag_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_wormhole_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_mesh_router_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_noc/bsg_noc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dmc/bsg_dmc_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_non_blocking_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_cache/bsg_cache_pkg.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_misc/bsg_defines.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_misc/bsg_defines.v</a> <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_round_robin_fifo_to_fifo.v.html" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_round_robin_fifo_to_fifo.v</a>
 defines: 
-completed: 2021-12-13 12:24:09
-time_elapsed: 0.223s
-ram usage: 130804 KB
+completed: 2021-12-13 14:39:04
+time_elapsed: 0.157s
+ram usage: 126056 KB
 </pre>
 <pre class="log">
 
@@ -54,7 +54,7 @@ module bsg_rr_f2f_input (
 	output wire [num_in_p - 1:0] yumi_o;
 	wire [(num_in_p == 1 ? 1 : $clog2(num_in_p)) - 1:0] iptr_r;
 	wire [(num_in_p == 1 ? 1 : $clog2(num_in_p)) - 1:0] iptr_r_data;
-	wire [(width_p * num_in_p) - 1:0] data_i_flat = ((num_in_p * width_p) &lt;= (width_p * num_in_p) ? {data_i} &lt;&lt; ((width_p * num_in_p) - (num_in_p * width_p)) : {data_i} &gt;&gt; ((num_in_p * width_p) - (width_p * num_in_p)));
+	wire [(width_p * num_in_p) - 1:0] data_i_flat = ((0 + (num_in_p * width_p)) &lt;= (width_p * num_in_p) ? {data_i} &lt;&lt; ((width_p * num_in_p) - (0 + (num_in_p * width_p))) : {data_i} &gt;&gt; ((0 + (num_in_p * width_p)) - (width_p * num_in_p)));
 	wire [(width_p * middle_meet_p) - 1:0] data_head_o_flat;
 	bsg_make_2D_array #(
 		.width_p(width_p),
@@ -308,7 +308,7 @@ module bsg_round_robin_fifo_to_fifo (
 		for (i = 0; i &lt; num_in_p; i = i + 1) begin : ic
 			if (in_channel_count_mask_p[i]) begin : in_chan
 				wire [(middle_meet_lp * width_p) - 1:0] data_head_tmp;
-				assign data_head[i] = ((middle_meet_lp * width_p) &lt;= (middle_meet_lp * width_p) ? {data_head_tmp} &lt;&lt; ((middle_meet_lp * width_p) - (middle_meet_lp * width_p)) : {data_head_tmp} &gt;&gt; ((middle_meet_lp * width_p) - (middle_meet_lp * width_p)));
+				assign data_head[i] = ((0 + (middle_meet_lp * width_p)) &lt;= (middle_meet_lp * width_p) ? {data_head_tmp} &lt;&lt; ((middle_meet_lp * width_p) - (0 + (middle_meet_lp * width_p))) : {data_head_tmp} &gt;&gt; ((0 + (middle_meet_lp * width_p)) - (middle_meet_lp * width_p)));
 				bsg_rr_f2f_input #(
 					.width_p(width_p),
 					.num_in_p(i + 1),
@@ -351,7 +351,7 @@ module bsg_round_robin_fifo_to_fifo (
 					.i(data_head[in_top_channel_i][0+:((i + 1) &lt; middle_meet_lp ? i + 1 : middle_meet_lp) * width_p]),
 					.o(data_head_array)
 				);
-				assign data_int_o[i][(width_p * (i + 1)) - 1:0] = (((i &gt;= 0 ? i + 1 : 1 - i) * width_p) &lt;= (width_p * (i + 1)) ? {data_o_array} &lt;&lt; ((width_p * (i + 1)) - ((i &gt;= 0 ? i + 1 : 1 - i) * width_p)) : {data_o_array} &gt;&gt; (((i &gt;= 0 ? i + 1 : 1 - i) * width_p) - (width_p * (i + 1))));
+				assign data_int_o[i][(width_p * (i + 1)) - 1:0] = ((0 + ((i &gt;= 0 ? i + 1 : 1 - i) * width_p)) &lt;= ((width_p * (i + 1)) * 1) ? {data_o_array} &lt;&lt; (((width_p * (i + 1)) * 1) - (0 + ((i &gt;= 0 ? i + 1 : 1 - i) * width_p))) : {data_o_array} &gt;&gt; ((0 + ((i &gt;= 0 ? i + 1 : 1 - i) * width_p)) - ((width_p * (i + 1)) * 1)));
 				bsg_rr_f2f_output #(
 					.width_p(width_p),
 					.num_out_p(i + 1),

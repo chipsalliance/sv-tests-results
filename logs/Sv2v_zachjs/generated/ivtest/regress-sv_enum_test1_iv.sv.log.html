@@ -7,9 +7,9 @@
 </head>
 <body>
 <h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-failed">
+<pre class="test-passed">
 description: Test imported from ivtest
-rc: 1 (means success: 0)
+rc: 0 (means success: 1)
 tags: ivtest
 incdirs: /root/sv-tests/sv-tests/third_party/tests/ivtest /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
 top_module: 
@@ -17,14 +17,173 @@ type: elaboration parsing
 mode: elaboration
 files: <a href="../../../../third_party/tests/ivtest/ivltests/enum_test1.v.html" target="file-frame">third_party/tests/ivtest/ivltests/enum_test1.v</a>
 defines: 
-completed: 2021-12-13 12:37:53
-time_elapsed: 0.016s
-ram usage: 17648 KB
+completed: 2021-12-13 14:56:32
+time_elapsed: 0.055s
+ram usage: 49636 KB
 </pre>
 <pre class="log">
 
 zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/enum_test1.v.html" target="file-frame">third_party/tests/ivtest/ivltests/enum_test1.v</a>
-<a href="../../../../third_party/tests/ivtest/ivltests/enum_test1.v.html#l-6" target="file-frame">third_party/tests/ivtest/ivltests/enum_test1.v:6</a>:28: Parse error: unexpected token &#39;[&#39; (Sym_brack_l)
+module test;
+	parameter PVALUE = 12;
+	localparam LVALUE = 88;
+	reg [7:0] unsignedbyte_enum;
+	reg signed [7:0] signedbyte_enum;
+	reg [31:0] E1;
+	reg [31:0] vr;
+	wire [31:0] par_enum;
+	reg [2:0] bin_enum;
+	integer next_state;
+	reg signed [31:0] i;
+	function automatic [31:0] sv2v_cast_32;
+		input reg [31:0] inp;
+		sv2v_cast_32 = inp;
+	endfunction
+	initial begin
+		if ((8&#39;d0 !== 8&#39;h00) || (8&#39;sd0 !== 8&#39;h00)) begin
+			$display(&#34;FAILED - First un-assigned element of enum type was not zero&#34;);
+			$finish;
+		end
+		if (1&#39;d0 || 1&#39;d0) begin
+			$display(&#34;FAILED - First initialised elements of enums E1 and vr were not elaborated properly&#34;);
+			$finish;
+		end
+		if ((((1&#39;d0 || 1&#39;d0) || 1&#39;d0) || 1&#39;d0) || 1&#39;d0) begin
+			$display(&#34;FAILED - Initialised elements SUB (0-4) in enum E1 were not elaborated properly&#34;);
+			$finish;
+		end
+		if ((1&#39;d0 || 1&#39;d0) || 1&#39;d0) begin
+			$display(&#34;FAILED - Initialised elements (6-8) JMP in enum E1 were not elaborated properly&#34;);
+			$finish;
+		end
+		if (((1&#39;d0 || 1&#39;d0) || 1&#39;d0) || 1&#39;d0) begin
+			$display(&#34;FAILED - Initialised elements REGISTER (1-4) in enum vr were not elaborated properly&#34;);
+			$finish;
+		end
+		if ((((8&#39;d23 != 23) || (8&#39;d91 != 91)) || (8&#39;d138 != 138)) || (8&#39;d207 != 207)) begin
+			$display(&#34;FAILED - Initialised some UVAL  in enum unsignedbyte_enum were not elaborated properly&#34;);
+			$display(&#34;UVAL23 = %0d, UVAL91 = %0d, UVAL138 = %0d, UVAL207 = %0d&#34;, 8&#39;d23, 8&#39;d91, 8&#39;d138, 8&#39;d207);
+			$finish;
+		end
+		if (((8&#39;sd7 != 7) || (8&#39;sd19 != 19)) || (8&#39;sd87 != 87)) begin
+			$display(&#34;FAILED - Initialised some SVAL  in enum signedbyte_enum were not elaborated properly&#34;);
+			$display(&#34;SVAL7 = %0d, SVAL19 = %0d, SVAL87 = %0d&#34;, 8&#39;sd7, 8&#39;d91, 8&#39;sd19, 8&#39;sd87);
+			$finish;
+		end
+		if ((8&#39;d255 != 255) || (8&#39;sd99 != 99)) begin
+			$display(&#34;FAILED - Initialised final values UVAL and SVAL did not elaborate properly&#34;);
+			$display(&#34;UVAL255 = %0d, SVAL99 = %0d&#34;, 8&#39;d255, 8&#39;sd99);
+			$finish;
+		end
+		if ((32&#39;sbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx !== &#39;bx) || (32&#39;sh1x2z3xxz !== 32&#39;h1x2z3xxz)) begin
+			$display(&#34;FAILED - Initialised x,z values in next_state did not elaborate properly&#34;);
+			$finish;
+		end
+		if ((((((sv2v_cast_32(PVALUE) != (PVALUE + 0)) || (sv2v_cast_32(PVALUE + 1) != (PVALUE + 1))) || (sv2v_cast_32(PVALUE + 2) != (PVALUE + 2))) || (sv2v_cast_32(PVALUE + 3) != (PVALUE + 3))) || (sv2v_cast_32(PVALUE + 4) != (PVALUE + 4))) || (sv2v_cast_32(PVALUE + 5) != (PVALUE + 5))) begin
+			$display(&#34;FAILED - Initialised values P in par_enum were not elaborated properly&#34;);
+			$finish;
+		end
+		if (((sv2v_cast_32(LVALUE) != 88) || (sv2v_cast_32(89) != 89)) || (sv2v_cast_32(90) != 90)) begin
+			$display(&#34;FAILED - Initialised values S in par_enum were not elaborated properly&#34;);
+			$finish;
+		end
+		#(1)
+			;
+		if (((((unsignedbyte_enum.num != 256) || (signedbyte_enum.num != 100)) || (E1.num != 9)) || (vr.num != 5)) || (par_enum.num != 9)) begin
+			$display(&#34;FAILED - The num method does not report as expected&#34;);
+			$finish;
+		end
+		if (((((unsignedbyte_enum.first != 0) || (signedbyte_enum.first != 0)) || (E1.first != 10)) || (vr.first != 1)) || (par_enum.first != PVALUE)) begin
+			$display(&#34;FAILED - The first method does not report as expected&#34;);
+			$finish;
+		end
+		if (((((unsignedbyte_enum.last != 255) || (signedbyte_enum.last != 99)) || (E1.last != 18)) || (vr.last != 12)) || (par_enum.last != 90)) begin
+			$display(&#34;FAILED - The last method does not report as expected&#34;);
+			$finish;
+		end
+		unsignedbyte_enum = unsignedbyte_enum.first;
+		for (i = 1; i &lt;= 255; i = i + 1)
+			begin
+				unsignedbyte_enum = unsignedbyte_enum.next;
+				if (unsignedbyte_enum != i) begin
+					$display(&#34;FAILED - The next method does not report as expected for unsignedbyte_enum&#34;);
+					$finish;
+				end
+			end
+		unsignedbyte_enum = unsignedbyte_enum.next;
+		if (unsignedbyte_enum != unsignedbyte_enum.first) begin
+			$display(&#34;FAILED - The next method did not wrap to the first element for unsignedbyte_enum&#34;);
+			$finish;
+		end
+		signedbyte_enum = signedbyte_enum.first;
+		for (i = 1; i &lt; 100; i = i + 1)
+			begin
+				signedbyte_enum = signedbyte_enum.next;
+				if (signedbyte_enum != i) begin
+					$display(&#34;FAILED - The next method does not report as expected for signedbyte_enum&#34;);
+					$finish;
+				end
+			end
+		signedbyte_enum = signedbyte_enum.next;
+		if (signedbyte_enum != signedbyte_enum.first) begin
+			$display(&#34;FAILED - The next method did not wrap to the first element for signedbyte_enum&#34;);
+			$finish;
+		end
+		E1 = E1.first;
+		for (i = E1.first; i &lt;= E1.last; i = i + 1)
+			begin
+				if (E1 != i) begin
+					$display(&#34;FAILED - The next method does not report as expected for E1&#34;);
+					$finish;
+				end
+				E1 = E1.next;
+			end
+		if (E1 != E1.first) begin
+			$display(&#34;FAILED - The next method did not wrap to the first element for E1&#34;);
+			$finish;
+		end
+		vr = vr.first;
+		vr = vr.next;
+		if (vr != 2) begin
+			$display(&#34;FAILED - The next method does not report as expected for vr in element REGISTER1&#34;);
+			$finish;
+		end
+		vr = vr.next;
+		if (vr != 10) begin
+			$display(&#34;FAILED - The next method does not report as expected for vr in element REGISTER2&#34;);
+			$finish;
+		end
+		vr = vr.next;
+		if (vr != 11) begin
+			$display(&#34;FAILED - The next method does not report as expected for vr in element REGISTER3&#34;);
+			$finish;
+		end
+		vr = vr.next;
+		if (vr != 12) begin
+			$display(&#34;FAILED - The next method does not report as expected for vr in element REGISTER4&#34;);
+			$finish;
+		end
+		vr = vr.next;
+		if (vr != vr.first) begin
+			$display(&#34;FAILED - The next method did not wrap to the first element for vr&#34;);
+			$finish;
+		end
+		bin_enum = bin_enum.first;
+		for (i = bin_enum.first; i &lt;= bin_enum.last; i = i + 1)
+			begin
+				if (bin_enum != i) begin
+					$display(&#34;FAILED - The next method does not report as expected for bin_enum&#34;);
+					$finish;
+				end
+				bin_enum = bin_enum.next;
+			end
+		if (bin_enum != bin_enum.first) begin
+			$display(&#34;FAILED - The next method did not wrap to the first element for bin_enum&#34;);
+			$finish;
+		end
+		$display(&#34;PASSED&#34;);
+	end
+endmodule
 
 </pre>
 </body>
