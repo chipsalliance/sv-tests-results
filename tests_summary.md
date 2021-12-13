@@ -1,18 +1,18 @@
 # Compared test results
 |         tool         |new_failures|new_passes|added|removed|not_affected|
 |----------------------|-----------:|---------:|----:|------:|-----------:|
-|Slang                 |           0|         0|    0|     12|        5106|
-|tree_sitter_verilog   |           0|         0|    0|     12|        4779|
-|Sv2v_zachjs           |           1|         1|    0|     12|        5104|
-|VanillaYosysUhdmPlugin|           3|         1|    0|     12|        5101|
-|UhdmYosys             |           2|         0|    0|     12|        5103|
-|moore                 |           1|         0|    0|     12|        4869|
-|Odin                  |           0|         0|    0|     12|        4870|
-|sv_parser             |           0|         0|    0|     12|        4870|
-|Surelog               |           2|         2|    0|     12|        5102|
-|UhdmVerilator         |           3|         1|    0|     12|        5117|
-|Verilator             |           0|         1|    0|     12|        5120|
-|VeribleExtractor      |           0|         0|    0|     12|        4779|
-|Icarus                |           0|         0|    0|     12|        4779|
-|Verible               |           0|         0|    0|     12|        4779|
-|Yosys                 |           0|         0|    0|     12|        5106|
+|Verilator             |           0|         0|    0|      0|        5121|
+|Odin                  |           0|         0|    0|      0|        4870|
+|Surelog               |           3|         1|    0|      0|        5102|
+|moore                 |           0|         0|    0|      0|        4870|
+|VeribleExtractor      |           0|         0|    0|      0|        4779|
+|Icarus                |           0|         0|    0|      0|        4779|
+|Yosys                 |           0|         0|    0|      0|        5106|
+|sv_parser             |           0|         0|    0|      0|        4870|
+|UhdmVerilator         |           0|         3|    0|      0|        5118|
+|Verible               |           0|         0|    0|      0|        4779|
+|Sv2v_zachjs           |           2|         1|    0|      0|        5103|
+|tree_sitter_verilog   |           0|         0|    0|      0|        4779|
+|VanillaYosysUhdmPlugin|           1|         3|    0|      0|        5101|
+|UhdmYosys             |           0|         2|    0|      0|        5103|
+|Slang                 |           0|         0|    0|      0|        5106|
