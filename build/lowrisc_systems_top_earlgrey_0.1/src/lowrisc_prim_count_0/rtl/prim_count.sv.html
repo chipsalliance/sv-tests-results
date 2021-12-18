@@ -221,7 +221,10 @@
 <span class="normal"><a href="#l-213">213</a></span>
 <span class="normal"><a href="#l-214">214</a></span>
 <span class="normal"><a href="#l-215">215</a></span>
-<span class="normal"><a href="#l-216">216</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-216">216</a></span>
+<span class="normal"><a href="#l-217">217</a></span>
+<span class="normal"><a href="#l-218">218</a></span>
+<span class="normal"><a href="#l-219">219</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -419,24 +422,27 @@
 <a id="l-196" name="l-196"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">OutSet_A</span><span class="p">,</span> <span class="p">##</span><span class="mi">1</span> <span class="n">set_i</span> <span class="o">|=&gt;</span>
 <a id="l-197" name="l-197"></a>          <span class="p">(</span><span class="n">CntStyle</span> <span class="o">==</span> <span class="n">DupCnt</span> <span class="o">||</span> <span class="n">OutSelDnCnt</span><span class="p">)</span> <span class="o">?</span> <span class="n">cnt_o</span> <span class="o">==</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">set_cnt_i</span><span class="p">)</span> <span class="o">:</span> <span class="n">cnt_o</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
 <a id="l-198" name="l-198"></a>
-<a id="l-199" name="l-199"></a>  <span class="c1">// This logic that will be assign to one, when user adds macro</span>
-<a id="l-200" name="l-200"></a>  <span class="c1">// ASSERT_PRIM_COUNT_ERROR_TRIGGER_ALERT to check the error with alert, in case that prim_count</span>
-<a id="l-201" name="l-201"></a>  <span class="c1">// is used in design without adding this assertion check.</span>
-<a id="l-202" name="l-202"></a>  <span class="no">`ifdef</span> <span class="n">INC_ASSERT</span>
-<a id="l-203" name="l-203"></a>  <span class="kt">logic</span> <span class="n">unused_assert_connected</span><span class="p">;</span>
-<a id="l-204" name="l-204"></a>
-<a id="l-205" name="l-205"></a>  <span class="c1">// ASSERT_INIT can only be used for paramters/constants in FPV.</span>
-<a id="l-206" name="l-206"></a>  <span class="no">`ifdef</span> <span class="n">SIMULATION</span>
-<a id="l-207" name="l-207"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">AssertConnected_A</span><span class="p">,</span> <span class="n">unused_assert_connected</span> <span class="o">===</span> <span class="mb">1&#39;b1</span> <span class="o">||</span> <span class="o">!</span><span class="n">EnableAlertTriggerSVA</span><span class="p">)</span>
-<a id="l-208" name="l-208"></a>  <span class="no">`endif</span>
-<a id="l-209" name="l-209"></a>  <span class="no">`endif</span>
-<a id="l-210" name="l-210"></a><span class="k">endmodule</span> <span class="c1">// prim_count</span>
-<a id="l-211" name="l-211"></a>
-<a id="l-212" name="l-212"></a><span class="cp">`define ASSERT_PRIM_COUNT_ERROR_TRIGGER_ALERT(NAME_, PRIM_HIER_, ALERT_, MAX_CYCLES_ = 5) \</span>
-<a id="l-213" name="l-213"></a><span class="cp">  `ASSERT(NAME_, $rose(PRIM_HIER_.err_o) |-&gt; ##[1:MAX_CYCLES_] $rose(ALERT_.alert_p)) \</span>
-<a id="l-214" name="l-214"></a><span class="cp">  `ifdef INC_ASSERT \</span>
-<a id="l-215" name="l-215"></a><span class="cp">  assign PRIM_HIER_.unused_assert_connected = 1&#39;b1; \</span>
-<a id="l-216" name="l-216"></a><span class="cp">  `endif</span>
+<a id="l-199" name="l-199"></a>  <span class="c1">// If the up counter reaches its max value, the value won&#39;t increment or change.</span>
+<a id="l-200" name="l-200"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">MaxUpCntStable_A</span><span class="p">,</span> <span class="n">up_cnt_q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">max_val</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">clr_i</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">set_i</span> <span class="o">|=&gt;</span> <span class="p">$</span><span class="n">stable</span><span class="p">(</span><span class="n">up_cnt_q</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<a id="l-201" name="l-201"></a>
+<a id="l-202" name="l-202"></a>  <span class="c1">// This logic that will be assign to one, when user adds macro</span>
+<a id="l-203" name="l-203"></a>  <span class="c1">// ASSERT_PRIM_COUNT_ERROR_TRIGGER_ALERT to check the error with alert, in case that prim_count</span>
+<a id="l-204" name="l-204"></a>  <span class="c1">// is used in design without adding this assertion check.</span>
+<a id="l-205" name="l-205"></a>  <span class="no">`ifdef</span> <span class="n">INC_ASSERT</span>
+<a id="l-206" name="l-206"></a>  <span class="kt">logic</span> <span class="n">unused_assert_connected</span><span class="p">;</span>
+<a id="l-207" name="l-207"></a>
+<a id="l-208" name="l-208"></a>  <span class="c1">// ASSERT_INIT can only be used for paramters/constants in FPV.</span>
+<a id="l-209" name="l-209"></a>  <span class="no">`ifdef</span> <span class="n">SIMULATION</span>
+<a id="l-210" name="l-210"></a>  <span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">AssertConnected_A</span><span class="p">,</span> <span class="n">unused_assert_connected</span> <span class="o">===</span> <span class="mb">1&#39;b1</span> <span class="o">||</span> <span class="o">!</span><span class="n">EnableAlertTriggerSVA</span><span class="p">)</span>
+<a id="l-211" name="l-211"></a>  <span class="no">`endif</span>
+<a id="l-212" name="l-212"></a>  <span class="no">`endif</span>
+<a id="l-213" name="l-213"></a><span class="k">endmodule</span> <span class="c1">// prim_count</span>
+<a id="l-214" name="l-214"></a>
+<a id="l-215" name="l-215"></a><span class="cp">`define ASSERT_PRIM_COUNT_ERROR_TRIGGER_ALERT(NAME_, PRIM_HIER_, ALERT_, MAX_CYCLES_ = 5) \</span>
+<a id="l-216" name="l-216"></a><span class="cp">  `ASSERT(NAME_, $rose(PRIM_HIER_.err_o) |-&gt; ##[1:MAX_CYCLES_] $rose(ALERT_.alert_p)) \</span>
+<a id="l-217" name="l-217"></a><span class="cp">  `ifdef INC_ASSERT \</span>
+<a id="l-218" name="l-218"></a><span class="cp">  assign PRIM_HIER_.unused_assert_connected = 1&#39;b1; \</span>
+<a id="l-219" name="l-219"></a><span class="cp">  `endif</span>
 </pre></div>
 </td></tr></table>
   </body>
