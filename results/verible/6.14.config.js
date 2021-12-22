@@ -1,0 +1,1 @@
+config_loader_data['verible/6.14'] = [["chandle",1,"logs/Verible/chapter-6/6.14--chandle.sv.log.html","tests/chapter-6/6.14--chandle.sv.html"]]

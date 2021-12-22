@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/6.19.3'] = [["enum_type_checking",1,"logs/sv_parser/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"]]

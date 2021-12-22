@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/7.9.10'] = [["associative-arrays-as-arguments",1,"logs/moore_parse/chapter-7/arrays/associative/arguments.sv.log.html","tests/chapter-7/arrays/associative/arguments.sv.html"]]

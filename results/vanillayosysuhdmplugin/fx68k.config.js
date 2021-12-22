@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/fx68k'] = [["fx68k",0,"logs/VanillaYosysUhdmPlugin/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/8.21'] = [["abstract_class",1,"logs/VeribleExtractor/chapter-8/8.21--abstract_class.sv.log.html","tests/chapter-8/8.21--abstract_class.sv.html"]]

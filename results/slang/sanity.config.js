@@ -1,0 +1,1 @@
+config_loader_data['slang/sanity'] = [["sanity",1,"logs/Slang/sanity.sv.log.html","tests/sanity.sv.html"]]

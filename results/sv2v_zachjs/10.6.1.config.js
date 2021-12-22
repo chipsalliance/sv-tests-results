@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/10.6.1'] = [["assign_deassign",0,"logs/Sv2v_zachjs/chapter-10/10.6.1--assign-deassign.sv.log.html","tests/chapter-10/10.6.1--assign-deassign.sv.html"]]

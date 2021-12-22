@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/rsd'] = [["rsd",1,"logs/Sv2v_zachjs/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/6.19.3'] = [["enum_type_checking",1,"logs/VeribleExtractor/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verilator/6.16.12'] = [["string_hextoa",1,"logs/Verilator/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]

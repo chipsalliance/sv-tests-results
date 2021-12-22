@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/8.26.6.3'] = [["diamond_relationship",1,"logs/VeribleExtractor/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/6.16.15'] = [["string_realtoa",1,"logs/VeribleExtractor/chapter-6/6.16.15--string_realtoa.sv.log.html","tests/chapter-6/6.16.15--string_realtoa.sv.html"]]

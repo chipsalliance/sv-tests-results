@@ -1,0 +1,1 @@
+config_loader_data['uhdmyosys/18.5.5'] = [["uniqueness_constraints_0",0,"logs/UhdmYosys/chapter-18/18.5.5--uniqueness-constraints_0.sv.log.html","tests/chapter-18/18.5.5--uniqueness-constraints_0.sv.html"]]

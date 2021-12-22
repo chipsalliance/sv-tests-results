@@ -1,0 +1,1 @@
+config_loader_data['surelog/21.4'] = [["readmemb_task",1,"logs/Surelog/chapter-21/21.4--readmemb.sv.log.html","tests/chapter-21/21.4--readmemb.sv.html"],["readmemh_task",1,"logs/Surelog/chapter-21/21.4--readmemh.sv.log.html","tests/chapter-21/21.4--readmemh.sv.html"]]

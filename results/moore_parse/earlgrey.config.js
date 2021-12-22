@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/earlgrey'] = [["earlgrey",0,"logs/moore_parse/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

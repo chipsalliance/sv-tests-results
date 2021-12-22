@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/6.16.2'] = [["string_putc",1,"logs/moore_parse/chapter-6/6.16.2--string_putc.sv.log.html","tests/chapter-6/6.16.2--string_putc.sv.html"]]

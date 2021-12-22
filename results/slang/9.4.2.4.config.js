@@ -1,0 +1,1 @@
+config_loader_data['slang/9.4.2.4'] = [["event_sequence",1,"logs/Slang/chapter-9/9.4.2.4--event_sequence.sv.log.html","tests/chapter-9/9.4.2.4--event_sequence.sv.html"]]

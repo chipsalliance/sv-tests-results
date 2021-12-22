@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/9.2.2.1'] = [["always",1,"logs/sv_parser/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/7.10.2.1'] = [["bounded-queues",1,"logs/sv_parser/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"],["size",1,"logs/sv_parser/chapter-7/queues/size.sv.log.html","tests/chapter-7/queues/size.sv.html"]]

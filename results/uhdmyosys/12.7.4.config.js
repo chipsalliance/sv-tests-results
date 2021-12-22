@@ -1,0 +1,1 @@
+config_loader_data['uhdmyosys/12.7.4'] = [["while_loop",0,"logs/UhdmYosys/chapter-12/12.7.4--while.sv.log.html","tests/chapter-12/12.7.4--while.sv.html"]]

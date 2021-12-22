@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/7.10.2.4'] = [["pop_front",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/pop_front.sv.log.html","tests/chapter-7/queues/pop_front.sv.html"]]

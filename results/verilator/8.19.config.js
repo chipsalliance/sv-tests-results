@@ -1,0 +1,1 @@
+config_loader_data['verilator/8.19'] = [["global_constant",1,"logs/Verilator/chapter-8/8.19--global_constant.sv.log.html","tests/chapter-8/8.19--global_constant.sv.html"],["instance_constant",1,"logs/Verilator/chapter-8/8.19--instance_constant.sv.log.html","tests/chapter-8/8.19--instance_constant.sv.html"]]

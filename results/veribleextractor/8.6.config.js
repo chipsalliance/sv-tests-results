@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/8.6'] = [["methods",1,"logs/VeribleExtractor/chapter-8/8.6--methods.sv.log.html","tests/chapter-8/8.6--methods.sv.html"]]

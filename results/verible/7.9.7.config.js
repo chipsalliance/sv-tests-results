@@ -1,0 +1,1 @@
+config_loader_data['verible/7.9.7'] = [["associative-arrays-prev",1,"logs/Verible/chapter-7/arrays/associative/methods/prev.sv.log.html","tests/chapter-7/arrays/associative/methods/prev.sv.html"]]

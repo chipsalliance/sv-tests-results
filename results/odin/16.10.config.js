@@ -1,0 +1,1 @@
+config_loader_data['odin/16.10'] = [["property_local_var_test",0,"logs/Odin/chapter-16/16.10--property-local-var.sv.log.html","tests/chapter-16/16.10--property-local-var.sv.html"],["sequence_local_var_test",0,"logs/Odin/chapter-16/16.10--sequence-local-var.sv.log.html","tests/chapter-16/16.10--sequence-local-var.sv.html"]]

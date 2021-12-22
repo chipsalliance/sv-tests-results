@@ -1,0 +1,1 @@
+config_loader_data['surelog/earlgrey'] = [["earlgrey",0,"logs/Surelog/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

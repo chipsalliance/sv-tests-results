@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/6.19.5.2'] = [["enum_last",1,"logs/VeribleExtractor/chapter-6/6.19.5.2--enum_last.sv.log.html","tests/chapter-6/6.19.5.2--enum_last.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verilator/11.10'] = [["string_bit_array",1,"logs/Verilator/chapter-11/11.10--string_bit_array.sv.log.html","tests/chapter-11/11.10--string_bit_array.sv.html"],["string_bit_array_sim",1,"logs/Verilator/chapter-11/11.10--string_bit_array-sim.sv.log.html","tests/chapter-11/11.10--string_bit_array-sim.sv.html"]]

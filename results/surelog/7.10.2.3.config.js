@@ -1,0 +1,1 @@
+config_loader_data['surelog/7.10.2.3'] = [["delete",1,"logs/Surelog/chapter-7/queues/delete.sv.log.html","tests/chapter-7/queues/delete.sv.html"]]

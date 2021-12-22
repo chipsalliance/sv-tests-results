@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/ariane'] = [["ariane",0,"logs/tree_sitter_verilog/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/core/include/cv64a6_imafdc_sv39_config_pkg.sv.html"]]

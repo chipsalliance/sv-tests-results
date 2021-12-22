@@ -1,0 +1,1 @@
+config_loader_data['slang/8.13'] = [["inheritance",1,"logs/Slang/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]

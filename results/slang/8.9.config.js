@@ -1,0 +1,1 @@
+config_loader_data['slang/8.9'] = [["static_properties",1,"logs/Slang/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]

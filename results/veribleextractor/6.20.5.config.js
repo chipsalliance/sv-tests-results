@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/6.20.5'] = [["specparam",1,"logs/VeribleExtractor/chapter-6/6.20.5--specparam.sv.log.html","tests/chapter-6/6.20.5--specparam.sv.html"]]

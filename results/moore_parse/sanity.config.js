@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/sanity'] = [["sanity",1,"logs/moore_parse/sanity.sv.log.html","tests/sanity.sv.html"]]

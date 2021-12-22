@@ -1,0 +1,1 @@
+config_loader_data['slang/6.16.5'] = [["string_tolower",1,"logs/Slang/chapter-6/6.16.5--string_tolower.sv.log.html","tests/chapter-6/6.16.5--string_tolower.sv.html"]]

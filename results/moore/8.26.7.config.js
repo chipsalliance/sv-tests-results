@@ -1,0 +1,1 @@
+config_loader_data['moore/8.26.7'] = [["partial_implementation",0,"logs/moore/chapter-8/8.26.7--partial_implementation.sv.log.html","tests/chapter-8/8.26.7--partial_implementation.sv.html"]]

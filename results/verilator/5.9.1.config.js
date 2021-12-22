@@ -1,0 +1,1 @@
+config_loader_data['verilator/5.9.1'] = [["string-special-chars",1,"logs/Verilator/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]

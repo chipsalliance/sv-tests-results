@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/21.7'] = [["vcd_dump_test",1,"logs/sv_parser/chapter-21/21.7--dumpfile.sv.log.html","tests/chapter-21/21.7--dumpfile.sv.html"],["vcd_dumpports_test",1,"logs/sv_parser/chapter-21/21.7--dumpports.sv.log.html","tests/chapter-21/21.7--dumpports.sv.html"]]

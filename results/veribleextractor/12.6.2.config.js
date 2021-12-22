@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/12.6.2'] = [["if_pattern",0,"logs/VeribleExtractor/chapter-12/12.6.2--if_pattern.sv.log.html","tests/chapter-12/12.6.2--if_pattern.sv.html"]]

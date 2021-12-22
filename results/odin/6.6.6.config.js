@@ -1,0 +1,1 @@
+config_loader_data['odin/6.6.6'] = [["net_supply0",0,"logs/Odin/generated/nets/6.6.6--net_supply0.sv.log.html","tests/generated/nets/6.6.6--net_supply0.sv.html"],["net_supply1",0,"logs/Odin/generated/nets/6.6.6--net_supply1.sv.log.html","tests/generated/nets/6.6.6--net_supply1.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verilator/9.2.3'] = [["final",1,"logs/Verilator/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]

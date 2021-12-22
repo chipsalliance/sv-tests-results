@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/7.10.3'] = [["queues-elements-persistence",1,"logs/sv_parser/chapter-7/queues/persistence.sv.log.html","tests/chapter-7/queues/persistence.sv.html"]]

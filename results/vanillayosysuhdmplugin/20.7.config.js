@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/20.7'] = [["array_queries",0,"logs/VanillaYosysUhdmPlugin/chapter-20/20.7--array-queries.sv.log.html","tests/chapter-20/20.7--array-queries.sv.html"],["array_queries_multi_dim",0,"logs/VanillaYosysUhdmPlugin/chapter-20/20.7--array-queries-multi-dim.sv.log.html","tests/chapter-20/20.7--array-queries-multi-dim.sv.html"]]

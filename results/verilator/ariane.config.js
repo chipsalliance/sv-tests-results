@@ -1,0 +1,1 @@
+config_loader_data['verilator/ariane'] = [["ariane",1,"logs/Verilator/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/core/include/cv64a6_imafdc_sv39_config_pkg.sv.html"]]

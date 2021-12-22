@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/6.24.3'] = [["bitstream_cast",1,"logs/sv_parser/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]

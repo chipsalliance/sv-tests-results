@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/tnoc'] = [["TNoC",0,"logs/moore_parse/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

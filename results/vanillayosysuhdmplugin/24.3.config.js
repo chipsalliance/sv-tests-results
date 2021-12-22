@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/24.3'] = [["program_construct",1,"logs/VanillaYosysUhdmPlugin/chapter-24/24.3--program.sv.log.html","tests/chapter-24/24.3--program.sv.html"]]

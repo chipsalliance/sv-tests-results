@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/12.7.1'] = [["for_loop",1,"logs/VanillaYosysUhdmPlugin/chapter-12/12.7.1--for.sv.log.html","tests/chapter-12/12.7.1--for.sv.html"]]

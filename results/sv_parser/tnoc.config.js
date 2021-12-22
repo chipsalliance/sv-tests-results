@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/tnoc'] = [["TNoC",1,"logs/sv_parser/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/6.20.5'] = [["specparam",0,"logs/Sv2v_zachjs/chapter-6/6.20.5--specparam.sv.log.html","tests/chapter-6/6.20.5--specparam.sv.html"],["specparam_inv",1,"logs/Sv2v_zachjs/chapter-6/6.20.5--specparam_inv.sv.log.html","tests/chapter-6/6.20.5--specparam_inv.sv.html"]]

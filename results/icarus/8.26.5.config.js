@@ -1,0 +1,1 @@
+config_loader_data['icarus/8.26.5'] = [["implemented_class_handle",0,"logs/Icarus/chapter-8/8.26.5--implemented_class_handle.sv.log.html","tests/chapter-8/8.26.5--implemented_class_handle.sv.html"]]

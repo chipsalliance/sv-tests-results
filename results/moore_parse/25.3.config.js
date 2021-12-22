@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/25.3'] = [["interface",1,"logs/moore_parse/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verilator/7.7'] = [["unpacked-arrays-as-arguments-to-subroutines",1,"logs/Verilator/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]

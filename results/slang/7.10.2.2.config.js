@@ -1,0 +1,1 @@
+config_loader_data['slang/7.10.2.2'] = [["insert",1,"logs/Slang/chapter-7/queues/insert.sv.log.html","tests/chapter-7/queues/insert.sv.html"]]

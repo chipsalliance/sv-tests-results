@@ -1,0 +1,1 @@
+config_loader_data['verilator/5.8'] = [["time-literals",1,"logs/Verilator/chapter-5/5.8-time-literals.sv.log.html","tests/chapter-5/5.8-time-literals.sv.html"]]

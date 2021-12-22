@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/21.7'] = [["vcd_dump_test",1,"logs/moore_parse/chapter-21/21.7--dumpfile.sv.log.html","tests/chapter-21/21.7--dumpfile.sv.html"],["vcd_dumpports_test",1,"logs/moore_parse/chapter-21/21.7--dumpports.sv.log.html","tests/chapter-21/21.7--dumpports.sv.html"]]

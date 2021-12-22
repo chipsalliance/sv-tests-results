@@ -1,0 +1,1 @@
+config_loader_data['verible/8.9'] = [["static_properties",1,"logs/Verible/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]

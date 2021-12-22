@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/sanity'] = [["sanity",1,"logs/Sv2v_zachjs/sanity.sv.log.html","tests/sanity.sv.html"]]

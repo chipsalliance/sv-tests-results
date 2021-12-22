@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/7.10.1'] = [["max-size",1,"logs/VeribleExtractor/chapter-7/queues/max-size.sv.log.html","tests/chapter-7/queues/max-size.sv.html"],["slice",1,"logs/VeribleExtractor/chapter-7/queues/slice.sv.log.html","tests/chapter-7/queues/slice.sv.html"]]

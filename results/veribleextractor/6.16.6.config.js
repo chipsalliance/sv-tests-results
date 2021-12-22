@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/6.16.6'] = [["string_compare_fn",1,"logs/VeribleExtractor/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]

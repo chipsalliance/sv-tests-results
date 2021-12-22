@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/7.5.1'] = [["dynamic-arrays-op-new",1,"logs/VeribleExtractor/chapter-7/arrays/dynamic/op-new.sv.log.html","tests/chapter-7/arrays/dynamic/op-new.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/6.6.8'] = [["interconnect",1,"logs/VanillaYosysUhdmPlugin/chapter-6/6.6.8--interconnect.sv.log.html","tests/chapter-6/6.6.8--interconnect.sv.html"]]

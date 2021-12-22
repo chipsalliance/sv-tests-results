@@ -1,0 +1,1 @@
+config_loader_data['surelog/7.9.8'] = [["associative-arrays-arg-traversal",1,"logs/Surelog/chapter-7/arrays/associative/methods/traversal.sv.log.html","tests/chapter-7/arrays/associative/methods/traversal.sv.html"]]

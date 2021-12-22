@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/8.27'] = [["forward_declaration",1,"logs/VanillaYosysUhdmPlugin/chapter-8/8.27--forward_declaration.sv.log.html","tests/chapter-8/8.27--forward_declaration.sv.html"]]

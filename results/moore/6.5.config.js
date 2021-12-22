@@ -1,0 +1,1 @@
+config_loader_data['moore/6.5'] = [["variable_assignment",1,"logs/moore/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]

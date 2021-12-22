@@ -1,0 +1,1 @@
+config_loader_data['odin/6.6.4'] = [["net_trireg",1,"logs/Odin/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verible/6.16.3'] = [["string_getc",1,"logs/Verible/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]

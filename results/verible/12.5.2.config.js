@@ -1,0 +1,1 @@
+config_loader_data['verible/12.5.2'] = [["case_constant",1,"logs/Verible/chapter-12/12.5.2--case_const.sv.log.html","tests/chapter-12/12.5.2--case_const.sv.html"]]

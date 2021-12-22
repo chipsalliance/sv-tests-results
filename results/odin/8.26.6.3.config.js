@@ -1,0 +1,1 @@
+config_loader_data['odin/8.26.6.3'] = [["diamond_relationship",0,"logs/Odin/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]

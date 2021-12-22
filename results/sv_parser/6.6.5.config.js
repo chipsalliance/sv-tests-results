@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/6.6.5'] = [["net_tri0",1,"logs/sv_parser/generated/nets/6.6.5--net_tri0.sv.log.html","tests/generated/nets/6.6.5--net_tri0.sv.html"],["net_tri1",1,"logs/sv_parser/generated/nets/6.6.5--net_tri1.sv.log.html","tests/generated/nets/6.6.5--net_tri1.sv.html"]]

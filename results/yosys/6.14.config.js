@@ -1,0 +1,1 @@
+config_loader_data['yosys/6.14'] = [["chandle",0,"logs/Yosys/chapter-6/6.14--chandle.sv.log.html","tests/chapter-6/6.14--chandle.sv.html"]]

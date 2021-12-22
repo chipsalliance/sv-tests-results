@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/7.10.2.4'] = [["pop_front",1,"logs/moore_parse/chapter-7/queues/pop_front.sv.log.html","tests/chapter-7/queues/pop_front.sv.html"]]

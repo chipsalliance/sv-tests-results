@@ -1,0 +1,1 @@
+config_loader_data['uhdmverilator/6.16.3'] = [["string_getc",1,"logs/UhdmVerilator/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]

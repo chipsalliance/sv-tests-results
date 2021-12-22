@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/8.9'] = [["static_properties",1,"logs/moore_parse/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]

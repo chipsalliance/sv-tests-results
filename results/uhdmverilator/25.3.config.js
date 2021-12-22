@@ -1,0 +1,1 @@
+config_loader_data['uhdmverilator/25.3'] = [["interface",1,"logs/UhdmVerilator/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

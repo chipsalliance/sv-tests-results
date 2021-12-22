@@ -1,0 +1,1 @@
+config_loader_data['slang/8.20'] = [["virtual_method",1,"logs/Slang/chapter-8/8.20--virtual_method.sv.log.html","tests/chapter-8/8.20--virtual_method.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verilator/6.23'] = [["type_op",1,"logs/Verilator/chapter-6/6.23--type_op.sv.log.html","tests/chapter-6/6.23--type_op.sv.html"],["type_op_compare",0,"logs/Verilator/chapter-6/6.23--type_op_compare.sv.log.html","tests/chapter-6/6.23--type_op_compare.sv.html"]]

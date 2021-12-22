@@ -1,0 +1,1 @@
+config_loader_data['yosys/6.19.5.5'] = [["enum_num",0,"logs/Yosys/chapter-6/6.19.5.5--enum_num.sv.log.html","tests/chapter-6/6.19.5.5--enum_num.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/8.22'] = [["dynamic_method_lookup",1,"logs/VeribleExtractor/chapter-8/8.22--dynamic_method_lookup.sv.log.html","tests/chapter-8/8.22--dynamic_method_lookup.sv.html"]]

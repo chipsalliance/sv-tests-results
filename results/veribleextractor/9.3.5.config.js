@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/9.3.5'] = [["statement_labels_par",1,"logs/VeribleExtractor/chapter-9/9.3.5--statement_labels_par.sv.log.html","tests/chapter-9/9.3.5--statement_labels_par.sv.html"],["statement_labels_seq",1,"logs/VeribleExtractor/chapter-9/9.3.5--statement_labels_seq.sv.log.html","tests/chapter-9/9.3.5--statement_labels_seq.sv.html"]]

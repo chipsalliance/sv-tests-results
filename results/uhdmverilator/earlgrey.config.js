@@ -1,0 +1,1 @@
+config_loader_data['uhdmverilator/earlgrey'] = [["earlgrey",0,"logs/UhdmVerilator/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

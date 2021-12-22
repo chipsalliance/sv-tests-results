@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/sanity'] = [["sanity",1,"logs/VanillaYosysUhdmPlugin/sanity.sv.log.html","tests/sanity.sv.html"]]

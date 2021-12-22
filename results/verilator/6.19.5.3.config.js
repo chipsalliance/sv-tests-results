@@ -1,0 +1,1 @@
+config_loader_data['verilator/6.19.5.3'] = [["enum_next",1,"logs/Verilator/chapter-6/6.19.5.3--enum_next.sv.log.html","tests/chapter-6/6.19.5.3--enum_next.sv.html"]]

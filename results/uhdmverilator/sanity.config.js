@@ -1,0 +1,1 @@
+config_loader_data['uhdmverilator/sanity'] = [["sanity",1,"logs/UhdmVerilator/sanity.sv.log.html","tests/sanity.sv.html"]]

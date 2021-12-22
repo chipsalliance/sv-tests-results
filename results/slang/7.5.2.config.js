@@ -1,0 +1,1 @@
+config_loader_data['slang/7.5.2'] = [["dynamic-arrays-op-size",1,"logs/Slang/chapter-7/arrays/dynamic/op-size.sv.log.html","tests/chapter-7/arrays/dynamic/op-size.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['moore/8.21'] = [["abstract_class",0,"logs/moore/chapter-8/8.21--abstract_class.sv.log.html","tests/chapter-8/8.21--abstract_class.sv.html"]]

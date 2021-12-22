@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/6.19.5.1'] = [["enum_first",1,"logs/Sv2v_zachjs/chapter-6/6.19.5.1--enum_first.sv.log.html","tests/chapter-6/6.19.5.1--enum_first.sv.html"]]

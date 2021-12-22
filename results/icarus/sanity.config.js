@@ -1,0 +1,1 @@
+config_loader_data['icarus/sanity'] = [["sanity",1,"logs/Icarus/sanity.sv.log.html","tests/sanity.sv.html"]]

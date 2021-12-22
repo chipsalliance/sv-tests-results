@@ -1,0 +1,1 @@
+config_loader_data['yosys/earlgrey'] = [["earlgrey",0,"logs/Yosys/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

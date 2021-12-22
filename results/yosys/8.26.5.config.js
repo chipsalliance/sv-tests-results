@@ -1,0 +1,1 @@
+config_loader_data['yosys/8.26.5'] = [["implemented_class_handle",0,"logs/Yosys/chapter-8/8.26.5--implemented_class_handle.sv.log.html","tests/chapter-8/8.26.5--implemented_class_handle.sv.html"],["interface_instantiation",1,"logs/Yosys/chapter-8/8.26.5--invalid_interface_instantiation.sv.log.html","tests/chapter-8/8.26.5--invalid_interface_instantiation.sv.html"]]

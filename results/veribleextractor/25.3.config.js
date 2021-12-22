@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/25.3'] = [["interface",1,"logs/VeribleExtractor/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

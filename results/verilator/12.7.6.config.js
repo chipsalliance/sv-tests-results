@@ -1,0 +1,1 @@
+config_loader_data['verilator/12.7.6'] = [["forever_loop",1,"logs/Verilator/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]

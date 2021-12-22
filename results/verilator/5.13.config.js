@@ -1,0 +1,1 @@
+config_loader_data['verilator/5.13'] = [["builtin-methods-string",1,"logs/Verilator/chapter-5/5.13-builtin-methods-strings.sv.log.html","tests/chapter-5/5.13-builtin-methods-strings.sv.html"]]

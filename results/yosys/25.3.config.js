@@ -1,0 +1,1 @@
+config_loader_data['yosys/25.3'] = [["interface",0,"logs/Yosys/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

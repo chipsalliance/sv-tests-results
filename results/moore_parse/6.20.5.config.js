@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/6.20.5'] = [["specparam",0,"logs/moore_parse/chapter-6/6.20.5--specparam.sv.log.html","tests/chapter-6/6.20.5--specparam.sv.html"]]

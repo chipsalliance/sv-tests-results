@@ -1,0 +1,1 @@
+config_loader_data['surelog/7.3.2'] = [["basic-tagged-packed-union",1,"logs/Surelog/chapter-7/unions/tagged/packed.sv.log.html","tests/chapter-7/unions/tagged/packed.sv.html"],["basic-tagged-union",1,"logs/Surelog/chapter-7/unions/tagged/basic.sv.log.html","tests/chapter-7/unions/tagged/basic.sv.html"]]

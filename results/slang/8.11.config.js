@@ -1,0 +1,1 @@
+config_loader_data['slang/8.11'] = [["this",1,"logs/Slang/chapter-8/8.11--this.sv.log.html","tests/chapter-8/8.11--this.sv.html"]]

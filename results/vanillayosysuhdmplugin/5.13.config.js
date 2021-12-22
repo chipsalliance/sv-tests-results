@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/5.13'] = [["builtin-methods-string",0,"logs/VanillaYosysUhdmPlugin/chapter-5/5.13-builtin-methods-strings.sv.log.html","tests/chapter-5/5.13-builtin-methods-strings.sv.html"]]

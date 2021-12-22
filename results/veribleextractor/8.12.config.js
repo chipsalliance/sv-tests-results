@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/8.12'] = [["assignment",1,"logs/VeribleExtractor/chapter-8/8.12--assignment.sv.log.html","tests/chapter-8/8.12--assignment.sv.html"],["shallow_copy",1,"logs/VeribleExtractor/chapter-8/8.12--shallow_copy.sv.log.html","tests/chapter-8/8.12--shallow_copy.sv.html"]]

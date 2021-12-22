@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/7.3'] = [["basic-union",0,"logs/VanillaYosysUhdmPlugin/chapter-7/unions/unpacked/basic.sv.log.html","tests/chapter-7/unions/unpacked/basic.sv.html"],["union_test_0",0,"logs/VanillaYosysUhdmPlugin/generic/union/union_test_0.sv.log.html","tests/generic/union/union_test_0.sv.html"]]

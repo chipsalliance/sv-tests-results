@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/16.15'] = [["property_disable_iff_test",1,"logs/sv_parser/chapter-16/16.15--property-disable-iff.sv.log.html","tests/chapter-16/16.15--property-disable-iff.sv.html"]]

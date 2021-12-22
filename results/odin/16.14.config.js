@@ -1,0 +1,1 @@
+config_loader_data['odin/16.14'] = [["assume_property_test",0,"logs/Odin/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['verible/12.7.4'] = [["while_loop",1,"logs/Verible/chapter-12/12.7.4--while.sv.log.html","tests/chapter-12/12.7.4--while.sv.html"]]

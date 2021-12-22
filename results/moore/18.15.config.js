@@ -1,0 +1,1 @@
+config_loader_data['moore/18.15'] = [["manually_seeding_randomize_0",1,"logs/moore/chapter-18/18.15--manually-seeding-randomize_0.sv.log.html","tests/chapter-18/18.15--manually-seeding-randomize_0.sv.html"]]

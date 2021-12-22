@@ -1,0 +1,1 @@
+config_loader_data['moore/7.2.2'] = [["unpacked-structures-members-default-value",1,"logs/moore/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]

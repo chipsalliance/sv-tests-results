@@ -1,0 +1,1 @@
+config_loader_data['verible/7.8.4'] = [["associative-arrays-integral",1,"logs/Verible/chapter-7/arrays/associative/integral.sv.log.html","tests/chapter-7/arrays/associative/integral.sv.html"]]

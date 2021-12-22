@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/7.9.6'] = [["associative-arrays-next",1,"logs/sv_parser/chapter-7/arrays/associative/methods/next.sv.log.html","tests/chapter-7/arrays/associative/methods/next.sv.html"]]

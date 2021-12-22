@@ -1,0 +1,1 @@
+config_loader_data['moore/26.2'] = [["package_decl",0,"logs/moore/chapter-26/26.2--package-decl.sv.log.html","tests/chapter-26/26.2--package-decl.sv.html"]]

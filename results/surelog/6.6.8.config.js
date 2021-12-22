@@ -1,0 +1,1 @@
+config_loader_data['surelog/6.6.8'] = [["interconnect",1,"logs/Surelog/chapter-6/6.6.8--interconnect.sv.log.html","tests/chapter-6/6.6.8--interconnect.sv.html"]]

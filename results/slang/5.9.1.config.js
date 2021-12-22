@@ -1,0 +1,1 @@
+config_loader_data['slang/5.9.1'] = [["string-special-chars",1,"logs/Slang/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]

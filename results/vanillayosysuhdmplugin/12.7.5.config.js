@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/12.7.5'] = [["dowhile_loop",0,"logs/VanillaYosysUhdmPlugin/chapter-12/12.7.5--dowhile.sv.log.html","tests/chapter-12/12.7.5--dowhile.sv.html"]]

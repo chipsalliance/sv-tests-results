@@ -1,0 +1,1 @@
+config_loader_data['icarus/7.6'] = [["array-unpacked-assignments",0,"logs/Icarus/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]

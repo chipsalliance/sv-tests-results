@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/25.3'] = [["interface",1,"logs/Sv2v_zachjs/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

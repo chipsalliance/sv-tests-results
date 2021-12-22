@@ -1,0 +1,1 @@
+config_loader_data['uhdmyosys/8.13'] = [["inheritance",0,"logs/UhdmYosys/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]

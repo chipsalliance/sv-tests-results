@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/16.14'] = [["assume_property_test",1,"logs/VeribleExtractor/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]

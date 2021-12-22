@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/7.8.3'] = [["associative-arrays-class",0,"logs/Sv2v_zachjs/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]

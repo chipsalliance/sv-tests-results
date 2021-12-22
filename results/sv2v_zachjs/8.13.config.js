@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/8.13'] = [["inheritance",0,"logs/Sv2v_zachjs/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]

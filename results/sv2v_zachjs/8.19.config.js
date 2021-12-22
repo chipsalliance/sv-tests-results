@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/8.19'] = [["global_constant",0,"logs/Sv2v_zachjs/chapter-8/8.19--global_constant.sv.log.html","tests/chapter-8/8.19--global_constant.sv.html"],["instance_constant",0,"logs/Sv2v_zachjs/chapter-8/8.19--instance_constant.sv.log.html","tests/chapter-8/8.19--instance_constant.sv.html"]]

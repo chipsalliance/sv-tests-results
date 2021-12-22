@@ -1,0 +1,1 @@
+config_loader_data['uhdmverilator/tnoc'] = [["TNoC",0,"logs/UhdmVerilator/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

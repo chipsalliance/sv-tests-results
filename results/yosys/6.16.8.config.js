@@ -1,0 +1,1 @@
+config_loader_data['yosys/6.16.8'] = [["string_substr",0,"logs/Yosys/chapter-6/6.16.8--string_substr.sv.log.html","tests/chapter-6/6.16.8--string_substr.sv.html"]]

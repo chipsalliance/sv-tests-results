@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/6.6.2'] = [["net_uwire",1,"logs/Sv2v_zachjs/generated/nets/6.6.2--net_uwire.sv.log.html","tests/generated/nets/6.6.2--net_uwire.sv.html"]]

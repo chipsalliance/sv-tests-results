@@ -1,0 +1,1 @@
+config_loader_data['yosys/18.4.2'] = [["randc_modifier",0,"logs/Yosys/chapter-18/18.4.2--randc-modifier.sv.log.html","tests/chapter-18/18.4.2--randc-modifier.sv.html"]]

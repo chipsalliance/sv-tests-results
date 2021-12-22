@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/8.10'] = [["static_methods",0,"logs/Sv2v_zachjs/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]

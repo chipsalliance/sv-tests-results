@@ -1,0 +1,1 @@
+config_loader_data['verilator/6.16.6'] = [["string_compare_fn",1,"logs/Verilator/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/16.14'] = [["assume_property_test",1,"logs/moore_parse/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]

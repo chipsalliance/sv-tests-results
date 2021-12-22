@@ -1,0 +1,1 @@
+config_loader_data['surelog/sanity'] = [["sanity",1,"logs/Surelog/sanity.sv.log.html","tests/sanity.sv.html"]]

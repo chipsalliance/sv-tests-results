@@ -1,0 +1,1 @@
+config_loader_data['odin/6.20.3'] = [["parameter_type",0,"logs/Odin/chapter-6/6.20.3--parameter_type.sv.log.html","tests/chapter-6/6.20.3--parameter_type.sv.html"]]

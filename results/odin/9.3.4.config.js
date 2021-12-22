@@ -1,0 +1,1 @@
+config_loader_data['odin/9.3.4'] = [["block_names_par",0,"logs/Odin/chapter-9/9.3.4--block_names_par.sv.log.html","tests/chapter-9/9.3.4--block_names_par.sv.html"],["block_names_seq",0,"logs/Odin/chapter-9/9.3.4--block_names_seq.sv.log.html","tests/chapter-9/9.3.4--block_names_seq.sv.html"]]

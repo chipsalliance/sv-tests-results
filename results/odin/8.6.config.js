@@ -1,0 +1,1 @@
+config_loader_data['odin/8.6'] = [["methods",0,"logs/Odin/chapter-8/8.6--methods.sv.log.html","tests/chapter-8/8.6--methods.sv.html"]]

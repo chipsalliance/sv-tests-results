@@ -1,0 +1,1 @@
+config_loader_data['odin/6.19.1'] = [["enum_typedef",0,"logs/Odin/chapter-6/6.19.1--enum_typedef.sv.log.html","tests/chapter-6/6.19.1--enum_typedef.sv.html"]]

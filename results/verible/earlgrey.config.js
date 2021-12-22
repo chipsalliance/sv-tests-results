@@ -1,0 +1,1 @@
+config_loader_data['verible/earlgrey'] = [["earlgrey",1,"logs/Verible/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

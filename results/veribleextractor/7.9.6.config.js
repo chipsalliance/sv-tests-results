@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/7.9.6'] = [["associative-arrays-next",1,"logs/VeribleExtractor/chapter-7/arrays/associative/methods/next.sv.log.html","tests/chapter-7/arrays/associative/methods/next.sv.html"]]

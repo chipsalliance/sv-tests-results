@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/6.16.5'] = [["string_tolower",0,"logs/VanillaYosysUhdmPlugin/chapter-6/6.16.5--string_tolower.sv.log.html","tests/chapter-6/6.16.5--string_tolower.sv.html"]]

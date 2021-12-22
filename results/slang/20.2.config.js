@@ -1,0 +1,1 @@
+config_loader_data['slang/20.2'] = [["exit_task",1,"logs/Slang/chapter-20/20.2--exit.sv.log.html","tests/chapter-20/20.2--exit.sv.html"],["finish_task",1,"logs/Slang/chapter-20/20.2--finish.sv.log.html","tests/chapter-20/20.2--finish.sv.html"],["stop_task",1,"logs/Slang/chapter-20/20.2--stop.sv.log.html","tests/chapter-20/20.2--stop.sv.html"]]

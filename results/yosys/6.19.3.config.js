@@ -1,0 +1,1 @@
+config_loader_data['yosys/6.19.3'] = [["enum_type_checking",1,"logs/Yosys/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"],["enum_type_checking_inv",0,"logs/Yosys/chapter-6/6.19.3--enum_type_checking_inv.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking_inv.sv.html"]]

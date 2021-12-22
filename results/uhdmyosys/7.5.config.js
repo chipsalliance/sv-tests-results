@@ -1,0 +1,1 @@
+config_loader_data['uhdmyosys/7.5'] = [["dyn-arr-basic",1,"logs/UhdmYosys/chapter-7/arrays/dynamic/basic.sv.log.html","tests/chapter-7/arrays/dynamic/basic.sv.html"]]

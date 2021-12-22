@@ -1,0 +1,1 @@
+config_loader_data['yosys/5.6.3'] = [["system-functions",1,"logs/Yosys/chapter-5/5.6.3--system-functions.sv.log.html","tests/chapter-5/5.6.3--system-functions.sv.html"]]

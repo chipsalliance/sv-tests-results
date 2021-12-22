@@ -1,0 +1,1 @@
+config_loader_data['verible/18.6.2'] = [["post_randomize_method_0",1,"logs/Verible/chapter-18/18.6.2--post-randomize_method_0.sv.log.html","tests/chapter-18/18.6.2--post-randomize_method_0.sv.html"],["pre_randomize_method_0",1,"logs/Verible/chapter-18/18.6.2--pre-randomize-method_0.sv.log.html","tests/chapter-18/18.6.2--pre-randomize-method_0.sv.html"]]

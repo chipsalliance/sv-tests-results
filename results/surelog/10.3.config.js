@@ -1,0 +1,1 @@
+config_loader_data['surelog/10.3'] = [["proc_assignment__bad",0,"logs/Surelog/chapter-10/10.3--proc-assignment--bad.sv.log.html","tests/chapter-10/10.3--proc-assignment--bad.sv.html"]]

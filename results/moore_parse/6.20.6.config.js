@@ -1,0 +1,1 @@
+config_loader_data['moore_parse/6.20.6'] = [["const",1,"logs/moore_parse/chapter-6/6.20.6--const.sv.log.html","tests/chapter-6/6.20.6--const.sv.html"]]

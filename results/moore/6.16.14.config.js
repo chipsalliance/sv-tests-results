@@ -1,0 +1,1 @@
+config_loader_data['moore/6.16.14'] = [["string_bintoa",0,"logs/moore/chapter-6/6.16.14--string_bintoa.sv.log.html","tests/chapter-6/6.16.14--string_bintoa.sv.html"]]

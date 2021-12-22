@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/6.20.3'] = [["parameter_type",1,"logs/Sv2v_zachjs/chapter-6/6.20.3--parameter_type.sv.log.html","tests/chapter-6/6.20.3--parameter_type.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['vanillayosysuhdmplugin/18.5'] = [["constraint_blocks_0",0,"logs/VanillaYosysUhdmPlugin/chapter-18/18.5--constraint-blocks_0.sv.log.html","tests/chapter-18/18.5--constraint-blocks_0.sv.html"]]

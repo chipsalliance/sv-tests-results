@@ -1,0 +1,1 @@
+config_loader_data['odin/6.19.2'] = [["enum_sequence",0,"logs/Odin/chapter-6/6.19.2--enum_sequence.sv.log.html","tests/chapter-6/6.19.2--enum_sequence.sv.html"],["enum_sequence_range",0,"logs/Odin/chapter-6/6.19.2--enum_sequence_range.sv.log.html","tests/chapter-6/6.19.2--enum_sequence_range.sv.html"]]

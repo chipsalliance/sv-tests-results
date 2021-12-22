@@ -1,0 +1,1 @@
+config_loader_data['icarus/8.25'] = [["parameters",0,"logs/Icarus/chapter-8/8.5--parameters.sv.log.html","tests/chapter-8/8.5--parameters.sv.html"],["parametrized_class_extend",0,"logs/Icarus/chapter-8/8.25--parametrized_class_extend.sv.log.html","tests/chapter-8/8.25--parametrized_class_extend.sv.html"]]

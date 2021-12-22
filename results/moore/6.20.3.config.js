@@ -1,0 +1,1 @@
+config_loader_data['moore/6.20.3'] = [["parameter_type",1,"logs/moore/chapter-6/6.20.3--parameter_type.sv.log.html","tests/chapter-6/6.20.3--parameter_type.sv.html"]]

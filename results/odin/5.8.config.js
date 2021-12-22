@@ -1,0 +1,1 @@
+config_loader_data['odin/5.8'] = [["time-literals",0,"logs/Odin/chapter-5/5.8-time-literals.sv.log.html","tests/chapter-5/5.8-time-literals.sv.html"]]

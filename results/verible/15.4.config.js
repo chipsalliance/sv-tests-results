@@ -1,0 +1,1 @@
+config_loader_data['verible/15.4'] = [["mailbox_blocking",1,"logs/Verible/chapter-15/15.4--mailbox-blocking.sv.log.html","tests/chapter-15/15.4--mailbox-blocking.sv.html"],["mailbox_non_blocking",1,"logs/Verible/chapter-15/15.4--mailbox-non-blocking.sv.log.html","tests/chapter-15/15.4--mailbox-non-blocking.sv.html"]]

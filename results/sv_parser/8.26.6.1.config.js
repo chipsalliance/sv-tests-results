@@ -1,0 +1,1 @@
+config_loader_data['sv_parser/8.26.6.1'] = [["name_conflict_resolved",1,"logs/sv_parser/chapter-8/8.26.6.1--name_conflict_resolved.sv.log.html","tests/chapter-8/8.26.6.1--name_conflict_resolved.sv.html"]]

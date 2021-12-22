@@ -1,0 +1,1 @@
+config_loader_data['odin/9.2.2.4'] = [["always_ff",0,"logs/Odin/chapter-9/9.2.2.4--always_ff.sv.log.html","tests/chapter-9/9.2.2.4--always_ff.sv.html"]]

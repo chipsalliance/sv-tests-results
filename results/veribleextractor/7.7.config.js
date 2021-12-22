@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/7.7'] = [["unpacked-arrays-as-arguments-to-subroutines",1,"logs/VeribleExtractor/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]
