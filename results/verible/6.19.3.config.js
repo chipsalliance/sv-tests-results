@@ -1,1 +1,1 @@
-config_loader_data['verible/6.19.3'] = [["enum_type_checking",1,"logs/Verible/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"]]
+config_loader_data['verible/6.19.3'] = [["","enum_type_checking",1,"logs/Verible/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"]]

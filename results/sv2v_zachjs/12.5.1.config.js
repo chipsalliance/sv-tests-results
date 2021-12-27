@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/12.5.1'] = [["casex",1,"logs/Sv2v_zachjs/chapter-12/12.5.1--casex.sv.log.html","tests/chapter-12/12.5.1--casex.sv.html"],["casez",1,"logs/Sv2v_zachjs/chapter-12/12.5.1--casez.sv.log.html","tests/chapter-12/12.5.1--casez.sv.html"]]
+config_loader_data['sv2v_zachjs/12.5.1'] = [["","casex",1,"logs/Sv2v_zachjs/chapter-12/12.5.1--casex.sv.log.html","tests/chapter-12/12.5.1--casex.sv.html"],["","casez",1,"logs/Sv2v_zachjs/chapter-12/12.5.1--casez.sv.log.html","tests/chapter-12/12.5.1--casez.sv.html"]]

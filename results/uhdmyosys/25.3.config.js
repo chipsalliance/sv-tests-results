@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/25.3'] = [["interface",1,"logs/UhdmYosys/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]
+config_loader_data['uhdmyosys/25.3'] = [["","interface",1,"logs/UhdmYosys/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

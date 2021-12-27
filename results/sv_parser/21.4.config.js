@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/21.4'] = [["readmemb_task",1,"logs/sv_parser/chapter-21/21.4--readmemb.sv.log.html","tests/chapter-21/21.4--readmemb.sv.html"],["readmemh_task",1,"logs/sv_parser/chapter-21/21.4--readmemh.sv.log.html","tests/chapter-21/21.4--readmemh.sv.html"]]
+config_loader_data['sv_parser/21.4'] = [["","readmemb_task",1,"logs/sv_parser/chapter-21/21.4--readmemb.sv.log.html","tests/chapter-21/21.4--readmemb.sv.html"],["","readmemh_task",1,"logs/sv_parser/chapter-21/21.4--readmemh.sv.log.html","tests/chapter-21/21.4--readmemh.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/7.5'] = [["dyn-arr-basic",0,"logs/Sv2v_zachjs/chapter-7/arrays/dynamic/basic.sv.log.html","tests/chapter-7/arrays/dynamic/basic.sv.html"]]
+config_loader_data['sv2v_zachjs/7.5'] = [["","dyn-arr-basic",0,"logs/Sv2v_zachjs/chapter-7/arrays/dynamic/basic.sv.log.html","tests/chapter-7/arrays/dynamic/basic.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/6.19.5.6'] = [["enum_name",1,"logs/moore_parse/chapter-6/6.19.5.6--enum_name.sv.log.html","tests/chapter-6/6.19.5.6--enum_name.sv.html"]]
+config_loader_data['moore_parse/6.19.5.6'] = [["","enum_name",1,"logs/moore_parse/chapter-6/6.19.5.6--enum_name.sv.log.html","tests/chapter-6/6.19.5.6--enum_name.sv.html"]]

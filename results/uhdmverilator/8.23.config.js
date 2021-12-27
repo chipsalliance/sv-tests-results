@@ -1,1 +1,1 @@
-config_loader_data['uhdmverilator/8.23'] = [["scope_resolution",0,"logs/UhdmVerilator/chapter-8/8.23--scope_resolution.sv.log.html","tests/chapter-8/8.23--scope_resolution.sv.html"]]
+config_loader_data['uhdmverilator/8.23'] = [["","scope_resolution",0,"logs/UhdmVerilator/chapter-8/8.23--scope_resolution.sv.log.html","tests/chapter-8/8.23--scope_resolution.sv.html"]]

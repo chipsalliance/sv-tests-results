@@ -1,229 +1,243 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7-hd
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv</a>
-defines: 
-completed: 2021-12-27 02:53:27
-time_elapsed: 0.037s
-ram usage: 35748 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7-hd <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv</a>
-`default_nettype none
-module top_david_v1 (
-	clk_100m,
-	btn_rst,
-	hdmi_tx_ch0_p,
-	hdmi_tx_ch0_n,
-	hdmi_tx_ch1_p,
-	hdmi_tx_ch1_n,
-	hdmi_tx_ch2_p,
-	hdmi_tx_ch2_n,
-	hdmi_tx_clk_p,
-	hdmi_tx_clk_n
-);
-	input wire clk_100m;
-	input wire btn_rst;
-	output wire hdmi_tx_ch0_p;
-	output wire hdmi_tx_ch0_n;
-	output wire hdmi_tx_ch1_p;
-	output wire hdmi_tx_ch1_n;
-	output wire hdmi_tx_ch2_p;
-	output wire hdmi_tx_ch2_n;
-	output wire hdmi_tx_clk_p;
-	output wire hdmi_tx_clk_n;
-	wire clk_pix;
-	wire clk_pix_5x;
-	wire clk_pix_locked;
-	clock_gen_720p clock_pix_inst(
-		.clk_100m(clk_100m),
-		.rst(!btn_rst),
-		.clk_pix(clk_pix),
-		.clk_pix_5x(clk_pix_5x),
-		.clk_pix_locked(clk_pix_locked)
-	);
-	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
-	wire hsync;
-	wire vsync;
-	wire de;
-	wire frame;
-	display_720p #(.CORDW(CORDW)) display_inst(
-		.clk_pix(clk_pix),
-		.rst(!clk_pix_locked),
-		.sx(sx),
-		.sy(sy),
-		.hsync(hsync),
-		.vsync(vsync),
-		.de(de),
-		.frame(frame),
-		.line()
-	);
-	localparam FB_WIDTH = 160;
-	localparam FB_HEIGHT = 120;
-	localparam FB_PIXELS = 19200;
-	localparam FB_ADDRW = 15;
-	localparam FB_DATAW = 1;
-	localparam FB_IMAGE = &#34;david_1bit.mem&#34;;
-	reg fb_we;
-	reg [14:0] fb_addr_write;
-	reg [14:0] fb_addr_read;
-	reg [0:0] fb_colr_write;
-	wire [0:0] fb_colr_read;
-	bram_sdp #(
-		.WIDTH(FB_DATAW),
-		.DEPTH(FB_PIXELS),
-		.INIT_F(FB_IMAGE)
-	) bram_inst(
-		.clk_write(clk_pix),
-		.clk_read(clk_pix),
-		.we(fb_we),
-		.addr_write(fb_addr_write),
-		.addr_read(fb_addr_read),
-		.data_in(fb_colr_write),
-		.data_out(fb_colr_read)
-	);
-	reg [7:0] cnt_draw;
-	reg [31:0] state;
-	always @(posedge clk_pix)
-		case (state)
-			32&#39;d1:
-				if (cnt_draw &lt; 159) begin
-					fb_addr_write &lt;= fb_addr_write + 1;
-					cnt_draw &lt;= cnt_draw + 1;
-				end
-				else begin
-					cnt_draw &lt;= 0;
-					state &lt;= 32&#39;d2;
-				end
-			32&#39;d2:
-				if (cnt_draw &lt; 119) begin
-					fb_addr_write &lt;= fb_addr_write + FB_WIDTH;
-					cnt_draw &lt;= cnt_draw + 1;
-				end
-				else begin
-					fb_addr_write &lt;= 0;
-					cnt_draw &lt;= 0;
-					state &lt;= 32&#39;d4;
-				end
-			32&#39;d4:
-				if (cnt_draw &lt; 119) begin
-					fb_addr_write &lt;= fb_addr_write + FB_WIDTH;
-					cnt_draw &lt;= cnt_draw + 1;
-				end
-				else begin
-					cnt_draw &lt;= 0;
-					state &lt;= 32&#39;d3;
-				end
-			32&#39;d3:
-				if (cnt_draw &lt; 159) begin
-					fb_addr_write &lt;= fb_addr_write + 1;
-					cnt_draw &lt;= cnt_draw + 1;
-				end
-				else begin
-					fb_we &lt;= 0;
-					state &lt;= 32&#39;d5;
-				end
-			32&#39;d0:
-				if (frame) begin
-					fb_colr_write &lt;= 1;
-					fb_we &lt;= 1;
-					cnt_draw &lt;= 0;
-					state &lt;= 32&#39;d1;
-				end
-			default: state &lt;= 32&#39;d5;
-		endcase
-	reg paint;
-	always @(*) paint = (((sy &gt;= 0) &amp;&amp; (sy &lt; FB_HEIGHT)) &amp;&amp; (sx &gt;= 0)) &amp;&amp; (sx &lt; FB_WIDTH);
-	always @(posedge clk_pix)
-		if (frame)
-			fb_addr_read &lt;= 0;
-		else if (paint)
-			fb_addr_read &lt;= fb_addr_read + 1;
-	reg paint_p1;
-	reg hsync_p1;
-	reg vsync_p1;
-	reg de_p1;
-	always @(posedge clk_pix) begin
-		paint_p1 &lt;= paint;
-		hsync_p1 &lt;= hsync;
-		vsync_p1 &lt;= vsync;
-		de_p1 &lt;= de;
-	end
-	reg [7:0] dvi_red;
-	reg [7:0] dvi_green;
-	reg [7:0] dvi_blue;
-	reg dvi_hsync;
-	reg dvi_vsync;
-	reg dvi_de;
-	always @(posedge clk_pix) begin
-		dvi_hsync &lt;= hsync_p1;
-		dvi_vsync &lt;= vsync_p1;
-		dvi_de &lt;= de_p1;
-		dvi_red &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 8&#39;hff : 8&#39;h00);
-		dvi_green &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 8&#39;hff : 8&#39;h00);
-		dvi_blue &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 8&#39;hff : 8&#39;h00);
-	end
-	wire tmds_ch0_serial;
-	wire tmds_ch1_serial;
-	wire tmds_ch2_serial;
-	wire tmds_clk_serial;
-	dvi_generator dvi_out(
-		.clk_pix(clk_pix),
-		.clk_pix_5x(clk_pix_5x),
-		.rst(!clk_pix_locked),
-		.de(dvi_de),
-		.data_in_ch0(dvi_blue),
-		.data_in_ch1(dvi_green),
-		.data_in_ch2(dvi_red),
-		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),
-		.ctrl_in_ch1(2&#39;b00),
-		.ctrl_in_ch2(2&#39;b00),
-		.tmds_ch0_serial(tmds_ch0_serial),
-		.tmds_ch1_serial(tmds_ch1_serial),
-		.tmds_ch2_serial(tmds_ch2_serial),
-		.tmds_clk_serial(tmds_clk_serial)
-	);
-	tmds_out tmds_ch0(
-		.tmds(tmds_ch0_serial),
-		.pin_p(hdmi_tx_ch0_p),
-		.pin_n(hdmi_tx_ch0_n)
-	);
-	tmds_out tmds_ch1(
-		.tmds(tmds_ch1_serial),
-		.pin_p(hdmi_tx_ch1_p),
-		.pin_n(hdmi_tx_ch1_n)
-	);
-	tmds_out tmds_ch2(
-		.tmds(tmds_ch2_serial),
-		.pin_p(hdmi_tx_ch2_p),
-		.pin_n(hdmi_tx_ch2_n)
-	);
-	tmds_out tmds_clk(
-		.tmds(tmds_clk_serial),
-		.pin_p(hdmi_tx_clk_p),
-		.pin_n(hdmi_tx_clk_n)
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>graphics_framebuffers_xc7-hd_projf_top_david_v1</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7-hd<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:43</dd></div>
+        <div><dt>time elapsed</dt><dd>0.037s</dd></div>
+        <div><dt>ram usage</dt><dd>35684 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7-hd <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7-hd_projf_top_david_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7-hd/top_david_v1.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module top_david_v1 (</pre>
+      <pre>	clk_100m,</pre>
+      <pre>	btn_rst,</pre>
+      <pre>	hdmi_tx_ch0_p,</pre>
+      <pre>	hdmi_tx_ch0_n,</pre>
+      <pre>	hdmi_tx_ch1_p,</pre>
+      <pre>	hdmi_tx_ch1_n,</pre>
+      <pre>	hdmi_tx_ch2_p,</pre>
+      <pre>	hdmi_tx_ch2_n,</pre>
+      <pre>	hdmi_tx_clk_p,</pre>
+      <pre>	hdmi_tx_clk_n</pre>
+      <pre>);</pre>
+      <pre>	input wire clk_100m;</pre>
+      <pre>	input wire btn_rst;</pre>
+      <pre>	output wire hdmi_tx_ch0_p;</pre>
+      <pre>	output wire hdmi_tx_ch0_n;</pre>
+      <pre>	output wire hdmi_tx_ch1_p;</pre>
+      <pre>	output wire hdmi_tx_ch1_n;</pre>
+      <pre>	output wire hdmi_tx_ch2_p;</pre>
+      <pre>	output wire hdmi_tx_ch2_n;</pre>
+      <pre>	output wire hdmi_tx_clk_p;</pre>
+      <pre>	output wire hdmi_tx_clk_n;</pre>
+      <pre>	wire clk_pix;</pre>
+      <pre>	wire clk_pix_5x;</pre>
+      <pre>	wire clk_pix_locked;</pre>
+      <pre>	clock_gen_720p clock_pix_inst(</pre>
+      <pre>		.clk_100m(clk_100m),</pre>
+      <pre>		.rst(!btn_rst),</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.clk_pix_5x(clk_pix_5x),</pre>
+      <pre>		.clk_pix_locked(clk_pix_locked)</pre>
+      <pre>	);</pre>
+      <pre>	localparam CORDW = 16;</pre>
+      <pre>	wire signed [15:0] sx;</pre>
+      <pre>	wire signed [15:0] sy;</pre>
+      <pre>	wire hsync;</pre>
+      <pre>	wire vsync;</pre>
+      <pre>	wire de;</pre>
+      <pre>	wire frame;</pre>
+      <pre>	display_720p #(.CORDW(CORDW)) display_inst(</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.rst(!clk_pix_locked),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sy(sy),</pre>
+      <pre>		.hsync(hsync),</pre>
+      <pre>		.vsync(vsync),</pre>
+      <pre>		.de(de),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line()</pre>
+      <pre>	);</pre>
+      <pre>	localparam FB_WIDTH = 160;</pre>
+      <pre>	localparam FB_HEIGHT = 120;</pre>
+      <pre>	localparam FB_PIXELS = 19200;</pre>
+      <pre>	localparam FB_ADDRW = 15;</pre>
+      <pre>	localparam FB_DATAW = 1;</pre>
+      <pre>	localparam FB_IMAGE = &#34;david_1bit.mem&#34;;</pre>
+      <pre>	reg fb_we;</pre>
+      <pre>	reg [14:0] fb_addr_write;</pre>
+      <pre>	reg [14:0] fb_addr_read;</pre>
+      <pre>	reg [0:0] fb_colr_write;</pre>
+      <pre>	wire [0:0] fb_colr_read;</pre>
+      <pre>	bram_sdp #(</pre>
+      <pre>		.WIDTH(FB_DATAW),</pre>
+      <pre>		.DEPTH(FB_PIXELS),</pre>
+      <pre>		.INIT_F(FB_IMAGE)</pre>
+      <pre>	) bram_inst(</pre>
+      <pre>		.clk_write(clk_pix),</pre>
+      <pre>		.clk_read(clk_pix),</pre>
+      <pre>		.we(fb_we),</pre>
+      <pre>		.addr_write(fb_addr_write),</pre>
+      <pre>		.addr_read(fb_addr_read),</pre>
+      <pre>		.data_in(fb_colr_write),</pre>
+      <pre>		.data_out(fb_colr_read)</pre>
+      <pre>	);</pre>
+      <pre>	reg [7:0] cnt_draw;</pre>
+      <pre>	reg [31:0] state;</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		case (state)</pre>
+      <pre>			32&#39;d1:</pre>
+      <pre>				if (cnt_draw &lt; 159) begin</pre>
+      <pre>					fb_addr_write &lt;= fb_addr_write + 1;</pre>
+      <pre>					cnt_draw &lt;= cnt_draw + 1;</pre>
+      <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					cnt_draw &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d2;</pre>
+      <pre>				end</pre>
+      <pre>			32&#39;d2:</pre>
+      <pre>				if (cnt_draw &lt; 119) begin</pre>
+      <pre>					fb_addr_write &lt;= fb_addr_write + FB_WIDTH;</pre>
+      <pre>					cnt_draw &lt;= cnt_draw + 1;</pre>
+      <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					fb_addr_write &lt;= 0;</pre>
+      <pre>					cnt_draw &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d4;</pre>
+      <pre>				end</pre>
+      <pre>			32&#39;d4:</pre>
+      <pre>				if (cnt_draw &lt; 119) begin</pre>
+      <pre>					fb_addr_write &lt;= fb_addr_write + FB_WIDTH;</pre>
+      <pre>					cnt_draw &lt;= cnt_draw + 1;</pre>
+      <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					cnt_draw &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d3;</pre>
+      <pre>				end</pre>
+      <pre>			32&#39;d3:</pre>
+      <pre>				if (cnt_draw &lt; 159) begin</pre>
+      <pre>					fb_addr_write &lt;= fb_addr_write + 1;</pre>
+      <pre>					cnt_draw &lt;= cnt_draw + 1;</pre>
+      <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					fb_we &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d5;</pre>
+      <pre>				end</pre>
+      <pre>			32&#39;d0:</pre>
+      <pre>				if (frame) begin</pre>
+      <pre>					fb_colr_write &lt;= 1;</pre>
+      <pre>					fb_we &lt;= 1;</pre>
+      <pre>					cnt_draw &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d1;</pre>
+      <pre>				end</pre>
+      <pre>			default: state &lt;= 32&#39;d5;</pre>
+      <pre>		endcase</pre>
+      <pre>	reg paint;</pre>
+      <pre>	always @(*) paint = (((sy &gt;= 0) &amp;&amp; (sy &lt; FB_HEIGHT)) &amp;&amp; (sx &gt;= 0)) &amp;&amp; (sx &lt; FB_WIDTH);</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		if (frame)</pre>
+      <pre>			fb_addr_read &lt;= 0;</pre>
+      <pre>		else if (paint)</pre>
+      <pre>			fb_addr_read &lt;= fb_addr_read + 1;</pre>
+      <pre>	reg paint_p1;</pre>
+      <pre>	reg hsync_p1;</pre>
+      <pre>	reg vsync_p1;</pre>
+      <pre>	reg de_p1;</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		paint_p1 &lt;= paint;</pre>
+      <pre>		hsync_p1 &lt;= hsync;</pre>
+      <pre>		vsync_p1 &lt;= vsync;</pre>
+      <pre>		de_p1 &lt;= de;</pre>
+      <pre>	end</pre>
+      <pre>	reg [7:0] dvi_red;</pre>
+      <pre>	reg [7:0] dvi_green;</pre>
+      <pre>	reg [7:0] dvi_blue;</pre>
+      <pre>	reg dvi_hsync;</pre>
+      <pre>	reg dvi_vsync;</pre>
+      <pre>	reg dvi_de;</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		dvi_hsync &lt;= hsync_p1;</pre>
+      <pre>		dvi_vsync &lt;= vsync_p1;</pre>
+      <pre>		dvi_de &lt;= de_p1;</pre>
+      <pre>		dvi_red &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 8&#39;hff : 8&#39;h00);</pre>
+      <pre>		dvi_green &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 8&#39;hff : 8&#39;h00);</pre>
+      <pre>		dvi_blue &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 8&#39;hff : 8&#39;h00);</pre>
+      <pre>	end</pre>
+      <pre>	wire tmds_ch0_serial;</pre>
+      <pre>	wire tmds_ch1_serial;</pre>
+      <pre>	wire tmds_ch2_serial;</pre>
+      <pre>	wire tmds_clk_serial;</pre>
+      <pre>	dvi_generator dvi_out(</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.clk_pix_5x(clk_pix_5x),</pre>
+      <pre>		.rst(!clk_pix_locked),</pre>
+      <pre>		.de(dvi_de),</pre>
+      <pre>		.data_in_ch0(dvi_blue),</pre>
+      <pre>		.data_in_ch1(dvi_green),</pre>
+      <pre>		.data_in_ch2(dvi_red),</pre>
+      <pre>		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),</pre>
+      <pre>		.ctrl_in_ch1(2&#39;b00),</pre>
+      <pre>		.ctrl_in_ch2(2&#39;b00),</pre>
+      <pre>		.tmds_ch0_serial(tmds_ch0_serial),</pre>
+      <pre>		.tmds_ch1_serial(tmds_ch1_serial),</pre>
+      <pre>		.tmds_ch2_serial(tmds_ch2_serial),</pre>
+      <pre>		.tmds_clk_serial(tmds_clk_serial)</pre>
+      <pre>	);</pre>
+      <pre>	tmds_out tmds_ch0(</pre>
+      <pre>		.tmds(tmds_ch0_serial),</pre>
+      <pre>		.pin_p(hdmi_tx_ch0_p),</pre>
+      <pre>		.pin_n(hdmi_tx_ch0_n)</pre>
+      <pre>	);</pre>
+      <pre>	tmds_out tmds_ch1(</pre>
+      <pre>		.tmds(tmds_ch1_serial),</pre>
+      <pre>		.pin_p(hdmi_tx_ch1_p),</pre>
+      <pre>		.pin_n(hdmi_tx_ch1_n)</pre>
+      <pre>	);</pre>
+      <pre>	tmds_out tmds_ch2(</pre>
+      <pre>		.tmds(tmds_ch2_serial),</pre>
+      <pre>		.pin_p(hdmi_tx_ch2_p),</pre>
+      <pre>		.pin_n(hdmi_tx_ch2_n)</pre>
+      <pre>	);</pre>
+      <pre>	tmds_out tmds_clk(</pre>
+      <pre>		.tmds(tmds_clk_serial),</pre>
+      <pre>		.pin_p(hdmi_tx_clk_p),</pre>
+      <pre>		.pin_n(hdmi_tx_clk_n)</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

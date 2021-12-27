@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.5.1'] = [["dynamic-arrays-op-new",1,"logs/sv_parser/chapter-7/arrays/dynamic/op-new.sv.log.html","tests/chapter-7/arrays/dynamic/op-new.sv.html"]]
+config_loader_data['sv_parser/7.5.1'] = [["","dynamic-arrays-op-new",1,"logs/sv_parser/chapter-7/arrays/dynamic/op-new.sv.log.html","tests/chapter-7/arrays/dynamic/op-new.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/7.7'] = [["unpacked-arrays-as-arguments-to-subroutines",1,"logs/moore_parse/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]
+config_loader_data['moore_parse/7.7'] = [["","unpacked-arrays-as-arguments-to-subroutines",1,"logs/moore_parse/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]

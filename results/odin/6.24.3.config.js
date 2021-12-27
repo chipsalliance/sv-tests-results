@@ -1,1 +1,1 @@
-config_loader_data['odin/6.24.3'] = [["bitstream_cast",0,"logs/Odin/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]
+config_loader_data['odin/6.24.3'] = [["","bitstream_cast",0,"logs/Odin/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]

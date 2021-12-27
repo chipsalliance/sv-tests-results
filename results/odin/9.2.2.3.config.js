@@ -1,1 +1,1 @@
-config_loader_data['odin/9.2.2.3'] = [["always_latch_expr",0,"logs/Odin/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]
+config_loader_data['odin/9.2.2.3'] = [["","always_latch_expr",0,"logs/Odin/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]

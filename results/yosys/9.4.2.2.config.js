@@ -1,1 +1,1 @@
-config_loader_data['yosys/9.4.2.2'] = [["event_implicit",1,"logs/Yosys/chapter-9/9.4.2.2--event_implicit.sv.log.html","tests/chapter-9/9.4.2.2--event_implicit.sv.html"]]
+config_loader_data['yosys/9.4.2.2'] = [["","event_implicit",1,"logs/Yosys/chapter-9/9.4.2.2--event_implicit.sv.log.html","tests/chapter-9/9.4.2.2--event_implicit.sv.html"]]

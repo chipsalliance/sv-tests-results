@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.2.2'] = [["unpacked-structures-members-default-value",1,"logs/sv_parser/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]
+config_loader_data['sv_parser/7.2.2'] = [["","unpacked-structures-members-default-value",1,"logs/sv_parser/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]

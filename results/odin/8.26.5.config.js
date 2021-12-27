@@ -1,1 +1,1 @@
-config_loader_data['odin/8.26.5'] = [["implemented_class_handle",0,"logs/Odin/chapter-8/8.26.5--implemented_class_handle.sv.log.html","tests/chapter-8/8.26.5--implemented_class_handle.sv.html"]]
+config_loader_data['odin/8.26.5'] = [["","implemented_class_handle",0,"logs/Odin/chapter-8/8.26.5--implemented_class_handle.sv.log.html","tests/chapter-8/8.26.5--implemented_class_handle.sv.html"]]

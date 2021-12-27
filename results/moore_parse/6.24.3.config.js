@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/6.24.3'] = [["bitstream_cast",1,"logs/moore_parse/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]
+config_loader_data['moore_parse/6.24.3'] = [["","bitstream_cast",1,"logs/moore_parse/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]

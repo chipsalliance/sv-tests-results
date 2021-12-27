@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/8.24'] = [["out_of_block_methods",0,"logs/moore_parse/chapter-8/8.24--out_of_block_methods.sv.log.html","tests/chapter-8/8.24--out_of_block_methods.sv.html"]]
+config_loader_data['moore_parse/8.24'] = [["","out_of_block_methods",0,"logs/moore_parse/chapter-8/8.24--out_of_block_methods.sv.log.html","tests/chapter-8/8.24--out_of_block_methods.sv.html"]]

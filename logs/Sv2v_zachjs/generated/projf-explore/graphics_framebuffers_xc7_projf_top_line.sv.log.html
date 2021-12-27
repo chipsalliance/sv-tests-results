@@ -1,142 +1,156 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv</a>
-defines: 
-completed: 2021-12-27 02:53:27
-time_elapsed: 0.024s
-ram usage: 26384 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7 <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv</a>
-`default_nettype none
-module top_line (
-	clk_100m,
-	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
-);
-	input wire clk_100m;
-	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
-	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
-		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
-	);
-	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
-	wire hsync;
-	wire vsync;
-	wire frame;
-	display_480p #(.CORDW(CORDW)) display_inst(
-		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(sx),
-		.sy(sy),
-		.hsync(hsync),
-		.vsync(vsync),
-		.de(),
-		.frame(frame),
-		.line()
-	);
-	localparam FB_WIDTH = 160;
-	localparam FB_HEIGHT = 120;
-	localparam FB_PIXELS = 19200;
-	localparam FB_ADDRW = 15;
-	localparam FB_DATAW = 1;
-	reg fb_we;
-	reg [14:0] fb_addr_write;
-	reg [14:0] fb_addr_read;
-	reg [0:0] fb_colr_write;
-	wire [0:0] fb_colr_read;
-	bram_sdp #(
-		.WIDTH(FB_DATAW),
-		.DEPTH(FB_PIXELS)
-	) bram_inst(
-		.clk_write(clk_pix),
-		.clk_read(clk_pix),
-		.we(fb_we),
-		.addr_write(fb_addr_write),
-		.addr_read(fb_addr_read),
-		.data_in(fb_colr_write),
-		.data_out(fb_colr_read)
-	);
-	reg [7:0] cnt_draw;
-	reg [31:0] state;
-	always @(posedge clk_pix)
-		case (state)
-			32&#39;d1:
-				if (cnt_draw &lt; 159) begin
-					fb_addr_write &lt;= fb_addr_write + 1;
-					cnt_draw &lt;= cnt_draw + 1;
-				end
-				else begin
-					fb_we &lt;= 0;
-					state &lt;= 32&#39;d2;
-				end
-			32&#39;d0:
-				if (frame) begin
-					fb_colr_write &lt;= 1;
-					fb_we &lt;= 1;
-					fb_addr_write &lt;= 9600;
-					cnt_draw &lt;= 0;
-					state &lt;= 32&#39;d1;
-				end
-			default: state &lt;= 32&#39;d2;
-		endcase
-	reg paint;
-	always @(*) paint = (((sy &gt;= 0) &amp;&amp; (sy &lt; FB_HEIGHT)) &amp;&amp; (sx &gt;= 0)) &amp;&amp; (sx &lt; FB_WIDTH);
-	always @(posedge clk_pix)
-		if (frame)
-			fb_addr_read &lt;= 0;
-		else if (paint)
-			fb_addr_read &lt;= fb_addr_read + 1;
-	reg paint_p1;
-	reg hsync_p1;
-	reg vsync_p1;
-	always @(posedge clk_pix) begin
-		paint_p1 &lt;= paint;
-		hsync_p1 &lt;= hsync;
-		vsync_p1 &lt;= vsync;
-	end
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync_p1;
-		vga_vsync &lt;= vsync_p1;
-		vga_r &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);
-		vga_g &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);
-		vga_b &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>graphics_framebuffers_xc7_projf_top_line</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:38</dd></div>
+        <div><dt>time elapsed</dt><dd>0.025s</dd></div>
+        <div><dt>ram usage</dt><dd>26568 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/framebuffers/xc7 <a href="../../../../tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv.html" target="file-frame">tests/generated/projf-explore/graphics_framebuffers_xc7_projf_top_line.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/framebuffers/xc7/top_line.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module top_line (</pre>
+      <pre>	clk_100m,</pre>
+      <pre>	btn_rst,</pre>
+      <pre>	vga_hsync,</pre>
+      <pre>	vga_vsync,</pre>
+      <pre>	vga_r,</pre>
+      <pre>	vga_g,</pre>
+      <pre>	vga_b</pre>
+      <pre>);</pre>
+      <pre>	input wire clk_100m;</pre>
+      <pre>	input wire btn_rst;</pre>
+      <pre>	output reg vga_hsync;</pre>
+      <pre>	output reg vga_vsync;</pre>
+      <pre>	output reg [3:0] vga_r;</pre>
+      <pre>	output reg [3:0] vga_g;</pre>
+      <pre>	output reg [3:0] vga_b;</pre>
+      <pre>	wire clk_pix;</pre>
+      <pre>	wire clk_locked;</pre>
+      <pre>	clock_gen_480p clock_pix_inst(</pre>
+      <pre>		.clk(clk_100m),</pre>
+      <pre>		.rst(!btn_rst),</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.clk_locked(clk_locked)</pre>
+      <pre>	);</pre>
+      <pre>	localparam CORDW = 16;</pre>
+      <pre>	wire signed [15:0] sx;</pre>
+      <pre>	wire signed [15:0] sy;</pre>
+      <pre>	wire hsync;</pre>
+      <pre>	wire vsync;</pre>
+      <pre>	wire frame;</pre>
+      <pre>	display_480p #(.CORDW(CORDW)) display_inst(</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sy(sy),</pre>
+      <pre>		.hsync(hsync),</pre>
+      <pre>		.vsync(vsync),</pre>
+      <pre>		.de(),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line()</pre>
+      <pre>	);</pre>
+      <pre>	localparam FB_WIDTH = 160;</pre>
+      <pre>	localparam FB_HEIGHT = 120;</pre>
+      <pre>	localparam FB_PIXELS = 19200;</pre>
+      <pre>	localparam FB_ADDRW = 15;</pre>
+      <pre>	localparam FB_DATAW = 1;</pre>
+      <pre>	reg fb_we;</pre>
+      <pre>	reg [14:0] fb_addr_write;</pre>
+      <pre>	reg [14:0] fb_addr_read;</pre>
+      <pre>	reg [0:0] fb_colr_write;</pre>
+      <pre>	wire [0:0] fb_colr_read;</pre>
+      <pre>	bram_sdp #(</pre>
+      <pre>		.WIDTH(FB_DATAW),</pre>
+      <pre>		.DEPTH(FB_PIXELS)</pre>
+      <pre>	) bram_inst(</pre>
+      <pre>		.clk_write(clk_pix),</pre>
+      <pre>		.clk_read(clk_pix),</pre>
+      <pre>		.we(fb_we),</pre>
+      <pre>		.addr_write(fb_addr_write),</pre>
+      <pre>		.addr_read(fb_addr_read),</pre>
+      <pre>		.data_in(fb_colr_write),</pre>
+      <pre>		.data_out(fb_colr_read)</pre>
+      <pre>	);</pre>
+      <pre>	reg [7:0] cnt_draw;</pre>
+      <pre>	reg [31:0] state;</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		case (state)</pre>
+      <pre>			32&#39;d1:</pre>
+      <pre>				if (cnt_draw &lt; 159) begin</pre>
+      <pre>					fb_addr_write &lt;= fb_addr_write + 1;</pre>
+      <pre>					cnt_draw &lt;= cnt_draw + 1;</pre>
+      <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					fb_we &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d2;</pre>
+      <pre>				end</pre>
+      <pre>			32&#39;d0:</pre>
+      <pre>				if (frame) begin</pre>
+      <pre>					fb_colr_write &lt;= 1;</pre>
+      <pre>					fb_we &lt;= 1;</pre>
+      <pre>					fb_addr_write &lt;= 9600;</pre>
+      <pre>					cnt_draw &lt;= 0;</pre>
+      <pre>					state &lt;= 32&#39;d1;</pre>
+      <pre>				end</pre>
+      <pre>			default: state &lt;= 32&#39;d2;</pre>
+      <pre>		endcase</pre>
+      <pre>	reg paint;</pre>
+      <pre>	always @(*) paint = (((sy &gt;= 0) &amp;&amp; (sy &lt; FB_HEIGHT)) &amp;&amp; (sx &gt;= 0)) &amp;&amp; (sx &lt; FB_WIDTH);</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		if (frame)</pre>
+      <pre>			fb_addr_read &lt;= 0;</pre>
+      <pre>		else if (paint)</pre>
+      <pre>			fb_addr_read &lt;= fb_addr_read + 1;</pre>
+      <pre>	reg paint_p1;</pre>
+      <pre>	reg hsync_p1;</pre>
+      <pre>	reg vsync_p1;</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		paint_p1 &lt;= paint;</pre>
+      <pre>		hsync_p1 &lt;= hsync;</pre>
+      <pre>		vsync_p1 &lt;= vsync;</pre>
+      <pre>	end</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		vga_hsync &lt;= hsync_p1;</pre>
+      <pre>		vga_vsync &lt;= vsync_p1;</pre>
+      <pre>		vga_r &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);</pre>
+      <pre>		vga_g &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);</pre>
+      <pre>		vga_b &lt;= (paint_p1 &amp;&amp; fb_colr_read ? 4&#39;hf : 4&#39;h0);</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

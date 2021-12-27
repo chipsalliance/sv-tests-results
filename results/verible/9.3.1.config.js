@@ -1,1 +1,1 @@
-config_loader_data['verible/9.3.1'] = [["sequential_block",1,"logs/Verible/chapter-9/9.3.1--sequential_block.sv.log.html","tests/chapter-9/9.3.1--sequential_block.sv.html"]]
+config_loader_data['verible/9.3.1'] = [["","sequential_block",1,"logs/Verible/chapter-9/9.3.1--sequential_block.sv.log.html","tests/chapter-9/9.3.1--sequential_block.sv.html"]]

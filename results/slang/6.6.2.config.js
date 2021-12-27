@@ -1,1 +1,1 @@
-config_loader_data['slang/6.6.2'] = [["net_uwire",1,"logs/Slang/generated/nets/6.6.2--net_uwire.sv.log.html","tests/generated/nets/6.6.2--net_uwire.sv.html"]]
+config_loader_data['slang/6.6.2'] = [["","net_uwire",1,"logs/Slang/generated/nets/6.6.2--net_uwire.sv.log.html","tests/generated/nets/6.6.2--net_uwire.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/9.2.3'] = [["final",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/9.2.3'] = [["","final",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]

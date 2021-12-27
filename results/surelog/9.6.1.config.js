@@ -1,1 +1,1 @@
-config_loader_data['surelog/9.6.1'] = [["wait_fork",1,"logs/Surelog/chapter-9/9.6.1--wait_fork.sv.log.html","tests/chapter-9/9.6.1--wait_fork.sv.html"]]
+config_loader_data['surelog/9.6.1'] = [["","wait_fork",1,"logs/Surelog/chapter-9/9.6.1--wait_fork.sv.log.html","tests/chapter-9/9.6.1--wait_fork.sv.html"]]

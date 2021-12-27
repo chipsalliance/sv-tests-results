@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/8.27'] = [["forward_declaration",1,"logs/VeribleExtractor/chapter-8/8.27--forward_declaration.sv.log.html","tests/chapter-8/8.27--forward_declaration.sv.html"]]
+config_loader_data['veribleextractor/8.27'] = [["","forward_declaration",1,"logs/VeribleExtractor/chapter-8/8.27--forward_declaration.sv.log.html","tests/chapter-8/8.27--forward_declaration.sv.html"]]

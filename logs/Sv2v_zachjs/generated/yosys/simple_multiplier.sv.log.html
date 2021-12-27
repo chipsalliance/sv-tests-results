@@ -1,141 +1,155 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from yosys
-rc: 0 (means success: 1)
-tags: yosys
-incdirs: /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple
-top_module: 
-type: parsing elaboration
-mode: elaboration
-files: <a href="../../../../tests/generated/yosys/simple_multiplier.sv.html" target="file-frame">tests/generated/yosys/simple_multiplier.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/multiplier.v.html" target="file-frame">third_party/tools/yosys/tests/simple/multiplier.v</a>
-defines: 
-completed: 2021-12-27 02:52:52
-time_elapsed: 0.033s
-ram usage: 31428 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_multiplier.sv.html" target="file-frame">tests/generated/yosys/simple_multiplier.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/multiplier.v.html" target="file-frame">third_party/tools/yosys/tests/simple/multiplier.v</a>
-module Multiplier_flat (
-	A,
-	B,
-	P
-);
-	parameter M = 4;
-	parameter N = 4;
-	input [M - 1:0] A;
-	input [N - 1:0] B;
-	output wire [(M + N) - 1:0] P;
-	wire [(((N ** 2) + (((2 * M) + 1) * N)) - 2) / 2:0] PP;
-	assign PP[0+:M + 1] = {1&#39;b0, {A &amp; {M {B[0]}}}};
-	assign P = PP[((N - 1) * (N + (2 * M))) / 2+:M + N];
-	genvar i;
-	generate
-		for (i = 1; i &lt; N; i = i + 1) begin : addPartialProduct
-			wire [(M + i) - 1:0] gA;
-			wire [(M + i) - 1:0] gB;
-			wire [(M + i) - 1:0] gS;
-			wire Cout;
-			assign gA = {A &amp; {M {B[i]}}, {i {1&#39;b0}}};
-			assign gB = PP[((i - 1) * (i + (2 * M))) / 2+:M + i];
-			assign PP[((i + 0) * ((i + 1) + (2 * M))) / 2+:(M + i) + 1] = {Cout, gS};
-			RippleCarryAdder #(.N(M + i)) adder(
-				.A(gA),
-				.B(gB),
-				.S(gS),
-				.Cin(1&#39;b0),
-				.Cout(Cout)
-			);
-		end
-	endgenerate
-endmodule
-module Multiplier_2D (
-	A,
-	B,
-	P
-);
-	parameter M = 4;
-	parameter N = 4;
-	input [M - 1:0] A;
-	input [N - 1:0] B;
-	output wire [(M + N) - 1:0] P;
-	wire [(M + N) - 1:0] PP [N - 1:0];
-	assign PP[0] = {{N {1&#39;b0}}, {A &amp; {M {B[0]}}}};
-	assign P = PP[N - 1];
-	genvar i;
-	generate
-		for (i = 1; i &lt; N; i = i + 1) begin : addPartialProduct
-			wire [(M + i) - 1:0] gA;
-			wire [(M + i) - 1:0] gB;
-			wire [(M + i) - 1:0] gS;
-			wire Cout;
-			assign gA = {A &amp; {M {B[i]}}, {i {1&#39;b0}}};
-			assign gB = PP[i - 1][(M + i) - 1:0];
-			assign PP[i] = {{N - i {1&#39;b0}}, Cout, gS};
-			RippleCarryAdder #(.N(M + i)) adder(
-				.A(gA),
-				.B(gB),
-				.S(gS),
-				.Cin(1&#39;b0),
-				.Cout(Cout)
-			);
-		end
-	endgenerate
-endmodule
-module RippleCarryAdder (
-	A,
-	B,
-	Cin,
-	S,
-	Cout
-);
-	parameter N = 4;
-	input [N - 1:0] A;
-	input [N - 1:0] B;
-	input Cin;
-	output wire [N - 1:0] S;
-	output wire Cout;
-	wire [N:0] CC;
-	assign CC[0] = Cin;
-	assign Cout = CC[N];
-	genvar i;
-	generate
-		for (i = 0; i &lt; N; i = i + 1) begin : addbit
-			FullAdder unit(
-				.A(A[i]),
-				.B(B[i]),
-				.Cin(CC[i]),
-				.S(S[i]),
-				.Cout(CC[i + 1])
-			);
-		end
-	endgenerate
-endmodule
-module FullAdder (
-	A,
-	B,
-	Cin,
-	S,
-	Cout
-);
-	input A;
-	input B;
-	input Cin;
-	output wire S;
-	output wire Cout;
-	assign {Cout, S} = (A + B) + Cin;
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>simple_multiplier</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from yosys</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>yosys</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing elaboration</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>elaboration</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/yosys/simple_multiplier.sv.html" target="file-frame">tests/generated/yosys/simple_multiplier.sv</a><li>
+            <li><a href="../../../../third_party/tools/yosys/tests/simple/multiplier.v.html" target="file-frame">third_party/tools/yosys/tests/simple/multiplier.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:32</dd></div>
+        <div><dt>time elapsed</dt><dd>0.030s</dd></div>
+        <div><dt>ram usage</dt><dd>31640 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_multiplier.sv.html" target="file-frame">tests/generated/yosys/simple_multiplier.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/multiplier.v.html" target="file-frame">third_party/tools/yosys/tests/simple/multiplier.v</a></pre>
+      <pre>module Multiplier_flat (</pre>
+      <pre>	A,</pre>
+      <pre>	B,</pre>
+      <pre>	P</pre>
+      <pre>);</pre>
+      <pre>	parameter M = 4;</pre>
+      <pre>	parameter N = 4;</pre>
+      <pre>	input [M - 1:0] A;</pre>
+      <pre>	input [N - 1:0] B;</pre>
+      <pre>	output wire [(M + N) - 1:0] P;</pre>
+      <pre>	wire [(((N ** 2) + (((2 * M) + 1) * N)) - 2) / 2:0] PP;</pre>
+      <pre>	assign PP[0+:M + 1] = {1&#39;b0, {A &amp; {M {B[0]}}}};</pre>
+      <pre>	assign P = PP[((N - 1) * (N + (2 * M))) / 2+:M + N];</pre>
+      <pre>	genvar i;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 1; i &lt; N; i = i + 1) begin : addPartialProduct</pre>
+      <pre>			wire [(M + i) - 1:0] gA;</pre>
+      <pre>			wire [(M + i) - 1:0] gB;</pre>
+      <pre>			wire [(M + i) - 1:0] gS;</pre>
+      <pre>			wire Cout;</pre>
+      <pre>			assign gA = {A &amp; {M {B[i]}}, {i {1&#39;b0}}};</pre>
+      <pre>			assign gB = PP[((i - 1) * (i + (2 * M))) / 2+:M + i];</pre>
+      <pre>			assign PP[((i + 0) * ((i + 1) + (2 * M))) / 2+:(M + i) + 1] = {Cout, gS};</pre>
+      <pre>			RippleCarryAdder #(.N(M + i)) adder(</pre>
+      <pre>				.A(gA),</pre>
+      <pre>				.B(gB),</pre>
+      <pre>				.S(gS),</pre>
+      <pre>				.Cin(1&#39;b0),</pre>
+      <pre>				.Cout(Cout)</pre>
+      <pre>			);</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module Multiplier_2D (</pre>
+      <pre>	A,</pre>
+      <pre>	B,</pre>
+      <pre>	P</pre>
+      <pre>);</pre>
+      <pre>	parameter M = 4;</pre>
+      <pre>	parameter N = 4;</pre>
+      <pre>	input [M - 1:0] A;</pre>
+      <pre>	input [N - 1:0] B;</pre>
+      <pre>	output wire [(M + N) - 1:0] P;</pre>
+      <pre>	wire [(M + N) - 1:0] PP [N - 1:0];</pre>
+      <pre>	assign PP[0] = {{N {1&#39;b0}}, {A &amp; {M {B[0]}}}};</pre>
+      <pre>	assign P = PP[N - 1];</pre>
+      <pre>	genvar i;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 1; i &lt; N; i = i + 1) begin : addPartialProduct</pre>
+      <pre>			wire [(M + i) - 1:0] gA;</pre>
+      <pre>			wire [(M + i) - 1:0] gB;</pre>
+      <pre>			wire [(M + i) - 1:0] gS;</pre>
+      <pre>			wire Cout;</pre>
+      <pre>			assign gA = {A &amp; {M {B[i]}}, {i {1&#39;b0}}};</pre>
+      <pre>			assign gB = PP[i - 1][(M + i) - 1:0];</pre>
+      <pre>			assign PP[i] = {{N - i {1&#39;b0}}, Cout, gS};</pre>
+      <pre>			RippleCarryAdder #(.N(M + i)) adder(</pre>
+      <pre>				.A(gA),</pre>
+      <pre>				.B(gB),</pre>
+      <pre>				.S(gS),</pre>
+      <pre>				.Cin(1&#39;b0),</pre>
+      <pre>				.Cout(Cout)</pre>
+      <pre>			);</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module RippleCarryAdder (</pre>
+      <pre>	A,</pre>
+      <pre>	B,</pre>
+      <pre>	Cin,</pre>
+      <pre>	S,</pre>
+      <pre>	Cout</pre>
+      <pre>);</pre>
+      <pre>	parameter N = 4;</pre>
+      <pre>	input [N - 1:0] A;</pre>
+      <pre>	input [N - 1:0] B;</pre>
+      <pre>	input Cin;</pre>
+      <pre>	output wire [N - 1:0] S;</pre>
+      <pre>	output wire Cout;</pre>
+      <pre>	wire [N:0] CC;</pre>
+      <pre>	assign CC[0] = Cin;</pre>
+      <pre>	assign Cout = CC[N];</pre>
+      <pre>	genvar i;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 0; i &lt; N; i = i + 1) begin : addbit</pre>
+      <pre>			FullAdder unit(</pre>
+      <pre>				.A(A[i]),</pre>
+      <pre>				.B(B[i]),</pre>
+      <pre>				.Cin(CC[i]),</pre>
+      <pre>				.S(S[i]),</pre>
+      <pre>				.Cout(CC[i + 1])</pre>
+      <pre>			);</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module FullAdder (</pre>
+      <pre>	A,</pre>
+      <pre>	B,</pre>
+      <pre>	Cin,</pre>
+      <pre>	S,</pre>
+      <pre>	Cout</pre>
+      <pre>);</pre>
+      <pre>	input A;</pre>
+      <pre>	input B;</pre>
+      <pre>	input Cin;</pre>
+      <pre>	output wire S;</pre>
+      <pre>	output wire Cout;</pre>
+      <pre>	assign {Cout, S} = (A + B) + Cin;</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

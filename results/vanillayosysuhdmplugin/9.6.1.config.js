@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/9.6.1'] = [["wait_fork",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.6.1--wait_fork.sv.log.html","tests/chapter-9/9.6.1--wait_fork.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/9.6.1'] = [["","wait_fork",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.6.1--wait_fork.sv.log.html","tests/chapter-9/9.6.1--wait_fork.sv.html"]]

@@ -1,257 +1,271 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from yosys
-rc: 0 (means success: 1)
-tags: yosys
-incdirs: /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple
-top_module: 
-type: parsing elaboration
-mode: elaboration
-files: <a href="../../../../tests/generated/yosys/simple_generate.sv.html" target="file-frame">tests/generated/yosys/simple_generate.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/generate.v.html" target="file-frame">third_party/tools/yosys/tests/simple/generate.v</a>
-defines: 
-completed: 2021-12-27 02:52:36
-time_elapsed: 0.047s
-ram usage: 43904 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_generate.sv.html" target="file-frame">tests/generated/yosys/simple_generate.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/generate.v.html" target="file-frame">third_party/tools/yosys/tests/simple/generate.v</a>
-module gen_test1 (
-	clk,
-	a,
-	b,
-	y
-);
-	input clk;
-	input [7:0] a;
-	input [7:0] b;
-	output reg [7:0] y;
-	genvar i;
-	genvar j;
-	wire [15:0] tmp1;
-	generate
-		for (i = 0; i &lt; 8; i = i + 1) begin : gen1
-			wire and_wire;
-			wire or_wire;
-			assign and_wire = a[i] &amp; b[i];
-			assign or_wire = a[i] | b[i];
-			if ((i % 2) == 0) begin : gen2true
-				assign tmp1[i] = and_wire;
-				assign tmp1[i + 8] = or_wire;
-			end
-			else begin : gen2false
-				assign tmp1[i] = or_wire;
-				assign tmp1[i + 8] = and_wire;
-			end
-		end
-		for (i = 0; i &lt; 8; i = i + 1) begin : gen3
-			wire [4:0] tmp2;
-			for (j = 0; j &lt;= 4; j = j + 1) begin : gen4
-				wire tmpbuf;
-				assign tmpbuf = tmp1[i + (2 * j)];
-				assign tmp2[j] = tmpbuf;
-			end
-			always @(posedge clk) y[i] &lt;= ^tmp2;
-		end
-	endgenerate
-endmodule
-module gen_test2 (
-	clk,
-	a,
-	b,
-	y
-);
-	input clk;
-	input [7:0] a;
-	input [7:0] b;
-	output reg [8:0] y;
-	integer i;
-	reg [8:0] carry;
-	always @(posedge clk) begin
-		carry[0] = 0;
-		for (i = 0; i &lt; 8; i = i + 1)
-			begin
-				casez ({a[i], b[i], carry[i]})
-					3&#39;bz11, 3&#39;b1z1, 3&#39;b11z: carry[i + 1] = 1;
-					default: carry[i + 1] = 0;
-				endcase
-				y[i] = (a[i] ^ b[i]) ^ carry[i];
-			end
-		y[8] = carry[8];
-	end
-endmodule
-module gen_test3 (
-	a,
-	b,
-	sel,
-	y,
-	z
-);
-	input [3:0] a;
-	input [3:0] b;
-	input sel;
-	output wire [3:0] y;
-	output wire [3:0] z;
-	genvar i;
-	generate
-		for (i = 0; i &lt; 2; i = i + 1) begin : genblk1
-			assign y[i] = (sel ? a[i] : b[i]);
-			assign z[i] = (sel ? b[i] : a[i]);
-		end
-		for (i = 0; i &lt; 2; i = i + 1) begin : genblk2
-			if (i == 0) begin : genblk1
-				assign y[2] = (sel ? a[2] : b[2]);
-			end
-			else begin : genblk1
-				assign z[2] = (sel ? a[2] : b[2]);
-			end
-			case (i)
-				default: begin : genblk2
-					assign z[3] = (sel ? a[3] : b[3]);
-				end
-				0: begin : genblk2
-					assign y[3] = (sel ? a[3] : b[3]);
-				end
-			endcase
-		end
-	endgenerate
-endmodule
-module gen_test4 (
-	a,
-	b
-);
-	input [3:0] a;
-	output wire [3:0] b;
-	genvar i;
-	generate
-		for (i = 0; i &lt; 3; i = i + 1) begin : foo
-			localparam PREV = i - 1;
-			wire temp;
-			if (i == 0) begin : genblk1
-				assign temp = a[0];
-			end
-			else begin : genblk1
-				assign temp = foo[PREV].temp &amp; a[i];
-			end
-			assign b[i] = temp;
-		end
-	endgenerate
-endmodule
-module gen_test5 (
-	input_bits,
-	out
-);
-	parameter WIDTH = 256;
-	parameter CHUNK = 4;
-	input [WIDTH - 1:0] input_bits;
-	output wire out;
-	genvar step;
-	genvar i;
-	genvar j;
-	generate
-		for (step = 1; step &lt;= WIDTH; step = step * CHUNK) begin : steps
-			localparam PREV = step / CHUNK;
-			localparam DIM = WIDTH / step;
-			for (i = 0; i &lt; DIM; i = i + 1) begin : outer
-				localparam LAST_START = i * CHUNK;
-				for (j = 0; j &lt; CHUNK; j = j + 1) begin : inner
-					wire temp;
-					if (step == 1) begin : genblk1
-						assign temp = input_bits[i];
-					end
-					else if (j == 0) begin : genblk1
-						assign temp = steps[PREV].outer[LAST_START].val;
-					end
-					else begin : genblk1
-						assign temp = steps[step].outer[i].inner[j - 1].temp &amp; steps[PREV].outer[LAST_START + j].val;
-					end
-				end
-				wire val;
-				assign val = steps[step].outer[i].inner[CHUNK - 1].temp;
-			end
-		end
-	endgenerate
-	assign out = steps[WIDTH].outer[0].val;
-endmodule
-module gen_test6 (o);
-	output wire [3:0] o;
-	genvar i;
-	generate
-		for (i = 3; i &gt;= 0; i = i - 1) begin : genblk1
-			assign o[i] = 1&#39;b0;
-		end
-	endgenerate
-endmodule
-module gen_test7;
-	reg [2:0] out1;
-	reg [2:0] out2;
-	wire [2:0] out3;
-	generate
-		if (1) begin : cond
-			reg [2:0] sub_out1;
-			reg [2:0] sub_out2;
-			wire [2:0] sub_out3;
-			initial begin : init
-				reg signed [31:0] x;
-				x = 4;
-				out1 = x;
-				sub_out1 = x;
-			end
-			always @(*) begin : proc
-				reg signed [31:0] x;
-				x = 2;
-				out2 = x;
-				sub_out2 = x;
-			end
-			genvar x;
-			for (x = 0; x &lt; 3; x = x + 1) begin : genblk1
-				assign out3[x] = 1;
-				assign sub_out3[x] = 1;
-			end
-		end
-	endgenerate
-endmodule
-module gen_test8;
-	wire [1:0] x = 2&#39;b11;
-	generate
-		if (1) begin : A
-			wire [1:0] x;
-			if (1) begin : B
-				wire [1:0] x = 2&#39;b00;
-			end
-			if (1) begin : C
-				wire [1:0] x = 2&#39;b01;
-			end
-			assign x = (B.x ^ 2&#39;b11) ^ C.x;
-		end
-	endgenerate
-endmodule
-module gen_test9;
-	wire [1:0] w = 2&#39;b11;
-	generate
-		if (1) begin : A
-			wire [1:0] x;
-			if (1) begin : B
-				wire [1:0] y = 2&#39;b00;
-			end
-			if (1) begin : C
-				wire [1:0] z = 2&#39;b01;
-			end
-			assign x = (B.y ^ 2&#39;b11) ^ C.z;
-		end
-	endgenerate
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>simple_generate</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from yosys</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>yosys</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing elaboration</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>elaboration</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/yosys/simple_generate.sv.html" target="file-frame">tests/generated/yosys/simple_generate.sv</a><li>
+            <li><a href="../../../../third_party/tools/yosys/tests/simple/generate.v.html" target="file-frame">third_party/tools/yosys/tests/simple/generate.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:30</dd></div>
+        <div><dt>time elapsed</dt><dd>0.050s</dd></div>
+        <div><dt>ram usage</dt><dd>43896 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_generate.sv.html" target="file-frame">tests/generated/yosys/simple_generate.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/generate.v.html" target="file-frame">third_party/tools/yosys/tests/simple/generate.v</a></pre>
+      <pre>module gen_test1 (</pre>
+      <pre>	clk,</pre>
+      <pre>	a,</pre>
+      <pre>	b,</pre>
+      <pre>	y</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	input [7:0] a;</pre>
+      <pre>	input [7:0] b;</pre>
+      <pre>	output reg [7:0] y;</pre>
+      <pre>	genvar i;</pre>
+      <pre>	genvar j;</pre>
+      <pre>	wire [15:0] tmp1;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 0; i &lt; 8; i = i + 1) begin : gen1</pre>
+      <pre>			wire and_wire;</pre>
+      <pre>			wire or_wire;</pre>
+      <pre>			assign and_wire = a[i] &amp; b[i];</pre>
+      <pre>			assign or_wire = a[i] | b[i];</pre>
+      <pre>			if ((i % 2) == 0) begin : gen2true</pre>
+      <pre>				assign tmp1[i] = and_wire;</pre>
+      <pre>				assign tmp1[i + 8] = or_wire;</pre>
+      <pre>			end</pre>
+      <pre>			else begin : gen2false</pre>
+      <pre>				assign tmp1[i] = or_wire;</pre>
+      <pre>				assign tmp1[i + 8] = and_wire;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>		for (i = 0; i &lt; 8; i = i + 1) begin : gen3</pre>
+      <pre>			wire [4:0] tmp2;</pre>
+      <pre>			for (j = 0; j &lt;= 4; j = j + 1) begin : gen4</pre>
+      <pre>				wire tmpbuf;</pre>
+      <pre>				assign tmpbuf = tmp1[i + (2 * j)];</pre>
+      <pre>				assign tmp2[j] = tmpbuf;</pre>
+      <pre>			end</pre>
+      <pre>			always @(posedge clk) y[i] &lt;= ^tmp2;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test2 (</pre>
+      <pre>	clk,</pre>
+      <pre>	a,</pre>
+      <pre>	b,</pre>
+      <pre>	y</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	input [7:0] a;</pre>
+      <pre>	input [7:0] b;</pre>
+      <pre>	output reg [8:0] y;</pre>
+      <pre>	integer i;</pre>
+      <pre>	reg [8:0] carry;</pre>
+      <pre>	always @(posedge clk) begin</pre>
+      <pre>		carry[0] = 0;</pre>
+      <pre>		for (i = 0; i &lt; 8; i = i + 1)</pre>
+      <pre>			begin</pre>
+      <pre>				casez ({a[i], b[i], carry[i]})</pre>
+      <pre>					3&#39;bz11, 3&#39;b1z1, 3&#39;b11z: carry[i + 1] = 1;</pre>
+      <pre>					default: carry[i + 1] = 0;</pre>
+      <pre>				endcase</pre>
+      <pre>				y[i] = (a[i] ^ b[i]) ^ carry[i];</pre>
+      <pre>			end</pre>
+      <pre>		y[8] = carry[8];</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test3 (</pre>
+      <pre>	a,</pre>
+      <pre>	b,</pre>
+      <pre>	sel,</pre>
+      <pre>	y,</pre>
+      <pre>	z</pre>
+      <pre>);</pre>
+      <pre>	input [3:0] a;</pre>
+      <pre>	input [3:0] b;</pre>
+      <pre>	input sel;</pre>
+      <pre>	output wire [3:0] y;</pre>
+      <pre>	output wire [3:0] z;</pre>
+      <pre>	genvar i;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 0; i &lt; 2; i = i + 1) begin : genblk1</pre>
+      <pre>			assign y[i] = (sel ? a[i] : b[i]);</pre>
+      <pre>			assign z[i] = (sel ? b[i] : a[i]);</pre>
+      <pre>		end</pre>
+      <pre>		for (i = 0; i &lt; 2; i = i + 1) begin : genblk2</pre>
+      <pre>			if (i == 0) begin : genblk1</pre>
+      <pre>				assign y[2] = (sel ? a[2] : b[2]);</pre>
+      <pre>			end</pre>
+      <pre>			else begin : genblk1</pre>
+      <pre>				assign z[2] = (sel ? a[2] : b[2]);</pre>
+      <pre>			end</pre>
+      <pre>			case (i)</pre>
+      <pre>				default: begin : genblk2</pre>
+      <pre>					assign z[3] = (sel ? a[3] : b[3]);</pre>
+      <pre>				end</pre>
+      <pre>				0: begin : genblk2</pre>
+      <pre>					assign y[3] = (sel ? a[3] : b[3]);</pre>
+      <pre>				end</pre>
+      <pre>			endcase</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test4 (</pre>
+      <pre>	a,</pre>
+      <pre>	b</pre>
+      <pre>);</pre>
+      <pre>	input [3:0] a;</pre>
+      <pre>	output wire [3:0] b;</pre>
+      <pre>	genvar i;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 0; i &lt; 3; i = i + 1) begin : foo</pre>
+      <pre>			localparam PREV = i - 1;</pre>
+      <pre>			wire temp;</pre>
+      <pre>			if (i == 0) begin : genblk1</pre>
+      <pre>				assign temp = a[0];</pre>
+      <pre>			end</pre>
+      <pre>			else begin : genblk1</pre>
+      <pre>				assign temp = foo[PREV].temp &amp; a[i];</pre>
+      <pre>			end</pre>
+      <pre>			assign b[i] = temp;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test5 (</pre>
+      <pre>	input_bits,</pre>
+      <pre>	out</pre>
+      <pre>);</pre>
+      <pre>	parameter WIDTH = 256;</pre>
+      <pre>	parameter CHUNK = 4;</pre>
+      <pre>	input [WIDTH - 1:0] input_bits;</pre>
+      <pre>	output wire out;</pre>
+      <pre>	genvar step;</pre>
+      <pre>	genvar i;</pre>
+      <pre>	genvar j;</pre>
+      <pre>	generate</pre>
+      <pre>		for (step = 1; step &lt;= WIDTH; step = step * CHUNK) begin : steps</pre>
+      <pre>			localparam PREV = step / CHUNK;</pre>
+      <pre>			localparam DIM = WIDTH / step;</pre>
+      <pre>			for (i = 0; i &lt; DIM; i = i + 1) begin : outer</pre>
+      <pre>				localparam LAST_START = i * CHUNK;</pre>
+      <pre>				for (j = 0; j &lt; CHUNK; j = j + 1) begin : inner</pre>
+      <pre>					wire temp;</pre>
+      <pre>					if (step == 1) begin : genblk1</pre>
+      <pre>						assign temp = input_bits[i];</pre>
+      <pre>					end</pre>
+      <pre>					else if (j == 0) begin : genblk1</pre>
+      <pre>						assign temp = steps[PREV].outer[LAST_START].val;</pre>
+      <pre>					end</pre>
+      <pre>					else begin : genblk1</pre>
+      <pre>						assign temp = steps[step].outer[i].inner[j - 1].temp &amp; steps[PREV].outer[LAST_START + j].val;</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>				wire val;</pre>
+      <pre>				assign val = steps[step].outer[i].inner[CHUNK - 1].temp;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>	assign out = steps[WIDTH].outer[0].val;</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test6 (o);</pre>
+      <pre>	output wire [3:0] o;</pre>
+      <pre>	genvar i;</pre>
+      <pre>	generate</pre>
+      <pre>		for (i = 3; i &gt;= 0; i = i - 1) begin : genblk1</pre>
+      <pre>			assign o[i] = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test7;</pre>
+      <pre>	reg [2:0] out1;</pre>
+      <pre>	reg [2:0] out2;</pre>
+      <pre>	wire [2:0] out3;</pre>
+      <pre>	generate</pre>
+      <pre>		if (1) begin : cond</pre>
+      <pre>			reg [2:0] sub_out1;</pre>
+      <pre>			reg [2:0] sub_out2;</pre>
+      <pre>			wire [2:0] sub_out3;</pre>
+      <pre>			initial begin : init</pre>
+      <pre>				reg signed [31:0] x;</pre>
+      <pre>				x = 4;</pre>
+      <pre>				out1 = x;</pre>
+      <pre>				sub_out1 = x;</pre>
+      <pre>			end</pre>
+      <pre>			always @(*) begin : proc</pre>
+      <pre>				reg signed [31:0] x;</pre>
+      <pre>				x = 2;</pre>
+      <pre>				out2 = x;</pre>
+      <pre>				sub_out2 = x;</pre>
+      <pre>			end</pre>
+      <pre>			genvar x;</pre>
+      <pre>			for (x = 0; x &lt; 3; x = x + 1) begin : genblk1</pre>
+      <pre>				assign out3[x] = 1;</pre>
+      <pre>				assign sub_out3[x] = 1;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test8;</pre>
+      <pre>	wire [1:0] x = 2&#39;b11;</pre>
+      <pre>	generate</pre>
+      <pre>		if (1) begin : A</pre>
+      <pre>			wire [1:0] x;</pre>
+      <pre>			if (1) begin : B</pre>
+      <pre>				wire [1:0] x = 2&#39;b00;</pre>
+      <pre>			end</pre>
+      <pre>			if (1) begin : C</pre>
+      <pre>				wire [1:0] x = 2&#39;b01;</pre>
+      <pre>			end</pre>
+      <pre>			assign x = (B.x ^ 2&#39;b11) ^ C.x;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module gen_test9;</pre>
+      <pre>	wire [1:0] w = 2&#39;b11;</pre>
+      <pre>	generate</pre>
+      <pre>		if (1) begin : A</pre>
+      <pre>			wire [1:0] x;</pre>
+      <pre>			if (1) begin : B</pre>
+      <pre>				wire [1:0] y = 2&#39;b00;</pre>
+      <pre>			end</pre>
+      <pre>			if (1) begin : C</pre>
+      <pre>				wire [1:0] z = 2&#39;b01;</pre>
+      <pre>			end</pre>
+      <pre>			assign x = (B.y ^ 2&#39;b11) ^ C.z;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

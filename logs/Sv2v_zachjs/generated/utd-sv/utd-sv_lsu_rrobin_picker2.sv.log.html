@@ -1,121 +1,135 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv</a> <a href="../../../../third_party/tests/utd-sv/lsu_rrobin_picker2.v.html" target="file-frame">third_party/tests/utd-sv/lsu_rrobin_picker2.v</a>
-defines: 
-completed: 2021-12-27 02:40:27
-time_elapsed: 0.035s
-ram usage: 32820 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv</a> <a href="../../../../third_party/tests/utd-sv/lsu_rrobin_picker2.v.html" target="file-frame">third_party/tests/utd-sv/lsu_rrobin_picker2.v</a>
-module lsu_rrobin_picker2 (
-	so,
-	pick_one_hot,
-	rclk,
-	grst_l,
-	arst_l,
-	si,
-	se,
-	events,
-	events_picked,
-	thread_force
-);
-	input rclk;
-	input grst_l;
-	input arst_l;
-	input si;
-	input se;
-	output wire so;
-	input [3:0] events;
-	input [3:0] events_picked;
-	input [3:0] thread_force;
-	output wire [3:0] pick_one_hot;
-	wire clk;
-	wire reset;
-	wire dbb_reset_l;
-	wire [3:0] thread_force_pe_mask;
-	wire [3:0] pick_thread_force_1hot;
-	wire thread_force_events_sel;
-	wire [3:0] pick_rrobin_1hot;
-	wire [3:0] pick_rev_rrobin_1hot;
-	wire [3:0] pick_rrobin_1hot_mx;
-	wire events_pick_dir_d1;
-	wire events_pick_dir;
-	wire [3:0] pick_rrobin_status_or_one_hot;
-	wire [3:0] pick_rrobin_din;
-	wire [3:0] pick_rrobin;
-	wire pick_rrobin_reset;
-	wire pick_rrobin_dir_upd;
-	wire [3:0] pick_rrobin_events;
-	dffrl_async rstff(
-		.din(grst_l),
-		.q(dbb_reset_l),
-		.clk(clk),
-		.se(se),
-		.si(),
-		.so(),
-		.rst_l(arst_l)
-	);
-	assign reset = ~dbb_reset_l;
-	assign clk = rclk;
-	assign thread_force_events_sel = |(events[3:0] &amp; thread_force[3:0]);
-	assign thread_force_pe_mask[3:0] = events[3:0] &amp; thread_force[3:0];
-	assign pick_thread_force_1hot[0] = thread_force_pe_mask[0];
-	assign pick_thread_force_1hot[1] = thread_force_pe_mask[1] &amp; ~thread_force_pe_mask[0];
-	assign pick_thread_force_1hot[2] = thread_force_pe_mask[2] &amp; ~|thread_force_pe_mask[1:0];
-	assign pick_thread_force_1hot[3] = thread_force_pe_mask[3] &amp; ~|thread_force_pe_mask[2:0];
-	assign pick_rrobin_events[3:0] = events[3:0] &amp; ~pick_rrobin[3:0];
-	assign pick_rrobin_1hot[0] = ~events_pick_dir_d1 &amp; pick_rrobin_events[0];
-	assign pick_rrobin_1hot[1] = (~events_pick_dir_d1 &amp; pick_rrobin_events[1]) &amp; ~pick_rrobin_events[0];
-	assign pick_rrobin_1hot[2] = (~events_pick_dir_d1 &amp; pick_rrobin_events[2]) &amp; ~|pick_rrobin_events[1:0];
-	assign pick_rrobin_1hot[3] = (~events_pick_dir_d1 &amp; pick_rrobin_events[3]) &amp; ~|pick_rrobin_events[2:0];
-	assign pick_rev_rrobin_1hot[0] = (events_pick_dir_d1 &amp; pick_rrobin_events[0]) &amp; ~|pick_rrobin_events[3:1];
-	assign pick_rev_rrobin_1hot[1] = (events_pick_dir_d1 &amp; pick_rrobin_events[1]) &amp; ~|pick_rrobin_events[3:2];
-	assign pick_rev_rrobin_1hot[2] = (events_pick_dir_d1 &amp; pick_rrobin_events[2]) &amp; ~|pick_rrobin_events[3];
-	assign pick_rev_rrobin_1hot[3] = events_pick_dir_d1 &amp; pick_rrobin_events[3];
-	assign pick_rrobin_1hot_mx[3:0] = pick_rev_rrobin_1hot[3:0] | pick_rrobin_1hot[3:0];
-	assign pick_one_hot[3:0] = (thread_force_events_sel ? pick_thread_force_1hot[3:0] : pick_rrobin_1hot_mx[3:0]);
-	assign pick_rrobin_status_or_one_hot[3:0] = pick_rrobin[3:0] | events_picked[3:0];
-	assign pick_rrobin_reset = reset | ~|(events[3:0] &amp; ~pick_rrobin_status_or_one_hot[3:0]);
-	assign pick_rrobin_dir_upd = |events[3:0] &amp; ~|(events[3:0] &amp; ~pick_rrobin_status_or_one_hot[3:0]);
-	assign pick_rrobin_din[3:0] = pick_rrobin_status_or_one_hot[3:0] &amp; ~{4 {pick_rrobin_reset}};
-	dff_s #(4) ff_pick_rrobin(
-		.din(pick_rrobin_din[3:0]),
-		.q(pick_rrobin[3:0]),
-		.clk(clk),
-		.se(1&#39;b0),
-		.si(),
-		.so()
-	);
-	assign events_pick_dir = ~reset &amp; ((~pick_rrobin_dir_upd &amp; events_pick_dir_d1) | (pick_rrobin_dir_upd &amp; ~events_pick_dir_d1));
-	dff_s #(1) ff_events_pick_dir(
-		.din(events_pick_dir),
-		.q(events_pick_dir_d1),
-		.clk(clk),
-		.se(1&#39;b0),
-		.si(),
-		.so()
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_lsu_rrobin_picker2</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/lsu_rrobin_picker2.v.html" target="file-frame">third_party/tests/utd-sv/lsu_rrobin_picker2.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:36</dd></div>
+        <div><dt>time elapsed</dt><dd>0.033s</dd></div>
+        <div><dt>ram usage</dt><dd>32840 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_lsu_rrobin_picker2.sv</a> <a href="../../../../third_party/tests/utd-sv/lsu_rrobin_picker2.v.html" target="file-frame">third_party/tests/utd-sv/lsu_rrobin_picker2.v</a></pre>
+      <pre>module lsu_rrobin_picker2 (</pre>
+      <pre>	so,</pre>
+      <pre>	pick_one_hot,</pre>
+      <pre>	rclk,</pre>
+      <pre>	grst_l,</pre>
+      <pre>	arst_l,</pre>
+      <pre>	si,</pre>
+      <pre>	se,</pre>
+      <pre>	events,</pre>
+      <pre>	events_picked,</pre>
+      <pre>	thread_force</pre>
+      <pre>);</pre>
+      <pre>	input rclk;</pre>
+      <pre>	input grst_l;</pre>
+      <pre>	input arst_l;</pre>
+      <pre>	input si;</pre>
+      <pre>	input se;</pre>
+      <pre>	output wire so;</pre>
+      <pre>	input [3:0] events;</pre>
+      <pre>	input [3:0] events_picked;</pre>
+      <pre>	input [3:0] thread_force;</pre>
+      <pre>	output wire [3:0] pick_one_hot;</pre>
+      <pre>	wire clk;</pre>
+      <pre>	wire reset;</pre>
+      <pre>	wire dbb_reset_l;</pre>
+      <pre>	wire [3:0] thread_force_pe_mask;</pre>
+      <pre>	wire [3:0] pick_thread_force_1hot;</pre>
+      <pre>	wire thread_force_events_sel;</pre>
+      <pre>	wire [3:0] pick_rrobin_1hot;</pre>
+      <pre>	wire [3:0] pick_rev_rrobin_1hot;</pre>
+      <pre>	wire [3:0] pick_rrobin_1hot_mx;</pre>
+      <pre>	wire events_pick_dir_d1;</pre>
+      <pre>	wire events_pick_dir;</pre>
+      <pre>	wire [3:0] pick_rrobin_status_or_one_hot;</pre>
+      <pre>	wire [3:0] pick_rrobin_din;</pre>
+      <pre>	wire [3:0] pick_rrobin;</pre>
+      <pre>	wire pick_rrobin_reset;</pre>
+      <pre>	wire pick_rrobin_dir_upd;</pre>
+      <pre>	wire [3:0] pick_rrobin_events;</pre>
+      <pre>	dffrl_async rstff(</pre>
+      <pre>		.din(grst_l),</pre>
+      <pre>		.q(dbb_reset_l),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so(),</pre>
+      <pre>		.rst_l(arst_l)</pre>
+      <pre>	);</pre>
+      <pre>	assign reset = ~dbb_reset_l;</pre>
+      <pre>	assign clk = rclk;</pre>
+      <pre>	assign thread_force_events_sel = |(events[3:0] &amp; thread_force[3:0]);</pre>
+      <pre>	assign thread_force_pe_mask[3:0] = events[3:0] &amp; thread_force[3:0];</pre>
+      <pre>	assign pick_thread_force_1hot[0] = thread_force_pe_mask[0];</pre>
+      <pre>	assign pick_thread_force_1hot[1] = thread_force_pe_mask[1] &amp; ~thread_force_pe_mask[0];</pre>
+      <pre>	assign pick_thread_force_1hot[2] = thread_force_pe_mask[2] &amp; ~|thread_force_pe_mask[1:0];</pre>
+      <pre>	assign pick_thread_force_1hot[3] = thread_force_pe_mask[3] &amp; ~|thread_force_pe_mask[2:0];</pre>
+      <pre>	assign pick_rrobin_events[3:0] = events[3:0] &amp; ~pick_rrobin[3:0];</pre>
+      <pre>	assign pick_rrobin_1hot[0] = ~events_pick_dir_d1 &amp; pick_rrobin_events[0];</pre>
+      <pre>	assign pick_rrobin_1hot[1] = (~events_pick_dir_d1 &amp; pick_rrobin_events[1]) &amp; ~pick_rrobin_events[0];</pre>
+      <pre>	assign pick_rrobin_1hot[2] = (~events_pick_dir_d1 &amp; pick_rrobin_events[2]) &amp; ~|pick_rrobin_events[1:0];</pre>
+      <pre>	assign pick_rrobin_1hot[3] = (~events_pick_dir_d1 &amp; pick_rrobin_events[3]) &amp; ~|pick_rrobin_events[2:0];</pre>
+      <pre>	assign pick_rev_rrobin_1hot[0] = (events_pick_dir_d1 &amp; pick_rrobin_events[0]) &amp; ~|pick_rrobin_events[3:1];</pre>
+      <pre>	assign pick_rev_rrobin_1hot[1] = (events_pick_dir_d1 &amp; pick_rrobin_events[1]) &amp; ~|pick_rrobin_events[3:2];</pre>
+      <pre>	assign pick_rev_rrobin_1hot[2] = (events_pick_dir_d1 &amp; pick_rrobin_events[2]) &amp; ~|pick_rrobin_events[3];</pre>
+      <pre>	assign pick_rev_rrobin_1hot[3] = events_pick_dir_d1 &amp; pick_rrobin_events[3];</pre>
+      <pre>	assign pick_rrobin_1hot_mx[3:0] = pick_rev_rrobin_1hot[3:0] | pick_rrobin_1hot[3:0];</pre>
+      <pre>	assign pick_one_hot[3:0] = (thread_force_events_sel ? pick_thread_force_1hot[3:0] : pick_rrobin_1hot_mx[3:0]);</pre>
+      <pre>	assign pick_rrobin_status_or_one_hot[3:0] = pick_rrobin[3:0] | events_picked[3:0];</pre>
+      <pre>	assign pick_rrobin_reset = reset | ~|(events[3:0] &amp; ~pick_rrobin_status_or_one_hot[3:0]);</pre>
+      <pre>	assign pick_rrobin_dir_upd = |events[3:0] &amp; ~|(events[3:0] &amp; ~pick_rrobin_status_or_one_hot[3:0]);</pre>
+      <pre>	assign pick_rrobin_din[3:0] = pick_rrobin_status_or_one_hot[3:0] &amp; ~{4 {pick_rrobin_reset}};</pre>
+      <pre>	dff_s #(4) ff_pick_rrobin(</pre>
+      <pre>		.din(pick_rrobin_din[3:0]),</pre>
+      <pre>		.q(pick_rrobin[3:0]),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign events_pick_dir = ~reset &amp; ((~pick_rrobin_dir_upd &amp; events_pick_dir_d1) | (pick_rrobin_dir_upd &amp; ~events_pick_dir_d1));</pre>
+      <pre>	dff_s #(1) ff_events_pick_dir(</pre>
+      <pre>		.din(events_pick_dir),</pre>
+      <pre>		.q(events_pick_dir_d1),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

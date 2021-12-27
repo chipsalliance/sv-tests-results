@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/11.3.5'] = [["expr_short_circuit",1,"logs/Sv2v_zachjs/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]
+config_loader_data['sv2v_zachjs/11.3.5'] = [["","expr_short_circuit",1,"logs/Sv2v_zachjs/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]

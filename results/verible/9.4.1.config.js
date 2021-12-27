@@ -1,1 +1,1 @@
-config_loader_data['verible/9.4.1'] = [["always",1,"logs/Verible/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"],["delay_control",1,"logs/Verible/chapter-9/9.4.1--delay_control.sv.log.html","tests/chapter-9/9.4.1--delay_control.sv.html"]]
+config_loader_data['verible/9.4.1'] = [["","always",1,"logs/Verible/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"],["","delay_control",1,"logs/Verible/chapter-9/9.4.1--delay_control.sv.log.html","tests/chapter-9/9.4.1--delay_control.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/9.2.3'] = [["final",1,"logs/Sv2v_zachjs/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]
+config_loader_data['sv2v_zachjs/9.2.3'] = [["","final",1,"logs/Sv2v_zachjs/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]

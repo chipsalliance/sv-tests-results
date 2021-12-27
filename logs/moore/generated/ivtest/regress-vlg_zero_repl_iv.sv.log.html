@@ -1,131 +1,145 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="http://llhd.io/" target="_blank">moore</a></h3>
-<pre class="test-passed">
-description: Test imported from ivtest
-rc: 0 (means success: 1)
-tags: ivtest
-incdirs: /root/sv-tests/sv-tests/third_party/tests/ivtest /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
-top_module: 
-type: simulation parsing
-mode: parsing
-files: <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v</a>
-defines: 
-completed: 2021-12-27 02:35:14
-time_elapsed: 0.007s
-ram usage: 10216 KB
-</pre>
-<pre class="log">
-
-moore -I /root/sv-tests/sv-tests/third_party/tests/ivtest -I /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests -e test <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v</a>
-warning: unsupported: system task `$display`; ignored
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html#l-20" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v:20:7</a>-62:
-   | 
-   |       $display(&#34;FAILED: zero-replication (NB): got %h&#34;, lat1);
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
-
-warning: unsupported: system task `$display`; ignored
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html#l-24" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v:24:7</a>-61:
-   | 
-   |       $display(&#34;FAILED: zero-replication (B): got %h&#34;, lat2);
-   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
-
-warning: unsupported: system task `$display`; ignored
-  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html#l-28" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v:28:17</a>-35:
-   | 
-   |     if (passed) $display(&#34;PASSED&#34;);
-   |                 ^^^^^^^^^^^^^^^^^^ 
-
-proc %test.initial.235.0 (i1$ %sign_bit, i1$ %lsb) -&gt; (i1$ %passed, i32$ %in, i32$ %lat1, i32$ %lat2) {
-0:
-    %1 = prb i32$ %lat1
-    %lat1.shadow = var i32 %1
-    %2 = prb i32$ %lat2
-    %lat2.shadow = var i32 %2
-    %3 = prb i1$ %passed
-    %passed.shadow = var i1 %3
-    %4 = prb i32$ %in
-    %in.shadow = var i32 %4
-    %5 = const i1 1
-    %6 = const time 0s 1e
-    drv i1$ %passed, %5, %6
-    st i1* %passed.shadow, %5
-    %7 = const i32 2147483649
-    drv i32$ %in, %7, %6
-    st i32* %in.shadow, %7
-    %8 = const time 0s 1d
-    %concat = ld i32* %in.shadow
-    drv i32$ %lat1, %concat, %8
-    %concat1 = ld i32* %in.shadow
-    drv i32$ %lat2, %concat1, %6
-    st i32* %lat2.shadow, %concat1
-    %9 = const i32 1
-    wait %10 for %9
-10:
-    %11 = prb i32$ %in
-    st i32* %in.shadow, %11
-    %12 = prb i32$ %lat2
-    st i32* %lat2.shadow, %12
-    %13 = prb i1$ %passed
-    st i1* %passed.shadow, %13
-    %14 = prb i32$ %lat1
-    st i32* %lat1.shadow, %14
-    %lat1.shadow.ld = ld i32* %lat1.shadow
-    %15 = const i32 2147483649
-    %16 = neq i32 %lat1.shadow.ld, %15
-    %17 = const i1 0
-    %18 = neq i1 %16, %17
-    %19 = const time 0s 1e
-    br %18, %if_exit, %if_true
-if_true:
-    drv i1$ %passed, %17, %19
-    st i1* %passed.shadow, %17
-    br %if_exit
-if_exit:
-    %lat2.shadow.ld = ld i32* %lat2.shadow
-    %20 = neq i32 %lat2.shadow.ld, %15
-    %21 = neq i1 %20, %17
-    br %21, %if_exit1, %if_true1
-if_true1:
-    drv i1$ %passed, %17, %19
-    st i1* %passed.shadow, %17
-    br %if_exit1
-if_exit1:
-    halt
-}
-
-entity @test () -&gt; () {
-    %0 = const i1 0
-    %passed = sig i1 %0
-    %1 = const i32 0
-    %in = sig i32 %1
-    %lat1 = sig i32 %1
-    %lat2 = sig i32 %1
-    %sign_bit = sig i1 %0
-    %in.prb = prb i32$ %in
-    %2 = exts i1, i32 %in.prb, 31, 1
-    %3 = inss i32 %1, i1 %2, 0, 1
-    %4 = exts i1, i32 %3, 0, 1
-    %5 = sig i1 %0
-    %6 = const time 0s 1d
-    drv i1$ %5, %4, %6
-    con i1$ %sign_bit, %5
-    %lsb = sig i1 %0
-    %7 = exts i1, i32 %in.prb, 0, 1
-    %8 = sig i1 %0
-    drv i1$ %8, %7, %6
-    con i1$ %lsb, %8
-    inst %test.initial.235.0 (i1$ %sign_bit, i1$ %lsb) -&gt; (i1$ %passed, i32$ %in, i32$ %lat1, i32$ %lat2)
-}
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="http://llhd.io/" target="_blank"><h1>moore</h1></a>
+      <h2>regress-vlg_zero_repl_iv</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:04:50</dd></div>
+        <div><dt>time elapsed</dt><dd>0.007s</dd></div>
+        <div><dt>ram usage</dt><dd>10196 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>moore -I /root/sv-tests/sv-tests/third_party/tests/ivtest -I /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests -e test <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v</a></pre>
+      <pre>warning: unsupported: system task `$display`; ignored</pre>
+      <pre>  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html#l-20" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v:20:7</a>-62:</pre>
+      <pre>   | </pre>
+      <pre>   |       $display(&#34;FAILED: zero-replication (NB): got %h&#34;, lat1);</pre>
+      <pre>   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ </pre>
+      <pre></pre>
+      <pre>warning: unsupported: system task `$display`; ignored</pre>
+      <pre>  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html#l-24" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v:24:7</a>-61:</pre>
+      <pre>   | </pre>
+      <pre>   |       $display(&#34;FAILED: zero-replication (B): got %h&#34;, lat2);</pre>
+      <pre>   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ </pre>
+      <pre></pre>
+      <pre>warning: unsupported: system task `$display`; ignored</pre>
+      <pre>  --&gt; <a href="../../../../third_party/tests/ivtest/ivltests/zero_repl.v.html#l-28" target="file-frame">third_party/tests/ivtest/ivltests/zero_repl.v:28:17</a>-35:</pre>
+      <pre>   | </pre>
+      <pre>   |     if (passed) $display(&#34;PASSED&#34;);</pre>
+      <pre>   |                 ^^^^^^^^^^^^^^^^^^ </pre>
+      <pre></pre>
+      <pre>proc %test.initial.235.0 (i1$ %sign_bit, i1$ %lsb) -&gt; (i1$ %passed, i32$ %in, i32$ %lat1, i32$ %lat2) {</pre>
+      <pre>0:</pre>
+      <pre>    %1 = prb i32$ %lat1</pre>
+      <pre>    %lat1.shadow = var i32 %1</pre>
+      <pre>    %2 = prb i32$ %in</pre>
+      <pre>    %in.shadow = var i32 %2</pre>
+      <pre>    %3 = prb i32$ %lat2</pre>
+      <pre>    %lat2.shadow = var i32 %3</pre>
+      <pre>    %4 = prb i1$ %passed</pre>
+      <pre>    %passed.shadow = var i1 %4</pre>
+      <pre>    %5 = const i1 1</pre>
+      <pre>    %6 = const time 0s 1e</pre>
+      <pre>    drv i1$ %passed, %5, %6</pre>
+      <pre>    st i1* %passed.shadow, %5</pre>
+      <pre>    %7 = const i32 2147483649</pre>
+      <pre>    drv i32$ %in, %7, %6</pre>
+      <pre>    st i32* %in.shadow, %7</pre>
+      <pre>    %8 = const time 0s 1d</pre>
+      <pre>    %concat = ld i32* %in.shadow</pre>
+      <pre>    drv i32$ %lat1, %concat, %8</pre>
+      <pre>    %concat1 = ld i32* %in.shadow</pre>
+      <pre>    drv i32$ %lat2, %concat1, %6</pre>
+      <pre>    st i32* %lat2.shadow, %concat1</pre>
+      <pre>    %9 = const i32 1</pre>
+      <pre>    wait %10 for %9</pre>
+      <pre>10:</pre>
+      <pre>    %11 = prb i1$ %passed</pre>
+      <pre>    st i1* %passed.shadow, %11</pre>
+      <pre>    %12 = prb i32$ %lat1</pre>
+      <pre>    st i32* %lat1.shadow, %12</pre>
+      <pre>    %13 = prb i32$ %in</pre>
+      <pre>    st i32* %in.shadow, %13</pre>
+      <pre>    %14 = prb i32$ %lat2</pre>
+      <pre>    st i32* %lat2.shadow, %14</pre>
+      <pre>    %lat1.shadow.ld = ld i32* %lat1.shadow</pre>
+      <pre>    %15 = const i32 2147483649</pre>
+      <pre>    %16 = neq i32 %lat1.shadow.ld, %15</pre>
+      <pre>    %17 = const i1 0</pre>
+      <pre>    %18 = neq i1 %16, %17</pre>
+      <pre>    %19 = const time 0s 1e</pre>
+      <pre>    br %18, %if_exit, %if_true</pre>
+      <pre>if_true:</pre>
+      <pre>    drv i1$ %passed, %17, %19</pre>
+      <pre>    st i1* %passed.shadow, %17</pre>
+      <pre>    br %if_exit</pre>
+      <pre>if_exit:</pre>
+      <pre>    %lat2.shadow.ld = ld i32* %lat2.shadow</pre>
+      <pre>    %20 = neq i32 %lat2.shadow.ld, %15</pre>
+      <pre>    %21 = neq i1 %20, %17</pre>
+      <pre>    br %21, %if_exit1, %if_true1</pre>
+      <pre>if_true1:</pre>
+      <pre>    drv i1$ %passed, %17, %19</pre>
+      <pre>    st i1* %passed.shadow, %17</pre>
+      <pre>    br %if_exit1</pre>
+      <pre>if_exit1:</pre>
+      <pre>    halt</pre>
+      <pre>}</pre>
+      <pre></pre>
+      <pre>entity @test () -&gt; () {</pre>
+      <pre>    %0 = const i1 0</pre>
+      <pre>    %passed = sig i1 %0</pre>
+      <pre>    %1 = const i32 0</pre>
+      <pre>    %in = sig i32 %1</pre>
+      <pre>    %lat1 = sig i32 %1</pre>
+      <pre>    %lat2 = sig i32 %1</pre>
+      <pre>    %sign_bit = sig i1 %0</pre>
+      <pre>    %in.prb = prb i32$ %in</pre>
+      <pre>    %2 = exts i1, i32 %in.prb, 31, 1</pre>
+      <pre>    %3 = inss i32 %1, i1 %2, 0, 1</pre>
+      <pre>    %4 = exts i1, i32 %3, 0, 1</pre>
+      <pre>    %5 = sig i1 %0</pre>
+      <pre>    %6 = const time 0s 1d</pre>
+      <pre>    drv i1$ %5, %4, %6</pre>
+      <pre>    con i1$ %sign_bit, %5</pre>
+      <pre>    %lsb = sig i1 %0</pre>
+      <pre>    %7 = exts i1, i32 %in.prb, 0, 1</pre>
+      <pre>    %8 = sig i1 %0</pre>
+      <pre>    drv i1$ %8, %7, %6</pre>
+      <pre>    con i1$ %lsb, %8</pre>
+      <pre>    inst %test.initial.235.0 (i1$ %sign_bit, i1$ %lsb) -&gt; (i1$ %passed, i32$ %in, i32$ %lat1, i32$ %lat2)</pre>
+      <pre>}</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

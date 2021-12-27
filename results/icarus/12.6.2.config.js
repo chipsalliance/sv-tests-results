@@ -1,1 +1,1 @@
-config_loader_data['icarus/12.6.2'] = [["if_pattern",0,"logs/Icarus/chapter-12/12.6.2--if_pattern.sv.log.html","tests/chapter-12/12.6.2--if_pattern.sv.html"]]
+config_loader_data['icarus/12.6.2'] = [["","if_pattern",0,"logs/Icarus/chapter-12/12.6.2--if_pattern.sv.log.html","tests/chapter-12/12.6.2--if_pattern.sv.html"]]

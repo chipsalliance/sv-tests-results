@@ -1,1 +1,1 @@
-config_loader_data['slang/ibex'] = [["ibex",1,"logs/Slang/generated/fusesoc/ibex-sim.sv.log.html","build/lowrisc_ibex_ibex_simple_system_0/src/lowrisc_ibex_ibex_pkg_0.1/rtl/ibex_pkg.sv.html"]]
+config_loader_data['slang/ibex'] = [["","ibex",1,"logs/Slang/generated/fusesoc/ibex-sim.sv.log.html","build/lowrisc_ibex_ibex_simple_system_0/src/lowrisc_ibex_ibex_pkg_0.1/rtl/ibex_pkg.sv.html"]]

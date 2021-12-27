@@ -1,1 +1,1 @@
-config_loader_data['verible/11.12'] = [["let_construct",1,"logs/Verible/chapter-11/11.12--let_construct.sv.log.html","tests/chapter-11/11.12--let_construct.sv.html"]]
+config_loader_data['verible/11.12'] = [["","let_construct",1,"logs/Verible/chapter-11/11.12--let_construct.sv.log.html","tests/chapter-11/11.12--let_construct.sv.html"]]

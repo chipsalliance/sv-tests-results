@@ -1,1 +1,1 @@
-config_loader_data['odin/earlgrey'] = [["earlgrey",0,"logs/Odin/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]
+config_loader_data['odin/earlgrey'] = [["","earlgrey",0,"logs/Odin/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

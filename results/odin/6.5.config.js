@@ -1,1 +1,1 @@
-config_loader_data['odin/6.5'] = [["variable_assignment",0,"logs/Odin/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]
+config_loader_data['odin/6.5'] = [["","variable_assignment",0,"logs/Odin/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/12.6.3'] = [["conditional_pattern",0,"logs/moore_parse/chapter-12/12.6.3--conditional_pattern.sv.log.html","tests/chapter-12/12.6.3--conditional_pattern.sv.html"]]
+config_loader_data['moore_parse/12.6.3'] = [["","conditional_pattern",0,"logs/moore_parse/chapter-12/12.6.3--conditional_pattern.sv.log.html","tests/chapter-12/12.6.3--conditional_pattern.sv.html"]]

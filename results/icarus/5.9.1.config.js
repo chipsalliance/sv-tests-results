@@ -1,1 +1,1 @@
-config_loader_data['icarus/5.9.1'] = [["string-special-chars",1,"logs/Icarus/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]
+config_loader_data['icarus/5.9.1'] = [["","string-special-chars",1,"logs/Icarus/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]

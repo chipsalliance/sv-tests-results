@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/8.20'] = [["virtual_method",1,"logs/sv_parser/chapter-8/8.20--virtual_method.sv.log.html","tests/chapter-8/8.20--virtual_method.sv.html"]]
+config_loader_data['sv_parser/8.20'] = [["","virtual_method",1,"logs/sv_parser/chapter-8/8.20--virtual_method.sv.log.html","tests/chapter-8/8.20--virtual_method.sv.html"]]

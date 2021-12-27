@@ -1,186 +1,200 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv</a> <a href="../../../../third_party/tests/utd-sv/ccx_arb_srcq.v.html" target="file-frame">third_party/tests/utd-sv/ccx_arb_srcq.v</a>
-defines: 
-completed: 2021-12-27 02:40:28
-time_elapsed: 0.040s
-ram usage: 43128 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv</a> <a href="../../../../third_party/tests/utd-sv/ccx_arb_srcq.v.html" target="file-frame">third_party/tests/utd-sv/ccx_arb_srcq.v</a>
-module ccx_arb_srcq (
-	qfull,
-	qsel0,
-	qsel1,
-	shift_x,
-	ctl_qsel0_a,
-	ctl_qsel1_a_l,
-	ctl_shift_a,
-	q0_hold_a,
-	atom_a,
-	req_q,
-	atom_q,
-	grant_a,
-	rclk,
-	reset_d1
-);
-	output wire qfull;
-	output wire qsel0;
-	output wire qsel1;
-	output wire shift_x;
-	output wire ctl_qsel0_a;
-	output wire ctl_qsel1_a_l;
-	output wire ctl_shift_a;
-	output wire q0_hold_a;
-	output wire atom_a;
-	input req_q;
-	input atom_q;
-	input grant_a;
-	input rclk;
-	input reset_d1;
-	wire [1:0] qcount_decr;
-	wire [1:0] qcount_decr_d1;
-	wire [1:0] qcount_decr_r_d1;
-	wire [1:0] qcount_incr;
-	wire qsel1_l;
-	wire shift_a;
-	wire q0_hold_a_l;
-	wire shift_hi;
-	wire shift_hi_d1;
-	wire incr_a;
-	wire decr;
-	wire atom_rqqual_x;
-	wire atom_rqqual_a;
-	wire req_atomqual_a;
-	wire req_a;
-	wire qfull_a;
-	dff_s #(1) dff_ccx_com_atom(
-		.din(atom_q),
-		.q(atom_a),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	dff_s #(1) dff_ccx_com_req(
-		.din(req_q),
-		.q(req_a),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	dff_s #(1) dff_ccx_com_qf(
-		.din(qfull),
-		.q(qfull_a),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	assign atom_rqqual_a = (atom_a &amp; req_a) | ((atom_rqqual_x &amp; qfull_a) &amp; ~reset_d1);
-	dff_s #(1) dff_ccx_com_atomq(
-		.din(atom_rqqual_a),
-		.q(atom_rqqual_x),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	assign req_atomqual_a = (atom_rqqual_x | req_a) &amp; (~qfull_a &amp; ~reset_d1);
-	assign incr_a = req_atomqual_a;
-	assign qfull = qcount_incr[1];
-	assign shift_hi = ~(qcount_decr[1] | qcount_decr[0]);
-	dff_s #(1) dff_ccx_com_shift_hi(
-		.din(shift_hi),
-		.q(shift_hi_d1),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	assign decr = grant_a &amp; ~reset_d1;
-	mux2ds #(1) mx2ds_ccx_com_decr0(
-		.dout(qcount_decr[0]),
-		.in0(qcount_incr[0]),
-		.in1(qcount_incr[1]),
-		.sel0(~decr),
-		.sel1(decr)
-	);
-	mux2ds #(1) mx2ds_ccx_com_decr1(
-		.dout(qcount_decr[1]),
-		.in0(qcount_incr[1]),
-		.in1(1&#39;b0),
-		.sel0(~decr),
-		.sel1(decr)
-	);
-	dff_s #(1) dff_ccx_com_decr0(
-		.din(qcount_decr[0]),
-		.q(qcount_decr_d1[0]),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	assign qcount_decr_r_d1[0] = qcount_decr_d1[0] &amp; ~reset_d1;
-	dff_s #(1) dff_ccx_com_decr1(
-		.din(qcount_decr[1]),
-		.q(qcount_decr_d1[1]),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	assign qcount_decr_r_d1[1] = qcount_decr_d1[1] &amp; ~reset_d1;
-	mux2ds #(1) mx2ds_ccx_com_incr0(
-		.dout(qcount_incr[0]),
-		.in0(qcount_decr_r_d1[0]),
-		.in1(shift_hi_d1),
-		.sel0(~incr_a),
-		.sel1(incr_a)
-	);
-	mux2ds #(1) mx2ds_ccx_com_incr1(
-		.dout(qcount_incr[1]),
-		.in0(qcount_decr_r_d1[1]),
-		.in1(qcount_decr_r_d1[0]),
-		.sel0(~incr_a),
-		.sel1(incr_a)
-	);
-	assign qsel1 = qcount_incr[1] &amp; incr_a;
-	assign qsel0 = qcount_incr[0] &amp; incr_a;
-	assign shift_a = qcount_incr[1] &amp; grant_a;
-	dff_s #(1) dff_ccx_com_shiftx(
-		.din(shift_a),
-		.q(shift_x),
-		.clk(rclk),
-		.se(1&#39;b0),
-		.si(1&#39;b0),
-		.so()
-	);
-	assign q0_hold_a = ~(~qsel0 &amp; ~shift_x);
-	assign ctl_qsel1_a_l = ~((qcount_decr_r_d1[0] &amp; incr_a) &amp; ~grant_a);
-	assign ctl_qsel0_a = (qcount_incr[0] &amp; incr_a) | ((qcount_decr_r_d1[0] &amp; incr_a) &amp; grant_a);
-	assign ctl_shift_a = qcount_decr_r_d1[1] &amp; grant_a;
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_ccx_arb_srcq</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/ccx_arb_srcq.v.html" target="file-frame">third_party/tests/utd-sv/ccx_arb_srcq.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:18:12</dd></div>
+        <div><dt>time elapsed</dt><dd>0.042s</dd></div>
+        <div><dt>ram usage</dt><dd>43044 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ccx_arb_srcq.sv</a> <a href="../../../../third_party/tests/utd-sv/ccx_arb_srcq.v.html" target="file-frame">third_party/tests/utd-sv/ccx_arb_srcq.v</a></pre>
+      <pre>module ccx_arb_srcq (</pre>
+      <pre>	qfull,</pre>
+      <pre>	qsel0,</pre>
+      <pre>	qsel1,</pre>
+      <pre>	shift_x,</pre>
+      <pre>	ctl_qsel0_a,</pre>
+      <pre>	ctl_qsel1_a_l,</pre>
+      <pre>	ctl_shift_a,</pre>
+      <pre>	q0_hold_a,</pre>
+      <pre>	atom_a,</pre>
+      <pre>	req_q,</pre>
+      <pre>	atom_q,</pre>
+      <pre>	grant_a,</pre>
+      <pre>	rclk,</pre>
+      <pre>	reset_d1</pre>
+      <pre>);</pre>
+      <pre>	output wire qfull;</pre>
+      <pre>	output wire qsel0;</pre>
+      <pre>	output wire qsel1;</pre>
+      <pre>	output wire shift_x;</pre>
+      <pre>	output wire ctl_qsel0_a;</pre>
+      <pre>	output wire ctl_qsel1_a_l;</pre>
+      <pre>	output wire ctl_shift_a;</pre>
+      <pre>	output wire q0_hold_a;</pre>
+      <pre>	output wire atom_a;</pre>
+      <pre>	input req_q;</pre>
+      <pre>	input atom_q;</pre>
+      <pre>	input grant_a;</pre>
+      <pre>	input rclk;</pre>
+      <pre>	input reset_d1;</pre>
+      <pre>	wire [1:0] qcount_decr;</pre>
+      <pre>	wire [1:0] qcount_decr_d1;</pre>
+      <pre>	wire [1:0] qcount_decr_r_d1;</pre>
+      <pre>	wire [1:0] qcount_incr;</pre>
+      <pre>	wire qsel1_l;</pre>
+      <pre>	wire shift_a;</pre>
+      <pre>	wire q0_hold_a_l;</pre>
+      <pre>	wire shift_hi;</pre>
+      <pre>	wire shift_hi_d1;</pre>
+      <pre>	wire incr_a;</pre>
+      <pre>	wire decr;</pre>
+      <pre>	wire atom_rqqual_x;</pre>
+      <pre>	wire atom_rqqual_a;</pre>
+      <pre>	wire req_atomqual_a;</pre>
+      <pre>	wire req_a;</pre>
+      <pre>	wire qfull_a;</pre>
+      <pre>	dff_s #(1) dff_ccx_com_atom(</pre>
+      <pre>		.din(atom_q),</pre>
+      <pre>		.q(atom_a),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s #(1) dff_ccx_com_req(</pre>
+      <pre>		.din(req_q),</pre>
+      <pre>		.q(req_a),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s #(1) dff_ccx_com_qf(</pre>
+      <pre>		.din(qfull),</pre>
+      <pre>		.q(qfull_a),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign atom_rqqual_a = (atom_a &amp; req_a) | ((atom_rqqual_x &amp; qfull_a) &amp; ~reset_d1);</pre>
+      <pre>	dff_s #(1) dff_ccx_com_atomq(</pre>
+      <pre>		.din(atom_rqqual_a),</pre>
+      <pre>		.q(atom_rqqual_x),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign req_atomqual_a = (atom_rqqual_x | req_a) &amp; (~qfull_a &amp; ~reset_d1);</pre>
+      <pre>	assign incr_a = req_atomqual_a;</pre>
+      <pre>	assign qfull = qcount_incr[1];</pre>
+      <pre>	assign shift_hi = ~(qcount_decr[1] | qcount_decr[0]);</pre>
+      <pre>	dff_s #(1) dff_ccx_com_shift_hi(</pre>
+      <pre>		.din(shift_hi),</pre>
+      <pre>		.q(shift_hi_d1),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign decr = grant_a &amp; ~reset_d1;</pre>
+      <pre>	mux2ds #(1) mx2ds_ccx_com_decr0(</pre>
+      <pre>		.dout(qcount_decr[0]),</pre>
+      <pre>		.in0(qcount_incr[0]),</pre>
+      <pre>		.in1(qcount_incr[1]),</pre>
+      <pre>		.sel0(~decr),</pre>
+      <pre>		.sel1(decr)</pre>
+      <pre>	);</pre>
+      <pre>	mux2ds #(1) mx2ds_ccx_com_decr1(</pre>
+      <pre>		.dout(qcount_decr[1]),</pre>
+      <pre>		.in0(qcount_incr[1]),</pre>
+      <pre>		.in1(1&#39;b0),</pre>
+      <pre>		.sel0(~decr),</pre>
+      <pre>		.sel1(decr)</pre>
+      <pre>	);</pre>
+      <pre>	dff_s #(1) dff_ccx_com_decr0(</pre>
+      <pre>		.din(qcount_decr[0]),</pre>
+      <pre>		.q(qcount_decr_d1[0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign qcount_decr_r_d1[0] = qcount_decr_d1[0] &amp; ~reset_d1;</pre>
+      <pre>	dff_s #(1) dff_ccx_com_decr1(</pre>
+      <pre>		.din(qcount_decr[1]),</pre>
+      <pre>		.q(qcount_decr_d1[1]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign qcount_decr_r_d1[1] = qcount_decr_d1[1] &amp; ~reset_d1;</pre>
+      <pre>	mux2ds #(1) mx2ds_ccx_com_incr0(</pre>
+      <pre>		.dout(qcount_incr[0]),</pre>
+      <pre>		.in0(qcount_decr_r_d1[0]),</pre>
+      <pre>		.in1(shift_hi_d1),</pre>
+      <pre>		.sel0(~incr_a),</pre>
+      <pre>		.sel1(incr_a)</pre>
+      <pre>	);</pre>
+      <pre>	mux2ds #(1) mx2ds_ccx_com_incr1(</pre>
+      <pre>		.dout(qcount_incr[1]),</pre>
+      <pre>		.in0(qcount_decr_r_d1[1]),</pre>
+      <pre>		.in1(qcount_decr_r_d1[0]),</pre>
+      <pre>		.sel0(~incr_a),</pre>
+      <pre>		.sel1(incr_a)</pre>
+      <pre>	);</pre>
+      <pre>	assign qsel1 = qcount_incr[1] &amp; incr_a;</pre>
+      <pre>	assign qsel0 = qcount_incr[0] &amp; incr_a;</pre>
+      <pre>	assign shift_a = qcount_incr[1] &amp; grant_a;</pre>
+      <pre>	dff_s #(1) dff_ccx_com_shiftx(</pre>
+      <pre>		.din(shift_a),</pre>
+      <pre>		.q(shift_x),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(1&#39;b0),</pre>
+      <pre>		.si(1&#39;b0),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign q0_hold_a = ~(~qsel0 &amp; ~shift_x);</pre>
+      <pre>	assign ctl_qsel1_a_l = ~((qcount_decr_r_d1[0] &amp; incr_a) &amp; ~grant_a);</pre>
+      <pre>	assign ctl_qsel0_a = (qcount_incr[0] &amp; incr_a) | ((qcount_decr_r_d1[0] &amp; incr_a) &amp; grant_a);</pre>
+      <pre>	assign ctl_shift_a = qcount_decr_r_d1[1] &amp; grant_a;</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

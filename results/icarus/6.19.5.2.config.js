@@ -1,1 +1,1 @@
-config_loader_data['icarus/6.19.5.2'] = [["enum_last",1,"logs/Icarus/chapter-6/6.19.5.2--enum_last.sv.log.html","tests/chapter-6/6.19.5.2--enum_last.sv.html"]]
+config_loader_data['icarus/6.19.5.2'] = [["","enum_last",1,"logs/Icarus/chapter-6/6.19.5.2--enum_last.sv.log.html","tests/chapter-6/6.19.5.2--enum_last.sv.html"]]

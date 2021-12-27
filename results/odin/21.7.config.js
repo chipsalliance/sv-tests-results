@@ -1,1 +1,1 @@
-config_loader_data['odin/21.7'] = [["vcd_dump_test",0,"logs/Odin/chapter-21/21.7--dumpfile.sv.log.html","tests/chapter-21/21.7--dumpfile.sv.html"],["vcd_dumpports_test",0,"logs/Odin/chapter-21/21.7--dumpports.sv.log.html","tests/chapter-21/21.7--dumpports.sv.html"]]
+config_loader_data['odin/21.7'] = [["","vcd_dump_test",0,"logs/Odin/chapter-21/21.7--dumpfile.sv.log.html","tests/chapter-21/21.7--dumpfile.sv.html"],["","vcd_dumpports_test",0,"logs/Odin/chapter-21/21.7--dumpports.sv.log.html","tests/chapter-21/21.7--dumpports.sv.html"]]

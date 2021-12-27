@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/12.6.2'] = [["if_pattern",0,"logs/UhdmYosys/chapter-12/12.6.2--if_pattern.sv.log.html","tests/chapter-12/12.6.2--if_pattern.sv.html"]]
+config_loader_data['uhdmyosys/12.6.2'] = [["","if_pattern",0,"logs/UhdmYosys/chapter-12/12.6.2--if_pattern.sv.log.html","tests/chapter-12/12.6.2--if_pattern.sv.html"]]

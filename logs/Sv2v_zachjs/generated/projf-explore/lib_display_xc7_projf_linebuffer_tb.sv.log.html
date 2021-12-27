@@ -1,199 +1,213 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv</a>
-defines: 
-completed: 2021-12-27 02:53:20
-time_elapsed: 0.038s
-ram usage: 39608 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7 <a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv</a>
-`default_nettype none
-module linebuffer_tb;
-	parameter CLK_PERIOD_100M = 10;
-	parameter CLK_PERIOD_25M = 40;
-	reg clk_25m;
-	reg clk_100m;
-	reg rst_in;
-	reg rst_out;
-	parameter LB_SCALE = 2;
-	parameter LB_LEN = 3;
-	parameter LB_BPC = 4;
-	parameter PIXEL_CNT = 6;
-	reg [LB_BPC - 1:0] ch0 [0:PIXEL_CNT - 1];
-	reg [LB_BPC - 1:0] ch1 [0:PIXEL_CNT - 1];
-	reg [LB_BPC - 1:0] ch2 [0:PIXEL_CNT - 1];
-	wire data_req;
-	reg en_in;
-	reg en_out;
-	reg frame;
-	reg line;
-	reg [LB_BPC - 1:0] din_0;
-	reg [LB_BPC - 1:0] din_1;
-	reg [LB_BPC - 1:0] din_2;
-	wire [LB_BPC - 1:0] dout_0;
-	wire [LB_BPC - 1:0] dout_1;
-	wire [LB_BPC - 1:0] dout_2;
-	reg [$clog2(PIXEL_CNT) - 1:0] read_addr;
-	reg [$clog2(LB_LEN + 1) - 1:0] cnt_h;
-	always @(posedge clk_100m) begin
-		if (data_req) begin
-			cnt_h &lt;= 0;
-			en_in &lt;= 1;
-		end
-		else if (cnt_h &lt; LB_LEN) begin
-			cnt_h &lt;= cnt_h + 1;
-			read_addr &lt;= (read_addr == (PIXEL_CNT - 1) ? 0 : read_addr + 1);
-		end
-		if (cnt_h == (LB_LEN - 1))
-			en_in &lt;= 0;
-		if (frame)
-			read_addr &lt;= 0;
-		if (rst_in) begin
-			read_addr &lt;= 0;
-			cnt_h &lt;= 0;
-			en_in &lt;= 0;
-		end
-	end
-	linebuffer #(
-		.WIDTH(LB_BPC),
-		.LEN(LB_LEN),
-		.SCALE(LB_SCALE)
-	) lb_inst(
-		.clk_in(clk_100m),
-		.clk_out(clk_25m),
-		.rst_in(rst_in),
-		.rst_out(rst_out),
-		.data_req(data_req),
-		.en_in(en_in),
-		.en_out(en_out),
-		.frame(frame),
-		.line(line),
-		.din_0(din_0),
-		.din_1(din_1),
-		.din_2(din_2),
-		.dout_0(dout_0),
-		.dout_1(dout_1),
-		.dout_2(dout_2)
-	);
-	always #(CLK_PERIOD_100M / 2) clk_100m = ~clk_100m;
-	always #(CLK_PERIOD_25M / 2) clk_25m = ~clk_25m;
-	initial begin
-		ch0[0] = 4&#39;b1010;
-		ch1[0] = 4&#39;b0101;
-		ch2[0] = 4&#39;b1111;
-		ch0[1] = 4&#39;b1000;
-		ch1[1] = 4&#39;b0100;
-		ch2[1] = 4&#39;b0010;
-		ch0[2] = 4&#39;b0000;
-		ch1[2] = 4&#39;b0010;
-		ch2[2] = 4&#39;b0001;
-		ch0[3] = 4&#39;b0101;
-		ch1[3] = 4&#39;b1010;
-		ch2[3] = 4&#39;b0000;
-		ch0[4] = 4&#39;b0000;
-		ch1[4] = 4&#39;b0010;
-		ch2[4] = 4&#39;b0001;
-		ch0[5] = 4&#39;b1000;
-		ch1[5] = 4&#39;b0100;
-		ch2[5] = 4&#39;b0010;
-	end
-	always @(*) begin
-		din_0 = ch0[read_addr];
-		din_1 = ch1[read_addr];
-		din_2 = ch2[read_addr];
-	end
-	initial begin
-		clk_100m = 1;
-		rst_in = 1;
-		frame = 0;
-		#(100) rst_in = 0;
-		#(240) frame = 1;
-		#(40) frame = 0;
-		#(1800) frame = 1;
-		#(40) frame = 0;
-		#(1800) frame = 1;
-		#(40) frame = 0;
-		#(1800) frame = 1;
-		#(40) frame = 0;
-	end
-	initial begin
-		clk_25m = 1;
-		rst_out = 1;
-		en_out = 0;
-		line = 0;
-		#(100) rst_out = 0;
-		#(300) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(160) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(160) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(80) line = 1;
-		#(40) line = 0;
-		#(80) en_out = 1;
-		#(240) en_out = 0;
-		#(1000)
-			$finish;
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>lib_display_xc7_projf_linebuffer_tb</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:42</dd></div>
+        <div><dt>time elapsed</dt><dd>0.039s</dd></div>
+        <div><dt>ram usage</dt><dd>39808 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7 <a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_linebuffer_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/linebuffer_tb.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module linebuffer_tb;</pre>
+      <pre>	parameter CLK_PERIOD_100M = 10;</pre>
+      <pre>	parameter CLK_PERIOD_25M = 40;</pre>
+      <pre>	reg clk_25m;</pre>
+      <pre>	reg clk_100m;</pre>
+      <pre>	reg rst_in;</pre>
+      <pre>	reg rst_out;</pre>
+      <pre>	parameter LB_SCALE = 2;</pre>
+      <pre>	parameter LB_LEN = 3;</pre>
+      <pre>	parameter LB_BPC = 4;</pre>
+      <pre>	parameter PIXEL_CNT = 6;</pre>
+      <pre>	reg [LB_BPC - 1:0] ch0 [0:PIXEL_CNT - 1];</pre>
+      <pre>	reg [LB_BPC - 1:0] ch1 [0:PIXEL_CNT - 1];</pre>
+      <pre>	reg [LB_BPC - 1:0] ch2 [0:PIXEL_CNT - 1];</pre>
+      <pre>	wire data_req;</pre>
+      <pre>	reg en_in;</pre>
+      <pre>	reg en_out;</pre>
+      <pre>	reg frame;</pre>
+      <pre>	reg line;</pre>
+      <pre>	reg [LB_BPC - 1:0] din_0;</pre>
+      <pre>	reg [LB_BPC - 1:0] din_1;</pre>
+      <pre>	reg [LB_BPC - 1:0] din_2;</pre>
+      <pre>	wire [LB_BPC - 1:0] dout_0;</pre>
+      <pre>	wire [LB_BPC - 1:0] dout_1;</pre>
+      <pre>	wire [LB_BPC - 1:0] dout_2;</pre>
+      <pre>	reg [$clog2(PIXEL_CNT) - 1:0] read_addr;</pre>
+      <pre>	reg [$clog2(LB_LEN + 1) - 1:0] cnt_h;</pre>
+      <pre>	always @(posedge clk_100m) begin</pre>
+      <pre>		if (data_req) begin</pre>
+      <pre>			cnt_h &lt;= 0;</pre>
+      <pre>			en_in &lt;= 1;</pre>
+      <pre>		end</pre>
+      <pre>		else if (cnt_h &lt; LB_LEN) begin</pre>
+      <pre>			cnt_h &lt;= cnt_h + 1;</pre>
+      <pre>			read_addr &lt;= (read_addr == (PIXEL_CNT - 1) ? 0 : read_addr + 1);</pre>
+      <pre>		end</pre>
+      <pre>		if (cnt_h == (LB_LEN - 1))</pre>
+      <pre>			en_in &lt;= 0;</pre>
+      <pre>		if (frame)</pre>
+      <pre>			read_addr &lt;= 0;</pre>
+      <pre>		if (rst_in) begin</pre>
+      <pre>			read_addr &lt;= 0;</pre>
+      <pre>			cnt_h &lt;= 0;</pre>
+      <pre>			en_in &lt;= 0;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
+      <pre>	linebuffer #(</pre>
+      <pre>		.WIDTH(LB_BPC),</pre>
+      <pre>		.LEN(LB_LEN),</pre>
+      <pre>		.SCALE(LB_SCALE)</pre>
+      <pre>	) lb_inst(</pre>
+      <pre>		.clk_in(clk_100m),</pre>
+      <pre>		.clk_out(clk_25m),</pre>
+      <pre>		.rst_in(rst_in),</pre>
+      <pre>		.rst_out(rst_out),</pre>
+      <pre>		.data_req(data_req),</pre>
+      <pre>		.en_in(en_in),</pre>
+      <pre>		.en_out(en_out),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line(line),</pre>
+      <pre>		.din_0(din_0),</pre>
+      <pre>		.din_1(din_1),</pre>
+      <pre>		.din_2(din_2),</pre>
+      <pre>		.dout_0(dout_0),</pre>
+      <pre>		.dout_1(dout_1),</pre>
+      <pre>		.dout_2(dout_2)</pre>
+      <pre>	);</pre>
+      <pre>	always #(CLK_PERIOD_100M / 2) clk_100m = ~clk_100m;</pre>
+      <pre>	always #(CLK_PERIOD_25M / 2) clk_25m = ~clk_25m;</pre>
+      <pre>	initial begin</pre>
+      <pre>		ch0[0] = 4&#39;b1010;</pre>
+      <pre>		ch1[0] = 4&#39;b0101;</pre>
+      <pre>		ch2[0] = 4&#39;b1111;</pre>
+      <pre>		ch0[1] = 4&#39;b1000;</pre>
+      <pre>		ch1[1] = 4&#39;b0100;</pre>
+      <pre>		ch2[1] = 4&#39;b0010;</pre>
+      <pre>		ch0[2] = 4&#39;b0000;</pre>
+      <pre>		ch1[2] = 4&#39;b0010;</pre>
+      <pre>		ch2[2] = 4&#39;b0001;</pre>
+      <pre>		ch0[3] = 4&#39;b0101;</pre>
+      <pre>		ch1[3] = 4&#39;b1010;</pre>
+      <pre>		ch2[3] = 4&#39;b0000;</pre>
+      <pre>		ch0[4] = 4&#39;b0000;</pre>
+      <pre>		ch1[4] = 4&#39;b0010;</pre>
+      <pre>		ch2[4] = 4&#39;b0001;</pre>
+      <pre>		ch0[5] = 4&#39;b1000;</pre>
+      <pre>		ch1[5] = 4&#39;b0100;</pre>
+      <pre>		ch2[5] = 4&#39;b0010;</pre>
+      <pre>	end</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		din_0 = ch0[read_addr];</pre>
+      <pre>		din_1 = ch1[read_addr];</pre>
+      <pre>		din_2 = ch2[read_addr];</pre>
+      <pre>	end</pre>
+      <pre>	initial begin</pre>
+      <pre>		clk_100m = 1;</pre>
+      <pre>		rst_in = 1;</pre>
+      <pre>		frame = 0;</pre>
+      <pre>		#(100) rst_in = 0;</pre>
+      <pre>		#(240) frame = 1;</pre>
+      <pre>		#(40) frame = 0;</pre>
+      <pre>		#(1800) frame = 1;</pre>
+      <pre>		#(40) frame = 0;</pre>
+      <pre>		#(1800) frame = 1;</pre>
+      <pre>		#(40) frame = 0;</pre>
+      <pre>		#(1800) frame = 1;</pre>
+      <pre>		#(40) frame = 0;</pre>
+      <pre>	end</pre>
+      <pre>	initial begin</pre>
+      <pre>		clk_25m = 1;</pre>
+      <pre>		rst_out = 1;</pre>
+      <pre>		en_out = 0;</pre>
+      <pre>		line = 0;</pre>
+      <pre>		#(100) rst_out = 0;</pre>
+      <pre>		#(300) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(160) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(160) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(80) line = 1;</pre>
+      <pre>		#(40) line = 0;</pre>
+      <pre>		#(80) en_out = 1;</pre>
+      <pre>		#(240) en_out = 0;</pre>
+      <pre>		#(1000)</pre>
+      <pre>			$finish;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

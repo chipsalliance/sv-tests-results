@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/6.16.4'] = [["string_toupper",1,"logs/Sv2v_zachjs/chapter-6/6.16.4--string_toupper.sv.log.html","tests/chapter-6/6.16.4--string_toupper.sv.html"]]
+config_loader_data['sv2v_zachjs/6.16.4'] = [["","string_toupper",1,"logs/Sv2v_zachjs/chapter-6/6.16.4--string_toupper.sv.log.html","tests/chapter-6/6.16.4--string_toupper.sv.html"]]

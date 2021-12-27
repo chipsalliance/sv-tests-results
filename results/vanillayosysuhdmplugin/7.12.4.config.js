@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/7.12.4'] = [["unpacked-array-iterator-index-querying",0,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/unpacked/index.sv.log.html","tests/chapter-7/arrays/unpacked/index.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/7.12.4'] = [["","unpacked-array-iterator-index-querying",0,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/unpacked/index.sv.log.html","tests/chapter-7/arrays/unpacked/index.sv.html"]]

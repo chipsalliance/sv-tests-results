@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.6'] = [["array-unpacked-assignments",1,"logs/sv_parser/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]
+config_loader_data['sv_parser/7.6'] = [["","array-unpacked-assignments",1,"logs/sv_parser/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]

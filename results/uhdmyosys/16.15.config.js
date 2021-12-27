@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/16.15'] = [["property_disable_iff_test",0,"logs/UhdmYosys/chapter-16/16.15--property-disable-iff.sv.log.html","tests/chapter-16/16.15--property-disable-iff.sv.html"]]
+config_loader_data['uhdmyosys/16.15'] = [["","property_disable_iff_test",0,"logs/UhdmYosys/chapter-16/16.15--property-disable-iff.sv.log.html","tests/chapter-16/16.15--property-disable-iff.sv.html"]]

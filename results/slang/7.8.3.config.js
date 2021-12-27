@@ -1,1 +1,1 @@
-config_loader_data['slang/7.8.3'] = [["associative-arrays-class",1,"logs/Slang/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]
+config_loader_data['slang/7.8.3'] = [["","associative-arrays-class",1,"logs/Slang/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]

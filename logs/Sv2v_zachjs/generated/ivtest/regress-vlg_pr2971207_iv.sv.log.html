@@ -1,149 +1,163 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Test imported from ivtest
-rc: 0 (means success: 1)
-tags: ivtest
-incdirs: /root/sv-tests/sv-tests/third_party/tests/ivtest /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
-top_module: 
-type: simulation parsing
-mode: parsing
-files: <a href="../../../../third_party/tests/ivtest/ivltests/pr2971207.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2971207.v</a>
-defines: 
-completed: 2021-12-27 02:39:25
-time_elapsed: 0.026s
-ram usage: 27860 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2971207.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2971207.v</a>
-module top;
-	reg pass;
-	reg pass_f1;
-	reg pass_f2;
-	reg pass_f3;
-	reg pass_f4;
-	reg pass_f5;
-	reg [240:1] res;
-	initial begin
-		pass = 1&#39;b1;
-		$swrite(res, &#34;%m&#34;);
-		if (res != &#34;top&#34;) begin
-			$display(&#34;Failed initial, got \&#34;%0s\&#34;&#34;, res);
-			pass = 1&#39;b0;
-		end
-		begin : my_begin
-			$swrite(res, &#34;%m&#34;);
-			if (res != &#34;top.my_begin&#34;) begin
-				$display(&#34;Failed named begin (1st), got \&#34;%0s\&#34;&#34;, res);
-				pass = 1&#39;b0;
-			end
-			begin : my_begin_begin
-				$swrite(res, &#34;%m&#34;);
-				if (res != &#34;top.my_begin.my_begin_begin&#34;) begin
-					$display(&#34;Failed nested named begin, got \&#34;%0s\&#34;&#34;, res);
-					pass = 1&#39;b0;
-				end
-			end
-			$swrite(res, &#34;%m&#34;);
-			if (res != &#34;top.my_begin&#34;) begin
-				$display(&#34;Failed named begin (2nd), got \&#34;%0s\&#34;&#34;, res);
-				pass = 1&#39;b0;
-			end
-			pass_f1 = 1&#39;b1;
-			pass_f2 = 1&#39;b1;
-			fork : my_begin_fork
-				begin
-					$swrite(res, &#34;%m&#34;);
-					if (res != &#34;top.my_begin.my_begin_fork&#34;) begin
-						$display(&#34;Failed after named begin/fork (1), got \&#34;%0s\&#34;&#34;, res);
-						pass_f1 = 1&#39;b0;
-					end
-				end
-				begin
-					$swrite(res, &#34;%m&#34;);
-					if (res != &#34;top.my_begin.my_begin_fork&#34;) begin
-						$display(&#34;Failed after named begin/fork (2), got \&#34;%0s\&#34;&#34;, res);
-						pass_f2 = 1&#39;b0;
-					end
-				end
-			join
-			pass = (pass &amp; pass_f1) &amp; pass_f2;
-			$swrite(res, &#34;%m&#34;);
-			if (res != &#34;top.my_begin&#34;) begin
-				$display(&#34;Failed named begin (3rd), got \&#34;%0s\&#34;&#34;, res);
-				pass = 1&#39;b0;
-			end
-		end
-		$swrite(res, &#34;%m&#34;);
-		if (res != &#34;top&#34;) begin
-			$display(&#34;Failed after named begin, got \&#34;%0s\&#34;&#34;, res);
-			pass = 1&#39;b0;
-		end
-		pass_f1 = 1&#39;b1;
-		pass_f2 = 1&#39;b1;
-		pass_f3 = 1&#39;b1;
-		pass_f4 = 1&#39;b1;
-		pass_f5 = 1&#39;b1;
-		fork : my_fork
-			begin
-				$swrite(res, &#34;%m&#34;);
-				if (res != &#34;top.my_fork&#34;) begin
-					$display(&#34;Failed after named fork (1), got \&#34;%0s\&#34;&#34;, res);
-					pass_f1 = 1&#39;b0;
-				end
-			end
-			begin : my_fork_begin
-				$swrite(res, &#34;%m&#34;);
-				if (res != &#34;top.my_fork.my_fork_begin&#34;) begin
-					$display(&#34;Failed after named fork/begin, got \&#34;%0s\&#34;&#34;, res);
-					pass_f4 = 1&#39;b0;
-				end
-			end
-			begin
-				$swrite(res, &#34;%m&#34;);
-				if (res != &#34;top.my_fork&#34;) begin
-					$display(&#34;Failed after named fork (2), got \&#34;%0s\&#34;&#34;, res);
-					pass_f2 = 1&#39;b0;
-				end
-			end
-			fork : my_fork_fork
-				begin
-					$swrite(res, &#34;%m&#34;);
-					if (res != &#34;top.my_fork.my_fork_fork&#34;) begin
-						$display(&#34;Failed after named fork/fork, got \&#34;%0s\&#34;&#34;, res);
-						pass_f2 = 1&#39;b0;
-					end
-				end
-			join
-			begin
-				$swrite(res, &#34;%m&#34;);
-				if (res != &#34;top.my_fork&#34;) begin
-					$display(&#34;Failed after named fork (3), got \&#34;%0s\&#34;&#34;, res);
-					pass_f3 = 1&#39;b0;
-				end
-			end
-		join
-		pass = ((pass &amp; pass_f1) &amp; pass_f2) &amp; pass_f3;
-		$swrite(res, &#34;%m&#34;);
-		if (res != &#34;top&#34;) begin
-			$display(&#34;Failed final, got \&#34;%0s\&#34;&#34;, res);
-			pass = 1&#39;b0;
-		end
-		if (pass)
-			$display(&#34;PASSED&#34;);
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>regress-vlg_pr2971207_iv</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/ivltests/pr2971207.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2971207.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:06:41</dd></div>
+        <div><dt>time elapsed</dt><dd>0.026s</dd></div>
+        <div><dt>ram usage</dt><dd>27592 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/pr2971207.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr2971207.v</a></pre>
+      <pre>module top;</pre>
+      <pre>	reg pass;</pre>
+      <pre>	reg pass_f1;</pre>
+      <pre>	reg pass_f2;</pre>
+      <pre>	reg pass_f3;</pre>
+      <pre>	reg pass_f4;</pre>
+      <pre>	reg pass_f5;</pre>
+      <pre>	reg [240:1] res;</pre>
+      <pre>	initial begin</pre>
+      <pre>		pass = 1&#39;b1;</pre>
+      <pre>		$swrite(res, &#34;%m&#34;);</pre>
+      <pre>		if (res != &#34;top&#34;) begin</pre>
+      <pre>			$display(&#34;Failed initial, got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>			pass = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		begin : my_begin</pre>
+      <pre>			$swrite(res, &#34;%m&#34;);</pre>
+      <pre>			if (res != &#34;top.my_begin&#34;) begin</pre>
+      <pre>				$display(&#34;Failed named begin (1st), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>				pass = 1&#39;b0;</pre>
+      <pre>			end</pre>
+      <pre>			begin : my_begin_begin</pre>
+      <pre>				$swrite(res, &#34;%m&#34;);</pre>
+      <pre>				if (res != &#34;top.my_begin.my_begin_begin&#34;) begin</pre>
+      <pre>					$display(&#34;Failed nested named begin, got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>					pass = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			$swrite(res, &#34;%m&#34;);</pre>
+      <pre>			if (res != &#34;top.my_begin&#34;) begin</pre>
+      <pre>				$display(&#34;Failed named begin (2nd), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>				pass = 1&#39;b0;</pre>
+      <pre>			end</pre>
+      <pre>			pass_f1 = 1&#39;b1;</pre>
+      <pre>			pass_f2 = 1&#39;b1;</pre>
+      <pre>			fork : my_begin_fork</pre>
+      <pre>				begin</pre>
+      <pre>					$swrite(res, &#34;%m&#34;);</pre>
+      <pre>					if (res != &#34;top.my_begin.my_begin_fork&#34;) begin</pre>
+      <pre>						$display(&#34;Failed after named begin/fork (1), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>						pass_f1 = 1&#39;b0;</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>				begin</pre>
+      <pre>					$swrite(res, &#34;%m&#34;);</pre>
+      <pre>					if (res != &#34;top.my_begin.my_begin_fork&#34;) begin</pre>
+      <pre>						$display(&#34;Failed after named begin/fork (2), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>						pass_f2 = 1&#39;b0;</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>			join</pre>
+      <pre>			pass = (pass &amp; pass_f1) &amp; pass_f2;</pre>
+      <pre>			$swrite(res, &#34;%m&#34;);</pre>
+      <pre>			if (res != &#34;top.my_begin&#34;) begin</pre>
+      <pre>				$display(&#34;Failed named begin (3rd), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>				pass = 1&#39;b0;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>		$swrite(res, &#34;%m&#34;);</pre>
+      <pre>		if (res != &#34;top&#34;) begin</pre>
+      <pre>			$display(&#34;Failed after named begin, got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>			pass = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		pass_f1 = 1&#39;b1;</pre>
+      <pre>		pass_f2 = 1&#39;b1;</pre>
+      <pre>		pass_f3 = 1&#39;b1;</pre>
+      <pre>		pass_f4 = 1&#39;b1;</pre>
+      <pre>		pass_f5 = 1&#39;b1;</pre>
+      <pre>		fork : my_fork</pre>
+      <pre>			begin</pre>
+      <pre>				$swrite(res, &#34;%m&#34;);</pre>
+      <pre>				if (res != &#34;top.my_fork&#34;) begin</pre>
+      <pre>					$display(&#34;Failed after named fork (1), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>					pass_f1 = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			begin : my_fork_begin</pre>
+      <pre>				$swrite(res, &#34;%m&#34;);</pre>
+      <pre>				if (res != &#34;top.my_fork.my_fork_begin&#34;) begin</pre>
+      <pre>					$display(&#34;Failed after named fork/begin, got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>					pass_f4 = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			begin</pre>
+      <pre>				$swrite(res, &#34;%m&#34;);</pre>
+      <pre>				if (res != &#34;top.my_fork&#34;) begin</pre>
+      <pre>					$display(&#34;Failed after named fork (2), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>					pass_f2 = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			fork : my_fork_fork</pre>
+      <pre>				begin</pre>
+      <pre>					$swrite(res, &#34;%m&#34;);</pre>
+      <pre>					if (res != &#34;top.my_fork.my_fork_fork&#34;) begin</pre>
+      <pre>						$display(&#34;Failed after named fork/fork, got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>						pass_f2 = 1&#39;b0;</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>			join</pre>
+      <pre>			begin</pre>
+      <pre>				$swrite(res, &#34;%m&#34;);</pre>
+      <pre>				if (res != &#34;top.my_fork&#34;) begin</pre>
+      <pre>					$display(&#34;Failed after named fork (3), got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>					pass_f3 = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>		join</pre>
+      <pre>		pass = ((pass &amp; pass_f1) &amp; pass_f2) &amp; pass_f3;</pre>
+      <pre>		$swrite(res, &#34;%m&#34;);</pre>
+      <pre>		if (res != &#34;top&#34;) begin</pre>
+      <pre>			$display(&#34;Failed final, got \&#34;%0s\&#34;&#34;, res);</pre>
+      <pre>			pass = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		if (pass)</pre>
+      <pre>			$display(&#34;PASSED&#34;);</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

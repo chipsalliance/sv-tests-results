@@ -1,1 +1,1 @@
-config_loader_data['verible/6.6.2'] = [["net_uwire",1,"logs/Verible/generated/nets/6.6.2--net_uwire.sv.log.html","tests/generated/nets/6.6.2--net_uwire.sv.html"]]
+config_loader_data['verible/6.6.2'] = [["","net_uwire",1,"logs/Verible/generated/nets/6.6.2--net_uwire.sv.log.html","tests/generated/nets/6.6.2--net_uwire.sv.html"]]

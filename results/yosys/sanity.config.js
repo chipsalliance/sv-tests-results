@@ -1,1 +1,1 @@
-config_loader_data['yosys/sanity'] = [["sanity",1,"logs/Yosys/sanity.sv.log.html","tests/sanity.sv.html"]]
+config_loader_data['yosys/sanity'] = [["","sanity",1,"logs/Yosys/sanity.sv.log.html","tests/sanity.sv.html"]]

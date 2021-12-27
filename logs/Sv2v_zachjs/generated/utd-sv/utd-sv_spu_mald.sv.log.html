@@ -1,172 +1,186 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_spu_mald.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_spu_mald.sv</a> <a href="../../../../third_party/tests/utd-sv/spu_mald.v.html" target="file-frame">third_party/tests/utd-sv/spu_mald.v</a>
-defines: 
-completed: 2021-12-27 02:40:25
-time_elapsed: 0.030s
-ram usage: 28216 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_spu_mald.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_spu_mald.sv</a> <a href="../../../../third_party/tests/utd-sv/spu_mald.v.html" target="file-frame">third_party/tests/utd-sv/spu_mald.v</a>
-module spu_mald (
-	spu_mald_rstln,
-	spu_mald_maaddr_addrinc,
-	spu_mald_memwen,
-	spu_mald_mpa_addrinc,
-	spu_mald_ldreq,
-	spu_mald_done,
-	spu_mald_force_mpa_add16,
-	spu_mald_done_set,
-	ld_inprog,
-	ldreq_ack,
-	ln_received,
-	len_neqz,
-	mactl_ldop,
-	spu_maaddr_mpa1maddr0,
-	spu_mactl_iss_pulse_dly,
-	spu_wen_ma_unc_err_pulse,
-	spu_mactl_stxa_force_abort,
-	se,
-	reset,
-	rclk
-);
-	input reset;
-	input rclk;
-	input se;
-	input ld_inprog;
-	input ldreq_ack;
-	input ln_received;
-	input len_neqz;
-	input mactl_ldop;
-	input spu_maaddr_mpa1maddr0;
-	input spu_mactl_iss_pulse_dly;
-	input spu_wen_ma_unc_err_pulse;
-	input spu_mactl_stxa_force_abort;
-	output wire spu_mald_rstln;
-	output wire spu_mald_maaddr_addrinc;
-	output wire spu_mald_memwen;
-	output wire spu_mald_mpa_addrinc;
-	output wire spu_mald_ldreq;
-	output wire spu_mald_done;
-	output wire spu_mald_force_mpa_add16;
-	output wire spu_mald_done_set;
-	wire tr2wait4ln_frm_ldreq;
-	wire local_stxa_abort;
-	wire spu_mald_done_wen = ((spu_mald_done | spu_wen_ma_unc_err_pulse) | local_stxa_abort) &amp; mactl_ldop;
-	wire spu_mald_done_rst = reset | spu_mactl_iss_pulse_dly;
-	dffre_s #(1) spu_mald_done_ff(
-		.din(1&#39;b1),
-		.q(spu_mald_done_set),
-		.en(spu_mald_done_wen),
-		.rst(spu_mald_done_rst),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire state_reset = ((reset | spu_mald_done) | spu_wen_ma_unc_err_pulse) | local_stxa_abort;
-	wire nxt_idle_state;
-	wire cur_idle_state;
-	dff_s #(1) idle_state_ff(
-		.din(nxt_idle_state),
-		.q(cur_idle_state),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire nxt_ldreq_state;
-	wire cur_ldreq_state;
-	dffr_s #(1) ldreq_state_ff(
-		.din(nxt_ldreq_state),
-		.q(cur_ldreq_state),
-		.rst(state_reset),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire nxt_wait4ln_state;
-	wire cur_wait4ln_state;
-	dffr_s #(1) wait4ln_state_ff(
-		.din(nxt_wait4ln_state),
-		.q(cur_wait4ln_state),
-		.rst(state_reset),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire nxt_mamemwr_state;
-	wire cur_mamemwr_state;
-	dffr_s #(1) mamemwr_state_ff(
-		.din(nxt_mamemwr_state),
-		.q(cur_mamemwr_state),
-		.rst(state_reset),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire nxt_chk4mpa1maddr0_state;
-	wire cur_chk4mpa1maddr0_state;
-	dffr_s #(1) chk4mpa1maddr0_state_ff(
-		.din(nxt_chk4mpa1maddr0_state),
-		.q(cur_chk4mpa1maddr0_state),
-		.rst(state_reset),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire start_ldop = spu_mactl_iss_pulse_dly &amp; mactl_ldop;
-	assign spu_mald_done = cur_chk4mpa1maddr0_state &amp; ~len_neqz;
-	assign nxt_idle_state = (state_reset | spu_mald_done) | (cur_idle_state &amp; ~start_ldop);
-	assign nxt_ldreq_state = (((cur_chk4mpa1maddr0_state &amp; ~spu_maaddr_mpa1maddr0) &amp; len_neqz) | (cur_idle_state &amp; start_ldop)) | (cur_ldreq_state &amp; ~ldreq_ack);
-	assign spu_mald_rstln = (((cur_mamemwr_state &amp; ld_inprog) &amp; len_neqz) | local_stxa_abort) | spu_wen_ma_unc_err_pulse;
-	assign tr2wait4ln_frm_ldreq = cur_ldreq_state &amp; ldreq_ack;
-	assign nxt_wait4ln_state = tr2wait4ln_frm_ldreq | (cur_wait4ln_state &amp; ~ln_received);
-	wire tr2mamemwr_frm_wait4ln = cur_wait4ln_state &amp; ln_received;
-	wire tr2mamemwr_frm_chk4mpa1maddr0 = (cur_chk4mpa1maddr0_state &amp; spu_maaddr_mpa1maddr0) &amp; len_neqz;
-	wire mald_memwen = (tr2mamemwr_frm_wait4ln | tr2mamemwr_frm_chk4mpa1maddr0) &amp; len_neqz;
-	wire mald_memwen_dly;
-	dffr_s #(1) wen_dly_ff(
-		.din(mald_memwen),
-		.q(mald_memwen_dly),
-		.rst(state_reset),
-		.clk(rclk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign nxt_mamemwr_state = mald_memwen_dly;
-	assign local_stxa_abort = mald_memwen_dly &amp; spu_mactl_stxa_force_abort;
-	assign nxt_chk4mpa1maddr0_state = cur_mamemwr_state;
-	assign spu_mald_memwen = nxt_mamemwr_state;
-	assign spu_mald_maaddr_addrinc = cur_mamemwr_state;
-	assign spu_mald_mpa_addrinc = cur_mamemwr_state;
-	assign spu_mald_force_mpa_add16 = 1&#39;b0;
-	assign spu_mald_ldreq = cur_ldreq_state;
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_spu_mald</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_spu_mald.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_spu_mald.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/spu_mald.v.html" target="file-frame">third_party/tests/utd-sv/spu_mald.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:50</dd></div>
+        <div><dt>time elapsed</dt><dd>0.025s</dd></div>
+        <div><dt>ram usage</dt><dd>28160 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_spu_mald.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_spu_mald.sv</a> <a href="../../../../third_party/tests/utd-sv/spu_mald.v.html" target="file-frame">third_party/tests/utd-sv/spu_mald.v</a></pre>
+      <pre>module spu_mald (</pre>
+      <pre>	spu_mald_rstln,</pre>
+      <pre>	spu_mald_maaddr_addrinc,</pre>
+      <pre>	spu_mald_memwen,</pre>
+      <pre>	spu_mald_mpa_addrinc,</pre>
+      <pre>	spu_mald_ldreq,</pre>
+      <pre>	spu_mald_done,</pre>
+      <pre>	spu_mald_force_mpa_add16,</pre>
+      <pre>	spu_mald_done_set,</pre>
+      <pre>	ld_inprog,</pre>
+      <pre>	ldreq_ack,</pre>
+      <pre>	ln_received,</pre>
+      <pre>	len_neqz,</pre>
+      <pre>	mactl_ldop,</pre>
+      <pre>	spu_maaddr_mpa1maddr0,</pre>
+      <pre>	spu_mactl_iss_pulse_dly,</pre>
+      <pre>	spu_wen_ma_unc_err_pulse,</pre>
+      <pre>	spu_mactl_stxa_force_abort,</pre>
+      <pre>	se,</pre>
+      <pre>	reset,</pre>
+      <pre>	rclk</pre>
+      <pre>);</pre>
+      <pre>	input reset;</pre>
+      <pre>	input rclk;</pre>
+      <pre>	input se;</pre>
+      <pre>	input ld_inprog;</pre>
+      <pre>	input ldreq_ack;</pre>
+      <pre>	input ln_received;</pre>
+      <pre>	input len_neqz;</pre>
+      <pre>	input mactl_ldop;</pre>
+      <pre>	input spu_maaddr_mpa1maddr0;</pre>
+      <pre>	input spu_mactl_iss_pulse_dly;</pre>
+      <pre>	input spu_wen_ma_unc_err_pulse;</pre>
+      <pre>	input spu_mactl_stxa_force_abort;</pre>
+      <pre>	output wire spu_mald_rstln;</pre>
+      <pre>	output wire spu_mald_maaddr_addrinc;</pre>
+      <pre>	output wire spu_mald_memwen;</pre>
+      <pre>	output wire spu_mald_mpa_addrinc;</pre>
+      <pre>	output wire spu_mald_ldreq;</pre>
+      <pre>	output wire spu_mald_done;</pre>
+      <pre>	output wire spu_mald_force_mpa_add16;</pre>
+      <pre>	output wire spu_mald_done_set;</pre>
+      <pre>	wire tr2wait4ln_frm_ldreq;</pre>
+      <pre>	wire local_stxa_abort;</pre>
+      <pre>	wire spu_mald_done_wen = ((spu_mald_done | spu_wen_ma_unc_err_pulse) | local_stxa_abort) &amp; mactl_ldop;</pre>
+      <pre>	wire spu_mald_done_rst = reset | spu_mactl_iss_pulse_dly;</pre>
+      <pre>	dffre_s #(1) spu_mald_done_ff(</pre>
+      <pre>		.din(1&#39;b1),</pre>
+      <pre>		.q(spu_mald_done_set),</pre>
+      <pre>		.en(spu_mald_done_wen),</pre>
+      <pre>		.rst(spu_mald_done_rst),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire state_reset = ((reset | spu_mald_done) | spu_wen_ma_unc_err_pulse) | local_stxa_abort;</pre>
+      <pre>	wire nxt_idle_state;</pre>
+      <pre>	wire cur_idle_state;</pre>
+      <pre>	dff_s #(1) idle_state_ff(</pre>
+      <pre>		.din(nxt_idle_state),</pre>
+      <pre>		.q(cur_idle_state),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire nxt_ldreq_state;</pre>
+      <pre>	wire cur_ldreq_state;</pre>
+      <pre>	dffr_s #(1) ldreq_state_ff(</pre>
+      <pre>		.din(nxt_ldreq_state),</pre>
+      <pre>		.q(cur_ldreq_state),</pre>
+      <pre>		.rst(state_reset),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire nxt_wait4ln_state;</pre>
+      <pre>	wire cur_wait4ln_state;</pre>
+      <pre>	dffr_s #(1) wait4ln_state_ff(</pre>
+      <pre>		.din(nxt_wait4ln_state),</pre>
+      <pre>		.q(cur_wait4ln_state),</pre>
+      <pre>		.rst(state_reset),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire nxt_mamemwr_state;</pre>
+      <pre>	wire cur_mamemwr_state;</pre>
+      <pre>	dffr_s #(1) mamemwr_state_ff(</pre>
+      <pre>		.din(nxt_mamemwr_state),</pre>
+      <pre>		.q(cur_mamemwr_state),</pre>
+      <pre>		.rst(state_reset),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire nxt_chk4mpa1maddr0_state;</pre>
+      <pre>	wire cur_chk4mpa1maddr0_state;</pre>
+      <pre>	dffr_s #(1) chk4mpa1maddr0_state_ff(</pre>
+      <pre>		.din(nxt_chk4mpa1maddr0_state),</pre>
+      <pre>		.q(cur_chk4mpa1maddr0_state),</pre>
+      <pre>		.rst(state_reset),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire start_ldop = spu_mactl_iss_pulse_dly &amp; mactl_ldop;</pre>
+      <pre>	assign spu_mald_done = cur_chk4mpa1maddr0_state &amp; ~len_neqz;</pre>
+      <pre>	assign nxt_idle_state = (state_reset | spu_mald_done) | (cur_idle_state &amp; ~start_ldop);</pre>
+      <pre>	assign nxt_ldreq_state = (((cur_chk4mpa1maddr0_state &amp; ~spu_maaddr_mpa1maddr0) &amp; len_neqz) | (cur_idle_state &amp; start_ldop)) | (cur_ldreq_state &amp; ~ldreq_ack);</pre>
+      <pre>	assign spu_mald_rstln = (((cur_mamemwr_state &amp; ld_inprog) &amp; len_neqz) | local_stxa_abort) | spu_wen_ma_unc_err_pulse;</pre>
+      <pre>	assign tr2wait4ln_frm_ldreq = cur_ldreq_state &amp; ldreq_ack;</pre>
+      <pre>	assign nxt_wait4ln_state = tr2wait4ln_frm_ldreq | (cur_wait4ln_state &amp; ~ln_received);</pre>
+      <pre>	wire tr2mamemwr_frm_wait4ln = cur_wait4ln_state &amp; ln_received;</pre>
+      <pre>	wire tr2mamemwr_frm_chk4mpa1maddr0 = (cur_chk4mpa1maddr0_state &amp; spu_maaddr_mpa1maddr0) &amp; len_neqz;</pre>
+      <pre>	wire mald_memwen = (tr2mamemwr_frm_wait4ln | tr2mamemwr_frm_chk4mpa1maddr0) &amp; len_neqz;</pre>
+      <pre>	wire mald_memwen_dly;</pre>
+      <pre>	dffr_s #(1) wen_dly_ff(</pre>
+      <pre>		.din(mald_memwen),</pre>
+      <pre>		.q(mald_memwen_dly),</pre>
+      <pre>		.rst(state_reset),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign nxt_mamemwr_state = mald_memwen_dly;</pre>
+      <pre>	assign local_stxa_abort = mald_memwen_dly &amp; spu_mactl_stxa_force_abort;</pre>
+      <pre>	assign nxt_chk4mpa1maddr0_state = cur_mamemwr_state;</pre>
+      <pre>	assign spu_mald_memwen = nxt_mamemwr_state;</pre>
+      <pre>	assign spu_mald_maaddr_addrinc = cur_mamemwr_state;</pre>
+      <pre>	assign spu_mald_mpa_addrinc = cur_mamemwr_state;</pre>
+      <pre>	assign spu_mald_force_mpa_add16 = 1&#39;b0;</pre>
+      <pre>	assign spu_mald_ldreq = cur_ldreq_state;</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

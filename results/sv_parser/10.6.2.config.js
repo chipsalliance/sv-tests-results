@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/10.6.2'] = [["force_release",1,"logs/sv_parser/chapter-10/10.6.2--force-release.sv.log.html","tests/chapter-10/10.6.2--force-release.sv.html"]]
+config_loader_data['sv_parser/10.6.2'] = [["","force_release",1,"logs/sv_parser/chapter-10/10.6.2--force-release.sv.log.html","tests/chapter-10/10.6.2--force-release.sv.html"]]

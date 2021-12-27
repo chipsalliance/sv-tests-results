@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/12.7.4'] = [["while_loop",1,"logs/sv_parser/chapter-12/12.7.4--while.sv.log.html","tests/chapter-12/12.7.4--while.sv.html"]]
+config_loader_data['sv_parser/12.7.4'] = [["","while_loop",1,"logs/sv_parser/chapter-12/12.7.4--while.sv.log.html","tests/chapter-12/12.7.4--while.sv.html"]]

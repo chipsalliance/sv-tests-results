@@ -1,1 +1,1 @@
-config_loader_data['yosys/18.4.1'] = [["rand_modifier",0,"logs/Yosys/chapter-18/18.4.1--rand-modifier.sv.log.html","tests/chapter-18/18.4.1--rand-modifier.sv.html"]]
+config_loader_data['yosys/18.4.1'] = [["","rand_modifier",0,"logs/Yosys/chapter-18/18.4.1--rand-modifier.sv.log.html","tests/chapter-18/18.4.1--rand-modifier.sv.html"]]

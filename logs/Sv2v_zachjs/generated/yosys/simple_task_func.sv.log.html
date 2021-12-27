@@ -1,191 +1,205 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from yosys
-rc: 0 (means success: 1)
-tags: yosys
-incdirs: /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple
-top_module: 
-type: parsing elaboration
-mode: elaboration
-files: <a href="../../../../tests/generated/yosys/simple_task_func.sv.html" target="file-frame">tests/generated/yosys/simple_task_func.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/task_func.v.html" target="file-frame">third_party/tools/yosys/tests/simple/task_func.v</a>
-defines: 
-completed: 2021-12-27 02:52:46
-time_elapsed: 0.031s
-ram usage: 32348 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_task_func.sv.html" target="file-frame">tests/generated/yosys/simple_task_func.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/task_func.v.html" target="file-frame">third_party/tools/yosys/tests/simple/task_func.v</a>
-module task_func_test01 (
-	clk,
-	a,
-	b,
-	c,
-	x,
-	y,
-	z,
-	w
-);
-	input clk;
-	input [7:0] a;
-	input [7:0] b;
-	input [7:0] c;
-	output reg [7:0] x;
-	output reg [7:0] y;
-	output reg [7:0] z;
-	output reg [7:0] w;
-	function [7:0] sum_shift;
-		input [3:0] s1;
-		input [3:0] s2;
-		input [3:0] s3;
-		sum_shift = (s1 + (s2 &lt;&lt; 2)) + (s3 &lt;&lt; 4);
-	endfunction
-	task reset_w;
-		w = 0;
-	endtask
-	task add_to;
-		output reg [7:0] out;
-		input [7:0] in;
-		out = out + in;
-	endtask
-	always @(posedge clk) begin
-		x = sum_shift(a, b, c);
-		y = sum_shift(a[7:4], b[5:2], c[3:0]);
-		z = sum_shift(a[0], b[5:4], c &gt;&gt; 5) ^ sum_shift(1, 2, 3);
-		reset_w;
-		add_to(w, x);
-		add_to(w, y);
-		add_to(w, z);
-	end
-endmodule
-module task_func_test02 (
-	clk,
-	a,
-	b,
-	c,
-	x,
-	y,
-	z,
-	w
-);
-	input clk;
-	input [7:0] a;
-	input [7:0] b;
-	input [7:0] c;
-	output reg [7:0] x;
-	output reg [7:0] y;
-	output reg [7:0] z;
-	output reg [7:0] w;
-	function [7:0] sum_shift;
-		input [3:0] s1;
-		input [3:0] s2;
-		input [3:0] s3;
-		sum_shift = (s1 + (s2 &lt;&lt; 2)) + (s3 &lt;&lt; 4);
-	endfunction
-	task reset_w;
-		w = 0;
-	endtask
-	task add_to;
-		output reg [7:0] out;
-		input [7:0] in;
-		out = out + in;
-	endtask
-	always @(posedge clk) begin
-		x = sum_shift(a, b, c);
-		y = sum_shift(a[7:4], b[5:2], c[3:0]);
-		z = sum_shift(a[0], b[5:4], c &gt;&gt; 5) ^ sum_shift(1, 2, 3);
-		reset_w;
-		add_to(w, x);
-		add_to(w, y);
-		add_to(w, z);
-	end
-endmodule
-module task_func_test03 (
-	din_a,
-	din_b,
-	dout_a
-);
-	input [7:0] din_a;
-	input [7:0] din_b;
-	output wire [7:0] dout_a;
-	function [7:0] test;
-		input [7:0] a;
-		input [7:0] b;
-		begin : TEST
-			integer i;
-			for (i = 0; i &lt;= 7; i = i + 1)
-				test[i] = a[i] &amp; b[i];
-		end
-	endfunction
-	assign dout_a = test(din_a, din_b);
-endmodule
-module task_func_test04 (
-	in,
-	out1,
-	out2,
-	out3,
-	out4
-);
-	input [7:0] in;
-	output wire [7:0] out1;
-	output wire [7:0] out2;
-	output wire [7:0] out3;
-	output wire [7:0] out4;
-	parameter p = 23;
-	parameter px = 42;
-	function [7:0] test1;
-		input [7:0] i;
-		parameter p = 42;
-		test1 = i + p;
-	endfunction
-	function [7:0] test2;
-		input [7:0] i;
-		parameter p2 = p + 42;
-		test2 = i + p2;
-	endfunction
-	function [7:0] test3;
-		input [7:0] i;
-		test3 = i + p;
-	endfunction
-	function [7:0] test4;
-		input [7:0] i;
-		parameter px = p + 13;
-		parameter p3 = px - 37;
-		parameter p4 = p3 ^ px;
-		test4 = i + p4;
-	endfunction
-	assign out1 = test1(in);
-	assign out2 = test2(in);
-	assign out3 = test3(in);
-	assign out4 = test4(in);
-endmodule
-module task_func_test05 (
-	data_in,
-	data_out,
-	clk
-);
-	output reg data_out;
-	input data_in;
-	input clk;
-	task myTask;
-		output reg out;
-		input in;
-		out = in;
-	endtask
-	always @(posedge clk)
-		myTask(data_out, data_in);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>simple_task_func</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from yosys</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>yosys</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing elaboration</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>elaboration</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/yosys/simple_task_func.sv.html" target="file-frame">tests/generated/yosys/simple_task_func.sv</a><li>
+            <li><a href="../../../../third_party/tools/yosys/tests/simple/task_func.v.html" target="file-frame">third_party/tools/yosys/tests/simple/task_func.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:32</dd></div>
+        <div><dt>time elapsed</dt><dd>0.036s</dd></div>
+        <div><dt>ram usage</dt><dd>32284 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple <a href="../../../../tests/generated/yosys/simple_task_func.sv.html" target="file-frame">tests/generated/yosys/simple_task_func.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/task_func.v.html" target="file-frame">third_party/tools/yosys/tests/simple/task_func.v</a></pre>
+      <pre>module task_func_test01 (</pre>
+      <pre>	clk,</pre>
+      <pre>	a,</pre>
+      <pre>	b,</pre>
+      <pre>	c,</pre>
+      <pre>	x,</pre>
+      <pre>	y,</pre>
+      <pre>	z,</pre>
+      <pre>	w</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	input [7:0] a;</pre>
+      <pre>	input [7:0] b;</pre>
+      <pre>	input [7:0] c;</pre>
+      <pre>	output reg [7:0] x;</pre>
+      <pre>	output reg [7:0] y;</pre>
+      <pre>	output reg [7:0] z;</pre>
+      <pre>	output reg [7:0] w;</pre>
+      <pre>	function [7:0] sum_shift;</pre>
+      <pre>		input [3:0] s1;</pre>
+      <pre>		input [3:0] s2;</pre>
+      <pre>		input [3:0] s3;</pre>
+      <pre>		sum_shift = (s1 + (s2 &lt;&lt; 2)) + (s3 &lt;&lt; 4);</pre>
+      <pre>	endfunction</pre>
+      <pre>	task reset_w;</pre>
+      <pre>		w = 0;</pre>
+      <pre>	endtask</pre>
+      <pre>	task add_to;</pre>
+      <pre>		output reg [7:0] out;</pre>
+      <pre>		input [7:0] in;</pre>
+      <pre>		out = out + in;</pre>
+      <pre>	endtask</pre>
+      <pre>	always @(posedge clk) begin</pre>
+      <pre>		x = sum_shift(a, b, c);</pre>
+      <pre>		y = sum_shift(a[7:4], b[5:2], c[3:0]);</pre>
+      <pre>		z = sum_shift(a[0], b[5:4], c &gt;&gt; 5) ^ sum_shift(1, 2, 3);</pre>
+      <pre>		reset_w;</pre>
+      <pre>		add_to(w, x);</pre>
+      <pre>		add_to(w, y);</pre>
+      <pre>		add_to(w, z);</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre>module task_func_test02 (</pre>
+      <pre>	clk,</pre>
+      <pre>	a,</pre>
+      <pre>	b,</pre>
+      <pre>	c,</pre>
+      <pre>	x,</pre>
+      <pre>	y,</pre>
+      <pre>	z,</pre>
+      <pre>	w</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	input [7:0] a;</pre>
+      <pre>	input [7:0] b;</pre>
+      <pre>	input [7:0] c;</pre>
+      <pre>	output reg [7:0] x;</pre>
+      <pre>	output reg [7:0] y;</pre>
+      <pre>	output reg [7:0] z;</pre>
+      <pre>	output reg [7:0] w;</pre>
+      <pre>	function [7:0] sum_shift;</pre>
+      <pre>		input [3:0] s1;</pre>
+      <pre>		input [3:0] s2;</pre>
+      <pre>		input [3:0] s3;</pre>
+      <pre>		sum_shift = (s1 + (s2 &lt;&lt; 2)) + (s3 &lt;&lt; 4);</pre>
+      <pre>	endfunction</pre>
+      <pre>	task reset_w;</pre>
+      <pre>		w = 0;</pre>
+      <pre>	endtask</pre>
+      <pre>	task add_to;</pre>
+      <pre>		output reg [7:0] out;</pre>
+      <pre>		input [7:0] in;</pre>
+      <pre>		out = out + in;</pre>
+      <pre>	endtask</pre>
+      <pre>	always @(posedge clk) begin</pre>
+      <pre>		x = sum_shift(a, b, c);</pre>
+      <pre>		y = sum_shift(a[7:4], b[5:2], c[3:0]);</pre>
+      <pre>		z = sum_shift(a[0], b[5:4], c &gt;&gt; 5) ^ sum_shift(1, 2, 3);</pre>
+      <pre>		reset_w;</pre>
+      <pre>		add_to(w, x);</pre>
+      <pre>		add_to(w, y);</pre>
+      <pre>		add_to(w, z);</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre>module task_func_test03 (</pre>
+      <pre>	din_a,</pre>
+      <pre>	din_b,</pre>
+      <pre>	dout_a</pre>
+      <pre>);</pre>
+      <pre>	input [7:0] din_a;</pre>
+      <pre>	input [7:0] din_b;</pre>
+      <pre>	output wire [7:0] dout_a;</pre>
+      <pre>	function [7:0] test;</pre>
+      <pre>		input [7:0] a;</pre>
+      <pre>		input [7:0] b;</pre>
+      <pre>		begin : TEST</pre>
+      <pre>			integer i;</pre>
+      <pre>			for (i = 0; i &lt;= 7; i = i + 1)</pre>
+      <pre>				test[i] = a[i] &amp; b[i];</pre>
+      <pre>		end</pre>
+      <pre>	endfunction</pre>
+      <pre>	assign dout_a = test(din_a, din_b);</pre>
+      <pre>endmodule</pre>
+      <pre>module task_func_test04 (</pre>
+      <pre>	in,</pre>
+      <pre>	out1,</pre>
+      <pre>	out2,</pre>
+      <pre>	out3,</pre>
+      <pre>	out4</pre>
+      <pre>);</pre>
+      <pre>	input [7:0] in;</pre>
+      <pre>	output wire [7:0] out1;</pre>
+      <pre>	output wire [7:0] out2;</pre>
+      <pre>	output wire [7:0] out3;</pre>
+      <pre>	output wire [7:0] out4;</pre>
+      <pre>	parameter p = 23;</pre>
+      <pre>	parameter px = 42;</pre>
+      <pre>	function [7:0] test1;</pre>
+      <pre>		input [7:0] i;</pre>
+      <pre>		parameter p = 42;</pre>
+      <pre>		test1 = i + p;</pre>
+      <pre>	endfunction</pre>
+      <pre>	function [7:0] test2;</pre>
+      <pre>		input [7:0] i;</pre>
+      <pre>		parameter p2 = p + 42;</pre>
+      <pre>		test2 = i + p2;</pre>
+      <pre>	endfunction</pre>
+      <pre>	function [7:0] test3;</pre>
+      <pre>		input [7:0] i;</pre>
+      <pre>		test3 = i + p;</pre>
+      <pre>	endfunction</pre>
+      <pre>	function [7:0] test4;</pre>
+      <pre>		input [7:0] i;</pre>
+      <pre>		parameter px = p + 13;</pre>
+      <pre>		parameter p3 = px - 37;</pre>
+      <pre>		parameter p4 = p3 ^ px;</pre>
+      <pre>		test4 = i + p4;</pre>
+      <pre>	endfunction</pre>
+      <pre>	assign out1 = test1(in);</pre>
+      <pre>	assign out2 = test2(in);</pre>
+      <pre>	assign out3 = test3(in);</pre>
+      <pre>	assign out4 = test4(in);</pre>
+      <pre>endmodule</pre>
+      <pre>module task_func_test05 (</pre>
+      <pre>	data_in,</pre>
+      <pre>	data_out,</pre>
+      <pre>	clk</pre>
+      <pre>);</pre>
+      <pre>	output reg data_out;</pre>
+      <pre>	input data_in;</pre>
+      <pre>	input clk;</pre>
+      <pre>	task myTask;</pre>
+      <pre>		output reg out;</pre>
+      <pre>		input in;</pre>
+      <pre>		out = in;</pre>
+      <pre>	endtask</pre>
+      <pre>	always @(posedge clk)</pre>
+      <pre>		myTask(data_out, data_in);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

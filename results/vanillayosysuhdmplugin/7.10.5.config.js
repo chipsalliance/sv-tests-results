@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/7.10.5'] = [["bounded-queues",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/7.10.5'] = [["","bounded-queues",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"]]

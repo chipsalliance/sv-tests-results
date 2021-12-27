@@ -1,1 +1,1 @@
-config_loader_data['moore/8.26.6.3'] = [["diamond_relationship",0,"logs/moore/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]
+config_loader_data['moore/8.26.6.3'] = [["","diamond_relationship",0,"logs/moore/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]

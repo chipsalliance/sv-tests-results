@@ -1,1 +1,1 @@
-config_loader_data['verible/8.10'] = [["static_methods",1,"logs/Verible/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]
+config_loader_data['verible/8.10'] = [["","static_methods",1,"logs/Verible/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]

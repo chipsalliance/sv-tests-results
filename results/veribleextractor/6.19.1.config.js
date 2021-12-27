@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/6.19.1'] = [["enum_typedef",1,"logs/VeribleExtractor/chapter-6/6.19.1--enum_typedef.sv.log.html","tests/chapter-6/6.19.1--enum_typedef.sv.html"]]
+config_loader_data['veribleextractor/6.19.1'] = [["","enum_typedef",1,"logs/VeribleExtractor/chapter-6/6.19.1--enum_typedef.sv.log.html","tests/chapter-6/6.19.1--enum_typedef.sv.html"]]

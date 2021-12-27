@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/9.2.3'] = [["final",1,"logs/moore_parse/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]
+config_loader_data['moore_parse/9.2.3'] = [["","final",1,"logs/moore_parse/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['odin/6.9.1'] = [["logic_vector",0,"logs/Odin/chapter-6/6.9.1--logic_vector.sv.log.html","tests/chapter-6/6.9.1--logic_vector.sv.html"]]
+config_loader_data['odin/6.9.1'] = [["","logic_vector",0,"logs/Odin/chapter-6/6.9.1--logic_vector.sv.log.html","tests/chapter-6/6.9.1--logic_vector.sv.html"]]

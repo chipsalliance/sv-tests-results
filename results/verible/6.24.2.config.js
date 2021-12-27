@@ -1,1 +1,1 @@
-config_loader_data['verible/6.24.2'] = [["cast_fn",1,"logs/Verible/chapter-6/6.24.2--cast_fn.sv.log.html","tests/chapter-6/6.24.2--cast_fn.sv.html"],["cast_task",1,"logs/Verible/chapter-6/6.24.2--cast_task.sv.log.html","tests/chapter-6/6.24.2--cast_task.sv.html"]]
+config_loader_data['verible/6.24.2'] = [["","cast_fn",1,"logs/Verible/chapter-6/6.24.2--cast_fn.sv.log.html","tests/chapter-6/6.24.2--cast_fn.sv.html"],["","cast_task",1,"logs/Verible/chapter-6/6.24.2--cast_task.sv.log.html","tests/chapter-6/6.24.2--cast_task.sv.html"]]

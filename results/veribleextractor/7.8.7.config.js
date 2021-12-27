@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/7.8.7'] = [["associative-arrays-allocating-elements",1,"logs/VeribleExtractor/chapter-7/arrays/associative/alloc.sv.log.html","tests/chapter-7/arrays/associative/alloc.sv.html"]]
+config_loader_data['veribleextractor/7.8.7'] = [["","associative-arrays-allocating-elements",1,"logs/VeribleExtractor/chapter-7/arrays/associative/alloc.sv.log.html","tests/chapter-7/arrays/associative/alloc.sv.html"]]

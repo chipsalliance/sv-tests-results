@@ -1,1 +1,1 @@
-config_loader_data['yosys/16.14'] = [["assume_property_test",0,"logs/Yosys/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]
+config_loader_data['yosys/16.14'] = [["","assume_property_test",0,"logs/Yosys/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]

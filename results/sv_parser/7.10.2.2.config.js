@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.10.2.2'] = [["insert",1,"logs/sv_parser/chapter-7/queues/insert.sv.log.html","tests/chapter-7/queues/insert.sv.html"]]
+config_loader_data['sv_parser/7.10.2.2'] = [["","insert",1,"logs/sv_parser/chapter-7/queues/insert.sv.log.html","tests/chapter-7/queues/insert.sv.html"]]

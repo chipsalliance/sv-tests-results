@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/12.5'] = [["case",1,"logs/moore_parse/chapter-12/12.5--case.sv.log.html","tests/chapter-12/12.5--case.sv.html"]]
+config_loader_data['moore_parse/12.5'] = [["","case",1,"logs/moore_parse/chapter-12/12.5--case.sv.log.html","tests/chapter-12/12.5--case.sv.html"]]

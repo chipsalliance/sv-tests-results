@@ -1,156 +1,170 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv</a> <a href="../../../../third_party/tests/utd-sv/fpu_out_ctl.v.html" target="file-frame">third_party/tests/utd-sv/fpu_out_ctl.v</a>
-defines: 
-completed: 2021-12-27 02:40:26
-time_elapsed: 0.031s
-ram usage: 25648 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv</a> <a href="../../../../third_party/tests/utd-sv/fpu_out_ctl.v.html" target="file-frame">third_party/tests/utd-sv/fpu_out_ctl.v</a>
-module fpu_out_ctl (
-	d8stg_fdiv_in,
-	m6stg_fmul_in,
-	a6stg_fadd_in,
-	div_id_out_in,
-	m6stg_id_in,
-	add_id_out_in,
-	arst_l,
-	grst_l,
-	rclk,
-	fp_cpx_req_cq,
-	req_thread,
-	dest_rdy,
-	add_dest_rdy,
-	mul_dest_rdy,
-	div_dest_rdy,
-	se,
-	si,
-	so
-);
-	input d8stg_fdiv_in;
-	input m6stg_fmul_in;
-	input a6stg_fadd_in;
-	input [9:0] div_id_out_in;
-	input [9:0] m6stg_id_in;
-	input [9:0] add_id_out_in;
-	input arst_l;
-	input grst_l;
-	input rclk;
-	output wire [7:0] fp_cpx_req_cq;
-	output wire [1:0] req_thread;
-	output wire [2:0] dest_rdy;
-	output wire add_dest_rdy;
-	output wire mul_dest_rdy;
-	output wire div_dest_rdy;
-	input se;
-	input si;
-	output wire so;
-	wire reset;
-	wire add_req_in;
-	wire add_req_step;
-	wire add_req;
-	wire div_req_sel;
-	wire mul_req_sel;
-	wire add_req_sel;
-	wire [9:0] out_id;
-	wire [2:0] dest_rdy_in;
-	wire out_ctl_rst_l;
-	dffrl_async #(1) dffrl_out_ctl(
-		.din(grst_l),
-		.clk(rclk),
-		.rst_l(arst_l),
-		.q(out_ctl_rst_l),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign reset = !out_ctl_rst_l;
-	assign add_req_in = !add_req;
-	assign add_req_step = add_req_sel || mul_req_sel;
-	dffre_s #(1) i_add_req(
-		.din(add_req_in),
-		.en(add_req_step),
-		.rst(reset),
-		.clk(rclk),
-		.q(add_req),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign div_req_sel = d8stg_fdiv_in;
-	assign mul_req_sel = (m6stg_fmul_in &amp;&amp; (!add_req || !a6stg_fadd_in)) &amp;&amp; !div_req_sel;
-	assign add_req_sel = (a6stg_fadd_in &amp;&amp; (add_req || !m6stg_fmul_in)) &amp;&amp; !div_req_sel;
-	assign out_id[9:0] = (({10 {div_req_sel}} &amp; div_id_out_in[9:0]) | ({10 {mul_req_sel}} &amp; m6stg_id_in[9:0])) | ({10 {add_req_sel}} &amp; add_id_out_in[9:0]);
-	dff_s #(8) i_fp_cpx_req_cq(
-		.din(out_id[9:2]),
-		.clk(rclk),
-		.q(fp_cpx_req_cq[7:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s #(2) i_req_thread(
-		.din(out_id[1:0]),
-		.clk(rclk),
-		.q(req_thread[1:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign dest_rdy_in[2:0] = {div_req_sel, mul_req_sel, add_req_sel};
-	dff_s #(3) i_dest_rdy(
-		.din(dest_rdy_in[2:0]),
-		.clk(rclk),
-		.q(dest_rdy[2:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s i_add_dest_rdy(
-		.din(add_req_sel),
-		.clk(rclk),
-		.q(add_dest_rdy),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s i_mul_dest_rdy(
-		.din(mul_req_sel),
-		.clk(rclk),
-		.q(mul_dest_rdy),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s i_div_dest_rdy(
-		.din(div_req_sel),
-		.clk(rclk),
-		.q(div_dest_rdy),
-		.se(se),
-		.si(),
-		.so()
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_fpu_out_ctl</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/fpu_out_ctl.v.html" target="file-frame">third_party/tests/utd-sv/fpu_out_ctl.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:48</dd></div>
+        <div><dt>time elapsed</dt><dd>0.022s</dd></div>
+        <div><dt>ram usage</dt><dd>25664 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_fpu_out_ctl.sv</a> <a href="../../../../third_party/tests/utd-sv/fpu_out_ctl.v.html" target="file-frame">third_party/tests/utd-sv/fpu_out_ctl.v</a></pre>
+      <pre>module fpu_out_ctl (</pre>
+      <pre>	d8stg_fdiv_in,</pre>
+      <pre>	m6stg_fmul_in,</pre>
+      <pre>	a6stg_fadd_in,</pre>
+      <pre>	div_id_out_in,</pre>
+      <pre>	m6stg_id_in,</pre>
+      <pre>	add_id_out_in,</pre>
+      <pre>	arst_l,</pre>
+      <pre>	grst_l,</pre>
+      <pre>	rclk,</pre>
+      <pre>	fp_cpx_req_cq,</pre>
+      <pre>	req_thread,</pre>
+      <pre>	dest_rdy,</pre>
+      <pre>	add_dest_rdy,</pre>
+      <pre>	mul_dest_rdy,</pre>
+      <pre>	div_dest_rdy,</pre>
+      <pre>	se,</pre>
+      <pre>	si,</pre>
+      <pre>	so</pre>
+      <pre>);</pre>
+      <pre>	input d8stg_fdiv_in;</pre>
+      <pre>	input m6stg_fmul_in;</pre>
+      <pre>	input a6stg_fadd_in;</pre>
+      <pre>	input [9:0] div_id_out_in;</pre>
+      <pre>	input [9:0] m6stg_id_in;</pre>
+      <pre>	input [9:0] add_id_out_in;</pre>
+      <pre>	input arst_l;</pre>
+      <pre>	input grst_l;</pre>
+      <pre>	input rclk;</pre>
+      <pre>	output wire [7:0] fp_cpx_req_cq;</pre>
+      <pre>	output wire [1:0] req_thread;</pre>
+      <pre>	output wire [2:0] dest_rdy;</pre>
+      <pre>	output wire add_dest_rdy;</pre>
+      <pre>	output wire mul_dest_rdy;</pre>
+      <pre>	output wire div_dest_rdy;</pre>
+      <pre>	input se;</pre>
+      <pre>	input si;</pre>
+      <pre>	output wire so;</pre>
+      <pre>	wire reset;</pre>
+      <pre>	wire add_req_in;</pre>
+      <pre>	wire add_req_step;</pre>
+      <pre>	wire add_req;</pre>
+      <pre>	wire div_req_sel;</pre>
+      <pre>	wire mul_req_sel;</pre>
+      <pre>	wire add_req_sel;</pre>
+      <pre>	wire [9:0] out_id;</pre>
+      <pre>	wire [2:0] dest_rdy_in;</pre>
+      <pre>	wire out_ctl_rst_l;</pre>
+      <pre>	dffrl_async #(1) dffrl_out_ctl(</pre>
+      <pre>		.din(grst_l),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst_l(arst_l),</pre>
+      <pre>		.q(out_ctl_rst_l),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign reset = !out_ctl_rst_l;</pre>
+      <pre>	assign add_req_in = !add_req;</pre>
+      <pre>	assign add_req_step = add_req_sel || mul_req_sel;</pre>
+      <pre>	dffre_s #(1) i_add_req(</pre>
+      <pre>		.din(add_req_in),</pre>
+      <pre>		.en(add_req_step),</pre>
+      <pre>		.rst(reset),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(add_req),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign div_req_sel = d8stg_fdiv_in;</pre>
+      <pre>	assign mul_req_sel = (m6stg_fmul_in &amp;&amp; (!add_req || !a6stg_fadd_in)) &amp;&amp; !div_req_sel;</pre>
+      <pre>	assign add_req_sel = (a6stg_fadd_in &amp;&amp; (add_req || !m6stg_fmul_in)) &amp;&amp; !div_req_sel;</pre>
+      <pre>	assign out_id[9:0] = (({10 {div_req_sel}} &amp; div_id_out_in[9:0]) | ({10 {mul_req_sel}} &amp; m6stg_id_in[9:0])) | ({10 {add_req_sel}} &amp; add_id_out_in[9:0]);</pre>
+      <pre>	dff_s #(8) i_fp_cpx_req_cq(</pre>
+      <pre>		.din(out_id[9:2]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(fp_cpx_req_cq[7:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s #(2) i_req_thread(</pre>
+      <pre>		.din(out_id[1:0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(req_thread[1:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign dest_rdy_in[2:0] = {div_req_sel, mul_req_sel, add_req_sel};</pre>
+      <pre>	dff_s #(3) i_dest_rdy(</pre>
+      <pre>		.din(dest_rdy_in[2:0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(dest_rdy[2:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s i_add_dest_rdy(</pre>
+      <pre>		.din(add_req_sel),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(add_dest_rdy),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s i_mul_dest_rdy(</pre>
+      <pre>		.din(mul_req_sel),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(mul_dest_rdy),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s i_div_dest_rdy(</pre>
+      <pre>		.din(div_req_sel),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(div_dest_rdy),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/swerv'] = [["swerv",1,"logs/Sv2v_zachjs/generated/fusesoc/swerv.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/lint-verilator/config/common_defines.vh.html"]]
+config_loader_data['sv2v_zachjs/swerv'] = [["","swerv",1,"logs/Sv2v_zachjs/generated/fusesoc/swerv.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/lint-verilator/config/common_defines.vh.html"]]

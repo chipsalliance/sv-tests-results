@@ -1,1 +1,1 @@
-config_loader_data['slang/7.5'] = [["dyn-arr-basic",1,"logs/Slang/chapter-7/arrays/dynamic/basic.sv.log.html","tests/chapter-7/arrays/dynamic/basic.sv.html"]]
+config_loader_data['slang/7.5'] = [["","dyn-arr-basic",1,"logs/Slang/chapter-7/arrays/dynamic/basic.sv.log.html","tests/chapter-7/arrays/dynamic/basic.sv.html"]]

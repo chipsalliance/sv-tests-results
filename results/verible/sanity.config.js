@@ -1,1 +1,1 @@
-config_loader_data['verible/sanity'] = [["sanity",1,"logs/Verible/sanity.sv.log.html","tests/sanity.sv.html"]]
+config_loader_data['verible/sanity'] = [["","sanity",1,"logs/Verible/sanity.sv.log.html","tests/sanity.sv.html"]]

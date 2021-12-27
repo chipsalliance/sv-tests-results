@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/rsd'] = [["rsd",0,"logs/UhdmYosys/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
+config_loader_data['uhdmyosys/rsd'] = [["","rsd",0,"logs/UhdmYosys/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['icarus/6.5'] = [["variable_assignment",1,"logs/Icarus/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]
+config_loader_data['icarus/6.5'] = [["","variable_assignment",1,"logs/Icarus/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]

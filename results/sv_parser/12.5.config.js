@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/12.5'] = [["case",1,"logs/sv_parser/chapter-12/12.5--case.sv.log.html","tests/chapter-12/12.5--case.sv.html"]]
+config_loader_data['sv_parser/12.5'] = [["","case",1,"logs/sv_parser/chapter-12/12.5--case.sv.log.html","tests/chapter-12/12.5--case.sv.html"]]

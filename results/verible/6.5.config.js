@@ -1,1 +1,1 @@
-config_loader_data['verible/6.5'] = [["variable_assignment",1,"logs/Verible/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]
+config_loader_data['verible/6.5'] = [["","variable_assignment",1,"logs/Verible/chapter-6/6.5--variable_assignment.sv.log.html","tests/chapter-6/6.5--variable_assignment.sv.html"]]

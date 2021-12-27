@@ -1,1 +1,1 @@
-config_loader_data['icarus/7.2.2'] = [["unpacked-structures-members-default-value",0,"logs/Icarus/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]
+config_loader_data['icarus/7.2.2'] = [["","unpacked-structures-members-default-value",0,"logs/Icarus/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]

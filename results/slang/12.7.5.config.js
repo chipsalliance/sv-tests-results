@@ -1,1 +1,1 @@
-config_loader_data['slang/12.7.5'] = [["dowhile_loop",1,"logs/Slang/chapter-12/12.7.5--dowhile.sv.log.html","tests/chapter-12/12.7.5--dowhile.sv.html"]]
+config_loader_data['slang/12.7.5'] = [["","dowhile_loop",1,"logs/Slang/chapter-12/12.7.5--dowhile.sv.log.html","tests/chapter-12/12.7.5--dowhile.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/8.26.7'] = [["partial_implementation",0,"logs/Sv2v_zachjs/chapter-8/8.26.7--partial_implementation.sv.log.html","tests/chapter-8/8.26.7--partial_implementation.sv.html"]]
+config_loader_data['sv2v_zachjs/8.26.7'] = [["","partial_implementation",0,"logs/Sv2v_zachjs/chapter-8/8.26.7--partial_implementation.sv.log.html","tests/chapter-8/8.26.7--partial_implementation.sv.html"]]

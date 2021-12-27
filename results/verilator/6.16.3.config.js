@@ -1,1 +1,1 @@
-config_loader_data['verilator/6.16.3'] = [["string_getc",1,"logs/Verilator/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]
+config_loader_data['verilator/6.16.3'] = [["","string_getc",1,"logs/Verilator/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]

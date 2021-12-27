@@ -1,1 +1,1 @@
-config_loader_data['moore/6.19.5.3'] = [["enum_next",0,"logs/moore/chapter-6/6.19.5.3--enum_next.sv.log.html","tests/chapter-6/6.19.5.3--enum_next.sv.html"]]
+config_loader_data['moore/6.19.5.3'] = [["","enum_next",0,"logs/moore/chapter-6/6.19.5.3--enum_next.sv.log.html","tests/chapter-6/6.19.5.3--enum_next.sv.html"]]

@@ -1,261 +1,275 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/xc7
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv</a>
-defines: 
-completed: 2021-12-27 02:52:55
-time_elapsed: 0.039s
-ram usage: 38880 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/xc7 <a href="../../../../tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv</a>
-`default_nettype none
-module top_cube (
-	clk_100m,
-	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
-);
-	input wire clk_100m;
-	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
-	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
-		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
-	);
-	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
-	wire hsync;
-	wire vsync;
-	wire frame;
-	wire line;
-	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(
-		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(sx),
-		.sy(sy),
-		.hsync(hsync),
-		.vsync(vsync),
-		.de(),
-		.frame(frame),
-		.line(line)
-	);
-	wire frame_sys;
-	xd xd_frame(
-		.clk_i(clk_pix),
-		.clk_o(clk_100m),
-		.rst_i(1&#39;b0),
-		.rst_o(1&#39;b0),
-		.i(frame),
-		.o(frame_sys)
-	);
-	localparam FB_WIDTH = 320;
-	localparam FB_HEIGHT = 180;
-	localparam FB_CIDXW = 4;
-	localparam FB_CHANW = 4;
-	localparam FB_SCALE = 2;
-	localparam FB_IMAGE = &#34;&#34;;
-	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;
-	reg fb_we;
-	wire signed [15:0] fbx;
-	wire signed [15:0] fby;
-	reg [3:0] fb_cidx;
-	wire fb_busy;
-	wire [3:0] fb_red;
-	wire [3:0] fb_green;
-	wire [3:0] fb_blue;
-	framebuffer_bram #(
-		.WIDTH(FB_WIDTH),
-		.HEIGHT(FB_HEIGHT),
-		.CIDXW(FB_CIDXW),
-		.CHANW(FB_CHANW),
-		.SCALE(FB_SCALE),
-		.F_IMAGE(FB_IMAGE),
-		.F_PALETTE(FB_PALETTE)
-	) fb_inst(
-		.clk_sys(clk_100m),
-		.clk_pix(clk_pix),
-		.rst_sys(1&#39;b0),
-		.rst_pix(1&#39;b0),
-		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),
-		.frame(frame),
-		.line(line),
-		.we(fb_we),
-		.x(fbx),
-		.y(fby),
-		.cidx(fb_cidx),
-		.clip(),
-		.busy(fb_busy),
-		.red(fb_red),
-		.green(fb_green),
-		.blue(fb_blue)
-	);
-	localparam LINE_CNT = 9;
-	reg [3:0] line_id;
-	reg signed [15:0] vx0;
-	reg signed [15:0] vy0;
-	reg signed [15:0] vx1;
-	reg signed [15:0] vy1;
-	reg draw_start;
-	wire drawing;
-	wire draw_done;
-	reg [31:0] state;
-	always @(posedge clk_100m)
-		case (state)
-			32&#39;d1: begin
-				draw_start &lt;= 1;
-				state &lt;= 32&#39;d2;
-				fb_cidx &lt;= 4&#39;h8;
-				case (line_id)
-					4&#39;d0: begin
-						vx0 &lt;= 130;
-						vy0 &lt;= 60;
-						vx1 &lt;= 230;
-						vy1 &lt;= 60;
-					end
-					4&#39;d1: begin
-						vx0 &lt;= 230;
-						vy0 &lt;= 60;
-						vx1 &lt;= 230;
-						vy1 &lt;= 160;
-					end
-					4&#39;d2: begin
-						vx0 &lt;= 230;
-						vy0 &lt;= 160;
-						vx1 &lt;= 130;
-						vy1 &lt;= 160;
-					end
-					4&#39;d3: begin
-						vx0 &lt;= 130;
-						vy0 &lt;= 160;
-						vx1 &lt;= 130;
-						vy1 &lt;= 60;
-					end
-					4&#39;d4: begin
-						vx0 &lt;= 130;
-						vy0 &lt;= 160;
-						vx1 &lt;= 90;
-						vy1 &lt;= 120;
-					end
-					4&#39;d5: begin
-						vx0 &lt;= 90;
-						vy0 &lt;= 120;
-						vx1 &lt;= 90;
-						vy1 &lt;= 20;
-					end
-					4&#39;d6: begin
-						vx0 &lt;= 90;
-						vy0 &lt;= 20;
-						vx1 &lt;= 130;
-						vy1 &lt;= 60;
-					end
-					4&#39;d7: begin
-						vx0 &lt;= 90;
-						vy0 &lt;= 20;
-						vx1 &lt;= 190;
-						vy1 &lt;= 20;
-					end
-					4&#39;d8: begin
-						vx0 &lt;= 190;
-						vy0 &lt;= 20;
-						vx1 &lt;= 230;
-						vy1 &lt;= 60;
-					end
-					default: begin
-						vx0 &lt;= 0;
-						vy0 &lt;= 0;
-						vx1 &lt;= 0;
-						vy1 &lt;= 0;
-					end
-				endcase
-			end
-			32&#39;d2: begin
-				draw_start &lt;= 0;
-				if (draw_done)
-					if (line_id == 8)
-						state &lt;= 32&#39;d3;
-					else begin
-						line_id &lt;= line_id + 1;
-						state &lt;= 32&#39;d1;
-					end
-			end
-			32&#39;d3: state &lt;= 32&#39;d3;
-			default:
-				if (frame_sys)
-					state &lt;= 32&#39;d1;
-		endcase
-	localparam FRAME_WAIT = 300;
-	reg [8:0] cnt_frame_wait;
-	reg draw_req;
-	always @(posedge clk_100m) begin
-		if (!fb_busy)
-			draw_req &lt;= 0;
-		if (frame_sys)
-			if (cnt_frame_wait != 299)
-				cnt_frame_wait &lt;= cnt_frame_wait + 1;
-			else
-				draw_req &lt;= 1;
-	end
-	draw_line #(.CORDW(CORDW)) draw_line_inst(
-		.clk(clk_100m),
-		.rst(1&#39;b0),
-		.start(draw_start),
-		.oe(draw_req &amp;&amp; !fb_busy),
-		.x0(vx0),
-		.y0(vy0),
-		.x1(vx1),
-		.y1(vy1),
-		.x(fbx),
-		.y(fby),
-		.drawing(drawing),
-		.busy(),
-		.done(draw_done)
-	);
-	always @(*) fb_we = drawing;
-	reg hsync_p1;
-	reg vsync_p1;
-	always @(posedge clk_pix) begin
-		hsync_p1 &lt;= hsync;
-		vsync_p1 &lt;= vsync;
-	end
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync_p1;
-		vga_vsync &lt;= vsync_p1;
-		vga_r &lt;= fb_red;
-		vga_g &lt;= fb_green;
-		vga_b &lt;= fb_blue;
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>graphics_lines-and-triangles_xc7_projf_top_cube</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/xc7<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:41</dd></div>
+        <div><dt>time elapsed</dt><dd>0.039s</dd></div>
+        <div><dt>ram usage</dt><dd>38956 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/lines-and-triangles/xc7 <a href="../../../../tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv.html" target="file-frame">tests/generated/projf-explore/graphics_lines-and-triangles_xc7_projf_top_cube.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/lines-and-triangles/xc7/top_cube.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module top_cube (</pre>
+      <pre>	clk_100m,</pre>
+      <pre>	btn_rst,</pre>
+      <pre>	vga_hsync,</pre>
+      <pre>	vga_vsync,</pre>
+      <pre>	vga_r,</pre>
+      <pre>	vga_g,</pre>
+      <pre>	vga_b</pre>
+      <pre>);</pre>
+      <pre>	input wire clk_100m;</pre>
+      <pre>	input wire btn_rst;</pre>
+      <pre>	output reg vga_hsync;</pre>
+      <pre>	output reg vga_vsync;</pre>
+      <pre>	output reg [3:0] vga_r;</pre>
+      <pre>	output reg [3:0] vga_g;</pre>
+      <pre>	output reg [3:0] vga_b;</pre>
+      <pre>	wire clk_pix;</pre>
+      <pre>	wire clk_locked;</pre>
+      <pre>	clock_gen_480p clock_pix_inst(</pre>
+      <pre>		.clk(clk_100m),</pre>
+      <pre>		.rst(!btn_rst),</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.clk_locked(clk_locked)</pre>
+      <pre>	);</pre>
+      <pre>	localparam CORDW = 16;</pre>
+      <pre>	wire signed [15:0] sx;</pre>
+      <pre>	wire signed [15:0] sy;</pre>
+      <pre>	wire hsync;</pre>
+      <pre>	wire vsync;</pre>
+      <pre>	wire frame;</pre>
+      <pre>	wire line;</pre>
+      <pre>	display_timings_480p #(.CORDW(CORDW)) display_timings_inst(</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sy(sy),</pre>
+      <pre>		.hsync(hsync),</pre>
+      <pre>		.vsync(vsync),</pre>
+      <pre>		.de(),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line(line)</pre>
+      <pre>	);</pre>
+      <pre>	wire frame_sys;</pre>
+      <pre>	xd xd_frame(</pre>
+      <pre>		.clk_i(clk_pix),</pre>
+      <pre>		.clk_o(clk_100m),</pre>
+      <pre>		.rst_i(1&#39;b0),</pre>
+      <pre>		.rst_o(1&#39;b0),</pre>
+      <pre>		.i(frame),</pre>
+      <pre>		.o(frame_sys)</pre>
+      <pre>	);</pre>
+      <pre>	localparam FB_WIDTH = 320;</pre>
+      <pre>	localparam FB_HEIGHT = 180;</pre>
+      <pre>	localparam FB_CIDXW = 4;</pre>
+      <pre>	localparam FB_CHANW = 4;</pre>
+      <pre>	localparam FB_SCALE = 2;</pre>
+      <pre>	localparam FB_IMAGE = &#34;&#34;;</pre>
+      <pre>	localparam FB_PALETTE = &#34;16_colr_4bit_palette.mem&#34;;</pre>
+      <pre>	reg fb_we;</pre>
+      <pre>	wire signed [15:0] fbx;</pre>
+      <pre>	wire signed [15:0] fby;</pre>
+      <pre>	reg [3:0] fb_cidx;</pre>
+      <pre>	wire fb_busy;</pre>
+      <pre>	wire [3:0] fb_red;</pre>
+      <pre>	wire [3:0] fb_green;</pre>
+      <pre>	wire [3:0] fb_blue;</pre>
+      <pre>	framebuffer_bram #(</pre>
+      <pre>		.WIDTH(FB_WIDTH),</pre>
+      <pre>		.HEIGHT(FB_HEIGHT),</pre>
+      <pre>		.CIDXW(FB_CIDXW),</pre>
+      <pre>		.CHANW(FB_CHANW),</pre>
+      <pre>		.SCALE(FB_SCALE),</pre>
+      <pre>		.F_IMAGE(FB_IMAGE),</pre>
+      <pre>		.F_PALETTE(FB_PALETTE)</pre>
+      <pre>	) fb_inst(</pre>
+      <pre>		.clk_sys(clk_100m),</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.rst_sys(1&#39;b0),</pre>
+      <pre>		.rst_pix(1&#39;b0),</pre>
+      <pre>		.de(((sy &gt;= 60) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= 0)),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line(line),</pre>
+      <pre>		.we(fb_we),</pre>
+      <pre>		.x(fbx),</pre>
+      <pre>		.y(fby),</pre>
+      <pre>		.cidx(fb_cidx),</pre>
+      <pre>		.clip(),</pre>
+      <pre>		.busy(fb_busy),</pre>
+      <pre>		.red(fb_red),</pre>
+      <pre>		.green(fb_green),</pre>
+      <pre>		.blue(fb_blue)</pre>
+      <pre>	);</pre>
+      <pre>	localparam LINE_CNT = 9;</pre>
+      <pre>	reg [3:0] line_id;</pre>
+      <pre>	reg signed [15:0] vx0;</pre>
+      <pre>	reg signed [15:0] vy0;</pre>
+      <pre>	reg signed [15:0] vx1;</pre>
+      <pre>	reg signed [15:0] vy1;</pre>
+      <pre>	reg draw_start;</pre>
+      <pre>	wire drawing;</pre>
+      <pre>	wire draw_done;</pre>
+      <pre>	reg [31:0] state;</pre>
+      <pre>	always @(posedge clk_100m)</pre>
+      <pre>		case (state)</pre>
+      <pre>			32&#39;d1: begin</pre>
+      <pre>				draw_start &lt;= 1;</pre>
+      <pre>				state &lt;= 32&#39;d2;</pre>
+      <pre>				fb_cidx &lt;= 4&#39;h8;</pre>
+      <pre>				case (line_id)</pre>
+      <pre>					4&#39;d0: begin</pre>
+      <pre>						vx0 &lt;= 130;</pre>
+      <pre>						vy0 &lt;= 60;</pre>
+      <pre>						vx1 &lt;= 230;</pre>
+      <pre>						vy1 &lt;= 60;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d1: begin</pre>
+      <pre>						vx0 &lt;= 230;</pre>
+      <pre>						vy0 &lt;= 60;</pre>
+      <pre>						vx1 &lt;= 230;</pre>
+      <pre>						vy1 &lt;= 160;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d2: begin</pre>
+      <pre>						vx0 &lt;= 230;</pre>
+      <pre>						vy0 &lt;= 160;</pre>
+      <pre>						vx1 &lt;= 130;</pre>
+      <pre>						vy1 &lt;= 160;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d3: begin</pre>
+      <pre>						vx0 &lt;= 130;</pre>
+      <pre>						vy0 &lt;= 160;</pre>
+      <pre>						vx1 &lt;= 130;</pre>
+      <pre>						vy1 &lt;= 60;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d4: begin</pre>
+      <pre>						vx0 &lt;= 130;</pre>
+      <pre>						vy0 &lt;= 160;</pre>
+      <pre>						vx1 &lt;= 90;</pre>
+      <pre>						vy1 &lt;= 120;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d5: begin</pre>
+      <pre>						vx0 &lt;= 90;</pre>
+      <pre>						vy0 &lt;= 120;</pre>
+      <pre>						vx1 &lt;= 90;</pre>
+      <pre>						vy1 &lt;= 20;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d6: begin</pre>
+      <pre>						vx0 &lt;= 90;</pre>
+      <pre>						vy0 &lt;= 20;</pre>
+      <pre>						vx1 &lt;= 130;</pre>
+      <pre>						vy1 &lt;= 60;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d7: begin</pre>
+      <pre>						vx0 &lt;= 90;</pre>
+      <pre>						vy0 &lt;= 20;</pre>
+      <pre>						vx1 &lt;= 190;</pre>
+      <pre>						vy1 &lt;= 20;</pre>
+      <pre>					end</pre>
+      <pre>					4&#39;d8: begin</pre>
+      <pre>						vx0 &lt;= 190;</pre>
+      <pre>						vy0 &lt;= 20;</pre>
+      <pre>						vx1 &lt;= 230;</pre>
+      <pre>						vy1 &lt;= 60;</pre>
+      <pre>					end</pre>
+      <pre>					default: begin</pre>
+      <pre>						vx0 &lt;= 0;</pre>
+      <pre>						vy0 &lt;= 0;</pre>
+      <pre>						vx1 &lt;= 0;</pre>
+      <pre>						vy1 &lt;= 0;</pre>
+      <pre>					end</pre>
+      <pre>				endcase</pre>
+      <pre>			end</pre>
+      <pre>			32&#39;d2: begin</pre>
+      <pre>				draw_start &lt;= 0;</pre>
+      <pre>				if (draw_done)</pre>
+      <pre>					if (line_id == 8)</pre>
+      <pre>						state &lt;= 32&#39;d3;</pre>
+      <pre>					else begin</pre>
+      <pre>						line_id &lt;= line_id + 1;</pre>
+      <pre>						state &lt;= 32&#39;d1;</pre>
+      <pre>					end</pre>
+      <pre>			end</pre>
+      <pre>			32&#39;d3: state &lt;= 32&#39;d3;</pre>
+      <pre>			default:</pre>
+      <pre>				if (frame_sys)</pre>
+      <pre>					state &lt;= 32&#39;d1;</pre>
+      <pre>		endcase</pre>
+      <pre>	localparam FRAME_WAIT = 300;</pre>
+      <pre>	reg [8:0] cnt_frame_wait;</pre>
+      <pre>	reg draw_req;</pre>
+      <pre>	always @(posedge clk_100m) begin</pre>
+      <pre>		if (!fb_busy)</pre>
+      <pre>			draw_req &lt;= 0;</pre>
+      <pre>		if (frame_sys)</pre>
+      <pre>			if (cnt_frame_wait != 299)</pre>
+      <pre>				cnt_frame_wait &lt;= cnt_frame_wait + 1;</pre>
+      <pre>			else</pre>
+      <pre>				draw_req &lt;= 1;</pre>
+      <pre>	end</pre>
+      <pre>	draw_line #(.CORDW(CORDW)) draw_line_inst(</pre>
+      <pre>		.clk(clk_100m),</pre>
+      <pre>		.rst(1&#39;b0),</pre>
+      <pre>		.start(draw_start),</pre>
+      <pre>		.oe(draw_req &amp;&amp; !fb_busy),</pre>
+      <pre>		.x0(vx0),</pre>
+      <pre>		.y0(vy0),</pre>
+      <pre>		.x1(vx1),</pre>
+      <pre>		.y1(vy1),</pre>
+      <pre>		.x(fbx),</pre>
+      <pre>		.y(fby),</pre>
+      <pre>		.drawing(drawing),</pre>
+      <pre>		.busy(),</pre>
+      <pre>		.done(draw_done)</pre>
+      <pre>	);</pre>
+      <pre>	always @(*) fb_we = drawing;</pre>
+      <pre>	reg hsync_p1;</pre>
+      <pre>	reg vsync_p1;</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		hsync_p1 &lt;= hsync;</pre>
+      <pre>		vsync_p1 &lt;= vsync;</pre>
+      <pre>	end</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		vga_hsync &lt;= hsync_p1;</pre>
+      <pre>		vga_vsync &lt;= vsync_p1;</pre>
+      <pre>		vga_r &lt;= fb_red;</pre>
+      <pre>		vga_g &lt;= fb_green;</pre>
+      <pre>		vga_b &lt;= fb_blue;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

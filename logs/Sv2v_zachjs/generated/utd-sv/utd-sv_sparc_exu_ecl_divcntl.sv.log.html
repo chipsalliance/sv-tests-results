@@ -1,373 +1,387 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv</a> <a href="../../../../third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v.html" target="file-frame">third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v</a>
-defines: 
-completed: 2021-12-27 02:40:27
-time_elapsed: 0.071s
-ram usage: 63592 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv</a> <a href="../../../../third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v.html" target="file-frame">third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v</a>
-module sparc_exu_ecl_divcntl (
-	ecl_div_xinmask,
-	ecl_div_keep_d,
-	ecl_div_ld_inputs,
-	ecl_div_sel_adder,
-	ecl_div_last_cycle,
-	ecl_div_almostlast_cycle,
-	ecl_div_sel_div,
-	divcntl_wb_req_g,
-	divcntl_ccr_cc_w2,
-	ecl_div_sel_64b,
-	ecl_div_sel_u32,
-	ecl_div_sel_pos32,
-	ecl_div_sel_neg32,
-	ecl_div_upper32_zero,
-	ecl_div_upper33_one,
-	ecl_div_upper33_zero,
-	ecl_div_dividend_sign,
-	ecl_div_newq,
-	ecl_div_subtract_l,
-	ecl_div_keepx,
-	ecl_div_cin,
-	clk,
-	se,
-	reset,
-	mdqctl_divcntl_input_vld,
-	wb_divcntl_ack_g,
-	mdqctl_divcntl_reset_div,
-	div_ecl_gencc_in_msb_l,
-	div_ecl_gencc_in_31,
-	div_ecl_upper32_equal,
-	div_ecl_low32_nonzero,
-	ecl_div_signed_div,
-	div_ecl_dividend_msb,
-	div_ecl_xin_msb_l,
-	div_ecl_x_msb,
-	div_ecl_d_msb,
-	div_ecl_cout64,
-	div_ecl_divisorin_31,
-	ecl_div_div64,
-	mdqctl_divcntl_muldone,
-	ecl_div_muls,
-	div_ecl_adder_out_31,
-	muls_rs1_31_m_l,
-	div_ecl_cout32,
-	rs2_data_31_m,
-	div_ecl_detect_zero_high,
-	div_ecl_detect_zero_low,
-	div_ecl_d_62
-);
-	input clk;
-	input se;
-	input reset;
-	input mdqctl_divcntl_input_vld;
-	input wb_divcntl_ack_g;
-	input mdqctl_divcntl_reset_div;
-	input div_ecl_gencc_in_msb_l;
-	input div_ecl_gencc_in_31;
-	input div_ecl_upper32_equal;
-	input div_ecl_low32_nonzero;
-	input ecl_div_signed_div;
-	input div_ecl_dividend_msb;
-	input div_ecl_xin_msb_l;
-	input div_ecl_x_msb;
-	input div_ecl_d_msb;
-	input div_ecl_cout64;
-	input div_ecl_divisorin_31;
-	input ecl_div_div64;
-	input mdqctl_divcntl_muldone;
-	input ecl_div_muls;
-	input div_ecl_adder_out_31;
-	input muls_rs1_31_m_l;
-	input div_ecl_cout32;
-	input rs2_data_31_m;
-	input div_ecl_detect_zero_high;
-	input div_ecl_detect_zero_low;
-	input div_ecl_d_62;
-	output wire ecl_div_xinmask;
-	output wire ecl_div_keep_d;
-	output wire ecl_div_ld_inputs;
-	output wire ecl_div_sel_adder;
-	output wire ecl_div_last_cycle;
-	output wire ecl_div_almostlast_cycle;
-	output wire ecl_div_sel_div;
-	output wire divcntl_wb_req_g;
-	output wire [7:0] divcntl_ccr_cc_w2;
-	output wire ecl_div_sel_64b;
-	output wire ecl_div_sel_u32;
-	output wire ecl_div_sel_pos32;
-	output wire ecl_div_sel_neg32;
-	output wire ecl_div_upper32_zero;
-	output wire ecl_div_upper33_one;
-	output wire ecl_div_upper33_zero;
-	output wire ecl_div_dividend_sign;
-	output wire ecl_div_newq;
-	output wire ecl_div_subtract_l;
-	output wire ecl_div_keepx;
-	output wire ecl_div_cin;
-	wire firstq;
-	wire q_next;
-	wire adderin1_64;
-	wire adderin2_64;
-	wire firstlast_sub;
-	wire sub_next;
-	wire subtract;
-	wire bit64_halfadd;
-	wire partial_qpredict;
-	wire [1:0] q_next_nocout;
-	wire [1:0] sub_next_nocout;
-	wire partial_qpredict_l;
-	wire divisor_sign;
-	wire detect_zero;
-	wire new_zero_rem_with_zero;
-	wire new_zero_rem_no_zero;
-	wire zero_rem_d;
-	wire zero_rem_q;
-	wire last_cin_with_zero;
-	wire last_cin_no_zero;
-	wire last_cin;
-	wire last_cin_next;
-	wire upper32_equal_d1;
-	wire gencc_in_msb_l_d1;
-	wire gencc_in_31_d1;
-	wire sel_div_d1;
-	wire low32_nonzero_d1;
-	wire [3:0] xcc;
-	wire [3:0] icc;
-	wire unsign_ovfl;
-	wire pos_ovfl;
-	wire neg_ovfl;
-	wire muls_c;
-	wire next_muls_c;
-	wire muls_v;
-	wire next_muls_v;
-	wire muls_rs1_data_31_m;
-	wire div_adder_out_31_w;
-	wire rs2_data_31_w;
-	wire muls_rs1_data_31_w;
-	wire ovfl_32;
-	wire div_v;
-	wire [5:0] div_state;
-	wire [5:0] next_state;
-	wire go_idle;
-	wire stay_idle;
-	wire go_run;
-	wire stay_run;
-	wire go_last_calc;
-	wire go_chk_ovfl;
-	wire go_fix_ovfl;
-	wire go_done;
-	wire stay_done;
-	wire reset_cnt;
-	wire [5:0] cntr;
-	wire cntris63;
-	assign divcntl_wb_req_g = div_state[5] | (~((div_state[5] | div_state[3]) | div_state[4]) &amp; mdqctl_divcntl_muldone);
-	assign ecl_div_sel_div = ~(~((div_state[5] | div_state[3]) | div_state[4]) &amp; mdqctl_divcntl_muldone);
-	dff_s #(6) divstate_dff(
-		.din(next_state[5:0]),
-		.clk(clk),
-		.q(div_state[5:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign ecl_div_almostlast_cycle = go_last_calc &amp; ~ecl_div_ld_inputs;
-	assign ecl_div_sel_adder = (div_state[1] | div_state[2]) &amp; ~ecl_div_ld_inputs;
-	assign ecl_div_last_cycle = div_state[2];
-	assign ecl_div_ld_inputs = mdqctl_divcntl_input_vld;
-	assign ecl_div_keep_d = ~(ecl_div_sel_adder | ecl_div_ld_inputs);
-	assign reset_cnt = ~div_state[1];
-	assign stay_idle = div_state[0] &amp; ~mdqctl_divcntl_input_vld;
-	assign go_idle = div_state[5] &amp; wb_divcntl_ack_g;
-	assign next_state[0] = ((go_idle | stay_idle) | mdqctl_divcntl_reset_div) | reset;
-	assign stay_run = (div_state[1] &amp; ~cntris63) &amp; ~ecl_div_muls;
-	assign go_run = div_state[0] &amp; mdqctl_divcntl_input_vld;
-	assign next_state[1] = ((go_run | stay_run) &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;
-	assign go_last_calc = div_state[1] &amp; cntris63;
-	assign next_state[2] = (go_last_calc &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;
-	assign go_chk_ovfl = div_state[2];
-	assign next_state[3] = (go_chk_ovfl &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;
-	assign go_fix_ovfl = div_state[3] | (div_state[1] &amp; ecl_div_muls);
-	assign next_state[4] = (go_fix_ovfl &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;
-	assign go_done = div_state[4];
-	assign stay_done = div_state[5] &amp; ~wb_divcntl_ack_g;
-	assign next_state[5] = ((go_done | stay_done) &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;
-	sparc_exu_ecl_cnt6 cnt6(
-		.reset(reset_cnt),
-		.cntr(cntr[5:0]),
-		.clk(clk),
-		.se(se)
-	);
-	assign cntris63 = ((((cntr[5] &amp; cntr[4]) &amp; cntr[3]) &amp; cntr[2]) &amp; cntr[1]) &amp; cntr[0];
-	assign ecl_div_dividend_sign = ecl_div_signed_div &amp; div_ecl_dividend_msb;
-	assign ecl_div_xinmask = div_ecl_divisorin_31 &amp; ecl_div_signed_div;
-	assign divisor_sign = div_ecl_x_msb &amp; ecl_div_signed_div;
-	assign adderin1_64 = div_ecl_d_msb;
-	assign adderin2_64 = (ecl_div_signed_div &amp; div_ecl_x_msb) ^ subtract;
-	assign bit64_halfadd = adderin1_64 ^ adderin2_64;
-	assign partial_qpredict = bit64_halfadd ^ ~(div_ecl_x_msb &amp; ecl_div_signed_div);
-	assign partial_qpredict_l = ~partial_qpredict;
-	assign firstq = ecl_div_dividend_sign;
-	mux2ds #(2) qnext_mux(
-		.dout(q_next_nocout[1:0]),
-		.in0({partial_qpredict, partial_qpredict_l}),
-		.in1({2 {firstq}}),
-		.sel0(~ecl_div_ld_inputs),
-		.sel1(ecl_div_ld_inputs)
-	);
-	dp_mux2es qnext_cout_mux(
-		.dout(q_next),
-		.in0(q_next_nocout[1]),
-		.in1(q_next_nocout[0]),
-		.sel(div_ecl_cout64)
-	);
-	dff_s q_dff(
-		.din(q_next),
-		.clk(clk),
-		.q(ecl_div_newq),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign firstlast_sub = (~ecl_div_almostlast_cycle &amp; ~ecl_div_muls) &amp; (~ecl_div_signed_div | ~(div_ecl_dividend_msb ^ ~div_ecl_xin_msb_l));
-	assign ecl_div_keepx = ~(ecl_div_ld_inputs | ecl_div_almostlast_cycle);
-	mux2ds #(2) subnext_mux(
-		.dout(sub_next_nocout[1:0]),
-		.in0({2 {firstlast_sub}}),
-		.in1({partial_qpredict, partial_qpredict_l}),
-		.sel0(~ecl_div_keepx),
-		.sel1(ecl_div_keepx)
-	);
-	dp_mux2es subtract_cout_mux(
-		.dout(sub_next),
-		.in0(sub_next_nocout[1]),
-		.in1(sub_next_nocout[0]),
-		.sel(div_ecl_cout64)
-	);
-	dff_s sub_dff(
-		.din(sub_next),
-		.clk(clk),
-		.q(subtract),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign ecl_div_subtract_l = ~subtract;
-	assign detect_zero = div_ecl_detect_zero_low &amp; div_ecl_detect_zero_high;
-	assign ecl_div_cin = (ecl_div_last_cycle ? last_cin : subtract);
-	assign new_zero_rem_with_zero = ~ecl_div_ld_inputs &amp; (~div_ecl_d_62 | ecl_div_almostlast_cycle);
-	assign new_zero_rem_no_zero = zero_rem_q &amp; new_zero_rem_with_zero;
-	assign zero_rem_d = (detect_zero ? new_zero_rem_with_zero : new_zero_rem_no_zero);
-	dff_s zero_rem_dff(
-		.din(zero_rem_d),
-		.clk(clk),
-		.q(zero_rem_q),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign last_cin_with_zero = ecl_div_signed_div &amp; (((divisor_sign &amp; ~div_ecl_d_62) | ((~divisor_sign &amp; div_ecl_d_62) &amp; ~new_zero_rem_with_zero)) | ((divisor_sign &amp; div_ecl_d_62) &amp; new_zero_rem_with_zero));
-	assign last_cin_no_zero = ecl_div_signed_div &amp; (((divisor_sign &amp; ~div_ecl_d_62) | ((~divisor_sign &amp; div_ecl_d_62) &amp; ~new_zero_rem_no_zero)) | ((divisor_sign &amp; div_ecl_d_62) &amp; new_zero_rem_no_zero));
-	assign last_cin_next = (detect_zero ? last_cin_with_zero : last_cin_no_zero);
-	dff_s last_cin_dff(
-		.din(last_cin_next),
-		.clk(clk),
-		.q(last_cin),
-		.se(se),
-		.si(),
-		.so()
-	);
-	wire inputs_neg_d;
-	wire inputs_neg_q;
-	wire large_neg_ovfl;
-	assign inputs_neg_d = div_ecl_dividend_msb &amp; div_ecl_divisorin_31;
-	assign large_neg_ovfl = inputs_neg_q &amp; ~gencc_in_msb_l_d1;
-	dffe_s inputs_neg_dff(
-		.din(inputs_neg_d),
-		.clk(clk),
-		.q(inputs_neg_q),
-		.en(ecl_div_ld_inputs),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s #(5) cc_sig_dff(
-		.din({div_ecl_upper32_equal, div_ecl_gencc_in_msb_l, div_ecl_gencc_in_31, ecl_div_sel_div, div_ecl_low32_nonzero}),
-		.q({upper32_equal_d1, gencc_in_msb_l_d1, gencc_in_31_d1, sel_div_d1, low32_nonzero_d1}),
-		.clk(clk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign ecl_div_sel_64b = ecl_div_div64 | ecl_div_muls;
-	assign ecl_div_sel_u32 = ~ecl_div_sel_64b &amp; ~ecl_div_signed_div;
-	assign ecl_div_sel_pos32 = (~ecl_div_sel_64b &amp; ecl_div_signed_div) &amp; (gencc_in_msb_l_d1 | large_neg_ovfl);
-	assign ecl_div_sel_neg32 = ((~ecl_div_sel_64b &amp; ecl_div_signed_div) &amp; ~gencc_in_msb_l_d1) &amp; ~large_neg_ovfl;
-	assign ecl_div_upper32_zero = upper32_equal_d1 &amp; gencc_in_msb_l_d1;
-	assign ecl_div_upper33_zero = (upper32_equal_d1 &amp; gencc_in_msb_l_d1) &amp; ~gencc_in_31_d1;
-	assign ecl_div_upper33_one = (upper32_equal_d1 &amp; ~gencc_in_msb_l_d1) &amp; gencc_in_31_d1;
-	assign unsign_ovfl = (ecl_div_sel_u32 &amp; ~ecl_div_upper32_zero) &amp; sel_div_d1;
-	assign pos_ovfl = (ecl_div_sel_pos32 &amp; ~ecl_div_upper33_zero) &amp; sel_div_d1;
-	assign neg_ovfl = (ecl_div_sel_neg32 &amp; ~ecl_div_upper33_one) &amp; sel_div_d1;
-	assign div_v = (pos_ovfl | unsign_ovfl) | neg_ovfl;
-	assign next_muls_c = (div_state[1] ? div_ecl_cout32 : muls_c);
-	assign muls_rs1_data_31_m = ~muls_rs1_31_m_l;
-	dff_s #(3) muls_overlow_dff(
-		.din({muls_rs1_data_31_m, rs2_data_31_m, div_ecl_adder_out_31}),
-		.q({muls_rs1_data_31_w, rs2_data_31_w, div_adder_out_31_w}),
-		.clk(clk),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign ovfl_32 = ((muls_rs1_data_31_w &amp; rs2_data_31_w) &amp; ~div_adder_out_31_w) | ((~muls_rs1_data_31_w &amp; ~rs2_data_31_w) &amp; div_adder_out_31_w);
-	assign next_muls_v = (div_state[4] ? ovfl_32 : muls_v);
-	dff_s muls_c_dff(
-		.din(next_muls_c),
-		.clk(clk),
-		.q(muls_c),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s muls_v_dff(
-		.din(next_muls_v),
-		.clk(clk),
-		.q(muls_v),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign xcc[3] = (~gencc_in_msb_l_d1 &amp; ~unsign_ovfl) &amp; ~pos_ovfl;
-	assign icc[3] = ((gencc_in_31_d1 &amp; ~pos_ovfl) | neg_ovfl) | unsign_ovfl;
-	assign xcc[2] = (upper32_equal_d1 &amp; gencc_in_msb_l_d1) &amp; ~low32_nonzero_d1;
-	assign icc[2] = ~low32_nonzero_d1 &amp; ~div_v;
-	assign xcc[1] = 1&#39;b0;
-	assign icc[1] = (ecl_div_muls &amp; sel_div_d1 ? muls_v : div_v);
-	assign xcc[0] = 1&#39;b0;
-	assign icc[0] = (ecl_div_muls &amp; sel_div_d1) &amp; muls_c;
-	assign divcntl_ccr_cc_w2 = {xcc, icc};
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_sparc_exu_ecl_divcntl</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v.html" target="file-frame">third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:51</dd></div>
+        <div><dt>time elapsed</dt><dd>0.065s</dd></div>
+        <div><dt>ram usage</dt><dd>63604 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sparc_exu_ecl_divcntl.sv</a> <a href="../../../../third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v.html" target="file-frame">third_party/tests/utd-sv/sparc_exu_ecl_divcntl.v</a></pre>
+      <pre>module sparc_exu_ecl_divcntl (</pre>
+      <pre>	ecl_div_xinmask,</pre>
+      <pre>	ecl_div_keep_d,</pre>
+      <pre>	ecl_div_ld_inputs,</pre>
+      <pre>	ecl_div_sel_adder,</pre>
+      <pre>	ecl_div_last_cycle,</pre>
+      <pre>	ecl_div_almostlast_cycle,</pre>
+      <pre>	ecl_div_sel_div,</pre>
+      <pre>	divcntl_wb_req_g,</pre>
+      <pre>	divcntl_ccr_cc_w2,</pre>
+      <pre>	ecl_div_sel_64b,</pre>
+      <pre>	ecl_div_sel_u32,</pre>
+      <pre>	ecl_div_sel_pos32,</pre>
+      <pre>	ecl_div_sel_neg32,</pre>
+      <pre>	ecl_div_upper32_zero,</pre>
+      <pre>	ecl_div_upper33_one,</pre>
+      <pre>	ecl_div_upper33_zero,</pre>
+      <pre>	ecl_div_dividend_sign,</pre>
+      <pre>	ecl_div_newq,</pre>
+      <pre>	ecl_div_subtract_l,</pre>
+      <pre>	ecl_div_keepx,</pre>
+      <pre>	ecl_div_cin,</pre>
+      <pre>	clk,</pre>
+      <pre>	se,</pre>
+      <pre>	reset,</pre>
+      <pre>	mdqctl_divcntl_input_vld,</pre>
+      <pre>	wb_divcntl_ack_g,</pre>
+      <pre>	mdqctl_divcntl_reset_div,</pre>
+      <pre>	div_ecl_gencc_in_msb_l,</pre>
+      <pre>	div_ecl_gencc_in_31,</pre>
+      <pre>	div_ecl_upper32_equal,</pre>
+      <pre>	div_ecl_low32_nonzero,</pre>
+      <pre>	ecl_div_signed_div,</pre>
+      <pre>	div_ecl_dividend_msb,</pre>
+      <pre>	div_ecl_xin_msb_l,</pre>
+      <pre>	div_ecl_x_msb,</pre>
+      <pre>	div_ecl_d_msb,</pre>
+      <pre>	div_ecl_cout64,</pre>
+      <pre>	div_ecl_divisorin_31,</pre>
+      <pre>	ecl_div_div64,</pre>
+      <pre>	mdqctl_divcntl_muldone,</pre>
+      <pre>	ecl_div_muls,</pre>
+      <pre>	div_ecl_adder_out_31,</pre>
+      <pre>	muls_rs1_31_m_l,</pre>
+      <pre>	div_ecl_cout32,</pre>
+      <pre>	rs2_data_31_m,</pre>
+      <pre>	div_ecl_detect_zero_high,</pre>
+      <pre>	div_ecl_detect_zero_low,</pre>
+      <pre>	div_ecl_d_62</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	input se;</pre>
+      <pre>	input reset;</pre>
+      <pre>	input mdqctl_divcntl_input_vld;</pre>
+      <pre>	input wb_divcntl_ack_g;</pre>
+      <pre>	input mdqctl_divcntl_reset_div;</pre>
+      <pre>	input div_ecl_gencc_in_msb_l;</pre>
+      <pre>	input div_ecl_gencc_in_31;</pre>
+      <pre>	input div_ecl_upper32_equal;</pre>
+      <pre>	input div_ecl_low32_nonzero;</pre>
+      <pre>	input ecl_div_signed_div;</pre>
+      <pre>	input div_ecl_dividend_msb;</pre>
+      <pre>	input div_ecl_xin_msb_l;</pre>
+      <pre>	input div_ecl_x_msb;</pre>
+      <pre>	input div_ecl_d_msb;</pre>
+      <pre>	input div_ecl_cout64;</pre>
+      <pre>	input div_ecl_divisorin_31;</pre>
+      <pre>	input ecl_div_div64;</pre>
+      <pre>	input mdqctl_divcntl_muldone;</pre>
+      <pre>	input ecl_div_muls;</pre>
+      <pre>	input div_ecl_adder_out_31;</pre>
+      <pre>	input muls_rs1_31_m_l;</pre>
+      <pre>	input div_ecl_cout32;</pre>
+      <pre>	input rs2_data_31_m;</pre>
+      <pre>	input div_ecl_detect_zero_high;</pre>
+      <pre>	input div_ecl_detect_zero_low;</pre>
+      <pre>	input div_ecl_d_62;</pre>
+      <pre>	output wire ecl_div_xinmask;</pre>
+      <pre>	output wire ecl_div_keep_d;</pre>
+      <pre>	output wire ecl_div_ld_inputs;</pre>
+      <pre>	output wire ecl_div_sel_adder;</pre>
+      <pre>	output wire ecl_div_last_cycle;</pre>
+      <pre>	output wire ecl_div_almostlast_cycle;</pre>
+      <pre>	output wire ecl_div_sel_div;</pre>
+      <pre>	output wire divcntl_wb_req_g;</pre>
+      <pre>	output wire [7:0] divcntl_ccr_cc_w2;</pre>
+      <pre>	output wire ecl_div_sel_64b;</pre>
+      <pre>	output wire ecl_div_sel_u32;</pre>
+      <pre>	output wire ecl_div_sel_pos32;</pre>
+      <pre>	output wire ecl_div_sel_neg32;</pre>
+      <pre>	output wire ecl_div_upper32_zero;</pre>
+      <pre>	output wire ecl_div_upper33_one;</pre>
+      <pre>	output wire ecl_div_upper33_zero;</pre>
+      <pre>	output wire ecl_div_dividend_sign;</pre>
+      <pre>	output wire ecl_div_newq;</pre>
+      <pre>	output wire ecl_div_subtract_l;</pre>
+      <pre>	output wire ecl_div_keepx;</pre>
+      <pre>	output wire ecl_div_cin;</pre>
+      <pre>	wire firstq;</pre>
+      <pre>	wire q_next;</pre>
+      <pre>	wire adderin1_64;</pre>
+      <pre>	wire adderin2_64;</pre>
+      <pre>	wire firstlast_sub;</pre>
+      <pre>	wire sub_next;</pre>
+      <pre>	wire subtract;</pre>
+      <pre>	wire bit64_halfadd;</pre>
+      <pre>	wire partial_qpredict;</pre>
+      <pre>	wire [1:0] q_next_nocout;</pre>
+      <pre>	wire [1:0] sub_next_nocout;</pre>
+      <pre>	wire partial_qpredict_l;</pre>
+      <pre>	wire divisor_sign;</pre>
+      <pre>	wire detect_zero;</pre>
+      <pre>	wire new_zero_rem_with_zero;</pre>
+      <pre>	wire new_zero_rem_no_zero;</pre>
+      <pre>	wire zero_rem_d;</pre>
+      <pre>	wire zero_rem_q;</pre>
+      <pre>	wire last_cin_with_zero;</pre>
+      <pre>	wire last_cin_no_zero;</pre>
+      <pre>	wire last_cin;</pre>
+      <pre>	wire last_cin_next;</pre>
+      <pre>	wire upper32_equal_d1;</pre>
+      <pre>	wire gencc_in_msb_l_d1;</pre>
+      <pre>	wire gencc_in_31_d1;</pre>
+      <pre>	wire sel_div_d1;</pre>
+      <pre>	wire low32_nonzero_d1;</pre>
+      <pre>	wire [3:0] xcc;</pre>
+      <pre>	wire [3:0] icc;</pre>
+      <pre>	wire unsign_ovfl;</pre>
+      <pre>	wire pos_ovfl;</pre>
+      <pre>	wire neg_ovfl;</pre>
+      <pre>	wire muls_c;</pre>
+      <pre>	wire next_muls_c;</pre>
+      <pre>	wire muls_v;</pre>
+      <pre>	wire next_muls_v;</pre>
+      <pre>	wire muls_rs1_data_31_m;</pre>
+      <pre>	wire div_adder_out_31_w;</pre>
+      <pre>	wire rs2_data_31_w;</pre>
+      <pre>	wire muls_rs1_data_31_w;</pre>
+      <pre>	wire ovfl_32;</pre>
+      <pre>	wire div_v;</pre>
+      <pre>	wire [5:0] div_state;</pre>
+      <pre>	wire [5:0] next_state;</pre>
+      <pre>	wire go_idle;</pre>
+      <pre>	wire stay_idle;</pre>
+      <pre>	wire go_run;</pre>
+      <pre>	wire stay_run;</pre>
+      <pre>	wire go_last_calc;</pre>
+      <pre>	wire go_chk_ovfl;</pre>
+      <pre>	wire go_fix_ovfl;</pre>
+      <pre>	wire go_done;</pre>
+      <pre>	wire stay_done;</pre>
+      <pre>	wire reset_cnt;</pre>
+      <pre>	wire [5:0] cntr;</pre>
+      <pre>	wire cntris63;</pre>
+      <pre>	assign divcntl_wb_req_g = div_state[5] | (~((div_state[5] | div_state[3]) | div_state[4]) &amp; mdqctl_divcntl_muldone);</pre>
+      <pre>	assign ecl_div_sel_div = ~(~((div_state[5] | div_state[3]) | div_state[4]) &amp; mdqctl_divcntl_muldone);</pre>
+      <pre>	dff_s #(6) divstate_dff(</pre>
+      <pre>		.din(next_state[5:0]),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(div_state[5:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign ecl_div_almostlast_cycle = go_last_calc &amp; ~ecl_div_ld_inputs;</pre>
+      <pre>	assign ecl_div_sel_adder = (div_state[1] | div_state[2]) &amp; ~ecl_div_ld_inputs;</pre>
+      <pre>	assign ecl_div_last_cycle = div_state[2];</pre>
+      <pre>	assign ecl_div_ld_inputs = mdqctl_divcntl_input_vld;</pre>
+      <pre>	assign ecl_div_keep_d = ~(ecl_div_sel_adder | ecl_div_ld_inputs);</pre>
+      <pre>	assign reset_cnt = ~div_state[1];</pre>
+      <pre>	assign stay_idle = div_state[0] &amp; ~mdqctl_divcntl_input_vld;</pre>
+      <pre>	assign go_idle = div_state[5] &amp; wb_divcntl_ack_g;</pre>
+      <pre>	assign next_state[0] = ((go_idle | stay_idle) | mdqctl_divcntl_reset_div) | reset;</pre>
+      <pre>	assign stay_run = (div_state[1] &amp; ~cntris63) &amp; ~ecl_div_muls;</pre>
+      <pre>	assign go_run = div_state[0] &amp; mdqctl_divcntl_input_vld;</pre>
+      <pre>	assign next_state[1] = ((go_run | stay_run) &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;</pre>
+      <pre>	assign go_last_calc = div_state[1] &amp; cntris63;</pre>
+      <pre>	assign next_state[2] = (go_last_calc &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;</pre>
+      <pre>	assign go_chk_ovfl = div_state[2];</pre>
+      <pre>	assign next_state[3] = (go_chk_ovfl &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;</pre>
+      <pre>	assign go_fix_ovfl = div_state[3] | (div_state[1] &amp; ecl_div_muls);</pre>
+      <pre>	assign next_state[4] = (go_fix_ovfl &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;</pre>
+      <pre>	assign go_done = div_state[4];</pre>
+      <pre>	assign stay_done = div_state[5] &amp; ~wb_divcntl_ack_g;</pre>
+      <pre>	assign next_state[5] = ((go_done | stay_done) &amp; ~mdqctl_divcntl_reset_div) &amp; ~reset;</pre>
+      <pre>	sparc_exu_ecl_cnt6 cnt6(</pre>
+      <pre>		.reset(reset_cnt),</pre>
+      <pre>		.cntr(cntr[5:0]),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.se(se)</pre>
+      <pre>	);</pre>
+      <pre>	assign cntris63 = ((((cntr[5] &amp; cntr[4]) &amp; cntr[3]) &amp; cntr[2]) &amp; cntr[1]) &amp; cntr[0];</pre>
+      <pre>	assign ecl_div_dividend_sign = ecl_div_signed_div &amp; div_ecl_dividend_msb;</pre>
+      <pre>	assign ecl_div_xinmask = div_ecl_divisorin_31 &amp; ecl_div_signed_div;</pre>
+      <pre>	assign divisor_sign = div_ecl_x_msb &amp; ecl_div_signed_div;</pre>
+      <pre>	assign adderin1_64 = div_ecl_d_msb;</pre>
+      <pre>	assign adderin2_64 = (ecl_div_signed_div &amp; div_ecl_x_msb) ^ subtract;</pre>
+      <pre>	assign bit64_halfadd = adderin1_64 ^ adderin2_64;</pre>
+      <pre>	assign partial_qpredict = bit64_halfadd ^ ~(div_ecl_x_msb &amp; ecl_div_signed_div);</pre>
+      <pre>	assign partial_qpredict_l = ~partial_qpredict;</pre>
+      <pre>	assign firstq = ecl_div_dividend_sign;</pre>
+      <pre>	mux2ds #(2) qnext_mux(</pre>
+      <pre>		.dout(q_next_nocout[1:0]),</pre>
+      <pre>		.in0({partial_qpredict, partial_qpredict_l}),</pre>
+      <pre>		.in1({2 {firstq}}),</pre>
+      <pre>		.sel0(~ecl_div_ld_inputs),</pre>
+      <pre>		.sel1(ecl_div_ld_inputs)</pre>
+      <pre>	);</pre>
+      <pre>	dp_mux2es qnext_cout_mux(</pre>
+      <pre>		.dout(q_next),</pre>
+      <pre>		.in0(q_next_nocout[1]),</pre>
+      <pre>		.in1(q_next_nocout[0]),</pre>
+      <pre>		.sel(div_ecl_cout64)</pre>
+      <pre>	);</pre>
+      <pre>	dff_s q_dff(</pre>
+      <pre>		.din(q_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(ecl_div_newq),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign firstlast_sub = (~ecl_div_almostlast_cycle &amp; ~ecl_div_muls) &amp; (~ecl_div_signed_div | ~(div_ecl_dividend_msb ^ ~div_ecl_xin_msb_l));</pre>
+      <pre>	assign ecl_div_keepx = ~(ecl_div_ld_inputs | ecl_div_almostlast_cycle);</pre>
+      <pre>	mux2ds #(2) subnext_mux(</pre>
+      <pre>		.dout(sub_next_nocout[1:0]),</pre>
+      <pre>		.in0({2 {firstlast_sub}}),</pre>
+      <pre>		.in1({partial_qpredict, partial_qpredict_l}),</pre>
+      <pre>		.sel0(~ecl_div_keepx),</pre>
+      <pre>		.sel1(ecl_div_keepx)</pre>
+      <pre>	);</pre>
+      <pre>	dp_mux2es subtract_cout_mux(</pre>
+      <pre>		.dout(sub_next),</pre>
+      <pre>		.in0(sub_next_nocout[1]),</pre>
+      <pre>		.in1(sub_next_nocout[0]),</pre>
+      <pre>		.sel(div_ecl_cout64)</pre>
+      <pre>	);</pre>
+      <pre>	dff_s sub_dff(</pre>
+      <pre>		.din(sub_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(subtract),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign ecl_div_subtract_l = ~subtract;</pre>
+      <pre>	assign detect_zero = div_ecl_detect_zero_low &amp; div_ecl_detect_zero_high;</pre>
+      <pre>	assign ecl_div_cin = (ecl_div_last_cycle ? last_cin : subtract);</pre>
+      <pre>	assign new_zero_rem_with_zero = ~ecl_div_ld_inputs &amp; (~div_ecl_d_62 | ecl_div_almostlast_cycle);</pre>
+      <pre>	assign new_zero_rem_no_zero = zero_rem_q &amp; new_zero_rem_with_zero;</pre>
+      <pre>	assign zero_rem_d = (detect_zero ? new_zero_rem_with_zero : new_zero_rem_no_zero);</pre>
+      <pre>	dff_s zero_rem_dff(</pre>
+      <pre>		.din(zero_rem_d),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(zero_rem_q),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign last_cin_with_zero = ecl_div_signed_div &amp; (((divisor_sign &amp; ~div_ecl_d_62) | ((~divisor_sign &amp; div_ecl_d_62) &amp; ~new_zero_rem_with_zero)) | ((divisor_sign &amp; div_ecl_d_62) &amp; new_zero_rem_with_zero));</pre>
+      <pre>	assign last_cin_no_zero = ecl_div_signed_div &amp; (((divisor_sign &amp; ~div_ecl_d_62) | ((~divisor_sign &amp; div_ecl_d_62) &amp; ~new_zero_rem_no_zero)) | ((divisor_sign &amp; div_ecl_d_62) &amp; new_zero_rem_no_zero));</pre>
+      <pre>	assign last_cin_next = (detect_zero ? last_cin_with_zero : last_cin_no_zero);</pre>
+      <pre>	dff_s last_cin_dff(</pre>
+      <pre>		.din(last_cin_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(last_cin),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	wire inputs_neg_d;</pre>
+      <pre>	wire inputs_neg_q;</pre>
+      <pre>	wire large_neg_ovfl;</pre>
+      <pre>	assign inputs_neg_d = div_ecl_dividend_msb &amp; div_ecl_divisorin_31;</pre>
+      <pre>	assign large_neg_ovfl = inputs_neg_q &amp; ~gencc_in_msb_l_d1;</pre>
+      <pre>	dffe_s inputs_neg_dff(</pre>
+      <pre>		.din(inputs_neg_d),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(inputs_neg_q),</pre>
+      <pre>		.en(ecl_div_ld_inputs),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s #(5) cc_sig_dff(</pre>
+      <pre>		.din({div_ecl_upper32_equal, div_ecl_gencc_in_msb_l, div_ecl_gencc_in_31, ecl_div_sel_div, div_ecl_low32_nonzero}),</pre>
+      <pre>		.q({upper32_equal_d1, gencc_in_msb_l_d1, gencc_in_31_d1, sel_div_d1, low32_nonzero_d1}),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign ecl_div_sel_64b = ecl_div_div64 | ecl_div_muls;</pre>
+      <pre>	assign ecl_div_sel_u32 = ~ecl_div_sel_64b &amp; ~ecl_div_signed_div;</pre>
+      <pre>	assign ecl_div_sel_pos32 = (~ecl_div_sel_64b &amp; ecl_div_signed_div) &amp; (gencc_in_msb_l_d1 | large_neg_ovfl);</pre>
+      <pre>	assign ecl_div_sel_neg32 = ((~ecl_div_sel_64b &amp; ecl_div_signed_div) &amp; ~gencc_in_msb_l_d1) &amp; ~large_neg_ovfl;</pre>
+      <pre>	assign ecl_div_upper32_zero = upper32_equal_d1 &amp; gencc_in_msb_l_d1;</pre>
+      <pre>	assign ecl_div_upper33_zero = (upper32_equal_d1 &amp; gencc_in_msb_l_d1) &amp; ~gencc_in_31_d1;</pre>
+      <pre>	assign ecl_div_upper33_one = (upper32_equal_d1 &amp; ~gencc_in_msb_l_d1) &amp; gencc_in_31_d1;</pre>
+      <pre>	assign unsign_ovfl = (ecl_div_sel_u32 &amp; ~ecl_div_upper32_zero) &amp; sel_div_d1;</pre>
+      <pre>	assign pos_ovfl = (ecl_div_sel_pos32 &amp; ~ecl_div_upper33_zero) &amp; sel_div_d1;</pre>
+      <pre>	assign neg_ovfl = (ecl_div_sel_neg32 &amp; ~ecl_div_upper33_one) &amp; sel_div_d1;</pre>
+      <pre>	assign div_v = (pos_ovfl | unsign_ovfl) | neg_ovfl;</pre>
+      <pre>	assign next_muls_c = (div_state[1] ? div_ecl_cout32 : muls_c);</pre>
+      <pre>	assign muls_rs1_data_31_m = ~muls_rs1_31_m_l;</pre>
+      <pre>	dff_s #(3) muls_overlow_dff(</pre>
+      <pre>		.din({muls_rs1_data_31_m, rs2_data_31_m, div_ecl_adder_out_31}),</pre>
+      <pre>		.q({muls_rs1_data_31_w, rs2_data_31_w, div_adder_out_31_w}),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign ovfl_32 = ((muls_rs1_data_31_w &amp; rs2_data_31_w) &amp; ~div_adder_out_31_w) | ((~muls_rs1_data_31_w &amp; ~rs2_data_31_w) &amp; div_adder_out_31_w);</pre>
+      <pre>	assign next_muls_v = (div_state[4] ? ovfl_32 : muls_v);</pre>
+      <pre>	dff_s muls_c_dff(</pre>
+      <pre>		.din(next_muls_c),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(muls_c),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s muls_v_dff(</pre>
+      <pre>		.din(next_muls_v),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(muls_v),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign xcc[3] = (~gencc_in_msb_l_d1 &amp; ~unsign_ovfl) &amp; ~pos_ovfl;</pre>
+      <pre>	assign icc[3] = ((gencc_in_31_d1 &amp; ~pos_ovfl) | neg_ovfl) | unsign_ovfl;</pre>
+      <pre>	assign xcc[2] = (upper32_equal_d1 &amp; gencc_in_msb_l_d1) &amp; ~low32_nonzero_d1;</pre>
+      <pre>	assign icc[2] = ~low32_nonzero_d1 &amp; ~div_v;</pre>
+      <pre>	assign xcc[1] = 1&#39;b0;</pre>
+      <pre>	assign icc[1] = (ecl_div_muls &amp; sel_div_d1 ? muls_v : div_v);</pre>
+      <pre>	assign xcc[0] = 1&#39;b0;</pre>
+      <pre>	assign icc[0] = (ecl_div_muls &amp; sel_div_d1) &amp; muls_c;</pre>
+      <pre>	assign divcntl_ccr_cc_w2 = {xcc, icc};</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

@@ -1,1 +1,1 @@
-config_loader_data['surelog/24.3'] = [["program_construct",1,"logs/Surelog/chapter-24/24.3--program.sv.log.html","tests/chapter-24/24.3--program.sv.html"]]
+config_loader_data['surelog/24.3'] = [["","program_construct",1,"logs/Surelog/chapter-24/24.3--program.sv.log.html","tests/chapter-24/24.3--program.sv.html"]]

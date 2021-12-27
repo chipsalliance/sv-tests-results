@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/6.16.6'] = [["string_compare_fn",1,"logs/Sv2v_zachjs/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]
+config_loader_data['sv2v_zachjs/6.16.6'] = [["","string_compare_fn",1,"logs/Sv2v_zachjs/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/12.7.6'] = [["forever_loop",0,"logs/Sv2v_zachjs/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]
+config_loader_data['sv2v_zachjs/12.7.6'] = [["","forever_loop",0,"logs/Sv2v_zachjs/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]

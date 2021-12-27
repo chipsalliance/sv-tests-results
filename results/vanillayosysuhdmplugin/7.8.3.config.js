@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/7.8.3'] = [["associative-arrays-class",1,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/7.8.3'] = [["","associative-arrays-class",1,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]

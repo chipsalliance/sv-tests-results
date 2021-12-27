@@ -1,201 +1,215 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Test imported from ivtest
-rc: 0 (means success: 1)
-tags: ivtest
-incdirs: /root/sv-tests/sv-tests/third_party/tests/ivtest /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
-top_module: 
-type: simulation parsing
-mode: parsing
-files: <a href="../../../../third_party/tests/ivtest/contrib/fifo.v.html" target="file-frame">third_party/tests/ivtest/contrib/fifo.v</a>
-defines: 
-completed: 2021-12-27 02:39:35
-time_elapsed: 0.034s
-ram usage: 34728 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/contrib/fifo.v.html" target="file-frame">third_party/tests/ivtest/contrib/fifo.v</a>
-module fifo (
-	clk,
-	rstp,
-	din,
-	writep,
-	readp,
-	dout,
-	emptyp,
-	fullp
-);
-	input clk;
-	input rstp;
-	input [15:0] din;
-	input readp;
-	input writep;
-	output reg [15:0] dout;
-	output reg emptyp;
-	output reg fullp;
-	parameter DEPTH = 3;
-	parameter MAX_COUNT = 3&#39;b111;
-	reg [DEPTH - 1:0] tail;
-	reg [DEPTH - 1:0] head;
-	reg [DEPTH - 1:0] count;
-	reg [15:0] fifomem [0:MAX_COUNT];
-	always @(posedge clk)
-		if (rstp == 1)
-			dout &lt;= 16&#39;h0000;
-		else
-			dout &lt;= fifomem[tail];
-	always @(posedge clk)
-		if (((rstp == 1&#39;b0) &amp;&amp; (writep == 1&#39;b1)) &amp;&amp; (fullp == 1&#39;b0))
-			fifomem[head] &lt;= din;
-	always @(posedge clk)
-		if (rstp == 1&#39;b1)
-			head &lt;= 2&#39;b00;
-		else if ((writep == 1&#39;b1) &amp;&amp; (fullp == 1&#39;b0))
-			head &lt;= head + 1;
-	always @(posedge clk)
-		if (rstp == 1&#39;b1)
-			tail &lt;= 2&#39;b00;
-		else if ((readp == 1&#39;b1) &amp;&amp; (emptyp == 1&#39;b0))
-			tail &lt;= tail + 1;
-	always @(posedge clk)
-		if (rstp == 1&#39;b1)
-			count &lt;= 2&#39;b00;
-		else
-			case ({readp, writep})
-				2&#39;b00: count &lt;= count;
-				2&#39;b01:
-					if (count != MAX_COUNT)
-						count &lt;= count + 1;
-				2&#39;b10:
-					if (count != 2&#39;b00)
-						count &lt;= count - 1;
-				2&#39;b11: count &lt;= count;
-			endcase
-	always @(count)
-		if (count == 2&#39;b00)
-			emptyp &lt;= 1&#39;b1;
-		else
-			emptyp &lt;= 1&#39;b0;
-	always @(count)
-		if (count == MAX_COUNT)
-			fullp &lt;= 1&#39;b1;
-		else
-			fullp &lt;= 1&#39;b0;
-endmodule
-module test_fifo;
-	reg clk;
-	reg rstp;
-	reg [15:0] din;
-	reg readp;
-	reg writep;
-	wire [15:0] dout;
-	wire emptyp;
-	wire fullp;
-	reg error;
-	reg [15:0] value;
-	fifo U1(
-		.clk(clk),
-		.rstp(rstp),
-		.din(din),
-		.readp(readp),
-		.writep(writep),
-		.dout(dout),
-		.emptyp(emptyp),
-		.fullp(fullp)
-	);
-	task read_word;
-		input [15:0] _expect;
-		begin
-			@(negedge clk)
-				;
-			readp = 1;
-			@(posedge clk)
-				#(5)
-					;
-			if (_expect !== dout) begin
-				$display(&#34;FAILED - Expect %0h, Read %0h from FIFO&#34;, _expect, dout);
-				error = 1;
-			end
-			readp = 0;
-		end
-	endtask
-	task write_word;
-		input [15:0] value;
-		begin
-			@(negedge clk)
-				;
-			din = value;
-			writep = 1;
-			@(posedge clk)
-				;
-			#(5)
-				;
-			din = 16&#39;hzzzz;
-			writep = 0;
-		end
-	endtask
-	initial begin
-		clk = 0;
-		forever begin
-			#(10) clk = 1;
-			#(10) clk = 0;
-		end
-	end
-	task test1;
-		begin
-			din = 16&#39;hzzzz;
-			writep = 0;
-			readp = 0;
-			rstp = 1;
-			#(50)
-				;
-			rstp = 0;
-			#(50)
-				;
-			write_word(16&#39;h1111);
-			write_word(16&#39;h2222);
-			write_word(16&#39;h3333);
-			read_word(16&#39;h1111);
-			read_word(16&#39;h2222);
-			write_word(16&#39;h4444);
-			read_word(16&#39;h3333);
-			write_word(16&#39;h0001);
-			write_word(16&#39;h0002);
-			write_word(16&#39;h0003);
-			write_word(16&#39;h0004);
-			write_word(16&#39;h0005);
-			write_word(16&#39;h0006);
-			write_word(16&#39;h0007);
-			write_word(16&#39;h0008);
-			read_word(16&#39;h4444);
-			read_word(16&#39;h0001);
-			read_word(16&#39;h0002);
-			read_word(16&#39;h0003);
-			read_word(16&#39;h0004);
-			read_word(16&#39;h0005);
-			read_word(16&#39;h0006);
-		end
-	endtask
-	initial begin
-		error = 0;
-		test1;
-		if (error == 0)
-			$display(&#34;PASSED&#34;);
-		$finish;
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>regress-vlg_fifo_iv</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/contrib/fifo.v.html" target="file-frame">third_party/tests/ivtest/contrib/fifo.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:06:39</dd></div>
+        <div><dt>time elapsed</dt><dd>0.035s</dd></div>
+        <div><dt>ram usage</dt><dd>34868 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/contrib/fifo.v.html" target="file-frame">third_party/tests/ivtest/contrib/fifo.v</a></pre>
+      <pre>module fifo (</pre>
+      <pre>	clk,</pre>
+      <pre>	rstp,</pre>
+      <pre>	din,</pre>
+      <pre>	writep,</pre>
+      <pre>	readp,</pre>
+      <pre>	dout,</pre>
+      <pre>	emptyp,</pre>
+      <pre>	fullp</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	input rstp;</pre>
+      <pre>	input [15:0] din;</pre>
+      <pre>	input readp;</pre>
+      <pre>	input writep;</pre>
+      <pre>	output reg [15:0] dout;</pre>
+      <pre>	output reg emptyp;</pre>
+      <pre>	output reg fullp;</pre>
+      <pre>	parameter DEPTH = 3;</pre>
+      <pre>	parameter MAX_COUNT = 3&#39;b111;</pre>
+      <pre>	reg [DEPTH - 1:0] tail;</pre>
+      <pre>	reg [DEPTH - 1:0] head;</pre>
+      <pre>	reg [DEPTH - 1:0] count;</pre>
+      <pre>	reg [15:0] fifomem [0:MAX_COUNT];</pre>
+      <pre>	always @(posedge clk)</pre>
+      <pre>		if (rstp == 1)</pre>
+      <pre>			dout &lt;= 16&#39;h0000;</pre>
+      <pre>		else</pre>
+      <pre>			dout &lt;= fifomem[tail];</pre>
+      <pre>	always @(posedge clk)</pre>
+      <pre>		if (((rstp == 1&#39;b0) &amp;&amp; (writep == 1&#39;b1)) &amp;&amp; (fullp == 1&#39;b0))</pre>
+      <pre>			fifomem[head] &lt;= din;</pre>
+      <pre>	always @(posedge clk)</pre>
+      <pre>		if (rstp == 1&#39;b1)</pre>
+      <pre>			head &lt;= 2&#39;b00;</pre>
+      <pre>		else if ((writep == 1&#39;b1) &amp;&amp; (fullp == 1&#39;b0))</pre>
+      <pre>			head &lt;= head + 1;</pre>
+      <pre>	always @(posedge clk)</pre>
+      <pre>		if (rstp == 1&#39;b1)</pre>
+      <pre>			tail &lt;= 2&#39;b00;</pre>
+      <pre>		else if ((readp == 1&#39;b1) &amp;&amp; (emptyp == 1&#39;b0))</pre>
+      <pre>			tail &lt;= tail + 1;</pre>
+      <pre>	always @(posedge clk)</pre>
+      <pre>		if (rstp == 1&#39;b1)</pre>
+      <pre>			count &lt;= 2&#39;b00;</pre>
+      <pre>		else</pre>
+      <pre>			case ({readp, writep})</pre>
+      <pre>				2&#39;b00: count &lt;= count;</pre>
+      <pre>				2&#39;b01:</pre>
+      <pre>					if (count != MAX_COUNT)</pre>
+      <pre>						count &lt;= count + 1;</pre>
+      <pre>				2&#39;b10:</pre>
+      <pre>					if (count != 2&#39;b00)</pre>
+      <pre>						count &lt;= count - 1;</pre>
+      <pre>				2&#39;b11: count &lt;= count;</pre>
+      <pre>			endcase</pre>
+      <pre>	always @(count)</pre>
+      <pre>		if (count == 2&#39;b00)</pre>
+      <pre>			emptyp &lt;= 1&#39;b1;</pre>
+      <pre>		else</pre>
+      <pre>			emptyp &lt;= 1&#39;b0;</pre>
+      <pre>	always @(count)</pre>
+      <pre>		if (count == MAX_COUNT)</pre>
+      <pre>			fullp &lt;= 1&#39;b1;</pre>
+      <pre>		else</pre>
+      <pre>			fullp &lt;= 1&#39;b0;</pre>
+      <pre>endmodule</pre>
+      <pre>module test_fifo;</pre>
+      <pre>	reg clk;</pre>
+      <pre>	reg rstp;</pre>
+      <pre>	reg [15:0] din;</pre>
+      <pre>	reg readp;</pre>
+      <pre>	reg writep;</pre>
+      <pre>	wire [15:0] dout;</pre>
+      <pre>	wire emptyp;</pre>
+      <pre>	wire fullp;</pre>
+      <pre>	reg error;</pre>
+      <pre>	reg [15:0] value;</pre>
+      <pre>	fifo U1(</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.rstp(rstp),</pre>
+      <pre>		.din(din),</pre>
+      <pre>		.readp(readp),</pre>
+      <pre>		.writep(writep),</pre>
+      <pre>		.dout(dout),</pre>
+      <pre>		.emptyp(emptyp),</pre>
+      <pre>		.fullp(fullp)</pre>
+      <pre>	);</pre>
+      <pre>	task read_word;</pre>
+      <pre>		input [15:0] _expect;</pre>
+      <pre>		begin</pre>
+      <pre>			@(negedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			readp = 1;</pre>
+      <pre>			@(posedge clk)</pre>
+      <pre>				#(5)</pre>
+      <pre>					;</pre>
+      <pre>			if (_expect !== dout) begin</pre>
+      <pre>				$display(&#34;FAILED - Expect %0h, Read %0h from FIFO&#34;, _expect, dout);</pre>
+      <pre>				error = 1;</pre>
+      <pre>			end</pre>
+      <pre>			readp = 0;</pre>
+      <pre>		end</pre>
+      <pre>	endtask</pre>
+      <pre>	task write_word;</pre>
+      <pre>		input [15:0] value;</pre>
+      <pre>		begin</pre>
+      <pre>			@(negedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			din = value;</pre>
+      <pre>			writep = 1;</pre>
+      <pre>			@(posedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			#(5)</pre>
+      <pre>				;</pre>
+      <pre>			din = 16&#39;hzzzz;</pre>
+      <pre>			writep = 0;</pre>
+      <pre>		end</pre>
+      <pre>	endtask</pre>
+      <pre>	initial begin</pre>
+      <pre>		clk = 0;</pre>
+      <pre>		forever begin</pre>
+      <pre>			#(10) clk = 1;</pre>
+      <pre>			#(10) clk = 0;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
+      <pre>	task test1;</pre>
+      <pre>		begin</pre>
+      <pre>			din = 16&#39;hzzzz;</pre>
+      <pre>			writep = 0;</pre>
+      <pre>			readp = 0;</pre>
+      <pre>			rstp = 1;</pre>
+      <pre>			#(50)</pre>
+      <pre>				;</pre>
+      <pre>			rstp = 0;</pre>
+      <pre>			#(50)</pre>
+      <pre>				;</pre>
+      <pre>			write_word(16&#39;h1111);</pre>
+      <pre>			write_word(16&#39;h2222);</pre>
+      <pre>			write_word(16&#39;h3333);</pre>
+      <pre>			read_word(16&#39;h1111);</pre>
+      <pre>			read_word(16&#39;h2222);</pre>
+      <pre>			write_word(16&#39;h4444);</pre>
+      <pre>			read_word(16&#39;h3333);</pre>
+      <pre>			write_word(16&#39;h0001);</pre>
+      <pre>			write_word(16&#39;h0002);</pre>
+      <pre>			write_word(16&#39;h0003);</pre>
+      <pre>			write_word(16&#39;h0004);</pre>
+      <pre>			write_word(16&#39;h0005);</pre>
+      <pre>			write_word(16&#39;h0006);</pre>
+      <pre>			write_word(16&#39;h0007);</pre>
+      <pre>			write_word(16&#39;h0008);</pre>
+      <pre>			read_word(16&#39;h4444);</pre>
+      <pre>			read_word(16&#39;h0001);</pre>
+      <pre>			read_word(16&#39;h0002);</pre>
+      <pre>			read_word(16&#39;h0003);</pre>
+      <pre>			read_word(16&#39;h0004);</pre>
+      <pre>			read_word(16&#39;h0005);</pre>
+      <pre>			read_word(16&#39;h0006);</pre>
+      <pre>		end</pre>
+      <pre>	endtask</pre>
+      <pre>	initial begin</pre>
+      <pre>		error = 0;</pre>
+      <pre>		test1;</pre>
+      <pre>		if (error == 0)</pre>
+      <pre>			$display(&#34;PASSED&#34;);</pre>
+      <pre>		$finish;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

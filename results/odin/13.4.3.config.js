@@ -1,1 +1,1 @@
-config_loader_data['odin/13.4.3'] = [["const_function",0,"logs/Odin/chapter-13/13.4.3--const-function.sv.log.html","tests/chapter-13/13.4.3--const-function.sv.html"]]
+config_loader_data['odin/13.4.3'] = [["","const_function",0,"logs/Odin/chapter-13/13.4.3--const-function.sv.log.html","tests/chapter-13/13.4.3--const-function.sv.html"]]

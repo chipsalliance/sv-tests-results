@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/12.7.2'] = [["repeat_loop",0,"logs/VanillaYosysUhdmPlugin/chapter-12/12.7.2--repeat.sv.log.html","tests/chapter-12/12.7.2--repeat.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/12.7.2'] = [["","repeat_loop",0,"logs/VanillaYosysUhdmPlugin/chapter-12/12.7.2--repeat.sv.log.html","tests/chapter-12/12.7.2--repeat.sv.html"]]

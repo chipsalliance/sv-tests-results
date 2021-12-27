@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/26.2'] = [["package_decl",1,"logs/Sv2v_zachjs/chapter-26/26.2--package-decl.sv.log.html","tests/chapter-26/26.2--package-decl.sv.html"]]
+config_loader_data['sv2v_zachjs/26.2'] = [["","package_decl",1,"logs/Sv2v_zachjs/chapter-26/26.2--package-decl.sv.log.html","tests/chapter-26/26.2--package-decl.sv.html"]]

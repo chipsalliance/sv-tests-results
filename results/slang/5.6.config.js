@@ -1,1 +1,1 @@
-config_loader_data['slang/5.6'] = [["identifiers",1,"logs/Slang/chapter-5/5.6--identifiers.sv.log.html","tests/chapter-5/5.6--identifiers.sv.html"],["wrong-identifiers",1,"logs/Slang/chapter-5/5.6--wrong-identifiers.sv.log.html","tests/chapter-5/5.6--wrong-identifiers.sv.html"]]
+config_loader_data['slang/5.6'] = [["","identifiers",1,"logs/Slang/chapter-5/5.6--identifiers.sv.log.html","tests/chapter-5/5.6--identifiers.sv.html"],["","wrong-identifiers",1,"logs/Slang/chapter-5/5.6--wrong-identifiers.sv.log.html","tests/chapter-5/5.6--wrong-identifiers.sv.html"]]

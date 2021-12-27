@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/9.6.1'] = [["wait_fork",0,"logs/Sv2v_zachjs/chapter-9/9.6.1--wait_fork.sv.log.html","tests/chapter-9/9.6.1--wait_fork.sv.html"]]
+config_loader_data['sv2v_zachjs/9.6.1'] = [["","wait_fork",0,"logs/Sv2v_zachjs/chapter-9/9.6.1--wait_fork.sv.log.html","tests/chapter-9/9.6.1--wait_fork.sv.html"]]

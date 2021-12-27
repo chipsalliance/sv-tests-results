@@ -1,1 +1,1 @@
-config_loader_data['icarus/10.4.2'] = [["non_blocking_assignment",1,"logs/Icarus/chapter-10/10.4.2--non-blocking-assignment.sv.log.html","tests/chapter-10/10.4.2--non-blocking-assignment.sv.html"]]
+config_loader_data['icarus/10.4.2'] = [["","non_blocking_assignment",1,"logs/Icarus/chapter-10/10.4.2--non-blocking-assignment.sv.log.html","tests/chapter-10/10.4.2--non-blocking-assignment.sv.html"]]

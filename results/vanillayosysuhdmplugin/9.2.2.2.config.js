@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/9.2.2.2'] = [["always_comb",1,"logs/VanillaYosysUhdmPlugin/chapter-9/9.2.2.2--always_comb.sv.log.html","tests/chapter-9/9.2.2.2--always_comb.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/9.2.2.2'] = [["","always_comb",1,"logs/VanillaYosysUhdmPlugin/chapter-9/9.2.2.2--always_comb.sv.log.html","tests/chapter-9/9.2.2.2--always_comb.sv.html"]]

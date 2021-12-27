@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/rsd'] = [["rsd",0,"logs/sv_parser/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
+config_loader_data['sv_parser/rsd'] = [["","rsd",0,"logs/sv_parser/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

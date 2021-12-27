@@ -1,1 +1,1 @@
-config_loader_data['surelog/scr1'] = [["scr1",1,"logs/Surelog/generated/scr1/scr1.sv.log.html","third_party/cores/scr1/src/core/pipeline/scr1_pipe_hdu.sv.html"]]
+config_loader_data['surelog/scr1'] = [["","scr1",1,"logs/Surelog/generated/scr1/scr1.sv.log.html","third_party/cores/scr1/src/core/pipeline/scr1_pipe_hdu.sv.html"]]

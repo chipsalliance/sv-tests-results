@@ -1,1 +1,1 @@
-config_loader_data['verilator/6.19.5.1'] = [["enum_first",1,"logs/Verilator/chapter-6/6.19.5.1--enum_first.sv.log.html","tests/chapter-6/6.19.5.1--enum_first.sv.html"]]
+config_loader_data['verilator/6.19.5.1'] = [["","enum_first",1,"logs/Verilator/chapter-6/6.19.5.1--enum_first.sv.log.html","tests/chapter-6/6.19.5.1--enum_first.sv.html"]]

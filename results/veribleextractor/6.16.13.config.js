@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/6.16.13'] = [["string_octtoa",1,"logs/VeribleExtractor/chapter-6/6.16.13--string_octtoa.sv.log.html","tests/chapter-6/6.16.13--string_octtoa.sv.html"]]
+config_loader_data['veribleextractor/6.16.13'] = [["","string_octtoa",1,"logs/VeribleExtractor/chapter-6/6.16.13--string_octtoa.sv.log.html","tests/chapter-6/6.16.13--string_octtoa.sv.html"]]

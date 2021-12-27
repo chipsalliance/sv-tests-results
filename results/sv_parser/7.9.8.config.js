@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.9.8'] = [["associative-arrays-arg-traversal",1,"logs/sv_parser/chapter-7/arrays/associative/methods/traversal.sv.log.html","tests/chapter-7/arrays/associative/methods/traversal.sv.html"]]
+config_loader_data['sv_parser/7.9.8'] = [["","associative-arrays-arg-traversal",1,"logs/sv_parser/chapter-7/arrays/associative/methods/traversal.sv.log.html","tests/chapter-7/arrays/associative/methods/traversal.sv.html"]]

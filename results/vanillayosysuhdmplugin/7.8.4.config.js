@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/7.8.4'] = [["associative-arrays-integral",1,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/associative/integral.sv.log.html","tests/chapter-7/arrays/associative/integral.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/7.8.4'] = [["","associative-arrays-integral",1,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/associative/integral.sv.log.html","tests/chapter-7/arrays/associative/integral.sv.html"]]

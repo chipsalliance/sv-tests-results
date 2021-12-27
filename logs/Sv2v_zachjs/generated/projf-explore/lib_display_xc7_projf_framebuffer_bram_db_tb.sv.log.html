@@ -1,188 +1,202 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv</a>
-defines: 
-completed: 2021-12-27 02:53:02
-time_elapsed: 0.031s
-ram usage: 31828 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7 <a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv</a>
-`default_nettype none
-module framebuffer_bram_db_tb;
-	parameter CLK_PERIOD_100M = 10;
-	parameter CLK_PERIOD_25M = 40;
-	reg clk_25m;
-	reg clk_100m;
-	reg rst_sys;
-	reg rst_pix;
-	reg disp_hsync;
-	reg disp_vsync;
-	reg disp_de;
-	reg [3:0] disp_r;
-	reg [3:0] disp_g;
-	reg [3:0] disp_b;
-	localparam H_RES = 24;
-	localparam V_RES = 18;
-	localparam CORDW = 16;
-	wire hsync;
-	wire vsync;
-	wire de;
-	wire frame;
-	wire line;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
-	display_timings_24x18 display_timings_inst(
-		.clk_pix(clk_25m),
-		.rst(rst_pix),
-		.sx(sx),
-		.sy(sy),
-		.hsync(hsync),
-		.vsync(vsync),
-		.de(de),
-		.frame(frame),
-		.line(line)
-	);
-	wire frame_sys;
-	xd xd_frame(
-		.clk_i(clk_25m),
-		.clk_o(clk_100m),
-		.rst_i(rst_pix),
-		.rst_o(rst_sys),
-		.i(frame),
-		.o(frame_sys)
-	);
-	localparam FB_WIDTH = 12;
-	localparam FB_HEIGHT = 9;
-	localparam FB_CIDXW = 4;
-	localparam FB_CHANW = 4;
-	localparam FB_IMAGE = &#34;test_box_db_12x9.mem&#34;;
-	localparam FB_PALETTE = &#34;test_palette.mem&#34;;
-	localparam FB_SCALE = 2;
-	reg fb_we;
-	reg fb_clear;
-	wire fb_busy;
-	wire fb_wready;
-	wire fb_clip;
-	reg signed [15:0] fbx;
-	reg signed [15:0] fby;
-	reg [3:0] fb_cidx;
-	reg [3:0] fb_bgidx;
-	wire [3:0] fb_red;
-	wire [3:0] fb_green;
-	wire [3:0] fb_blue;
-	reg fb_active;
-	always @(*) fb_active = de;
-	framebuffer_bram_db #(
-		.WIDTH(FB_WIDTH),
-		.HEIGHT(FB_HEIGHT),
-		.CIDXW(FB_CIDXW),
-		.CHANW(FB_CHANW),
-		.SCALE(FB_SCALE),
-		.F_IMAGE(FB_IMAGE),
-		.F_PALETTE(FB_PALETTE)
-	) fb_inst(
-		.clk_sys(clk_100m),
-		.clk_pix(clk_25m),
-		.rst_sys(rst_sys),
-		.rst_pix(rst_pix),
-		.de(fb_active),
-		.frame(frame),
-		.line(line),
-		.we(fb_we),
-		.x(fbx),
-		.y(fby),
-		.cidx(fb_cidx),
-		.bgidx(fb_bgidx),
-		.clear(fb_clear),
-		.wready(fb_wready),
-		.busy(fb_busy),
-		.clip(fb_clip),
-		.red(fb_red),
-		.green(fb_green),
-		.blue(fb_blue)
-	);
-	reg [31:0] state;
-	always @(posedge clk_100m) begin
-		case (state)
-			32&#39;d1:
-				if (fb_wready) begin
-					fb_cidx &lt;= 4&#39;h7;
-					fb_we &lt;= 1;
-					fbx &lt;= 0;
-					fby &lt;= ((fby &gt; 1) &amp;&amp; (fby &lt; 6) ? fby + 1 : 2);
-					state &lt;= 32&#39;d2;
-				end
-			32&#39;d2:
-				if (!fb_busy)
-					if (fbx &lt; 11)
-						fbx &lt;= fbx + 1;
-					else begin
-						fb_we &lt;= 0;
-						state &lt;= 32&#39;d3;
-					end
-			default:
-				if (frame_sys)
-					state &lt;= 32&#39;d1;
-		endcase
-		if (rst_sys) begin
-			fb_we &lt;= 0;
-			fbx &lt;= 0;
-			fby &lt;= 0;
-			state &lt;= 32&#39;d0;
-		end
-	end
-	reg hsync_p1;
-	reg vsync_p1;
-	reg de_p1;
-	always @(posedge clk_25m) begin
-		hsync_p1 &lt;= hsync;
-		vsync_p1 &lt;= vsync;
-		de_p1 &lt;= de;
-	end
-	always @(posedge clk_25m) begin
-		disp_hsync &lt;= hsync_p1;
-		disp_vsync &lt;= vsync_p1;
-		disp_de &lt;= de_p1;
-		disp_r &lt;= fb_red;
-		disp_g &lt;= fb_green;
-		disp_b &lt;= fb_blue;
-	end
-	always #(CLK_PERIOD_100M / 2) clk_100m = ~clk_100m;
-	always #(CLK_PERIOD_25M / 2) clk_25m = ~clk_25m;
-	initial begin
-		clk_100m = 1;
-		clk_25m = 1;
-		rst_sys = 1;
-		rst_pix = 1;
-		fb_bgidx = 4&#39;h1;
-		fb_clear = 0;
-		#(100) rst_sys = 0;
-		rst_pix = 0;
-		#(28140) fb_clear = 1;
-		#(120000)
-			$finish;
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>lib_display_xc7_projf_framebuffer_bram_db_tb</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:41</dd></div>
+        <div><dt>time elapsed</dt><dd>0.031s</dd></div>
+        <div><dt>ram usage</dt><dd>31756 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/lib/display/xc7 <a href="../../../../tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv.html" target="file-frame">tests/generated/projf-explore/lib_display_xc7_projf_framebuffer_bram_db_tb.sv</a> <a href="../../../../third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv.html" target="file-frame">third_party/tests/projf-explore/lib/display/xc7/framebuffer_bram_db_tb.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module framebuffer_bram_db_tb;</pre>
+      <pre>	parameter CLK_PERIOD_100M = 10;</pre>
+      <pre>	parameter CLK_PERIOD_25M = 40;</pre>
+      <pre>	reg clk_25m;</pre>
+      <pre>	reg clk_100m;</pre>
+      <pre>	reg rst_sys;</pre>
+      <pre>	reg rst_pix;</pre>
+      <pre>	reg disp_hsync;</pre>
+      <pre>	reg disp_vsync;</pre>
+      <pre>	reg disp_de;</pre>
+      <pre>	reg [3:0] disp_r;</pre>
+      <pre>	reg [3:0] disp_g;</pre>
+      <pre>	reg [3:0] disp_b;</pre>
+      <pre>	localparam H_RES = 24;</pre>
+      <pre>	localparam V_RES = 18;</pre>
+      <pre>	localparam CORDW = 16;</pre>
+      <pre>	wire hsync;</pre>
+      <pre>	wire vsync;</pre>
+      <pre>	wire de;</pre>
+      <pre>	wire frame;</pre>
+      <pre>	wire line;</pre>
+      <pre>	wire signed [15:0] sx;</pre>
+      <pre>	wire signed [15:0] sy;</pre>
+      <pre>	display_timings_24x18 display_timings_inst(</pre>
+      <pre>		.clk_pix(clk_25m),</pre>
+      <pre>		.rst(rst_pix),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sy(sy),</pre>
+      <pre>		.hsync(hsync),</pre>
+      <pre>		.vsync(vsync),</pre>
+      <pre>		.de(de),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line(line)</pre>
+      <pre>	);</pre>
+      <pre>	wire frame_sys;</pre>
+      <pre>	xd xd_frame(</pre>
+      <pre>		.clk_i(clk_25m),</pre>
+      <pre>		.clk_o(clk_100m),</pre>
+      <pre>		.rst_i(rst_pix),</pre>
+      <pre>		.rst_o(rst_sys),</pre>
+      <pre>		.i(frame),</pre>
+      <pre>		.o(frame_sys)</pre>
+      <pre>	);</pre>
+      <pre>	localparam FB_WIDTH = 12;</pre>
+      <pre>	localparam FB_HEIGHT = 9;</pre>
+      <pre>	localparam FB_CIDXW = 4;</pre>
+      <pre>	localparam FB_CHANW = 4;</pre>
+      <pre>	localparam FB_IMAGE = &#34;test_box_db_12x9.mem&#34;;</pre>
+      <pre>	localparam FB_PALETTE = &#34;test_palette.mem&#34;;</pre>
+      <pre>	localparam FB_SCALE = 2;</pre>
+      <pre>	reg fb_we;</pre>
+      <pre>	reg fb_clear;</pre>
+      <pre>	wire fb_busy;</pre>
+      <pre>	wire fb_wready;</pre>
+      <pre>	wire fb_clip;</pre>
+      <pre>	reg signed [15:0] fbx;</pre>
+      <pre>	reg signed [15:0] fby;</pre>
+      <pre>	reg [3:0] fb_cidx;</pre>
+      <pre>	reg [3:0] fb_bgidx;</pre>
+      <pre>	wire [3:0] fb_red;</pre>
+      <pre>	wire [3:0] fb_green;</pre>
+      <pre>	wire [3:0] fb_blue;</pre>
+      <pre>	reg fb_active;</pre>
+      <pre>	always @(*) fb_active = de;</pre>
+      <pre>	framebuffer_bram_db #(</pre>
+      <pre>		.WIDTH(FB_WIDTH),</pre>
+      <pre>		.HEIGHT(FB_HEIGHT),</pre>
+      <pre>		.CIDXW(FB_CIDXW),</pre>
+      <pre>		.CHANW(FB_CHANW),</pre>
+      <pre>		.SCALE(FB_SCALE),</pre>
+      <pre>		.F_IMAGE(FB_IMAGE),</pre>
+      <pre>		.F_PALETTE(FB_PALETTE)</pre>
+      <pre>	) fb_inst(</pre>
+      <pre>		.clk_sys(clk_100m),</pre>
+      <pre>		.clk_pix(clk_25m),</pre>
+      <pre>		.rst_sys(rst_sys),</pre>
+      <pre>		.rst_pix(rst_pix),</pre>
+      <pre>		.de(fb_active),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line(line),</pre>
+      <pre>		.we(fb_we),</pre>
+      <pre>		.x(fbx),</pre>
+      <pre>		.y(fby),</pre>
+      <pre>		.cidx(fb_cidx),</pre>
+      <pre>		.bgidx(fb_bgidx),</pre>
+      <pre>		.clear(fb_clear),</pre>
+      <pre>		.wready(fb_wready),</pre>
+      <pre>		.busy(fb_busy),</pre>
+      <pre>		.clip(fb_clip),</pre>
+      <pre>		.red(fb_red),</pre>
+      <pre>		.green(fb_green),</pre>
+      <pre>		.blue(fb_blue)</pre>
+      <pre>	);</pre>
+      <pre>	reg [31:0] state;</pre>
+      <pre>	always @(posedge clk_100m) begin</pre>
+      <pre>		case (state)</pre>
+      <pre>			32&#39;d1:</pre>
+      <pre>				if (fb_wready) begin</pre>
+      <pre>					fb_cidx &lt;= 4&#39;h7;</pre>
+      <pre>					fb_we &lt;= 1;</pre>
+      <pre>					fbx &lt;= 0;</pre>
+      <pre>					fby &lt;= ((fby &gt; 1) &amp;&amp; (fby &lt; 6) ? fby + 1 : 2);</pre>
+      <pre>					state &lt;= 32&#39;d2;</pre>
+      <pre>				end</pre>
+      <pre>			32&#39;d2:</pre>
+      <pre>				if (!fb_busy)</pre>
+      <pre>					if (fbx &lt; 11)</pre>
+      <pre>						fbx &lt;= fbx + 1;</pre>
+      <pre>					else begin</pre>
+      <pre>						fb_we &lt;= 0;</pre>
+      <pre>						state &lt;= 32&#39;d3;</pre>
+      <pre>					end</pre>
+      <pre>			default:</pre>
+      <pre>				if (frame_sys)</pre>
+      <pre>					state &lt;= 32&#39;d1;</pre>
+      <pre>		endcase</pre>
+      <pre>		if (rst_sys) begin</pre>
+      <pre>			fb_we &lt;= 0;</pre>
+      <pre>			fbx &lt;= 0;</pre>
+      <pre>			fby &lt;= 0;</pre>
+      <pre>			state &lt;= 32&#39;d0;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
+      <pre>	reg hsync_p1;</pre>
+      <pre>	reg vsync_p1;</pre>
+      <pre>	reg de_p1;</pre>
+      <pre>	always @(posedge clk_25m) begin</pre>
+      <pre>		hsync_p1 &lt;= hsync;</pre>
+      <pre>		vsync_p1 &lt;= vsync;</pre>
+      <pre>		de_p1 &lt;= de;</pre>
+      <pre>	end</pre>
+      <pre>	always @(posedge clk_25m) begin</pre>
+      <pre>		disp_hsync &lt;= hsync_p1;</pre>
+      <pre>		disp_vsync &lt;= vsync_p1;</pre>
+      <pre>		disp_de &lt;= de_p1;</pre>
+      <pre>		disp_r &lt;= fb_red;</pre>
+      <pre>		disp_g &lt;= fb_green;</pre>
+      <pre>		disp_b &lt;= fb_blue;</pre>
+      <pre>	end</pre>
+      <pre>	always #(CLK_PERIOD_100M / 2) clk_100m = ~clk_100m;</pre>
+      <pre>	always #(CLK_PERIOD_25M / 2) clk_25m = ~clk_25m;</pre>
+      <pre>	initial begin</pre>
+      <pre>		clk_100m = 1;</pre>
+      <pre>		clk_25m = 1;</pre>
+      <pre>		rst_sys = 1;</pre>
+      <pre>		rst_pix = 1;</pre>
+      <pre>		fb_bgidx = 4&#39;h1;</pre>
+      <pre>		fb_clear = 0;</pre>
+      <pre>		#(100) rst_sys = 0;</pre>
+      <pre>		rst_pix = 0;</pre>
+      <pre>		#(28140) fb_clear = 1;</pre>
+      <pre>		#(120000)</pre>
+      <pre>			$finish;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

@@ -1,280 +1,294 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv</a> <a href="../../../../third_party/tests/utd-sv/ucb_flow_jbi.v.html" target="file-frame">third_party/tests/utd-sv/ucb_flow_jbi.v</a>
-defines: 
-completed: 2021-12-27 02:40:24
-time_elapsed: 0.085s
-ram usage: 76356 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv</a> <a href="../../../../third_party/tests/utd-sv/ucb_flow_jbi.v.html" target="file-frame">third_party/tests/utd-sv/ucb_flow_jbi.v</a>
-module ucb_flow_jbi (
-	ucb_iob_stall,
-	rd_req_vld,
-	wr_req_vld,
-	thr_id_in,
-	buf_id_in,
-	size_in,
-	addr_in,
-	data_in,
-	ack_busy,
-	int_busy,
-	ucb_iob_vld,
-	ucb_iob_data,
-	clk,
-	rst_l,
-	iob_ucb_vld,
-	iob_ucb_data,
-	req_acpted,
-	rd_ack_vld,
-	rd_nack_vld,
-	thr_id_out,
-	buf_id_out,
-	data128,
-	data_out,
-	int_vld,
-	int_typ,
-	int_thr_id,
-	dev_id,
-	int_stat,
-	int_vec,
-	iob_ucb_stall
-);
-	parameter IOB_UCB_WIDTH = 32;
-	parameter UCB_IOB_WIDTH = 8;
-	parameter REG_WIDTH = 128;
-	input clk;
-	input rst_l;
-	input iob_ucb_vld;
-	input [IOB_UCB_WIDTH - 1:0] iob_ucb_data;
-	output wire ucb_iob_stall;
-	output wire rd_req_vld;
-	output wire wr_req_vld;
-	output wire [5:0] thr_id_in;
-	output wire [1:0] buf_id_in;
-	output wire [2:0] size_in;
-	output wire [39:0] addr_in;
-	output wire [63:0] data_in;
-	input req_acpted;
-	input rd_ack_vld;
-	input rd_nack_vld;
-	input [5:0] thr_id_out;
-	input [1:0] buf_id_out;
-	input data128;
-	input [REG_WIDTH - 1:0] data_out;
-	output wire ack_busy;
-	input int_vld;
-	input [3:0] int_typ;
-	input [5:0] int_thr_id;
-	input [8:0] dev_id;
-	input [31:0] int_stat;
-	input [5:0] int_vec;
-	output wire int_busy;
-	output wire ucb_iob_vld;
-	output wire [UCB_IOB_WIDTH - 1:0] ucb_iob_data;
-	input iob_ucb_stall;
-	wire indata_buf_vld;
-	wire [127:0] indata_buf;
-	wire ucb_iob_stall_a1;
-	wire read_pending;
-	wire write_pending;
-	wire rd_buf;
-	wire [1:0] buf_head_next;
-	wire [1:0] buf_head;
-	wire wr_buf;
-	wire [1:0] buf_tail_next;
-	wire [1:0] buf_tail;
-	wire buf_full_next;
-	wire buf_full;
-	wire buf_empty_next;
-	wire buf_empty;
-	wire [116:0] req_in;
-	wire buf0_en;
-	wire [116:0] buf0;
-	wire buf1_en;
-	wire [116:0] buf1;
-	wire [116:0] req_out;
-	wire rd_req_vld_nq;
-	wire wr_req_vld_nq;
-	wire ack_buf_rd;
-	wire ack_buf_wr;
-	wire ack_buf_vld;
-	wire ack_buf_vld_next;
-	wire ack_buf_is_nack;
-	wire ack_buf_is_data128;
-	wire [3:0] ack_typ_out;
-	wire [REG_WIDTH + 11:0] ack_buf_in;
-	wire [REG_WIDTH + 11:0] ack_buf;
-	wire [((REG_WIDTH + 64) / UCB_IOB_WIDTH) - 1:0] ack_buf_vec;
-	wire int_buf_rd;
-	wire int_buf_wr;
-	wire int_buf_vld;
-	wire int_buf_vld_next;
-	wire [56:0] int_buf_in;
-	wire [56:0] int_buf;
-	wire [((REG_WIDTH + 64) / UCB_IOB_WIDTH) - 1:0] int_buf_vec;
-	wire int_last_rd;
-	wire outdata_buf_busy;
-	wire outdata_buf_wr;
-	wire [REG_WIDTH + 63:0] outdata_buf_in;
-	wire [((REG_WIDTH + 64) / UCB_IOB_WIDTH) - 1:0] outdata_vec_in;
-	ucb_bus_in #(
-		IOB_UCB_WIDTH,
-		64
-	) ucb_bus_in(
-		.rst_l(rst_l),
-		.clk(clk),
-		.vld(iob_ucb_vld),
-		.data(iob_ucb_data),
-		.stall(ucb_iob_stall),
-		.indata_buf_vld(indata_buf_vld),
-		.indata_buf(indata_buf),
-		.stall_a1(ucb_iob_stall_a1)
-	);
-	assign read_pending = (indata_buf[3:0] == 4&#39;b0100) &amp; indata_buf_vld;
-	assign write_pending = (indata_buf[3:0] == 4&#39;b0101) &amp; indata_buf_vld;
-	assign ucb_iob_stall_a1 = (read_pending | write_pending) &amp; buf_full;
-	assign rd_buf = req_acpted;
-	assign buf_head_next = (~rst_l ? 2&#39;b01 : (rd_buf ? {buf_head[0:0], buf_head[1]} : buf_head));
-	dff_ns #(2) buf_head_ff(
-		.din(buf_head_next),
-		.clk(clk),
-		.q(buf_head)
-	);
-	assign wr_buf = (read_pending | write_pending) &amp; ~buf_full;
-	assign buf_tail_next = (~rst_l ? 2&#39;b01 : (wr_buf ? {buf_tail[0:0], buf_tail[1]} : buf_tail));
-	dff_ns #(2) buf_tail_ff(
-		.din(buf_tail_next),
-		.clk(clk),
-		.q(buf_tail)
-	);
-	assign buf_full_next = (buf_head_next == buf_tail_next) &amp; wr_buf;
-	dffrle_ns #(1) buf_full_ff(
-		.din(buf_full_next),
-		.rst_l(rst_l),
-		.en(rd_buf | wr_buf),
-		.clk(clk),
-		.q(buf_full)
-	);
-	assign buf_empty_next = ((buf_head_next == buf_tail_next) &amp; rd_buf) | ~rst_l;
-	dffe_ns #(1) buf_empty_ff(
-		.din(buf_empty_next),
-		.en((rd_buf | wr_buf) | ~rst_l),
-		.clk(clk),
-		.q(buf_empty)
-	);
-	assign req_in = {indata_buf[127:64], indata_buf[54:15], indata_buf[14:12], indata_buf[11:10], indata_buf[9:4], write_pending, read_pending};
-	assign buf0_en = buf_tail[0] &amp; wr_buf;
-	dffe_ns #(117) buf0_ff(
-		.din(req_in),
-		.en(buf0_en),
-		.clk(clk),
-		.q(buf0)
-	);
-	assign buf1_en = buf_tail[1] &amp; wr_buf;
-	dffe_ns #(117) buf1_ff(
-		.din(req_in),
-		.en(buf1_en),
-		.clk(clk),
-		.q(buf1)
-	);
-	assign req_out = (buf_head[0] ? buf0 : (buf_head[1] ? buf1 : {117 {1&#39;b0}}));
-	assign {data_in, addr_in, size_in, buf_id_in, thr_id_in, wr_req_vld_nq, rd_req_vld_nq} = req_out;
-	assign rd_req_vld = rd_req_vld_nq &amp; ~buf_empty;
-	assign wr_req_vld = wr_req_vld_nq &amp; ~buf_empty;
-	assign ack_buf_wr = rd_ack_vld | rd_nack_vld;
-	assign ack_buf_vld_next = (ack_buf_wr ? 1&#39;b1 : (ack_buf_rd ? 1&#39;b0 : ack_buf_vld));
-	dffrl_ns #(1) ack_buf_vld_ff(
-		.din(ack_buf_vld_next),
-		.clk(clk),
-		.rst_l(rst_l),
-		.q(ack_buf_vld)
-	);
-	dffe_ns #(1) ack_buf_is_nack_ff(
-		.din(rd_nack_vld),
-		.en(ack_buf_wr),
-		.clk(clk),
-		.q(ack_buf_is_nack)
-	);
-	dffe_ns #(1) ack_buf_is_data128_ff(
-		.din(data128),
-		.en(ack_buf_wr),
-		.clk(clk),
-		.q(ack_buf_is_data128)
-	);
-	assign ack_typ_out = (rd_ack_vld ? 4&#39;b0001 : 4&#39;b0000);
-	assign ack_buf_in = {data_out, buf_id_out, thr_id_out, ack_typ_out};
-	dffe_ns #(REG_WIDTH + 12) ack_buf_ff(
-		.din(ack_buf_in),
-		.en(ack_buf_wr),
-		.clk(clk),
-		.q(ack_buf)
-	);
-	assign ack_buf_vec = (ack_buf_is_nack ? {{REG_WIDTH / UCB_IOB_WIDTH {1&#39;b0}}, {64 / UCB_IOB_WIDTH {1&#39;b1}}} : (ack_buf_is_data128 ? {(REG_WIDTH + 64) / UCB_IOB_WIDTH {1&#39;b1}} : {128 / UCB_IOB_WIDTH {1&#39;b1}}));
-	assign ack_busy = ack_buf_vld;
-	assign int_buf_wr = int_vld;
-	assign int_buf_vld_next = (int_buf_wr ? 1&#39;b1 : (int_buf_rd ? 1&#39;b0 : int_buf_vld));
-	dffrl_ns #(1) int_buf_vld_ff(
-		.din(int_buf_vld_next),
-		.clk(clk),
-		.rst_l(rst_l),
-		.q(int_buf_vld)
-	);
-	assign int_buf_in = {int_vec, int_stat, dev_id, int_thr_id, int_typ};
-	dffe_ns #(57) int_buf_ff(
-		.din(int_buf_in),
-		.en(int_buf_wr),
-		.clk(clk),
-		.q(int_buf)
-	);
-	assign int_buf_vec = {{REG_WIDTH / UCB_IOB_WIDTH {1&#39;b0}}, {64 / UCB_IOB_WIDTH {1&#39;b1}}};
-	assign int_busy = int_buf_vld;
-	dffrle_ns #(1) int_last_rd_ff(
-		.din(int_buf_rd),
-		.en(ack_buf_rd | int_buf_rd),
-		.rst_l(rst_l),
-		.clk(clk),
-		.q(int_last_rd)
-	);
-	assign ack_buf_rd = (~outdata_buf_busy &amp; ack_buf_vld) &amp; (~int_buf_vld | int_last_rd);
-	assign int_buf_rd = (~outdata_buf_busy &amp; int_buf_vld) &amp; (~ack_buf_vld | ~int_last_rd);
-	assign outdata_buf_wr = ack_buf_rd | int_buf_rd;
-	assign outdata_buf_in = (ack_buf_rd ? {ack_buf[REG_WIDTH + 11:12], {9 {1&#39;b0}}, {40 {1&#39;b0}}, {3 {1&#39;b0}}, ack_buf[11:10], ack_buf[9:4], ack_buf[3:0]} : {{REG_WIDTH {1&#39;b0}}, {7 {1&#39;b0}}, int_buf[56:51], int_buf[50:19], int_buf[18:10], int_buf[9:4], int_buf[3:0]});
-	assign outdata_vec_in = (ack_buf_rd ? ack_buf_vec : int_buf_vec);
-	ucb_bus_out #(
-		UCB_IOB_WIDTH,
-		REG_WIDTH
-	) ucb_bus_out(
-		.rst_l(rst_l),
-		.clk(clk),
-		.outdata_buf_wr(outdata_buf_wr),
-		.outdata_buf_in(outdata_buf_in),
-		.outdata_vec_in(outdata_vec_in),
-		.outdata_buf_busy(outdata_buf_busy),
-		.vld(ucb_iob_vld),
-		.data(ucb_iob_data),
-		.stall(iob_ucb_stall)
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_ucb_flow_jbi</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/ucb_flow_jbi.v.html" target="file-frame">third_party/tests/utd-sv/ucb_flow_jbi.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:18:03</dd></div>
+        <div><dt>time elapsed</dt><dd>0.078s</dd></div>
+        <div><dt>ram usage</dt><dd>76128 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ucb_flow_jbi.sv</a> <a href="../../../../third_party/tests/utd-sv/ucb_flow_jbi.v.html" target="file-frame">third_party/tests/utd-sv/ucb_flow_jbi.v</a></pre>
+      <pre>module ucb_flow_jbi (</pre>
+      <pre>	ucb_iob_stall,</pre>
+      <pre>	rd_req_vld,</pre>
+      <pre>	wr_req_vld,</pre>
+      <pre>	thr_id_in,</pre>
+      <pre>	buf_id_in,</pre>
+      <pre>	size_in,</pre>
+      <pre>	addr_in,</pre>
+      <pre>	data_in,</pre>
+      <pre>	ack_busy,</pre>
+      <pre>	int_busy,</pre>
+      <pre>	ucb_iob_vld,</pre>
+      <pre>	ucb_iob_data,</pre>
+      <pre>	clk,</pre>
+      <pre>	rst_l,</pre>
+      <pre>	iob_ucb_vld,</pre>
+      <pre>	iob_ucb_data,</pre>
+      <pre>	req_acpted,</pre>
+      <pre>	rd_ack_vld,</pre>
+      <pre>	rd_nack_vld,</pre>
+      <pre>	thr_id_out,</pre>
+      <pre>	buf_id_out,</pre>
+      <pre>	data128,</pre>
+      <pre>	data_out,</pre>
+      <pre>	int_vld,</pre>
+      <pre>	int_typ,</pre>
+      <pre>	int_thr_id,</pre>
+      <pre>	dev_id,</pre>
+      <pre>	int_stat,</pre>
+      <pre>	int_vec,</pre>
+      <pre>	iob_ucb_stall</pre>
+      <pre>);</pre>
+      <pre>	parameter IOB_UCB_WIDTH = 32;</pre>
+      <pre>	parameter UCB_IOB_WIDTH = 8;</pre>
+      <pre>	parameter REG_WIDTH = 128;</pre>
+      <pre>	input clk;</pre>
+      <pre>	input rst_l;</pre>
+      <pre>	input iob_ucb_vld;</pre>
+      <pre>	input [IOB_UCB_WIDTH - 1:0] iob_ucb_data;</pre>
+      <pre>	output wire ucb_iob_stall;</pre>
+      <pre>	output wire rd_req_vld;</pre>
+      <pre>	output wire wr_req_vld;</pre>
+      <pre>	output wire [5:0] thr_id_in;</pre>
+      <pre>	output wire [1:0] buf_id_in;</pre>
+      <pre>	output wire [2:0] size_in;</pre>
+      <pre>	output wire [39:0] addr_in;</pre>
+      <pre>	output wire [63:0] data_in;</pre>
+      <pre>	input req_acpted;</pre>
+      <pre>	input rd_ack_vld;</pre>
+      <pre>	input rd_nack_vld;</pre>
+      <pre>	input [5:0] thr_id_out;</pre>
+      <pre>	input [1:0] buf_id_out;</pre>
+      <pre>	input data128;</pre>
+      <pre>	input [REG_WIDTH - 1:0] data_out;</pre>
+      <pre>	output wire ack_busy;</pre>
+      <pre>	input int_vld;</pre>
+      <pre>	input [3:0] int_typ;</pre>
+      <pre>	input [5:0] int_thr_id;</pre>
+      <pre>	input [8:0] dev_id;</pre>
+      <pre>	input [31:0] int_stat;</pre>
+      <pre>	input [5:0] int_vec;</pre>
+      <pre>	output wire int_busy;</pre>
+      <pre>	output wire ucb_iob_vld;</pre>
+      <pre>	output wire [UCB_IOB_WIDTH - 1:0] ucb_iob_data;</pre>
+      <pre>	input iob_ucb_stall;</pre>
+      <pre>	wire indata_buf_vld;</pre>
+      <pre>	wire [127:0] indata_buf;</pre>
+      <pre>	wire ucb_iob_stall_a1;</pre>
+      <pre>	wire read_pending;</pre>
+      <pre>	wire write_pending;</pre>
+      <pre>	wire rd_buf;</pre>
+      <pre>	wire [1:0] buf_head_next;</pre>
+      <pre>	wire [1:0] buf_head;</pre>
+      <pre>	wire wr_buf;</pre>
+      <pre>	wire [1:0] buf_tail_next;</pre>
+      <pre>	wire [1:0] buf_tail;</pre>
+      <pre>	wire buf_full_next;</pre>
+      <pre>	wire buf_full;</pre>
+      <pre>	wire buf_empty_next;</pre>
+      <pre>	wire buf_empty;</pre>
+      <pre>	wire [116:0] req_in;</pre>
+      <pre>	wire buf0_en;</pre>
+      <pre>	wire [116:0] buf0;</pre>
+      <pre>	wire buf1_en;</pre>
+      <pre>	wire [116:0] buf1;</pre>
+      <pre>	wire [116:0] req_out;</pre>
+      <pre>	wire rd_req_vld_nq;</pre>
+      <pre>	wire wr_req_vld_nq;</pre>
+      <pre>	wire ack_buf_rd;</pre>
+      <pre>	wire ack_buf_wr;</pre>
+      <pre>	wire ack_buf_vld;</pre>
+      <pre>	wire ack_buf_vld_next;</pre>
+      <pre>	wire ack_buf_is_nack;</pre>
+      <pre>	wire ack_buf_is_data128;</pre>
+      <pre>	wire [3:0] ack_typ_out;</pre>
+      <pre>	wire [REG_WIDTH + 11:0] ack_buf_in;</pre>
+      <pre>	wire [REG_WIDTH + 11:0] ack_buf;</pre>
+      <pre>	wire [((REG_WIDTH + 64) / UCB_IOB_WIDTH) - 1:0] ack_buf_vec;</pre>
+      <pre>	wire int_buf_rd;</pre>
+      <pre>	wire int_buf_wr;</pre>
+      <pre>	wire int_buf_vld;</pre>
+      <pre>	wire int_buf_vld_next;</pre>
+      <pre>	wire [56:0] int_buf_in;</pre>
+      <pre>	wire [56:0] int_buf;</pre>
+      <pre>	wire [((REG_WIDTH + 64) / UCB_IOB_WIDTH) - 1:0] int_buf_vec;</pre>
+      <pre>	wire int_last_rd;</pre>
+      <pre>	wire outdata_buf_busy;</pre>
+      <pre>	wire outdata_buf_wr;</pre>
+      <pre>	wire [REG_WIDTH + 63:0] outdata_buf_in;</pre>
+      <pre>	wire [((REG_WIDTH + 64) / UCB_IOB_WIDTH) - 1:0] outdata_vec_in;</pre>
+      <pre>	ucb_bus_in #(</pre>
+      <pre>		IOB_UCB_WIDTH,</pre>
+      <pre>		64</pre>
+      <pre>	) ucb_bus_in(</pre>
+      <pre>		.rst_l(rst_l),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.vld(iob_ucb_vld),</pre>
+      <pre>		.data(iob_ucb_data),</pre>
+      <pre>		.stall(ucb_iob_stall),</pre>
+      <pre>		.indata_buf_vld(indata_buf_vld),</pre>
+      <pre>		.indata_buf(indata_buf),</pre>
+      <pre>		.stall_a1(ucb_iob_stall_a1)</pre>
+      <pre>	);</pre>
+      <pre>	assign read_pending = (indata_buf[3:0] == 4&#39;b0100) &amp; indata_buf_vld;</pre>
+      <pre>	assign write_pending = (indata_buf[3:0] == 4&#39;b0101) &amp; indata_buf_vld;</pre>
+      <pre>	assign ucb_iob_stall_a1 = (read_pending | write_pending) &amp; buf_full;</pre>
+      <pre>	assign rd_buf = req_acpted;</pre>
+      <pre>	assign buf_head_next = (~rst_l ? 2&#39;b01 : (rd_buf ? {buf_head[0:0], buf_head[1]} : buf_head));</pre>
+      <pre>	dff_ns #(2) buf_head_ff(</pre>
+      <pre>		.din(buf_head_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(buf_head)</pre>
+      <pre>	);</pre>
+      <pre>	assign wr_buf = (read_pending | write_pending) &amp; ~buf_full;</pre>
+      <pre>	assign buf_tail_next = (~rst_l ? 2&#39;b01 : (wr_buf ? {buf_tail[0:0], buf_tail[1]} : buf_tail));</pre>
+      <pre>	dff_ns #(2) buf_tail_ff(</pre>
+      <pre>		.din(buf_tail_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(buf_tail)</pre>
+      <pre>	);</pre>
+      <pre>	assign buf_full_next = (buf_head_next == buf_tail_next) &amp; wr_buf;</pre>
+      <pre>	dffrle_ns #(1) buf_full_ff(</pre>
+      <pre>		.din(buf_full_next),</pre>
+      <pre>		.rst_l(rst_l),</pre>
+      <pre>		.en(rd_buf | wr_buf),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(buf_full)</pre>
+      <pre>	);</pre>
+      <pre>	assign buf_empty_next = ((buf_head_next == buf_tail_next) &amp; rd_buf) | ~rst_l;</pre>
+      <pre>	dffe_ns #(1) buf_empty_ff(</pre>
+      <pre>		.din(buf_empty_next),</pre>
+      <pre>		.en((rd_buf | wr_buf) | ~rst_l),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(buf_empty)</pre>
+      <pre>	);</pre>
+      <pre>	assign req_in = {indata_buf[127:64], indata_buf[54:15], indata_buf[14:12], indata_buf[11:10], indata_buf[9:4], write_pending, read_pending};</pre>
+      <pre>	assign buf0_en = buf_tail[0] &amp; wr_buf;</pre>
+      <pre>	dffe_ns #(117) buf0_ff(</pre>
+      <pre>		.din(req_in),</pre>
+      <pre>		.en(buf0_en),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(buf0)</pre>
+      <pre>	);</pre>
+      <pre>	assign buf1_en = buf_tail[1] &amp; wr_buf;</pre>
+      <pre>	dffe_ns #(117) buf1_ff(</pre>
+      <pre>		.din(req_in),</pre>
+      <pre>		.en(buf1_en),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(buf1)</pre>
+      <pre>	);</pre>
+      <pre>	assign req_out = (buf_head[0] ? buf0 : (buf_head[1] ? buf1 : {117 {1&#39;b0}}));</pre>
+      <pre>	assign {data_in, addr_in, size_in, buf_id_in, thr_id_in, wr_req_vld_nq, rd_req_vld_nq} = req_out;</pre>
+      <pre>	assign rd_req_vld = rd_req_vld_nq &amp; ~buf_empty;</pre>
+      <pre>	assign wr_req_vld = wr_req_vld_nq &amp; ~buf_empty;</pre>
+      <pre>	assign ack_buf_wr = rd_ack_vld | rd_nack_vld;</pre>
+      <pre>	assign ack_buf_vld_next = (ack_buf_wr ? 1&#39;b1 : (ack_buf_rd ? 1&#39;b0 : ack_buf_vld));</pre>
+      <pre>	dffrl_ns #(1) ack_buf_vld_ff(</pre>
+      <pre>		.din(ack_buf_vld_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.rst_l(rst_l),</pre>
+      <pre>		.q(ack_buf_vld)</pre>
+      <pre>	);</pre>
+      <pre>	dffe_ns #(1) ack_buf_is_nack_ff(</pre>
+      <pre>		.din(rd_nack_vld),</pre>
+      <pre>		.en(ack_buf_wr),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(ack_buf_is_nack)</pre>
+      <pre>	);</pre>
+      <pre>	dffe_ns #(1) ack_buf_is_data128_ff(</pre>
+      <pre>		.din(data128),</pre>
+      <pre>		.en(ack_buf_wr),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(ack_buf_is_data128)</pre>
+      <pre>	);</pre>
+      <pre>	assign ack_typ_out = (rd_ack_vld ? 4&#39;b0001 : 4&#39;b0000);</pre>
+      <pre>	assign ack_buf_in = {data_out, buf_id_out, thr_id_out, ack_typ_out};</pre>
+      <pre>	dffe_ns #(REG_WIDTH + 12) ack_buf_ff(</pre>
+      <pre>		.din(ack_buf_in),</pre>
+      <pre>		.en(ack_buf_wr),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(ack_buf)</pre>
+      <pre>	);</pre>
+      <pre>	assign ack_buf_vec = (ack_buf_is_nack ? {{REG_WIDTH / UCB_IOB_WIDTH {1&#39;b0}}, {64 / UCB_IOB_WIDTH {1&#39;b1}}} : (ack_buf_is_data128 ? {(REG_WIDTH + 64) / UCB_IOB_WIDTH {1&#39;b1}} : {128 / UCB_IOB_WIDTH {1&#39;b1}}));</pre>
+      <pre>	assign ack_busy = ack_buf_vld;</pre>
+      <pre>	assign int_buf_wr = int_vld;</pre>
+      <pre>	assign int_buf_vld_next = (int_buf_wr ? 1&#39;b1 : (int_buf_rd ? 1&#39;b0 : int_buf_vld));</pre>
+      <pre>	dffrl_ns #(1) int_buf_vld_ff(</pre>
+      <pre>		.din(int_buf_vld_next),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.rst_l(rst_l),</pre>
+      <pre>		.q(int_buf_vld)</pre>
+      <pre>	);</pre>
+      <pre>	assign int_buf_in = {int_vec, int_stat, dev_id, int_thr_id, int_typ};</pre>
+      <pre>	dffe_ns #(57) int_buf_ff(</pre>
+      <pre>		.din(int_buf_in),</pre>
+      <pre>		.en(int_buf_wr),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(int_buf)</pre>
+      <pre>	);</pre>
+      <pre>	assign int_buf_vec = {{REG_WIDTH / UCB_IOB_WIDTH {1&#39;b0}}, {64 / UCB_IOB_WIDTH {1&#39;b1}}};</pre>
+      <pre>	assign int_busy = int_buf_vld;</pre>
+      <pre>	dffrle_ns #(1) int_last_rd_ff(</pre>
+      <pre>		.din(int_buf_rd),</pre>
+      <pre>		.en(ack_buf_rd | int_buf_rd),</pre>
+      <pre>		.rst_l(rst_l),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.q(int_last_rd)</pre>
+      <pre>	);</pre>
+      <pre>	assign ack_buf_rd = (~outdata_buf_busy &amp; ack_buf_vld) &amp; (~int_buf_vld | int_last_rd);</pre>
+      <pre>	assign int_buf_rd = (~outdata_buf_busy &amp; int_buf_vld) &amp; (~ack_buf_vld | ~int_last_rd);</pre>
+      <pre>	assign outdata_buf_wr = ack_buf_rd | int_buf_rd;</pre>
+      <pre>	assign outdata_buf_in = (ack_buf_rd ? {ack_buf[REG_WIDTH + 11:12], {9 {1&#39;b0}}, {40 {1&#39;b0}}, {3 {1&#39;b0}}, ack_buf[11:10], ack_buf[9:4], ack_buf[3:0]} : {{REG_WIDTH {1&#39;b0}}, {7 {1&#39;b0}}, int_buf[56:51], int_buf[50:19], int_buf[18:10], int_buf[9:4], int_buf[3:0]});</pre>
+      <pre>	assign outdata_vec_in = (ack_buf_rd ? ack_buf_vec : int_buf_vec);</pre>
+      <pre>	ucb_bus_out #(</pre>
+      <pre>		UCB_IOB_WIDTH,</pre>
+      <pre>		REG_WIDTH</pre>
+      <pre>	) ucb_bus_out(</pre>
+      <pre>		.rst_l(rst_l),</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.outdata_buf_wr(outdata_buf_wr),</pre>
+      <pre>		.outdata_buf_in(outdata_buf_in),</pre>
+      <pre>		.outdata_vec_in(outdata_vec_in),</pre>
+      <pre>		.outdata_buf_busy(outdata_buf_busy),</pre>
+      <pre>		.vld(ucb_iob_vld),</pre>
+      <pre>		.data(ucb_iob_data),</pre>
+      <pre>		.stall(iob_ucb_stall)</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

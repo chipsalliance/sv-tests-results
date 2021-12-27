@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/8.20'] = [["virtual_method",0,"logs/VanillaYosysUhdmPlugin/chapter-8/8.20--virtual_method.sv.log.html","tests/chapter-8/8.20--virtual_method.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/8.20'] = [["","virtual_method",0,"logs/VanillaYosysUhdmPlugin/chapter-8/8.20--virtual_method.sv.log.html","tests/chapter-8/8.20--virtual_method.sv.html"]]

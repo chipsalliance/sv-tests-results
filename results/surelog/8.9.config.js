@@ -1,1 +1,1 @@
-config_loader_data['surelog/8.9'] = [["static_properties",1,"logs/Surelog/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]
+config_loader_data['surelog/8.9'] = [["","static_properties",1,"logs/Surelog/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]

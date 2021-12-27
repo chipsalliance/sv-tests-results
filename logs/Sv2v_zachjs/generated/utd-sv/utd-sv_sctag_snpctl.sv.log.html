@@ -1,270 +1,284 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_sctag_snpctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sctag_snpctl.sv</a> <a href="../../../../third_party/tests/utd-sv/sctag_snpctl.v.html" target="file-frame">third_party/tests/utd-sv/sctag_snpctl.v</a>
-defines: 
-completed: 2021-12-27 02:40:31
-time_elapsed: 0.042s
-ram usage: 44332 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_sctag_snpctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sctag_snpctl.sv</a> <a href="../../../../third_party/tests/utd-sv/sctag_snpctl.v.html" target="file-frame">third_party/tests/utd-sv/sctag_snpctl.v</a>
-module sctag_snpctl (
-	sctag_jbi_por_req,
-	so,
-	sctag_jbi_iq_dequeue,
-	snpq_arbctl_vld_px1,
-	snp_hdr1_wen0_s0,
-	snp_hdr2_wen0_s1,
-	snp_data1_wen0_s2,
-	snp_data2_wen0_s3,
-	snp_hdr1_wen1_s0,
-	snp_hdr2_wen1_s1,
-	snp_data1_wen1_s2,
-	snp_data2_wen1_s3,
-	snpctl_wr_ptr,
-	snpctl_rd_ptr,
-	rdmad_wr_entry_s2,
-	rdmatag_wr_en_s2,
-	sctag_scbuf_rdma_wren_s2,
-	sctag_scbuf_rdma_wrwl_s2,
-	jbi_req_vld_buf,
-	arbctl_snpsel_c1,
-	snpdp_rq_winv_s1,
-	rdmat_wr_entry_s1,
-	sctag_por_req,
-	rclk,
-	si,
-	se,
-	arst_l,
-	grst_l
-);
-	input jbi_req_vld_buf;
-	input arbctl_snpsel_c1;
-	input snpdp_rq_winv_s1;
-	input [1:0] rdmat_wr_entry_s1;
-	input sctag_por_req;
-	input rclk;
-	input si;
-	input se;
-	input arst_l;
-	input grst_l;
-	output wire sctag_jbi_por_req;
-	output wire so;
-	output wire sctag_jbi_iq_dequeue;
-	output wire snpq_arbctl_vld_px1;
-	output wire snp_hdr1_wen0_s0;
-	output wire snp_hdr2_wen0_s1;
-	output wire snp_data1_wen0_s2;
-	output wire snp_data2_wen0_s3;
-	output wire snp_hdr1_wen1_s0;
-	output wire snp_hdr2_wen1_s1;
-	output wire snp_data1_wen1_s2;
-	output wire snp_data2_wen1_s3;
-	output wire snpctl_wr_ptr;
-	output wire snpctl_rd_ptr;
-	output wire [1:0] rdmad_wr_entry_s2;
-	output wire rdmatag_wr_en_s2;
-	output wire [15:0] sctag_scbuf_rdma_wren_s2;
-	output wire [1:0] sctag_scbuf_rdma_wrwl_s2;
-	wire jbi_req_vld_s0;
-	wire wr_ptr_in;
-	wire wr_ptr;
-	wire rd_ptr_in;
-	wire rd_ptr;
-	wire winv_reset;
-	wire winv_en;
-	wire winv_rq_active_s2;
-	wire winv_rq_active_s2_1;
-	wire sel_snpiq_cnt_reset;
-	wire snpiq_cnt_en;
-	wire sel_snpiq_cnt_plus0;
-	wire snpiq_cnt_rst;
-	wire [4:0] snpiq_cnt_plus0;
-	wire [4:0] snpiq_cnt_in;
-	wire [4:0] snpiq_cnt;
-	wire [1:0] snpq_valid_in;
-	wire [1:0] snpq_valid;
-	wire [15:0] rdmadata_wen_s1;
-	wire [15:0] rdmadata_wen_s2;
-	wire [1:0] rdmad_wr_entry_s2_d1;
-	wire [1:0] rdmad_wr_wl_s2;
-	wire dbb_rst_l;
-	assign sctag_jbi_por_req = sctag_por_req;
-	dffrl_async #(1) reset_flop(
-		.q(dbb_rst_l),
-		.clk(rclk),
-		.rst_l(arst_l),
-		.din(grst_l),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dff_s #(1) ff_jbi_req_vld_s0(
-		.din(jbi_req_vld_buf),
-		.clk(rclk),
-		.q(jbi_req_vld_s0),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign winv_reset = ~dbb_rst_l;
-	assign winv_en = snpiq_cnt == 5&#39;d1;
-	dffre_s #(1) ff_winv_rq_active_s2(
-		.din(snpdp_rq_winv_s1),
-		.en(winv_en),
-		.clk(rclk),
-		.rst(winv_reset),
-		.q(winv_rq_active_s2),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign sel_snpiq_cnt_reset = ((snpiq_cnt == 5&#39;d17) &amp; winv_rq_active_s2) | ((snpiq_cnt == 5&#39;d3) &amp; ~winv_rq_active_s2);
-	assign sel_snpiq_cnt_plus0 = |snpiq_cnt | jbi_req_vld_s0;
-	assign snpiq_cnt_plus0 = snpiq_cnt + 5&#39;d1;
-	assign snpiq_cnt_en = sel_snpiq_cnt_plus0 | sel_snpiq_cnt_reset;
-	assign snpiq_cnt_rst = ~dbb_rst_l;
-	mux2ds #(5) mux_snpiq_cnt(
-		.dout(snpiq_cnt_in[4:0]),
-		.in0(snpiq_cnt_plus0[4:0]),
-		.in1(5&#39;b00000),
-		.sel0(~sel_snpiq_cnt_reset),
-		.sel1(sel_snpiq_cnt_reset)
-	);
-	dffre_s #(5) ff_snpiq_cnt(
-		.din(snpiq_cnt_in[4:0]),
-		.en(snpiq_cnt_en),
-		.clk(rclk),
-		.rst(snpiq_cnt_rst),
-		.q(snpiq_cnt[4:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign wr_ptr_in = ((~wr_ptr &amp; sel_snpiq_cnt_reset) | wr_ptr) &amp; ~(wr_ptr &amp; sel_snpiq_cnt_reset);
-	dffrl_s #(1) ff_wr_ptr(
-		.q(wr_ptr),
-		.din(wr_ptr_in),
-		.clk(rclk),
-		.rst_l(dbb_rst_l),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign snpctl_wr_ptr = wr_ptr;
-	assign snp_hdr1_wen0_s0 = (~wr_ptr &amp; (snpiq_cnt == 5&#39;d0)) &amp; jbi_req_vld_s0;
-	assign snp_hdr2_wen0_s1 = ~wr_ptr &amp; (snpiq_cnt == 5&#39;d1);
-	assign snp_data1_wen0_s2 = ~wr_ptr &amp; (snpiq_cnt == 5&#39;d2);
-	assign snp_data2_wen0_s3 = ~wr_ptr &amp; (snpiq_cnt == 5&#39;d3);
-	assign snp_hdr1_wen1_s0 = (wr_ptr &amp; (snpiq_cnt == 5&#39;d0)) &amp; jbi_req_vld_s0;
-	assign snp_hdr2_wen1_s1 = wr_ptr &amp; (snpiq_cnt == 5&#39;d1);
-	assign snp_data1_wen1_s2 = wr_ptr &amp; (snpiq_cnt == 5&#39;d2);
-	assign snp_data2_wen1_s3 = wr_ptr &amp; (snpiq_cnt == 5&#39;d3);
-	assign rdmatag_wr_en_s2 = winv_rq_active_s2 &amp; (snpiq_cnt == 5&#39;d2);
-	assign rdmadata_wen_s1[0] = snpiq_cnt == 5&#39;d1;
-	assign rdmadata_wen_s1[1] = snpiq_cnt == 5&#39;d2;
-	assign rdmadata_wen_s1[2] = snpiq_cnt == 5&#39;d3;
-	assign rdmadata_wen_s1[3] = snpiq_cnt == 5&#39;d4;
-	assign rdmadata_wen_s1[4] = snpiq_cnt == 5&#39;d5;
-	assign rdmadata_wen_s1[5] = snpiq_cnt == 5&#39;d6;
-	assign rdmadata_wen_s1[6] = snpiq_cnt == 5&#39;d7;
-	assign rdmadata_wen_s1[7] = snpiq_cnt == 5&#39;d8;
-	assign rdmadata_wen_s1[8] = snpiq_cnt == 5&#39;d9;
-	assign rdmadata_wen_s1[9] = snpiq_cnt == 5&#39;d10;
-	assign rdmadata_wen_s1[10] = snpiq_cnt == 5&#39;d11;
-	assign rdmadata_wen_s1[11] = snpiq_cnt == 5&#39;d12;
-	assign rdmadata_wen_s1[12] = snpiq_cnt == 5&#39;d13;
-	assign rdmadata_wen_s1[13] = snpiq_cnt == 5&#39;d14;
-	assign rdmadata_wen_s1[14] = snpiq_cnt == 5&#39;d15;
-	assign rdmadata_wen_s1[15] = snpiq_cnt == 5&#39;d16;
-	dff_s #(16) ff_rdmadata_wen_s2(
-		.din(rdmadata_wen_s1[15:0]),
-		.clk(rclk),
-		.q(rdmadata_wen_s2[15:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	dffre_s #(1) ff_winv_rq_active_s2_1(
-		.din(snpdp_rq_winv_s1),
-		.en(winv_en),
-		.clk(rclk),
-		.rst(winv_reset),
-		.q(winv_rq_active_s2_1),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign sctag_scbuf_rdma_wren_s2 = rdmadata_wen_s2 &amp; {16 {winv_rq_active_s2_1}};
-	dff_s #(2) ff_rdmad_wr_entry_s2(
-		.din(rdmat_wr_entry_s1[1:0]),
-		.clk(rclk),
-		.q(rdmad_wr_entry_s2[1:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	mux2ds #(2) mux_rdmad_wr_entry_s2(
-		.dout(rdmad_wr_wl_s2[1:0]),
-		.in0(rdmad_wr_entry_s2[1:0]),
-		.in1(rdmad_wr_entry_s2_d1[1:0]),
-		.sel0(rdmatag_wr_en_s2),
-		.sel1(~rdmatag_wr_en_s2)
-	);
-	assign sctag_scbuf_rdma_wrwl_s2 = rdmad_wr_wl_s2;
-	dffrl_s #(2) ff_rdmad_wr_entry_s2_d1(
-		.din(rdmad_wr_wl_s2[1:0]),
-		.clk(rclk),
-		.rst_l(dbb_rst_l),
-		.q(rdmad_wr_entry_s2_d1[1:0]),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign snpq_valid_in[0] = (snpq_valid[0] | (~wr_ptr &amp; sel_snpiq_cnt_reset)) &amp; ~(~rd_ptr &amp; arbctl_snpsel_c1);
-	assign snpq_valid_in[1] = (snpq_valid[1] | (wr_ptr &amp; sel_snpiq_cnt_reset)) &amp; ~(rd_ptr &amp; arbctl_snpsel_c1);
-	dffrl_s #(2) ff_snp_valid(
-		.q(snpq_valid[1:0]),
-		.din(snpq_valid_in[1:0]),
-		.clk(rclk),
-		.rst_l(dbb_rst_l),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign snpq_arbctl_vld_px1 = |snpq_valid;
-	assign rd_ptr_in = ((~rd_ptr &amp; arbctl_snpsel_c1) | rd_ptr) &amp; ~(rd_ptr &amp; arbctl_snpsel_c1);
-	dffrl_s #(1) ff_rd_ptr(
-		.q(rd_ptr),
-		.din(rd_ptr_in),
-		.clk(rclk),
-		.rst_l(dbb_rst_l),
-		.se(se),
-		.si(),
-		.so()
-	);
-	assign snpctl_rd_ptr = rd_ptr;
-	assign sctag_jbi_iq_dequeue = arbctl_snpsel_c1;
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_sctag_snpctl</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_sctag_snpctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sctag_snpctl.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/sctag_snpctl.v.html" target="file-frame">third_party/tests/utd-sv/sctag_snpctl.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:46</dd></div>
+        <div><dt>time elapsed</dt><dd>0.045s</dd></div>
+        <div><dt>ram usage</dt><dd>44320 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_sctag_snpctl.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_sctag_snpctl.sv</a> <a href="../../../../third_party/tests/utd-sv/sctag_snpctl.v.html" target="file-frame">third_party/tests/utd-sv/sctag_snpctl.v</a></pre>
+      <pre>module sctag_snpctl (</pre>
+      <pre>	sctag_jbi_por_req,</pre>
+      <pre>	so,</pre>
+      <pre>	sctag_jbi_iq_dequeue,</pre>
+      <pre>	snpq_arbctl_vld_px1,</pre>
+      <pre>	snp_hdr1_wen0_s0,</pre>
+      <pre>	snp_hdr2_wen0_s1,</pre>
+      <pre>	snp_data1_wen0_s2,</pre>
+      <pre>	snp_data2_wen0_s3,</pre>
+      <pre>	snp_hdr1_wen1_s0,</pre>
+      <pre>	snp_hdr2_wen1_s1,</pre>
+      <pre>	snp_data1_wen1_s2,</pre>
+      <pre>	snp_data2_wen1_s3,</pre>
+      <pre>	snpctl_wr_ptr,</pre>
+      <pre>	snpctl_rd_ptr,</pre>
+      <pre>	rdmad_wr_entry_s2,</pre>
+      <pre>	rdmatag_wr_en_s2,</pre>
+      <pre>	sctag_scbuf_rdma_wren_s2,</pre>
+      <pre>	sctag_scbuf_rdma_wrwl_s2,</pre>
+      <pre>	jbi_req_vld_buf,</pre>
+      <pre>	arbctl_snpsel_c1,</pre>
+      <pre>	snpdp_rq_winv_s1,</pre>
+      <pre>	rdmat_wr_entry_s1,</pre>
+      <pre>	sctag_por_req,</pre>
+      <pre>	rclk,</pre>
+      <pre>	si,</pre>
+      <pre>	se,</pre>
+      <pre>	arst_l,</pre>
+      <pre>	grst_l</pre>
+      <pre>);</pre>
+      <pre>	input jbi_req_vld_buf;</pre>
+      <pre>	input arbctl_snpsel_c1;</pre>
+      <pre>	input snpdp_rq_winv_s1;</pre>
+      <pre>	input [1:0] rdmat_wr_entry_s1;</pre>
+      <pre>	input sctag_por_req;</pre>
+      <pre>	input rclk;</pre>
+      <pre>	input si;</pre>
+      <pre>	input se;</pre>
+      <pre>	input arst_l;</pre>
+      <pre>	input grst_l;</pre>
+      <pre>	output wire sctag_jbi_por_req;</pre>
+      <pre>	output wire so;</pre>
+      <pre>	output wire sctag_jbi_iq_dequeue;</pre>
+      <pre>	output wire snpq_arbctl_vld_px1;</pre>
+      <pre>	output wire snp_hdr1_wen0_s0;</pre>
+      <pre>	output wire snp_hdr2_wen0_s1;</pre>
+      <pre>	output wire snp_data1_wen0_s2;</pre>
+      <pre>	output wire snp_data2_wen0_s3;</pre>
+      <pre>	output wire snp_hdr1_wen1_s0;</pre>
+      <pre>	output wire snp_hdr2_wen1_s1;</pre>
+      <pre>	output wire snp_data1_wen1_s2;</pre>
+      <pre>	output wire snp_data2_wen1_s3;</pre>
+      <pre>	output wire snpctl_wr_ptr;</pre>
+      <pre>	output wire snpctl_rd_ptr;</pre>
+      <pre>	output wire [1:0] rdmad_wr_entry_s2;</pre>
+      <pre>	output wire rdmatag_wr_en_s2;</pre>
+      <pre>	output wire [15:0] sctag_scbuf_rdma_wren_s2;</pre>
+      <pre>	output wire [1:0] sctag_scbuf_rdma_wrwl_s2;</pre>
+      <pre>	wire jbi_req_vld_s0;</pre>
+      <pre>	wire wr_ptr_in;</pre>
+      <pre>	wire wr_ptr;</pre>
+      <pre>	wire rd_ptr_in;</pre>
+      <pre>	wire rd_ptr;</pre>
+      <pre>	wire winv_reset;</pre>
+      <pre>	wire winv_en;</pre>
+      <pre>	wire winv_rq_active_s2;</pre>
+      <pre>	wire winv_rq_active_s2_1;</pre>
+      <pre>	wire sel_snpiq_cnt_reset;</pre>
+      <pre>	wire snpiq_cnt_en;</pre>
+      <pre>	wire sel_snpiq_cnt_plus0;</pre>
+      <pre>	wire snpiq_cnt_rst;</pre>
+      <pre>	wire [4:0] snpiq_cnt_plus0;</pre>
+      <pre>	wire [4:0] snpiq_cnt_in;</pre>
+      <pre>	wire [4:0] snpiq_cnt;</pre>
+      <pre>	wire [1:0] snpq_valid_in;</pre>
+      <pre>	wire [1:0] snpq_valid;</pre>
+      <pre>	wire [15:0] rdmadata_wen_s1;</pre>
+      <pre>	wire [15:0] rdmadata_wen_s2;</pre>
+      <pre>	wire [1:0] rdmad_wr_entry_s2_d1;</pre>
+      <pre>	wire [1:0] rdmad_wr_wl_s2;</pre>
+      <pre>	wire dbb_rst_l;</pre>
+      <pre>	assign sctag_jbi_por_req = sctag_por_req;</pre>
+      <pre>	dffrl_async #(1) reset_flop(</pre>
+      <pre>		.q(dbb_rst_l),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst_l(arst_l),</pre>
+      <pre>		.din(grst_l),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dff_s #(1) ff_jbi_req_vld_s0(</pre>
+      <pre>		.din(jbi_req_vld_buf),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(jbi_req_vld_s0),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign winv_reset = ~dbb_rst_l;</pre>
+      <pre>	assign winv_en = snpiq_cnt == 5&#39;d1;</pre>
+      <pre>	dffre_s #(1) ff_winv_rq_active_s2(</pre>
+      <pre>		.din(snpdp_rq_winv_s1),</pre>
+      <pre>		.en(winv_en),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst(winv_reset),</pre>
+      <pre>		.q(winv_rq_active_s2),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign sel_snpiq_cnt_reset = ((snpiq_cnt == 5&#39;d17) &amp; winv_rq_active_s2) | ((snpiq_cnt == 5&#39;d3) &amp; ~winv_rq_active_s2);</pre>
+      <pre>	assign sel_snpiq_cnt_plus0 = |snpiq_cnt | jbi_req_vld_s0;</pre>
+      <pre>	assign snpiq_cnt_plus0 = snpiq_cnt + 5&#39;d1;</pre>
+      <pre>	assign snpiq_cnt_en = sel_snpiq_cnt_plus0 | sel_snpiq_cnt_reset;</pre>
+      <pre>	assign snpiq_cnt_rst = ~dbb_rst_l;</pre>
+      <pre>	mux2ds #(5) mux_snpiq_cnt(</pre>
+      <pre>		.dout(snpiq_cnt_in[4:0]),</pre>
+      <pre>		.in0(snpiq_cnt_plus0[4:0]),</pre>
+      <pre>		.in1(5&#39;b00000),</pre>
+      <pre>		.sel0(~sel_snpiq_cnt_reset),</pre>
+      <pre>		.sel1(sel_snpiq_cnt_reset)</pre>
+      <pre>	);</pre>
+      <pre>	dffre_s #(5) ff_snpiq_cnt(</pre>
+      <pre>		.din(snpiq_cnt_in[4:0]),</pre>
+      <pre>		.en(snpiq_cnt_en),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst(snpiq_cnt_rst),</pre>
+      <pre>		.q(snpiq_cnt[4:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign wr_ptr_in = ((~wr_ptr &amp; sel_snpiq_cnt_reset) | wr_ptr) &amp; ~(wr_ptr &amp; sel_snpiq_cnt_reset);</pre>
+      <pre>	dffrl_s #(1) ff_wr_ptr(</pre>
+      <pre>		.q(wr_ptr),</pre>
+      <pre>		.din(wr_ptr_in),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst_l(dbb_rst_l),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign snpctl_wr_ptr = wr_ptr;</pre>
+      <pre>	assign snp_hdr1_wen0_s0 = (~wr_ptr &amp; (snpiq_cnt == 5&#39;d0)) &amp; jbi_req_vld_s0;</pre>
+      <pre>	assign snp_hdr2_wen0_s1 = ~wr_ptr &amp; (snpiq_cnt == 5&#39;d1);</pre>
+      <pre>	assign snp_data1_wen0_s2 = ~wr_ptr &amp; (snpiq_cnt == 5&#39;d2);</pre>
+      <pre>	assign snp_data2_wen0_s3 = ~wr_ptr &amp; (snpiq_cnt == 5&#39;d3);</pre>
+      <pre>	assign snp_hdr1_wen1_s0 = (wr_ptr &amp; (snpiq_cnt == 5&#39;d0)) &amp; jbi_req_vld_s0;</pre>
+      <pre>	assign snp_hdr2_wen1_s1 = wr_ptr &amp; (snpiq_cnt == 5&#39;d1);</pre>
+      <pre>	assign snp_data1_wen1_s2 = wr_ptr &amp; (snpiq_cnt == 5&#39;d2);</pre>
+      <pre>	assign snp_data2_wen1_s3 = wr_ptr &amp; (snpiq_cnt == 5&#39;d3);</pre>
+      <pre>	assign rdmatag_wr_en_s2 = winv_rq_active_s2 &amp; (snpiq_cnt == 5&#39;d2);</pre>
+      <pre>	assign rdmadata_wen_s1[0] = snpiq_cnt == 5&#39;d1;</pre>
+      <pre>	assign rdmadata_wen_s1[1] = snpiq_cnt == 5&#39;d2;</pre>
+      <pre>	assign rdmadata_wen_s1[2] = snpiq_cnt == 5&#39;d3;</pre>
+      <pre>	assign rdmadata_wen_s1[3] = snpiq_cnt == 5&#39;d4;</pre>
+      <pre>	assign rdmadata_wen_s1[4] = snpiq_cnt == 5&#39;d5;</pre>
+      <pre>	assign rdmadata_wen_s1[5] = snpiq_cnt == 5&#39;d6;</pre>
+      <pre>	assign rdmadata_wen_s1[6] = snpiq_cnt == 5&#39;d7;</pre>
+      <pre>	assign rdmadata_wen_s1[7] = snpiq_cnt == 5&#39;d8;</pre>
+      <pre>	assign rdmadata_wen_s1[8] = snpiq_cnt == 5&#39;d9;</pre>
+      <pre>	assign rdmadata_wen_s1[9] = snpiq_cnt == 5&#39;d10;</pre>
+      <pre>	assign rdmadata_wen_s1[10] = snpiq_cnt == 5&#39;d11;</pre>
+      <pre>	assign rdmadata_wen_s1[11] = snpiq_cnt == 5&#39;d12;</pre>
+      <pre>	assign rdmadata_wen_s1[12] = snpiq_cnt == 5&#39;d13;</pre>
+      <pre>	assign rdmadata_wen_s1[13] = snpiq_cnt == 5&#39;d14;</pre>
+      <pre>	assign rdmadata_wen_s1[14] = snpiq_cnt == 5&#39;d15;</pre>
+      <pre>	assign rdmadata_wen_s1[15] = snpiq_cnt == 5&#39;d16;</pre>
+      <pre>	dff_s #(16) ff_rdmadata_wen_s2(</pre>
+      <pre>		.din(rdmadata_wen_s1[15:0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(rdmadata_wen_s2[15:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	dffre_s #(1) ff_winv_rq_active_s2_1(</pre>
+      <pre>		.din(snpdp_rq_winv_s1),</pre>
+      <pre>		.en(winv_en),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst(winv_reset),</pre>
+      <pre>		.q(winv_rq_active_s2_1),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign sctag_scbuf_rdma_wren_s2 = rdmadata_wen_s2 &amp; {16 {winv_rq_active_s2_1}};</pre>
+      <pre>	dff_s #(2) ff_rdmad_wr_entry_s2(</pre>
+      <pre>		.din(rdmat_wr_entry_s1[1:0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.q(rdmad_wr_entry_s2[1:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	mux2ds #(2) mux_rdmad_wr_entry_s2(</pre>
+      <pre>		.dout(rdmad_wr_wl_s2[1:0]),</pre>
+      <pre>		.in0(rdmad_wr_entry_s2[1:0]),</pre>
+      <pre>		.in1(rdmad_wr_entry_s2_d1[1:0]),</pre>
+      <pre>		.sel0(rdmatag_wr_en_s2),</pre>
+      <pre>		.sel1(~rdmatag_wr_en_s2)</pre>
+      <pre>	);</pre>
+      <pre>	assign sctag_scbuf_rdma_wrwl_s2 = rdmad_wr_wl_s2;</pre>
+      <pre>	dffrl_s #(2) ff_rdmad_wr_entry_s2_d1(</pre>
+      <pre>		.din(rdmad_wr_wl_s2[1:0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst_l(dbb_rst_l),</pre>
+      <pre>		.q(rdmad_wr_entry_s2_d1[1:0]),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign snpq_valid_in[0] = (snpq_valid[0] | (~wr_ptr &amp; sel_snpiq_cnt_reset)) &amp; ~(~rd_ptr &amp; arbctl_snpsel_c1);</pre>
+      <pre>	assign snpq_valid_in[1] = (snpq_valid[1] | (wr_ptr &amp; sel_snpiq_cnt_reset)) &amp; ~(rd_ptr &amp; arbctl_snpsel_c1);</pre>
+      <pre>	dffrl_s #(2) ff_snp_valid(</pre>
+      <pre>		.q(snpq_valid[1:0]),</pre>
+      <pre>		.din(snpq_valid_in[1:0]),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst_l(dbb_rst_l),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign snpq_arbctl_vld_px1 = |snpq_valid;</pre>
+      <pre>	assign rd_ptr_in = ((~rd_ptr &amp; arbctl_snpsel_c1) | rd_ptr) &amp; ~(rd_ptr &amp; arbctl_snpsel_c1);</pre>
+      <pre>	dffrl_s #(1) ff_rd_ptr(</pre>
+      <pre>		.q(rd_ptr),</pre>
+      <pre>		.din(rd_ptr_in),</pre>
+      <pre>		.clk(rclk),</pre>
+      <pre>		.rst_l(dbb_rst_l),</pre>
+      <pre>		.se(se),</pre>
+      <pre>		.si(),</pre>
+      <pre>		.so()</pre>
+      <pre>	);</pre>
+      <pre>	assign snpctl_rd_ptr = rd_ptr;</pre>
+      <pre>	assign sctag_jbi_iq_dequeue = arbctl_snpsel_c1;</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

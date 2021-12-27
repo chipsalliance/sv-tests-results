@@ -1,1 +1,1 @@
-config_loader_data['slang/7.6'] = [["array-unpacked-assignments",1,"logs/Slang/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]
+config_loader_data['slang/7.6'] = [["","array-unpacked-assignments",1,"logs/Slang/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]

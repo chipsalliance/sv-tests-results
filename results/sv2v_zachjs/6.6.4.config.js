@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/6.6.4'] = [["net_trireg",1,"logs/Sv2v_zachjs/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]
+config_loader_data['sv2v_zachjs/6.6.4'] = [["","net_trireg",1,"logs/Sv2v_zachjs/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]

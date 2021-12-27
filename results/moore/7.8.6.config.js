@@ -1,1 +1,1 @@
-config_loader_data['moore/7.8.6'] = [["associative-arrays-access-nonexistent",0,"logs/moore/chapter-7/arrays/associative/nonexistent.sv.log.html","tests/chapter-7/arrays/associative/nonexistent.sv.html"]]
+config_loader_data['moore/7.8.6'] = [["","associative-arrays-access-nonexistent",0,"logs/moore/chapter-7/arrays/associative/nonexistent.sv.log.html","tests/chapter-7/arrays/associative/nonexistent.sv.html"]]

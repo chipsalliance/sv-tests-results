@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/tnoc'] = [["TNoC",0,"logs/UhdmYosys/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['uhdmyosys/tnoc'] = [["","TNoC",0,"logs/UhdmYosys/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

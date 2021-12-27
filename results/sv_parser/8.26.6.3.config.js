@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/8.26.6.3'] = [["diamond_relationship",1,"logs/sv_parser/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]
+config_loader_data['sv_parser/8.26.6.3'] = [["","diamond_relationship",1,"logs/sv_parser/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]

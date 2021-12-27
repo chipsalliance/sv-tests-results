@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/8.9'] = [["static_properties",1,"logs/VeribleExtractor/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]
+config_loader_data['veribleextractor/8.9'] = [["","static_properties",1,"logs/VeribleExtractor/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]

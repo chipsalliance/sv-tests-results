@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/fx68k'] = [["fx68k",1,"logs/Sv2v_zachjs/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
+config_loader_data['sv2v_zachjs/fx68k'] = [["","fx68k",1,"logs/Sv2v_zachjs/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['odin/9.2.2.1'] = [["always",0,"logs/Odin/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]
+config_loader_data['odin/9.2.2.1'] = [["","always",0,"logs/Odin/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['icarus/6.16.3'] = [["string_getc",0,"logs/Icarus/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]
+config_loader_data['icarus/6.16.3'] = [["","string_getc",0,"logs/Icarus/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]

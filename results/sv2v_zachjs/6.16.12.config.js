@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/6.16.12'] = [["string_hextoa",1,"logs/Sv2v_zachjs/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]
+config_loader_data['sv2v_zachjs/6.16.12'] = [["","string_hextoa",1,"logs/Sv2v_zachjs/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]

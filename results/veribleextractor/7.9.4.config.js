@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/7.9.4'] = [["associative-arrays-first",1,"logs/VeribleExtractor/chapter-7/arrays/associative/methods/first.sv.log.html","tests/chapter-7/arrays/associative/methods/first.sv.html"]]
+config_loader_data['veribleextractor/7.9.4'] = [["","associative-arrays-first",1,"logs/VeribleExtractor/chapter-7/arrays/associative/methods/first.sv.log.html","tests/chapter-7/arrays/associative/methods/first.sv.html"]]

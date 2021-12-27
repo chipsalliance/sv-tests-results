@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/7.9.7'] = [["associative-arrays-prev",0,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/associative/methods/prev.sv.log.html","tests/chapter-7/arrays/associative/methods/prev.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/7.9.7'] = [["","associative-arrays-prev",0,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/associative/methods/prev.sv.log.html","tests/chapter-7/arrays/associative/methods/prev.sv.html"]]

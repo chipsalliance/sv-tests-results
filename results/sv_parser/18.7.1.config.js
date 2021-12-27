@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/18.7.1'] = [["local_scope_resolution_0",1,"logs/sv_parser/chapter-18/18.7.1--local-scope-resolution_0.sv.log.html","tests/chapter-18/18.7.1--local-scope-resolution_0.sv.html"]]
+config_loader_data['sv_parser/18.7.1'] = [["","local_scope_resolution_0",1,"logs/sv_parser/chapter-18/18.7.1--local-scope-resolution_0.sv.log.html","tests/chapter-18/18.7.1--local-scope-resolution_0.sv.html"]]

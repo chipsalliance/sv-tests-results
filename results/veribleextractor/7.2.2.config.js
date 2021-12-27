@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/7.2.2'] = [["unpacked-structures-members-default-value",1,"logs/VeribleExtractor/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]
+config_loader_data['veribleextractor/7.2.2'] = [["","unpacked-structures-members-default-value",1,"logs/VeribleExtractor/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]

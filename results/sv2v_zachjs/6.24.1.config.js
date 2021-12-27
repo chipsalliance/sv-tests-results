@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/6.24.1'] = [["cast_op",1,"logs/Sv2v_zachjs/chapter-6/6.24.1--cast_op.sv.log.html","tests/chapter-6/6.24.1--cast_op.sv.html"]]
+config_loader_data['sv2v_zachjs/6.24.1'] = [["","cast_op",1,"logs/Sv2v_zachjs/chapter-6/6.24.1--cast_op.sv.log.html","tests/chapter-6/6.24.1--cast_op.sv.html"]]

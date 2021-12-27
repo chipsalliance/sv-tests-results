@@ -1,1 +1,1 @@
-config_loader_data['yosys/tnoc'] = [["TNoC",0,"logs/Yosys/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['yosys/tnoc'] = [["","TNoC",0,"logs/Yosys/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

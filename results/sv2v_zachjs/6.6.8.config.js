@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/6.6.8'] = [["interconnect",0,"logs/Sv2v_zachjs/chapter-6/6.6.8--interconnect.sv.log.html","tests/chapter-6/6.6.8--interconnect.sv.html"]]
+config_loader_data['sv2v_zachjs/6.6.8'] = [["","interconnect",0,"logs/Sv2v_zachjs/chapter-6/6.6.8--interconnect.sv.log.html","tests/chapter-6/6.6.8--interconnect.sv.html"]]

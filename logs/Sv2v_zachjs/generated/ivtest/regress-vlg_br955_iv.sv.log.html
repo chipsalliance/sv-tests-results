@@ -1,129 +1,143 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Test imported from ivtest
-rc: 0 (means success: 1)
-tags: ivtest
-incdirs: /root/sv-tests/sv-tests/third_party/tests/ivtest /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
-top_module: 
-type: simulation parsing
-mode: parsing
-files: <a href="../../../../third_party/tests/ivtest/ivltests/br955.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br955.v</a>
-defines: 
-completed: 2021-12-27 02:39:51
-time_elapsed: 0.022s
-ram usage: 25148 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/br955.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br955.v</a>
-module mux_2_to_1 (
-	sel_i,
-	dat_i,
-	dat_o
-);
-	input sel_i;
-	input [1:0] dat_i;
-	output wire dat_o;
-	assign dat_o = (sel_i &amp;&amp; dat_i[1]) || (~sel_i &amp;&amp; dat_i[0]);
-endmodule
-module mux_n_to_1 (
-	inputs_i,
-	sel_i,
-	output_o
-);
-	parameter sel_w = 4;
-	parameter n_inputs = 2 ** sel_w;
-	input [n_inputs - 1:0] inputs_i;
-	input [sel_w - 1:0] sel_i;
-	output wire output_o;
-	genvar i;
-	genvar j;
-	generate
-		if (sel_w == 1) begin : genblk1
-			mux_2_to_1 mux_simple(
-				.sel_i(sel_i),
-				.dat_i(inputs_i),
-				.dat_o(output_o)
-			);
-		end
-		else begin : genblk1
-			wire [n_inputs - 2:0] inter_w;
-			for (i = 0; i &lt; sel_w; i = i + 1) begin : SELECT_STAGE
-				if (i == 0) begin : genblk1
-					for (j = 0; j &lt; (n_inputs / 2); j = j + 1) begin : FIRST_STAGE
-						mux_2_to_1 mux_first_stage(
-							.sel_i(sel_i[i]),
-							.dat_i(inputs_i[(2 * j) + 1:2 * j]),
-							.dat_o(inter_w[j])
-						);
-					end
-				end
-				else begin : genblk1
-					for (j = 0; j &lt; (n_inputs / (2 ** (i + 1))); j = j + 1) begin : INTERMEDIARY_STAGE
-						mux_2_to_1 mux_intermediary_stages(
-							.sel_i(sel_i[i]),
-							.dat_i(inter_w[(((n_inputs / (2 ** (i - 1))) * ((2 ** (i - 1)) - 1)) + (2 * j)) + 1:((n_inputs / (2 ** (i - 1))) * ((2 ** (i - 1)) - 1)) + (2 * j)]),
-							.dat_o(inter_w[((n_inputs / (2 ** i)) * ((2 ** i) - 1)) + j])
-						);
-					end
-				end
-			end
-			assign output_o = inter_w[(n_inputs / (2 ** (sel_w - 1))) * ((2 ** (sel_w - 1)) - 1)];
-		end
-	endgenerate
-endmodule
-module top;
-	parameter sel_wid = 3;
-	parameter num_inputs = 2 ** sel_wid;
-	reg [num_inputs - 1:0] in;
-	reg [sel_wid - 1:0] sel;
-	wire out;
-	integer lp;
-	reg pass;
-	mux_n_to_1 #(
-		.sel_w(sel_wid),
-		.n_inputs(num_inputs)
-	) dut(
-		.inputs_i(in),
-		.sel_i(sel),
-		.output_o(out)
-	);
-	initial begin
-		pass = 1&#39;b1;
-		for (lp = 0; lp &lt; num_inputs; lp = lp + 1)
-			begin
-				sel = lp;
-				in = 2 ** lp;
-				$display(&#34;Checking input %0d;&#34;, sel);
-				#(1)
-					;
-				if (out !== 1&#39;b1) begin
-					$display(&#34;  Failed input high (%b), got %b&#34;, in, out);
-					pass = 1&#39;b0;
-				end
-				in = ~in;
-				#(1)
-					;
-				if (out !== 1&#39;b0) begin
-					$display(&#34;  Failed input low (%b), got %b&#34;, in, out);
-					pass = 1&#39;b0;
-				end
-			end
-		if (pass)
-			$display(&#34;PASSED&#34;);
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>regress-vlg_br955_iv</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/ivltests/br955.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br955.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:06:36</dd></div>
+        <div><dt>time elapsed</dt><dd>0.024s</dd></div>
+        <div><dt>ram usage</dt><dd>25068 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/br955.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br955.v</a></pre>
+      <pre>module mux_2_to_1 (</pre>
+      <pre>	sel_i,</pre>
+      <pre>	dat_i,</pre>
+      <pre>	dat_o</pre>
+      <pre>);</pre>
+      <pre>	input sel_i;</pre>
+      <pre>	input [1:0] dat_i;</pre>
+      <pre>	output wire dat_o;</pre>
+      <pre>	assign dat_o = (sel_i &amp;&amp; dat_i[1]) || (~sel_i &amp;&amp; dat_i[0]);</pre>
+      <pre>endmodule</pre>
+      <pre>module mux_n_to_1 (</pre>
+      <pre>	inputs_i,</pre>
+      <pre>	sel_i,</pre>
+      <pre>	output_o</pre>
+      <pre>);</pre>
+      <pre>	parameter sel_w = 4;</pre>
+      <pre>	parameter n_inputs = 2 ** sel_w;</pre>
+      <pre>	input [n_inputs - 1:0] inputs_i;</pre>
+      <pre>	input [sel_w - 1:0] sel_i;</pre>
+      <pre>	output wire output_o;</pre>
+      <pre>	genvar i;</pre>
+      <pre>	genvar j;</pre>
+      <pre>	generate</pre>
+      <pre>		if (sel_w == 1) begin : genblk1</pre>
+      <pre>			mux_2_to_1 mux_simple(</pre>
+      <pre>				.sel_i(sel_i),</pre>
+      <pre>				.dat_i(inputs_i),</pre>
+      <pre>				.dat_o(output_o)</pre>
+      <pre>			);</pre>
+      <pre>		end</pre>
+      <pre>		else begin : genblk1</pre>
+      <pre>			wire [n_inputs - 2:0] inter_w;</pre>
+      <pre>			for (i = 0; i &lt; sel_w; i = i + 1) begin : SELECT_STAGE</pre>
+      <pre>				if (i == 0) begin : genblk1</pre>
+      <pre>					for (j = 0; j &lt; (n_inputs / 2); j = j + 1) begin : FIRST_STAGE</pre>
+      <pre>						mux_2_to_1 mux_first_stage(</pre>
+      <pre>							.sel_i(sel_i[i]),</pre>
+      <pre>							.dat_i(inputs_i[(2 * j) + 1:2 * j]),</pre>
+      <pre>							.dat_o(inter_w[j])</pre>
+      <pre>						);</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>				else begin : genblk1</pre>
+      <pre>					for (j = 0; j &lt; (n_inputs / (2 ** (i + 1))); j = j + 1) begin : INTERMEDIARY_STAGE</pre>
+      <pre>						mux_2_to_1 mux_intermediary_stages(</pre>
+      <pre>							.sel_i(sel_i[i]),</pre>
+      <pre>							.dat_i(inter_w[(((n_inputs / (2 ** (i - 1))) * ((2 ** (i - 1)) - 1)) + (2 * j)) + 1:((n_inputs / (2 ** (i - 1))) * ((2 ** (i - 1)) - 1)) + (2 * j)]),</pre>
+      <pre>							.dat_o(inter_w[((n_inputs / (2 ** i)) * ((2 ** i) - 1)) + j])</pre>
+      <pre>						);</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			assign output_o = inter_w[(n_inputs / (2 ** (sel_w - 1))) * ((2 ** (sel_w - 1)) - 1)];</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module top;</pre>
+      <pre>	parameter sel_wid = 3;</pre>
+      <pre>	parameter num_inputs = 2 ** sel_wid;</pre>
+      <pre>	reg [num_inputs - 1:0] in;</pre>
+      <pre>	reg [sel_wid - 1:0] sel;</pre>
+      <pre>	wire out;</pre>
+      <pre>	integer lp;</pre>
+      <pre>	reg pass;</pre>
+      <pre>	mux_n_to_1 #(</pre>
+      <pre>		.sel_w(sel_wid),</pre>
+      <pre>		.n_inputs(num_inputs)</pre>
+      <pre>	) dut(</pre>
+      <pre>		.inputs_i(in),</pre>
+      <pre>		.sel_i(sel),</pre>
+      <pre>		.output_o(out)</pre>
+      <pre>	);</pre>
+      <pre>	initial begin</pre>
+      <pre>		pass = 1&#39;b1;</pre>
+      <pre>		for (lp = 0; lp &lt; num_inputs; lp = lp + 1)</pre>
+      <pre>			begin</pre>
+      <pre>				sel = lp;</pre>
+      <pre>				in = 2 ** lp;</pre>
+      <pre>				$display(&#34;Checking input %0d;&#34;, sel);</pre>
+      <pre>				#(1)</pre>
+      <pre>					;</pre>
+      <pre>				if (out !== 1&#39;b1) begin</pre>
+      <pre>					$display(&#34;  Failed input high (%b), got %b&#34;, in, out);</pre>
+      <pre>					pass = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>				in = ~in;</pre>
+      <pre>				#(1)</pre>
+      <pre>					;</pre>
+      <pre>				if (out !== 1&#39;b0) begin</pre>
+      <pre>					$display(&#34;  Failed input low (%b), got %b&#34;, in, out);</pre>
+      <pre>					pass = 1&#39;b0;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>		if (pass)</pre>
+      <pre>			$display(&#34;PASSED&#34;);</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

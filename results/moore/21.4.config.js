@@ -1,1 +1,1 @@
-config_loader_data['moore/21.4'] = [["readmemb_task",0,"logs/moore/chapter-21/21.4--readmemb.sv.log.html","tests/chapter-21/21.4--readmemb.sv.html"],["readmemh_task",0,"logs/moore/chapter-21/21.4--readmemh.sv.log.html","tests/chapter-21/21.4--readmemh.sv.html"]]
+config_loader_data['moore/21.4'] = [["","readmemb_task",0,"logs/moore/chapter-21/21.4--readmemb.sv.log.html","tests/chapter-21/21.4--readmemb.sv.html"],["","readmemh_task",0,"logs/moore/chapter-21/21.4--readmemh.sv.log.html","tests/chapter-21/21.4--readmemh.sv.html"]]

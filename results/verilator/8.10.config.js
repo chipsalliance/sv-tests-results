@@ -1,1 +1,1 @@
-config_loader_data['verilator/8.10'] = [["static_methods",0,"logs/Verilator/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]
+config_loader_data['verilator/8.10'] = [["","static_methods",0,"logs/Verilator/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]

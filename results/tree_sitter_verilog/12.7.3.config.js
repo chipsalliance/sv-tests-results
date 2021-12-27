@@ -1,1 +1,1 @@
-config_loader_data['tree_sitter_verilog/12.7.3'] = [["foreach_loop",0,"logs/tree_sitter_verilog/chapter-12/12.7.3--foreach.sv.log.html","tests/chapter-12/12.7.3--foreach.sv.html"]]
+config_loader_data['tree_sitter_verilog/12.7.3'] = [["","foreach_loop",0,"logs/tree_sitter_verilog/chapter-12/12.7.3--foreach.sv.log.html","tests/chapter-12/12.7.3--foreach.sv.html"]]

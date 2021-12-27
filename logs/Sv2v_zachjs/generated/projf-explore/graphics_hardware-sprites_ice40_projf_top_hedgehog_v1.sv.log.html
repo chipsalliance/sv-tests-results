@@ -1,178 +1,192 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv</a>
-defines: 
-completed: 2021-12-27 02:53:16
-time_elapsed: 0.032s
-ram usage: 30332 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40 <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv</a>
-`default_nettype none
-module top_hedgehog_v1 (
-	clk_12m,
-	btn_rst,
-	dvi_clk,
-	dvi_hsync,
-	dvi_vsync,
-	dvi_de,
-	dvi_r,
-	dvi_g,
-	dvi_b
-);
-	input wire clk_12m;
-	input wire btn_rst;
-	output wire dvi_clk;
-	output wire dvi_hsync;
-	output wire dvi_vsync;
-	output wire dvi_de;
-	output wire [3:0] dvi_r;
-	output wire [3:0] dvi_g;
-	output wire [3:0] dvi_b;
-	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_12m),
-		.rst(btn_rst),
-		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
-	);
-	localparam CORDW = 16;
-	wire signed [15:0] sx;
-	wire signed [15:0] sy;
-	wire hsync;
-	wire vsync;
-	wire de;
-	wire frame;
-	wire line;
-	display_480p #(.CORDW(CORDW)) display_inst(
-		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(sx),
-		.sy(sy),
-		.hsync(hsync),
-		.vsync(vsync),
-		.de(de),
-		.frame(frame),
-		.line(line)
-	);
-	localparam SPR_WIDTH = 32;
-	localparam SPR_HEIGHT = 20;
-	localparam SPR_SCALE_X = 4;
-	localparam SPR_SCALE_Y = 4;
-	localparam COLR_BITS = 4;
-	localparam SPR_TRANS = 9;
-	localparam SPR_FRAMES = 1;
-	localparam SPR_FILE = &#34;../res/hedgehog/hedgehog.mem&#34;;
-	localparam SPR_PALETTE = &#34;../res/hedgehog/hedgehog_palette.mem&#34;;
-	localparam SPR_PIXELS = 640;
-	localparam SPR_DEPTH = 640;
-	localparam SPR_ADDRW = 10;
-	reg spr_start;
-	wire spr_drawing;
-	wire [3:0] spr_pix;
-	wire [3:0] spr_rom_data;
-	wire [9:0] spr_rom_addr;
-	rom_sync #(
-		.WIDTH(COLR_BITS),
-		.DEPTH(SPR_DEPTH),
-		.INIT_F(SPR_FILE)
-	) spr_rom(
-		.clk(clk_pix),
-		.addr(spr_rom_addr),
-		.data(spr_rom_data)
-	);
-	localparam H_RES = 640;
-	localparam SPR_SPEED_X = 2;
-	reg signed [15:0] sprx;
-	reg signed [15:0] spry;
-	always @(posedge clk_pix) begin
-		if (frame)
-			sprx &lt;= (sprx &gt; -132 ? sprx - SPR_SPEED_X : H_RES);
-		if (!clk_locked) begin
-			sprx &lt;= H_RES;
-			spry &lt;= 200;
-		end
-	end
-	always @(*) spr_start = line &amp;&amp; (sy == spry);
-	sprite #(
-		.WIDTH(SPR_WIDTH),
-		.HEIGHT(SPR_HEIGHT),
-		.COLR_BITS(COLR_BITS),
-		.SCALE_X(SPR_SCALE_X),
-		.SCALE_Y(SPR_SCALE_Y),
-		.ADDRW(SPR_ADDRW)
-	) spr_instance(
-		.clk(clk_pix),
-		.rst(!clk_locked),
-		.start(spr_start),
-		.sx(sx),
-		.sprx(sprx),
-		.data_in(spr_rom_data),
-		.pos(spr_rom_addr),
-		.pix(spr_pix),
-		.drawing(spr_drawing),
-		.done()
-	);
-	wire [11:0] clut_colr;
-	rom_async #(
-		.WIDTH(12),
-		.DEPTH(11),
-		.INIT_F(SPR_PALETTE)
-	) clut(
-		.addr(spr_pix),
-		.data(clut_colr)
-	);
-	reg spr_trans;
-	reg [3:0] red_spr;
-	reg [3:0] green_spr;
-	reg [3:0] blue_spr;
-	reg [3:0] red_bg;
-	reg [3:0] green_bg;
-	reg [3:0] blue_bg;
-	reg [3:0] red;
-	reg [3:0] green;
-	reg [3:0] blue;
-	always @(*) begin
-		spr_trans = spr_pix == SPR_TRANS;
-		{red_spr, green_spr, blue_spr} = clut_colr;
-		{red_bg, green_bg, blue_bg} = 12&#39;h260;
-		red = (spr_drawing &amp;&amp; !spr_trans ? red_spr : red_bg);
-		green = (spr_drawing &amp;&amp; !spr_trans ? green_spr : green_bg);
-		blue = (spr_drawing &amp;&amp; !spr_trans ? blue_spr : blue_bg);
-	end
-	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(
-		.PACKAGE_PIN(dvi_clk),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0(1&#39;b0),
-		.D_OUT_1(1&#39;b1)
-	);
-	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](
-		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),
-		.OUTPUT_CLK(clk_pix),
-		.D_OUT_0({hsync, vsync, de, red, green, blue}),
-		.D_OUT_1()
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>graphics_hardware-sprites_ice40_projf_top_hedgehog_v1</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:42</dd></div>
+        <div><dt>time elapsed</dt><dd>0.036s</dd></div>
+        <div><dt>ram usage</dt><dd>30600 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/hardware-sprites/ice40 <a href="../../../../tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv.html" target="file-frame">tests/generated/projf-explore/graphics_hardware-sprites_ice40_projf_top_hedgehog_v1.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/hardware-sprites/ice40/top_hedgehog_v1.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module top_hedgehog_v1 (</pre>
+      <pre>	clk_12m,</pre>
+      <pre>	btn_rst,</pre>
+      <pre>	dvi_clk,</pre>
+      <pre>	dvi_hsync,</pre>
+      <pre>	dvi_vsync,</pre>
+      <pre>	dvi_de,</pre>
+      <pre>	dvi_r,</pre>
+      <pre>	dvi_g,</pre>
+      <pre>	dvi_b</pre>
+      <pre>);</pre>
+      <pre>	input wire clk_12m;</pre>
+      <pre>	input wire btn_rst;</pre>
+      <pre>	output wire dvi_clk;</pre>
+      <pre>	output wire dvi_hsync;</pre>
+      <pre>	output wire dvi_vsync;</pre>
+      <pre>	output wire dvi_de;</pre>
+      <pre>	output wire [3:0] dvi_r;</pre>
+      <pre>	output wire [3:0] dvi_g;</pre>
+      <pre>	output wire [3:0] dvi_b;</pre>
+      <pre>	wire clk_pix;</pre>
+      <pre>	wire clk_locked;</pre>
+      <pre>	clock_gen_480p clock_pix_inst(</pre>
+      <pre>		.clk(clk_12m),</pre>
+      <pre>		.rst(btn_rst),</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.clk_locked(clk_locked)</pre>
+      <pre>	);</pre>
+      <pre>	localparam CORDW = 16;</pre>
+      <pre>	wire signed [15:0] sx;</pre>
+      <pre>	wire signed [15:0] sy;</pre>
+      <pre>	wire hsync;</pre>
+      <pre>	wire vsync;</pre>
+      <pre>	wire de;</pre>
+      <pre>	wire frame;</pre>
+      <pre>	wire line;</pre>
+      <pre>	display_480p #(.CORDW(CORDW)) display_inst(</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sy(sy),</pre>
+      <pre>		.hsync(hsync),</pre>
+      <pre>		.vsync(vsync),</pre>
+      <pre>		.de(de),</pre>
+      <pre>		.frame(frame),</pre>
+      <pre>		.line(line)</pre>
+      <pre>	);</pre>
+      <pre>	localparam SPR_WIDTH = 32;</pre>
+      <pre>	localparam SPR_HEIGHT = 20;</pre>
+      <pre>	localparam SPR_SCALE_X = 4;</pre>
+      <pre>	localparam SPR_SCALE_Y = 4;</pre>
+      <pre>	localparam COLR_BITS = 4;</pre>
+      <pre>	localparam SPR_TRANS = 9;</pre>
+      <pre>	localparam SPR_FRAMES = 1;</pre>
+      <pre>	localparam SPR_FILE = &#34;../res/hedgehog/hedgehog.mem&#34;;</pre>
+      <pre>	localparam SPR_PALETTE = &#34;../res/hedgehog/hedgehog_palette.mem&#34;;</pre>
+      <pre>	localparam SPR_PIXELS = 640;</pre>
+      <pre>	localparam SPR_DEPTH = 640;</pre>
+      <pre>	localparam SPR_ADDRW = 10;</pre>
+      <pre>	reg spr_start;</pre>
+      <pre>	wire spr_drawing;</pre>
+      <pre>	wire [3:0] spr_pix;</pre>
+      <pre>	wire [3:0] spr_rom_data;</pre>
+      <pre>	wire [9:0] spr_rom_addr;</pre>
+      <pre>	rom_sync #(</pre>
+      <pre>		.WIDTH(COLR_BITS),</pre>
+      <pre>		.DEPTH(SPR_DEPTH),</pre>
+      <pre>		.INIT_F(SPR_FILE)</pre>
+      <pre>	) spr_rom(</pre>
+      <pre>		.clk(clk_pix),</pre>
+      <pre>		.addr(spr_rom_addr),</pre>
+      <pre>		.data(spr_rom_data)</pre>
+      <pre>	);</pre>
+      <pre>	localparam H_RES = 640;</pre>
+      <pre>	localparam SPR_SPEED_X = 2;</pre>
+      <pre>	reg signed [15:0] sprx;</pre>
+      <pre>	reg signed [15:0] spry;</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		if (frame)</pre>
+      <pre>			sprx &lt;= (sprx &gt; -132 ? sprx - SPR_SPEED_X : H_RES);</pre>
+      <pre>		if (!clk_locked) begin</pre>
+      <pre>			sprx &lt;= H_RES;</pre>
+      <pre>			spry &lt;= 200;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
+      <pre>	always @(*) spr_start = line &amp;&amp; (sy == spry);</pre>
+      <pre>	sprite #(</pre>
+      <pre>		.WIDTH(SPR_WIDTH),</pre>
+      <pre>		.HEIGHT(SPR_HEIGHT),</pre>
+      <pre>		.COLR_BITS(COLR_BITS),</pre>
+      <pre>		.SCALE_X(SPR_SCALE_X),</pre>
+      <pre>		.SCALE_Y(SPR_SCALE_Y),</pre>
+      <pre>		.ADDRW(SPR_ADDRW)</pre>
+      <pre>	) spr_instance(</pre>
+      <pre>		.clk(clk_pix),</pre>
+      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.start(spr_start),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sprx(sprx),</pre>
+      <pre>		.data_in(spr_rom_data),</pre>
+      <pre>		.pos(spr_rom_addr),</pre>
+      <pre>		.pix(spr_pix),</pre>
+      <pre>		.drawing(spr_drawing),</pre>
+      <pre>		.done()</pre>
+      <pre>	);</pre>
+      <pre>	wire [11:0] clut_colr;</pre>
+      <pre>	rom_async #(</pre>
+      <pre>		.WIDTH(12),</pre>
+      <pre>		.DEPTH(11),</pre>
+      <pre>		.INIT_F(SPR_PALETTE)</pre>
+      <pre>	) clut(</pre>
+      <pre>		.addr(spr_pix),</pre>
+      <pre>		.data(clut_colr)</pre>
+      <pre>	);</pre>
+      <pre>	reg spr_trans;</pre>
+      <pre>	reg [3:0] red_spr;</pre>
+      <pre>	reg [3:0] green_spr;</pre>
+      <pre>	reg [3:0] blue_spr;</pre>
+      <pre>	reg [3:0] red_bg;</pre>
+      <pre>	reg [3:0] green_bg;</pre>
+      <pre>	reg [3:0] blue_bg;</pre>
+      <pre>	reg [3:0] red;</pre>
+      <pre>	reg [3:0] green;</pre>
+      <pre>	reg [3:0] blue;</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		spr_trans = spr_pix == SPR_TRANS;</pre>
+      <pre>		{red_spr, green_spr, blue_spr} = clut_colr;</pre>
+      <pre>		{red_bg, green_bg, blue_bg} = 12&#39;h260;</pre>
+      <pre>		red = (spr_drawing &amp;&amp; !spr_trans ? red_spr : red_bg);</pre>
+      <pre>		green = (spr_drawing &amp;&amp; !spr_trans ? green_spr : green_bg);</pre>
+      <pre>		blue = (spr_drawing &amp;&amp; !spr_trans ? blue_spr : blue_bg);</pre>
+      <pre>	end</pre>
+      <pre>	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(</pre>
+      <pre>		.PACKAGE_PIN(dvi_clk),</pre>
+      <pre>		.OUTPUT_CLK(clk_pix),</pre>
+      <pre>		.D_OUT_0(1&#39;b0),</pre>
+      <pre>		.D_OUT_1(1&#39;b1)</pre>
+      <pre>	);</pre>
+      <pre>	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](</pre>
+      <pre>		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),</pre>
+      <pre>		.OUTPUT_CLK(clk_pix),</pre>
+      <pre>		.D_OUT_0({hsync, vsync, de, red, green, blue}),</pre>
+      <pre>		.D_OUT_1()</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

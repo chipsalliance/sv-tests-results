@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/swerv'] = [["swerv",0,"logs/VanillaYosysUhdmPlugin/generated/fusesoc/swerv.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/lint-verilator/config/common_defines.vh.html"]]
+config_loader_data['vanillayosysuhdmplugin/swerv'] = [["","swerv",0,"logs/VanillaYosysUhdmPlugin/generated/fusesoc/swerv.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/lint-verilator/config/common_defines.vh.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['surelog/6.6.4'] = [["net_trireg",1,"logs/Surelog/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]
+config_loader_data['surelog/6.6.4'] = [["","net_trireg",1,"logs/Surelog/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]

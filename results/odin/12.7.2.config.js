@@ -1,1 +1,1 @@
-config_loader_data['odin/12.7.2'] = [["repeat_loop",0,"logs/Odin/chapter-12/12.7.2--repeat.sv.log.html","tests/chapter-12/12.7.2--repeat.sv.html"]]
+config_loader_data['odin/12.7.2'] = [["","repeat_loop",0,"logs/Odin/chapter-12/12.7.2--repeat.sv.log.html","tests/chapter-12/12.7.2--repeat.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['surelog/6.16.5'] = [["string_tolower",1,"logs/Surelog/chapter-6/6.16.5--string_tolower.sv.log.html","tests/chapter-6/6.16.5--string_tolower.sv.html"]]
+config_loader_data['surelog/6.16.5'] = [["","string_tolower",1,"logs/Surelog/chapter-6/6.16.5--string_tolower.sv.log.html","tests/chapter-6/6.16.5--string_tolower.sv.html"]]

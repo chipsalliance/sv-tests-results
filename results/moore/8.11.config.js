@@ -1,1 +1,1 @@
-config_loader_data['moore/8.11'] = [["this",1,"logs/moore/chapter-8/8.11--this.sv.log.html","tests/chapter-8/8.11--this.sv.html"]]
+config_loader_data['moore/8.11'] = [["","this",1,"logs/moore/chapter-8/8.11--this.sv.log.html","tests/chapter-8/8.11--this.sv.html"]]

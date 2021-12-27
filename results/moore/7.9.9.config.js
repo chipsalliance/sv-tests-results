@@ -1,1 +1,1 @@
-config_loader_data['moore/7.9.9'] = [["associative-arrays-assignment",0,"logs/moore/chapter-7/arrays/associative/assignment.sv.log.html","tests/chapter-7/arrays/associative/assignment.sv.html"]]
+config_loader_data['moore/7.9.9'] = [["","associative-arrays-assignment",0,"logs/moore/chapter-7/arrays/associative/assignment.sv.log.html","tests/chapter-7/arrays/associative/assignment.sv.html"]]

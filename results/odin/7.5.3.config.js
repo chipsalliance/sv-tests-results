@@ -1,1 +1,1 @@
-config_loader_data['odin/7.5.3'] = [["dynamic-arrays-op-delete",0,"logs/Odin/chapter-7/arrays/dynamic/op-delete.sv.log.html","tests/chapter-7/arrays/dynamic/op-delete.sv.html"]]
+config_loader_data['odin/7.5.3'] = [["","dynamic-arrays-op-delete",0,"logs/Odin/chapter-7/arrays/dynamic/op-delete.sv.log.html","tests/chapter-7/arrays/dynamic/op-delete.sv.html"]]

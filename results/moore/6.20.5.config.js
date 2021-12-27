@@ -1,1 +1,1 @@
-config_loader_data['moore/6.20.5'] = [["specparam",0,"logs/moore/chapter-6/6.20.5--specparam.sv.log.html","tests/chapter-6/6.20.5--specparam.sv.html"]]
+config_loader_data['moore/6.20.5'] = [["","specparam",0,"logs/moore/chapter-6/6.20.5--specparam.sv.log.html","tests/chapter-6/6.20.5--specparam.sv.html"]]

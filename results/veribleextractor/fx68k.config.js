@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/fx68k'] = [["fx68k",1,"logs/VeribleExtractor/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
+config_loader_data['veribleextractor/fx68k'] = [["","fx68k",1,"logs/VeribleExtractor/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

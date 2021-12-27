@@ -1,1 +1,1 @@
-config_loader_data['slang/6.17'] = [["event",1,"logs/Slang/chapter-6/6.17--event.sv.log.html","tests/chapter-6/6.17--event.sv.html"]]
+config_loader_data['slang/6.17'] = [["","event",1,"logs/Slang/chapter-6/6.17--event.sv.log.html","tests/chapter-6/6.17--event.sv.html"]]

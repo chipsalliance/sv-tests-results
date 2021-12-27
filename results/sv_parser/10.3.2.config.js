@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/10.3.2'] = [["cont_assignment",1,"logs/sv_parser/chapter-10/10.3.2--cont-assignment.sv.log.html","tests/chapter-10/10.3.2--cont-assignment.sv.html"]]
+config_loader_data['sv_parser/10.3.2'] = [["","cont_assignment",1,"logs/sv_parser/chapter-10/10.3.2--cont-assignment.sv.log.html","tests/chapter-10/10.3.2--cont-assignment.sv.html"]]

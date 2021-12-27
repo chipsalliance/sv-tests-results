@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/7.10.2.2'] = [["insert",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/insert.sv.log.html","tests/chapter-7/queues/insert.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/7.10.2.2'] = [["","insert",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/insert.sv.log.html","tests/chapter-7/queues/insert.sv.html"]]

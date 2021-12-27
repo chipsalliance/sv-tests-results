@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/6.24.3'] = [["bitstream_cast",1,"logs/VeribleExtractor/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]
+config_loader_data['veribleextractor/6.24.3'] = [["","bitstream_cast",1,"logs/VeribleExtractor/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]

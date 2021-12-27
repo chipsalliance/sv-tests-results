@@ -1,1 +1,1 @@
-config_loader_data['verible/6.16.8'] = [["string_substr",1,"logs/Verible/chapter-6/6.16.8--string_substr.sv.log.html","tests/chapter-6/6.16.8--string_substr.sv.html"]]
+config_loader_data['verible/6.16.8'] = [["","string_substr",1,"logs/Verible/chapter-6/6.16.8--string_substr.sv.log.html","tests/chapter-6/6.16.8--string_substr.sv.html"]]

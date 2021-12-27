@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/9.3.1'] = [["sequential_block",1,"logs/moore_parse/chapter-9/9.3.1--sequential_block.sv.log.html","tests/chapter-9/9.3.1--sequential_block.sv.html"]]
+config_loader_data['moore_parse/9.3.1'] = [["","sequential_block",1,"logs/moore_parse/chapter-9/9.3.1--sequential_block.sv.log.html","tests/chapter-9/9.3.1--sequential_block.sv.html"]]

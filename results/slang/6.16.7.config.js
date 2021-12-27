@@ -1,1 +1,1 @@
-config_loader_data['slang/6.16.7'] = [["string_icompare",1,"logs/Slang/chapter-6/6.16.7--string_icompare.sv.log.html","tests/chapter-6/6.16.7--string_icompare.sv.html"]]
+config_loader_data['slang/6.16.7'] = [["","string_icompare",1,"logs/Slang/chapter-6/6.16.7--string_icompare.sv.log.html","tests/chapter-6/6.16.7--string_icompare.sv.html"]]

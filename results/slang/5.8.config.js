@@ -1,1 +1,1 @@
-config_loader_data['slang/5.8'] = [["time-literals",1,"logs/Slang/chapter-5/5.8-time-literals.sv.log.html","tests/chapter-5/5.8-time-literals.sv.html"]]
+config_loader_data['slang/5.8'] = [["","time-literals",1,"logs/Slang/chapter-5/5.8-time-literals.sv.log.html","tests/chapter-5/5.8-time-literals.sv.html"]]

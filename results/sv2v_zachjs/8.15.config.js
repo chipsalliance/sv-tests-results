@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/8.15'] = [["super",0,"logs/Sv2v_zachjs/chapter-8/8.15--super.sv.log.html","tests/chapter-8/8.15--super.sv.html"],["super-def-new",0,"logs/Sv2v_zachjs/chapter-8/8.15--super-default-new.sv.log.html","tests/chapter-8/8.15--super-default-new.sv.html"]]
+config_loader_data['sv2v_zachjs/8.15'] = [["","super",0,"logs/Sv2v_zachjs/chapter-8/8.15--super.sv.log.html","tests/chapter-8/8.15--super.sv.html"],["","super-def-new",0,"logs/Sv2v_zachjs/chapter-8/8.15--super-default-new.sv.log.html","tests/chapter-8/8.15--super-default-new.sv.html"]]

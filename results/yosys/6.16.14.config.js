@@ -1,1 +1,1 @@
-config_loader_data['yosys/6.16.14'] = [["string_bintoa",0,"logs/Yosys/chapter-6/6.16.14--string_bintoa.sv.log.html","tests/chapter-6/6.16.14--string_bintoa.sv.html"]]
+config_loader_data['yosys/6.16.14'] = [["","string_bintoa",0,"logs/Yosys/chapter-6/6.16.14--string_bintoa.sv.log.html","tests/chapter-6/6.16.14--string_bintoa.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['moore/25.3'] = [["interface",0,"logs/moore/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]
+config_loader_data['moore/25.3'] = [["","interface",0,"logs/moore/chapter-25/25.3-interface.sv.log.html","tests/chapter-25/25.3-interface.sv.html"]]

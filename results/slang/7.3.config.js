@@ -1,1 +1,1 @@
-config_loader_data['slang/7.3'] = [["basic-union",1,"logs/Slang/chapter-7/unions/unpacked/basic.sv.log.html","tests/chapter-7/unions/unpacked/basic.sv.html"],["union_test_0",1,"logs/Slang/generic/union/union_test_0.sv.log.html","tests/generic/union/union_test_0.sv.html"]]
+config_loader_data['slang/7.3'] = [["","basic-union",1,"logs/Slang/chapter-7/unions/unpacked/basic.sv.log.html","tests/chapter-7/unions/unpacked/basic.sv.html"],["","union_test_0",1,"logs/Slang/generic/union/union_test_0.sv.log.html","tests/generic/union/union_test_0.sv.html"]]

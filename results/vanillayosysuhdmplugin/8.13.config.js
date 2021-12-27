@@ -1,1 +1,1 @@
-config_loader_data['vanillayosysuhdmplugin/8.13'] = [["inheritance",0,"logs/VanillaYosysUhdmPlugin/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]
+config_loader_data['vanillayosysuhdmplugin/8.13'] = [["","inheritance",0,"logs/VanillaYosysUhdmPlugin/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['verilator/10.6.2'] = [["force_release",0,"logs/Verilator/chapter-10/10.6.2--force-release.sv.log.html","tests/chapter-10/10.6.2--force-release.sv.html"]]
+config_loader_data['verilator/10.6.2'] = [["","force_release",0,"logs/Verilator/chapter-10/10.6.2--force-release.sv.log.html","tests/chapter-10/10.6.2--force-release.sv.html"]]

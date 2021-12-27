@@ -1,1 +1,1 @@
-config_loader_data['verilator/12.5.4'] = [["case_set",1,"logs/Verilator/chapter-12/12.5.4--case_set.sv.log.html","tests/chapter-12/12.5.4--case_set.sv.html"]]
+config_loader_data['verilator/12.5.4'] = [["","case_set",1,"logs/Verilator/chapter-12/12.5.4--case_set.sv.log.html","tests/chapter-12/12.5.4--case_set.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/6.14'] = [["chandle",1,"logs/VeribleExtractor/chapter-6/6.14--chandle.sv.log.html","tests/chapter-6/6.14--chandle.sv.html"]]
+config_loader_data['veribleextractor/6.14'] = [["","chandle",1,"logs/VeribleExtractor/chapter-6/6.14--chandle.sv.log.html","tests/chapter-6/6.14--chandle.sv.html"]]

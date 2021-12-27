@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.9.10'] = [["associative-arrays-as-arguments",1,"logs/sv_parser/chapter-7/arrays/associative/arguments.sv.log.html","tests/chapter-7/arrays/associative/arguments.sv.html"]]
+config_loader_data['sv_parser/7.9.10'] = [["","associative-arrays-as-arguments",1,"logs/sv_parser/chapter-7/arrays/associative/arguments.sv.log.html","tests/chapter-7/arrays/associative/arguments.sv.html"]]

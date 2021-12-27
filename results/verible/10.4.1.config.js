@@ -1,1 +1,1 @@
-config_loader_data['verible/10.4.1'] = [["blocking_assignment",1,"logs/Verible/chapter-10/10.4.1--blocking-assignment.sv.log.html","tests/chapter-10/10.4.1--blocking-assignment.sv.html"]]
+config_loader_data['verible/10.4.1'] = [["","blocking_assignment",1,"logs/Verible/chapter-10/10.4.1--blocking-assignment.sv.log.html","tests/chapter-10/10.4.1--blocking-assignment.sv.html"]]

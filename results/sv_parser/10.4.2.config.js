@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/10.4.2'] = [["non_blocking_assignment",1,"logs/sv_parser/chapter-10/10.4.2--non-blocking-assignment.sv.log.html","tests/chapter-10/10.4.2--non-blocking-assignment.sv.html"]]
+config_loader_data['sv_parser/10.4.2'] = [["","non_blocking_assignment",1,"logs/sv_parser/chapter-10/10.4.2--non-blocking-assignment.sv.log.html","tests/chapter-10/10.4.2--non-blocking-assignment.sv.html"]]

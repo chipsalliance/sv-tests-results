@@ -1,137 +1,151 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv</a> <a href="../../../../third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v.html" target="file-frame">third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v</a>
-defines: 
-completed: 2021-12-27 02:40:24
-time_elapsed: 0.023s
-ram usage: 26404 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv</a> <a href="../../../../third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v.html" target="file-frame">third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v</a>
-module ctu_clsp_clkgn_clksel (
-	clkout,
-	sysclk_sel,
-	io_pwron_rst_l,
-	sel,
-	testmode_l,
-	sysclk,
-	divbypclk,
-	byp_mult_sel_l,
-	nstepsel,
-	jtag_clock_dr,
-	capture_l,
-	bypmode
-);
-	input io_pwron_rst_l;
-	input [2:0] sel;
-	input testmode_l;
-	input sysclk;
-	input divbypclk;
-	input byp_mult_sel_l;
-	input nstepsel;
-	input jtag_clock_dr;
-	input capture_l;
-	input bypmode;
-	output wire clkout;
-	output wire sysclk_sel;
-	wire force_altclk_l;
-	wire altclk_sync_l;
-	wire tck_sync;
-	wire bypclk_sync_pre;
-	wire bypclk_sync;
-	wire tck_sync_pre;
-	wire force_alt_clk_sync;
-	wire mult_sel;
-	wire nstep_clock_dr;
-	wire clock_dr;
-	wire altclk_sync_l_bar;
-	wire sysclk_sel_bar;
-	ctu_and2 u_capture_l_gated(
-		.a(jtag_clock_dr),
-		.b(capture_l),
-		.z(nstep_clock_dr)
-	);
-	ctu_mux21 u_jtag_clock_mux_gated(
-		.z(clock_dr),
-		.s(testmode_l),
-		.d0(jtag_clock_dr),
-		.d1(nstep_clock_dr)
-	);
-	ctu_clksel_async_synchronizer u_mult_sel_clk(
-		.presyncdata(mult_sel),
-		.syncdata(force_alt_clk_sync),
-		.arst_l(io_pwron_rst_l),
-		.aset_l(1&#39;b1),
-		.clk(sysclk)
-	);
-	wire altclk_sync_pre;
-	ctu_clksel_async_synchronizer u_byp_mult_sel_sync(
-		.presyncdata(altclk_sync_pre),
-		.syncdata(altclk_sync_l),
-		.arst_l(io_pwron_rst_l),
-		.aset_l(1&#39;b1),
-		.clk(divbypclk)
-	);
-	ctu_clksel_async_synchronizer u_bypclk_sync(
-		.presyncdata(bypclk_sync_pre),
-		.syncdata(bypclk_sync),
-		.aset_l(io_pwron_rst_l),
-		.arst_l(1&#39;b1),
-		.clk(divbypclk)
-	);
-	ctu_clksel_async_synchronizer u_tck_sync(
-		.presyncdata(tck_sync_pre),
-		.syncdata(tck_sync),
-		.arst_l(io_pwron_rst_l),
-		.aset_l(1&#39;b1),
-		.clk(jtag_clock_dr)
-	);
-	assign mult_sel = bypmode | nstepsel;
-	assign force_altclk_l = sel[0];
-	assign altclk_sync_pre = byp_mult_sel_l;
-	assign bypclk_sync_pre = sel[2];
-	assign tck_sync_pre = sel[1];
-	bw_u1_aoi22_4x u_clkout_gated(
-		.a1(bypclk_sync),
-		.a2(divbypclk),
-		.b1(tck_sync),
-		.b2(clock_dr),
-		.z(clkout)
-	);
-	ctu_inv u_altclk_sync_l_gated(
-		.z(altclk_sync_l_bar),
-		.a(altclk_sync_l)
-	);
-	bw_u1_oai21_4x u_sysclk_sel_bar_gated(
-		.a(altclk_sync_l_bar),
-		.b1(force_altclk_l),
-		.b2(force_alt_clk_sync),
-		.z(sysclk_sel_bar)
-	);
-	ctu_inv u_sysclk_sel_gated(
-		.z(sysclk_sel),
-		.a(sysclk_sel_bar)
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_ctu_clsp_clkgn_clksel</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v.html" target="file-frame">third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:54</dd></div>
+        <div><dt>time elapsed</dt><dd>0.023s</dd></div>
+        <div><dt>ram usage</dt><dd>26432 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_clsp_clkgn_clksel.sv</a> <a href="../../../../third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v.html" target="file-frame">third_party/tests/utd-sv/ctu_clsp_clkgn_clksel.v</a></pre>
+      <pre>module ctu_clsp_clkgn_clksel (</pre>
+      <pre>	clkout,</pre>
+      <pre>	sysclk_sel,</pre>
+      <pre>	io_pwron_rst_l,</pre>
+      <pre>	sel,</pre>
+      <pre>	testmode_l,</pre>
+      <pre>	sysclk,</pre>
+      <pre>	divbypclk,</pre>
+      <pre>	byp_mult_sel_l,</pre>
+      <pre>	nstepsel,</pre>
+      <pre>	jtag_clock_dr,</pre>
+      <pre>	capture_l,</pre>
+      <pre>	bypmode</pre>
+      <pre>);</pre>
+      <pre>	input io_pwron_rst_l;</pre>
+      <pre>	input [2:0] sel;</pre>
+      <pre>	input testmode_l;</pre>
+      <pre>	input sysclk;</pre>
+      <pre>	input divbypclk;</pre>
+      <pre>	input byp_mult_sel_l;</pre>
+      <pre>	input nstepsel;</pre>
+      <pre>	input jtag_clock_dr;</pre>
+      <pre>	input capture_l;</pre>
+      <pre>	input bypmode;</pre>
+      <pre>	output wire clkout;</pre>
+      <pre>	output wire sysclk_sel;</pre>
+      <pre>	wire force_altclk_l;</pre>
+      <pre>	wire altclk_sync_l;</pre>
+      <pre>	wire tck_sync;</pre>
+      <pre>	wire bypclk_sync_pre;</pre>
+      <pre>	wire bypclk_sync;</pre>
+      <pre>	wire tck_sync_pre;</pre>
+      <pre>	wire force_alt_clk_sync;</pre>
+      <pre>	wire mult_sel;</pre>
+      <pre>	wire nstep_clock_dr;</pre>
+      <pre>	wire clock_dr;</pre>
+      <pre>	wire altclk_sync_l_bar;</pre>
+      <pre>	wire sysclk_sel_bar;</pre>
+      <pre>	ctu_and2 u_capture_l_gated(</pre>
+      <pre>		.a(jtag_clock_dr),</pre>
+      <pre>		.b(capture_l),</pre>
+      <pre>		.z(nstep_clock_dr)</pre>
+      <pre>	);</pre>
+      <pre>	ctu_mux21 u_jtag_clock_mux_gated(</pre>
+      <pre>		.z(clock_dr),</pre>
+      <pre>		.s(testmode_l),</pre>
+      <pre>		.d0(jtag_clock_dr),</pre>
+      <pre>		.d1(nstep_clock_dr)</pre>
+      <pre>	);</pre>
+      <pre>	ctu_clksel_async_synchronizer u_mult_sel_clk(</pre>
+      <pre>		.presyncdata(mult_sel),</pre>
+      <pre>		.syncdata(force_alt_clk_sync),</pre>
+      <pre>		.arst_l(io_pwron_rst_l),</pre>
+      <pre>		.aset_l(1&#39;b1),</pre>
+      <pre>		.clk(sysclk)</pre>
+      <pre>	);</pre>
+      <pre>	wire altclk_sync_pre;</pre>
+      <pre>	ctu_clksel_async_synchronizer u_byp_mult_sel_sync(</pre>
+      <pre>		.presyncdata(altclk_sync_pre),</pre>
+      <pre>		.syncdata(altclk_sync_l),</pre>
+      <pre>		.arst_l(io_pwron_rst_l),</pre>
+      <pre>		.aset_l(1&#39;b1),</pre>
+      <pre>		.clk(divbypclk)</pre>
+      <pre>	);</pre>
+      <pre>	ctu_clksel_async_synchronizer u_bypclk_sync(</pre>
+      <pre>		.presyncdata(bypclk_sync_pre),</pre>
+      <pre>		.syncdata(bypclk_sync),</pre>
+      <pre>		.aset_l(io_pwron_rst_l),</pre>
+      <pre>		.arst_l(1&#39;b1),</pre>
+      <pre>		.clk(divbypclk)</pre>
+      <pre>	);</pre>
+      <pre>	ctu_clksel_async_synchronizer u_tck_sync(</pre>
+      <pre>		.presyncdata(tck_sync_pre),</pre>
+      <pre>		.syncdata(tck_sync),</pre>
+      <pre>		.arst_l(io_pwron_rst_l),</pre>
+      <pre>		.aset_l(1&#39;b1),</pre>
+      <pre>		.clk(jtag_clock_dr)</pre>
+      <pre>	);</pre>
+      <pre>	assign mult_sel = bypmode | nstepsel;</pre>
+      <pre>	assign force_altclk_l = sel[0];</pre>
+      <pre>	assign altclk_sync_pre = byp_mult_sel_l;</pre>
+      <pre>	assign bypclk_sync_pre = sel[2];</pre>
+      <pre>	assign tck_sync_pre = sel[1];</pre>
+      <pre>	bw_u1_aoi22_4x u_clkout_gated(</pre>
+      <pre>		.a1(bypclk_sync),</pre>
+      <pre>		.a2(divbypclk),</pre>
+      <pre>		.b1(tck_sync),</pre>
+      <pre>		.b2(clock_dr),</pre>
+      <pre>		.z(clkout)</pre>
+      <pre>	);</pre>
+      <pre>	ctu_inv u_altclk_sync_l_gated(</pre>
+      <pre>		.z(altclk_sync_l_bar),</pre>
+      <pre>		.a(altclk_sync_l)</pre>
+      <pre>	);</pre>
+      <pre>	bw_u1_oai21_4x u_sysclk_sel_bar_gated(</pre>
+      <pre>		.a(altclk_sync_l_bar),</pre>
+      <pre>		.b1(force_altclk_l),</pre>
+      <pre>		.b2(force_alt_clk_sync),</pre>
+      <pre>		.z(sysclk_sel_bar)</pre>
+      <pre>	);</pre>
+      <pre>	ctu_inv u_sysclk_sel_gated(</pre>
+      <pre>		.z(sysclk_sel),</pre>
+      <pre>		.a(sysclk_sel_bar)</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

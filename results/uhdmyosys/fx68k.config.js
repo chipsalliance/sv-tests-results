@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/fx68k'] = [["fx68k",0,"logs/UhdmYosys/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
+config_loader_data['uhdmyosys/fx68k'] = [["","fx68k",0,"logs/UhdmYosys/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

@@ -1,164 +1,178 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from utd-sv
-rc: 0 (means success: 1)
-tags: utd-sv
-incdirs: /root/sv-tests/sv-tests/third_party/tests/utd-sv
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/utd-sv/utd-sv_ctu_sync_header.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_sync_header.sv</a> <a href="../../../../third_party/tests/utd-sv/ctu_sync_header.v.html" target="file-frame">third_party/tests/utd-sv/ctu_sync_header.v</a>
-defines: 
-completed: 2021-12-27 02:40:29
-time_elapsed: 0.040s
-ram usage: 31924 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ctu_sync_header.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_sync_header.sv</a> <a href="../../../../third_party/tests/utd-sv/ctu_sync_header.v.html" target="file-frame">third_party/tests/utd-sv/ctu_sync_header.v</a>
-module ctu_sync_header (
-	ctu_dram_tx_sync_early,
-	jbus_rx_sync,
-	jbus_tx_sync,
-	so,
-	cmp_clk,
-	cmp_gclk,
-	ctu_dram_tx_sync,
-	ctu_jbus_rx_sync,
-	ctu_jbus_tx_sync,
-	se,
-	si,
-	start_clk_early_jl
-);
-	input cmp_clk;
-	input cmp_gclk;
-	input ctu_dram_tx_sync;
-	input ctu_jbus_rx_sync;
-	input ctu_jbus_tx_sync;
-	input se;
-	input si;
-	input start_clk_early_jl;
-	output wire ctu_dram_tx_sync_early;
-	output wire jbus_rx_sync;
-	output wire jbus_tx_sync;
-	output wire so;
-	wire ctu_dram_tx_sync_dly1;
-	wire ctu_dram_tx_sync_dly2;
-	wire ctu_jbus_rx_sync_dly1;
-	wire ctu_jbus_rx_sync_dly2;
-	wire ctu_jbus_rx_sync_dly3;
-	wire ctu_jbus_tx_sync_dly1;
-	wire ctu_jbus_tx_sync_dly2;
-	wire ctu_jbus_tx_sync_dly3;
-	wire ctu_dram_tx_sync_early_nxt;
-	wire jbus_tx_sync_nxt;
-	wire jbus_rx_sync_nxt;
-	wire jbus_tx_sync_local;
-	wire jbus_rx_sync_local;
-	wire dram_tx_sync_local;
-	wire pulse_cnt_dn_nxt;
-	wire [2:0] pulse_cnt_nxt;
-	wire [2:0] pulse_cnt;
-	wire pulse_filter;
-	dff_ns u_ctu_dram_tx_sync_dly1(
-		.q(ctu_dram_tx_sync_dly1),
-		.din(ctu_dram_tx_sync),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_jbus_tx_sync_dly1(
-		.q(ctu_jbus_tx_sync_dly1),
-		.din(ctu_jbus_tx_sync),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_jbus_rx_sync_dly1(
-		.q(ctu_jbus_rx_sync_dly1),
-		.din(ctu_jbus_rx_sync),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_dram_tx_sync_dly2(
-		.q(ctu_dram_tx_sync_dly2),
-		.din(ctu_dram_tx_sync_dly1),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_jbus_tx_sync_dly2(
-		.q(ctu_jbus_tx_sync_dly2),
-		.din(ctu_jbus_tx_sync_dly1),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_jbus_rx_sync_dly2(
-		.q(ctu_jbus_rx_sync_dly2),
-		.din(ctu_jbus_rx_sync_dly1),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_jbus_tx_sync_dly3(
-		.q(ctu_jbus_tx_sync_dly3),
-		.din(ctu_jbus_tx_sync_dly2),
-		.clk(cmp_gclk)
-	);
-	dff_ns u_ctu_jbus_rx_sync_dly3(
-		.q(ctu_jbus_rx_sync_dly3),
-		.din(ctu_jbus_rx_sync_dly2),
-		.clk(cmp_gclk)
-	);
-	cluster_header_sync u_ctu_cluster_header_sync(
-		.dram_tx_sync_local(dram_tx_sync_local),
-		.jbus_rx_sync_local(jbus_rx_sync_local),
-		.jbus_tx_sync_local(jbus_tx_sync_local),
-		.dram_rx_sync_local(),
-		.so(so),
-		.dram_rx_sync_global(1&#39;b0),
-		.dram_tx_sync_global(ctu_dram_tx_sync_dly2),
-		.jbus_rx_sync_global(ctu_jbus_rx_sync_dly3),
-		.jbus_tx_sync_global(ctu_jbus_tx_sync_dly3),
-		.cmp_gclk(cmp_gclk),
-		.cmp_rclk(cmp_clk),
-		.si(si),
-		.se(se)
-	);
-	assign pulse_cnt_dn_nxt = pulse_cnt == 3&#39;b111;
-	assign pulse_cnt_nxt = (~pulse_cnt_dn_nxt ? pulse_cnt + 3&#39;b001 : pulse_cnt);
-	dffrl_async_ns #(3) u_pulse_cnt(
-		.din(pulse_cnt_nxt),
-		.clk(cmp_clk),
-		.rst_l(start_clk_early_jl),
-		.q(pulse_cnt)
-	);
-	dffrl_async_ns u_filter_pulse(
-		.din(pulse_cnt_dn_nxt),
-		.clk(cmp_clk),
-		.rst_l(start_clk_early_jl),
-		.q(pulse_filter)
-	);
-	assign jbus_rx_sync_nxt = jbus_rx_sync_local &amp; pulse_filter;
-	dff_ns u_jbus_rx_sync(
-		.q(jbus_rx_sync),
-		.din(jbus_rx_sync_nxt),
-		.clk(cmp_clk)
-	);
-	assign jbus_tx_sync_nxt = jbus_tx_sync_local &amp; pulse_filter;
-	dff_ns u_jbus_tx_sync(
-		.q(jbus_tx_sync),
-		.din(jbus_tx_sync_nxt),
-		.clk(cmp_clk)
-	);
-	assign ctu_dram_tx_sync_early_nxt = dram_tx_sync_local &amp; pulse_filter;
-	dff_ns u_dram_tx_sync_early(
-		.q(ctu_dram_tx_sync_early),
-		.din(ctu_dram_tx_sync_early_nxt),
-		.clk(cmp_clk)
-	);
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>utd-sv_ctu_sync_header</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from utd-sv</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>utd-sv</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/utd-sv<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/utd-sv/utd-sv_ctu_sync_header.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_sync_header.sv</a><li>
+            <li><a href="../../../../third_party/tests/utd-sv/ctu_sync_header.v.html" target="file-frame">third_party/tests/utd-sv/ctu_sync_header.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:17:51</dd></div>
+        <div><dt>time elapsed</dt><dd>0.028s</dd></div>
+        <div><dt>ram usage</dt><dd>31772 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/utd-sv <a href="../../../../tests/generated/utd-sv/utd-sv_ctu_sync_header.sv.html" target="file-frame">tests/generated/utd-sv/utd-sv_ctu_sync_header.sv</a> <a href="../../../../third_party/tests/utd-sv/ctu_sync_header.v.html" target="file-frame">third_party/tests/utd-sv/ctu_sync_header.v</a></pre>
+      <pre>module ctu_sync_header (</pre>
+      <pre>	ctu_dram_tx_sync_early,</pre>
+      <pre>	jbus_rx_sync,</pre>
+      <pre>	jbus_tx_sync,</pre>
+      <pre>	so,</pre>
+      <pre>	cmp_clk,</pre>
+      <pre>	cmp_gclk,</pre>
+      <pre>	ctu_dram_tx_sync,</pre>
+      <pre>	ctu_jbus_rx_sync,</pre>
+      <pre>	ctu_jbus_tx_sync,</pre>
+      <pre>	se,</pre>
+      <pre>	si,</pre>
+      <pre>	start_clk_early_jl</pre>
+      <pre>);</pre>
+      <pre>	input cmp_clk;</pre>
+      <pre>	input cmp_gclk;</pre>
+      <pre>	input ctu_dram_tx_sync;</pre>
+      <pre>	input ctu_jbus_rx_sync;</pre>
+      <pre>	input ctu_jbus_tx_sync;</pre>
+      <pre>	input se;</pre>
+      <pre>	input si;</pre>
+      <pre>	input start_clk_early_jl;</pre>
+      <pre>	output wire ctu_dram_tx_sync_early;</pre>
+      <pre>	output wire jbus_rx_sync;</pre>
+      <pre>	output wire jbus_tx_sync;</pre>
+      <pre>	output wire so;</pre>
+      <pre>	wire ctu_dram_tx_sync_dly1;</pre>
+      <pre>	wire ctu_dram_tx_sync_dly2;</pre>
+      <pre>	wire ctu_jbus_rx_sync_dly1;</pre>
+      <pre>	wire ctu_jbus_rx_sync_dly2;</pre>
+      <pre>	wire ctu_jbus_rx_sync_dly3;</pre>
+      <pre>	wire ctu_jbus_tx_sync_dly1;</pre>
+      <pre>	wire ctu_jbus_tx_sync_dly2;</pre>
+      <pre>	wire ctu_jbus_tx_sync_dly3;</pre>
+      <pre>	wire ctu_dram_tx_sync_early_nxt;</pre>
+      <pre>	wire jbus_tx_sync_nxt;</pre>
+      <pre>	wire jbus_rx_sync_nxt;</pre>
+      <pre>	wire jbus_tx_sync_local;</pre>
+      <pre>	wire jbus_rx_sync_local;</pre>
+      <pre>	wire dram_tx_sync_local;</pre>
+      <pre>	wire pulse_cnt_dn_nxt;</pre>
+      <pre>	wire [2:0] pulse_cnt_nxt;</pre>
+      <pre>	wire [2:0] pulse_cnt;</pre>
+      <pre>	wire pulse_filter;</pre>
+      <pre>	dff_ns u_ctu_dram_tx_sync_dly1(</pre>
+      <pre>		.q(ctu_dram_tx_sync_dly1),</pre>
+      <pre>		.din(ctu_dram_tx_sync),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_jbus_tx_sync_dly1(</pre>
+      <pre>		.q(ctu_jbus_tx_sync_dly1),</pre>
+      <pre>		.din(ctu_jbus_tx_sync),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_jbus_rx_sync_dly1(</pre>
+      <pre>		.q(ctu_jbus_rx_sync_dly1),</pre>
+      <pre>		.din(ctu_jbus_rx_sync),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_dram_tx_sync_dly2(</pre>
+      <pre>		.q(ctu_dram_tx_sync_dly2),</pre>
+      <pre>		.din(ctu_dram_tx_sync_dly1),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_jbus_tx_sync_dly2(</pre>
+      <pre>		.q(ctu_jbus_tx_sync_dly2),</pre>
+      <pre>		.din(ctu_jbus_tx_sync_dly1),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_jbus_rx_sync_dly2(</pre>
+      <pre>		.q(ctu_jbus_rx_sync_dly2),</pre>
+      <pre>		.din(ctu_jbus_rx_sync_dly1),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_jbus_tx_sync_dly3(</pre>
+      <pre>		.q(ctu_jbus_tx_sync_dly3),</pre>
+      <pre>		.din(ctu_jbus_tx_sync_dly2),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	dff_ns u_ctu_jbus_rx_sync_dly3(</pre>
+      <pre>		.q(ctu_jbus_rx_sync_dly3),</pre>
+      <pre>		.din(ctu_jbus_rx_sync_dly2),</pre>
+      <pre>		.clk(cmp_gclk)</pre>
+      <pre>	);</pre>
+      <pre>	cluster_header_sync u_ctu_cluster_header_sync(</pre>
+      <pre>		.dram_tx_sync_local(dram_tx_sync_local),</pre>
+      <pre>		.jbus_rx_sync_local(jbus_rx_sync_local),</pre>
+      <pre>		.jbus_tx_sync_local(jbus_tx_sync_local),</pre>
+      <pre>		.dram_rx_sync_local(),</pre>
+      <pre>		.so(so),</pre>
+      <pre>		.dram_rx_sync_global(1&#39;b0),</pre>
+      <pre>		.dram_tx_sync_global(ctu_dram_tx_sync_dly2),</pre>
+      <pre>		.jbus_rx_sync_global(ctu_jbus_rx_sync_dly3),</pre>
+      <pre>		.jbus_tx_sync_global(ctu_jbus_tx_sync_dly3),</pre>
+      <pre>		.cmp_gclk(cmp_gclk),</pre>
+      <pre>		.cmp_rclk(cmp_clk),</pre>
+      <pre>		.si(si),</pre>
+      <pre>		.se(se)</pre>
+      <pre>	);</pre>
+      <pre>	assign pulse_cnt_dn_nxt = pulse_cnt == 3&#39;b111;</pre>
+      <pre>	assign pulse_cnt_nxt = (~pulse_cnt_dn_nxt ? pulse_cnt + 3&#39;b001 : pulse_cnt);</pre>
+      <pre>	dffrl_async_ns #(3) u_pulse_cnt(</pre>
+      <pre>		.din(pulse_cnt_nxt),</pre>
+      <pre>		.clk(cmp_clk),</pre>
+      <pre>		.rst_l(start_clk_early_jl),</pre>
+      <pre>		.q(pulse_cnt)</pre>
+      <pre>	);</pre>
+      <pre>	dffrl_async_ns u_filter_pulse(</pre>
+      <pre>		.din(pulse_cnt_dn_nxt),</pre>
+      <pre>		.clk(cmp_clk),</pre>
+      <pre>		.rst_l(start_clk_early_jl),</pre>
+      <pre>		.q(pulse_filter)</pre>
+      <pre>	);</pre>
+      <pre>	assign jbus_rx_sync_nxt = jbus_rx_sync_local &amp; pulse_filter;</pre>
+      <pre>	dff_ns u_jbus_rx_sync(</pre>
+      <pre>		.q(jbus_rx_sync),</pre>
+      <pre>		.din(jbus_rx_sync_nxt),</pre>
+      <pre>		.clk(cmp_clk)</pre>
+      <pre>	);</pre>
+      <pre>	assign jbus_tx_sync_nxt = jbus_tx_sync_local &amp; pulse_filter;</pre>
+      <pre>	dff_ns u_jbus_tx_sync(</pre>
+      <pre>		.q(jbus_tx_sync),</pre>
+      <pre>		.din(jbus_tx_sync_nxt),</pre>
+      <pre>		.clk(cmp_clk)</pre>
+      <pre>	);</pre>
+      <pre>	assign ctu_dram_tx_sync_early_nxt = dram_tx_sync_local &amp; pulse_filter;</pre>
+      <pre>	dff_ns u_dram_tx_sync_early(</pre>
+      <pre>		.q(ctu_dram_tx_sync_early),</pre>
+      <pre>		.din(ctu_dram_tx_sync_early_nxt),</pre>
+      <pre>		.clk(cmp_clk)</pre>
+      <pre>	);</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

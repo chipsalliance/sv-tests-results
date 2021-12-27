@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/9.4.2.3'] = [["event_conditional",0,"logs/Sv2v_zachjs/chapter-9/9.4.2.3--event_conditional.sv.log.html","tests/chapter-9/9.4.2.3--event_conditional.sv.html"]]
+config_loader_data['sv2v_zachjs/9.4.2.3'] = [["","event_conditional",0,"logs/Sv2v_zachjs/chapter-9/9.4.2.3--event_conditional.sv.log.html","tests/chapter-9/9.4.2.3--event_conditional.sv.html"]]

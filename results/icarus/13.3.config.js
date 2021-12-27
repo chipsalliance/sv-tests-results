@@ -1,1 +1,1 @@
-config_loader_data['icarus/13.3'] = [["task",1,"logs/Icarus/chapter-13/13.3--task.sv.log.html","tests/chapter-13/13.3--task.sv.html"]]
+config_loader_data['icarus/13.3'] = [["","task",1,"logs/Icarus/chapter-13/13.3--task.sv.log.html","tests/chapter-13/13.3--task.sv.html"]]

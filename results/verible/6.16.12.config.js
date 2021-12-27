@@ -1,1 +1,1 @@
-config_loader_data['verible/6.16.12'] = [["string_hextoa",1,"logs/Verible/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]
+config_loader_data['verible/6.16.12'] = [["","string_hextoa",1,"logs/Verible/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]

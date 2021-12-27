@@ -1,1 +1,1 @@
-config_loader_data['yosys/7.10.2.1'] = [["bounded-queues",0,"logs/Yosys/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"],["size",0,"logs/Yosys/chapter-7/queues/size.sv.log.html","tests/chapter-7/queues/size.sv.html"]]
+config_loader_data['yosys/7.10.2.1'] = [["","bounded-queues",0,"logs/Yosys/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"],["","size",0,"logs/Yosys/chapter-7/queues/size.sv.log.html","tests/chapter-7/queues/size.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['icarus/8.26.6.1'] = [["name_conflict_resolved",0,"logs/Icarus/chapter-8/8.26.6.1--name_conflict_resolved.sv.log.html","tests/chapter-8/8.26.6.1--name_conflict_resolved.sv.html"]]
+config_loader_data['icarus/8.26.6.1'] = [["","name_conflict_resolved",0,"logs/Icarus/chapter-8/8.26.6.1--name_conflict_resolved.sv.log.html","tests/chapter-8/8.26.6.1--name_conflict_resolved.sv.html"]]

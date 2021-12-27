@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/7.10.5'] = [["bounded-queues",1,"logs/sv_parser/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"]]
+config_loader_data['sv_parser/7.10.5'] = [["","bounded-queues",1,"logs/sv_parser/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"]]

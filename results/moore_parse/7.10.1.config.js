@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/7.10.1'] = [["max-size",1,"logs/moore_parse/chapter-7/queues/max-size.sv.log.html","tests/chapter-7/queues/max-size.sv.html"],["slice",1,"logs/moore_parse/chapter-7/queues/slice.sv.log.html","tests/chapter-7/queues/slice.sv.html"]]
+config_loader_data['moore_parse/7.10.1'] = [["","max-size",1,"logs/moore_parse/chapter-7/queues/max-size.sv.log.html","tests/chapter-7/queues/max-size.sv.html"],["","slice",1,"logs/moore_parse/chapter-7/queues/slice.sv.log.html","tests/chapter-7/queues/slice.sv.html"]]

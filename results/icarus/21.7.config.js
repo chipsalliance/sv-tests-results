@@ -1,1 +1,1 @@
-config_loader_data['icarus/21.7'] = [["vcd_dump_test",1,"logs/Icarus/chapter-21/21.7--dumpfile.sv.log.html","tests/chapter-21/21.7--dumpfile.sv.html"],["vcd_dumpports_test",1,"logs/Icarus/chapter-21/21.7--dumpports.sv.log.html","tests/chapter-21/21.7--dumpports.sv.html"]]
+config_loader_data['icarus/21.7'] = [["","vcd_dump_test",1,"logs/Icarus/chapter-21/21.7--dumpfile.sv.log.html","tests/chapter-21/21.7--dumpfile.sv.html"],["","vcd_dumpports_test",1,"logs/Icarus/chapter-21/21.7--dumpports.sv.log.html","tests/chapter-21/21.7--dumpports.sv.html"]]

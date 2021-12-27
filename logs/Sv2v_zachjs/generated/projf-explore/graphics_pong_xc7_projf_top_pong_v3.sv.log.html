@@ -1,168 +1,182 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Tests imported from projf-explore
-rc: 0 (means success: 1)
-tags: projf-explore
-incdirs: /root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7
-top_module: 
-type: parsing
-mode: parsing
-files: <a href="../../../../tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv.html" target="file-frame">tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv</a>
-defines: 
-completed: 2021-12-27 02:53:03
-time_elapsed: 0.034s
-ram usage: 36668 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7 <a href="../../../../tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv.html" target="file-frame">tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv</a>
-`default_nettype none
-module top_pong_v3 (
-	clk_100m,
-	btn_rst,
-	vga_hsync,
-	vga_vsync,
-	vga_r,
-	vga_g,
-	vga_b
-);
-	input wire clk_100m;
-	input wire btn_rst;
-	output reg vga_hsync;
-	output reg vga_vsync;
-	output reg [3:0] vga_r;
-	output reg [3:0] vga_g;
-	output reg [3:0] vga_b;
-	wire clk_pix;
-	wire clk_locked;
-	clock_gen_480p clock_pix_inst(
-		.clk(clk_100m),
-		.rst(!btn_rst),
-		.clk_pix(clk_pix),
-		.clk_locked(clk_locked)
-	);
-	localparam CORDW = 10;
-	wire [9:0] sx;
-	wire [9:0] sy;
-	wire hsync;
-	wire vsync;
-	wire de;
-	simple_480p display_inst(
-		.clk_pix(clk_pix),
-		.rst(!clk_locked),
-		.sx(sx),
-		.sy(sy),
-		.hsync(hsync),
-		.vsync(vsync),
-		.de(de)
-	);
-	localparam H_RES_FULL = 800;
-	localparam V_RES_FULL = 525;
-	localparam H_RES = 640;
-	localparam V_RES = 480;
-	reg animate;
-	always @(*) animate = (sy == V_RES) &amp;&amp; (sx == 0);
-	localparam B_SIZE = 8;
-	reg [9:0] bx;
-	reg [9:0] by;
-	reg dx;
-	reg dy;
-	reg [9:0] spx = 6;
-	reg [9:0] spy = 4;
-	reg b_draw;
-	localparam P_H = 40;
-	localparam P_W = 10;
-	localparam P_SP = 4;
-	localparam P_OFFS = 32;
-	reg [9:0] p1y;
-	reg [9:0] p2y;
-	reg p1_draw;
-	reg p2_draw;
-	reg p1_col;
-	reg p2_col;
-	always @(posedge clk_pix)
-		if (animate) begin
-			if ((p1y + 22) &lt; (by + 4)) begin
-				if (p1y &lt; 438)
-					p1y &lt;= p1y + P_SP;
-			end
-			else if ((p1y + 20) &gt; (by + 6))
-				if (p1y &gt; P_SP)
-					p1y &lt;= p1y - P_SP;
-			if ((p2y + 22) &lt; (by + 4)) begin
-				if (p2y &lt; 438)
-					p2y &lt;= p2y + P_SP;
-			end
-			else if ((p2y + 20) &gt; (by + 6))
-				if (p2y &gt; P_SP)
-					p2y &lt;= p2y - P_SP;
-		end
-	always @(*) begin
-		p1_draw = (((sx &gt;= P_OFFS) &amp;&amp; (sx &lt; 42)) &amp;&amp; (sy &gt;= p1y)) &amp;&amp; (sy &lt; (p1y + P_H));
-		p2_draw = (((sx &gt;= 598) &amp;&amp; (sx &lt; 608)) &amp;&amp; (sy &gt;= p2y)) &amp;&amp; (sy &lt; (p2y + P_H));
-	end
-	always @(posedge clk_pix)
-		if (animate) begin
-			p1_col &lt;= 0;
-			p2_col &lt;= 0;
-		end
-		else if (b_draw) begin
-			if (p1_draw)
-				p1_col &lt;= 1;
-			if (p2_draw)
-				p2_col &lt;= 1;
-		end
-	always @(posedge clk_pix)
-		if (animate) begin
-			if (p1_col) begin
-				dx &lt;= 0;
-				bx &lt;= bx + spx;
-			end
-			else if (p2_col) begin
-				dx &lt;= 1;
-				bx &lt;= bx - spx;
-			end
-			else if (bx &gt;= (H_RES - (spx + B_SIZE))) begin
-				dx &lt;= 1;
-				bx &lt;= bx - spx;
-			end
-			else if (bx &lt; spx) begin
-				dx &lt;= 0;
-				bx &lt;= bx + spx;
-			end
-			else
-				bx &lt;= (dx ? bx - spx : bx + spx);
-			if (by &gt;= (V_RES - (spy + B_SIZE))) begin
-				dy &lt;= 1;
-				by &lt;= by - spy;
-			end
-			else if (by &lt; spy) begin
-				dy &lt;= 0;
-				by &lt;= by + spy;
-			end
-			else
-				by &lt;= (dy ? by - spy : by + spy);
-		end
-	always @(*) b_draw = (((sx &gt;= bx) &amp;&amp; (sx &lt; (bx + B_SIZE))) &amp;&amp; (sy &gt;= by)) &amp;&amp; (sy &lt; (by + B_SIZE));
-	always @(posedge clk_pix) begin
-		vga_hsync &lt;= hsync;
-		vga_vsync &lt;= vsync;
-		vga_r &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-		vga_g &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-		vga_b &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>graphics_pong_xc7_projf_top_pong_v3</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Tests imported from projf-explore</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>projf-explore</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv.html" target="file-frame">tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv</a><li>
+            <li><a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:05:41</dd></div>
+        <div><dt>time elapsed</dt><dd>0.039s</dd></div>
+        <div><dt>ram usage</dt><dd>36848 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/projf-explore/graphics/pong/xc7 <a href="../../../../tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv.html" target="file-frame">tests/generated/projf-explore/graphics_pong_xc7_projf_top_pong_v3.sv</a> <a href="../../../../third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv.html" target="file-frame">third_party/tests/projf-explore/graphics/pong/xc7/top_pong_v3.sv</a></pre>
+      <pre>`default_nettype none</pre>
+      <pre>module top_pong_v3 (</pre>
+      <pre>	clk_100m,</pre>
+      <pre>	btn_rst,</pre>
+      <pre>	vga_hsync,</pre>
+      <pre>	vga_vsync,</pre>
+      <pre>	vga_r,</pre>
+      <pre>	vga_g,</pre>
+      <pre>	vga_b</pre>
+      <pre>);</pre>
+      <pre>	input wire clk_100m;</pre>
+      <pre>	input wire btn_rst;</pre>
+      <pre>	output reg vga_hsync;</pre>
+      <pre>	output reg vga_vsync;</pre>
+      <pre>	output reg [3:0] vga_r;</pre>
+      <pre>	output reg [3:0] vga_g;</pre>
+      <pre>	output reg [3:0] vga_b;</pre>
+      <pre>	wire clk_pix;</pre>
+      <pre>	wire clk_locked;</pre>
+      <pre>	clock_gen_480p clock_pix_inst(</pre>
+      <pre>		.clk(clk_100m),</pre>
+      <pre>		.rst(!btn_rst),</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.clk_locked(clk_locked)</pre>
+      <pre>	);</pre>
+      <pre>	localparam CORDW = 10;</pre>
+      <pre>	wire [9:0] sx;</pre>
+      <pre>	wire [9:0] sy;</pre>
+      <pre>	wire hsync;</pre>
+      <pre>	wire vsync;</pre>
+      <pre>	wire de;</pre>
+      <pre>	simple_480p display_inst(</pre>
+      <pre>		.clk_pix(clk_pix),</pre>
+      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.sx(sx),</pre>
+      <pre>		.sy(sy),</pre>
+      <pre>		.hsync(hsync),</pre>
+      <pre>		.vsync(vsync),</pre>
+      <pre>		.de(de)</pre>
+      <pre>	);</pre>
+      <pre>	localparam H_RES_FULL = 800;</pre>
+      <pre>	localparam V_RES_FULL = 525;</pre>
+      <pre>	localparam H_RES = 640;</pre>
+      <pre>	localparam V_RES = 480;</pre>
+      <pre>	reg animate;</pre>
+      <pre>	always @(*) animate = (sy == V_RES) &amp;&amp; (sx == 0);</pre>
+      <pre>	localparam B_SIZE = 8;</pre>
+      <pre>	reg [9:0] bx;</pre>
+      <pre>	reg [9:0] by;</pre>
+      <pre>	reg dx;</pre>
+      <pre>	reg dy;</pre>
+      <pre>	reg [9:0] spx = 6;</pre>
+      <pre>	reg [9:0] spy = 4;</pre>
+      <pre>	reg b_draw;</pre>
+      <pre>	localparam P_H = 40;</pre>
+      <pre>	localparam P_W = 10;</pre>
+      <pre>	localparam P_SP = 4;</pre>
+      <pre>	localparam P_OFFS = 32;</pre>
+      <pre>	reg [9:0] p1y;</pre>
+      <pre>	reg [9:0] p2y;</pre>
+      <pre>	reg p1_draw;</pre>
+      <pre>	reg p2_draw;</pre>
+      <pre>	reg p1_col;</pre>
+      <pre>	reg p2_col;</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		if (animate) begin</pre>
+      <pre>			if ((p1y + 22) &lt; (by + 4)) begin</pre>
+      <pre>				if (p1y &lt; 438)</pre>
+      <pre>					p1y &lt;= p1y + P_SP;</pre>
+      <pre>			end</pre>
+      <pre>			else if ((p1y + 20) &gt; (by + 6))</pre>
+      <pre>				if (p1y &gt; P_SP)</pre>
+      <pre>					p1y &lt;= p1y - P_SP;</pre>
+      <pre>			if ((p2y + 22) &lt; (by + 4)) begin</pre>
+      <pre>				if (p2y &lt; 438)</pre>
+      <pre>					p2y &lt;= p2y + P_SP;</pre>
+      <pre>			end</pre>
+      <pre>			else if ((p2y + 20) &gt; (by + 6))</pre>
+      <pre>				if (p2y &gt; P_SP)</pre>
+      <pre>					p2y &lt;= p2y - P_SP;</pre>
+      <pre>		end</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		p1_draw = (((sx &gt;= P_OFFS) &amp;&amp; (sx &lt; 42)) &amp;&amp; (sy &gt;= p1y)) &amp;&amp; (sy &lt; (p1y + P_H));</pre>
+      <pre>		p2_draw = (((sx &gt;= 598) &amp;&amp; (sx &lt; 608)) &amp;&amp; (sy &gt;= p2y)) &amp;&amp; (sy &lt; (p2y + P_H));</pre>
+      <pre>	end</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		if (animate) begin</pre>
+      <pre>			p1_col &lt;= 0;</pre>
+      <pre>			p2_col &lt;= 0;</pre>
+      <pre>		end</pre>
+      <pre>		else if (b_draw) begin</pre>
+      <pre>			if (p1_draw)</pre>
+      <pre>				p1_col &lt;= 1;</pre>
+      <pre>			if (p2_draw)</pre>
+      <pre>				p2_col &lt;= 1;</pre>
+      <pre>		end</pre>
+      <pre>	always @(posedge clk_pix)</pre>
+      <pre>		if (animate) begin</pre>
+      <pre>			if (p1_col) begin</pre>
+      <pre>				dx &lt;= 0;</pre>
+      <pre>				bx &lt;= bx + spx;</pre>
+      <pre>			end</pre>
+      <pre>			else if (p2_col) begin</pre>
+      <pre>				dx &lt;= 1;</pre>
+      <pre>				bx &lt;= bx - spx;</pre>
+      <pre>			end</pre>
+      <pre>			else if (bx &gt;= (H_RES - (spx + B_SIZE))) begin</pre>
+      <pre>				dx &lt;= 1;</pre>
+      <pre>				bx &lt;= bx - spx;</pre>
+      <pre>			end</pre>
+      <pre>			else if (bx &lt; spx) begin</pre>
+      <pre>				dx &lt;= 0;</pre>
+      <pre>				bx &lt;= bx + spx;</pre>
+      <pre>			end</pre>
+      <pre>			else</pre>
+      <pre>				bx &lt;= (dx ? bx - spx : bx + spx);</pre>
+      <pre>			if (by &gt;= (V_RES - (spy + B_SIZE))) begin</pre>
+      <pre>				dy &lt;= 1;</pre>
+      <pre>				by &lt;= by - spy;</pre>
+      <pre>			end</pre>
+      <pre>			else if (by &lt; spy) begin</pre>
+      <pre>				dy &lt;= 0;</pre>
+      <pre>				by &lt;= by + spy;</pre>
+      <pre>			end</pre>
+      <pre>			else</pre>
+      <pre>				by &lt;= (dy ? by - spy : by + spy);</pre>
+      <pre>		end</pre>
+      <pre>	always @(*) b_draw = (((sx &gt;= bx) &amp;&amp; (sx &lt; (bx + B_SIZE))) &amp;&amp; (sy &gt;= by)) &amp;&amp; (sy &lt; (by + B_SIZE));</pre>
+      <pre>	always @(posedge clk_pix) begin</pre>
+      <pre>		vga_hsync &lt;= hsync;</pre>
+      <pre>		vga_vsync &lt;= vsync;</pre>
+      <pre>		vga_r &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);</pre>
+      <pre>		vga_g &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);</pre>
+      <pre>		vga_b &lt;= (de &amp;&amp; ((b_draw | p1_draw) | p2_draw) ? 4&#39;hf : 4&#39;h0);</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>

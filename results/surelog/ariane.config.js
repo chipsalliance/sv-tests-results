@@ -1,1 +1,1 @@
-config_loader_data['surelog/ariane'] = [["ariane",0,"logs/Surelog/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/core/include/cv64a6_imafdc_sv39_config_pkg.sv.html"]]
+config_loader_data['surelog/ariane'] = [["","ariane",0,"logs/Surelog/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/core/include/cv64a6_imafdc_sv39_config_pkg.sv.html"]]

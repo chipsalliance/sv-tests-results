@@ -1,1 +1,1 @@
-config_loader_data['icarus/6.16.7'] = [["string_icompare",0,"logs/Icarus/chapter-6/6.16.7--string_icompare.sv.log.html","tests/chapter-6/6.16.7--string_icompare.sv.html"]]
+config_loader_data['icarus/6.16.7'] = [["","string_icompare",0,"logs/Icarus/chapter-6/6.16.7--string_icompare.sv.log.html","tests/chapter-6/6.16.7--string_icompare.sv.html"]]

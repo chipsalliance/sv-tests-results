@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/8.26.5'] = [["implemented_class_handle",1,"logs/VeribleExtractor/chapter-8/8.26.5--implemented_class_handle.sv.log.html","tests/chapter-8/8.26.5--implemented_class_handle.sv.html"]]
+config_loader_data['veribleextractor/8.26.5'] = [["","implemented_class_handle",1,"logs/VeribleExtractor/chapter-8/8.26.5--implemented_class_handle.sv.log.html","tests/chapter-8/8.26.5--implemented_class_handle.sv.html"]]

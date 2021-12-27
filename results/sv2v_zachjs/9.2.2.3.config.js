@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/9.2.2.3'] = [["always_latch_expr",1,"logs/Sv2v_zachjs/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]
+config_loader_data['sv2v_zachjs/9.2.2.3'] = [["","always_latch_expr",1,"logs/Sv2v_zachjs/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]

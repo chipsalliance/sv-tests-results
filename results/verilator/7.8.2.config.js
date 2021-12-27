@@ -1,1 +1,1 @@
-config_loader_data['verilator/7.8.2'] = [["associative-arrays-string",1,"logs/Verilator/chapter-7/arrays/associative/string.sv.log.html","tests/chapter-7/arrays/associative/string.sv.html"]]
+config_loader_data['verilator/7.8.2'] = [["","associative-arrays-string",1,"logs/Verilator/chapter-7/arrays/associative/string.sv.log.html","tests/chapter-7/arrays/associative/string.sv.html"]]

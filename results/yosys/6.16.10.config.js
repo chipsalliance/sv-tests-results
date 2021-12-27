@@ -1,1 +1,1 @@
-config_loader_data['yosys/6.16.10'] = [["string_atoreal",0,"logs/Yosys/chapter-6/6.16.10--string_atoreal.sv.log.html","tests/chapter-6/6.16.10--string_atoreal.sv.html"]]
+config_loader_data['yosys/6.16.10'] = [["","string_atoreal",0,"logs/Yosys/chapter-6/6.16.10--string_atoreal.sv.log.html","tests/chapter-6/6.16.10--string_atoreal.sv.html"]]

@@ -1,142 +1,156 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    .log { font-family: "Courier New", Consolas, monospace; font-size: 80%; }
-    .test-failed { background-color: #ffaaaa; }
-    .test-passed { background-color: #aaffaa; }
-  </style>
-</head>
-<body>
-<h3><a href="https://github.com/zachjs/sv2v" target="_blank">zachjs-sv2v</a></h3>
-<pre class="test-passed">
-description: Test imported from ivtest
-rc: 0 (means success: 1)
-tags: ivtest
-incdirs: /root/sv-tests/sv-tests/third_party/tests/ivtest /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests
-top_module: 
-type: simulation parsing
-mode: parsing
-files: <a href="../../../../third_party/tests/ivtest/contrib/mult16.v.html" target="file-frame">third_party/tests/ivtest/contrib/mult16.v</a>
-defines: 
-completed: 2021-12-27 02:39:52
-time_elapsed: 0.029s
-ram usage: 26044 KB
-</pre>
-<pre class="log">
-
-zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/contrib/mult16.v.html" target="file-frame">third_party/tests/ivtest/contrib/mult16.v</a>
-module mult16 (
-	clk,
-	resetb,
-	start,
-	done,
-	ain,
-	bin,
-	yout
-);
-	parameter N = 16;
-	input clk;
-	input resetb;
-	input start;
-	input [15:0] ain;
-	input [15:0] bin;
-	output reg [31:0] yout;
-	output reg done;
-	reg [31:0] a;
-	reg [15:0] b;
-	always @(posedge clk or negedge resetb)
-		if (~resetb) begin
-			a &lt;= 0;
-			b &lt;= 0;
-			yout &lt;= 0;
-			done &lt;= 1&#39;b1;
-		end
-		else if (start) begin
-			a &lt;= ain;
-			b &lt;= bin;
-			yout &lt;= 0;
-			done &lt;= 0;
-		end
-		else if (~done)
-			if (b != 0) begin
-				if (b[0])
-					yout &lt;= yout + a;
-				b &lt;= b &gt;&gt; 1;
-				a &lt;= a &lt;&lt; 1;
-				$display(&#34;a = %h, b = %h, yout = %h&#34;, a, b, yout);
-			end
-			else
-				done &lt;= 1&#39;b1;
-endmodule
-module mul16;
-	reg clk;
-	reg resetb;
-	reg start;
-	reg [15:0] a;
-	reg [15:0] b;
-	wire [31:0] y;
-	wire done;
-	mult16 mult16inst(
-		.clk(clk),
-		.resetb(resetb),
-		.start(start),
-		.done(done),
-		.ain(a),
-		.bin(b),
-		.yout(y)
-	);
-	initial begin
-		clk = 0;
-		forever #(10) clk = ~clk;
-	end
-	initial begin
-		resetb = 0;
-		#(30) resetb = 1;
-	end
-	integer num_errors;
-	parameter MAX_TRIALS = 10;
-	task test_multiply;
-		input [15:0] aarg;
-		input [15:0] barg;
-		integer expected_answer;
-		if (~done)
-			$display(&#34;Multiplier is Busy!!&#34;);
-		else begin
-			@(negedge clk)
-				;
-			start = 1;
-			a = aarg;
-			b = barg;
-			@(negedge clk) start = 0;
-			@(posedge done)
-				;
-			expected_answer = a * b;
-			$display(&#34;%0d * %0d = %0h, Reality = %0h&#34;, a, b, y, expected_answer);
-			if (y !== expected_answer) begin
-				$display(&#34;   FAILED!&#34;);
-				num_errors = num_errors + 1;
-			end
-		end
-	endtask
-	initial begin
-		num_errors = 0;
-		#(100)
-			;
-		repeat (MAX_TRIALS) test_multiply($random, $random);
-		test_multiply($random, 1);
-		test_multiply(1, $random);
-		test_multiply($random, 0);
-		test_multiply(0, $random);
-		$display(&#34;Done.  %0d Errors&#34;, num_errors);
-		if (num_errors == 0)
-			$display(&#34;PASSED&#34;);
-		#(800)
-			;
-		$finish;
-	end
-endmodule
-
-</pre>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header>
+      <a href="https://github.com/zachjs/sv2v" target="_blank"><h1>zachjs-sv2v</h1></a>
+      <h2>regress-vlg_mult16_iv</h2>
+    </header>
+    <section class="property-list test-passed">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation parsing</dd></div>
+        <div><dt>results group</dt><dd><em></em></dd></div>
+        <div><dt>mode</dt><dd>parsing</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/contrib/mult16.v.html" target="file-frame">third_party/tests/ivtest/contrib/mult16.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2021-12-27 14:06:37</dd></div>
+        <div><dt>time elapsed</dt><dd>0.024s</dd></div>
+        <div><dt>ram usage</dt><dd>26040 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/contrib/mult16.v.html" target="file-frame">third_party/tests/ivtest/contrib/mult16.v</a></pre>
+      <pre>module mult16 (</pre>
+      <pre>	clk,</pre>
+      <pre>	resetb,</pre>
+      <pre>	start,</pre>
+      <pre>	done,</pre>
+      <pre>	ain,</pre>
+      <pre>	bin,</pre>
+      <pre>	yout</pre>
+      <pre>);</pre>
+      <pre>	parameter N = 16;</pre>
+      <pre>	input clk;</pre>
+      <pre>	input resetb;</pre>
+      <pre>	input start;</pre>
+      <pre>	input [15:0] ain;</pre>
+      <pre>	input [15:0] bin;</pre>
+      <pre>	output reg [31:0] yout;</pre>
+      <pre>	output reg done;</pre>
+      <pre>	reg [31:0] a;</pre>
+      <pre>	reg [15:0] b;</pre>
+      <pre>	always @(posedge clk or negedge resetb)</pre>
+      <pre>		if (~resetb) begin</pre>
+      <pre>			a &lt;= 0;</pre>
+      <pre>			b &lt;= 0;</pre>
+      <pre>			yout &lt;= 0;</pre>
+      <pre>			done &lt;= 1&#39;b1;</pre>
+      <pre>		end</pre>
+      <pre>		else if (start) begin</pre>
+      <pre>			a &lt;= ain;</pre>
+      <pre>			b &lt;= bin;</pre>
+      <pre>			yout &lt;= 0;</pre>
+      <pre>			done &lt;= 0;</pre>
+      <pre>		end</pre>
+      <pre>		else if (~done)</pre>
+      <pre>			if (b != 0) begin</pre>
+      <pre>				if (b[0])</pre>
+      <pre>					yout &lt;= yout + a;</pre>
+      <pre>				b &lt;= b &gt;&gt; 1;</pre>
+      <pre>				a &lt;= a &lt;&lt; 1;</pre>
+      <pre>				$display(&#34;a = %h, b = %h, yout = %h&#34;, a, b, yout);</pre>
+      <pre>			end</pre>
+      <pre>			else</pre>
+      <pre>				done &lt;= 1&#39;b1;</pre>
+      <pre>endmodule</pre>
+      <pre>module mul16;</pre>
+      <pre>	reg clk;</pre>
+      <pre>	reg resetb;</pre>
+      <pre>	reg start;</pre>
+      <pre>	reg [15:0] a;</pre>
+      <pre>	reg [15:0] b;</pre>
+      <pre>	wire [31:0] y;</pre>
+      <pre>	wire done;</pre>
+      <pre>	mult16 mult16inst(</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.resetb(resetb),</pre>
+      <pre>		.start(start),</pre>
+      <pre>		.done(done),</pre>
+      <pre>		.ain(a),</pre>
+      <pre>		.bin(b),</pre>
+      <pre>		.yout(y)</pre>
+      <pre>	);</pre>
+      <pre>	initial begin</pre>
+      <pre>		clk = 0;</pre>
+      <pre>		forever #(10) clk = ~clk;</pre>
+      <pre>	end</pre>
+      <pre>	initial begin</pre>
+      <pre>		resetb = 0;</pre>
+      <pre>		#(30) resetb = 1;</pre>
+      <pre>	end</pre>
+      <pre>	integer num_errors;</pre>
+      <pre>	parameter MAX_TRIALS = 10;</pre>
+      <pre>	task test_multiply;</pre>
+      <pre>		input [15:0] aarg;</pre>
+      <pre>		input [15:0] barg;</pre>
+      <pre>		integer expected_answer;</pre>
+      <pre>		if (~done)</pre>
+      <pre>			$display(&#34;Multiplier is Busy!!&#34;);</pre>
+      <pre>		else begin</pre>
+      <pre>			@(negedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			start = 1;</pre>
+      <pre>			a = aarg;</pre>
+      <pre>			b = barg;</pre>
+      <pre>			@(negedge clk) start = 0;</pre>
+      <pre>			@(posedge done)</pre>
+      <pre>				;</pre>
+      <pre>			expected_answer = a * b;</pre>
+      <pre>			$display(&#34;%0d * %0d = %0h, Reality = %0h&#34;, a, b, y, expected_answer);</pre>
+      <pre>			if (y !== expected_answer) begin</pre>
+      <pre>				$display(&#34;   FAILED!&#34;);</pre>
+      <pre>				num_errors = num_errors + 1;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>	endtask</pre>
+      <pre>	initial begin</pre>
+      <pre>		num_errors = 0;</pre>
+      <pre>		#(100)</pre>
+      <pre>			;</pre>
+      <pre>		repeat (MAX_TRIALS) test_multiply($random, $random);</pre>
+      <pre>		test_multiply($random, 1);</pre>
+      <pre>		test_multiply(1, $random);</pre>
+      <pre>		test_multiply($random, 0);</pre>
+      <pre>		test_multiply(0, $random);</pre>
+      <pre>		$display(&#34;Done.  %0d Errors&#34;, num_errors);</pre>
+      <pre>		if (num_errors == 0)</pre>
+      <pre>			$display(&#34;PASSED&#34;);</pre>
+      <pre>		#(800)</pre>
+      <pre>			;</pre>
+      <pre>		$finish;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
 </html>
