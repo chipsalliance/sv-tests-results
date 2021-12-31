@@ -300,265 +300,265 @@
 <a id="l-16" name="l-16"></a><span class="c1">//</span>
 <a id="l-17" name="l-17"></a><span class="c1">// See also: prim_esc_sender, prim_diff_decode, alert_handler</span>
 <a id="l-18" name="l-18"></a>
-<a id="l-19" name="l-19"></a><span class="no">`include</span> <span class="s">&quot;prim_assert.sv&quot;</span>
+<a id="l-19" name="l-19"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;prim_assert.sv&quot;</span><span class="w"></span>
 <a id="l-20" name="l-20"></a>
-<a id="l-21" name="l-21"></a><span class="k">module</span> <span class="n">prim_esc_receiver</span>
-<a id="l-22" name="l-22"></a>  <span class="kn">import</span> <span class="nn">prim_esc_pkg::*</span><span class="p">;</span>
-<a id="l-23" name="l-23"></a><span class="p">#(</span>
-<a id="l-24" name="l-24"></a>  <span class="c1">// The number of escalation severities. Should be set to the Alert Handler&#39;s N_ESC_SEV when this</span>
-<a id="l-25" name="l-25"></a>  <span class="c1">// primitive is instantiated.</span>
-<a id="l-26" name="l-26"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">N_ESC_SEV</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<a id="l-21" name="l-21"></a><span class="k">module</span><span class="w"> </span><span class="n">prim_esc_receiver</span><span class="w"></span>
+<a id="l-22" name="l-22"></a><span class="w">  </span><span class="k">import</span><span class="w"> </span><span class="n">prim_esc_pkg</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
+<a id="l-23" name="l-23"></a><span class="p">#(</span><span class="w"></span>
+<a id="l-24" name="l-24"></a><span class="w">  </span><span class="c1">// The number of escalation severities. Should be set to the Alert Handler&#39;s N_ESC_SEV when this</span>
+<a id="l-25" name="l-25"></a><span class="w">  </span><span class="c1">// primitive is instantiated.</span>
+<a id="l-26" name="l-26"></a><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">N_ESC_SEV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
 <a id="l-27" name="l-27"></a>
-<a id="l-28" name="l-28"></a>  <span class="c1">// The width of the Alert Handler&#39;s ping counter. Should be set to the Alert Handler&#39;s PING_CNT_DW</span>
-<a id="l-29" name="l-29"></a>  <span class="c1">// when this primitive is instantiated.</span>
-<a id="l-30" name="l-30"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">PING_CNT_DW</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+<a id="l-28" name="l-28"></a><span class="w">  </span><span class="c1">// The width of the Alert Handler&#39;s ping counter. Should be set to the Alert Handler&#39;s PING_CNT_DW</span>
+<a id="l-29" name="l-29"></a><span class="w">  </span><span class="c1">// when this primitive is instantiated.</span>
+<a id="l-30" name="l-30"></a><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">PING_CNT_DW</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"></span>
 <a id="l-31" name="l-31"></a>
-<a id="l-32" name="l-32"></a>  <span class="c1">// This counter monitors incoming ping requests and auto-escalates if the alert handler</span>
-<a id="l-33" name="l-33"></a>  <span class="c1">// ceases to send them regularly. The maximum number of cycles between subsequent ping requests</span>
-<a id="l-34" name="l-34"></a>  <span class="c1">// is N_ESC_SEV x (2 x 2 x 2**PING_CNT_DW), see also implementation of the ping timer</span>
-<a id="l-35" name="l-35"></a>  <span class="c1">// (alert_handler_ping_timer.sv). The timeout counter below uses a timeout that is 4x larger than</span>
-<a id="l-36" name="l-36"></a>  <span class="c1">// that in order to incorporate some margin.</span>
-<a id="l-37" name="l-37"></a>  <span class="c1">//</span>
-<a id="l-38" name="l-38"></a>  <span class="c1">// Do NOT modify this counter value, when instantiating it in the design. It is only exposed to</span>
-<a id="l-39" name="l-39"></a>  <span class="c1">// reduce the state space in the FPV testbench.</span>
-<a id="l-40" name="l-40"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">MarginFactor</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-<a id="l-41" name="l-41"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">NumWaitCounts</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<a id="l-42" name="l-42"></a>  <span class="k">localparam</span> <span class="kt">int</span> <span class="n">NumTimeoutCounts</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<a id="l-43" name="l-43"></a>  <span class="k">parameter</span> <span class="kt">int</span> <span class="n">TimeoutCntDw</span> <span class="o">=</span> <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">MarginFactor</span><span class="p">)</span> <span class="o">+</span>
-<a id="l-44" name="l-44"></a>                               <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">N_ESC_SEV</span><span class="p">)</span> <span class="o">+</span>
-<a id="l-45" name="l-45"></a>                               <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NumWaitCounts</span><span class="p">)</span> <span class="o">+</span>
-<a id="l-46" name="l-46"></a>                               <span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NumTimeoutCounts</span><span class="p">)</span> <span class="o">+</span>
-<a id="l-47" name="l-47"></a>                               <span class="n">PING_CNT_DW</span>
-<a id="l-48" name="l-48"></a><span class="p">)</span> <span class="p">(</span>
-<a id="l-49" name="l-49"></a>  <span class="k">input</span>           <span class="n">clk_i</span><span class="p">,</span>
-<a id="l-50" name="l-50"></a>  <span class="k">input</span>           <span class="n">rst_ni</span><span class="p">,</span>
-<a id="l-51" name="l-51"></a>  <span class="c1">// escalation enable</span>
-<a id="l-52" name="l-52"></a>  <span class="k">output</span> <span class="kt">logic</span>    <span class="n">esc_req_o</span><span class="p">,</span>
-<a id="l-53" name="l-53"></a>  <span class="c1">// escalation / ping response</span>
-<a id="l-54" name="l-54"></a>  <span class="k">output</span> <span class="n">esc_rx_t</span> <span class="n">esc_rx_o</span><span class="p">,</span>
-<a id="l-55" name="l-55"></a>  <span class="c1">// escalation output diff pair</span>
-<a id="l-56" name="l-56"></a>  <span class="k">input</span> <span class="n">esc_tx_t</span>  <span class="n">esc_tx_i</span>
-<a id="l-57" name="l-57"></a><span class="p">);</span>
+<a id="l-32" name="l-32"></a><span class="w">  </span><span class="c1">// This counter monitors incoming ping requests and auto-escalates if the alert handler</span>
+<a id="l-33" name="l-33"></a><span class="w">  </span><span class="c1">// ceases to send them regularly. The maximum number of cycles between subsequent ping requests</span>
+<a id="l-34" name="l-34"></a><span class="w">  </span><span class="c1">// is N_ESC_SEV x (2 x 2 x 2**PING_CNT_DW), see also implementation of the ping timer</span>
+<a id="l-35" name="l-35"></a><span class="w">  </span><span class="c1">// (alert_handler_ping_timer.sv). The timeout counter below uses a timeout that is 4x larger than</span>
+<a id="l-36" name="l-36"></a><span class="w">  </span><span class="c1">// that in order to incorporate some margin.</span>
+<a id="l-37" name="l-37"></a><span class="w">  </span><span class="c1">//</span>
+<a id="l-38" name="l-38"></a><span class="w">  </span><span class="c1">// Do NOT modify this counter value, when instantiating it in the design. It is only exposed to</span>
+<a id="l-39" name="l-39"></a><span class="w">  </span><span class="c1">// reduce the state space in the FPV testbench.</span>
+<a id="l-40" name="l-40"></a><span class="w">  </span><span class="k">localparam</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MarginFactor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<a id="l-41" name="l-41"></a><span class="w">  </span><span class="k">localparam</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">NumWaitCounts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<a id="l-42" name="l-42"></a><span class="w">  </span><span class="k">localparam</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">NumTimeoutCounts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"></span>
+<a id="l-43" name="l-43"></a><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">TimeoutCntDw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">MarginFactor</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<a id="l-44" name="l-44"></a><span class="w">                               </span><span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">N_ESC_SEV</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<a id="l-45" name="l-45"></a><span class="w">                               </span><span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NumWaitCounts</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<a id="l-46" name="l-46"></a><span class="w">                               </span><span class="p">$</span><span class="n">clog2</span><span class="p">(</span><span class="n">NumTimeoutCounts</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"></span>
+<a id="l-47" name="l-47"></a><span class="w">                               </span><span class="n">PING_CNT_DW</span><span class="w"></span>
+<a id="l-48" name="l-48"></a><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-49" name="l-49"></a><span class="w">  </span><span class="k">input</span><span class="w">           </span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-50" name="l-50"></a><span class="w">  </span><span class="k">input</span><span class="w">           </span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-51" name="l-51"></a><span class="w">  </span><span class="c1">// escalation enable</span>
+<a id="l-52" name="l-52"></a><span class="w">  </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w">    </span><span class="n">esc_req_o</span><span class="p">,</span><span class="w"></span>
+<a id="l-53" name="l-53"></a><span class="w">  </span><span class="c1">// escalation / ping response</span>
+<a id="l-54" name="l-54"></a><span class="w">  </span><span class="k">output</span><span class="w"> </span><span class="n">esc_rx_t</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">,</span><span class="w"></span>
+<a id="l-55" name="l-55"></a><span class="w">  </span><span class="c1">// escalation output diff pair</span>
+<a id="l-56" name="l-56"></a><span class="w">  </span><span class="k">input</span><span class="w"> </span><span class="n">esc_tx_t</span><span class="w">  </span><span class="n">esc_tx_i</span><span class="w"></span>
+<a id="l-57" name="l-57"></a><span class="p">);</span><span class="w"></span>
 <a id="l-58" name="l-58"></a>
-<a id="l-59" name="l-59"></a>  <span class="c1">/////////////////////////////////</span>
-<a id="l-60" name="l-60"></a>  <span class="c1">// decode differential signals //</span>
-<a id="l-61" name="l-61"></a>  <span class="c1">/////////////////////////////////</span>
+<a id="l-59" name="l-59"></a><span class="w">  </span><span class="c1">/////////////////////////////////</span>
+<a id="l-60" name="l-60"></a><span class="w">  </span><span class="c1">// decode differential signals //</span>
+<a id="l-61" name="l-61"></a><span class="w">  </span><span class="c1">/////////////////////////////////</span>
 <a id="l-62" name="l-62"></a>
-<a id="l-63" name="l-63"></a>  <span class="kt">logic</span> <span class="n">esc_level</span><span class="p">,</span> <span class="n">esc_p</span><span class="p">,</span> <span class="n">esc_n</span><span class="p">,</span> <span class="n">sigint_detected</span><span class="p">;</span>
+<a id="l-63" name="l-63"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">esc_level</span><span class="p">,</span><span class="w"> </span><span class="n">esc_p</span><span class="p">,</span><span class="w"> </span><span class="n">esc_n</span><span class="p">,</span><span class="w"> </span><span class="n">sigint_detected</span><span class="p">;</span><span class="w"></span>
 <a id="l-64" name="l-64"></a>
-<a id="l-65" name="l-65"></a>  <span class="c1">// This prevents further tool optimizations of the differential signal.</span>
-<a id="l-66" name="l-66"></a>  <span class="n">prim_buf</span> <span class="p">#(</span>
-<a id="l-67" name="l-67"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<a id="l-68" name="l-68"></a>  <span class="p">)</span> <span class="n">u_prim_buf_esc</span> <span class="p">(</span>
-<a id="l-69" name="l-69"></a>    <span class="p">.</span><span class="n">in_i</span><span class="p">({</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">,</span>
-<a id="l-70" name="l-70"></a>           <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">}),</span>
-<a id="l-71" name="l-71"></a>    <span class="p">.</span><span class="n">out_o</span><span class="p">({</span><span class="n">esc_n</span><span class="p">,</span>
-<a id="l-72" name="l-72"></a>            <span class="n">esc_p</span><span class="p">})</span>
-<a id="l-73" name="l-73"></a>  <span class="p">);</span>
+<a id="l-65" name="l-65"></a><span class="w">  </span><span class="c1">// This prevents further tool optimizations of the differential signal.</span>
+<a id="l-66" name="l-66"></a><span class="w">  </span><span class="n">prim_buf</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-67" name="l-67"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"></span>
+<a id="l-68" name="l-68"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_prim_buf_esc</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-69" name="l-69"></a><span class="w">    </span><span class="p">.</span><span class="n">in_i</span><span class="p">({</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">,</span><span class="w"></span>
+<a id="l-70" name="l-70"></a><span class="w">           </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">}),</span><span class="w"></span>
+<a id="l-71" name="l-71"></a><span class="w">    </span><span class="p">.</span><span class="n">out_o</span><span class="p">({</span><span class="n">esc_n</span><span class="p">,</span><span class="w"></span>
+<a id="l-72" name="l-72"></a><span class="w">            </span><span class="n">esc_p</span><span class="p">})</span><span class="w"></span>
+<a id="l-73" name="l-73"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
 <a id="l-74" name="l-74"></a>
-<a id="l-75" name="l-75"></a>  <span class="n">prim_diff_decode</span> <span class="p">#(</span>
-<a id="l-76" name="l-76"></a>    <span class="p">.</span><span class="n">AsyncOn</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">)</span>
-<a id="l-77" name="l-77"></a>  <span class="p">)</span> <span class="n">u_decode_esc</span> <span class="p">(</span>
-<a id="l-78" name="l-78"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a id="l-79" name="l-79"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a id="l-80" name="l-80"></a>    <span class="p">.</span><span class="n">diff_pi</span>  <span class="p">(</span> <span class="n">esc_p</span>           <span class="p">),</span>
-<a id="l-81" name="l-81"></a>    <span class="p">.</span><span class="n">diff_ni</span>  <span class="p">(</span> <span class="n">esc_n</span>           <span class="p">),</span>
-<a id="l-82" name="l-82"></a>    <span class="p">.</span><span class="n">level_o</span>  <span class="p">(</span> <span class="n">esc_level</span>       <span class="p">),</span>
-<a id="l-83" name="l-83"></a>    <span class="p">.</span><span class="n">rise_o</span>   <span class="p">(</span>                 <span class="p">),</span>
-<a id="l-84" name="l-84"></a>    <span class="p">.</span><span class="n">fall_o</span>   <span class="p">(</span>                 <span class="p">),</span>
-<a id="l-85" name="l-85"></a>    <span class="p">.</span><span class="n">event_o</span>  <span class="p">(</span>                 <span class="p">),</span>
-<a id="l-86" name="l-86"></a>    <span class="p">.</span><span class="n">sigint_o</span> <span class="p">(</span> <span class="n">sigint_detected</span> <span class="p">)</span>
-<a id="l-87" name="l-87"></a>  <span class="p">);</span>
+<a id="l-75" name="l-75"></a><span class="w">  </span><span class="n">prim_diff_decode</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-76" name="l-76"></a><span class="w">    </span><span class="p">.</span><span class="n">AsyncOn</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">)</span><span class="w"></span>
+<a id="l-77" name="l-77"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_decode_esc</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-78" name="l-78"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-79" name="l-79"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-80" name="l-80"></a><span class="w">    </span><span class="p">.</span><span class="n">diff_pi</span><span class="w">  </span><span class="p">(</span><span class="w"> </span><span class="n">esc_p</span><span class="w">           </span><span class="p">),</span><span class="w"></span>
+<a id="l-81" name="l-81"></a><span class="w">    </span><span class="p">.</span><span class="n">diff_ni</span><span class="w">  </span><span class="p">(</span><span class="w"> </span><span class="n">esc_n</span><span class="w">           </span><span class="p">),</span><span class="w"></span>
+<a id="l-82" name="l-82"></a><span class="w">    </span><span class="p">.</span><span class="n">level_o</span><span class="w">  </span><span class="p">(</span><span class="w"> </span><span class="n">esc_level</span><span class="w">       </span><span class="p">),</span><span class="w"></span>
+<a id="l-83" name="l-83"></a><span class="w">    </span><span class="p">.</span><span class="n">rise_o</span><span class="w">   </span><span class="p">(</span><span class="w">                 </span><span class="p">),</span><span class="w"></span>
+<a id="l-84" name="l-84"></a><span class="w">    </span><span class="p">.</span><span class="n">fall_o</span><span class="w">   </span><span class="p">(</span><span class="w">                 </span><span class="p">),</span><span class="w"></span>
+<a id="l-85" name="l-85"></a><span class="w">    </span><span class="p">.</span><span class="n">event_o</span><span class="w">  </span><span class="p">(</span><span class="w">                 </span><span class="p">),</span><span class="w"></span>
+<a id="l-86" name="l-86"></a><span class="w">    </span><span class="p">.</span><span class="n">sigint_o</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">sigint_detected</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<a id="l-87" name="l-87"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
 <a id="l-88" name="l-88"></a>
-<a id="l-89" name="l-89"></a>  <span class="c1">////////////////////////////////////////////</span>
-<a id="l-90" name="l-90"></a>  <span class="c1">// Ping Monitor Counter / Auto Escalation //</span>
-<a id="l-91" name="l-91"></a>  <span class="c1">////////////////////////////////////////////</span>
+<a id="l-89" name="l-89"></a><span class="w">  </span><span class="c1">////////////////////////////////////////////</span>
+<a id="l-90" name="l-90"></a><span class="w">  </span><span class="c1">// Ping Monitor Counter / Auto Escalation //</span>
+<a id="l-91" name="l-91"></a><span class="w">  </span><span class="c1">////////////////////////////////////////////</span>
 <a id="l-92" name="l-92"></a>
-<a id="l-93" name="l-93"></a>  <span class="c1">// The timeout counter is kicked off when the first ping occurs, and subsequent pings reset</span>
-<a id="l-94" name="l-94"></a>  <span class="c1">// the counter to 1. The counter keeps on counting when it is nonzero, and saturates when it</span>
-<a id="l-95" name="l-95"></a>  <span class="c1">// has reached its maximum (this state is terminal).</span>
-<a id="l-96" name="l-96"></a>  <span class="kt">logic</span> <span class="n">ping_en</span><span class="p">,</span> <span class="n">timeout_cnt_error</span><span class="p">;</span>
-<a id="l-97" name="l-97"></a>  <span class="kt">logic</span> <span class="n">timeout_cnt_set</span><span class="p">,</span> <span class="n">timeout_cnt_en</span><span class="p">;</span>
-<a id="l-98" name="l-98"></a>  <span class="kt">logic</span> <span class="p">[</span><span class="n">TimeoutCntDw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">timeout_cnt</span><span class="p">;</span>
-<a id="l-99" name="l-99"></a>  <span class="k">assign</span> <span class="n">timeout_cnt_set</span> <span class="o">=</span> <span class="p">(</span><span class="n">ping_en</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="p">));</span>
-<a id="l-100" name="l-100"></a>  <span class="k">assign</span> <span class="n">timeout_cnt_en</span> <span class="o">=</span> <span class="p">((</span><span class="n">timeout_cnt</span> <span class="o">&gt;</span> <span class="m">&#39;0</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="p">));</span>
+<a id="l-93" name="l-93"></a><span class="w">  </span><span class="c1">// The timeout counter is kicked off when the first ping occurs, and subsequent pings reset</span>
+<a id="l-94" name="l-94"></a><span class="w">  </span><span class="c1">// the counter to 1. The counter keeps on counting when it is nonzero, and saturates when it</span>
+<a id="l-95" name="l-95"></a><span class="w">  </span><span class="c1">// has reached its maximum (this state is terminal).</span>
+<a id="l-96" name="l-96"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">ping_en</span><span class="p">,</span><span class="w"> </span><span class="n">timeout_cnt_error</span><span class="p">;</span><span class="w"></span>
+<a id="l-97" name="l-97"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">timeout_cnt_set</span><span class="p">,</span><span class="w"> </span><span class="n">timeout_cnt_en</span><span class="p">;</span><span class="w"></span>
+<a id="l-98" name="l-98"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">TimeoutCntDw</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">timeout_cnt</span><span class="p">;</span><span class="w"></span>
+<a id="l-99" name="l-99"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">timeout_cnt_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ping_en</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="p">));</span><span class="w"></span>
+<a id="l-100" name="l-100"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">timeout_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">((</span><span class="n">timeout_cnt</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="p">));</span><span class="w"></span>
 <a id="l-101" name="l-101"></a>
-<a id="l-102" name="l-102"></a>  <span class="n">prim_count</span> <span class="p">#(</span>
-<a id="l-103" name="l-103"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">TimeoutCntDw</span><span class="p">),</span>
-<a id="l-104" name="l-104"></a>    <span class="p">.</span><span class="n">OutSelDnCnt</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="c1">// count up</span>
-<a id="l-105" name="l-105"></a>    <span class="p">.</span><span class="n">CntStyle</span><span class="p">(</span><span class="n">prim_count_pkg</span><span class="o">::</span><span class="n">DupCnt</span><span class="p">),</span>
-<a id="l-106" name="l-106"></a>    <span class="c1">// The escalation receiver behaves differently than other comportable IP. I.e., instead of</span>
-<a id="l-107" name="l-107"></a>    <span class="c1">// sending out an alert signal, this condition is handled internally in the alert handler.</span>
-<a id="l-108" name="l-108"></a>    <span class="p">.</span><span class="n">EnableAlertTriggerSVA</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a id="l-109" name="l-109"></a>  <span class="p">)</span> <span class="n">u_prim_count</span> <span class="p">(</span>
-<a id="l-110" name="l-110"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a id="l-111" name="l-111"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a id="l-112" name="l-112"></a>    <span class="p">.</span><span class="n">clr_i</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span>
-<a id="l-113" name="l-113"></a>    <span class="p">.</span><span class="n">set_i</span><span class="p">(</span><span class="n">timeout_cnt_set</span><span class="p">),</span>
-<a id="l-114" name="l-114"></a>    <span class="p">.</span><span class="n">set_cnt_i</span><span class="p">(</span><span class="n">TimeoutCntDw</span><span class="p">&#39;(</span><span class="mi">1</span><span class="p">)),</span>
-<a id="l-115" name="l-115"></a>    <span class="p">.</span><span class="n">en_i</span><span class="p">(</span><span class="n">timeout_cnt_en</span><span class="p">),</span>
-<a id="l-116" name="l-116"></a>    <span class="p">.</span><span class="n">step_i</span><span class="p">(</span><span class="n">TimeoutCntDw</span><span class="p">&#39;(</span><span class="mi">1</span><span class="p">)),</span>
-<a id="l-117" name="l-117"></a>    <span class="p">.</span><span class="n">cnt_o</span><span class="p">(</span><span class="n">timeout_cnt</span><span class="p">),</span>
-<a id="l-118" name="l-118"></a>    <span class="p">.</span><span class="n">err_o</span><span class="p">(</span><span class="n">timeout_cnt_error</span><span class="p">)</span>
-<a id="l-119" name="l-119"></a>  <span class="p">);</span>
+<a id="l-102" name="l-102"></a><span class="w">  </span><span class="n">prim_count</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-103" name="l-103"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">TimeoutCntDw</span><span class="p">),</span><span class="w"></span>
+<a id="l-104" name="l-104"></a><span class="w">    </span><span class="p">.</span><span class="n">OutSelDnCnt</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="c1">// count up</span>
+<a id="l-105" name="l-105"></a><span class="w">    </span><span class="p">.</span><span class="n">CntStyle</span><span class="p">(</span><span class="n">prim_count_pkg</span><span class="o">::</span><span class="n">DupCnt</span><span class="p">),</span><span class="w"></span>
+<a id="l-106" name="l-106"></a><span class="w">    </span><span class="c1">// The escalation receiver behaves differently than other comportable IP. I.e., instead of</span>
+<a id="l-107" name="l-107"></a><span class="w">    </span><span class="c1">// sending out an alert signal, this condition is handled internally in the alert handler.</span>
+<a id="l-108" name="l-108"></a><span class="w">    </span><span class="p">.</span><span class="n">EnableAlertTriggerSVA</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<a id="l-109" name="l-109"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_prim_count</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-110" name="l-110"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-111" name="l-111"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-112" name="l-112"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
+<a id="l-113" name="l-113"></a><span class="w">    </span><span class="p">.</span><span class="n">set_i</span><span class="p">(</span><span class="n">timeout_cnt_set</span><span class="p">),</span><span class="w"></span>
+<a id="l-114" name="l-114"></a><span class="w">    </span><span class="p">.</span><span class="n">set_cnt_i</span><span class="p">(</span><span class="n">TimeoutCntDw</span><span class="p">&#39;(</span><span class="mi">1</span><span class="p">)),</span><span class="w"></span>
+<a id="l-115" name="l-115"></a><span class="w">    </span><span class="p">.</span><span class="n">en_i</span><span class="p">(</span><span class="n">timeout_cnt_en</span><span class="p">),</span><span class="w"></span>
+<a id="l-116" name="l-116"></a><span class="w">    </span><span class="p">.</span><span class="n">step_i</span><span class="p">(</span><span class="n">TimeoutCntDw</span><span class="p">&#39;(</span><span class="mi">1</span><span class="p">)),</span><span class="w"></span>
+<a id="l-117" name="l-117"></a><span class="w">    </span><span class="p">.</span><span class="n">cnt_o</span><span class="p">(</span><span class="n">timeout_cnt</span><span class="p">),</span><span class="w"></span>
+<a id="l-118" name="l-118"></a><span class="w">    </span><span class="p">.</span><span class="n">err_o</span><span class="p">(</span><span class="n">timeout_cnt_error</span><span class="p">)</span><span class="w"></span>
+<a id="l-119" name="l-119"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
 <a id="l-120" name="l-120"></a>
-<a id="l-121" name="l-121"></a>  <span class="c1">// Escalation is asserted if</span>
-<a id="l-122" name="l-122"></a>  <span class="c1">// - requested via the escalation sender/receiver path,</span>
-<a id="l-123" name="l-123"></a>  <span class="c1">// - the ping monitor timeout is reached,</span>
-<a id="l-124" name="l-124"></a>  <span class="c1">// - the two ping monitor counters are in an inconsistent state.</span>
-<a id="l-125" name="l-125"></a>  <span class="kt">logic</span> <span class="n">esc_req</span><span class="p">;</span>
-<a id="l-126" name="l-126"></a>  <span class="n">prim_sec_anchor_buf</span> <span class="p">#(</span>
-<a id="l-127" name="l-127"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="l-128" name="l-128"></a>  <span class="p">)</span> <span class="n">u_prim_buf_esc_req</span> <span class="p">(</span>
-<a id="l-129" name="l-129"></a>    <span class="p">.</span><span class="n">in_i</span><span class="p">(</span><span class="n">esc_req</span> <span class="o">||</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="p">)</span> <span class="o">||</span> <span class="n">timeout_cnt_error</span><span class="p">),</span>
-<a id="l-130" name="l-130"></a>    <span class="p">.</span><span class="n">out_o</span><span class="p">(</span><span class="n">esc_req_o</span><span class="p">)</span>
-<a id="l-131" name="l-131"></a>  <span class="p">);</span>
+<a id="l-121" name="l-121"></a><span class="w">  </span><span class="c1">// Escalation is asserted if</span>
+<a id="l-122" name="l-122"></a><span class="w">  </span><span class="c1">// - requested via the escalation sender/receiver path,</span>
+<a id="l-123" name="l-123"></a><span class="w">  </span><span class="c1">// - the ping monitor timeout is reached,</span>
+<a id="l-124" name="l-124"></a><span class="w">  </span><span class="c1">// - the two ping monitor counters are in an inconsistent state.</span>
+<a id="l-125" name="l-125"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">esc_req</span><span class="p">;</span><span class="w"></span>
+<a id="l-126" name="l-126"></a><span class="w">  </span><span class="n">prim_sec_anchor_buf</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-127" name="l-127"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
+<a id="l-128" name="l-128"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_prim_buf_esc_req</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-129" name="l-129"></a><span class="w">    </span><span class="p">.</span><span class="n">in_i</span><span class="p">(</span><span class="n">esc_req</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">timeout_cnt_error</span><span class="p">),</span><span class="w"></span>
+<a id="l-130" name="l-130"></a><span class="w">    </span><span class="p">.</span><span class="n">out_o</span><span class="p">(</span><span class="n">esc_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-131" name="l-131"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
 <a id="l-132" name="l-132"></a>
-<a id="l-133" name="l-133"></a>  <span class="c1">/////////////////</span>
-<a id="l-134" name="l-134"></a>  <span class="c1">// RX/TX Logic //</span>
-<a id="l-135" name="l-135"></a>  <span class="c1">/////////////////</span>
+<a id="l-133" name="l-133"></a><span class="w">  </span><span class="c1">/////////////////</span>
+<a id="l-134" name="l-134"></a><span class="w">  </span><span class="c1">// RX/TX Logic //</span>
+<a id="l-135" name="l-135"></a><span class="w">  </span><span class="c1">/////////////////</span>
 <a id="l-136" name="l-136"></a>
-<a id="l-137" name="l-137"></a>  <span class="k">typedef</span> <span class="k">enum</span> <span class="kt">logic</span> <span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span><span class="n">Idle</span><span class="p">,</span> <span class="n">Check</span><span class="p">,</span> <span class="n">PingResp</span><span class="p">,</span> <span class="n">EscResp</span><span class="p">,</span> <span class="n">SigInt</span><span class="p">}</span> <span class="n">state_e</span><span class="p">;</span>
-<a id="l-138" name="l-138"></a>  <span class="n">state_e</span> <span class="n">state_d</span><span class="p">,</span> <span class="n">state_q</span><span class="p">;</span>
-<a id="l-139" name="l-139"></a>  <span class="kt">logic</span> <span class="n">resp_pd</span><span class="p">,</span> <span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-140" name="l-140"></a>  <span class="kt">logic</span> <span class="n">resp_nd</span><span class="p">,</span> <span class="n">resp_nq</span><span class="p">;</span>
+<a id="l-137" name="l-137"></a><span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="n">Idle</span><span class="p">,</span><span class="w"> </span><span class="n">Check</span><span class="p">,</span><span class="w"> </span><span class="n">PingResp</span><span class="p">,</span><span class="w"> </span><span class="n">EscResp</span><span class="p">,</span><span class="w"> </span><span class="n">SigInt</span><span class="p">}</span><span class="w"> </span><span class="n">state_e</span><span class="p">;</span><span class="w"></span>
+<a id="l-138" name="l-138"></a><span class="w">  </span><span class="n">state_e</span><span class="w"> </span><span class="n">state_d</span><span class="p">,</span><span class="w"> </span><span class="n">state_q</span><span class="p">;</span><span class="w"></span>
+<a id="l-139" name="l-139"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">resp_pd</span><span class="p">,</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-140" name="l-140"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">resp_nd</span><span class="p">,</span><span class="w"> </span><span class="n">resp_nq</span><span class="p">;</span><span class="w"></span>
 <a id="l-141" name="l-141"></a>
-<a id="l-142" name="l-142"></a>  <span class="c1">// This prevents further tool optimizations of the differential signal.</span>
-<a id="l-143" name="l-143"></a>  <span class="n">prim_sec_anchor_flop</span> <span class="p">#(</span>
-<a id="l-144" name="l-144"></a>    <span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
-<a id="l-145" name="l-145"></a>    <span class="p">.</span><span class="n">ResetValue</span><span class="p">(</span><span class="mb">2&#39;b10</span><span class="p">)</span>
-<a id="l-146" name="l-146"></a>  <span class="p">)</span> <span class="n">u_prim_flop_esc</span> <span class="p">(</span>
-<a id="l-147" name="l-147"></a>    <span class="p">.</span><span class="n">clk_i</span><span class="p">,</span>
-<a id="l-148" name="l-148"></a>    <span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span>
-<a id="l-149" name="l-149"></a>    <span class="p">.</span><span class="n">d_i</span><span class="p">({</span><span class="n">resp_nd</span><span class="p">,</span> <span class="n">resp_pd</span><span class="p">}),</span>
-<a id="l-150" name="l-150"></a>    <span class="p">.</span><span class="n">q_o</span><span class="p">({</span><span class="n">resp_nq</span><span class="p">,</span> <span class="n">resp_pq</span><span class="p">})</span>
-<a id="l-151" name="l-151"></a>  <span class="p">);</span>
+<a id="l-142" name="l-142"></a><span class="w">  </span><span class="c1">// This prevents further tool optimizations of the differential signal.</span>
+<a id="l-143" name="l-143"></a><span class="w">  </span><span class="n">prim_sec_anchor_flop</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-144" name="l-144"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"></span>
+<a id="l-145" name="l-145"></a><span class="w">    </span><span class="p">.</span><span class="n">ResetValue</span><span class="p">(</span><span class="mb">2&#39;b10</span><span class="p">)</span><span class="w"></span>
+<a id="l-146" name="l-146"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_prim_flop_esc</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-147" name="l-147"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-148" name="l-148"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-149" name="l-149"></a><span class="w">    </span><span class="p">.</span><span class="n">d_i</span><span class="p">({</span><span class="n">resp_nd</span><span class="p">,</span><span class="w"> </span><span class="n">resp_pd</span><span class="p">}),</span><span class="w"></span>
+<a id="l-150" name="l-150"></a><span class="w">    </span><span class="p">.</span><span class="n">q_o</span><span class="p">({</span><span class="n">resp_nq</span><span class="p">,</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">})</span><span class="w"></span>
+<a id="l-151" name="l-151"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
 <a id="l-152" name="l-152"></a>
-<a id="l-153" name="l-153"></a>  <span class="k">assign</span> <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span> <span class="o">=</span> <span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-154" name="l-154"></a>  <span class="k">assign</span> <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_n</span> <span class="o">=</span> <span class="n">resp_nq</span><span class="p">;</span>
+<a id="l-153" name="l-153"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-154" name="l-154"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resp_nq</span><span class="p">;</span><span class="w"></span>
 <a id="l-155" name="l-155"></a>
-<a id="l-156" name="l-156"></a>  <span class="k">always_comb</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_fsm</span>
-<a id="l-157" name="l-157"></a>    <span class="c1">// default</span>
-<a id="l-158" name="l-158"></a>    <span class="n">state_d</span>  <span class="o">=</span> <span class="n">state_q</span><span class="p">;</span>
-<a id="l-159" name="l-159"></a>    <span class="n">resp_pd</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-160" name="l-160"></a>    <span class="n">resp_nd</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-161" name="l-161"></a>    <span class="n">esc_req</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-162" name="l-162"></a>    <span class="n">ping_en</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-156" name="l-156"></a><span class="w">  </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_fsm</span><span class="w"></span>
+<a id="l-157" name="l-157"></a><span class="w">    </span><span class="c1">// default</span>
+<a id="l-158" name="l-158"></a><span class="w">    </span><span class="n">state_d</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">state_q</span><span class="p">;</span><span class="w"></span>
+<a id="l-159" name="l-159"></a><span class="w">    </span><span class="n">resp_pd</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-160" name="l-160"></a><span class="w">    </span><span class="n">resp_nd</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-161" name="l-161"></a><span class="w">    </span><span class="n">esc_req</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-162" name="l-162"></a><span class="w">    </span><span class="n">ping_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
 <a id="l-163" name="l-163"></a>
-<a id="l-164" name="l-164"></a>    <span class="k">unique</span> <span class="k">case</span> <span class="p">(</span><span class="n">state_q</span><span class="p">)</span>
-<a id="l-165" name="l-165"></a>      <span class="c1">// wait for the esc_p/n diff pair</span>
-<a id="l-166" name="l-166"></a>      <span class="nl">Idle:</span> <span class="k">begin</span>
-<a id="l-167" name="l-167"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">esc_level</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-168" name="l-168"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">Check</span><span class="p">;</span>
-<a id="l-169" name="l-169"></a>          <span class="n">resp_pd</span> <span class="o">=</span> <span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-170" name="l-170"></a>          <span class="n">resp_nd</span> <span class="o">=</span> <span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-171" name="l-171"></a>        <span class="k">end</span>
-<a id="l-172" name="l-172"></a>      <span class="k">end</span>
-<a id="l-173" name="l-173"></a>      <span class="c1">// we decide here whether this is only a ping request or</span>
-<a id="l-174" name="l-174"></a>      <span class="c1">// whether this is an escalation enable</span>
-<a id="l-175" name="l-175"></a>      <span class="nl">Check:</span> <span class="k">begin</span>
-<a id="l-176" name="l-176"></a>        <span class="n">state_d</span> <span class="o">=</span> <span class="n">PingResp</span><span class="p">;</span>
-<a id="l-177" name="l-177"></a>        <span class="n">resp_pd</span> <span class="o">=</span> <span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-178" name="l-178"></a>        <span class="n">resp_nd</span> <span class="o">=</span> <span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-179" name="l-179"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">esc_level</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-180" name="l-180"></a>          <span class="n">state_d</span>  <span class="o">=</span> <span class="n">EscResp</span><span class="p">;</span>
-<a id="l-181" name="l-181"></a>          <span class="n">esc_req</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-182" name="l-182"></a>        <span class="k">end</span>
-<a id="l-183" name="l-183"></a>      <span class="k">end</span>
-<a id="l-184" name="l-184"></a>      <span class="c1">// finish ping response. in case esc_level is again asserted,</span>
-<a id="l-185" name="l-185"></a>      <span class="c1">// we got an escalation signal (pings cannot occur back to back)</span>
-<a id="l-186" name="l-186"></a>      <span class="nl">PingResp:</span> <span class="k">begin</span>
-<a id="l-187" name="l-187"></a>        <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
-<a id="l-188" name="l-188"></a>        <span class="n">resp_pd</span> <span class="o">=</span> <span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-189" name="l-189"></a>        <span class="n">resp_nd</span> <span class="o">=</span> <span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-190" name="l-190"></a>        <span class="n">ping_en</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-191" name="l-191"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">esc_level</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-192" name="l-192"></a>          <span class="n">state_d</span>  <span class="o">=</span> <span class="n">EscResp</span><span class="p">;</span>
-<a id="l-193" name="l-193"></a>          <span class="n">esc_req</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-194" name="l-194"></a>        <span class="k">end</span>
-<a id="l-195" name="l-195"></a>      <span class="k">end</span>
-<a id="l-196" name="l-196"></a>      <span class="c1">// we have got an escalation enable pulse,</span>
-<a id="l-197" name="l-197"></a>      <span class="c1">// keep on toggling the outputs</span>
-<a id="l-198" name="l-198"></a>      <span class="nl">EscResp:</span> <span class="k">begin</span>
-<a id="l-199" name="l-199"></a>        <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
-<a id="l-200" name="l-200"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">esc_level</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-201" name="l-201"></a>          <span class="n">state_d</span>  <span class="o">=</span> <span class="n">EscResp</span><span class="p">;</span>
-<a id="l-202" name="l-202"></a>          <span class="n">resp_pd</span>  <span class="o">=</span> <span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-203" name="l-203"></a>          <span class="n">resp_nd</span>  <span class="o">=</span> <span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-204" name="l-204"></a>          <span class="n">esc_req</span>  <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-205" name="l-205"></a>        <span class="k">end</span>
-<a id="l-206" name="l-206"></a>      <span class="k">end</span>
-<a id="l-207" name="l-207"></a>      <span class="c1">// we have a signal integrity issue at one of</span>
-<a id="l-208" name="l-208"></a>      <span class="c1">// the incoming diff pairs. this condition is</span>
-<a id="l-209" name="l-209"></a>      <span class="c1">// signalled to the sender by setting the resp</span>
-<a id="l-210" name="l-210"></a>      <span class="c1">// diffpair to the same value and continuously</span>
-<a id="l-211" name="l-211"></a>      <span class="c1">// toggling them.</span>
-<a id="l-212" name="l-212"></a>      <span class="nl">SigInt:</span> <span class="k">begin</span>
-<a id="l-213" name="l-213"></a>        <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
-<a id="l-214" name="l-214"></a>        <span class="n">esc_req</span> <span class="o">=</span> <span class="mb">1&#39;b1</span><span class="p">;</span>
-<a id="l-215" name="l-215"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">sigint_detected</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-216" name="l-216"></a>          <span class="n">state_d</span> <span class="o">=</span> <span class="n">SigInt</span><span class="p">;</span>
-<a id="l-217" name="l-217"></a>          <span class="n">resp_pd</span> <span class="o">=</span> <span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-218" name="l-218"></a>          <span class="n">resp_nd</span> <span class="o">=</span> <span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span>
-<a id="l-219" name="l-219"></a>        <span class="k">end</span>
-<a id="l-220" name="l-220"></a>      <span class="k">end</span>
-<a id="l-221" name="l-221"></a>      <span class="k">default</span> <span class="o">:</span> <span class="n">state_d</span> <span class="o">=</span> <span class="n">Idle</span><span class="p">;</span>
-<a id="l-222" name="l-222"></a>    <span class="k">endcase</span>
+<a id="l-164" name="l-164"></a><span class="w">    </span><span class="k">unique</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">state_q</span><span class="p">)</span><span class="w"></span>
+<a id="l-165" name="l-165"></a><span class="w">      </span><span class="c1">// wait for the esc_p/n diff pair</span>
+<a id="l-166" name="l-166"></a><span class="w">      </span><span class="nl">Idle:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-167" name="l-167"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">esc_level</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-168" name="l-168"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Check</span><span class="p">;</span><span class="w"></span>
+<a id="l-169" name="l-169"></a><span class="w">          </span><span class="n">resp_pd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-170" name="l-170"></a><span class="w">          </span><span class="n">resp_nd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-171" name="l-171"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-172" name="l-172"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-173" name="l-173"></a><span class="w">      </span><span class="c1">// we decide here whether this is only a ping request or</span>
+<a id="l-174" name="l-174"></a><span class="w">      </span><span class="c1">// whether this is an escalation enable</span>
+<a id="l-175" name="l-175"></a><span class="w">      </span><span class="nl">Check:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-176" name="l-176"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PingResp</span><span class="p">;</span><span class="w"></span>
+<a id="l-177" name="l-177"></a><span class="w">        </span><span class="n">resp_pd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-178" name="l-178"></a><span class="w">        </span><span class="n">resp_nd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-179" name="l-179"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">esc_level</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-180" name="l-180"></a><span class="w">          </span><span class="n">state_d</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">EscResp</span><span class="p">;</span><span class="w"></span>
+<a id="l-181" name="l-181"></a><span class="w">          </span><span class="n">esc_req</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-182" name="l-182"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-183" name="l-183"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-184" name="l-184"></a><span class="w">      </span><span class="c1">// finish ping response. in case esc_level is again asserted,</span>
+<a id="l-185" name="l-185"></a><span class="w">      </span><span class="c1">// we got an escalation signal (pings cannot occur back to back)</span>
+<a id="l-186" name="l-186"></a><span class="w">      </span><span class="nl">PingResp:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-187" name="l-187"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Idle</span><span class="p">;</span><span class="w"></span>
+<a id="l-188" name="l-188"></a><span class="w">        </span><span class="n">resp_pd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-189" name="l-189"></a><span class="w">        </span><span class="n">resp_nd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-190" name="l-190"></a><span class="w">        </span><span class="n">ping_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-191" name="l-191"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">esc_level</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-192" name="l-192"></a><span class="w">          </span><span class="n">state_d</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">EscResp</span><span class="p">;</span><span class="w"></span>
+<a id="l-193" name="l-193"></a><span class="w">          </span><span class="n">esc_req</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-194" name="l-194"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-195" name="l-195"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-196" name="l-196"></a><span class="w">      </span><span class="c1">// we have got an escalation enable pulse,</span>
+<a id="l-197" name="l-197"></a><span class="w">      </span><span class="c1">// keep on toggling the outputs</span>
+<a id="l-198" name="l-198"></a><span class="w">      </span><span class="nl">EscResp:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-199" name="l-199"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Idle</span><span class="p">;</span><span class="w"></span>
+<a id="l-200" name="l-200"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">esc_level</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-201" name="l-201"></a><span class="w">          </span><span class="n">state_d</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">EscResp</span><span class="p">;</span><span class="w"></span>
+<a id="l-202" name="l-202"></a><span class="w">          </span><span class="n">resp_pd</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-203" name="l-203"></a><span class="w">          </span><span class="n">resp_nd</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-204" name="l-204"></a><span class="w">          </span><span class="n">esc_req</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-205" name="l-205"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-206" name="l-206"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-207" name="l-207"></a><span class="w">      </span><span class="c1">// we have a signal integrity issue at one of</span>
+<a id="l-208" name="l-208"></a><span class="w">      </span><span class="c1">// the incoming diff pairs. this condition is</span>
+<a id="l-209" name="l-209"></a><span class="w">      </span><span class="c1">// signalled to the sender by setting the resp</span>
+<a id="l-210" name="l-210"></a><span class="w">      </span><span class="c1">// diffpair to the same value and continuously</span>
+<a id="l-211" name="l-211"></a><span class="w">      </span><span class="c1">// toggling them.</span>
+<a id="l-212" name="l-212"></a><span class="w">      </span><span class="nl">SigInt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-213" name="l-213"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Idle</span><span class="p">;</span><span class="w"></span>
+<a id="l-214" name="l-214"></a><span class="w">        </span><span class="n">esc_req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-215" name="l-215"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sigint_detected</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-216" name="l-216"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SigInt</span><span class="p">;</span><span class="w"></span>
+<a id="l-217" name="l-217"></a><span class="w">          </span><span class="n">resp_pd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-218" name="l-218"></a><span class="w">          </span><span class="n">resp_nd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">resp_pq</span><span class="p">;</span><span class="w"></span>
+<a id="l-219" name="l-219"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-220" name="l-220"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-221" name="l-221"></a><span class="w">      </span><span class="k">default</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Idle</span><span class="p">;</span><span class="w"></span>
+<a id="l-222" name="l-222"></a><span class="w">    </span><span class="k">endcase</span><span class="w"></span>
 <a id="l-223" name="l-223"></a>
-<a id="l-224" name="l-224"></a>    <span class="c1">// bail out if a signal integrity issue has been detected</span>
-<a id="l-225" name="l-225"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">sigint_detected</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">state_q</span> <span class="o">!=</span> <span class="n">SigInt</span><span class="p">))</span> <span class="k">begin</span>
-<a id="l-226" name="l-226"></a>      <span class="n">state_d</span>  <span class="o">=</span> <span class="n">SigInt</span><span class="p">;</span>
-<a id="l-227" name="l-227"></a>      <span class="n">resp_pd</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-228" name="l-228"></a>      <span class="n">resp_nd</span>  <span class="o">=</span> <span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-229" name="l-229"></a>    <span class="k">end</span>
-<a id="l-230" name="l-230"></a>  <span class="k">end</span>
+<a id="l-224" name="l-224"></a><span class="w">    </span><span class="c1">// bail out if a signal integrity issue has been detected</span>
+<a id="l-225" name="l-225"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sigint_detected</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">state_q</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">SigInt</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-226" name="l-226"></a><span class="w">      </span><span class="n">state_d</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">SigInt</span><span class="p">;</span><span class="w"></span>
+<a id="l-227" name="l-227"></a><span class="w">      </span><span class="n">resp_pd</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-228" name="l-228"></a><span class="w">      </span><span class="n">resp_nd</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-229" name="l-229"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-230" name="l-230"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
 <a id="l-231" name="l-231"></a>
 <a id="l-232" name="l-232"></a>
-<a id="l-233" name="l-233"></a>  <span class="c1">///////////////</span>
-<a id="l-234" name="l-234"></a>  <span class="c1">// Registers //</span>
-<a id="l-235" name="l-235"></a>  <span class="c1">///////////////</span>
+<a id="l-233" name="l-233"></a><span class="w">  </span><span class="c1">///////////////</span>
+<a id="l-234" name="l-234"></a><span class="w">  </span><span class="c1">// Registers //</span>
+<a id="l-235" name="l-235"></a><span class="w">  </span><span class="c1">///////////////</span>
 <a id="l-236" name="l-236"></a>
-<a id="l-237" name="l-237"></a>  <span class="k">always_ff</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk_i</span> <span class="k">or</span> <span class="k">negedge</span> <span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span> <span class="o">:</span> <span class="n">p_regs</span>
-<a id="l-238" name="l-238"></a>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span> <span class="k">begin</span>
-<a id="l-239" name="l-239"></a>      <span class="n">state_q</span> <span class="o">&lt;=</span> <span class="n">Idle</span><span class="p">;</span>
-<a id="l-240" name="l-240"></a>    <span class="k">end</span> <span class="k">else</span> <span class="k">begin</span>
-<a id="l-241" name="l-241"></a>      <span class="n">state_q</span> <span class="o">&lt;=</span> <span class="n">state_d</span><span class="p">;</span>
-<a id="l-242" name="l-242"></a>    <span class="k">end</span>
-<a id="l-243" name="l-243"></a>  <span class="k">end</span>
+<a id="l-237" name="l-237"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_regs</span><span class="w"></span>
+<a id="l-238" name="l-238"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-239" name="l-239"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">Idle</span><span class="p">;</span><span class="w"></span>
+<a id="l-240" name="l-240"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-241" name="l-241"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-242" name="l-242"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-243" name="l-243"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
 <a id="l-244" name="l-244"></a>
-<a id="l-245" name="l-245"></a>  <span class="c1">////////////////</span>
-<a id="l-246" name="l-246"></a>  <span class="c1">// assertions //</span>
-<a id="l-247" name="l-247"></a>  <span class="c1">////////////////</span>
+<a id="l-245" name="l-245"></a><span class="w">  </span><span class="c1">////////////////</span>
+<a id="l-246" name="l-246"></a><span class="w">  </span><span class="c1">// assertions //</span>
+<a id="l-247" name="l-247"></a><span class="w">  </span><span class="c1">////////////////</span>
 <a id="l-248" name="l-248"></a>
-<a id="l-249" name="l-249"></a>  <span class="c1">// check whether all outputs have a good known state after reset</span>
-<a id="l-250" name="l-250"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">EscEnKnownO_A</span><span class="p">,</span> <span class="n">esc_req_o</span><span class="p">)</span>
-<a id="l-251" name="l-251"></a>  <span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">RespPKnownO_A</span><span class="p">,</span> <span class="n">esc_rx_o</span><span class="p">)</span>
+<a id="l-249" name="l-249"></a><span class="w">  </span><span class="c1">// check whether all outputs have a good known state after reset</span>
+<a id="l-250" name="l-250"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">EscEnKnownO_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-251" name="l-251"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">RespPKnownO_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">)</span><span class="w"></span>
 <a id="l-252" name="l-252"></a>
-<a id="l-253" name="l-253"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SigIntCheck0_A</span><span class="p">,</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">==</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span> <span class="o">|=&gt;</span>
-<a id="l-254" name="l-254"></a>      <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span> <span class="o">==</span> <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_n</span><span class="p">)</span>
-<a id="l-255" name="l-255"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SigIntCheck1_A</span><span class="p">,</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">==</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span> <span class="o">|=&gt;</span> <span class="n">state_q</span> <span class="o">==</span> <span class="n">SigInt</span><span class="p">)</span>
-<a id="l-256" name="l-256"></a>  <span class="c1">// auto-escalate in case of signal integrity issue</span>
-<a id="l-257" name="l-257"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">SigIntCheck2_A</span><span class="p">,</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">==</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span> <span class="o">|=&gt;</span> <span class="n">esc_req_o</span><span class="p">)</span>
-<a id="l-258" name="l-258"></a>  <span class="c1">// correct diff encoding</span>
-<a id="l-259" name="l-259"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">DiffEncCheck_A</span><span class="p">,</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">^</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span> <span class="o">|=&gt;</span>
-<a id="l-260" name="l-260"></a>      <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span> <span class="o">^</span> <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_n</span><span class="p">)</span>
-<a id="l-261" name="l-261"></a>  <span class="c1">// disable in case of signal integrity issue</span>
-<a id="l-262" name="l-262"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">PingRespCheck_A</span><span class="p">,</span> <span class="n">state_q</span> <span class="o">==</span> <span class="n">Idle</span> <span class="p">##</span><span class="mi">1</span> <span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">)</span> <span class="p">##</span><span class="mi">1</span> <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">)</span> <span class="o">|-&gt;</span>
-<a id="l-263" name="l-263"></a>      <span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="p">)</span> <span class="p">##</span><span class="mi">1</span> <span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="p">),</span>
-<a id="l-264" name="l-264"></a>      <span class="n">clk_i</span><span class="p">,</span> <span class="o">!</span><span class="n">rst_ni</span> <span class="o">||</span> <span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">==</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">))</span>
-<a id="l-265" name="l-265"></a>  <span class="c1">// escalation response needs to continuously toggle</span>
-<a id="l-266" name="l-266"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscRespCheck_A</span><span class="p">,</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">&amp;&amp;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-<a id="l-267" name="l-267"></a>      <span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">^</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">^</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span>
-<a id="l-268" name="l-268"></a>      <span class="o">|=&gt;</span> <span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span> <span class="o">!=</span> <span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="p">))</span>
-<a id="l-269" name="l-269"></a>  <span class="c1">// detect escalation pulse</span>
-<a id="l-270" name="l-270"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscEnCheck_A</span><span class="p">,</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">^</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">state_q</span> <span class="o">!=</span> <span class="n">SigInt</span>
-<a id="l-271" name="l-271"></a>      <span class="p">##</span><span class="mi">1</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span> <span class="o">^</span> <span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span> <span class="o">|-&gt;</span> <span class="n">esc_req_o</span><span class="p">)</span>
-<a id="l-272" name="l-272"></a>  <span class="c1">// make sure the counter does not wrap around</span>
-<a id="l-273" name="l-273"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscCntWrap_A</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">timeout_cnt</span> <span class="o">|=&gt;</span> <span class="n">timeout_cnt</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
-<a id="l-274" name="l-274"></a>  <span class="c1">// if the counter expires, escalation should be asserted</span>
-<a id="l-275" name="l-275"></a>  <span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscCntEsc_A</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">timeout_cnt</span> <span class="o">|-&gt;</span> <span class="n">esc_req_o</span><span class="p">)</span>
+<a id="l-253" name="l-253"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">SigIntCheck0_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="w"> </span><span class="o">|=&gt;</span><span class="w"></span>
+<a id="l-254" name="l-254"></a><span class="w">      </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_n</span><span class="p">)</span><span class="w"></span>
+<a id="l-255" name="l-255"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">SigIntCheck1_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="w"> </span><span class="o">|=&gt;</span><span class="w"> </span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">SigInt</span><span class="p">)</span><span class="w"></span>
+<a id="l-256" name="l-256"></a><span class="w">  </span><span class="c1">// auto-escalate in case of signal integrity issue</span>
+<a id="l-257" name="l-257"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">SigIntCheck2_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="w"> </span><span class="o">|=&gt;</span><span class="w"> </span><span class="n">esc_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-258" name="l-258"></a><span class="w">  </span><span class="c1">// correct diff encoding</span>
+<a id="l-259" name="l-259"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">DiffEncCheck_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="w"> </span><span class="o">|=&gt;</span><span class="w"></span>
+<a id="l-260" name="l-260"></a><span class="w">      </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_n</span><span class="p">)</span><span class="w"></span>
+<a id="l-261" name="l-261"></a><span class="w">  </span><span class="c1">// disable in case of signal integrity issue</span>
+<a id="l-262" name="l-262"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">PingRespCheck_A</span><span class="p">,</span><span class="w"> </span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Idle</span><span class="w"> </span><span class="p">##</span><span class="mi">1</span><span class="w"> </span><span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">)</span><span class="w"> </span><span class="p">##</span><span class="mi">1</span><span class="w"> </span><span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">)</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"></span>
+<a id="l-263" name="l-263"></a><span class="w">      </span><span class="p">$</span><span class="n">rose</span><span class="p">(</span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="p">)</span><span class="w"> </span><span class="p">##</span><span class="mi">1</span><span class="w"> </span><span class="p">$</span><span class="n">fell</span><span class="p">(</span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="p">),</span><span class="w"></span>
+<a id="l-264" name="l-264"></a><span class="w">      </span><span class="n">clk_i</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">rst_ni</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">))</span><span class="w"></span>
+<a id="l-265" name="l-265"></a><span class="w">  </span><span class="c1">// escalation response needs to continuously toggle</span>
+<a id="l-266" name="l-266"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscRespCheck_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
+<a id="l-267" name="l-267"></a><span class="w">      </span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span><span class="w"></span>
+<a id="l-268" name="l-268"></a><span class="w">      </span><span class="o">|=&gt;</span><span class="w"> </span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">esc_rx_o</span><span class="p">.</span><span class="n">resp_p</span><span class="p">))</span><span class="w"></span>
+<a id="l-269" name="l-269"></a><span class="w">  </span><span class="c1">// detect escalation pulse</span>
+<a id="l-270" name="l-270"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscEnCheck_A</span><span class="p">,</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">state_q</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">SigInt</span><span class="w"></span>
+<a id="l-271" name="l-271"></a><span class="w">      </span><span class="p">##</span><span class="mi">1</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_p</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">esc_tx_i</span><span class="p">.</span><span class="n">esc_n</span><span class="p">)</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">esc_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-272" name="l-272"></a><span class="w">  </span><span class="c1">// make sure the counter does not wrap around</span>
+<a id="l-273" name="l-273"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscCntWrap_A</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="w"> </span><span class="o">|=&gt;</span><span class="w"> </span><span class="n">timeout_cnt</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<a id="l-274" name="l-274"></a><span class="w">  </span><span class="c1">// if the counter expires, escalation should be asserted</span>
+<a id="l-275" name="l-275"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">EscCntEsc_A</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">timeout_cnt</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">esc_req_o</span><span class="p">)</span><span class="w"></span>
 <a id="l-276" name="l-276"></a>
-<a id="l-277" name="l-277"></a><span class="k">endmodule</span> <span class="o">:</span> <span class="n">prim_esc_receiver</span>
+<a id="l-277" name="l-277"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">prim_esc_receiver</span><span class="w"></span>
 </pre></div>
 </td></tr></table>
   </body>
