@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/tnoc'] = [["","TNoC",1,"logs/VeribleExtractor/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['veribleextractor/tnoc'] = [["cores","TNoC",1,"logs/VeribleExtractor/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

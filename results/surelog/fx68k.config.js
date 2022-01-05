@@ -1,1 +1,1 @@
-config_loader_data['surelog/fx68k'] = [["","fx68k",1,"logs/Surelog/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
+config_loader_data['surelog/fx68k'] = [["cores","fx68k",1,"logs/Surelog/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

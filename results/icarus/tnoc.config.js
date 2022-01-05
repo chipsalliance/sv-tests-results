@@ -1,1 +1,1 @@
-config_loader_data['icarus/tnoc'] = [["","TNoC",0,"logs/Icarus/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['icarus/tnoc'] = [["cores","TNoC",0,"logs/Icarus/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

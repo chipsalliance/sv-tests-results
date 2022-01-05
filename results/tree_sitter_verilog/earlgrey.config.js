@@ -1,1 +1,1 @@
-config_loader_data['tree_sitter_verilog/earlgrey'] = [["","earlgrey",0,"logs/tree_sitter_verilog/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]
+config_loader_data['tree_sitter_verilog/earlgrey'] = [["cores","earlgrey",0,"logs/tree_sitter_verilog/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/earlgrey'] = [["","earlgrey",0,"logs/sv_parser/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]
+config_loader_data['sv_parser/earlgrey'] = [["cores","earlgrey",0,"logs/sv_parser/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

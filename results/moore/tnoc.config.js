@@ -1,1 +1,1 @@
-config_loader_data['moore/tnoc'] = [["","TNoC",0,"logs/moore/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['moore/tnoc'] = [["cores","TNoC",0,"logs/moore/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

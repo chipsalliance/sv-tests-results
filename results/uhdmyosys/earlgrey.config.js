@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/earlgrey'] = [["","earlgrey",0,"logs/UhdmYosys/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]
+config_loader_data['uhdmyosys/earlgrey'] = [["cores","earlgrey",0,"logs/UhdmYosys/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

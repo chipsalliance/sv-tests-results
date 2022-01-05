@@ -1,1 +1,1 @@
-config_loader_data['verible/rsd'] = [["","rsd",0,"logs/Verible/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
+config_loader_data['verible/rsd'] = [["cores","rsd",0,"logs/Verible/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

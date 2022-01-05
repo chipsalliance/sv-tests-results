@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/earlgrey'] = [["","earlgrey",0,"logs/VeribleExtractor/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]
+config_loader_data['veribleextractor/earlgrey'] = [["cores","earlgrey",0,"logs/VeribleExtractor/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]

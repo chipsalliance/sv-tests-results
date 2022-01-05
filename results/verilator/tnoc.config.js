@@ -1,1 +1,1 @@
-config_loader_data['verilator/tnoc'] = [["","TNoC",0,"logs/Verilator/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['verilator/tnoc'] = [["cores","TNoC",0,"logs/Verilator/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
