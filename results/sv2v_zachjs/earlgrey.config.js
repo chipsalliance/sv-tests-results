@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/earlgrey'] = [["cores","earlgrey",0,"logs/Sv2v_zachjs/generated/fusesoc/earlgrey.sv.log.html","third_party/tests/uvm/src/uvm_pkg.sv.html"]]
+config_loader_data['sv2v_zachjs/earlgrey'] = [["cores","earlgrey",0,"logs/Sv2v_zachjs/generated/fusesoc/earlgrey.sv.log.html","build/lowrisc_systems_top_earlgrey_0.1/src/lowrisc_constants_top_pkg_0/rtl/top_pkg.sv.html"]]

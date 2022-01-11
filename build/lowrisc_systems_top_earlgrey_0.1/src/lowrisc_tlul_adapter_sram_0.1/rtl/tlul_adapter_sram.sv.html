@@ -519,14 +519,7 @@
 <span class="normal"><a href="#l-511">511</a></span>
 <span class="normal"><a href="#l-512">512</a></span>
 <span class="normal"><a href="#l-513">513</a></span>
-<span class="normal"><a href="#l-514">514</a></span>
-<span class="normal"><a href="#l-515">515</a></span>
-<span class="normal"><a href="#l-516">516</a></span>
-<span class="normal"><a href="#l-517">517</a></span>
-<span class="normal"><a href="#l-518">518</a></span>
-<span class="normal"><a href="#l-519">519</a></span>
-<span class="normal"><a href="#l-520">520</a></span>
-<span class="normal"><a href="#l-521">521</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-514">514</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a>
@@ -951,102 +944,95 @@
 <a id="l-423" name="l-423"></a><span class="w">  </span><span class="c1">//    responses), storing the request is necessary. And if the read entry</span>
 <a id="l-424" name="l-424"></a><span class="w">  </span><span class="c1">//    is write op, it is safe to return the response right away. If it is</span>
 <a id="l-425" name="l-425"></a><span class="w">  </span><span class="c1">//    read reqeust, then D response is waiting until read data arrives.</span>
-<a id="l-426" name="l-426"></a>
-<a id="l-427" name="l-427"></a><span class="w">  </span><span class="c1">// Notes:</span>
-<a id="l-428" name="l-428"></a><span class="w">  </span><span class="c1">// The oustanding+1 allows the reqfifo to absorb back to back transactions</span>
-<a id="l-429" name="l-429"></a><span class="w">  </span><span class="c1">// without any wait states.  Alternatively, the depth can be kept as</span>
-<a id="l-430" name="l-430"></a><span class="w">  </span><span class="c1">// oustanding as long as the outgoing ready is qualified with the acceptance</span>
-<a id="l-431" name="l-431"></a><span class="w">  </span><span class="c1">// of the response in the same cycle.  Doing so however creates a path from</span>
-<a id="l-432" name="l-432"></a><span class="w">  </span><span class="c1">// ready_i to ready_o, which may not be desireable.</span>
-<a id="l-433" name="l-433"></a><span class="w">  </span><span class="n">prim_fifo_sync</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
-<a id="l-434" name="l-434"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="w">   </span><span class="p">(</span><span class="n">ReqFifoWidth</span><span class="p">),</span><span class="w"></span>
-<a id="l-435" name="l-435"></a><span class="w">    </span><span class="p">.</span><span class="n">Pass</span><span class="w">    </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
-<a id="l-436" name="l-436"></a><span class="w">    </span><span class="p">.</span><span class="n">Depth</span><span class="w">   </span><span class="p">(</span><span class="n">Outstanding</span><span class="p">)</span><span class="w"></span>
-<a id="l-437" name="l-437"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_reqfifo</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<a id="l-438" name="l-438"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
-<a id="l-439" name="l-439"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
-<a id="l-440" name="l-440"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="w">   </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
-<a id="l-441" name="l-441"></a><span class="w">    </span><span class="p">.</span><span class="n">wvalid_i</span><span class="p">(</span><span class="n">reqfifo_wvalid</span><span class="p">),</span><span class="w"></span>
-<a id="l-442" name="l-442"></a><span class="w">    </span><span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">reqfifo_wready</span><span class="p">),</span><span class="w"></span>
-<a id="l-443" name="l-443"></a><span class="w">    </span><span class="p">.</span><span class="n">wdata_i</span><span class="w"> </span><span class="p">(</span><span class="n">reqfifo_wdata</span><span class="p">),</span><span class="w"></span>
-<a id="l-444" name="l-444"></a><span class="w">    </span><span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span><span class="n">reqfifo_rvalid</span><span class="p">),</span><span class="w"></span>
-<a id="l-445" name="l-445"></a><span class="w">    </span><span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">reqfifo_rready</span><span class="p">),</span><span class="w"></span>
-<a id="l-446" name="l-446"></a><span class="w">    </span><span class="p">.</span><span class="n">rdata_o</span><span class="w"> </span><span class="p">(</span><span class="n">reqfifo_rdata</span><span class="p">),</span><span class="w"></span>
-<a id="l-447" name="l-447"></a><span class="w">    </span><span class="p">.</span><span class="n">full_o</span><span class="w">  </span><span class="p">(),</span><span class="w"></span>
-<a id="l-448" name="l-448"></a><span class="w">    </span><span class="p">.</span><span class="n">depth_o</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
-<a id="l-449" name="l-449"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
-<a id="l-450" name="l-450"></a>
-<a id="l-451" name="l-451"></a><span class="w">  </span><span class="c1">// sramreqfifo:</span>
-<a id="l-452" name="l-452"></a><span class="w">  </span><span class="c1">//    While the ReqFIFO holds the request until it is sent back via TL-UL, the</span>
-<a id="l-453" name="l-453"></a><span class="w">  </span><span class="c1">//    sramreqfifo only needs to hold the mask and word offset until the read</span>
-<a id="l-454" name="l-454"></a><span class="w">  </span><span class="c1">//    data returns from memory.</span>
-<a id="l-455" name="l-455"></a><span class="w">  </span><span class="n">prim_fifo_sync</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
-<a id="l-456" name="l-456"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="w">   </span><span class="p">(</span><span class="n">SramReqFifoWidth</span><span class="p">),</span><span class="w"></span>
-<a id="l-457" name="l-457"></a><span class="w">    </span><span class="p">.</span><span class="n">Pass</span><span class="w">    </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
-<a id="l-458" name="l-458"></a><span class="w">    </span><span class="p">.</span><span class="n">Depth</span><span class="w">   </span><span class="p">(</span><span class="n">Outstanding</span><span class="p">)</span><span class="w"></span>
-<a id="l-459" name="l-459"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_sramreqfifo</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<a id="l-460" name="l-460"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
-<a id="l-461" name="l-461"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
-<a id="l-462" name="l-462"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="w">   </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
-<a id="l-463" name="l-463"></a><span class="w">    </span><span class="p">.</span><span class="n">wvalid_i</span><span class="p">(</span><span class="n">sramreqfifo_wvalid</span><span class="p">),</span><span class="w"></span>
-<a id="l-464" name="l-464"></a><span class="w">    </span><span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">sramreqfifo_wready</span><span class="p">),</span><span class="w"></span>
-<a id="l-465" name="l-465"></a><span class="w">    </span><span class="p">.</span><span class="n">wdata_i</span><span class="w"> </span><span class="p">(</span><span class="n">sramreqfifo_wdata</span><span class="p">),</span><span class="w"></span>
-<a id="l-466" name="l-466"></a><span class="w">    </span><span class="p">.</span><span class="n">rvalid_o</span><span class="p">(),</span><span class="w"></span>
-<a id="l-467" name="l-467"></a><span class="w">    </span><span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">sramreqfifo_rready</span><span class="p">),</span><span class="w"></span>
-<a id="l-468" name="l-468"></a><span class="w">    </span><span class="p">.</span><span class="n">rdata_o</span><span class="w"> </span><span class="p">(</span><span class="n">sramreqfifo_rdata</span><span class="p">),</span><span class="w"></span>
-<a id="l-469" name="l-469"></a><span class="w">    </span><span class="p">.</span><span class="n">full_o</span><span class="w">  </span><span class="p">(),</span><span class="w"></span>
-<a id="l-470" name="l-470"></a><span class="w">    </span><span class="p">.</span><span class="n">depth_o</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
-<a id="l-471" name="l-471"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
-<a id="l-472" name="l-472"></a>
-<a id="l-473" name="l-473"></a><span class="w">  </span><span class="c1">// Rationale having #Outstanding depth in response FIFO.</span>
-<a id="l-474" name="l-474"></a><span class="w">  </span><span class="c1">//    In normal case, if the host or the crossbar accepts the response data,</span>
-<a id="l-475" name="l-475"></a><span class="w">  </span><span class="c1">//    response FIFO isn&#39;t needed. But if in any case it has a chance to be</span>
-<a id="l-476" name="l-476"></a><span class="w">  </span><span class="c1">//    back pressured, the response FIFO should store the returned data not to</span>
-<a id="l-477" name="l-477"></a><span class="w">  </span><span class="c1">//    lose the data from the SRAM interface. Remember, SRAM interface doesn&#39;t</span>
-<a id="l-478" name="l-478"></a><span class="w">  </span><span class="c1">//    have back-pressure signal such as read_ready.</span>
-<a id="l-479" name="l-479"></a><span class="w">  </span><span class="n">prim_fifo_sync</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
-<a id="l-480" name="l-480"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="w">   </span><span class="p">(</span><span class="n">RspFifoWidth</span><span class="p">),</span><span class="w"></span>
-<a id="l-481" name="l-481"></a><span class="w">    </span><span class="p">.</span><span class="n">Pass</span><span class="w">    </span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span><span class="w"></span>
-<a id="l-482" name="l-482"></a><span class="w">    </span><span class="p">.</span><span class="n">Depth</span><span class="w">   </span><span class="p">(</span><span class="n">Outstanding</span><span class="p">)</span><span class="w"></span>
-<a id="l-483" name="l-483"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_rspfifo</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<a id="l-484" name="l-484"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
-<a id="l-485" name="l-485"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
-<a id="l-486" name="l-486"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="w">   </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
-<a id="l-487" name="l-487"></a><span class="w">    </span><span class="p">.</span><span class="n">wvalid_i</span><span class="p">(</span><span class="n">rspfifo_wvalid</span><span class="p">),</span><span class="w"></span>
-<a id="l-488" name="l-488"></a><span class="w">    </span><span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">rspfifo_wready</span><span class="p">),</span><span class="w"></span>
-<a id="l-489" name="l-489"></a><span class="w">    </span><span class="p">.</span><span class="n">wdata_i</span><span class="w"> </span><span class="p">(</span><span class="n">rspfifo_wdata</span><span class="p">),</span><span class="w"></span>
-<a id="l-490" name="l-490"></a><span class="w">    </span><span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span><span class="n">rspfifo_rvalid</span><span class="p">),</span><span class="w"></span>
-<a id="l-491" name="l-491"></a><span class="w">    </span><span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">rspfifo_rready</span><span class="p">),</span><span class="w"></span>
-<a id="l-492" name="l-492"></a><span class="w">    </span><span class="p">.</span><span class="n">rdata_o</span><span class="w"> </span><span class="p">(</span><span class="n">rspfifo_rdata</span><span class="p">),</span><span class="w"></span>
-<a id="l-493" name="l-493"></a><span class="w">    </span><span class="p">.</span><span class="n">full_o</span><span class="w">  </span><span class="p">(),</span><span class="w"></span>
-<a id="l-494" name="l-494"></a><span class="w">    </span><span class="p">.</span><span class="n">depth_o</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
-<a id="l-495" name="l-495"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
+<a id="l-426" name="l-426"></a><span class="w">  </span><span class="n">prim_fifo_sync</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-427" name="l-427"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="w">   </span><span class="p">(</span><span class="n">ReqFifoWidth</span><span class="p">),</span><span class="w"></span>
+<a id="l-428" name="l-428"></a><span class="w">    </span><span class="p">.</span><span class="n">Pass</span><span class="w">    </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
+<a id="l-429" name="l-429"></a><span class="w">    </span><span class="p">.</span><span class="n">Depth</span><span class="w">   </span><span class="p">(</span><span class="n">Outstanding</span><span class="p">)</span><span class="w"></span>
+<a id="l-430" name="l-430"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_reqfifo</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-431" name="l-431"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-432" name="l-432"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-433" name="l-433"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="w">   </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
+<a id="l-434" name="l-434"></a><span class="w">    </span><span class="p">.</span><span class="n">wvalid_i</span><span class="p">(</span><span class="n">reqfifo_wvalid</span><span class="p">),</span><span class="w"></span>
+<a id="l-435" name="l-435"></a><span class="w">    </span><span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">reqfifo_wready</span><span class="p">),</span><span class="w"></span>
+<a id="l-436" name="l-436"></a><span class="w">    </span><span class="p">.</span><span class="n">wdata_i</span><span class="w"> </span><span class="p">(</span><span class="n">reqfifo_wdata</span><span class="p">),</span><span class="w"></span>
+<a id="l-437" name="l-437"></a><span class="w">    </span><span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span><span class="n">reqfifo_rvalid</span><span class="p">),</span><span class="w"></span>
+<a id="l-438" name="l-438"></a><span class="w">    </span><span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">reqfifo_rready</span><span class="p">),</span><span class="w"></span>
+<a id="l-439" name="l-439"></a><span class="w">    </span><span class="p">.</span><span class="n">rdata_o</span><span class="w"> </span><span class="p">(</span><span class="n">reqfifo_rdata</span><span class="p">),</span><span class="w"></span>
+<a id="l-440" name="l-440"></a><span class="w">    </span><span class="p">.</span><span class="n">full_o</span><span class="w">  </span><span class="p">(),</span><span class="w"></span>
+<a id="l-441" name="l-441"></a><span class="w">    </span><span class="p">.</span><span class="n">depth_o</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
+<a id="l-442" name="l-442"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
+<a id="l-443" name="l-443"></a>
+<a id="l-444" name="l-444"></a><span class="w">  </span><span class="c1">// sramreqfifo:</span>
+<a id="l-445" name="l-445"></a><span class="w">  </span><span class="c1">//    While the ReqFIFO holds the request until it is sent back via TL-UL, the</span>
+<a id="l-446" name="l-446"></a><span class="w">  </span><span class="c1">//    sramreqfifo only needs to hold the mask and word offset until the read</span>
+<a id="l-447" name="l-447"></a><span class="w">  </span><span class="c1">//    data returns from memory.</span>
+<a id="l-448" name="l-448"></a><span class="w">  </span><span class="n">prim_fifo_sync</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-449" name="l-449"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="w">   </span><span class="p">(</span><span class="n">SramReqFifoWidth</span><span class="p">),</span><span class="w"></span>
+<a id="l-450" name="l-450"></a><span class="w">    </span><span class="p">.</span><span class="n">Pass</span><span class="w">    </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
+<a id="l-451" name="l-451"></a><span class="w">    </span><span class="p">.</span><span class="n">Depth</span><span class="w">   </span><span class="p">(</span><span class="n">Outstanding</span><span class="p">)</span><span class="w"></span>
+<a id="l-452" name="l-452"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_sramreqfifo</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-453" name="l-453"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-454" name="l-454"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-455" name="l-455"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="w">   </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
+<a id="l-456" name="l-456"></a><span class="w">    </span><span class="p">.</span><span class="n">wvalid_i</span><span class="p">(</span><span class="n">sramreqfifo_wvalid</span><span class="p">),</span><span class="w"></span>
+<a id="l-457" name="l-457"></a><span class="w">    </span><span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">sramreqfifo_wready</span><span class="p">),</span><span class="w"></span>
+<a id="l-458" name="l-458"></a><span class="w">    </span><span class="p">.</span><span class="n">wdata_i</span><span class="w"> </span><span class="p">(</span><span class="n">sramreqfifo_wdata</span><span class="p">),</span><span class="w"></span>
+<a id="l-459" name="l-459"></a><span class="w">    </span><span class="p">.</span><span class="n">rvalid_o</span><span class="p">(),</span><span class="w"></span>
+<a id="l-460" name="l-460"></a><span class="w">    </span><span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">sramreqfifo_rready</span><span class="p">),</span><span class="w"></span>
+<a id="l-461" name="l-461"></a><span class="w">    </span><span class="p">.</span><span class="n">rdata_o</span><span class="w"> </span><span class="p">(</span><span class="n">sramreqfifo_rdata</span><span class="p">),</span><span class="w"></span>
+<a id="l-462" name="l-462"></a><span class="w">    </span><span class="p">.</span><span class="n">full_o</span><span class="w">  </span><span class="p">(),</span><span class="w"></span>
+<a id="l-463" name="l-463"></a><span class="w">    </span><span class="p">.</span><span class="n">depth_o</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
+<a id="l-464" name="l-464"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
+<a id="l-465" name="l-465"></a>
+<a id="l-466" name="l-466"></a><span class="w">  </span><span class="c1">// Rationale having #Outstanding depth in response FIFO.</span>
+<a id="l-467" name="l-467"></a><span class="w">  </span><span class="c1">//    In normal case, if the host or the crossbar accepts the response data,</span>
+<a id="l-468" name="l-468"></a><span class="w">  </span><span class="c1">//    response FIFO isn&#39;t needed. But if in any case it has a chance to be</span>
+<a id="l-469" name="l-469"></a><span class="w">  </span><span class="c1">//    back pressured, the response FIFO should store the returned data not to</span>
+<a id="l-470" name="l-470"></a><span class="w">  </span><span class="c1">//    lose the data from the SRAM interface. Remember, SRAM interface doesn&#39;t</span>
+<a id="l-471" name="l-471"></a><span class="w">  </span><span class="c1">//    have back-pressure signal such as read_ready.</span>
+<a id="l-472" name="l-472"></a><span class="w">  </span><span class="n">prim_fifo_sync</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<a id="l-473" name="l-473"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="w">   </span><span class="p">(</span><span class="n">RspFifoWidth</span><span class="p">),</span><span class="w"></span>
+<a id="l-474" name="l-474"></a><span class="w">    </span><span class="p">.</span><span class="n">Pass</span><span class="w">    </span><span class="p">(</span><span class="mb">1&#39;b1</span><span class="p">),</span><span class="w"></span>
+<a id="l-475" name="l-475"></a><span class="w">    </span><span class="p">.</span><span class="n">Depth</span><span class="w">   </span><span class="p">(</span><span class="n">Outstanding</span><span class="p">)</span><span class="w"></span>
+<a id="l-476" name="l-476"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_rspfifo</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<a id="l-477" name="l-477"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
+<a id="l-478" name="l-478"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
+<a id="l-479" name="l-479"></a><span class="w">    </span><span class="p">.</span><span class="n">clr_i</span><span class="w">   </span><span class="p">(</span><span class="mb">1&#39;b0</span><span class="p">),</span><span class="w"></span>
+<a id="l-480" name="l-480"></a><span class="w">    </span><span class="p">.</span><span class="n">wvalid_i</span><span class="p">(</span><span class="n">rspfifo_wvalid</span><span class="p">),</span><span class="w"></span>
+<a id="l-481" name="l-481"></a><span class="w">    </span><span class="p">.</span><span class="n">wready_o</span><span class="p">(</span><span class="n">rspfifo_wready</span><span class="p">),</span><span class="w"></span>
+<a id="l-482" name="l-482"></a><span class="w">    </span><span class="p">.</span><span class="n">wdata_i</span><span class="w"> </span><span class="p">(</span><span class="n">rspfifo_wdata</span><span class="p">),</span><span class="w"></span>
+<a id="l-483" name="l-483"></a><span class="w">    </span><span class="p">.</span><span class="n">rvalid_o</span><span class="p">(</span><span class="n">rspfifo_rvalid</span><span class="p">),</span><span class="w"></span>
+<a id="l-484" name="l-484"></a><span class="w">    </span><span class="p">.</span><span class="n">rready_i</span><span class="p">(</span><span class="n">rspfifo_rready</span><span class="p">),</span><span class="w"></span>
+<a id="l-485" name="l-485"></a><span class="w">    </span><span class="p">.</span><span class="n">rdata_o</span><span class="w"> </span><span class="p">(</span><span class="n">rspfifo_rdata</span><span class="p">),</span><span class="w"></span>
+<a id="l-486" name="l-486"></a><span class="w">    </span><span class="p">.</span><span class="n">full_o</span><span class="w">  </span><span class="p">(),</span><span class="w"></span>
+<a id="l-487" name="l-487"></a><span class="w">    </span><span class="p">.</span><span class="n">depth_o</span><span class="w"> </span><span class="p">()</span><span class="w"></span>
+<a id="l-488" name="l-488"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
+<a id="l-489" name="l-489"></a>
+<a id="l-490" name="l-490"></a><span class="w">  </span><span class="c1">// below assertion fails when SRAM rvalid is asserted even though ReqFifo is empty</span>
+<a id="l-491" name="l-491"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">rvalidHighReqFifoEmpty</span><span class="p">,</span><span class="w"> </span><span class="n">rvalid_i</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">reqfifo_rvalid</span><span class="p">)</span><span class="w"></span>
+<a id="l-492" name="l-492"></a>
+<a id="l-493" name="l-493"></a><span class="w">  </span><span class="c1">// below assertion fails when outstanding value is too small (SRAM rvalid is asserted</span>
+<a id="l-494" name="l-494"></a><span class="w">  </span><span class="c1">// even though the RspFifo is full)</span>
+<a id="l-495" name="l-495"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">rvalidHighWhenRspFifoFull</span><span class="p">,</span><span class="w"> </span><span class="n">rvalid_i</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">rspfifo_wready</span><span class="p">)</span><span class="w"></span>
 <a id="l-496" name="l-496"></a>
-<a id="l-497" name="l-497"></a><span class="w">  </span><span class="c1">// below assertion fails when SRAM rvalid is asserted even though ReqFifo is empty</span>
-<a id="l-498" name="l-498"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">rvalidHighReqFifoEmpty</span><span class="p">,</span><span class="w"> </span><span class="n">rvalid_i</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">reqfifo_rvalid</span><span class="p">)</span><span class="w"></span>
+<a id="l-497" name="l-497"></a><span class="w">  </span><span class="c1">// If both ErrOnWrite and ErrOnRead are set, this block is useless</span>
+<a id="l-498" name="l-498"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">adapterNoReadOrWrite</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ErrOnWrite</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ErrOnRead</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
 <a id="l-499" name="l-499"></a>
-<a id="l-500" name="l-500"></a><span class="w">  </span><span class="c1">// below assertion fails when outstanding value is too small (SRAM rvalid is asserted</span>
-<a id="l-501" name="l-501"></a><span class="w">  </span><span class="c1">// even though the RspFifo is full)</span>
-<a id="l-502" name="l-502"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">rvalidHighWhenRspFifoFull</span><span class="p">,</span><span class="w"> </span><span class="n">rvalid_i</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">rspfifo_wready</span><span class="p">)</span><span class="w"></span>
-<a id="l-503" name="l-503"></a>
-<a id="l-504" name="l-504"></a><span class="w">  </span><span class="c1">// If both ErrOnWrite and ErrOnRead are set, this block is useless</span>
-<a id="l-505" name="l-505"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">adapterNoReadOrWrite</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ErrOnWrite</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ErrOnRead</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<a id="l-506" name="l-506"></a>
-<a id="l-507" name="l-507"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">SramDwHasByteGranularity_A</span><span class="p">,</span><span class="w"> </span><span class="n">SramDw</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<a id="l-508" name="l-508"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">SramDwIsMultipleOfTlulWidth_A</span><span class="p">,</span><span class="w"> </span><span class="n">SramDw</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_DW</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
-<a id="l-509" name="l-509"></a>
-<a id="l-510" name="l-510"></a><span class="w">  </span><span class="c1">// These parameter options cannot both be true at the same time</span>
-<a id="l-511" name="l-511"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">DataIntgOptions_A</span><span class="p">,</span><span class="w"> </span><span class="o">~</span><span class="p">(</span><span class="n">EnableDataIntgGen</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">EnableDataIntgPt</span><span class="p">))</span><span class="w"></span>
-<a id="l-512" name="l-512"></a>
-<a id="l-513" name="l-513"></a><span class="w">  </span><span class="c1">// make sure outputs are defined</span>
-<a id="l-514" name="l-514"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlOutKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">tl_o</span><span class="w">   </span><span class="p">)</span><span class="w"></span>
-<a id="l-515" name="l-515"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ReqOutKnown_A</span><span class="p">,</span><span class="w">   </span><span class="n">req_o</span><span class="w">  </span><span class="p">)</span><span class="w"></span>
-<a id="l-516" name="l-516"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">WeOutKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">we_o</span><span class="w">   </span><span class="p">)</span><span class="w"></span>
-<a id="l-517" name="l-517"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">AddrOutKnown_A</span><span class="p">,</span><span class="w">  </span><span class="n">addr_o</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<a id="l-518" name="l-518"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">WdataOutKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">wdata_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-519" name="l-519"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">WmaskOutKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">wmask_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-520" name="l-520"></a>
-<a id="l-521" name="l-521"></a><span class="k">endmodule</span><span class="w"></span>
+<a id="l-500" name="l-500"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">SramDwHasByteGranularity_A</span><span class="p">,</span><span class="w"> </span><span class="n">SramDw</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<a id="l-501" name="l-501"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">SramDwIsMultipleOfTlulWidth_A</span><span class="p">,</span><span class="w"> </span><span class="n">SramDw</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">top_pkg</span><span class="o">::</span><span class="n">TL_DW</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"></span>
+<a id="l-502" name="l-502"></a>
+<a id="l-503" name="l-503"></a><span class="w">  </span><span class="c1">// These parameter options cannot both be true at the same time</span>
+<a id="l-504" name="l-504"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">DataIntgOptions_A</span><span class="p">,</span><span class="w"> </span><span class="o">~</span><span class="p">(</span><span class="n">EnableDataIntgGen</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">EnableDataIntgPt</span><span class="p">))</span><span class="w"></span>
+<a id="l-505" name="l-505"></a>
+<a id="l-506" name="l-506"></a><span class="w">  </span><span class="c1">// make sure outputs are defined</span>
+<a id="l-507" name="l-507"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlOutKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">tl_o</span><span class="w">   </span><span class="p">)</span><span class="w"></span>
+<a id="l-508" name="l-508"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ReqOutKnown_A</span><span class="p">,</span><span class="w">   </span><span class="n">req_o</span><span class="w">  </span><span class="p">)</span><span class="w"></span>
+<a id="l-509" name="l-509"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">WeOutKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">we_o</span><span class="w">   </span><span class="p">)</span><span class="w"></span>
+<a id="l-510" name="l-510"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">AddrOutKnown_A</span><span class="p">,</span><span class="w">  </span><span class="n">addr_o</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<a id="l-511" name="l-511"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">WdataOutKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">wdata_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-512" name="l-512"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">WmaskOutKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">wmask_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-513" name="l-513"></a>
+<a id="l-514" name="l-514"></a><span class="k">endmodule</span><span class="w"></span>
 </pre></div>
 </td></tr></table>
   </body>
