@@ -61,9 +61,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-01-19 01:39:24</dd></div>
-        <div><dt>time elapsed</dt><dd>2.714s</dd></div>
-        <div><dt>ram usage</dt><dd>315088 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-01-20 01:44:36</dd></div>
+        <div><dt>time elapsed</dt><dd>2.772s</dd></div>
+        <div><dt>ram usage</dt><dd>317860 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -130,9 +130,13 @@
       <pre>	localparam SCR1_CSR_CMD_WIDTH_E = 2;</pre>
       <pre>	input wire [1:0] csr2hdu_cmd_i;</pre>
       <pre>	localparam [31:0] SCR1_CSR_ADDR_WIDTH = 12;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = &#39;h4;</pre>
+      <pre>	function automatic [11:0] sv2v_cast_C7572;</pre>
+      <pre>		input reg [11:0] inp;</pre>
+      <pre>		sv2v_cast_C7572 = inp;</pre>
+      <pre>	endfunction</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = sv2v_cast_C7572(&#39;h4);</pre>
       <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_SPAN = SCR1_CSR_ADDR_HDU_MSPAN;</pre>
-      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(32&#39;h00000004);</pre>
+      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(SCR1_HDU_DEBUGCSR_ADDR_SPAN);</pre>
       <pre>	input wire [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] csr2hdu_addr_i;</pre>
       <pre>	input wire [31:0] csr2hdu_wdata_i;</pre>
       <pre>	output wire hdu2csr_resp_o;</pre>
@@ -667,10 +671,10 @@
       <pre>	wire [1:0] csr_tdata2_upd;</pre>
       <pre>	reg [(MTRIG_NUM * SCR1_TDU_DATA_W) - 1:0] csr_tdata2_ff;</pre>
       <pre>	assign tdu2csr_resp_o = (csr2tdu_req_i ? 1&#39;d0 : 1&#39;d1);</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA1 = &#39;h1;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA2 = &#39;h2;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TINFO = &#39;h4;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TSELECT = &#39;h0;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA1 = 3&#39;sd1;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA2 = 3&#39;sd2;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TINFO = 3&#39;sd4;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TSELECT = 3&#39;sd0;</pre>
       <pre>	localparam [31:0] SCR1_TDU_ICOUNT_ACTION_HI = 5;</pre>
       <pre>	localparam [31:0] SCR1_TDU_ICOUNT_ACTION_LO = 0;</pre>
       <pre>	localparam [31:0] SCR1_TDU_ICOUNT_HIT = 24;</pre>
@@ -961,7 +965,7 @@
       <pre>	input wire [31:0] csr2ipic_wdata_i;</pre>
       <pre>	output reg [31:0] ipic2csr_rdata_o;</pre>
       <pre>	output wire ipic2csr_irq_m_req_o;</pre>
-      <pre>	localparam SCR1_IRQ_VECT_WIDTH = 5;</pre>
+      <pre>	localparam SCR1_IRQ_IDX_WIDTH = 4;</pre>
       <pre>	localparam SCR1_IRQ_LINES_WIDTH = 4;</pre>
       <pre>	function automatic [1:0] scr1_search_one_2;</pre>
       <pre>		input reg [1:0] din;</pre>
@@ -972,7 +976,7 @@
       <pre>			scr1_search_one_2 = tmp;</pre>
       <pre>		end</pre>
       <pre>	endfunction</pre>
-      <pre>	function automatic [5:0] scr1_search_one_16;</pre>
+      <pre>	function automatic [4:0] scr1_search_one_16;</pre>
       <pre>		input reg [15:0] din;</pre>
       <pre>		begin : sv2v_autoblock_1</pre>
       <pre>			reg [7:0] stage1_vd;</pre>
@@ -981,7 +985,7 @@
       <pre>			reg stage1_idx [7:0];</pre>
       <pre>			reg [1:0] stage2_idx [3:0];</pre>
       <pre>			reg [2:0] stage3_idx [1:0];</pre>
-      <pre>			reg [5:0] result;</pre>
+      <pre>			reg [4:0] result;</pre>
       <pre>			begin : sv2v_autoblock_2</pre>
       <pre>				reg [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; 8; i = i + 1)</pre>
@@ -1012,8 +1016,8 @@
       <pre>						stage3_idx[i] = (~tmp[0] ? {tmp[0], stage2_idx[2 * i]} : {tmp[0], stage2_idx[(2 * i) + 1]});</pre>
       <pre>					end</pre>
       <pre>			end</pre>
-      <pre>			result[5] = |stage3_vd;</pre>
-      <pre>			result[4-:SCR1_IRQ_VECT_WIDTH] = (stage3_vd[0] ? {1&#39;b0, stage3_idx[0]} : {1&#39;b1, stage3_idx[1]});</pre>
+      <pre>			result[4] = |stage3_vd;</pre>
+      <pre>			result[3-:SCR1_IRQ_IDX_WIDTH] = (stage3_vd[0] ? {1&#39;b0, stage3_idx[0]} : {1&#39;b1, stage3_idx[1]});</pre>
       <pre>			scr1_search_one_16 = result;</pre>
       <pre>		end</pre>
       <pre>	endfunction</pre>
@@ -1023,6 +1027,7 @@
       <pre>	wire [15:0] irq_edge_detected;</pre>
       <pre>	wire [15:0] irq_lvl;</pre>
       <pre>	wire ipic_cisv_upd;</pre>
+      <pre>	localparam SCR1_IRQ_VECT_WIDTH = 5;</pre>
       <pre>	reg [4:0] ipic_cisv_ff;</pre>
       <pre>	wire [4:0] ipic_cisv_next;</pre>
       <pre>	reg cicsr_wr_req;</pre>
@@ -1032,7 +1037,6 @@
       <pre>	reg soi_wr_req;</pre>
       <pre>	wire ipic_soi_req;</pre>
       <pre>	reg idxr_wr_req;</pre>
-      <pre>	localparam SCR1_IRQ_IDX_WIDTH = 4;</pre>
       <pre>	reg [3:0] ipic_idxr_ff;</pre>
       <pre>	wire ipic_ipr_upd;</pre>
       <pre>	reg [15:0] ipic_ipr_ff;</pre>
@@ -1053,16 +1057,16 @@
       <pre>	reg icsr_wr_req;</pre>
       <pre>	wire [8:0] ipic_icsr;</pre>
       <pre>	wire irq_serv_vd;</pre>
-      <pre>	wire [4:0] irq_serv_idx;</pre>
+      <pre>	wire [3:0] irq_serv_idx;</pre>
       <pre>	wire irq_req_vd;</pre>
-      <pre>	wire [4:0] irq_req_idx;</pre>
+      <pre>	wire [3:0] irq_req_idx;</pre>
       <pre>	wire irq_eoi_req_vd;</pre>
-      <pre>	wire [4:0] irq_eoi_req_idx;</pre>
+      <pre>	wire [3:0] irq_eoi_req_idx;</pre>
       <pre>	wire [15:0] irq_req_v;</pre>
       <pre>	wire irq_start_vd;</pre>
       <pre>	wire irq_hi_prior_pnd;</pre>
-      <pre>	wire [5:0] irr_priority;</pre>
-      <pre>	wire [5:0] isvr_priority_eoi;</pre>
+      <pre>	wire [4:0] irr_priority;</pre>
+      <pre>	wire [4:0] isvr_priority_eoi;</pre>
       <pre>	reg [15:0] ipic_isvr_eoi;</pre>
       <pre>	always @(posedge clk or negedge rst_n)</pre>
       <pre>		if (~rst_n) begin</pre>
@@ -1166,7 +1170,7 @@
       <pre>			ipic_cisv_ff &lt;= SCR1_IRQ_VOID_VECT_NUM;</pre>
       <pre>		else if (ipic_cisv_upd)</pre>
       <pre>			ipic_cisv_ff &lt;= ipic_cisv_next;</pre>
-      <pre>	assign ipic_cisv_next = (irq_start_vd ? irq_req_idx : (ipic_eoi_req ? (irq_eoi_req_vd ? irq_eoi_req_idx : SCR1_IRQ_VOID_VECT_NUM) : 1&#39;b0));</pre>
+      <pre>	assign ipic_cisv_next = (irq_start_vd ? {1&#39;b0, irq_req_idx} : (ipic_eoi_req ? (irq_eoi_req_vd ? {1&#39;b0, irq_eoi_req_idx} : SCR1_IRQ_VOID_VECT_NUM) : 1&#39;b0));</pre>
       <pre>	assign irq_serv_idx = ipic_cisv_ff[3:0];</pre>
       <pre>	assign irq_serv_vd = ~ipic_cisv_ff[4];</pre>
       <pre>	assign ipic_cicsr[1] = ipic_ipr_ff[irq_serv_idx] &amp; irq_serv_vd;</pre>
@@ -1265,11 +1269,11 @@
       <pre>	assign ipic_icsr[3-:SCR1_IRQ_LINES_WIDTH] = ipic_idxr_ff;</pre>
       <pre>	assign irq_req_v = ipic_ipr_ff &amp; ipic_ier_ff;</pre>
       <pre>	assign irr_priority = scr1_search_one_16(irq_req_v);</pre>
-      <pre>	assign irq_req_vd = irr_priority[5];</pre>
-      <pre>	assign irq_req_idx = irr_priority[4-:SCR1_IRQ_VECT_WIDTH];</pre>
+      <pre>	assign irq_req_vd = irr_priority[4];</pre>
+      <pre>	assign irq_req_idx = irr_priority[3-:SCR1_IRQ_IDX_WIDTH];</pre>
       <pre>	assign isvr_priority_eoi = scr1_search_one_16(ipic_isvr_eoi);</pre>
-      <pre>	assign irq_eoi_req_vd = isvr_priority_eoi[5];</pre>
-      <pre>	assign irq_eoi_req_idx = isvr_priority_eoi[4-:SCR1_IRQ_VECT_WIDTH];</pre>
+      <pre>	assign irq_eoi_req_vd = isvr_priority_eoi[4];</pre>
+      <pre>	assign irq_eoi_req_idx = isvr_priority_eoi[3-:SCR1_IRQ_IDX_WIDTH];</pre>
       <pre>	assign irq_hi_prior_pnd = irq_req_idx &lt; irq_serv_idx;</pre>
       <pre>	assign ipic2csr_irq_m_req_o = irq_req_vd &amp; (~irq_serv_vd | irq_hi_prior_pnd);</pre>
       <pre>	assign irq_start_vd = ipic2csr_irq_m_req_o &amp; ipic_soi_req;</pre>
@@ -1357,9 +1361,13 @@
       <pre>	input wire [31:0] ipic2csr_rdata_i;</pre>
       <pre>	output wire csr2hdu_req_o;</pre>
       <pre>	output wire [1:0] csr2hdu_cmd_o;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = &#39;h4;</pre>
+      <pre>	function automatic [11:0] sv2v_cast_C7572;</pre>
+      <pre>		input reg [11:0] inp;</pre>
+      <pre>		sv2v_cast_C7572 = inp;</pre>
+      <pre>	endfunction</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = sv2v_cast_C7572(&#39;h4);</pre>
       <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_SPAN = SCR1_CSR_ADDR_HDU_MSPAN;</pre>
-      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(32&#39;h00000004);</pre>
+      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(SCR1_HDU_DEBUGCSR_ADDR_SPAN);</pre>
       <pre>	output wire [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] csr2hdu_addr_o;</pre>
       <pre>	output wire [31:0] csr2hdu_wdata_o;</pre>
       <pre>	input wire [31:0] hdu2csr_rdata_i;</pre>
@@ -1475,7 +1483,7 @@
       <pre>	assign exu_req_no_exc = (exu2csr_r_req_i &amp; ~csr_r_exc) | (exu2csr_w_req_i &amp; ~csr_w_exc);</pre>
       <pre>	localparam [6:0] SCR1_CSR_ADDR_HPMCOUNTERH_MASK = 7&#39;b1100100;</pre>
       <pre>	localparam [6:0] SCR1_CSR_ADDR_HPMCOUNTER_MASK = 7&#39;b1100000;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_IPIC_BASE = &#39;hbf0;</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_IPIC_BASE = sv2v_cast_C7572(&#39;hbf0);</pre>
       <pre>	localparam [2:0] SCR1_IPIC_CICSR = 3&#39;h1;</pre>
       <pre>	localparam [11:0] SCR1_CSR_ADDR_IPIC_CICSR = SCR1_CSR_ADDR_IPIC_BASE + SCR1_IPIC_CICSR;</pre>
       <pre>	localparam [2:0] SCR1_IPIC_CISV = 3&#39;h0;</pre>
@@ -1492,38 +1500,38 @@
       <pre>	localparam [11:0] SCR1_CSR_ADDR_IPIC_ISVR = SCR1_CSR_ADDR_IPIC_BASE + SCR1_IPIC_ISVR;</pre>
       <pre>	localparam [2:0] SCR1_IPIC_SOI = 3&#39;h5;</pre>
       <pre>	localparam [11:0] SCR1_CSR_ADDR_IPIC_SOI = SCR1_CSR_ADDR_IPIC_BASE + SCR1_IPIC_SOI;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MARCHID = &#39;hf12;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MCAUSE = &#39;h342;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MCOUNTEN = &#39;h7e0;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MEPC = &#39;h341;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MHARTID = &#39;hf14;</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MARCHID = sv2v_cast_C7572(&#39;hf12);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MCAUSE = sv2v_cast_C7572(&#39;h342);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MCOUNTEN = sv2v_cast_C7572(&#39;h7e0);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MEPC = sv2v_cast_C7572(&#39;h341);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MHARTID = sv2v_cast_C7572(&#39;hf14);</pre>
       <pre>	localparam [6:0] SCR1_CSR_ADDR_MHPMCOUNTERH_MASK = 7&#39;b1011100;</pre>
       <pre>	localparam [6:0] SCR1_CSR_ADDR_MHPMCOUNTER_MASK = 7&#39;b1011000;</pre>
       <pre>	localparam [6:0] SCR1_CSR_ADDR_MHPMEVENT_MASK = 7&#39;b0011001;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIE = &#39;h304;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIMPID = &#39;hf13;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIP = &#39;h344;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MISA = &#39;h301;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MSCRATCH = &#39;h340;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MSTATUS = &#39;h300;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MTVAL = &#39;h343;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MTVEC = &#39;h305;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MVENDORID = &#39;hf11;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_TDU_MBASE = &#39;h7a0;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA1 = &#39;h1;</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIE = sv2v_cast_C7572(&#39;h304);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIMPID = sv2v_cast_C7572(&#39;hf13);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIP = sv2v_cast_C7572(&#39;h344);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MISA = sv2v_cast_C7572(&#39;h301);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MSCRATCH = sv2v_cast_C7572(&#39;h340);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MSTATUS = sv2v_cast_C7572(&#39;h300);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MTVAL = sv2v_cast_C7572(&#39;h343);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MTVEC = sv2v_cast_C7572(&#39;h305);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MVENDORID = sv2v_cast_C7572(&#39;hf11);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_TDU_MBASE = sv2v_cast_C7572(&#39;h7a0);</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA1 = 3&#39;sd1;</pre>
       <pre>	localparam [11:0] SCR1_CSR_ADDR_TDU_TDATA1 = SCR1_CSR_ADDR_TDU_MBASE + SCR1_CSR_ADDR_TDU_OFFS_TDATA1;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA2 = &#39;h2;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TDATA2 = 3&#39;sd2;</pre>
       <pre>	localparam [11:0] SCR1_CSR_ADDR_TDU_TDATA2 = SCR1_CSR_ADDR_TDU_MBASE + SCR1_CSR_ADDR_TDU_OFFS_TDATA2;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TINFO = &#39;h4;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TINFO = 3&#39;sd4;</pre>
       <pre>	localparam [11:0] SCR1_CSR_ADDR_TDU_TINFO = SCR1_CSR_ADDR_TDU_MBASE + SCR1_CSR_ADDR_TDU_OFFS_TINFO;</pre>
-      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TSELECT = &#39;h0;</pre>
+      <pre>	localparam [2:0] SCR1_CSR_ADDR_TDU_OFFS_TSELECT = 3&#39;sd0;</pre>
       <pre>	localparam [11:0] SCR1_CSR_ADDR_TDU_TSELECT = SCR1_CSR_ADDR_TDU_MBASE + SCR1_CSR_ADDR_TDU_OFFS_TSELECT;</pre>
       <pre>	localparam [31:0] SCR1_CSR_MARCHID = 32&#39;d8;</pre>
-      <pre>	localparam [31:0] SCR1_CSR_MIMPID = 32&#39;h21051400;</pre>
+      <pre>	localparam [31:0] SCR1_CSR_MIMPID = 32&#39;h22011200;</pre>
       <pre>	localparam [1:0] SCR1_MISA_MXL_32 = 2&#39;d1;</pre>
       <pre>	localparam [31:0] SCR1_CSR_MISA = (((SCR1_MISA_MXL_32 &lt;&lt; 30) | 32&#39;h00000100) | 32&#39;h00000004) | 32&#39;h00001000;</pre>
       <pre>	localparam [31:0] SCR1_CSR_MVENDORID = 32&#39;h00000000;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MBASE = &#39;h7b0;</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MBASE = sv2v_cast_C7572(&#39;h7b0);</pre>
       <pre>	function automatic [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] sv2v_cast_9627E;</pre>
       <pre>		input reg [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] inp;</pre>
       <pre>		sv2v_cast_9627E = inp;</pre>
@@ -2353,10 +2361,10 @@
       <pre>	assign exu2hdu_ibrkpt_hw_o = tdu2exu_ibrkpt_exc_req_i | tdu2lsu_dbrkpt_exc_req_i;</pre>
       <pre>	assign mprf_rs1_req = exu_queue_vd &amp; idu2exu_use_rs1_i;</pre>
       <pre>	assign mprf_rs2_req = exu_queue_vd &amp; idu2exu_use_rs2_i;</pre>
-      <pre>	assign mprf_rs1_addr = exu_queue[51-:5];</pre>
-      <pre>	assign mprf_rs2_addr = exu_queue[46-:5];</pre>
-      <pre>	assign exu2mprf_rs1_addr_o = (mprf_rs1_req ? mprf_rs1_addr : {5 {1&#39;sb0}});</pre>
-      <pre>	assign exu2mprf_rs2_addr_o = (mprf_rs2_req ? mprf_rs2_addr : {5 {1&#39;sb0}});</pre>
+      <pre>	assign mprf_rs1_addr = exu_queue[51:47];</pre>
+      <pre>	assign mprf_rs2_addr = exu_queue[46:42];</pre>
+      <pre>	assign exu2mprf_rs1_addr_o = (mprf_rs1_req ? mprf_rs1_addr[4:0] : {5 {1&#39;sb0}});</pre>
+      <pre>	assign exu2mprf_rs2_addr_o = (mprf_rs2_req ? mprf_rs2_addr[4:0] : {5 {1&#39;sb0}});</pre>
       <pre>	function automatic [2:0] sv2v_cast_88572;</pre>
       <pre>		input reg [2:0] inp;</pre>
       <pre>		sv2v_cast_88572 = inp;</pre>
@@ -2526,7 +2534,7 @@
       <pre>		sv2v_cast_2C34F = inp;</pre>
       <pre>	endfunction</pre>
       <pre>	always @(*) begin</pre>
-      <pre>		main_sum_res = (exu2ialu_cmd_i != sv2v_cast_2C34F({32 {1&#39;sb0}} + 4) ? exu2ialu_main_op1_i - exu2ialu_main_op2_i : exu2ialu_main_op1_i + exu2ialu_main_op2_i);</pre>
+      <pre>		main_sum_res = (exu2ialu_cmd_i != sv2v_cast_2C34F({32 {1&#39;sb0}} + 4) ? {1&#39;b0, exu2ialu_main_op1_i} - {1&#39;b0, exu2ialu_main_op2_i} : {1&#39;b0, exu2ialu_main_op1_i} + {1&#39;b0, exu2ialu_main_op2_i});</pre>
       <pre>		main_sum_pos_ovflw = (~exu2ialu_main_op1_i[31] &amp; exu2ialu_main_op2_i[31]) &amp; main_sum_res[31];</pre>
       <pre>		main_sum_neg_ovflw = (exu2ialu_main_op1_i[31] &amp; ~exu2ialu_main_op2_i[31]) &amp; ~main_sum_res[31];</pre>
       <pre>		main_sum_flags[0] = main_sum_res[32];</pre>
@@ -2588,7 +2596,7 @@
       <pre>	assign mul_op2_sgn = mul_op2_is_sgn &amp; exu2ialu_main_op2_i[31];</pre>
       <pre>	assign mul_op1 = (mdu_cmd_mul ? $signed({mul_op1_sgn, exu2ialu_main_op1_i}) : {33 {1&#39;sb0}});</pre>
       <pre>	assign mul_op2 = (mdu_cmd_mul ? $signed({mul_op2_sgn, exu2ialu_main_op2_i}) : {33 {1&#39;sb0}});</pre>
-      <pre>	assign mul_res = (mdu_cmd_mul ? mul_op1 * mul_op2 : &#39;sb0);</pre>
+      <pre>	assign mul_res = (mdu_cmd_mul ? mul_op1 * mul_op2 : $signed(1&#39;sb0));</pre>
       <pre>	assign div_cmd = {(exu2ialu_cmd_i == sv2v_cast_2C34F({32 {1&#39;sb0}} + 21)) | (exu2ialu_cmd_i == sv2v_cast_2C34F({32 {1&#39;sb0}} + 22)), (exu2ialu_cmd_i == sv2v_cast_2C34F({32 {1&#39;sb0}} + 22)) | (exu2ialu_cmd_i == sv2v_cast_2C34F({32 {1&#39;sb0}} + 20))};</pre>
       <pre>	assign div_ops_are_sgn = ~div_cmd[0];</pre>
       <pre>	assign div_op1_is_neg = div_ops_are_sgn &amp; exu2ialu_main_op1_i[31];</pre>
@@ -2709,8 +2717,6 @@
       <pre>	idu2exu_cmd_o,</pre>
       <pre>	idu2exu_use_rs1_o,</pre>
       <pre>	idu2exu_use_rs2_o,</pre>
-      <pre>	idu2exu_use_rd_o,</pre>
-      <pre>	idu2exu_use_imm_o,</pre>
       <pre>	exu2idu_rdy_i</pre>
       <pre>);</pre>
       <pre>	output wire idu2ifu_rdy_o;</pre>
@@ -2738,8 +2744,6 @@
       <pre>	output reg [74:0] idu2exu_cmd_o;</pre>
       <pre>	output reg idu2exu_use_rs1_o;</pre>
       <pre>	output reg idu2exu_use_rs2_o;</pre>
-      <pre>	output reg idu2exu_use_rd_o;</pre>
-      <pre>	output reg idu2exu_use_imm_o;</pre>
       <pre>	input wire exu2idu_rdy_i;</pre>
       <pre>	localparam [4:0] SCR1_MPRF_ZERO_ADDR = 5&#39;d0;</pre>
       <pre>	localparam [4:0] SCR1_MPRF_RA_ADDR = 5&#39;d1;</pre>
@@ -2820,8 +2824,6 @@
       <pre>		idu2exu_cmd_o[3-:SCR1_EXC_CODE_WIDTH_E] = sv2v_cast_C1CCF(4&#39;d0);</pre>
       <pre>		idu2exu_use_rs1_o = 1&#39;b0;</pre>
       <pre>		idu2exu_use_rs2_o = 1&#39;b0;</pre>
-      <pre>		idu2exu_use_rd_o = 1&#39;b0;</pre>
-      <pre>		idu2exu_use_imm_o = 1&#39;b0;</pre>
       <pre>		rvi_illegal = 1&#39;b0;</pre>
       <pre>		rvc_illegal = 1&#39;b0;</pre>
       <pre>		if (ifu2idu_imem_err_i) begin</pre>
@@ -2837,21 +2839,15 @@
       <pre>					idu2exu_cmd_o[41-:5] = instr[11:7];</pre>
       <pre>					case (rvi_opcode)</pre>
       <pre>						5&#39;b00101: begin</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(0);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 2);</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {instr[31:12], 12&#39;b000000000000};</pre>
       <pre>						end</pre>
       <pre>						5&#39;b01101: begin</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 3);</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {instr[31:12], 12&#39;b000000000000};</pre>
       <pre>						end</pre>
       <pre>						5&#39;b11011: begin</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(0);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 4);</pre>
       <pre>							idu2exu_cmd_o[56] = 1&#39;b1;</pre>
@@ -2859,8 +2855,6 @@
       <pre>						end</pre>
       <pre>						5&#39;b00000: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 5);</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {{21 {instr[31]}}, instr[30:20]};</pre>
@@ -2876,7 +2870,6 @@
       <pre>						5&#39;b01000: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>							idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {{21 {instr[31]}}, instr[30:25], instr[11:7]};</pre>
       <pre>							case (funct3)</pre>
@@ -2889,7 +2882,6 @@
       <pre>						5&#39;b01100: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>							idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(1);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
       <pre>							case (funct7)</pre>
@@ -2926,8 +2918,6 @@
       <pre>						end</pre>
       <pre>						5&#39;b00100: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {{21 {instr[31]}}, instr[30:20]};</pre>
       <pre>							idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(0);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
@@ -2977,7 +2967,6 @@
       <pre>						5&#39;b11000: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>							idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {{20 {instr[31]}}, instr[7], instr[30:25], instr[11:8], 1&#39;b0};</pre>
       <pre>							idu2exu_cmd_o[55] = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(0);</pre>
@@ -2994,8 +2983,6 @@
       <pre>						end</pre>
       <pre>						5&#39;b11001: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							case (funct3)</pre>
       <pre>								3&#39;b000: begin</pre>
       <pre>									idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
@@ -3007,13 +2994,9 @@
       <pre>							endcase</pre>
       <pre>						end</pre>
       <pre>						5&#39;b11100: begin</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[36-:32] = sv2v_cast_32({funct3, instr[31:20]});</pre>
       <pre>							case (funct3)</pre>
-      <pre>								3&#39;b000: begin</pre>
-      <pre>									idu2exu_use_rd_o = 1&#39;b0;</pre>
-      <pre>									idu2exu_use_imm_o = 1&#39;b0;</pre>
+      <pre>								3&#39;b000:</pre>
       <pre>									case ({instr[19:15], instr[11:7]})</pre>
       <pre>										10&#39;d0:</pre>
       <pre>											case (funct12)</pre>
@@ -3031,7 +3014,6 @@
       <pre>											endcase</pre>
       <pre>										default: rvi_illegal = 1&#39;b1;</pre>
       <pre>									endcase</pre>
-      <pre>								end</pre>
       <pre>								3&#39;b001: begin</pre>
       <pre>									idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 6);</pre>
@@ -3077,12 +3059,10 @@
       <pre>				2&#39;b00: begin</pre>
       <pre>					idu2exu_cmd_o[74] = 1&#39;b1;</pre>
       <pre>					idu2exu_use_rs1_o = 1&#39;b1;</pre>
-      <pre>					idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>					case (funct3)</pre>
       <pre>						3&#39;b000: begin</pre>
       <pre>							if (~|instr[12:5])</pre>
       <pre>								rvc_illegal = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 4);</pre>
       <pre>							idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(0);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
@@ -3091,7 +3071,6 @@
       <pre>							idu2exu_cmd_o[36-:32] = {22&#39;d0, instr[10:7], instr[12:11], instr[5], instr[6], 2&#39;b00};</pre>
       <pre>						end</pre>
       <pre>						3&#39;b010: begin</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>							idu2exu_cmd_o[66-:4] = sv2v_cast_F7F15({32 {1&#39;sb0}} + 3);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 5);</pre>
@@ -3112,8 +3091,6 @@
       <pre>				end</pre>
       <pre>				2&#39;b01: begin</pre>
       <pre>					idu2exu_cmd_o[74] = 1&#39;b1;</pre>
-      <pre>					idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>					idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>					case (funct3)</pre>
       <pre>						3&#39;b000: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
@@ -3159,12 +3136,10 @@
       <pre>							idu2exu_cmd_o[41-:5] = {2&#39;b01, instr[9:7]};</pre>
       <pre>							idu2exu_cmd_o[46-:5] = {2&#39;b01, instr[4:2]};</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
       <pre>							case (instr[11:10])</pre>
       <pre>								2&#39;b00: begin</pre>
       <pre>									if (instr[12])</pre>
       <pre>										rvc_illegal = 1&#39;b1;</pre>
-      <pre>									idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[36-:32] = {27&#39;d0, instr[6:2]};</pre>
       <pre>									idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 13);</pre>
       <pre>									idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(0);</pre>
@@ -3173,14 +3148,12 @@
       <pre>								2&#39;b01: begin</pre>
       <pre>									if (instr[12])</pre>
       <pre>										rvc_illegal = 1&#39;b1;</pre>
-      <pre>									idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[36-:32] = {27&#39;d0, instr[6:2]};</pre>
       <pre>									idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 14);</pre>
       <pre>									idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(0);</pre>
       <pre>									idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
       <pre>								end</pre>
       <pre>								2&#39;b10: begin</pre>
-      <pre>									idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 1);</pre>
       <pre>									idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(0);</pre>
       <pre>									idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
@@ -3215,7 +3188,6 @@
       <pre>							endcase</pre>
       <pre>						end</pre>
       <pre>						3&#39;b101: begin</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(0);</pre>
       <pre>							idu2exu_cmd_o[56] = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {{21 {instr[12]}}, instr[8], instr[10:9], instr[6], instr[7], instr[2], instr[11], instr[5:3], 1&#39;b0};</pre>
@@ -3223,7 +3195,6 @@
       <pre>						3&#39;b110: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>							idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 8);</pre>
       <pre>							idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(1);</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(0);</pre>
@@ -3235,7 +3206,6 @@
       <pre>						3&#39;b111: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>							idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 9);</pre>
       <pre>							idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(1);</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(0);</pre>
@@ -3253,8 +3223,6 @@
       <pre>						3&#39;b000: begin</pre>
       <pre>							if (instr[12])</pre>
       <pre>								rvc_illegal = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[51-:5] = instr[11:7];</pre>
       <pre>							idu2exu_cmd_o[41-:5] = instr[11:7];</pre>
       <pre>							idu2exu_cmd_o[36-:32] = {27&#39;d0, instr[6:2]};</pre>
@@ -3265,8 +3233,6 @@
       <pre>						3&#39;b010: begin</pre>
       <pre>							if (~|instr[11:7])</pre>
       <pre>								rvc_illegal = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>							idu2exu_cmd_o[66-:4] = sv2v_cast_F7F15({32 {1&#39;sb0}} + 3);</pre>
       <pre>							idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 5);</pre>
@@ -3278,7 +3244,6 @@
       <pre>							if (~instr[12]) begin</pre>
       <pre>								if (|instr[6:2]) begin</pre>
       <pre>									idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>									idu2exu_use_rd_o = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 4);</pre>
       <pre>									idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(1);</pre>
       <pre>									idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
@@ -3289,7 +3254,6 @@
       <pre>								else begin</pre>
       <pre>									if (~|instr[11:7])</pre>
       <pre>										rvc_illegal = 1&#39;b1;</pre>
-      <pre>									idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>									idu2exu_cmd_o[56] = 1&#39;b1;</pre>
       <pre>									idu2exu_cmd_o[51-:5] = instr[11:7];</pre>
@@ -3302,8 +3266,6 @@
       <pre>							end</pre>
       <pre>							else if (~|instr[6:2]) begin</pre>
       <pre>								idu2exu_use_rs1_o = 1&#39;b1;</pre>
-      <pre>								idu2exu_use_rd_o = 1&#39;b1;</pre>
-      <pre>								idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>								idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>								idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 4);</pre>
       <pre>								idu2exu_cmd_o[56] = 1&#39;b1;</pre>
@@ -3314,7 +3276,6 @@
       <pre>							else begin</pre>
       <pre>								idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>								idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>								idu2exu_use_rd_o = 1&#39;b1;</pre>
       <pre>								idu2exu_cmd_o[72-:5] = sv2v_cast_54B07({32 {1&#39;sb0}} + 4);</pre>
       <pre>								idu2exu_cmd_o[73-:1] = sv2v_cast_B3173(1);</pre>
       <pre>								idu2exu_cmd_o[59-:3] = sv2v_cast_D081A({32 {1&#39;sb0}} + 1);</pre>
@@ -3325,7 +3286,6 @@
       <pre>						3&#39;b110: begin</pre>
       <pre>							idu2exu_use_rs1_o = 1&#39;b1;</pre>
       <pre>							idu2exu_use_rs2_o = 1&#39;b1;</pre>
-      <pre>							idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>							idu2exu_cmd_o[67-:1] = sv2v_cast_9B2B1(1);</pre>
       <pre>							idu2exu_cmd_o[66-:4] = sv2v_cast_F7F15({32 {1&#39;sb0}} + 8);</pre>
       <pre>							idu2exu_cmd_o[51-:5] = SCR1_MPRF_SP_ADDR;</pre>
@@ -3350,8 +3310,6 @@
       <pre>			idu2exu_cmd_o[52] = 1&#39;b0;</pre>
       <pre>			idu2exu_use_rs1_o = 1&#39;b0;</pre>
       <pre>			idu2exu_use_rs2_o = 1&#39;b0;</pre>
-      <pre>			idu2exu_use_rd_o = 1&#39;b0;</pre>
-      <pre>			idu2exu_use_imm_o = 1&#39;b1;</pre>
       <pre>			idu2exu_cmd_o[36-:32] = instr;</pre>
       <pre>			idu2exu_cmd_o[4] = 1&#39;b1;</pre>
       <pre>			idu2exu_cmd_o[3-:SCR1_EXC_CODE_WIDTH_E] = sv2v_cast_C1CCF(4&#39;d2);</pre>
@@ -3494,10 +3452,10 @@
       <pre>			else if (instr_hi_rvi_lo_ff)</pre>
       <pre>				instr_type = (instr_hi_is_rvi ? 3&#39;d5 : 3&#39;d4);</pre>
       <pre>			else</pre>
-      <pre>				casez ({instr_hi_is_rvi, instr_lo_is_rvi})</pre>
-      <pre>					2&#39;bz1: instr_type = 3&#39;d1;</pre>
+      <pre>				case ({instr_hi_is_rvi, instr_lo_is_rvi})</pre>
       <pre>					2&#39;b00: instr_type = 3&#39;d2;</pre>
       <pre>					2&#39;b10: instr_type = 3&#39;d3;</pre>
+      <pre>					default: instr_type = 3&#39;d1;</pre>
       <pre>				endcase</pre>
       <pre>	end</pre>
       <pre>	always @(posedge clk or negedge rst_n)</pre>
@@ -3535,14 +3493,14 @@
       <pre>			q_wptr &lt;= 1&#39;sb0;</pre>
       <pre>		else if (q_wptr_upd)</pre>
       <pre>			q_wptr &lt;= q_wptr_next;</pre>
-      <pre>	assign q_wptr_next = (q_flush_req ? {3 {1&#39;sb0}} : (~q_wr_none ? q_wptr + (q_wr_full ? 2&#39;d2 : 1&#39;b1) : q_wptr));</pre>
+      <pre>	assign q_wptr_next = (q_flush_req ? {3 {1&#39;sb0}} : (~q_wr_none ? q_wptr + (q_wr_full ? 3&#39;b010 : 3&#39;b001) : q_wptr));</pre>
       <pre>	assign q_rptr_upd = q_flush_req | ~q_rd_none;</pre>
       <pre>	always @(posedge clk or negedge rst_n)</pre>
       <pre>		if (~rst_n)</pre>
       <pre>			q_rptr &lt;= 1&#39;sb0;</pre>
       <pre>		else if (q_rptr_upd)</pre>
       <pre>			q_rptr &lt;= q_rptr_next;</pre>
-      <pre>	assign q_rptr_next = (q_flush_req ? {3 {1&#39;sb0}} : (~q_rd_none ? q_rptr + (q_rd_hword ? 1&#39;b1 : 2&#39;d2) : q_rptr));</pre>
+      <pre>	assign q_rptr_next = (q_flush_req ? {3 {1&#39;sb0}} : (~q_rd_none ? q_rptr + (q_rd_hword ? 3&#39;b001 : 3&#39;b010) : q_rptr));</pre>
       <pre>	assign imem_rdata_hi = imem2ifu_rdata_i[31:16];</pre>
       <pre>	assign imem_rdata_lo = imem2ifu_rdata_i[15:0];</pre>
       <pre>	assign q_wr_en = imem_resp_vd &amp; ~q_flush_req;</pre>
@@ -3996,8 +3954,6 @@
       <pre>	wire [74:0] idu2exu_cmd;</pre>
       <pre>	wire idu2exu_use_rs1;</pre>
       <pre>	wire idu2exu_use_rs2;</pre>
-      <pre>	wire idu2exu_use_rd;</pre>
-      <pre>	wire idu2exu_use_imm;</pre>
       <pre>	wire exu2idu_rdy;</pre>
       <pre>	wire [4:0] exu2mprf_rs1_addr;</pre>
       <pre>	wire [31:0] mprf2exu_rs1_data;</pre>
@@ -4054,9 +4010,13 @@
       <pre>	wire fetch_pbuf;</pre>
       <pre>	wire csr2hdu_req;</pre>
       <pre>	wire [1:0] csr2hdu_cmd;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = &#39;h4;</pre>
+      <pre>	function automatic [11:0] sv2v_cast_C7572;</pre>
+      <pre>		input reg [11:0] inp;</pre>
+      <pre>		sv2v_cast_C7572 = inp;</pre>
+      <pre>	endfunction</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = sv2v_cast_C7572(&#39;h4);</pre>
       <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_SPAN = SCR1_CSR_ADDR_HDU_MSPAN;</pre>
-      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(32&#39;h00000004);</pre>
+      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(SCR1_HDU_DEBUGCSR_ADDR_SPAN);</pre>
       <pre>	wire [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] csr2hdu_addr;</pre>
       <pre>	wire [31:0] csr2hdu_wdata;</pre>
       <pre>	wire [31:0] hdu2csr_rdata;</pre>
@@ -4123,8 +4083,6 @@
       <pre>		.idu2exu_cmd_o(idu2exu_cmd),</pre>
       <pre>		.idu2exu_use_rs1_o(idu2exu_use_rs1),</pre>
       <pre>		.idu2exu_use_rs2_o(idu2exu_use_rs2),</pre>
-      <pre>		.idu2exu_use_rd_o(idu2exu_use_rd),</pre>
-      <pre>		.idu2exu_use_imm_o(idu2exu_use_imm),</pre>
       <pre>		.exu2idu_rdy_i(exu2idu_rdy)</pre>
       <pre>	);</pre>
       <pre>	scr1_pipe_exu i_pipe_exu(</pre>
@@ -4892,7 +4850,7 @@
       <pre>		.dout_serial(dr_idcode_tdo)</pre>
       <pre>	);</pre>
       <pre>	localparam [31:0] SCR1_TAP_DR_BLD_ID_WIDTH = 32;</pre>
-      <pre>	localparam [31:0] SCR1_TAP_BLD_ID_VALUE = 32&#39;h21051400;</pre>
+      <pre>	localparam [31:0] SCR1_TAP_BLD_ID_VALUE = 32&#39;h22011200;</pre>
       <pre>	scr1_tapc_shift_reg #(</pre>
       <pre>		.SCR1_WIDTH(SCR1_TAP_DR_BLD_ID_WIDTH),</pre>
       <pre>		.SCR1_RESET_VALUE(sv2v_cast_7ABF0_signed(0))</pre>
@@ -5901,11 +5859,15 @@
       <pre>	assign clk_en_abs = clk_en_dm &amp; dmcontrol_dmactive_ff;</pre>
       <pre>	assign abs_cmd = (dmi_req_command ? dmi2dm_wdata_i : abs_command_ff);</pre>
       <pre>	localparam [31:0] SCR1_CSR_ADDR_WIDTH = 12;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MARCHID = &#39;hf12;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MHARTID = &#39;hf14;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIMPID = &#39;hf13;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MISA = &#39;h301;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_MVENDORID = &#39;hf11;</pre>
+      <pre>	function automatic [11:0] sv2v_cast_C7572;</pre>
+      <pre>		input reg [11:0] inp;</pre>
+      <pre>		sv2v_cast_C7572 = inp;</pre>
+      <pre>	endfunction</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MARCHID = sv2v_cast_C7572(&#39;hf12);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MHARTID = sv2v_cast_C7572(&#39;hf14);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MIMPID = sv2v_cast_C7572(&#39;hf13);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MISA = sv2v_cast_C7572(&#39;h301);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_MVENDORID = sv2v_cast_C7572(&#39;hf11);</pre>
       <pre>	localparam SCR1_DBG_COMMAND_ACCESSMEM_AAMPOSTINC = 5&#39;d19;</pre>
       <pre>	localparam SCR1_DBG_COMMAND_ACCESSMEM_AAMSIZE_HI = 5&#39;d22;</pre>
       <pre>	localparam SCR1_DBG_COMMAND_ACCESSMEM_AAMSIZE_LO = 5&#39;d20;</pre>
@@ -5919,10 +5881,10 @@
       <pre>	localparam SCR1_DBG_COMMAND_ACCESSREG_RESERVEDB = 5&#39;d23;</pre>
       <pre>	localparam SCR1_DBG_COMMAND_ACCESSREG_TRANSFER = 5&#39;d17;</pre>
       <pre>	localparam SCR1_DBG_COMMAND_ACCESSREG_WRITE = 5&#39;d16;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MBASE = &#39;h7b0;</pre>
-      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = &#39;h4;</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MBASE = sv2v_cast_C7572(&#39;h7b0);</pre>
+      <pre>	localparam [11:0] SCR1_CSR_ADDR_HDU_MSPAN = sv2v_cast_C7572(&#39;h4);</pre>
       <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_SPAN = SCR1_CSR_ADDR_HDU_MSPAN;</pre>
-      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(32&#39;h00000004);</pre>
+      <pre>	localparam [31:0] SCR1_HDU_DEBUGCSR_ADDR_WIDTH = $clog2(SCR1_HDU_DEBUGCSR_ADDR_SPAN);</pre>
       <pre>	function automatic [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] sv2v_cast_9627E;</pre>
       <pre>		input reg [SCR1_HDU_DEBUGCSR_ADDR_WIDTH - 1:0] inp;</pre>
       <pre>		sv2v_cast_9627E = inp;</pre>
@@ -6216,7 +6178,7 @@
       <pre>			abs_data0_ff &lt;= abs_data0_next;</pre>
       <pre>	assign data0_xreg_save = dreg_wr_req &amp; ~abs_cmd_wr_ff;</pre>
       <pre>	localparam [31:0] SCR1_CSR_MARCHID = 32&#39;d8;</pre>
-      <pre>	localparam [31:0] SCR1_CSR_MIMPID = 32&#39;h21051400;</pre>
+      <pre>	localparam [31:0] SCR1_CSR_MIMPID = 32&#39;h22011200;</pre>
       <pre>	localparam [1:0] SCR1_MISA_MXL_32 = 2&#39;d1;</pre>
       <pre>	localparam [31:0] SCR1_CSR_MISA = (((SCR1_MISA_MXL_32 &lt;&lt; 30) | 32&#39;h00000100) | 32&#39;h00000004) | 32&#39;h00001000;</pre>
       <pre>	localparam [31:0] SCR1_CSR_MVENDORID = 32&#39;h00000000;</pre>
@@ -8443,6 +8405,12 @@
       <pre>endmodule</pre>
       <pre>module scr1_top_tb_axi;</pre>
       <pre>	localparam SCR1_MEM_SIZE = 1048576;</pre>
+      <pre>	localparam TIMEOUT = &#39;d2000000;</pre>
+      <pre>	localparam ARCH = &#39;h1;</pre>
+      <pre>	localparam COMPLIANCE = &#39;h2;</pre>
+      <pre>	localparam ADDR_START = &#39;h200;</pre>
+      <pre>	localparam ADDR_TRAP_VECTOR = &#39;h240;</pre>
+      <pre>	localparam ADDR_TRAP_DEFAULT = &#39;h1c0;</pre>
       <pre>	wire rst_n;</pre>
       <pre>	reg clk = 1&#39;b0;</pre>
       <pre>	reg rtc_clk = 1&#39;b0;</pre>
@@ -8547,6 +8515,7 @@
       <pre>	wire [3:0] io_axi_dmem_ruser;</pre>
       <pre>	wire io_axi_dmem_rvalid;</pre>
       <pre>	wire io_axi_dmem_rready;</pre>
+      <pre>	reg [31:0] watchdogs_cnt;</pre>
       <pre>	reg [31:0] f_results;</pre>
       <pre>	reg [31:0] f_info;</pre>
       <pre>	string s_results;</pre>
@@ -8557,9 +8526,14 @@
       <pre>	reg [31:0] tests_total;</pre>
       <pre>	reg [1:0] rst_cnt;</pre>
       <pre>	reg rst_init;</pre>
-      <pre>	function is_compliance;</pre>
+      <pre>	function signed [31:0] identify_test;</pre>
       <pre>		input string testname;</pre>
-      <pre>		is_compliance = testname.substr(0, 9) == &#34;compliance&#34;;</pre>
+      <pre>		if (testname.substr(0, 3) == &#34;arch&#34;)</pre>
+      <pre>			identify_test = ARCH;</pre>
+      <pre>		else if (testname.substr(0, 9) == &#34;compliance&#34;)</pre>
+      <pre>			identify_test = COMPLIANCE;</pre>
+      <pre>		else</pre>
+      <pre>			identify_test = 0;</pre>
       <pre>	endfunction</pre>
       <pre>	function string get_filename;</pre>
       <pre>		input string testname;</pre>
@@ -8574,7 +8548,10 @@
       <pre>	endfunction</pre>
       <pre>	function string get_ref_filename;</pre>
       <pre>		input string testname;</pre>
-      <pre>		get_ref_filename = testname.substr(11, testname.len() - 5);</pre>
+      <pre>		if (identify_test(test_file) == COMPLIANCE)</pre>
+      <pre>			get_ref_filename = testname.substr(11, testname.len() - 5);</pre>
+      <pre>		else if (identify_test(test_file) == ARCH)</pre>
+      <pre>			get_ref_filename = testname.substr(5, testname.len() - 5);</pre>
       <pre>	endfunction</pre>
       <pre>	always #(5) clk = ~clk;</pre>
       <pre>	always #(500) rtc_clk = ~rtc_clk;</pre>
@@ -8606,28 +8583,34 @@
       <pre>	localparam [31:0] SCR1_SIM_EXIT_ADDR = 32&#39;h000000f8;</pre>
       <pre>	always @(posedge clk) begin : sv2v_autoblock_1</pre>
       <pre>		reg test_pass;</pre>
+      <pre>		reg test_error;</pre>
       <pre>		reg [31:0] f_test;</pre>
+      <pre>		watchdogs_cnt &lt;= watchdogs_cnt + &#39;b1;</pre>
       <pre>		if (test_running) begin</pre>
       <pre>			test_pass = 1;</pre>
       <pre>			rst_init &lt;= 1&#39;b0;</pre>
       <pre>			if (((i_top.i_core_top.i_pipe_top.curr_pc == SCR1_SIM_EXIT_ADDR) &amp; ~rst_init) &amp; &amp;rst_cnt) begin : sv2v_autoblock_2</pre>
       <pre>				string full_filename;</pre>
       <pre>				full_filename = test_file;</pre>
-      <pre>				if (is_compliance(test_file)) begin : sv2v_autoblock_3</pre>
+      <pre>				if (identify_test(test_file)) begin : sv2v_autoblock_3</pre>
       <pre>					reg [31:0] tmpv;</pre>
       <pre>					reg [31:0] start;</pre>
       <pre>					reg [31:0] stop;</pre>
       <pre>					reg [31:0] ref_data;</pre>
       <pre>					reg [31:0] test_data;</pre>
+      <pre>					reg [31:0] start_addr;</pre>
+      <pre>					reg [31:0] trap_addr;</pre>
       <pre>					integer fd;</pre>
+      <pre>					reg [31:0] code;</pre>
       <pre>					string tmpstr;</pre>
       <pre>					test_running &lt;= 1&#39;b0;</pre>
       <pre>					test_pass = 1;</pre>
-      <pre>					$sformat(tmpstr, &#34;riscv64-unknown-elf-readelf -s %s | grep &#39;begin_signature\\|end_signature&#39; | awk &#39;{print $2}&#39; &gt; elfinfo&#34;, get_filename(test_file));</pre>
+      <pre>					test_error = 0;</pre>
+      <pre>					$sformat(tmpstr, &#34;riscv64-unknown-elf-readelf -s %s | grep &#39;begin_signature\\|end_signature\\| _start\\|trap_vector&#39; | awk &#39;{print $2}&#39; &gt; elfinfo&#34;, get_filename(test_file));</pre>
       <pre>					fd = $fopen(&#34;script.sh&#34;, &#34;w&#34;);</pre>
       <pre>					if (fd == 0) begin</pre>
       <pre>						$write(&#34;Can&#39;t open script.sh\n&#34;);</pre>
-      <pre>						test_pass = 0;</pre>
+      <pre>						test_error = 1;</pre>
       <pre>					end</pre>
       <pre>					$fwrite(fd, &#34;%s&#34;, tmpstr);</pre>
       <pre>					$fclose(fd);</pre>
@@ -8635,11 +8618,15 @@
       <pre>					fd = $fopen(&#34;elfinfo&#34;, &#34;r&#34;);</pre>
       <pre>					if (fd == 0) begin</pre>
       <pre>						$write(&#34;Can&#39;t open elfinfo\n&#34;);</pre>
-      <pre>						test_pass = 0;</pre>
+      <pre>						test_error = 1;</pre>
       <pre>					end</pre>
-      <pre>					if ($fscanf(fd, &#34;%h\n%h&#34;, start, stop) != 2) begin</pre>
+      <pre>					if ($fscanf(fd, &#34;%h\n%h\n%h\n%h&#34;, trap_addr, start, stop, start_addr) != 4) begin</pre>
       <pre>						$write(&#34;Wrong elfinfo data\n&#34;);</pre>
-      <pre>						test_pass = 0;</pre>
+      <pre>						test_error = 1;</pre>
+      <pre>					end</pre>
+      <pre>					if (((trap_addr != ADDR_TRAP_VECTOR) &amp; (trap_addr != ADDR_TRAP_DEFAULT)) | (start_addr != ADDR_START)) begin</pre>
+      <pre>						$write(&#34;\nError trap_vector %h or/and _start %h are incorrectly aligned and are not at their address\n&#34;, trap_addr, start_addr);</pre>
+      <pre>						test_error = 1;</pre>
       <pre>					end</pre>
       <pre>					if (start &gt; stop) begin</pre>
       <pre>						tmpv = start;</pre>
@@ -8647,22 +8634,29 @@
       <pre>						stop = tmpv;</pre>
       <pre>					end</pre>
       <pre>					$fclose(fd);</pre>
-      <pre>					$sformat(tmpstr, &#34;riscv_compliance/ref_data/%s&#34;, get_ref_filename(test_file));</pre>
+      <pre>					if (identify_test(test_file) == COMPLIANCE)</pre>
+      <pre>						$sformat(tmpstr, &#34;riscv_compliance/ref_data/%s&#34;, get_ref_filename(test_file));</pre>
+      <pre>					else if (identify_test(test_file) == ARCH)</pre>
+      <pre>						$sformat(tmpstr, &#34;riscv_arch/ref_data/%s&#34;, get_ref_filename(test_file));</pre>
       <pre>					fd = $fopen(tmpstr, &#34;r&#34;);</pre>
       <pre>					if (fd == 0) begin</pre>
       <pre>						$write(&#34;Can&#39;t open reference_data file: %s\n&#34;, tmpstr);</pre>
-      <pre>						test_pass = 0;</pre>
+      <pre>						test_error = 1;</pre>
       <pre>					end</pre>
-      <pre>					while (!$feof(fd) &amp;&amp; (start != stop)) begin</pre>
-      <pre>						$fscanf(fd, &#34;0x%h,\n&#34;, ref_data);</pre>
+      <pre>					while (!$feof(fd) &amp;&amp; (start != stop)) if ($fscanf(fd, &#34;%h&#34;, ref_data) == &#39;h1) begin</pre>
       <pre>						test_data = {i_memory_tb.memory[start + 3], i_memory_tb.memory[start + 2], i_memory_tb.memory[start + 1], i_memory_tb.memory[start]};</pre>
       <pre>						test_pass = test_pass &amp; (ref_data == test_data);</pre>
       <pre>						start = start + 4;</pre>
       <pre>					end</pre>
+      <pre>					else begin</pre>
+      <pre>						$write(&#34;Wrong $fscanf\n&#34;);</pre>
+      <pre>						test_pass = 0;</pre>
+      <pre>					end</pre>
       <pre>					$fclose(fd);</pre>
       <pre>					tests_total = tests_total + 1;</pre>
-      <pre>					tests_passed = tests_passed + test_pass;</pre>
-      <pre>					if (test_pass)</pre>
+      <pre>					tests_passed = tests_passed + (test_pass &amp; !test_error);</pre>
+      <pre>					watchdogs_cnt &lt;= 1&#39;sb0;</pre>
+      <pre>					if (test_pass &amp; !test_error)</pre>
       <pre>						$write(&#34;\033[0;32mTest passed\033[0m\n&#34;);</pre>
       <pre>					else</pre>
       <pre>						$write(&#34;\033[0;31mTest failed\033[0m\n&#34;);</pre>
@@ -8671,36 +8665,59 @@
       <pre>					test_running &lt;= 1&#39;b0;</pre>
       <pre>					test_pass = i_top.i_core_top.i_pipe_top.i_pipe_mprf.mprf_int[10] == 0;</pre>
       <pre>					tests_total = tests_total + 1;</pre>
-      <pre>					tests_passed = tests_passed + test_pass;</pre>
-      <pre>					if (test_pass)</pre>
+      <pre>					tests_passed = tests_passed + (test_pass &amp; !test_error);</pre>
+      <pre>					watchdogs_cnt &lt;= 1&#39;sb0;</pre>
+      <pre>					if (test_pass &amp; !test_error)</pre>
       <pre>						$write(&#34;\033[0;32mTest passed\033[0m\n&#34;);</pre>
       <pre>					else</pre>
       <pre>						$write(&#34;\033[0;31mTest failed\033[0m\n&#34;);</pre>
       <pre>				end</pre>
-      <pre>				$fwrite(f_results, &#34;%s\t\t%s\t%s\n&#34;, test_file, &#34;OK&#34;, (test_pass ? &#34;PASS&#34; : &#34;__FAIL&#34;));</pre>
+      <pre>				$fwrite(f_results, &#34;%s\t\t%s\t%s\n&#34;, test_file, &#34;OK&#34;, (test_pass &amp; !test_error ? &#34;PASS&#34; : &#34;__FAIL&#34;));</pre>
       <pre>			end</pre>
       <pre>		end</pre>
-      <pre>		else if (!$feof(f_info)) begin</pre>
-      <pre>			$fscanf(f_info, &#34;%s\n&#34;, test_file);</pre>
-      <pre>			f_test = $fopen(test_file, &#34;r&#34;);</pre>
-      <pre>			if (f_test != 0) begin</pre>
-      <pre>				i_memory_tb.test_file = test_file;</pre>
-      <pre>				i_memory_tb.test_file_init = 1&#39;b1;</pre>
-      <pre>				$write(&#34;\033[0;34m---Test: %s\033[0m\n&#34;, test_file);</pre>
-      <pre>				test_running &lt;= 1&#39;b1;</pre>
-      <pre>				rst_init &lt;= 1&#39;b1;</pre>
+      <pre>		else if (f_info) begin</pre>
+      <pre>			if (!$feof(f_info)) begin</pre>
+      <pre>				$fscanf(f_info, &#34;%s\n&#34;, test_file);</pre>
+      <pre>				f_test = $fopen(test_file, &#34;r&#34;);</pre>
+      <pre>				if (f_test != 0) begin</pre>
+      <pre>					i_memory_tb.test_file = test_file;</pre>
+      <pre>					i_memory_tb.test_file_init = 1&#39;b1;</pre>
+      <pre>					$write(&#34;\033[0;34m---Test: %s\033[0m\n&#34;, test_file);</pre>
+      <pre>					test_running &lt;= 1&#39;b1;</pre>
+      <pre>					rst_init &lt;= 1&#39;b1;</pre>
+      <pre>				end</pre>
+      <pre>				else</pre>
+      <pre>					$fwrite(f_results, &#34;%s\t\t%s\t%s\n&#34;, test_file, &#34;__FAIL&#34;, &#34;--------&#34;);</pre>
       <pre>			end</pre>
-      <pre>			else</pre>
-      <pre>				$fwrite(f_results, &#34;%s\t\t%s\t%s\n&#34;, test_file, &#34;__FAIL&#34;, &#34;--------&#34;);</pre>
+      <pre>			else begin</pre>
+      <pre>				$display(&#34;\n#--------------------------------------&#34;);</pre>
+      <pre>				$display(&#34;# Summary: %0d/%0d tests passed&#34;, tests_passed, tests_total);</pre>
+      <pre>				$display(&#34;#--------------------------------------\n&#34;);</pre>
+      <pre>				$fclose(f_info);</pre>
+      <pre>				$fclose(f_results);</pre>
+      <pre>				$finish;</pre>
+      <pre>			end</pre>
       <pre>		end</pre>
       <pre>		else begin</pre>
-      <pre>			$display(&#34;\n#--------------------------------------&#34;);</pre>
-      <pre>			$display(&#34;# Summary: %0d/%0d tests passed&#34;, tests_passed, tests_total);</pre>
-      <pre>			$display(&#34;#--------------------------------------\n&#34;);</pre>
-      <pre>			$fclose(f_info);</pre>
-      <pre>			$fclose(f_results);</pre>
+      <pre>			$write(&#34;\033[0;31mError: could not open file %s\033[0m\n&#34;, s_info);</pre>
       <pre>			$finish;</pre>
       <pre>		end</pre>
+      <pre>		if (watchdogs_cnt == TIMEOUT)</pre>
+      <pre>			if (test_file == &#34;watchdog.hex&#34;) begin</pre>
+      <pre>				tests_total = tests_total + &#39;b1;</pre>
+      <pre>				tests_passed = tests_passed + &#39;b1;</pre>
+      <pre>				$fwrite(f_results, &#34;%s\t\t%s\t%s\n&#34;, test_file, &#34;OK&#34;, &#34;PASS&#34;);</pre>
+      <pre>				test_running &lt;= 1&#39;sb0;</pre>
+      <pre>				watchdogs_cnt &lt;= 1&#39;sb0;</pre>
+      <pre>			end</pre>
+      <pre>			else begin</pre>
+      <pre>				tests_total = tests_total + &#39;b1;</pre>
+      <pre>				tests_passed = tests_passed + &#39;b0;</pre>
+      <pre>				$write(&#34;\033[0;31mError: TIMEOUT  %s\033[0m\n&#34;, test_file);</pre>
+      <pre>				$fwrite(f_results, &#34;%s\t\t%s\t%s\n&#34;, test_file, &#34;OK&#34;, &#34;__FAIL&#34;);</pre>
+      <pre>				test_running &lt;= 1&#39;sb0;</pre>
+      <pre>				watchdogs_cnt &lt;= 1&#39;sb0;</pre>
+      <pre>			end</pre>
       <pre>	end</pre>
       <pre>	scr1_top_axi i_top(</pre>
       <pre>		.pwrup_rst_n(rst_n),</pre>
