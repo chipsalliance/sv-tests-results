@@ -1,1 +1,1 @@
-config_loader_data['uhdmverilator/earlgrey'] = [["cores","earlgrey",0,"logs/UhdmVerilator/generated/fusesoc/earlgrey.sv.log.html","build/lowrisc_systems_top_earlgrey_0.1/src/lowrisc_constants_top_pkg_0/rtl/top_pkg.sv.html"]]
+config_loader_data['uhdmverilator/earlgrey'] = [["cores","earlgrey",0,"logs/UhdmVerilator/generated/fusesoc/earlgrey-sim.sv.log.html","build/lowrisc_dv_chip_verilator_sim_0.1/src/lowrisc_lint_comportable_0.1/tools/verilator/comportable.vlt.html"]]
