@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/swerv'] = [["cores","swerv",0,"logs/VeribleExtractor/generated/fusesoc/swerv.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/lint-verilator/config/common_defines.vh.html"]]
+config_loader_data['veribleextractor/swerv'] = [["cores","swerv",0,"logs/VeribleExtractor/generated/fusesoc/swerv-synth.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/synth-vivado/config/common_defines.vh.html"]]
