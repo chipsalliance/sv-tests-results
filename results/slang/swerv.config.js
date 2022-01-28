@@ -1,1 +1,1 @@
-config_loader_data['slang/swerv'] = [["cores","swerv",1,"logs/Slang/generated/fusesoc/swerv.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/lint-verilator/config/common_defines.vh.html"]]
+config_loader_data['slang/swerv'] = [["cores","swerv",0,"logs/Slang/generated/fusesoc/swerv-sim.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/sim-verilator/config/common_defines.vh.html"]]
