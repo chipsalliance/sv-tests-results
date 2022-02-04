@@ -1,1 +1,1 @@
-config_loader_data['moore_parse/swerv'] = [["cores","swerv",0,"logs/moore_parse/generated/fusesoc/swerv-synth.sv.log.html","build/chipsalliance.org_cores_SweRV_EH1_1.8/synth-vivado/config/common_defines.vh.html"]]
+config_loader_data['moore_parse/swerv'] = [["cores","swerv",0,"logs/moore_parse/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]
