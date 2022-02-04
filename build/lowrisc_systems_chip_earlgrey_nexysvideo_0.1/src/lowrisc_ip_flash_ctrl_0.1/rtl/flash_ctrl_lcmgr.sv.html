@@ -788,7 +788,23 @@
 <span class="normal"><a href="#l-780">780</a></span>
 <span class="normal"><a href="#l-781">781</a></span>
 <span class="normal"><a href="#l-782">782</a></span>
-<span class="normal"><a href="#l-783">783</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-783">783</a></span>
+<span class="normal"><a href="#l-784">784</a></span>
+<span class="normal"><a href="#l-785">785</a></span>
+<span class="normal"><a href="#l-786">786</a></span>
+<span class="normal"><a href="#l-787">787</a></span>
+<span class="normal"><a href="#l-788">788</a></span>
+<span class="normal"><a href="#l-789">789</a></span>
+<span class="normal"><a href="#l-790">790</a></span>
+<span class="normal"><a href="#l-791">791</a></span>
+<span class="normal"><a href="#l-792">792</a></span>
+<span class="normal"><a href="#l-793">793</a></span>
+<span class="normal"><a href="#l-794">794</a></span>
+<span class="normal"><a href="#l-795">795</a></span>
+<span class="normal"><a href="#l-796">796</a></span>
+<span class="normal"><a href="#l-797">797</a></span>
+<span class="normal"><a href="#l-798">798</a></span>
+<span class="normal"><a href="#l-799">799</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -1570,7 +1586,23 @@
 <a id="l-780" name="l-780"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">unused_seed_valid</span><span class="p">;</span><span class="w"></span>
 <a id="l-781" name="l-781"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">unused_seed_valid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">otp_key_rsp_i</span><span class="p">.</span><span class="n">seed_valid</span><span class="p">;</span><span class="w"></span>
 <a id="l-782" name="l-782"></a>
-<a id="l-783" name="l-783"></a><span class="k">endmodule</span><span class="w"> </span><span class="c1">// flash_ctrl_lcmgr</span>
+<a id="l-783" name="l-783"></a><span class="w">  </span><span class="c1">// assertion</span>
+<a id="l-784" name="l-784"></a>
+<a id="l-785" name="l-785"></a><span class="no">`ifdef</span><span class="w"> </span><span class="n">INC_ASSERT</span><span class="w"></span>
+<a id="l-786" name="l-786"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">DataWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">rma_data</span><span class="p">;</span><span class="w"></span>
+<a id="l-787" name="l-787"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-788" name="l-788"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rma_start</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rvalid_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rready_o</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-789" name="l-789"></a><span class="w">      </span><span class="n">rma_data</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">rma_data</span><span class="p">[</span><span class="n">DataWidth</span><span class="w"> </span><span class="o">-:</span><span class="w"> </span><span class="n">BusWidth</span><span class="p">],</span><span class="w"> </span><span class="n">rdata_i</span><span class="p">};</span><span class="w"></span>
+<a id="l-790" name="l-790"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-791" name="l-791"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
+<a id="l-792" name="l-792"></a>
+<a id="l-793" name="l-793"></a><span class="w">  </span><span class="c1">// check the rma programmed value actually matches what was read back</span>
+<a id="l-794" name="l-794"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">ProgRdVerify_A</span><span class="p">,</span><span class="w"> </span><span class="n">rma_start</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">rd_cnt_en</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">done_i</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">prog_data</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">rma_data</span><span class="p">)</span><span class="w"></span>
+<a id="l-795" name="l-795"></a>
+<a id="l-796" name="l-796"></a><span class="no">`endif</span><span class="w"></span>
+<a id="l-797" name="l-797"></a>
+<a id="l-798" name="l-798"></a>
+<a id="l-799" name="l-799"></a><span class="k">endmodule</span><span class="w"> </span><span class="c1">// flash_ctrl_lcmgr</span>
 </pre></div>
 </td></tr></table>
   </body>
