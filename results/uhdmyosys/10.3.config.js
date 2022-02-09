@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/10.3'] = [["","proc_assignment__bad",0,"logs/UhdmYosys/chapter-10/10.3--proc-assignment--bad.sv.log.html","tests/chapter-10/10.3--proc-assignment--bad.sv.html"]]
+config_loader_data['uhdmyosys/10.3'] = [["","proc_assignment__bad",1,"logs/UhdmYosys/chapter-10/10.3--proc-assignment--bad.sv.log.html","tests/chapter-10/10.3--proc-assignment--bad.sv.html"]]
