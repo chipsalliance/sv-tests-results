@@ -193,7 +193,12 @@
 <span class="normal"><a href="#l-185">185</a></span>
 <span class="normal"><a href="#l-186">186</a></span>
 <span class="normal"><a href="#l-187">187</a></span>
-<span class="normal"><a href="#l-188">188</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-188">188</a></span>
+<span class="normal"><a href="#l-189">189</a></span>
+<span class="normal"><a href="#l-190">190</a></span>
+<span class="normal"><a href="#l-191">191</a></span>
+<span class="normal"><a href="#l-192">192</a></span>
+<span class="normal"><a href="#l-193">193</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
@@ -371,16 +376,21 @@
 <a id="l-176" name="l-176"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">sw_step_down_req</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sw_step_down_en</span><span class="p">;</span><span class="w"></span>
 <a id="l-177" name="l-177"></a>
 <a id="l-178" name="l-178"></a><span class="w">  </span><span class="c1">// combine requests</span>
-<a id="l-179" name="l-179"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-180" name="l-180"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-181" name="l-181"></a><span class="w">      </span><span class="n">step_down_req_o</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">MuBi4False</span><span class="p">;</span><span class="w"></span>
-<a id="l-182" name="l-182"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-183" name="l-183"></a><span class="w">      </span><span class="n">step_down_req_o</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">mubi4_or_hi</span><span class="p">(</span><span class="n">lc_step_down_req</span><span class="p">,</span><span class="w"> </span><span class="n">sw_step_down_req</span><span class="p">);</span><span class="w"></span>
-<a id="l-184" name="l-184"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
-<a id="l-185" name="l-185"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
-<a id="l-186" name="l-186"></a>
-<a id="l-187" name="l-187"></a>
-<a id="l-188" name="l-188"></a><span class="k">endmodule</span><span class="w"> </span><span class="c1">// clkmgr_byp</span>
+<a id="l-179" name="l-179"></a><span class="w">  </span><span class="c1">// mubi4_or_hi is not directly used in the always block because it causes confusion</span>
+<a id="l-180" name="l-180"></a><span class="w">  </span><span class="c1">// with the lint tool and makes it think `rst_ni` is not appropriately used for some</span>
+<a id="l-181" name="l-181"></a><span class="w">  </span><span class="c1">// reason.</span>
+<a id="l-182" name="l-182"></a><span class="w">  </span><span class="n">mubi4_t</span><span class="w"> </span><span class="n">step_down_req_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-183" name="l-183"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">step_down_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mubi4_or_hi</span><span class="p">(</span><span class="n">lc_step_down_req</span><span class="p">,</span><span class="w"> </span><span class="n">sw_step_down_req</span><span class="p">);</span><span class="w"></span>
+<a id="l-184" name="l-184"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-185" name="l-185"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-186" name="l-186"></a><span class="w">      </span><span class="n">step_down_req_o</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">MuBi4False</span><span class="p">;</span><span class="w"></span>
+<a id="l-187" name="l-187"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-188" name="l-188"></a><span class="w">      </span><span class="n">step_down_req_o</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">step_down_req_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-189" name="l-189"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-190" name="l-190"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
+<a id="l-191" name="l-191"></a>
+<a id="l-192" name="l-192"></a>
+<a id="l-193" name="l-193"></a><span class="k">endmodule</span><span class="w"> </span><span class="c1">// clkmgr_byp</span>
 </pre></div>
 </td></tr></table>
   </body>
