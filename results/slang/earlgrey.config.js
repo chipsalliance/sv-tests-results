@@ -1,1 +1,1 @@
-config_loader_data['slang/earlgrey'] = [["cores","earlgrey",0,"logs/Slang/generated/fusesoc/earlgrey-sim.sv.log.html","build/lowrisc_dv_chip_verilator_sim_0.1/src/lowrisc_constants_top_pkg_0/rtl/top_pkg.sv.html"]]
+config_loader_data['slang/earlgrey'] = [["cores","earlgrey",1,"logs/Slang/generated/fusesoc/earlgrey-sim.sv.log.html","build/lowrisc_dv_chip_verilator_sim_0.1/src/lowrisc_constants_top_pkg_0/rtl/top_pkg.sv.html"]]
