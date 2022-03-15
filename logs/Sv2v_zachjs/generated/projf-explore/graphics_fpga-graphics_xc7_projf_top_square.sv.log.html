@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-03-14 01:43:56</dd></div>
-        <div><dt>time elapsed</dt><dd>0.016s</dd></div>
-        <div><dt>ram usage</dt><dd>18176 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-03-15 01:44:14</dd></div>
+        <div><dt>time elapsed</dt><dd>0.019s</dd></div>
+        <div><dt>ram usage</dt><dd>20224 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -43,7 +43,7 @@
       <pre>`default_nettype none</pre>
       <pre>module top_square (</pre>
       <pre>	clk_100m,</pre>
-      <pre>	btn_rst,</pre>
+      <pre>	btn_rst_n,</pre>
       <pre>	vga_hsync,</pre>
       <pre>	vga_vsync,</pre>
       <pre>	vga_r,</pre>
@@ -51,19 +51,20 @@
       <pre>	vga_b</pre>
       <pre>);</pre>
       <pre>	input wire clk_100m;</pre>
-      <pre>	input wire btn_rst;</pre>
+      <pre>	input wire btn_rst_n;</pre>
       <pre>	output reg vga_hsync;</pre>
       <pre>	output reg vga_vsync;</pre>
       <pre>	output reg [3:0] vga_r;</pre>
       <pre>	output reg [3:0] vga_g;</pre>
       <pre>	output reg [3:0] vga_b;</pre>
       <pre>	wire clk_pix;</pre>
-      <pre>	wire clk_locked;</pre>
-      <pre>	clock_gen_480p clock_pix_inst(</pre>
-      <pre>		.clk(clk_100m),</pre>
-      <pre>		.rst(!btn_rst),</pre>
+      <pre>	wire clk_pix_locked;</pre>
+      <pre>	clock_480p clock_pix_inst(</pre>
+      <pre>		.clk_100m(clk_100m),</pre>
+      <pre>		.rst(!btn_rst_n),</pre>
       <pre>		.clk_pix(clk_pix),</pre>
-      <pre>		.clk_locked(clk_locked)</pre>
+      <pre>		.clk_pix_5x(),</pre>
+      <pre>		.clk_pix_locked(clk_pix_locked)</pre>
       <pre>	);</pre>
       <pre>	localparam CORDW = 10;</pre>
       <pre>	wire [9:0] sx;</pre>
@@ -73,21 +74,36 @@
       <pre>	wire de;</pre>
       <pre>	simple_480p display_inst(</pre>
       <pre>		.clk_pix(clk_pix),</pre>
-      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.rst_pix(!clk_pix_locked),</pre>
       <pre>		.sx(sx),</pre>
       <pre>		.sy(sy),</pre>
       <pre>		.hsync(hsync),</pre>
       <pre>		.vsync(vsync),</pre>
       <pre>		.de(de)</pre>
       <pre>	);</pre>
-      <pre>	reg q_draw;</pre>
-      <pre>	always @(*) q_draw = ((sx &lt; 32) &amp;&amp; (sy &lt; 32) ? 1 : 0);</pre>
+      <pre>	reg square;</pre>
+      <pre>	always @(*) square = ((sx &gt; 220) &amp;&amp; (sx &lt; 420)) &amp;&amp; ((sy &gt; 140) &amp;&amp; (sy &lt; 340));</pre>
+      <pre>	reg [3:0] paint_r;</pre>
+      <pre>	reg [3:0] paint_g;</pre>
+      <pre>	reg [3:0] paint_b;</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		paint_r = (square ? 4&#39;hf : 4&#39;h1);</pre>
+      <pre>		paint_g = (square ? 4&#39;hf : 4&#39;h3);</pre>
+      <pre>		paint_b = (square ? 4&#39;hf : 4&#39;h7);</pre>
+      <pre>	end</pre>
       <pre>	always @(posedge clk_pix) begin</pre>
       <pre>		vga_hsync &lt;= hsync;</pre>
       <pre>		vga_vsync &lt;= vsync;</pre>
-      <pre>		vga_r &lt;= (!de ? 4&#39;h0 : (q_draw ? 4&#39;hf : 4&#39;h0));</pre>
-      <pre>		vga_g &lt;= (!de ? 4&#39;h0 : (q_draw ? 4&#39;h8 : 4&#39;h8));</pre>
-      <pre>		vga_b &lt;= (!de ? 4&#39;h0 : (q_draw ? 4&#39;h0 : 4&#39;hf));</pre>
+      <pre>		if (de) begin</pre>
+      <pre>			vga_r &lt;= paint_r;</pre>
+      <pre>			vga_g &lt;= paint_g;</pre>
+      <pre>			vga_b &lt;= paint_b;</pre>
+      <pre>		end</pre>
+      <pre>		else begin</pre>
+      <pre>			vga_r &lt;= 4&#39;h0;</pre>
+      <pre>			vga_g &lt;= 4&#39;h0;</pre>
+      <pre>			vga_b &lt;= 4&#39;h0;</pre>
+      <pre>		end</pre>
       <pre>	end</pre>
       <pre>endmodule</pre>
       <pre></pre>

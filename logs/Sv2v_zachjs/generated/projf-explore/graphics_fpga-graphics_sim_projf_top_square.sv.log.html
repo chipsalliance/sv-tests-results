@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-03-14 01:43:56</dd></div>
-        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
-        <div><dt>ram usage</dt><dd>17528 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-03-15 01:44:17</dd></div>
+        <div><dt>time elapsed</dt><dd>0.018s</dd></div>
+        <div><dt>ram usage</dt><dd>19100 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -43,7 +43,7 @@
       <pre>`default_nettype none</pre>
       <pre>module top_square (</pre>
       <pre>	clk_pix,</pre>
-      <pre>	rst,</pre>
+      <pre>	sim_rst,</pre>
       <pre>	sdl_sx,</pre>
       <pre>	sdl_sy,</pre>
       <pre>	sdl_de,</pre>
@@ -53,7 +53,7 @@
       <pre>);</pre>
       <pre>	parameter CORDW = 10;</pre>
       <pre>	input wire clk_pix;</pre>
-      <pre>	input wire rst;</pre>
+      <pre>	input wire sim_rst;</pre>
       <pre>	output reg [CORDW - 1:0] sdl_sx;</pre>
       <pre>	output reg [CORDW - 1:0] sdl_sy;</pre>
       <pre>	output reg sdl_de;</pre>
@@ -65,22 +65,30 @@
       <pre>	wire de;</pre>
       <pre>	simple_480p display_inst(</pre>
       <pre>		.clk_pix(clk_pix),</pre>
-      <pre>		.rst(rst),</pre>
+      <pre>		.rst_pix(sim_rst),</pre>
       <pre>		.sx(sx),</pre>
       <pre>		.sy(sy),</pre>
       <pre>		.hsync(),</pre>
       <pre>		.vsync(),</pre>
       <pre>		.de(de)</pre>
       <pre>	);</pre>
-      <pre>	reg q_draw;</pre>
-      <pre>	always @(*) q_draw = ((sx &lt; 32) &amp;&amp; (sy &lt; 32) ? 1 : 0);</pre>
+      <pre>	reg square;</pre>
+      <pre>	always @(*) square = ((sx &gt; 220) &amp;&amp; (sx &lt; 420)) &amp;&amp; ((sy &gt; 140) &amp;&amp; (sy &lt; 340));</pre>
+      <pre>	reg [3:0] paint_r;</pre>
+      <pre>	reg [3:0] paint_g;</pre>
+      <pre>	reg [3:0] paint_b;</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		paint_r = (square ? 4&#39;hf : 4&#39;h1);</pre>
+      <pre>		paint_g = (square ? 4&#39;hf : 4&#39;h3);</pre>
+      <pre>		paint_b = (square ? 4&#39;hf : 4&#39;h7);</pre>
+      <pre>	end</pre>
       <pre>	always @(posedge clk_pix) begin</pre>
       <pre>		sdl_sx &lt;= sx;</pre>
       <pre>		sdl_sy &lt;= sy;</pre>
       <pre>		sdl_de &lt;= de;</pre>
-      <pre>		sdl_r &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;hff : 8&#39;h00));</pre>
-      <pre>		sdl_g &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;h88 : 8&#39;h88));</pre>
-      <pre>		sdl_b &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;h00 : 8&#39;hff));</pre>
+      <pre>		sdl_r &lt;= {2 {paint_r}};</pre>
+      <pre>		sdl_g &lt;= {2 {paint_g}};</pre>
+      <pre>		sdl_b &lt;= {2 {paint_b}};</pre>
       <pre>	end</pre>
       <pre>endmodule</pre>
       <pre></pre>

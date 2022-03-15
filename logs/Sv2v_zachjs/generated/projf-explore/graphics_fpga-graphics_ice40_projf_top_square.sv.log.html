@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-03-14 01:44:00</dd></div>
-        <div><dt>time elapsed</dt><dd>0.017s</dd></div>
-        <div><dt>ram usage</dt><dd>20324 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-03-15 01:44:13</dd></div>
+        <div><dt>time elapsed</dt><dd>0.018s</dd></div>
+        <div><dt>ram usage</dt><dd>20388 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -62,12 +62,12 @@
       <pre>	output wire [3:0] dvi_g;</pre>
       <pre>	output wire [3:0] dvi_b;</pre>
       <pre>	wire clk_pix;</pre>
-      <pre>	wire clk_locked;</pre>
-      <pre>	clock_gen_480p clock_pix_inst(</pre>
-      <pre>		.clk(clk_12m),</pre>
+      <pre>	wire clk_pix_locked;</pre>
+      <pre>	clock_480p clock_pix_inst(</pre>
+      <pre>		.clk_12m(clk_12m),</pre>
       <pre>		.rst(btn_rst),</pre>
       <pre>		.clk_pix(clk_pix),</pre>
-      <pre>		.clk_locked(clk_locked)</pre>
+      <pre>		.clk_pix_locked(clk_pix_locked)</pre>
       <pre>	);</pre>
       <pre>	localparam CORDW = 10;</pre>
       <pre>	wire [9:0] sx;</pre>
@@ -77,34 +77,34 @@
       <pre>	wire de;</pre>
       <pre>	simple_480p display_inst(</pre>
       <pre>		.clk_pix(clk_pix),</pre>
-      <pre>		.rst(!clk_locked),</pre>
+      <pre>		.rst_pix(!clk_pix_locked),</pre>
       <pre>		.sx(sx),</pre>
       <pre>		.sy(sy),</pre>
       <pre>		.hsync(hsync),</pre>
       <pre>		.vsync(vsync),</pre>
       <pre>		.de(de)</pre>
       <pre>	);</pre>
-      <pre>	reg q_draw;</pre>
-      <pre>	always @(*) q_draw = ((sx &lt; 32) &amp;&amp; (sy &lt; 32) ? 1 : 0);</pre>
-      <pre>	reg [3:0] red;</pre>
-      <pre>	reg [3:0] green;</pre>
-      <pre>	reg [3:0] blue;</pre>
+      <pre>	reg square;</pre>
+      <pre>	always @(*) square = ((sx &gt; 220) &amp;&amp; (sx &lt; 420)) &amp;&amp; ((sy &gt; 140) &amp;&amp; (sy &lt; 340));</pre>
+      <pre>	reg [3:0] paint_r;</pre>
+      <pre>	reg [3:0] paint_g;</pre>
+      <pre>	reg [3:0] paint_b;</pre>
       <pre>	always @(*) begin</pre>
-      <pre>		red = (!de ? 4&#39;h0 : (q_draw ? 4&#39;hf : 4&#39;h0));</pre>
-      <pre>		green = (!de ? 4&#39;h0 : (q_draw ? 4&#39;h8 : 4&#39;h8));</pre>
-      <pre>		blue = (!de ? 4&#39;h0 : (q_draw ? 4&#39;h0 : 4&#39;hf));</pre>
+      <pre>		paint_r = (square ? 4&#39;hf : 4&#39;h1);</pre>
+      <pre>		paint_g = (square ? 4&#39;hf : 4&#39;h3);</pre>
+      <pre>		paint_b = (square ? 4&#39;hf : 4&#39;h7);</pre>
       <pre>	end</pre>
+      <pre>	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](</pre>
+      <pre>		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),</pre>
+      <pre>		.OUTPUT_CLK(clk_pix),</pre>
+      <pre>		.D_OUT_0({hsync, vsync, de, paint_r, paint_g, paint_b}),</pre>
+      <pre>		.D_OUT_1()</pre>
+      <pre>	);</pre>
       <pre>	SB_IO #(.PIN_TYPE(6&#39;b010000)) dvi_clk_io(</pre>
       <pre>		.PACKAGE_PIN(dvi_clk),</pre>
       <pre>		.OUTPUT_CLK(clk_pix),</pre>
       <pre>		.D_OUT_0(1&#39;b0),</pre>
       <pre>		.D_OUT_1(1&#39;b1)</pre>
-      <pre>	);</pre>
-      <pre>	SB_IO #(.PIN_TYPE(6&#39;b010100)) dvi_signal_io[14:0](</pre>
-      <pre>		.PACKAGE_PIN({dvi_hsync, dvi_vsync, dvi_de, dvi_r, dvi_g, dvi_b}),</pre>
-      <pre>		.OUTPUT_CLK(clk_pix),</pre>
-      <pre>		.D_OUT_0({hsync, vsync, de, red, green, blue}),</pre>
-      <pre>		.D_OUT_1()</pre>
       <pre>	);</pre>
       <pre>endmodule</pre>
       <pre></pre>

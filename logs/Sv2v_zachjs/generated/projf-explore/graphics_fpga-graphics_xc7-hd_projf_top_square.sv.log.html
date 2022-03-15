@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-03-14 01:43:55</dd></div>
-        <div><dt>time elapsed</dt><dd>0.021s</dd></div>
-        <div><dt>ram usage</dt><dd>23496 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-03-15 01:44:13</dd></div>
+        <div><dt>time elapsed</dt><dd>0.024s</dd></div>
+        <div><dt>ram usage</dt><dd>24660 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -43,7 +43,7 @@
       <pre>`default_nettype none</pre>
       <pre>module top_square (</pre>
       <pre>	clk_100m,</pre>
-      <pre>	btn_rst,</pre>
+      <pre>	btn_rst_n,</pre>
       <pre>	hdmi_tx_ch0_p,</pre>
       <pre>	hdmi_tx_ch0_n,</pre>
       <pre>	hdmi_tx_ch1_p,</pre>
@@ -54,7 +54,7 @@
       <pre>	hdmi_tx_clk_n</pre>
       <pre>);</pre>
       <pre>	input wire clk_100m;</pre>
-      <pre>	input wire btn_rst;</pre>
+      <pre>	input wire btn_rst_n;</pre>
       <pre>	output wire hdmi_tx_ch0_p;</pre>
       <pre>	output wire hdmi_tx_ch0_n;</pre>
       <pre>	output wire hdmi_tx_ch1_p;</pre>
@@ -66,9 +66,9 @@
       <pre>	wire clk_pix;</pre>
       <pre>	wire clk_pix_5x;</pre>
       <pre>	wire clk_pix_locked;</pre>
-      <pre>	clock_gen_720p clock_pix_inst(</pre>
+      <pre>	clock_720p clock_pix_inst(</pre>
       <pre>		.clk_100m(clk_100m),</pre>
-      <pre>		.rst(!btn_rst),</pre>
+      <pre>		.rst(!btn_rst_n),</pre>
       <pre>		.clk_pix(clk_pix),</pre>
       <pre>		.clk_pix_5x(clk_pix_5x),</pre>
       <pre>		.clk_pix_locked(clk_pix_locked)</pre>
@@ -81,18 +81,26 @@
       <pre>	wire de;</pre>
       <pre>	simple_720p display_inst(</pre>
       <pre>		.clk_pix(clk_pix),</pre>
-      <pre>		.rst(!clk_pix_locked),</pre>
+      <pre>		.rst_pix(!clk_pix_locked),</pre>
       <pre>		.sx(sx),</pre>
       <pre>		.sy(sy),</pre>
       <pre>		.hsync(hsync),</pre>
       <pre>		.vsync(vsync),</pre>
       <pre>		.de(de)</pre>
       <pre>	);</pre>
-      <pre>	reg q_draw;</pre>
-      <pre>	always @(*) q_draw = ((sx &lt; 64) &amp;&amp; (sy &lt; 64) ? 1 : 0);</pre>
-      <pre>	reg [7:0] dvi_red;</pre>
-      <pre>	reg [7:0] dvi_green;</pre>
-      <pre>	reg [7:0] dvi_blue;</pre>
+      <pre>	reg square;</pre>
+      <pre>	always @(*) square = ((sx &gt; 440) &amp;&amp; (sx &lt; 840)) &amp;&amp; ((sy &gt; 160) &amp;&amp; (sy &lt; 560));</pre>
+      <pre>	reg [3:0] paint_r;</pre>
+      <pre>	reg [3:0] paint_g;</pre>
+      <pre>	reg [3:0] paint_b;</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		paint_r = (square ? 4&#39;hf : 4&#39;h1);</pre>
+      <pre>		paint_g = (square ? 4&#39;hf : 4&#39;h3);</pre>
+      <pre>		paint_b = (square ? 4&#39;hf : 4&#39;h7);</pre>
+      <pre>	end</pre>
+      <pre>	reg [7:0] dvi_r;</pre>
+      <pre>	reg [7:0] dvi_g;</pre>
+      <pre>	reg [7:0] dvi_b;</pre>
       <pre>	reg dvi_hsync;</pre>
       <pre>	reg dvi_vsync;</pre>
       <pre>	reg dvi_de;</pre>
@@ -100,9 +108,9 @@
       <pre>		dvi_hsync &lt;= hsync;</pre>
       <pre>		dvi_vsync &lt;= vsync;</pre>
       <pre>		dvi_de &lt;= de;</pre>
-      <pre>		dvi_red &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;hff : 8&#39;h00));</pre>
-      <pre>		dvi_green &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;h88 : 8&#39;h88));</pre>
-      <pre>		dvi_blue &lt;= (!de ? 8&#39;h00 : (q_draw ? 8&#39;h00 : 8&#39;hff));</pre>
+      <pre>		dvi_r &lt;= {2 {paint_r}};</pre>
+      <pre>		dvi_g &lt;= {2 {paint_g}};</pre>
+      <pre>		dvi_b &lt;= {2 {paint_b}};</pre>
       <pre>	end</pre>
       <pre>	wire tmds_ch0_serial;</pre>
       <pre>	wire tmds_ch1_serial;</pre>
@@ -113,9 +121,9 @@
       <pre>		.clk_pix_5x(clk_pix_5x),</pre>
       <pre>		.rst_pix(!clk_pix_locked),</pre>
       <pre>		.de(dvi_de),</pre>
-      <pre>		.data_in_ch0(dvi_blue),</pre>
-      <pre>		.data_in_ch1(dvi_green),</pre>
-      <pre>		.data_in_ch2(dvi_red),</pre>
+      <pre>		.data_in_ch0(dvi_b),</pre>
+      <pre>		.data_in_ch1(dvi_g),</pre>
+      <pre>		.data_in_ch2(dvi_r),</pre>
       <pre>		.ctrl_in_ch0({dvi_vsync, dvi_hsync}),</pre>
       <pre>		.ctrl_in_ch1(2&#39;b00),</pre>
       <pre>		.ctrl_in_ch2(2&#39;b00),</pre>
