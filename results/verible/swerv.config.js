@@ -1,1 +1,1 @@
-config_loader_data['verible/swerv'] = [["cores","swerv",0,"logs/Verible/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]
+config_loader_data['verible/swerv'] = [["cores","swerv",1,"logs/Verible/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]
