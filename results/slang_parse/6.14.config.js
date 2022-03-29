@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/6.14'] = [["","chandle",1,"logs/Slang_parse/chapter-6/6.14--chandle.sv.log.html","tests/chapter-6/6.14--chandle.sv.html"]]

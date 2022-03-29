@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/fx68k'] = [["cores","fx68k",1,"logs/Slang_parse/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/18.4.2'] = [["","randc_modifier",1,"logs/Slang_parse/chapter-18/18.4.2--randc-modifier.sv.log.html","tests/chapter-18/18.4.2--randc-modifier.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.25'] = [["","parameters",1,"logs/Slang_parse/chapter-8/8.5--parameters.sv.log.html","tests/chapter-8/8.5--parameters.sv.html"],["","parametrized_class_extend",1,"logs/Slang_parse/chapter-8/8.25--parametrized_class_extend.sv.log.html","tests/chapter-8/8.25--parametrized_class_extend.sv.html"]]

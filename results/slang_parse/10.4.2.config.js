@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/10.4.2'] = [["","non_blocking_assignment",1,"logs/Slang_parse/chapter-10/10.4.2--non-blocking-assignment.sv.log.html","tests/chapter-10/10.4.2--non-blocking-assignment.sv.html"]]

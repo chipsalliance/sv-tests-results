@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.24'] = [["","out_of_block_methods",1,"logs/Slang_parse/chapter-8/8.24--out_of_block_methods.sv.log.html","tests/chapter-8/8.24--out_of_block_methods.sv.html"]]

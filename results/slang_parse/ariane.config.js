@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/ariane'] = [["cores","ariane",1,"logs/Slang_parse/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/core/include/cv64a6_imafdc_sv39_config_pkg.sv.html"]]

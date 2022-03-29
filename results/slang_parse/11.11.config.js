@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/11.11'] = [["","min_max_avg_delay",1,"logs/Slang_parse/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]

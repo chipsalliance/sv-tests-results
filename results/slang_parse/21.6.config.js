@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/21.6'] = [["","test_plusargs",1,"logs/Slang_parse/chapter-21/21.6--test.sv.log.html","tests/chapter-21/21.6--test.sv.html"],["","value_plusargs",1,"logs/Slang_parse/chapter-21/21.6--value.sv.log.html","tests/chapter-21/21.6--value.sv.html"]]

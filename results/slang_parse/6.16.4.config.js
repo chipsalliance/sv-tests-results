@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/6.16.4'] = [["","string_toupper",1,"logs/Slang_parse/chapter-6/6.16.4--string_toupper.sv.log.html","tests/chapter-6/6.16.4--string_toupper.sv.html"]]

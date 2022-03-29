@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/6.16.6'] = [["","string_compare_fn",1,"logs/Slang_parse/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]

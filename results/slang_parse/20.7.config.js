@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/20.7'] = [["","array_queries",1,"logs/Slang_parse/chapter-20/20.7--array-queries.sv.log.html","tests/chapter-20/20.7--array-queries.sv.html"],["","array_queries_multi_dim",1,"logs/Slang_parse/chapter-20/20.7--array-queries-multi-dim.sv.log.html","tests/chapter-20/20.7--array-queries-multi-dim.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/7.1'] = [["","basic-packed-structures",1,"logs/Slang_parse/chapter-7/structures/packed/basic.sv.log.html","tests/chapter-7/structures/packed/basic.sv.html"],["","basic-unpacked-structures",1,"logs/Slang_parse/chapter-7/structures/unpacked/basic.sv.log.html","tests/chapter-7/structures/unpacked/basic.sv.html"]]

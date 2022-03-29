@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/7.10.2.3'] = [["","delete",1,"logs/Slang_parse/chapter-7/queues/delete.sv.log.html","tests/chapter-7/queues/delete.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/7.9.2'] = [["","associative-arrays-delete",1,"logs/Slang_parse/chapter-7/arrays/associative/methods/delete.sv.log.html","tests/chapter-7/arrays/associative/methods/delete.sv.html"]]

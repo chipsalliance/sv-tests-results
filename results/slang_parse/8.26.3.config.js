@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.26.3'] = [["","type_access_extends",1,"logs/Slang_parse/chapter-8/8.26.3--type_access_extends.sv.log.html","tests/chapter-8/8.26.3--type_access_extends.sv.html"],["","type_access_implements",1,"logs/Slang_parse/chapter-8/8.26.3--type_access_implements.sv.log.html","tests/chapter-8/8.26.3--type_access_implements.sv.html"]]

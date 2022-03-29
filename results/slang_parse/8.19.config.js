@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.19'] = [["","global_constant",1,"logs/Slang_parse/chapter-8/8.19--global_constant.sv.log.html","tests/chapter-8/8.19--global_constant.sv.html"],["","instance_constant",1,"logs/Slang_parse/chapter-8/8.19--instance_constant.sv.log.html","tests/chapter-8/8.19--instance_constant.sv.html"]]

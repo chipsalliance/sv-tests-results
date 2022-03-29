@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/6.12'] = [["","real",1,"logs/Slang_parse/chapter-6/6.12--real.sv.log.html","tests/chapter-6/6.12--real.sv.html"],["","realtime",1,"logs/Slang_parse/chapter-6/6.12--realtime.sv.log.html","tests/chapter-6/6.12--realtime.sv.html"],["","shortreal",1,"logs/Slang_parse/chapter-6/6.12--shortreal.sv.log.html","tests/chapter-6/6.12--shortreal.sv.html"]]

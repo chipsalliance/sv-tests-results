@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/6.6.4'] = [["","net_trireg",1,"logs/Slang_parse/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]

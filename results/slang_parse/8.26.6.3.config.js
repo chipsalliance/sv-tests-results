@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.26.6.3'] = [["","diamond_relationship",1,"logs/Slang_parse/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]

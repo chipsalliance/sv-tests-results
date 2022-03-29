@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.8'] = [["","typed_constructor",1,"logs/Slang_parse/chapter-8/8.8--typed_constructor.sv.log.html","tests/chapter-8/8.8--typed_constructor.sv.html"],["","typed_constructor_param",1,"logs/Slang_parse/chapter-8/8.8--typed_constructor_param.sv.log.html","tests/chapter-8/8.8--typed_constructor_param.sv.html"]]

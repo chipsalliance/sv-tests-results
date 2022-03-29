@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/9.2.2.2'] = [["","always_comb",1,"logs/Slang_parse/chapter-9/9.2.2.2--always_comb.sv.log.html","tests/chapter-9/9.2.2.2--always_comb.sv.html"]]

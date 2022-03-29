@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/7.8.2'] = [["","associative-arrays-string",1,"logs/Slang_parse/chapter-7/arrays/associative/string.sv.log.html","tests/chapter-7/arrays/associative/string.sv.html"]]

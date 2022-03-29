@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/8.15'] = [["","super",1,"logs/Slang_parse/chapter-8/8.15--super.sv.log.html","tests/chapter-8/8.15--super.sv.html"],["","super-def-new",1,"logs/Slang_parse/chapter-8/8.15--super-default-new.sv.log.html","tests/chapter-8/8.15--super-default-new.sv.html"]]

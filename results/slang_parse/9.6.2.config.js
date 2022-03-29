@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/9.6.2'] = [["","disable",1,"logs/Slang_parse/chapter-9/9.6.2--disable.sv.log.html","tests/chapter-9/9.6.2--disable.sv.html"],["","disable_other",1,"logs/Slang_parse/chapter-9/9.6.2--disable_other.sv.log.html","tests/chapter-9/9.6.2--disable_other.sv.html"]]

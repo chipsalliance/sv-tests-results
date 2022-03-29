@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/15.4'] = [["","mailbox_blocking",1,"logs/Slang_parse/chapter-15/15.4--mailbox-blocking.sv.log.html","tests/chapter-15/15.4--mailbox-blocking.sv.html"],["","mailbox_non_blocking",1,"logs/Slang_parse/chapter-15/15.4--mailbox-non-blocking.sv.log.html","tests/chapter-15/15.4--mailbox-non-blocking.sv.html"]]

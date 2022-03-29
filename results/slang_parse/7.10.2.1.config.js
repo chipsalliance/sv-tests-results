@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/7.10.2.1'] = [["","bounded-queues",1,"logs/Slang_parse/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"],["","size",1,"logs/Slang_parse/chapter-7/queues/size.sv.log.html","tests/chapter-7/queues/size.sv.html"]]

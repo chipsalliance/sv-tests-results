@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/6.6.6'] = [["","net_supply0",1,"logs/Slang_parse/generated/nets/6.6.6--net_supply0.sv.log.html","tests/generated/nets/6.6.6--net_supply0.sv.html"],["","net_supply1",1,"logs/Slang_parse/generated/nets/6.6.6--net_supply1.sv.log.html","tests/generated/nets/6.6.6--net_supply1.sv.html"]]

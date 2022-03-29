@@ -1,0 +1,1 @@
+config_loader_data['slang_parse/ibex'] = [["cores","ibex",1,"logs/Slang_parse/generated/fusesoc/ibex-synth.sv.log.html","build/lowrisc_ibex_top_artya7_0.1/src/lowrisc_ibex_ibex_pkg_0.1/rtl/ibex_pkg.sv.html"]]
