@@ -605,28 +605,14 @@
 <span class="normal"><a href="#l-597">597</a></span>
 <span class="normal"><a href="#l-598">598</a></span>
 <span class="normal"><a href="#l-599">599</a></span>
-<span class="normal"><a href="#l-600">600</a></span>
-<span class="normal"><a href="#l-601">601</a></span>
-<span class="normal"><a href="#l-602">602</a></span>
-<span class="normal"><a href="#l-603">603</a></span>
-<span class="normal"><a href="#l-604">604</a></span>
-<span class="normal"><a href="#l-605">605</a></span>
-<span class="normal"><a href="#l-606">606</a></span>
-<span class="normal"><a href="#l-607">607</a></span>
-<span class="normal"><a href="#l-608">608</a></span>
-<span class="normal"><a href="#l-609">609</a></span>
-<span class="normal"><a href="#l-610">610</a></span>
-<span class="normal"><a href="#l-611">611</a></span>
-<span class="normal"><a href="#l-612">612</a></span>
-<span class="normal"><a href="#l-613">613</a></span>
-<span class="normal"><a href="#l-614">614</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-600">600</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
 <a id="l-5" name="l-5"></a><span class="c1">// Scrambling key derivation module for OTP.</span>
 <a id="l-6" name="l-6"></a><span class="c1">//</span>
 <a id="l-7" name="l-7"></a>
-<a id="l-8" name="l-8"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;prim_assert.sv&quot;</span><span class="w"></span>
+<a id="l-8" name="l-8"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;prim_flop_macros.sv&quot;</span><span class="w"></span>
 <a id="l-9" name="l-9"></a>
 <a id="l-10" name="l-10"></a><span class="k">module</span><span class="w"> </span><span class="n">otp_ctrl_kdi</span><span class="w"></span>
 <a id="l-11" name="l-11"></a><span class="w">  </span><span class="k">import</span><span class="w"> </span><span class="n">otp_ctrl_pkg</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
@@ -969,270 +955,256 @@
 <a id="l-348" name="l-348"></a><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="n">state_e</span><span class="p">;</span><span class="w"></span>
 <a id="l-349" name="l-349"></a>
 <a id="l-350" name="l-350"></a><span class="w">  </span><span class="n">state_e</span><span class="w"> </span><span class="n">state_d</span><span class="p">,</span><span class="w"> </span><span class="n">state_q</span><span class="p">;</span><span class="w"></span>
-<a id="l-351" name="l-351"></a>
-<a id="l-352" name="l-352"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">edn_req_d</span><span class="p">,</span><span class="w"> </span><span class="n">edn_req_q</span><span class="p">;</span><span class="w"></span>
-<a id="l-353" name="l-353"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">edn_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edn_req_q</span><span class="p">;</span><span class="w"></span>
-<a id="l-354" name="l-354"></a>
-<a id="l-355" name="l-355"></a><span class="w">  </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_fsm</span><span class="w"></span>
-<a id="l-356" name="l-356"></a><span class="w">    </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_q</span><span class="p">;</span><span class="w"></span>
-<a id="l-357" name="l-357"></a>
-<a id="l-358" name="l-358"></a><span class="w">    </span><span class="c1">// FSM Error output</span>
-<a id="l-359" name="l-359"></a><span class="w">    </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-360" name="l-360"></a>
-<a id="l-361" name="l-361"></a><span class="w">    </span><span class="c1">// Counters</span>
-<a id="l-362" name="l-362"></a><span class="w">    </span><span class="n">seed_cnt_en</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-363" name="l-363"></a><span class="w">    </span><span class="n">seed_cnt_clr</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-364" name="l-364"></a><span class="w">    </span><span class="n">entropy_cnt_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-365" name="l-365"></a><span class="w">    </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-366" name="l-366"></a>
-<a id="l-367" name="l-367"></a><span class="w">    </span><span class="c1">// EDN 128bit block fetch request.</span>
-<a id="l-368" name="l-368"></a><span class="w">    </span><span class="c1">// This keeps the request alive until it has</span>
-<a id="l-369" name="l-369"></a><span class="w">    </span><span class="c1">// been acked to adhere to the req/ack protocol</span>
-<a id="l-370" name="l-370"></a><span class="w">    </span><span class="c1">// even in cases where the FSM jumps into</span>
-<a id="l-371" name="l-371"></a><span class="w">    </span><span class="c1">// an error state while waiting for a request.</span>
-<a id="l-372" name="l-372"></a><span class="w">    </span><span class="n">edn_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edn_req_q</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">edn_ack_i</span><span class="p">;</span><span class="w"></span>
-<a id="l-373" name="l-373"></a>
-<a id="l-374" name="l-374"></a><span class="w">    </span><span class="c1">// Data selection and temp registers</span>
-<a id="l-375" name="l-375"></a><span class="w">    </span><span class="n">data_sel</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">SeedData</span><span class="p">;</span><span class="w"></span>
-<a id="l-376" name="l-376"></a><span class="w">    </span><span class="n">key_reg_en</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-377" name="l-377"></a><span class="w">    </span><span class="n">nonce_reg_en</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-378" name="l-378"></a><span class="w">    </span><span class="n">seed_valid_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-379" name="l-379"></a>
-<a id="l-380" name="l-380"></a><span class="w">    </span><span class="c1">// Scrambling datapath</span>
-<a id="l-381" name="l-381"></a><span class="w">    </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-382" name="l-382"></a><span class="w">    </span><span class="n">scrmbl_sel_o</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">req_bundle</span><span class="p">.</span><span class="n">digest_sel</span><span class="p">;</span><span class="w"></span>
-<a id="l-383" name="l-383"></a><span class="w">    </span><span class="n">scrmbl_cmd_o</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">LoadShadow</span><span class="p">;</span><span class="w"></span>
-<a id="l-384" name="l-384"></a><span class="w">    </span><span class="n">scrmbl_mode_o</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">StandardMode</span><span class="p">;</span><span class="w"></span>
-<a id="l-385" name="l-385"></a>
-<a id="l-386" name="l-386"></a><span class="w">    </span><span class="n">scrmbl_valid_o</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-387" name="l-387"></a>
-<a id="l-388" name="l-388"></a><span class="w">    </span><span class="c1">// Request acknowledgement</span>
-<a id="l-389" name="l-389"></a><span class="w">    </span><span class="n">req_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-390" name="l-390"></a>
-<a id="l-391" name="l-391"></a><span class="w">    </span><span class="k">unique</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">state_q</span><span class="p">)</span><span class="w"></span>
-<a id="l-392" name="l-392"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-393" name="l-393"></a><span class="w">      </span><span class="c1">// State right after reset. Wait here until KDI gets enabled.</span>
-<a id="l-394" name="l-394"></a><span class="w">      </span><span class="nl">ResetSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-395" name="l-395"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">kdi_en_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-396" name="l-396"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IdleSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-397" name="l-397"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-398" name="l-398"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-399" name="l-399"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-400" name="l-400"></a><span class="w">      </span><span class="c1">// Wait for a request, then go and acquire the mutex.</span>
-<a id="l-401" name="l-401"></a><span class="w">      </span><span class="nl">IdleSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-402" name="l-402"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_valid</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-403" name="l-403"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigClrSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-404" name="l-404"></a><span class="w">          </span><span class="n">seed_cnt_clr</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-405" name="l-405"></a><span class="w">          </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-406" name="l-406"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-407" name="l-407"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-408" name="l-408"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-409" name="l-409"></a><span class="w">      </span><span class="c1">// First, acquire the mutex for the digest and clear the digest state.</span>
-<a id="l-410" name="l-410"></a><span class="w">      </span><span class="nl">DigClrSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-411" name="l-411"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-412" name="l-412"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-413" name="l-413"></a><span class="w">        </span><span class="c1">// Need to reset the digest state and set digest mode to &quot;standard&quot;.</span>
-<a id="l-414" name="l-414"></a><span class="w">        </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigestInit</span><span class="p">;</span><span class="w"></span>
-<a id="l-415" name="l-415"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_mtx_gnt_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-416" name="l-416"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigLoadSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-417" name="l-417"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-418" name="l-418"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-419" name="l-419"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-420" name="l-420"></a><span class="w">      </span><span class="c1">// Load two 64bit blocks of the seed, and trigger digest calculation.</span>
-<a id="l-421" name="l-421"></a><span class="w">      </span><span class="nl">DigLoadSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-422" name="l-422"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-423" name="l-423"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-424" name="l-424"></a><span class="w">        </span><span class="c1">// Trigger digest round in case this is the second block in a row.</span>
-<a id="l-425" name="l-425"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">seed_cnt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-426" name="l-426"></a><span class="w">          </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Digest</span><span class="p">;</span><span class="w"></span>
-<a id="l-427" name="l-427"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-428" name="l-428"></a><span class="w">            </span><span class="c1">// Go and ingest a block of entropy if required.</span>
-<a id="l-429" name="l-429"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_bundle</span><span class="p">.</span><span class="n">ingest_entropy</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-430" name="l-430"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FetchEntropySt</span><span class="p">;</span><span class="w"></span>
-<a id="l-431" name="l-431"></a><span class="w">            </span><span class="c1">// Otherwise go to digest finalization state.</span>
-<a id="l-432" name="l-432"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-433" name="l-433"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigFinSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-434" name="l-434"></a><span class="w">            </span><span class="k">end</span><span class="w"></span>
-<a id="l-435" name="l-435"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-436" name="l-436"></a><span class="w">        </span><span class="c1">// Just load first 64bit block and stay here.</span>
-<a id="l-437" name="l-437"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-438" name="l-438"></a><span class="w">          </span><span class="n">seed_cnt_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-439" name="l-439"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-440" name="l-440"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-441" name="l-441"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-442" name="l-442"></a><span class="w">      </span><span class="c1">// Fetch random data to ingest for key derivation.</span>
-<a id="l-443" name="l-443"></a><span class="w">      </span><span class="nl">FetchEntropySt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-444" name="l-444"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-445" name="l-445"></a><span class="w">        </span><span class="n">edn_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-446" name="l-446"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">edn_ack_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-447" name="l-447"></a><span class="w">          </span><span class="n">nonce_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-448" name="l-448"></a><span class="w">          </span><span class="c1">// Finished, go and acknowledge this request.</span>
-<a id="l-449" name="l-449"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entropy_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">2&#39;h1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-450" name="l-450"></a><span class="w">            </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigEntropySt</span><span class="p">;</span><span class="w"></span>
-<a id="l-451" name="l-451"></a><span class="w">            </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-452" name="l-452"></a><span class="w">          </span><span class="c1">// Keep on requesting entropy.</span>
-<a id="l-453" name="l-453"></a><span class="w">          </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-454" name="l-454"></a><span class="w">            </span><span class="n">entropy_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-455" name="l-455"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-456" name="l-456"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-457" name="l-457"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-458" name="l-458"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-459" name="l-459"></a><span class="w">      </span><span class="c1">// Load two 64bit blocks of entropy data.</span>
-<a id="l-460" name="l-460"></a><span class="w">      </span><span class="nl">DigEntropySt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-461" name="l-461"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-462" name="l-462"></a><span class="w">        </span><span class="n">data_sel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntropyData</span><span class="p">;</span><span class="w"></span>
-<a id="l-463" name="l-463"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-464" name="l-464"></a><span class="w">        </span><span class="c1">// Trigger digest round in case this is the second block in a row,</span>
-<a id="l-465" name="l-465"></a><span class="w">        </span><span class="c1">// and go to digest finalization.</span>
-<a id="l-466" name="l-466"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entropy_cnt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-467" name="l-467"></a><span class="w">          </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Digest</span><span class="p">;</span><span class="w"></span>
-<a id="l-468" name="l-468"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-469" name="l-469"></a><span class="w">            </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigFinSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-470" name="l-470"></a><span class="w">            </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-471" name="l-471"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-472" name="l-472"></a><span class="w">        </span><span class="c1">// Just load first 64bit block and stay here.</span>
-<a id="l-473" name="l-473"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-474" name="l-474"></a><span class="w">          </span><span class="n">entropy_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-475" name="l-475"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-476" name="l-476"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-477" name="l-477"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-478" name="l-478"></a><span class="w">      </span><span class="c1">// Trigger digest finalization and go wait for the result.</span>
-<a id="l-479" name="l-479"></a><span class="w">      </span><span class="nl">DigFinSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-480" name="l-480"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-481" name="l-481"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-482" name="l-482"></a><span class="w">        </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigestFinalize</span><span class="p">;</span><span class="w"></span>
-<a id="l-483" name="l-483"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-484" name="l-484"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigWaitSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-485" name="l-485"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-486" name="l-486"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-487" name="l-487"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-488" name="l-488"></a><span class="w">      </span><span class="c1">// Wait for the digest to return, and write the result to the key</span>
-<a id="l-489" name="l-489"></a><span class="w">      </span><span class="c1">// output register. Go back and process the second part of the</span>
-<a id="l-490" name="l-490"></a><span class="w">      </span><span class="c1">// input seed if needed.</span>
-<a id="l-491" name="l-491"></a><span class="w">      </span><span class="nl">DigWaitSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-492" name="l-492"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-493" name="l-493"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_valid_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-494" name="l-494"></a><span class="w">          </span><span class="n">key_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-495" name="l-495"></a><span class="w">          </span><span class="c1">// Not finished yet, need to go back and produce second 64bit block.</span>
-<a id="l-496" name="l-496"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">seed_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">2&#39;h1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-497" name="l-497"></a><span class="w">            </span><span class="n">seed_cnt_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-498" name="l-498"></a><span class="w">            </span><span class="c1">// In this case the previous digest state is kept,</span>
-<a id="l-499" name="l-499"></a><span class="w">            </span><span class="c1">// which leads to a chained digest.</span>
-<a id="l-500" name="l-500"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_bundle</span><span class="p">.</span><span class="n">chained_digest</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-501" name="l-501"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigLoadSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-502" name="l-502"></a><span class="w">            </span><span class="c1">// In this case we revert the digest state to the netlist IV.</span>
-<a id="l-503" name="l-503"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-504" name="l-504"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigClrSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-505" name="l-505"></a><span class="w">            </span><span class="k">end</span><span class="w"></span>
-<a id="l-506" name="l-506"></a><span class="w">          </span><span class="c1">// This was the second 64bit output block.</span>
-<a id="l-507" name="l-507"></a><span class="w">          </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-508" name="l-508"></a><span class="w">            </span><span class="n">seed_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-509" name="l-509"></a><span class="w">            </span><span class="c1">// Make sure we output the status of the key seed in OTP.</span>
-<a id="l-510" name="l-510"></a><span class="w">            </span><span class="n">seed_valid_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-511" name="l-511"></a><span class="w">            </span><span class="c1">// Check whether we need to fetch additional nonce data.</span>
-<a id="l-512" name="l-512"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_bundle</span><span class="p">.</span><span class="n">fetch_nonce</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-513" name="l-513"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FetchNonceSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-514" name="l-514"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-515" name="l-515"></a><span class="w">              </span><span class="c1">// Finished, go and acknowledge this request.</span>
-<a id="l-516" name="l-516"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FinishSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-517" name="l-517"></a><span class="w">            </span><span class="k">end</span><span class="w"></span>
-<a id="l-518" name="l-518"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-519" name="l-519"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-520" name="l-520"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-521" name="l-521"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-522" name="l-522"></a><span class="w">      </span><span class="c1">// Fetch additional nonce data. Note that the mutex is released in</span>
-<a id="l-523" name="l-523"></a><span class="w">      </span><span class="c1">// this state.</span>
-<a id="l-524" name="l-524"></a><span class="w">      </span><span class="nl">FetchNonceSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-525" name="l-525"></a><span class="w">        </span><span class="n">edn_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-526" name="l-526"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">edn_ack_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-527" name="l-527"></a><span class="w">          </span><span class="n">nonce_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-528" name="l-528"></a><span class="w">          </span><span class="c1">// Finished, go and acknowledge this request.</span>
-<a id="l-529" name="l-529"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entropy_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">req_bundle</span><span class="p">.</span><span class="n">nonce_size</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-530" name="l-530"></a><span class="w">            </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FinishSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-531" name="l-531"></a><span class="w">            </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-532" name="l-532"></a><span class="w">          </span><span class="c1">// Keep on requesting entropy.</span>
-<a id="l-533" name="l-533"></a><span class="w">          </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-534" name="l-534"></a><span class="w">            </span><span class="n">entropy_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-535" name="l-535"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-536" name="l-536"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
-<a id="l-537" name="l-537"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-538" name="l-538"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-539" name="l-539"></a><span class="w">      </span><span class="c1">// Acknowledge request and go back to IdleSt.</span>
-<a id="l-540" name="l-540"></a><span class="w">      </span><span class="nl">FinishSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-541" name="l-541"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IdleSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-542" name="l-542"></a><span class="w">        </span><span class="n">req_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-543" name="l-543"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-544" name="l-544"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-545" name="l-545"></a><span class="w">      </span><span class="c1">// Terminal error state. This raises an alert.</span>
-<a id="l-546" name="l-546"></a><span class="w">      </span><span class="nl">ErrorSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-547" name="l-547"></a><span class="w">        </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-548" name="l-548"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-549" name="l-549"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-550" name="l-550"></a><span class="w">      </span><span class="c1">// This should never happen, hence we directly jump into the</span>
-<a id="l-551" name="l-551"></a><span class="w">      </span><span class="c1">// error state, where an alert will be triggered.</span>
-<a id="l-552" name="l-552"></a><span class="w">      </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-553" name="l-553"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ErrorSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-554" name="l-554"></a><span class="w">        </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-555" name="l-555"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-556" name="l-556"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
-<a id="l-557" name="l-557"></a><span class="w">    </span><span class="k">endcase</span><span class="w"> </span><span class="c1">// state_q</span>
-<a id="l-558" name="l-558"></a>
-<a id="l-559" name="l-559"></a><span class="w">    </span><span class="c1">// Unconditionally jump into the terminal error state in case of escalation.</span>
-<a id="l-560" name="l-560"></a><span class="w">    </span><span class="c1">// SEC_CM: KDI.FSM.LOCAL_ESC, KDI.FSM.GLOBAL_ESC</span>
-<a id="l-561" name="l-561"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">escalate_en_i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">lc_ctrl_pkg</span><span class="o">::</span><span class="n">Off</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">seed_cnt_err</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">entropy_cnt_err</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-562" name="l-562"></a><span class="w">      </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ErrorSt</span><span class="p">;</span><span class="w"></span>
-<a id="l-563" name="l-563"></a><span class="w">      </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
-<a id="l-564" name="l-564"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
-<a id="l-565" name="l-565"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
-<a id="l-566" name="l-566"></a>
-<a id="l-567" name="l-567"></a><span class="w">  </span><span class="c1">///////////////</span>
-<a id="l-568" name="l-568"></a><span class="w">  </span><span class="c1">// Registers //</span>
-<a id="l-569" name="l-569"></a><span class="w">  </span><span class="c1">///////////////</span>
-<a id="l-570" name="l-570"></a>
-<a id="l-571" name="l-571"></a><span class="w">  </span><span class="c1">// This primitive is used to place a size-only constraint on the</span>
-<a id="l-572" name="l-572"></a><span class="w">  </span><span class="c1">// flops in order to prevent FSM state encoding optimizations.</span>
-<a id="l-573" name="l-573"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">StateWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">state_raw_q</span><span class="p">;</span><span class="w"></span>
-<a id="l-574" name="l-574"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">state_q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_e</span><span class="p">&#39;(</span><span class="n">state_raw_q</span><span class="p">);</span><span class="w"></span>
-<a id="l-575" name="l-575"></a><span class="w">  </span><span class="n">prim_sparse_fsm_flop</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
-<a id="l-576" name="l-576"></a><span class="w">    </span><span class="p">.</span><span class="n">StateEnumT</span><span class="p">(</span><span class="n">state_e</span><span class="p">),</span><span class="w"></span>
-<a id="l-577" name="l-577"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">),</span><span class="w"></span>
-<a id="l-578" name="l-578"></a><span class="w">    </span><span class="p">.</span><span class="n">ResetValue</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">&#39;(</span><span class="n">ResetSt</span><span class="p">))</span><span class="w"></span>
-<a id="l-579" name="l-579"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_state_regs</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<a id="l-580" name="l-580"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
-<a id="l-581" name="l-581"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
-<a id="l-582" name="l-582"></a><span class="w">    </span><span class="p">.</span><span class="n">state_i</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">state_d</span><span class="w">     </span><span class="p">),</span><span class="w"></span>
-<a id="l-583" name="l-583"></a><span class="w">    </span><span class="p">.</span><span class="n">state_o</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">state_raw_q</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<a id="l-584" name="l-584"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
-<a id="l-585" name="l-585"></a>
-<a id="l-586" name="l-586"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_regs</span><span class="w"></span>
-<a id="l-587" name="l-587"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-588" name="l-588"></a><span class="w">      </span><span class="n">nonce_out_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">RndCnstScrmblKeyInit</span><span class="p">.</span><span class="n">nonce</span><span class="p">;</span><span class="w"></span>
-<a id="l-589" name="l-589"></a><span class="w">      </span><span class="n">seed_valid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-590" name="l-590"></a><span class="w">      </span><span class="n">edn_req_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-591" name="l-591"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-592" name="l-592"></a><span class="w">      </span><span class="n">nonce_out_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">nonce_out_d</span><span class="p">;</span><span class="w"></span>
-<a id="l-593" name="l-593"></a><span class="w">      </span><span class="n">seed_valid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">seed_valid_d</span><span class="p">;</span><span class="w"></span>
-<a id="l-594" name="l-594"></a><span class="w">      </span><span class="n">edn_req_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">edn_req_d</span><span class="p">;</span><span class="w"></span>
-<a id="l-595" name="l-595"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
-<a id="l-596" name="l-596"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
-<a id="l-597" name="l-597"></a>
-<a id="l-598" name="l-598"></a><span class="w">  </span><span class="c1">////////////////</span>
-<a id="l-599" name="l-599"></a><span class="w">  </span><span class="c1">// Assertions //</span>
-<a id="l-600" name="l-600"></a><span class="w">  </span><span class="c1">////////////////</span>
-<a id="l-601" name="l-601"></a>
-<a id="l-602" name="l-602"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">FsmErrKnown_A</span><span class="p">,</span><span class="w">             </span><span class="n">fsm_err_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-603" name="l-603"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">EdnReqKnown_A</span><span class="p">,</span><span class="w">             </span><span class="n">edn_req_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-604" name="l-604"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">FlashOtpKeyRspKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">flash_otp_key_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-605" name="l-605"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">SramOtpKeyRspKnown_A</span><span class="p">,</span><span class="w">      </span><span class="n">sram_otp_key_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-606" name="l-606"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtbnOtpKeyRspKnown_A</span><span class="p">,</span><span class="w">      </span><span class="n">otbn_otp_key_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-607" name="l-607"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblMtxReqKnown_A</span><span class="p">,</span><span class="w">       </span><span class="n">scrmbl_mtx_req_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-608" name="l-608"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblCmdKnown_A</span><span class="p">,</span><span class="w">          </span><span class="n">scrmbl_cmd_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-609" name="l-609"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblModeKnown_A</span><span class="p">,</span><span class="w">         </span><span class="n">scrmbl_mode_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-610" name="l-610"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblSelKnown_A</span><span class="p">,</span><span class="w">          </span><span class="n">scrmbl_sel_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-611" name="l-611"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblDataKnown_A</span><span class="p">,</span><span class="w">         </span><span class="n">scrmbl_data_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-612" name="l-612"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblValidKnown_A</span><span class="p">,</span><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-613" name="l-613"></a>
-<a id="l-614" name="l-614"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">otp_ctrl_kdi</span><span class="w"></span>
+<a id="l-351" name="l-351"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="n">edn_req_d</span><span class="p">,</span><span class="w"> </span><span class="n">edn_req_q</span><span class="p">;</span><span class="w"></span>
+<a id="l-352" name="l-352"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">edn_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edn_req_q</span><span class="p">;</span><span class="w"></span>
+<a id="l-353" name="l-353"></a>
+<a id="l-354" name="l-354"></a><span class="w">  </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_fsm</span><span class="w"></span>
+<a id="l-355" name="l-355"></a><span class="w">    </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_q</span><span class="p">;</span><span class="w"></span>
+<a id="l-356" name="l-356"></a>
+<a id="l-357" name="l-357"></a><span class="w">    </span><span class="c1">// FSM Error output</span>
+<a id="l-358" name="l-358"></a><span class="w">    </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-359" name="l-359"></a>
+<a id="l-360" name="l-360"></a><span class="w">    </span><span class="c1">// Counters</span>
+<a id="l-361" name="l-361"></a><span class="w">    </span><span class="n">seed_cnt_en</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-362" name="l-362"></a><span class="w">    </span><span class="n">seed_cnt_clr</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-363" name="l-363"></a><span class="w">    </span><span class="n">entropy_cnt_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-364" name="l-364"></a><span class="w">    </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-365" name="l-365"></a>
+<a id="l-366" name="l-366"></a><span class="w">    </span><span class="c1">// EDN 128bit block fetch request.</span>
+<a id="l-367" name="l-367"></a><span class="w">    </span><span class="c1">// This keeps the request alive until it has</span>
+<a id="l-368" name="l-368"></a><span class="w">    </span><span class="c1">// been acked to adhere to the req/ack protocol</span>
+<a id="l-369" name="l-369"></a><span class="w">    </span><span class="c1">// even in cases where the FSM jumps into</span>
+<a id="l-370" name="l-370"></a><span class="w">    </span><span class="c1">// an error state while waiting for a request.</span>
+<a id="l-371" name="l-371"></a><span class="w">    </span><span class="n">edn_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edn_req_q</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">edn_ack_i</span><span class="p">;</span><span class="w"></span>
+<a id="l-372" name="l-372"></a>
+<a id="l-373" name="l-373"></a><span class="w">    </span><span class="c1">// Data selection and temp registers</span>
+<a id="l-374" name="l-374"></a><span class="w">    </span><span class="n">data_sel</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="n">SeedData</span><span class="p">;</span><span class="w"></span>
+<a id="l-375" name="l-375"></a><span class="w">    </span><span class="n">key_reg_en</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-376" name="l-376"></a><span class="w">    </span><span class="n">nonce_reg_en</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-377" name="l-377"></a><span class="w">    </span><span class="n">seed_valid_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-378" name="l-378"></a>
+<a id="l-379" name="l-379"></a><span class="w">    </span><span class="c1">// Scrambling datapath</span>
+<a id="l-380" name="l-380"></a><span class="w">    </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-381" name="l-381"></a><span class="w">    </span><span class="n">scrmbl_sel_o</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">req_bundle</span><span class="p">.</span><span class="n">digest_sel</span><span class="p">;</span><span class="w"></span>
+<a id="l-382" name="l-382"></a><span class="w">    </span><span class="n">scrmbl_cmd_o</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">LoadShadow</span><span class="p">;</span><span class="w"></span>
+<a id="l-383" name="l-383"></a><span class="w">    </span><span class="n">scrmbl_mode_o</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="n">StandardMode</span><span class="p">;</span><span class="w"></span>
+<a id="l-384" name="l-384"></a>
+<a id="l-385" name="l-385"></a><span class="w">    </span><span class="n">scrmbl_valid_o</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-386" name="l-386"></a>
+<a id="l-387" name="l-387"></a><span class="w">    </span><span class="c1">// Request acknowledgement</span>
+<a id="l-388" name="l-388"></a><span class="w">    </span><span class="n">req_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-389" name="l-389"></a>
+<a id="l-390" name="l-390"></a><span class="w">    </span><span class="k">unique</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">state_q</span><span class="p">)</span><span class="w"></span>
+<a id="l-391" name="l-391"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-392" name="l-392"></a><span class="w">      </span><span class="c1">// State right after reset. Wait here until KDI gets enabled.</span>
+<a id="l-393" name="l-393"></a><span class="w">      </span><span class="nl">ResetSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-394" name="l-394"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">kdi_en_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-395" name="l-395"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IdleSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-396" name="l-396"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-397" name="l-397"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-398" name="l-398"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-399" name="l-399"></a><span class="w">      </span><span class="c1">// Wait for a request, then go and acquire the mutex.</span>
+<a id="l-400" name="l-400"></a><span class="w">      </span><span class="nl">IdleSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-401" name="l-401"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_valid</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-402" name="l-402"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigClrSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-403" name="l-403"></a><span class="w">          </span><span class="n">seed_cnt_clr</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-404" name="l-404"></a><span class="w">          </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-405" name="l-405"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-406" name="l-406"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-407" name="l-407"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-408" name="l-408"></a><span class="w">      </span><span class="c1">// First, acquire the mutex for the digest and clear the digest state.</span>
+<a id="l-409" name="l-409"></a><span class="w">      </span><span class="nl">DigClrSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-410" name="l-410"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-411" name="l-411"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-412" name="l-412"></a><span class="w">        </span><span class="c1">// Need to reset the digest state and set digest mode to &quot;standard&quot;.</span>
+<a id="l-413" name="l-413"></a><span class="w">        </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigestInit</span><span class="p">;</span><span class="w"></span>
+<a id="l-414" name="l-414"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_mtx_gnt_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-415" name="l-415"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigLoadSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-416" name="l-416"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-417" name="l-417"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-418" name="l-418"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-419" name="l-419"></a><span class="w">      </span><span class="c1">// Load two 64bit blocks of the seed, and trigger digest calculation.</span>
+<a id="l-420" name="l-420"></a><span class="w">      </span><span class="nl">DigLoadSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-421" name="l-421"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-422" name="l-422"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-423" name="l-423"></a><span class="w">        </span><span class="c1">// Trigger digest round in case this is the second block in a row.</span>
+<a id="l-424" name="l-424"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">seed_cnt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-425" name="l-425"></a><span class="w">          </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Digest</span><span class="p">;</span><span class="w"></span>
+<a id="l-426" name="l-426"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-427" name="l-427"></a><span class="w">            </span><span class="c1">// Go and ingest a block of entropy if required.</span>
+<a id="l-428" name="l-428"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_bundle</span><span class="p">.</span><span class="n">ingest_entropy</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-429" name="l-429"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FetchEntropySt</span><span class="p">;</span><span class="w"></span>
+<a id="l-430" name="l-430"></a><span class="w">            </span><span class="c1">// Otherwise go to digest finalization state.</span>
+<a id="l-431" name="l-431"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-432" name="l-432"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigFinSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-433" name="l-433"></a><span class="w">            </span><span class="k">end</span><span class="w"></span>
+<a id="l-434" name="l-434"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-435" name="l-435"></a><span class="w">        </span><span class="c1">// Just load first 64bit block and stay here.</span>
+<a id="l-436" name="l-436"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-437" name="l-437"></a><span class="w">          </span><span class="n">seed_cnt_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-438" name="l-438"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-439" name="l-439"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-440" name="l-440"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-441" name="l-441"></a><span class="w">      </span><span class="c1">// Fetch random data to ingest for key derivation.</span>
+<a id="l-442" name="l-442"></a><span class="w">      </span><span class="nl">FetchEntropySt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-443" name="l-443"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-444" name="l-444"></a><span class="w">        </span><span class="n">edn_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-445" name="l-445"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">edn_ack_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-446" name="l-446"></a><span class="w">          </span><span class="n">nonce_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-447" name="l-447"></a><span class="w">          </span><span class="c1">// Finished, go and acknowledge this request.</span>
+<a id="l-448" name="l-448"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entropy_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">2&#39;h1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-449" name="l-449"></a><span class="w">            </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigEntropySt</span><span class="p">;</span><span class="w"></span>
+<a id="l-450" name="l-450"></a><span class="w">            </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-451" name="l-451"></a><span class="w">          </span><span class="c1">// Keep on requesting entropy.</span>
+<a id="l-452" name="l-452"></a><span class="w">          </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-453" name="l-453"></a><span class="w">            </span><span class="n">entropy_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-454" name="l-454"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-455" name="l-455"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-456" name="l-456"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-457" name="l-457"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-458" name="l-458"></a><span class="w">      </span><span class="c1">// Load two 64bit blocks of entropy data.</span>
+<a id="l-459" name="l-459"></a><span class="w">      </span><span class="nl">DigEntropySt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-460" name="l-460"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-461" name="l-461"></a><span class="w">        </span><span class="n">data_sel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">EntropyData</span><span class="p">;</span><span class="w"></span>
+<a id="l-462" name="l-462"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-463" name="l-463"></a><span class="w">        </span><span class="c1">// Trigger digest round in case this is the second block in a row,</span>
+<a id="l-464" name="l-464"></a><span class="w">        </span><span class="c1">// and go to digest finalization.</span>
+<a id="l-465" name="l-465"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entropy_cnt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-466" name="l-466"></a><span class="w">          </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Digest</span><span class="p">;</span><span class="w"></span>
+<a id="l-467" name="l-467"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-468" name="l-468"></a><span class="w">            </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigFinSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-469" name="l-469"></a><span class="w">            </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-470" name="l-470"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-471" name="l-471"></a><span class="w">        </span><span class="c1">// Just load first 64bit block and stay here.</span>
+<a id="l-472" name="l-472"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-473" name="l-473"></a><span class="w">          </span><span class="n">entropy_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-474" name="l-474"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-475" name="l-475"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-476" name="l-476"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-477" name="l-477"></a><span class="w">      </span><span class="c1">// Trigger digest finalization and go wait for the result.</span>
+<a id="l-478" name="l-478"></a><span class="w">      </span><span class="nl">DigFinSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-479" name="l-479"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-480" name="l-480"></a><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-481" name="l-481"></a><span class="w">        </span><span class="n">scrmbl_cmd_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigestFinalize</span><span class="p">;</span><span class="w"></span>
+<a id="l-482" name="l-482"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_ready_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-483" name="l-483"></a><span class="w">          </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigWaitSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-484" name="l-484"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-485" name="l-485"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-486" name="l-486"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-487" name="l-487"></a><span class="w">      </span><span class="c1">// Wait for the digest to return, and write the result to the key</span>
+<a id="l-488" name="l-488"></a><span class="w">      </span><span class="c1">// output register. Go back and process the second part of the</span>
+<a id="l-489" name="l-489"></a><span class="w">      </span><span class="c1">// input seed if needed.</span>
+<a id="l-490" name="l-490"></a><span class="w">      </span><span class="nl">DigWaitSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-491" name="l-491"></a><span class="w">        </span><span class="n">scrmbl_mtx_req_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-492" name="l-492"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">scrmbl_valid_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-493" name="l-493"></a><span class="w">          </span><span class="n">key_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-494" name="l-494"></a><span class="w">          </span><span class="c1">// Not finished yet, need to go back and produce second 64bit block.</span>
+<a id="l-495" name="l-495"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">seed_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">2&#39;h1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-496" name="l-496"></a><span class="w">            </span><span class="n">seed_cnt_en</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-497" name="l-497"></a><span class="w">            </span><span class="c1">// In this case the previous digest state is kept,</span>
+<a id="l-498" name="l-498"></a><span class="w">            </span><span class="c1">// which leads to a chained digest.</span>
+<a id="l-499" name="l-499"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_bundle</span><span class="p">.</span><span class="n">chained_digest</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-500" name="l-500"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigLoadSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-501" name="l-501"></a><span class="w">            </span><span class="c1">// In this case we revert the digest state to the netlist IV.</span>
+<a id="l-502" name="l-502"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-503" name="l-503"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DigClrSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-504" name="l-504"></a><span class="w">            </span><span class="k">end</span><span class="w"></span>
+<a id="l-505" name="l-505"></a><span class="w">          </span><span class="c1">// This was the second 64bit output block.</span>
+<a id="l-506" name="l-506"></a><span class="w">          </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-507" name="l-507"></a><span class="w">            </span><span class="n">seed_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-508" name="l-508"></a><span class="w">            </span><span class="c1">// Make sure we output the status of the key seed in OTP.</span>
+<a id="l-509" name="l-509"></a><span class="w">            </span><span class="n">seed_valid_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-510" name="l-510"></a><span class="w">            </span><span class="c1">// Check whether we need to fetch additional nonce data.</span>
+<a id="l-511" name="l-511"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">req_bundle</span><span class="p">.</span><span class="n">fetch_nonce</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-512" name="l-512"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FetchNonceSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-513" name="l-513"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-514" name="l-514"></a><span class="w">              </span><span class="c1">// Finished, go and acknowledge this request.</span>
+<a id="l-515" name="l-515"></a><span class="w">              </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FinishSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-516" name="l-516"></a><span class="w">            </span><span class="k">end</span><span class="w"></span>
+<a id="l-517" name="l-517"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-518" name="l-518"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-519" name="l-519"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-520" name="l-520"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-521" name="l-521"></a><span class="w">      </span><span class="c1">// Fetch additional nonce data. Note that the mutex is released in</span>
+<a id="l-522" name="l-522"></a><span class="w">      </span><span class="c1">// this state.</span>
+<a id="l-523" name="l-523"></a><span class="w">      </span><span class="nl">FetchNonceSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-524" name="l-524"></a><span class="w">        </span><span class="n">edn_req_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-525" name="l-525"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">edn_ack_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-526" name="l-526"></a><span class="w">          </span><span class="n">nonce_reg_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-527" name="l-527"></a><span class="w">          </span><span class="c1">// Finished, go and acknowledge this request.</span>
+<a id="l-528" name="l-528"></a><span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">entropy_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">req_bundle</span><span class="p">.</span><span class="n">nonce_size</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-529" name="l-529"></a><span class="w">            </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FinishSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-530" name="l-530"></a><span class="w">            </span><span class="n">entropy_cnt_clr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-531" name="l-531"></a><span class="w">          </span><span class="c1">// Keep on requesting entropy.</span>
+<a id="l-532" name="l-532"></a><span class="w">          </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-533" name="l-533"></a><span class="w">            </span><span class="n">entropy_cnt_en</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-534" name="l-534"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-535" name="l-535"></a><span class="w">        </span><span class="k">end</span><span class="w"></span>
+<a id="l-536" name="l-536"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-537" name="l-537"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-538" name="l-538"></a><span class="w">      </span><span class="c1">// Acknowledge request and go back to IdleSt.</span>
+<a id="l-539" name="l-539"></a><span class="w">      </span><span class="nl">FinishSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-540" name="l-540"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IdleSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-541" name="l-541"></a><span class="w">        </span><span class="n">req_ready</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-542" name="l-542"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-543" name="l-543"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-544" name="l-544"></a><span class="w">      </span><span class="c1">// Terminal error state. This raises an alert.</span>
+<a id="l-545" name="l-545"></a><span class="w">      </span><span class="nl">ErrorSt:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-546" name="l-546"></a><span class="w">        </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-547" name="l-547"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-548" name="l-548"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-549" name="l-549"></a><span class="w">      </span><span class="c1">// This should never happen, hence we directly jump into the</span>
+<a id="l-550" name="l-550"></a><span class="w">      </span><span class="c1">// error state, where an alert will be triggered.</span>
+<a id="l-551" name="l-551"></a><span class="w">      </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-552" name="l-552"></a><span class="w">        </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ErrorSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-553" name="l-553"></a><span class="w">        </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-554" name="l-554"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-555" name="l-555"></a><span class="w">      </span><span class="c1">///////////////////////////////////////////////////////////////////</span>
+<a id="l-556" name="l-556"></a><span class="w">    </span><span class="k">endcase</span><span class="w"> </span><span class="c1">// state_q</span>
+<a id="l-557" name="l-557"></a>
+<a id="l-558" name="l-558"></a><span class="w">    </span><span class="c1">// Unconditionally jump into the terminal error state in case of escalation.</span>
+<a id="l-559" name="l-559"></a><span class="w">    </span><span class="c1">// SEC_CM: KDI.FSM.LOCAL_ESC, KDI.FSM.GLOBAL_ESC</span>
+<a id="l-560" name="l-560"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">escalate_en_i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">lc_ctrl_pkg</span><span class="o">::</span><span class="n">Off</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">seed_cnt_err</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">entropy_cnt_err</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-561" name="l-561"></a><span class="w">      </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ErrorSt</span><span class="p">;</span><span class="w"></span>
+<a id="l-562" name="l-562"></a><span class="w">      </span><span class="n">fsm_err_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mb">1&#39;b1</span><span class="p">;</span><span class="w"></span>
+<a id="l-563" name="l-563"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-564" name="l-564"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
+<a id="l-565" name="l-565"></a>
+<a id="l-566" name="l-566"></a><span class="w">  </span><span class="c1">///////////////</span>
+<a id="l-567" name="l-567"></a><span class="w">  </span><span class="c1">// Registers //</span>
+<a id="l-568" name="l-568"></a><span class="w">  </span><span class="c1">///////////////</span>
+<a id="l-569" name="l-569"></a>
+<a id="l-570" name="l-570"></a><span class="w">  </span><span class="no">`PRIM_FLOP_SPARSE_FSM</span><span class="p">(</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">state_d</span><span class="p">,</span><span class="w"> </span><span class="n">state_q</span><span class="p">,</span><span class="w"> </span><span class="n">state_e</span><span class="p">,</span><span class="w"> </span><span class="n">ResetSt</span><span class="p">)</span><span class="w"></span>
+<a id="l-571" name="l-571"></a>
+<a id="l-572" name="l-572"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_regs</span><span class="w"></span>
+<a id="l-573" name="l-573"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-574" name="l-574"></a><span class="w">      </span><span class="n">nonce_out_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">RndCnstScrmblKeyInit</span><span class="p">.</span><span class="n">nonce</span><span class="p">;</span><span class="w"></span>
+<a id="l-575" name="l-575"></a><span class="w">      </span><span class="n">seed_valid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-576" name="l-576"></a><span class="w">      </span><span class="n">edn_req_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-577" name="l-577"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-578" name="l-578"></a><span class="w">      </span><span class="n">nonce_out_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">nonce_out_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-579" name="l-579"></a><span class="w">      </span><span class="n">seed_valid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">seed_valid_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-580" name="l-580"></a><span class="w">      </span><span class="n">edn_req_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">edn_req_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-581" name="l-581"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-582" name="l-582"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
+<a id="l-583" name="l-583"></a>
+<a id="l-584" name="l-584"></a><span class="w">  </span><span class="c1">////////////////</span>
+<a id="l-585" name="l-585"></a><span class="w">  </span><span class="c1">// Assertions //</span>
+<a id="l-586" name="l-586"></a><span class="w">  </span><span class="c1">////////////////</span>
+<a id="l-587" name="l-587"></a>
+<a id="l-588" name="l-588"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">FsmErrKnown_A</span><span class="p">,</span><span class="w">             </span><span class="n">fsm_err_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-589" name="l-589"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">EdnReqKnown_A</span><span class="p">,</span><span class="w">             </span><span class="n">edn_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-590" name="l-590"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">FlashOtpKeyRspKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">flash_otp_key_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-591" name="l-591"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">SramOtpKeyRspKnown_A</span><span class="p">,</span><span class="w">      </span><span class="n">sram_otp_key_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-592" name="l-592"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtbnOtpKeyRspKnown_A</span><span class="p">,</span><span class="w">      </span><span class="n">otbn_otp_key_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-593" name="l-593"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblMtxReqKnown_A</span><span class="p">,</span><span class="w">       </span><span class="n">scrmbl_mtx_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-594" name="l-594"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblCmdKnown_A</span><span class="p">,</span><span class="w">          </span><span class="n">scrmbl_cmd_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-595" name="l-595"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblModeKnown_A</span><span class="p">,</span><span class="w">         </span><span class="n">scrmbl_mode_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-596" name="l-596"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblSelKnown_A</span><span class="p">,</span><span class="w">          </span><span class="n">scrmbl_sel_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-597" name="l-597"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblDataKnown_A</span><span class="p">,</span><span class="w">         </span><span class="n">scrmbl_data_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-598" name="l-598"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ScrmblValidKnown_A</span><span class="p">,</span><span class="w">        </span><span class="n">scrmbl_valid_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-599" name="l-599"></a>
+<a id="l-600" name="l-600"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">otp_ctrl_kdi</span><span class="w"></span>
 </pre></div>
 </td></tr></table>
   </body>

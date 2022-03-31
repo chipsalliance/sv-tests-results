@@ -513,27 +513,14 @@
 <span class="normal"><a href="#l-505">505</a></span>
 <span class="normal"><a href="#l-506">506</a></span>
 <span class="normal"><a href="#l-507">507</a></span>
-<span class="normal"><a href="#l-508">508</a></span>
-<span class="normal"><a href="#l-509">509</a></span>
-<span class="normal"><a href="#l-510">510</a></span>
-<span class="normal"><a href="#l-511">511</a></span>
-<span class="normal"><a href="#l-512">512</a></span>
-<span class="normal"><a href="#l-513">513</a></span>
-<span class="normal"><a href="#l-514">514</a></span>
-<span class="normal"><a href="#l-515">515</a></span>
-<span class="normal"><a href="#l-516">516</a></span>
-<span class="normal"><a href="#l-517">517</a></span>
-<span class="normal"><a href="#l-518">518</a></span>
-<span class="normal"><a href="#l-519">519</a></span>
-<span class="normal"><a href="#l-520">520</a></span>
-<span class="normal"><a href="#l-521">521</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-508">508</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a><span class="c1">//</span>
 <a id="l-5" name="l-5"></a><span class="c1">// Unbuffered partition for OTP controller.</span>
 <a id="l-6" name="l-6"></a><span class="c1">//</span>
 <a id="l-7" name="l-7"></a>
-<a id="l-8" name="l-8"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;prim_assert.sv&quot;</span><span class="w"></span>
+<a id="l-8" name="l-8"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;prim_flop_macros.sv&quot;</span><span class="w"></span>
 <a id="l-9" name="l-9"></a>
 <a id="l-10" name="l-10"></a><span class="k">module</span><span class="w"> </span><span class="n">otp_ctrl_part_unbuf</span><span class="w"></span>
 <a id="l-11" name="l-11"></a><span class="w">  </span><span class="k">import</span><span class="w"> </span><span class="n">otp_ctrl_pkg</span><span class="o">::*</span><span class="p">;</span><span class="w"></span>
@@ -962,91 +949,78 @@
 <a id="l-434" name="l-434"></a><span class="w">  </span><span class="c1">// Registers //</span>
 <a id="l-435" name="l-435"></a><span class="w">  </span><span class="c1">///////////////</span>
 <a id="l-436" name="l-436"></a>
-<a id="l-437" name="l-437"></a><span class="w">  </span><span class="c1">// This primitive is used to place a size-only constraint on the</span>
-<a id="l-438" name="l-438"></a><span class="w">  </span><span class="c1">// flops in order to prevent FSM state encoding optimizations.</span>
-<a id="l-439" name="l-439"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">StateWidth</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">state_raw_q</span><span class="p">;</span><span class="w"></span>
-<a id="l-440" name="l-440"></a><span class="w">  </span><span class="k">assign</span><span class="w"> </span><span class="n">state_q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_e</span><span class="p">&#39;(</span><span class="n">state_raw_q</span><span class="p">);</span><span class="w"></span>
-<a id="l-441" name="l-441"></a><span class="w">  </span><span class="n">prim_sparse_fsm_flop</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
-<a id="l-442" name="l-442"></a><span class="w">    </span><span class="p">.</span><span class="n">StateEnumT</span><span class="p">(</span><span class="n">state_e</span><span class="p">),</span><span class="w"></span>
-<a id="l-443" name="l-443"></a><span class="w">    </span><span class="p">.</span><span class="n">Width</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">),</span><span class="w"></span>
-<a id="l-444" name="l-444"></a><span class="w">    </span><span class="p">.</span><span class="n">ResetValue</span><span class="p">(</span><span class="n">StateWidth</span><span class="p">&#39;(</span><span class="n">ResetSt</span><span class="p">))</span><span class="w"></span>
-<a id="l-445" name="l-445"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="n">u_state_regs</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<a id="l-446" name="l-446"></a><span class="w">    </span><span class="p">.</span><span class="n">clk_i</span><span class="p">,</span><span class="w"></span>
-<a id="l-447" name="l-447"></a><span class="w">    </span><span class="p">.</span><span class="n">rst_ni</span><span class="p">,</span><span class="w"></span>
-<a id="l-448" name="l-448"></a><span class="w">    </span><span class="p">.</span><span class="n">state_i</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">state_d</span><span class="w">     </span><span class="p">),</span><span class="w"></span>
-<a id="l-449" name="l-449"></a><span class="w">    </span><span class="p">.</span><span class="n">state_o</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">state_raw_q</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
-<a id="l-450" name="l-450"></a><span class="w">  </span><span class="p">);</span><span class="w"></span>
-<a id="l-451" name="l-451"></a>
-<a id="l-452" name="l-452"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_regs</span><span class="w"></span>
-<a id="l-453" name="l-453"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-454" name="l-454"></a><span class="w">      </span><span class="n">error_q</span><span class="w">              </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">NoError</span><span class="p">;</span><span class="w"></span>
-<a id="l-455" name="l-455"></a><span class="w">      </span><span class="n">tlul_addr_q</span><span class="w">          </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span><span class="w"></span>
-<a id="l-456" name="l-456"></a><span class="w">      </span><span class="n">pending_tlul_error_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
-<a id="l-457" name="l-457"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-458" name="l-458"></a><span class="w">      </span><span class="n">error_q</span><span class="w">              </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">error_d</span><span class="p">;</span><span class="w"></span>
-<a id="l-459" name="l-459"></a><span class="w">      </span><span class="n">pending_tlul_error_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pending_tlul_error_d</span><span class="p">;</span><span class="w"></span>
-<a id="l-460" name="l-460"></a><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tlul_gnt_o</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<a id="l-461" name="l-461"></a><span class="w">        </span><span class="n">tlul_addr_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">tlul_addr_d</span><span class="p">;</span><span class="w"></span>
-<a id="l-462" name="l-462"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-463" name="l-463"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
-<a id="l-464" name="l-464"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
-<a id="l-465" name="l-465"></a>
-<a id="l-466" name="l-466"></a><span class="w">  </span><span class="c1">////////////////</span>
-<a id="l-467" name="l-467"></a><span class="w">  </span><span class="c1">// Assertions //</span>
-<a id="l-468" name="l-468"></a><span class="w">  </span><span class="c1">////////////////</span>
-<a id="l-469" name="l-469"></a>
-<a id="l-470" name="l-470"></a><span class="w">  </span><span class="c1">// Known assertions</span>
-<a id="l-471" name="l-471"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">InitDoneKnown_A</span><span class="p">,</span><span class="w">   </span><span class="n">init_done_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-472" name="l-472"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ErrorKnown_A</span><span class="p">,</span><span class="w">      </span><span class="n">error_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-473" name="l-473"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">AccessKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">access_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-474" name="l-474"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">DigestKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">digest_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-475" name="l-475"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulGntKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">tlul_gnt_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-476" name="l-476"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulRerrorKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">tlul_rerror_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-477" name="l-477"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulRvalidKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">tlul_rvalid_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-478" name="l-478"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulRdataKnown_A</span><span class="p">,</span><span class="w">  </span><span class="n">tlul_rdata_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-479" name="l-479"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpReqKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">otp_req_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-480" name="l-480"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpCmdKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">otp_cmd_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-481" name="l-481"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpSizeKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">otp_size_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-482" name="l-482"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpWdataKnown_A</span><span class="p">,</span><span class="w">   </span><span class="n">otp_wdata_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-483" name="l-483"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpAddrKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">otp_addr_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-484" name="l-484"></a>
-<a id="l-485" name="l-485"></a><span class="w">  </span><span class="c1">// Uninitialized partitions should always be locked, no matter what.</span>
-<a id="l-486" name="l-486"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">InitWriteLocksPartition_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-487" name="l-487"></a><span class="w">      </span><span class="o">~</span><span class="n">init_done_o</span><span class="w"></span>
+<a id="l-437" name="l-437"></a><span class="w">  </span><span class="no">`PRIM_FLOP_SPARSE_FSM</span><span class="p">(</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">state_d</span><span class="p">,</span><span class="w"> </span><span class="n">state_q</span><span class="p">,</span><span class="w"> </span><span class="n">state_e</span><span class="p">,</span><span class="w"> </span><span class="n">ResetSt</span><span class="p">)</span><span class="w"></span>
+<a id="l-438" name="l-438"></a>
+<a id="l-439" name="l-439"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">p_regs</span><span class="w"></span>
+<a id="l-440" name="l-440"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-441" name="l-441"></a><span class="w">      </span><span class="n">error_q</span><span class="w">              </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">NoError</span><span class="p">;</span><span class="w"></span>
+<a id="l-442" name="l-442"></a><span class="w">      </span><span class="n">tlul_addr_q</span><span class="w">          </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span><span class="w"></span>
+<a id="l-443" name="l-443"></a><span class="w">      </span><span class="n">pending_tlul_error_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span><span class="w"></span>
+<a id="l-444" name="l-444"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-445" name="l-445"></a><span class="w">      </span><span class="n">error_q</span><span class="w">              </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">error_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-446" name="l-446"></a><span class="w">      </span><span class="n">pending_tlul_error_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pending_tlul_error_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-447" name="l-447"></a><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tlul_gnt_o</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<a id="l-448" name="l-448"></a><span class="w">        </span><span class="n">tlul_addr_q</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">tlul_addr_d</span><span class="p">;</span><span class="w"></span>
+<a id="l-449" name="l-449"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-450" name="l-450"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-451" name="l-451"></a><span class="w">  </span><span class="k">end</span><span class="w"></span>
+<a id="l-452" name="l-452"></a>
+<a id="l-453" name="l-453"></a><span class="w">  </span><span class="c1">////////////////</span>
+<a id="l-454" name="l-454"></a><span class="w">  </span><span class="c1">// Assertions //</span>
+<a id="l-455" name="l-455"></a><span class="w">  </span><span class="c1">////////////////</span>
+<a id="l-456" name="l-456"></a>
+<a id="l-457" name="l-457"></a><span class="w">  </span><span class="c1">// Known assertions</span>
+<a id="l-458" name="l-458"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">InitDoneKnown_A</span><span class="p">,</span><span class="w">   </span><span class="n">init_done_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-459" name="l-459"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">ErrorKnown_A</span><span class="p">,</span><span class="w">      </span><span class="n">error_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-460" name="l-460"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">AccessKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">access_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-461" name="l-461"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">DigestKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">digest_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-462" name="l-462"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulGntKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">tlul_gnt_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-463" name="l-463"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulRerrorKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">tlul_rerror_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-464" name="l-464"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulRvalidKnown_A</span><span class="p">,</span><span class="w"> </span><span class="n">tlul_rvalid_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-465" name="l-465"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">TlulRdataKnown_A</span><span class="p">,</span><span class="w">  </span><span class="n">tlul_rdata_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-466" name="l-466"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpReqKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">otp_req_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-467" name="l-467"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpCmdKnown_A</span><span class="p">,</span><span class="w">     </span><span class="n">otp_cmd_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-468" name="l-468"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpSizeKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">otp_size_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-469" name="l-469"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpWdataKnown_A</span><span class="p">,</span><span class="w">   </span><span class="n">otp_wdata_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-470" name="l-470"></a><span class="w">  </span><span class="no">`ASSERT_KNOWN</span><span class="p">(</span><span class="n">OtpAddrKnown_A</span><span class="p">,</span><span class="w">    </span><span class="n">otp_addr_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-471" name="l-471"></a>
+<a id="l-472" name="l-472"></a><span class="w">  </span><span class="c1">// Uninitialized partitions should always be locked, no matter what.</span>
+<a id="l-473" name="l-473"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">InitWriteLocksPartition_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-474" name="l-474"></a><span class="w">      </span><span class="o">~</span><span class="n">init_done_o</span><span class="w"></span>
+<a id="l-475" name="l-475"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
+<a id="l-476" name="l-476"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">write_lock</span><span class="p">))</span><span class="w"></span>
+<a id="l-477" name="l-477"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">InitReadLocksPartition_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-478" name="l-478"></a><span class="w">      </span><span class="o">~</span><span class="n">init_done_o</span><span class="w"></span>
+<a id="l-479" name="l-479"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
+<a id="l-480" name="l-480"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">read_lock</span><span class="p">))</span><span class="w"></span>
+<a id="l-481" name="l-481"></a><span class="w">  </span><span class="c1">// Incoming Lock propagation</span>
+<a id="l-482" name="l-482"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">WriteLockPropagation_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-483" name="l-483"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_i</span><span class="p">.</span><span class="n">write_lock</span><span class="p">)</span><span class="w"></span>
+<a id="l-484" name="l-484"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
+<a id="l-485" name="l-485"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">write_lock</span><span class="p">))</span><span class="w"></span>
+<a id="l-486" name="l-486"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">ReadLockPropagation_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-487" name="l-487"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_i</span><span class="p">.</span><span class="n">read_lock</span><span class="p">)</span><span class="w"></span>
 <a id="l-488" name="l-488"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
-<a id="l-489" name="l-489"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">write_lock</span><span class="p">))</span><span class="w"></span>
-<a id="l-490" name="l-490"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">InitReadLocksPartition_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-491" name="l-491"></a><span class="w">      </span><span class="o">~</span><span class="n">init_done_o</span><span class="w"></span>
-<a id="l-492" name="l-492"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
-<a id="l-493" name="l-493"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">read_lock</span><span class="p">))</span><span class="w"></span>
-<a id="l-494" name="l-494"></a><span class="w">  </span><span class="c1">// Incoming Lock propagation</span>
-<a id="l-495" name="l-495"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">WriteLockPropagation_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-496" name="l-496"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_i</span><span class="p">.</span><span class="n">write_lock</span><span class="p">)</span><span class="w"></span>
-<a id="l-497" name="l-497"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
-<a id="l-498" name="l-498"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">write_lock</span><span class="p">))</span><span class="w"></span>
-<a id="l-499" name="l-499"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">ReadLockPropagation_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-500" name="l-500"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_i</span><span class="p">.</span><span class="n">read_lock</span><span class="p">)</span><span class="w"></span>
-<a id="l-501" name="l-501"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
-<a id="l-502" name="l-502"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">read_lock</span><span class="p">))</span><span class="w"></span>
-<a id="l-503" name="l-503"></a><span class="w">  </span><span class="c1">// If the partition is read locked, the TL-UL access must error out</span>
-<a id="l-504" name="l-504"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">TlulReadOnReadLock_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-505" name="l-505"></a><span class="w">      </span><span class="n">tlul_req_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tlul_gnt_o</span><span class="w"> </span><span class="p">##</span><span class="mi">1</span><span class="w"> </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">read_lock</span><span class="p">)</span><span class="w"></span>
-<a id="l-506" name="l-506"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
-<a id="l-507" name="l-507"></a><span class="w">      </span><span class="n">tlul_rerror_o</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">&#39;0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tlul_rvalid_o</span><span class="p">)</span><span class="w"></span>
-<a id="l-508" name="l-508"></a><span class="w">  </span><span class="c1">// ECC error in buffer regs.</span>
-<a id="l-509" name="l-509"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">EccErrorState_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-510" name="l-510"></a><span class="w">      </span><span class="n">ecc_err</span><span class="w"></span>
-<a id="l-511" name="l-511"></a><span class="w">      </span><span class="o">|=&gt;</span><span class="w"></span>
-<a id="l-512" name="l-512"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ErrorSt</span><span class="p">)</span><span class="w"></span>
-<a id="l-513" name="l-513"></a><span class="w">  </span><span class="c1">// OTP error response</span>
-<a id="l-514" name="l-514"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">OtpErrorState_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-515" name="l-515"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="ow">inside</span><span class="w"> </span><span class="p">{</span><span class="n">InitWaitSt</span><span class="p">,</span><span class="w"> </span><span class="n">ReadWaitSt</span><span class="p">}</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">otp_rvalid_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
-<a id="l-516" name="l-516"></a><span class="w">      </span><span class="o">!</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)</span><span class="w"> </span><span class="ow">inside</span><span class="w"> </span><span class="p">{</span><span class="n">NoError</span><span class="p">,</span><span class="w"> </span><span class="n">MacroEccCorrError</span><span class="p">}</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
-<a id="l-517" name="l-517"></a><span class="w">        </span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">MacroEccUncorrError</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">Info</span><span class="p">.</span><span class="n">ecc_fatal</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">ecc_err</span><span class="w"></span>
-<a id="l-518" name="l-518"></a><span class="w">      </span><span class="o">|=&gt;</span><span class="w"></span>
-<a id="l-519" name="l-519"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ErrorSt</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">error_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)))</span><span class="w"></span>
-<a id="l-520" name="l-520"></a>
-<a id="l-521" name="l-521"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">otp_ctrl_part_unbuf</span><span class="w"></span>
+<a id="l-489" name="l-489"></a><span class="w">      </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">read_lock</span><span class="p">))</span><span class="w"></span>
+<a id="l-490" name="l-490"></a><span class="w">  </span><span class="c1">// If the partition is read locked, the TL-UL access must error out</span>
+<a id="l-491" name="l-491"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">TlulReadOnReadLock_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-492" name="l-492"></a><span class="w">      </span><span class="n">tlul_req_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tlul_gnt_o</span><span class="w"> </span><span class="p">##</span><span class="mi">1</span><span class="w"> </span><span class="n">mubi8_test_true_loose</span><span class="p">(</span><span class="n">access_o</span><span class="p">.</span><span class="n">read_lock</span><span class="p">)</span><span class="w"></span>
+<a id="l-493" name="l-493"></a><span class="w">      </span><span class="o">|-&gt;</span><span class="w"></span>
+<a id="l-494" name="l-494"></a><span class="w">      </span><span class="n">tlul_rerror_o</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">&#39;0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">tlul_rvalid_o</span><span class="p">)</span><span class="w"></span>
+<a id="l-495" name="l-495"></a><span class="w">  </span><span class="c1">// ECC error in buffer regs.</span>
+<a id="l-496" name="l-496"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">EccErrorState_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-497" name="l-497"></a><span class="w">      </span><span class="n">ecc_err</span><span class="w"></span>
+<a id="l-498" name="l-498"></a><span class="w">      </span><span class="o">|=&gt;</span><span class="w"></span>
+<a id="l-499" name="l-499"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ErrorSt</span><span class="p">)</span><span class="w"></span>
+<a id="l-500" name="l-500"></a><span class="w">  </span><span class="c1">// OTP error response</span>
+<a id="l-501" name="l-501"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">OtpErrorState_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-502" name="l-502"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="ow">inside</span><span class="w"> </span><span class="p">{</span><span class="n">InitWaitSt</span><span class="p">,</span><span class="w"> </span><span class="n">ReadWaitSt</span><span class="p">}</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">otp_rvalid_i</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"></span>
+<a id="l-503" name="l-503"></a><span class="w">      </span><span class="o">!</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)</span><span class="w"> </span><span class="ow">inside</span><span class="w"> </span><span class="p">{</span><span class="n">NoError</span><span class="p">,</span><span class="w"> </span><span class="n">MacroEccCorrError</span><span class="p">}</span><span class="w"> </span><span class="o">||</span><span class="w"></span>
+<a id="l-504" name="l-504"></a><span class="w">        </span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">MacroEccUncorrError</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">Info</span><span class="p">.</span><span class="n">ecc_fatal</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">ecc_err</span><span class="w"></span>
+<a id="l-505" name="l-505"></a><span class="w">      </span><span class="o">|=&gt;</span><span class="w"></span>
+<a id="l-506" name="l-506"></a><span class="w">      </span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">ErrorSt</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">error_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">$</span><span class="n">past</span><span class="p">(</span><span class="n">otp_err_e</span><span class="p">&#39;(</span><span class="n">otp_err_i</span><span class="p">)))</span><span class="w"></span>
+<a id="l-507" name="l-507"></a>
+<a id="l-508" name="l-508"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">otp_ctrl_part_unbuf</span><span class="w"></span>
 </pre></div>
 </td></tr></table>
   </body>
