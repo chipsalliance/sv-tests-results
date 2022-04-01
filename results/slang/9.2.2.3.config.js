@@ -1,1 +1,1 @@
-config_loader_data['slang/9.2.2.3'] = [["","always_latch_expr",0,"logs/Slang/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]
+config_loader_data['slang/9.2.2.3'] = [["","always_latch_expr",1,"logs/Slang/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]
