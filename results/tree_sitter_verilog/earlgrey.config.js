@@ -1,1 +1,1 @@
-config_loader_data['tree_sitter_verilog/earlgrey'] = [["cores","earlgrey",0,"logs/tree_sitter_verilog/generated/fusesoc/earlgrey-synth.sv.log.html","build/lowrisc_systems_chip_earlgrey_nexysvideo_0.1/src/lowrisc_constants_top_pkg_0/rtl/top_pkg.sv.html"]]
+config_loader_data['tree_sitter_verilog/earlgrey'] = [["cores","earlgrey",0,"logs/tree_sitter_verilog/generated/fusesoc/earlgrey-synth.sv.log.html","build/lowrisc_systems_chip_earlgrey_nexysvideo_0.1/src/lowrisc_constants_jtag_id_pkg_0/rtl/jtag_id_pkg.sv.html"]]

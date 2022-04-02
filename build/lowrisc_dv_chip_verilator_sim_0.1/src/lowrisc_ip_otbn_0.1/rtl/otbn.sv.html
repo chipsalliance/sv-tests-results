@@ -1041,7 +1041,11 @@
 <span class="normal"><a href="#l-1033">1033</a></span>
 <span class="normal"><a href="#l-1034">1034</a></span>
 <span class="normal"><a href="#l-1035">1035</a></span>
-<span class="normal"><a href="#l-1036">1036</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
+<span class="normal"><a href="#l-1036">1036</a></span>
+<span class="normal"><a href="#l-1037">1037</a></span>
+<span class="normal"><a href="#l-1038">1038</a></span>
+<span class="normal"><a href="#l-1039">1039</a></span>
+<span class="normal"><a href="#l-1040">1040</a></span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright lowRISC contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a><span class="c1">// SPDX-License-Identifier: Apache-2.0</span>
 <a id="l-4" name="l-4"></a>
@@ -2066,17 +2070,21 @@
 <a id="l-1023" name="l-1023"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">NonIdleDmemReadsZero_A</span><span class="p">,</span><span class="w"></span>
 <a id="l-1024" name="l-1024"></a><span class="w">          </span><span class="p">(</span><span class="n">hw2reg</span><span class="p">.</span><span class="n">status</span><span class="p">.</span><span class="n">d</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">StatusIdle</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">dmem_rvalid_bus</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="n">dmem_rdata_bus</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">&#39;d0</span><span class="p">)</span><span class="w"></span>
 <a id="l-1025" name="l-1025"></a>
-<a id="l-1026" name="l-1026"></a><span class="w">  </span><span class="c1">// Constraint from package, check here as we cannot have `ASSERT_INIT in package</span>
-<a id="l-1027" name="l-1027"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">WsrESizeMatchesParameter_A</span><span class="p">,</span><span class="w"> </span><span class="p">$</span><span class="n">bits</span><span class="p">(</span><span class="n">wsr_e</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">WsrNumWidth</span><span class="p">)</span><span class="w"></span>
-<a id="l-1028" name="l-1028"></a>
-<a id="l-1029" name="l-1029"></a><span class="w">  </span><span class="no">`ASSERT_PRIM_FSM_ERROR_TRIGGER_ALERT</span><span class="p">(</span><span class="n">OtbnStartStopFsmCheck_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-1030" name="l-1030"></a><span class="w">    </span><span class="n">u_otbn_core</span><span class="p">.</span><span class="n">u_otbn_start_stop_control</span><span class="p">.</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">alert_tx_o</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"></span>
-<a id="l-1031" name="l-1031"></a><span class="w">  </span><span class="no">`ASSERT_PRIM_FSM_ERROR_TRIGGER_ALERT</span><span class="p">(</span><span class="n">OtbnControllerFsmCheck_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-1032" name="l-1032"></a><span class="w">    </span><span class="n">u_otbn_core</span><span class="p">.</span><span class="n">u_otbn_controller</span><span class="p">.</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">alert_tx_o</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"></span>
-<a id="l-1033" name="l-1033"></a><span class="w">  </span><span class="no">`ASSERT_PRIM_FSM_ERROR_TRIGGER_ALERT</span><span class="p">(</span><span class="n">OtbnScrambleCtrlFsmCheck_A</span><span class="p">,</span><span class="w"></span>
-<a id="l-1034" name="l-1034"></a><span class="w">    </span><span class="n">u_otbn_scramble_ctrl</span><span class="p">.</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">alert_tx_o</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"></span>
-<a id="l-1035" name="l-1035"></a>
-<a id="l-1036" name="l-1036"></a><span class="k">endmodule</span><span class="w"></span>
+<a id="l-1026" name="l-1026"></a><span class="w">  </span><span class="c1">// Error handling: if we pass an error signal down to the core then we should also be setting an</span>
+<a id="l-1027" name="l-1027"></a><span class="w">  </span><span class="c1">// error flag.</span>
+<a id="l-1028" name="l-1028"></a><span class="w">  </span><span class="no">`ASSERT</span><span class="p">(</span><span class="n">ErrBitIfEscalate_A</span><span class="p">,</span><span class="w"> </span><span class="n">core_escalate_en</span><span class="w"> </span><span class="o">|=&gt;</span><span class="w"> </span><span class="o">|</span><span class="n">err_bits_q</span><span class="p">)</span><span class="w"></span>
+<a id="l-1029" name="l-1029"></a>
+<a id="l-1030" name="l-1030"></a><span class="w">  </span><span class="c1">// Constraint from package, check here as we cannot have `ASSERT_INIT in package</span>
+<a id="l-1031" name="l-1031"></a><span class="w">  </span><span class="no">`ASSERT_INIT</span><span class="p">(</span><span class="n">WsrESizeMatchesParameter_A</span><span class="p">,</span><span class="w"> </span><span class="p">$</span><span class="n">bits</span><span class="p">(</span><span class="n">wsr_e</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">WsrNumWidth</span><span class="p">)</span><span class="w"></span>
+<a id="l-1032" name="l-1032"></a>
+<a id="l-1033" name="l-1033"></a><span class="w">  </span><span class="no">`ASSERT_PRIM_FSM_ERROR_TRIGGER_ALERT</span><span class="p">(</span><span class="n">OtbnStartStopFsmCheck_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-1034" name="l-1034"></a><span class="w">    </span><span class="n">u_otbn_core</span><span class="p">.</span><span class="n">u_otbn_start_stop_control</span><span class="p">.</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">alert_tx_o</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"></span>
+<a id="l-1035" name="l-1035"></a><span class="w">  </span><span class="no">`ASSERT_PRIM_FSM_ERROR_TRIGGER_ALERT</span><span class="p">(</span><span class="n">OtbnControllerFsmCheck_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-1036" name="l-1036"></a><span class="w">    </span><span class="n">u_otbn_core</span><span class="p">.</span><span class="n">u_otbn_controller</span><span class="p">.</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">alert_tx_o</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"></span>
+<a id="l-1037" name="l-1037"></a><span class="w">  </span><span class="no">`ASSERT_PRIM_FSM_ERROR_TRIGGER_ALERT</span><span class="p">(</span><span class="n">OtbnScrambleCtrlFsmCheck_A</span><span class="p">,</span><span class="w"></span>
+<a id="l-1038" name="l-1038"></a><span class="w">    </span><span class="n">u_otbn_scramble_ctrl</span><span class="p">.</span><span class="n">u_state_regs</span><span class="p">,</span><span class="w"> </span><span class="n">alert_tx_o</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="w"></span>
+<a id="l-1039" name="l-1039"></a>
+<a id="l-1040" name="l-1040"></a><span class="k">endmodule</span><span class="w"></span>
 </pre></div>
 </td></tr></table>
   </body>
