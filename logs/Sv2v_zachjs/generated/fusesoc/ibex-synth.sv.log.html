@@ -129,9 +129,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-04-12 01:47:04</dd></div>
-        <div><dt>time elapsed</dt><dd>5.369s</dd></div>
-        <div><dt>ram usage</dt><dd>420248 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-04-13 01:46:33</dd></div>
+        <div><dt>time elapsed</dt><dd>5.008s</dd></div>
+        <div><dt>ram usage</dt><dd>425152 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -1791,8 +1791,6 @@
       <pre>	rst_ni,</pre>
       <pre>	req_i,</pre>
       <pre>	branch_i,</pre>
-      <pre>	branch_mispredict_i,</pre>
-      <pre>	mispredict_addr_i,</pre>
       <pre>	addr_i,</pre>
       <pre>	ready_i,</pre>
       <pre>	valid_o,</pre>
@@ -1842,8 +1840,6 @@
       <pre>	input wire rst_ni;</pre>
       <pre>	input wire req_i;</pre>
       <pre>	input wire branch_i;</pre>
-      <pre>	input wire branch_mispredict_i;</pre>
-      <pre>	input wire [31:0] mispredict_addr_i;</pre>
       <pre>	input wire [31:0] addr_i;</pre>
       <pre>	input wire ready_i;</pre>
       <pre>	output wire valid_o;</pre>
@@ -1878,7 +1874,6 @@
       <pre>	wire [31:0] prefetch_addr_d;</pre>
       <pre>	reg [31:0] prefetch_addr_q;</pre>
       <pre>	wire prefetch_addr_en;</pre>
-      <pre>	wire branch_or_mispredict;</pre>
       <pre>	wire lookup_throttle;</pre>
       <pre>	wire lookup_req_ic0;</pre>
       <pre>	wire [31:0] lookup_addr_ic0;</pre>
@@ -2027,10 +2022,9 @@
       <pre>	reg inval_prog_q;</pre>
       <pre>	wire [ibex_pkg_IC_INDEX_W - 1:0] inval_index_d;</pre>
       <pre>	reg [ibex_pkg_IC_INDEX_W - 1:0] inval_index_q;</pre>
-      <pre>	assign branch_or_mispredict = branch_i | branch_mispredict_i;</pre>
       <pre>	assign lookup_addr_aligned = {lookup_addr_ic0[31:ibex_pkg_IC_LINE_W], {ibex_pkg_IC_LINE_W {1&#39;b0}}};</pre>
-      <pre>	assign prefetch_addr_d = (lookup_grant_ic0 ? lookup_addr_aligned + {{(ibex_pkg_ADDR_W - ibex_pkg_IC_LINE_W) - 1 {1&#39;b0}}, 1&#39;b1, {ibex_pkg_IC_LINE_W {1&#39;b0}}} : (branch_i ? addr_i : mispredict_addr_i));</pre>
-      <pre>	assign prefetch_addr_en = branch_or_mispredict | lookup_grant_ic0;</pre>
+      <pre>	assign prefetch_addr_d = (lookup_grant_ic0 ? lookup_addr_aligned + {{(ibex_pkg_ADDR_W - ibex_pkg_IC_LINE_W) - 1 {1&#39;b0}}, 1&#39;b1, {ibex_pkg_IC_LINE_W {1&#39;b0}}} : addr_i);</pre>
+      <pre>	assign prefetch_addr_en = branch_i | lookup_grant_ic0;</pre>
       <pre>	generate</pre>
       <pre>		if (ResetAll) begin : g_prefetch_addr_ra</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
@@ -2046,8 +2040,8 @@
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	assign lookup_throttle = fb_fill_level &gt; FB_THRESHOLD[1:0];</pre>
-      <pre>	assign lookup_req_ic0 = ((req_i &amp; ~&amp;fill_busy_q) &amp; (branch_or_mispredict | ~lookup_throttle)) &amp; ~ecc_write_req;</pre>
-      <pre>	assign lookup_addr_ic0 = (branch_i ? addr_i : (branch_mispredict_i ? mispredict_addr_i : prefetch_addr_q));</pre>
+      <pre>	assign lookup_req_ic0 = ((req_i &amp; ~&amp;fill_busy_q) &amp; (branch_i | ~lookup_throttle)) &amp; ~ecc_write_req;</pre>
+      <pre>	assign lookup_addr_ic0 = (branch_i ? addr_i : prefetch_addr_q);</pre>
       <pre>	assign lookup_index_ic0 = lookup_addr_ic0[ibex_pkg_IC_INDEX_HI:ibex_pkg_IC_LINE_W];</pre>
       <pre>	assign fill_req_ic0 = |fill_ram_req;</pre>
       <pre>	assign fill_index_ic0 = fill_ram_req_addr[ibex_pkg_IC_INDEX_HI:ibex_pkg_IC_LINE_W];</pre>
@@ -2264,7 +2258,7 @@
       <pre>		end</pre>
       <pre>	end</pre>
       <pre>	assign fill_new_alloc = lookup_grant_ic0;</pre>
-      <pre>	assign fill_spec_req = (~icache_enable_i | branch_or_mispredict) &amp; ~|fill_ext_req;</pre>
+      <pre>	assign fill_spec_req = (~icache_enable_i | branch_i) &amp; ~|fill_ext_req;</pre>
       <pre>	assign fill_spec_done = fill_spec_req &amp; instr_gnt_i;</pre>
       <pre>	assign fill_spec_hold = fill_spec_req &amp; ~instr_gnt_i;</pre>
       <pre>	genvar fb;</pre>
@@ -2279,15 +2273,15 @@
       <pre>			assign fill_alloc[fb] = fill_alloc_sel[fb] &amp; fill_new_alloc;</pre>
       <pre>			assign fill_busy_d[fb] = fill_alloc[fb] | (fill_busy_q[fb] &amp; ~fill_done[fb]);</pre>
       <pre>			assign fill_older_d[fb * NUM_FB+:NUM_FB] = (fill_alloc[fb] ? fill_busy_q : fill_older_q[fb * NUM_FB+:NUM_FB]) &amp; ~fill_done;</pre>
-      <pre>			assign fill_done[fb] = ((((fill_ram_done_q[fb] | fill_hit_q[fb]) | ~fill_cache_q[fb]) | |fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS]) &amp; ((fill_out_done[fb] | fill_stale_q[fb]) | branch_or_mispredict)) &amp; fill_rvd_done[fb];</pre>
-      <pre>			assign fill_stale_d[fb] = fill_busy_q[fb] &amp; (branch_or_mispredict | fill_stale_q[fb]);</pre>
+      <pre>			assign fill_done[fb] = ((((fill_ram_done_q[fb] | fill_hit_q[fb]) | ~fill_cache_q[fb]) | |fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS]) &amp; ((fill_out_done[fb] | fill_stale_q[fb]) | branch_i)) &amp; fill_rvd_done[fb];</pre>
+      <pre>			assign fill_stale_d[fb] = fill_busy_q[fb] &amp; (branch_i | fill_stale_q[fb]);</pre>
       <pre>			assign fill_cache_d[fb] = (fill_alloc[fb] &amp; fill_cache_new) | ((((fill_cache_q[fb] &amp; fill_busy_q[fb]) &amp; icache_enable_i) &amp; ~icache_inval_i) &amp; ~inval_lock);</pre>
       <pre>			assign fill_hit_ic1[fb] = ((lookup_valid_ic1 &amp; fill_in_ic1[fb]) &amp; tag_hit_ic1) &amp; ~ecc_err_ic1;</pre>
       <pre>			assign fill_hit_d[fb] = fill_hit_ic1[fb] | (fill_hit_q[fb] &amp; fill_busy_q[fb]);</pre>
       <pre>			assign fill_ext_req[fb] = fill_busy_q[fb] &amp; ~fill_ext_done_d[fb];</pre>
       <pre>			assign fill_ext_cnt_d[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] = (fill_alloc[fb] ? {{ibex_pkg_IC_LINE_BEATS_W {1&#39;b0}}, fill_spec_done} : fill_ext_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] + {{ibex_pkg_IC_LINE_BEATS_W {1&#39;b0}}, fill_ext_arb[fb] &amp; instr_gnt_i});</pre>
       <pre>			assign fill_ext_hold_d[fb] = (fill_alloc[fb] &amp; fill_spec_hold) | (fill_ext_arb[fb] &amp; ~instr_gnt_i);</pre>
-      <pre>			assign fill_ext_done_d[fb] = ((((fill_ext_cnt_q[(fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)) + (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W : ibex_pkg_IC_LINE_BEATS_W - ibex_pkg_IC_LINE_BEATS_W)] | fill_hit_ic1[fb]) | fill_hit_q[fb]) | (~fill_cache_q[fb] &amp; ((branch_or_mispredict | fill_stale_q[fb]) | fill_ext_beat[(fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)) + (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W : ibex_pkg_IC_LINE_BEATS_W - ibex_pkg_IC_LINE_BEATS_W)]))) &amp; ~fill_ext_hold_q[fb]) &amp; fill_busy_q[fb];</pre>
+      <pre>			assign fill_ext_done_d[fb] = ((((fill_ext_cnt_q[(fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)) + (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W : ibex_pkg_IC_LINE_BEATS_W - ibex_pkg_IC_LINE_BEATS_W)] | fill_hit_ic1[fb]) | fill_hit_q[fb]) | (~fill_cache_q[fb] &amp; ((branch_i | fill_stale_q[fb]) | fill_ext_beat[(fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)) + (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W : ibex_pkg_IC_LINE_BEATS_W - ibex_pkg_IC_LINE_BEATS_W)]))) &amp; ~fill_ext_hold_q[fb]) &amp; fill_busy_q[fb];</pre>
       <pre>			assign fill_rvd_exp[fb] = fill_busy_q[fb] &amp; ~fill_rvd_done[fb];</pre>
       <pre>			assign fill_rvd_cnt_d[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] = (fill_alloc[fb] ? {(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W) * 1 {1&#39;sb0}} : fill_rvd_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] + {{ibex_pkg_IC_LINE_BEATS_W {1&#39;b0}}, fill_rvd_arb[fb]});</pre>
       <pre>			assign fill_rvd_done[fb] = (fill_ext_done_q[fb] &amp; ~fill_ext_hold_q[fb]) &amp; (fill_rvd_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] == fill_ext_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)]);</pre>
@@ -2416,7 +2410,7 @@
       <pre>				end</pre>
       <pre>		end</pre>
       <pre>	end</pre>
-      <pre>	assign instr_req = ((~icache_enable_i | branch_or_mispredict) &amp; lookup_grant_ic0) | |fill_ext_req;</pre>
+      <pre>	assign instr_req = ((~icache_enable_i | branch_i) &amp; lookup_grant_ic0) | |fill_ext_req;</pre>
       <pre>	assign instr_addr = (|fill_ext_req ? fill_ext_req_addr : lookup_addr_ic0[31:ibex_pkg_BUS_W]);</pre>
       <pre>	assign instr_req_o = instr_req;</pre>
       <pre>	assign instr_addr_o = {instr_addr[31:ibex_pkg_BUS_W], {ibex_pkg_BUS_W {1&#39;b0}}};</pre>
@@ -2463,17 +2457,17 @@
       <pre>	assign skid_ready = (output_addr_q[1] &amp; ~skid_valid_q) &amp; (~output_compressed | output_err);</pre>
       <pre>	assign output_ready = (ready_i | skid_ready) &amp; ~skid_complete_instr;</pre>
       <pre>	assign output_compressed = rdata_o[1:0] != 2&#39;b11;</pre>
-      <pre>	assign skid_valid_d = (branch_or_mispredict ? 1&#39;b0 : (skid_valid_q ? ~(ready_i &amp; ((skid_data_q[1:0] != 2&#39;b11) | skid_err_q)) : data_valid &amp; ((output_addr_q[1] &amp; (~output_compressed | output_err)) | (((~output_addr_q[1] &amp; output_compressed) &amp; ~output_err) &amp; ready_i))));</pre>
+      <pre>	assign skid_valid_d = (branch_i ? 1&#39;b0 : (skid_valid_q ? ~(ready_i &amp; ((skid_data_q[1:0] != 2&#39;b11) | skid_err_q)) : data_valid &amp; ((output_addr_q[1] &amp; (~output_compressed | output_err)) | (((~output_addr_q[1] &amp; output_compressed) &amp; ~output_err) &amp; ready_i))));</pre>
       <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>		if (!rst_ni)</pre>
       <pre>			skid_valid_q &lt;= 1&#39;b0;</pre>
       <pre>		else</pre>
       <pre>			skid_valid_q &lt;= skid_valid_d;</pre>
       <pre>	assign output_valid = skid_complete_instr | (data_valid &amp; (((~output_addr_q[1] | skid_valid_q) | output_err) | (output_data[17:16] != 2&#39;b11)));</pre>
-      <pre>	assign output_addr_en = branch_or_mispredict | (ready_i &amp; valid_o);</pre>
+      <pre>	assign output_addr_en = branch_i | (ready_i &amp; valid_o);</pre>
       <pre>	assign addr_incr_two = output_compressed &amp; ~err_o;</pre>
       <pre>	assign output_addr_incr = output_addr_q[31:1] + {29&#39;d0, ~addr_incr_two, addr_incr_two};</pre>
-      <pre>	assign output_addr_d = (branch_i ? addr_i[31:1] : (branch_mispredict_i ? mispredict_addr_i[31:1] : output_addr_incr));</pre>
+      <pre>	assign output_addr_d = (branch_i ? addr_i[31:1] : output_addr_incr);</pre>
       <pre>	generate</pre>
       <pre>		if (ResetAll) begin : g_output_addr_ra</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
@@ -2509,7 +2503,7 @@
       <pre>		if (&amp;output_addr_q[1:1])</pre>
       <pre>			output_data_hi = output_data_hi | output_data[15:0];</pre>
       <pre>	end</pre>
-      <pre>	assign valid_o = output_valid &amp; ~branch_mispredict_i;</pre>
+      <pre>	assign valid_o = output_valid;</pre>
       <pre>	assign rdata_o = {output_data_hi, (skid_valid_q ? skid_data_q : output_data_lo)};</pre>
       <pre>	assign addr_o = {output_addr_q, 1&#39;b0};</pre>
       <pre>	assign err_o = (skid_valid_q &amp; skid_err_q) | (~skid_complete_instr &amp; output_err);</pre>
@@ -3895,9 +3889,9 @@
       <pre>	generate</pre>
       <pre>		if (1) begin : gen_generic</pre>
       <pre>			prim_generic_ram_2p #(</pre>
+      <pre>				.MemInitFile(MemInitFile),</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
-      <pre>				.MemInitFile(MemInitFile),</pre>
       <pre>				.Width(Width)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_a_i(clk_a_i),</pre>
@@ -4004,10 +3998,10 @@
       <pre>	generate</pre>
       <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
-      <pre>				.Depth(Depth),</pre>
+      <pre>				.Width(Width),</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
-      <pre>				.MemInitFile(MemInitFile),</pre>
-      <pre>				.Width(Width)</pre>
+      <pre>				.Depth(Depth),</pre>
+      <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_badbit(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.req_i(req_i),</pre>
@@ -4020,10 +4014,10 @@
       <pre>		end</pre>
       <pre>		else begin : gen_generic</pre>
       <pre>			prim_generic_ram_1p #(</pre>
-      <pre>				.Depth(Depth),</pre>
+      <pre>				.Width(Width),</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
-      <pre>				.MemInitFile(MemInitFile),</pre>
-      <pre>				.Width(Width)</pre>
+      <pre>				.Depth(Depth),</pre>
+      <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.req_i(req_i),</pre>
@@ -5396,7 +5390,7 @@
       <pre>			wire unused_load_intg_err_i;</pre>
       <pre>			assign unused_load_intg_err_i = load_intg_err_i;</pre>
       <pre>			assign irq_nm_int = 1&#39;b0;</pre>
-      <pre>			assign irq_nm_int_cause = 1&#39;sb0;</pre>
+      <pre>			assign irq_nm_int_cause = 5&#39;d0;</pre>
       <pre>			assign irq_nm_int_mtval = 1&#39;sb0;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
@@ -9126,6 +9120,9 @@
       <pre>	wire branch_req;</pre>
       <pre>	reg [31:0] fetch_addr_n;</pre>
       <pre>	wire unused_fetch_addr_n0;</pre>
+      <pre>	wire prefetch_branch;</pre>
+      <pre>	wire [31:0] prefetch_addr;</pre>
+      <pre>	wire fetch_valid_raw;</pre>
       <pre>	wire fetch_valid;</pre>
       <pre>	wire fetch_ready;</pre>
       <pre>	wire [31:0] fetch_rdata;</pre>
@@ -9205,6 +9202,9 @@
       <pre>	endgenerate</pre>
       <pre>	assign instr_err = instr_intg_err | instr_bus_err_i;</pre>
       <pre>	assign instr_intg_err_o = instr_intg_err &amp; instr_rvalid_i;</pre>
+      <pre>	assign prefetch_branch = branch_req | nt_branch_mispredict_i;</pre>
+      <pre>	assign prefetch_addr = (branch_req ? {fetch_addr_n[31:1], 1&#39;b0} : nt_branch_addr_i);</pre>
+      <pre>	assign fetch_valid = fetch_valid_raw &amp; ~nt_branch_mispredict_i;</pre>
       <pre>	generate</pre>
       <pre>		if (ICache) begin : gen_icache</pre>
       <pre>			ibex_icache #(</pre>
@@ -9217,12 +9217,10 @@
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.rst_ni(rst_ni),</pre>
       <pre>				.req_i(req_i),</pre>
-      <pre>				.branch_i(branch_req),</pre>
-      <pre>				.branch_mispredict_i(nt_branch_mispredict_i),</pre>
-      <pre>				.mispredict_addr_i(nt_branch_addr_i),</pre>
-      <pre>				.addr_i({fetch_addr_n[31:1], 1&#39;b0}),</pre>
+      <pre>				.branch_i(prefetch_branch),</pre>
+      <pre>				.addr_i(prefetch_addr),</pre>
       <pre>				.ready_i(fetch_ready),</pre>
-      <pre>				.valid_o(fetch_valid),</pre>
+      <pre>				.valid_o(fetch_valid_raw),</pre>
       <pre>				.rdata_o(fetch_rdata),</pre>
       <pre>				.addr_o(fetch_addr),</pre>
       <pre>				.err_o(fetch_err),</pre>
@@ -9255,12 +9253,10 @@
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.rst_ni(rst_ni),</pre>
       <pre>				.req_i(req_i),</pre>
-      <pre>				.branch_i(branch_req),</pre>
-      <pre>				.branch_mispredict_i(nt_branch_mispredict_i),</pre>
-      <pre>				.mispredict_addr_i(nt_branch_addr_i),</pre>
-      <pre>				.addr_i({fetch_addr_n[31:1], 1&#39;b0}),</pre>
+      <pre>				.branch_i(prefetch_branch),</pre>
+      <pre>				.addr_i(prefetch_addr),</pre>
       <pre>				.ready_i(fetch_ready),</pre>
-      <pre>				.valid_o(fetch_valid),</pre>
+      <pre>				.valid_o(fetch_valid_raw),</pre>
       <pre>				.rdata_o(fetch_rdata),</pre>
       <pre>				.addr_o(fetch_addr),</pre>
       <pre>				.err_o(fetch_err),</pre>
@@ -10603,8 +10599,6 @@
       <pre>	rst_ni,</pre>
       <pre>	req_i,</pre>
       <pre>	branch_i,</pre>
-      <pre>	branch_mispredict_i,</pre>
-      <pre>	mispredict_addr_i,</pre>
       <pre>	addr_i,</pre>
       <pre>	ready_i,</pre>
       <pre>	valid_o,</pre>
@@ -10625,8 +10619,6 @@
       <pre>	input wire rst_ni;</pre>
       <pre>	input wire req_i;</pre>
       <pre>	input wire branch_i;</pre>
-      <pre>	input wire branch_mispredict_i;</pre>
-      <pre>	input wire [31:0] mispredict_addr_i;</pre>
       <pre>	input wire [31:0] addr_i;</pre>
       <pre>	input wire ready_i;</pre>
       <pre>	output wire valid_o;</pre>
@@ -10668,11 +10660,8 @@
       <pre>	wire fifo_ready;</pre>
       <pre>	wire fifo_clear;</pre>
       <pre>	wire [1:0] fifo_busy;</pre>
-      <pre>	wire valid_raw;</pre>
-      <pre>	wire branch_or_mispredict;</pre>
       <pre>	assign busy_o = |rdata_outstanding_q | instr_req_o;</pre>
-      <pre>	assign branch_or_mispredict = branch_i | branch_mispredict_i;</pre>
-      <pre>	assign fifo_clear = branch_or_mispredict;</pre>
+      <pre>	assign fifo_clear = branch_i;</pre>
       <pre>	genvar i;</pre>
       <pre>	generate</pre>
       <pre>		for (i = 0; i &lt; NUM_REQS; i = i + 1) begin : gen_rd_rev</pre>
@@ -10692,17 +10681,17 @@
       <pre>		.in_addr_i(fifo_addr),</pre>
       <pre>		.in_rdata_i(instr_rdata_i),</pre>
       <pre>		.in_err_i(instr_err_i),</pre>
-      <pre>		.out_valid_o(valid_raw),</pre>
+      <pre>		.out_valid_o(valid_o),</pre>
       <pre>		.out_ready_i(ready_i),</pre>
       <pre>		.out_rdata_o(rdata_o),</pre>
       <pre>		.out_addr_o(addr_o),</pre>
       <pre>		.out_err_o(err_o),</pre>
       <pre>		.out_err_plus2_o(err_plus2_o)</pre>
       <pre>	);</pre>
-      <pre>	assign valid_new_req = (req_i &amp; (fifo_ready | branch_or_mispredict)) &amp; ~rdata_outstanding_q[1];</pre>
+      <pre>	assign valid_new_req = (req_i &amp; (fifo_ready | branch_i)) &amp; ~rdata_outstanding_q[1];</pre>
       <pre>	assign valid_req = valid_req_q | valid_new_req;</pre>
       <pre>	assign valid_req_d = valid_req &amp; ~instr_gnt_i;</pre>
-      <pre>	assign discard_req_d = valid_req_q &amp; (branch_or_mispredict | discard_req_q);</pre>
+      <pre>	assign discard_req_d = valid_req_q &amp; (branch_i | discard_req_q);</pre>
       <pre>	assign stored_addr_en = (valid_new_req &amp; ~valid_req_q) &amp; ~instr_gnt_i;</pre>
       <pre>	assign stored_addr_d = instr_addr;</pre>
       <pre>	generate</pre>
@@ -10719,8 +10708,8 @@
       <pre>					stored_addr_q &lt;= stored_addr_d;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign fetch_addr_en = branch_or_mispredict | (valid_new_req &amp; ~valid_req_q);</pre>
-      <pre>	assign fetch_addr_d = (branch_i ? addr_i : (branch_mispredict_i ? {mispredict_addr_i[31:2], 2&#39;b00} : {fetch_addr_q[31:2], 2&#39;b00})) + {{29 {1&#39;b0}}, valid_new_req &amp; ~valid_req_q, 2&#39;b00};</pre>
+      <pre>	assign fetch_addr_en = branch_i | (valid_new_req &amp; ~valid_req_q);</pre>
+      <pre>	assign fetch_addr_d = (branch_i ? addr_i : {fetch_addr_q[31:2], 2&#39;b00}) + {{29 {1&#39;b0}}, valid_new_req &amp; ~valid_req_q, 2&#39;b00};</pre>
       <pre>	generate</pre>
       <pre>		if (ResetAll) begin : g_fetch_addr_ra</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
@@ -10735,24 +10724,24 @@
       <pre>					fetch_addr_q &lt;= fetch_addr_d;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign instr_addr = (valid_req_q ? stored_addr_q : (branch_i ? addr_i : (branch_mispredict_i ? mispredict_addr_i : fetch_addr_q)));</pre>
+      <pre>	assign instr_addr = (valid_req_q ? stored_addr_q : (branch_i ? addr_i : fetch_addr_q));</pre>
       <pre>	assign instr_addr_w_aligned = {instr_addr[31:2], 2&#39;b00};</pre>
       <pre>	generate</pre>
       <pre>		for (i = 0; i &lt; NUM_REQS; i = i + 1) begin : g_outstanding_reqs</pre>
       <pre>			if (i == 0) begin : g_req0</pre>
       <pre>				assign rdata_outstanding_n[i] = (valid_req &amp; instr_gnt_i) | rdata_outstanding_q[i];</pre>
-      <pre>				assign branch_discard_n[i] = (((valid_req &amp; instr_gnt_i) &amp; discard_req_d) | (branch_or_mispredict &amp; rdata_outstanding_q[i])) | branch_discard_q[i];</pre>
+      <pre>				assign branch_discard_n[i] = (((valid_req &amp; instr_gnt_i) &amp; discard_req_d) | (branch_i &amp; rdata_outstanding_q[i])) | branch_discard_q[i];</pre>
       <pre>			end</pre>
       <pre>			else begin : g_reqtop</pre>
       <pre>				assign rdata_outstanding_n[i] = ((valid_req &amp; instr_gnt_i) &amp; rdata_outstanding_q[i - 1]) | rdata_outstanding_q[i];</pre>
-      <pre>				assign branch_discard_n[i] = ((((valid_req &amp; instr_gnt_i) &amp; discard_req_d) &amp; rdata_outstanding_q[i - 1]) | (branch_or_mispredict &amp; rdata_outstanding_q[i])) | branch_discard_q[i];</pre>
+      <pre>				assign branch_discard_n[i] = ((((valid_req &amp; instr_gnt_i) &amp; discard_req_d) &amp; rdata_outstanding_q[i - 1]) | (branch_i &amp; rdata_outstanding_q[i])) | branch_discard_q[i];</pre>
       <pre>			end</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	assign rdata_outstanding_s = (instr_rvalid_i ? {1&#39;b0, rdata_outstanding_n[1:1]} : rdata_outstanding_n);</pre>
       <pre>	assign branch_discard_s = (instr_rvalid_i ? {1&#39;b0, branch_discard_n[1:1]} : branch_discard_n);</pre>
       <pre>	assign fifo_valid = instr_rvalid_i &amp; ~branch_discard_q[0];</pre>
-      <pre>	assign fifo_addr = (branch_i ? addr_i : mispredict_addr_i);</pre>
+      <pre>	assign fifo_addr = addr_i;</pre>
       <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>		if (!rst_ni) begin</pre>
       <pre>			valid_req_q &lt;= 1&#39;b0;</pre>
@@ -10768,7 +10757,6 @@
       <pre>		end</pre>
       <pre>	assign instr_req_o = valid_req;</pre>
       <pre>	assign instr_addr_o = instr_addr_w_aligned;</pre>
-      <pre>	assign valid_o = valid_raw &amp; ~branch_mispredict_i;</pre>
       <pre>endmodule</pre>
       <pre>module ibex_pmp (</pre>
       <pre>	clk_i,</pre>
@@ -12375,7 +12363,7 @@
       <pre>	input [Width - 1:0] wmask_i;</pre>
       <pre>	input intg_error_i;</pre>
       <pre>	output reg [Width - 1:0] rdata_o;</pre>
-      <pre>	output wire rvalid_o;</pre>
+      <pre>	output reg rvalid_o;</pre>
       <pre>	output wire [1:0] rerror_o;</pre>
       <pre>	output wire [31:0] raddr_o;</pre>
       <pre>	input wire [9:0] cfg_i;</pre>
@@ -12397,46 +12385,39 @@
       <pre>	reg write_pending_q;</pre>
       <pre>	wire addr_collision_d;</pre>
       <pre>	reg addr_collision_q;</pre>
-      <pre>	reg [AddrWidth - 1:0] waddr_q;</pre>
-      <pre>	assign addr_collision_d = (read_en &amp; (write_en_q | write_pending_q)) &amp; (addr_i == waddr_q);</pre>
-      <pre>	wire macro_req;</pre>
-      <pre>	wire intg_err_macro_req;</pre>
-      <pre>	prim_buf u_intg_err_macro_req(</pre>
+      <pre>	wire [AddrWidth - 1:0] addr_scr;</pre>
+      <pre>	reg [AddrWidth - 1:0] waddr_scr_q;</pre>
+      <pre>	assign addr_collision_d = (read_en &amp; (write_en_q | write_pending_q)) &amp; (addr_scr == waddr_scr_q);</pre>
+      <pre>	wire intg_error_buf;</pre>
+      <pre>	reg intg_error_w_q;</pre>
+      <pre>	prim_buf u_intg_error(</pre>
       <pre>		.in_i(intg_error_i),</pre>
-      <pre>		.out_o(intg_err_macro_req)</pre>
+      <pre>		.out_o(intg_error_buf)</pre>
       <pre>	);</pre>
-      <pre>	assign macro_req = ~intg_err_macro_req &amp; ((read_en | write_en_q) | write_pending_q);</pre>
+      <pre>	wire macro_req;</pre>
+      <pre>	assign macro_req = (~intg_error_w_q &amp; ~intg_error_buf) &amp; ((read_en | write_en_q) | write_pending_q);</pre>
       <pre>	wire macro_write;</pre>
-      <pre>	assign macro_write = (write_en_q | write_pending_q) &amp; ~read_en;</pre>
+      <pre>	assign macro_write = ((write_en_q | write_pending_q) &amp; ~read_en) &amp; ~intg_error_w_q;</pre>
       <pre>	wire rw_collision;</pre>
       <pre>	assign rw_collision = write_en_q &amp; read_en;</pre>
       <pre>	wire [AddrWidth - 1:0] addr_mux;</pre>
-      <pre>	assign addr_mux = (read_en ? addr_i : waddr_q);</pre>
-      <pre>	wire [AddrWidth - 1:0] addr_scr;</pre>
+      <pre>	assign addr_mux = (read_en ? addr_scr : waddr_scr_q);</pre>
       <pre>	generate</pre>
       <pre>		if (NumAddrScrRounds &gt; 0) begin : gen_addr_scr</pre>
-      <pre>			wire intg_err_addr_scr;</pre>
-      <pre>			prim_buf u_intg_err_addr_scr(</pre>
-      <pre>				.in_i(intg_error_i),</pre>
-      <pre>				.out_o(intg_err_addr_scr)</pre>
-      <pre>			);</pre>
       <pre>			wire [AddrWidth - 1:0] addr_scr_nonce;</pre>
-      <pre>			genvar j;</pre>
-      <pre>			for (j = 0; j &lt; AddrWidth; j = j + 1) begin : gen_addr_scr_nonce</pre>
-      <pre>				assign addr_scr_nonce[j] = (intg_err_addr_scr ? nonce_i[(NonceWidth - 1) - j] : nonce_i[(NonceWidth - AddrWidth) + j]);</pre>
-      <pre>			end</pre>
+      <pre>			assign addr_scr_nonce = nonce_i[NonceWidth - AddrWidth+:AddrWidth];</pre>
       <pre>			prim_subst_perm #(</pre>
       <pre>				.DataWidth(AddrWidth),</pre>
       <pre>				.NumRounds(NumAddrScrRounds),</pre>
       <pre>				.Decrypt(0)</pre>
       <pre>			) u_prim_subst_perm(</pre>
-      <pre>				.data_i(addr_mux),</pre>
+      <pre>				.data_i(addr_i),</pre>
       <pre>				.key_i(addr_scr_nonce),</pre>
       <pre>				.data_o(addr_scr)</pre>
       <pre>			);</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_no_addr_scr</pre>
-      <pre>			assign addr_scr = addr_mux;</pre>
+      <pre>			assign addr_scr = addr_i;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	reg [AddrWidth - 1:0] raddr_q;</pre>
@@ -12448,18 +12429,10 @@
       <pre>	localparam signed [31:0] DataNonceWidth = 64 - AddrWidth;</pre>
       <pre>	wire [(NumParScr * 64) - 1:0] keystream;</pre>
       <pre>	wire [(NumParScr * DataNonceWidth) - 1:0] data_scr_nonce;</pre>
-      <pre>	wire intg_err_data_scr;</pre>
-      <pre>	prim_buf u_intg_err_data_scr(</pre>
-      <pre>		.in_i(intg_error_i),</pre>
-      <pre>		.out_o(intg_err_data_scr)</pre>
-      <pre>	);</pre>
       <pre>	genvar k;</pre>
       <pre>	generate</pre>
       <pre>		for (k = 0; k &lt; NumParScr; k = k + 1) begin : gen_par_scr</pre>
-      <pre>			genvar j;</pre>
-      <pre>			for (j = 0; j &lt; DataNonceWidth; j = j + 1) begin : gen_data_nonce</pre>
-      <pre>				assign data_scr_nonce[(k * DataNonceWidth) + j] = (intg_err_data_scr ? nonce_i[((k + 1) * DataNonceWidth) - j] : nonce_i[(k * DataNonceWidth) + j]);</pre>
-      <pre>			end</pre>
+      <pre>			assign data_scr_nonce[k * DataNonceWidth+:DataNonceWidth] = nonce_i[k * DataNonceWidth+:DataNonceWidth];</pre>
       <pre>			prim_prince #(</pre>
       <pre>				.DataWidth(64),</pre>
       <pre>				.KeyWidth(128),</pre>
@@ -12534,18 +12507,21 @@
       <pre>	wire [Width - 1:0] wdata_scr;</pre>
       <pre>	assign wdata_scr = (write_pending_q ? wdata_scr_q : wdata_scr_d);</pre>
       <pre>	reg rvalid_q;</pre>
-      <pre>	assign rvalid_o = rvalid_q;</pre>
-      <pre>	reg intg_error_q;</pre>
+      <pre>	reg intg_error_r_q;</pre>
       <pre>	reg [Width - 1:0] wmask_q;</pre>
       <pre>	always @(*) begin : p_forward_mux</pre>
       <pre>		rdata_o = 1&#39;sb0;</pre>
-      <pre>		if (rvalid_q &amp;&amp; !intg_error_q)</pre>
-      <pre>			rdata_o = rdata;</pre>
-      <pre>		if (addr_collision_q &amp;&amp; !intg_error_q) begin : sv2v_autoblock_1</pre>
-      <pre>			reg signed [31:0] k;</pre>
-      <pre>			for (k = 0; k &lt; Width; k = k + 1)</pre>
-      <pre>				if (wmask_q[k])</pre>
-      <pre>					rdata_o[k] = wdata_q[k];</pre>
+      <pre>		rvalid_o = 1&#39;b0;</pre>
+      <pre>		if (!intg_error_r_q &amp;&amp; rvalid_q) begin</pre>
+      <pre>			rvalid_o = 1&#39;b1;</pre>
+      <pre>			if (addr_collision_q) begin : sv2v_autoblock_1</pre>
+      <pre>				reg signed [31:0] k;</pre>
+      <pre>				for (k = 0; k &lt; Width; k = k + 1)</pre>
+      <pre>					if (wmask_q[k])</pre>
+      <pre>						rdata_o[k] = wdata_q[k];</pre>
+      <pre>			end</pre>
+      <pre>			else</pre>
+      <pre>				rdata_o = rdata;</pre>
       <pre>		end</pre>
       <pre>	end</pre>
       <pre>	always @(posedge clk_i or negedge rst_ni) begin : p_wdata_buf</pre>
@@ -12554,9 +12530,10 @@
       <pre>			addr_collision_q &lt;= 1&#39;b0;</pre>
       <pre>			rvalid_q &lt;= 1&#39;b0;</pre>
       <pre>			write_en_q &lt;= 1&#39;b0;</pre>
-      <pre>			intg_error_q &lt;= 1&#39;b0;</pre>
+      <pre>			intg_error_r_q &lt;= 1&#39;b0;</pre>
+      <pre>			intg_error_w_q &lt;= 1&#39;b0;</pre>
       <pre>			raddr_q &lt;= 1&#39;sb0;</pre>
-      <pre>			waddr_q &lt;= 1&#39;sb0;</pre>
+      <pre>			waddr_scr_q &lt;= 1&#39;sb0;</pre>
       <pre>			wmask_q &lt;= 1&#39;sb0;</pre>
       <pre>			wdata_q &lt;= 1&#39;sb0;</pre>
       <pre>			wdata_scr_q &lt;= 1&#39;sb0;</pre>
@@ -12566,13 +12543,14 @@
       <pre>			addr_collision_q &lt;= addr_collision_d;</pre>
       <pre>			rvalid_q &lt;= read_en;</pre>
       <pre>			write_en_q &lt;= write_en_d;</pre>
-      <pre>			intg_error_q &lt;= intg_error_i;</pre>
+      <pre>			intg_error_r_q &lt;= intg_error_buf;</pre>
       <pre>			if (read_en)</pre>
       <pre>				raddr_q &lt;= addr_i;</pre>
       <pre>			if (write_en_d) begin</pre>
-      <pre>				waddr_q &lt;= addr_i;</pre>
+      <pre>				waddr_scr_q &lt;= addr_scr;</pre>
       <pre>				wmask_q &lt;= wmask_i;</pre>
       <pre>				wdata_q &lt;= wdata_i;</pre>
+      <pre>				intg_error_w_q &lt;= intg_error_buf;</pre>
       <pre>			end</pre>
       <pre>			if (rw_collision)</pre>
       <pre>				wdata_scr_q &lt;= wdata_scr_d;</pre>
@@ -12591,7 +12569,7 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.req_i(macro_req),</pre>
       <pre>		.write_i(macro_write),</pre>
-      <pre>		.addr_i(addr_scr),</pre>
+      <pre>		.addr_i(addr_mux),</pre>
       <pre>		.wdata_i(wdata_scr),</pre>
       <pre>		.wmask_i(wmask_q),</pre>
       <pre>		.rdata_o(rdata_scr),</pre>
@@ -13051,11 +13029,7 @@
       <pre>	wire rst_shadow_set_q;</pre>
       <pre>	wire rst_shadow_n;</pre>
       <pre>	reg enable_cmp_q;</pre>
-      <pre>	function automatic signed [LockstepOffsetW - 1:0] sv2v_cast_3B624_signed;</pre>
-      <pre>		input reg signed [LockstepOffsetW - 1:0] inp;</pre>
-      <pre>		sv2v_cast_3B624_signed = inp;</pre>
-      <pre>	endfunction</pre>
-      <pre>	assign rst_shadow_cnt_incr = rst_shadow_cnt_q + sv2v_cast_3B624_signed(1);</pre>
+      <pre>	assign rst_shadow_cnt_incr = rst_shadow_cnt_q + 1&#39;b1;</pre>
       <pre>	function automatic [LockstepOffsetW - 1:0] sv2v_cast_3B624;</pre>
       <pre>		input reg [LockstepOffsetW - 1:0] inp;</pre>
       <pre>		sv2v_cast_3B624 = inp;</pre>
