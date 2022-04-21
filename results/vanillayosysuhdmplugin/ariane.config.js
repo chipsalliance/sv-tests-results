@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/ariane'] = [["cores","ariane",0,"logs/VanillaYosysUhdmPlugin/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/core/include/cv64a6_imafdc_sv39_config_pkg.sv.html"]]

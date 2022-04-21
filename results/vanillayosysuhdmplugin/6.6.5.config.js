@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/6.6.5'] = [["","net_tri0",1,"logs/VanillaYosysUhdmPlugin/generated/nets/6.6.5--net_tri0.sv.log.html","tests/generated/nets/6.6.5--net_tri0.sv.html"],["","net_tri1",1,"logs/VanillaYosysUhdmPlugin/generated/nets/6.6.5--net_tri1.sv.log.html","tests/generated/nets/6.6.5--net_tri1.sv.html"]]

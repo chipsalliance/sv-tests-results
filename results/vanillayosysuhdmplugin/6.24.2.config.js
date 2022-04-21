@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/6.24.2'] = [["","cast_fn",0,"logs/VanillaYosysUhdmPlugin/chapter-6/6.24.2--cast_fn.sv.log.html","tests/chapter-6/6.24.2--cast_fn.sv.html"],["","cast_task",0,"logs/VanillaYosysUhdmPlugin/chapter-6/6.24.2--cast_task.sv.log.html","tests/chapter-6/6.24.2--cast_task.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/18.12'] = [["","randomization_of_scope_variables_0",0,"logs/VanillaYosysUhdmPlugin/chapter-18/18.12--randomization-of-scope-variables_0.sv.log.html","tests/chapter-18/18.12--randomization-of-scope-variables_0.sv.html"]]

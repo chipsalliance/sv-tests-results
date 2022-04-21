@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/9.3.5'] = [["","statement_labels_par",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.3.5--statement_labels_par.sv.log.html","tests/chapter-9/9.3.5--statement_labels_par.sv.html"],["","statement_labels_seq",1,"logs/VanillaYosysUhdmPlugin/chapter-9/9.3.5--statement_labels_seq.sv.log.html","tests/chapter-9/9.3.5--statement_labels_seq.sv.html"]]

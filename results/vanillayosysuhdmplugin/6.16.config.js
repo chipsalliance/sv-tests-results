@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/6.16'] = [["","string",1,"logs/VanillaYosysUhdmPlugin/chapter-6/6.16--string.sv.log.html","tests/chapter-6/6.16--string.sv.html"]]

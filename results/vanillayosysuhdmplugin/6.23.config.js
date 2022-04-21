@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/6.23'] = [["","type_op",1,"logs/VanillaYosysUhdmPlugin/chapter-6/6.23--type_op.sv.log.html","tests/chapter-6/6.23--type_op.sv.html"],["","type_op_compare",0,"logs/VanillaYosysUhdmPlugin/chapter-6/6.23--type_op_compare.sv.log.html","tests/chapter-6/6.23--type_op_compare.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/8.10'] = [["","static_methods",0,"logs/VanillaYosysUhdmPlugin/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]

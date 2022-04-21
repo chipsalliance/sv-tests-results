@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/11.11'] = [["","min_max_avg_delay",1,"logs/VanillaYosysUhdmPlugin/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]

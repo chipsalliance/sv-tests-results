@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/18.13.2'] = [["","urandom_range_0",0,"logs/VanillaYosysUhdmPlugin/chapter-18/18.13.2--urandom_range_0.sv.log.html","tests/chapter-18/18.13.2--urandom_range_0.sv.html"]]

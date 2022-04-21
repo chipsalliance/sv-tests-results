@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/9.3.4'] = [["","block_names_par",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.3.4--block_names_par.sv.log.html","tests/chapter-9/9.3.4--block_names_par.sv.html"],["","block_names_seq",1,"logs/VanillaYosysUhdmPlugin/chapter-9/9.3.4--block_names_seq.sv.log.html","tests/chapter-9/9.3.4--block_names_seq.sv.html"]]

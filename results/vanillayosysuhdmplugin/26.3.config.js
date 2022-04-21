@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/26.3'] = [["","package_ref",1,"logs/VanillaYosysUhdmPlugin/chapter-26/26.3--package-ref.sv.log.html","tests/chapter-26/26.3--package-ref.sv.html"]]

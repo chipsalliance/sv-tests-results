@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/7.6'] = [["","array-unpacked-assignments",0,"logs/VanillaYosysUhdmPlugin/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]

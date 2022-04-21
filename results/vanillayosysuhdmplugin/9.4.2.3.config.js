@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/9.4.2.3'] = [["","event_conditional",0,"logs/VanillaYosysUhdmPlugin/chapter-9/9.4.2.3--event_conditional.sv.log.html","tests/chapter-9/9.4.2.3--event_conditional.sv.html"]]

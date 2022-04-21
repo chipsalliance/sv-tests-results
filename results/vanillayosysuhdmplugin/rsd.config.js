@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/rsd'] = [["cores","rsd",0,"logs/VanillaYosysUhdmPlugin/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['vanillayosysuhdmplugin/7.10.1'] = [["","max-size",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/max-size.sv.log.html","tests/chapter-7/queues/max-size.sv.html"],["","slice",0,"logs/VanillaYosysUhdmPlugin/chapter-7/queues/slice.sv.log.html","tests/chapter-7/queues/slice.sv.html"]]
