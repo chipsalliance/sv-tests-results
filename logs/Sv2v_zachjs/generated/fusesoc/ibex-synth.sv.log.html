@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-05-04 18:12:11</dd></div>
-        <div><dt>time elapsed</dt><dd>5.075s</dd></div>
-        <div><dt>ram usage</dt><dd>426484 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-05-06 02:18:27</dd></div>
+        <div><dt>time elapsed</dt><dd>5.017s</dd></div>
+        <div><dt>ram usage</dt><dd>424304 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -3918,8 +3918,8 @@
       <pre>	generate</pre>
       <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
-      <pre>				.ResetValue(ResetValue),</pre>
-      <pre>				.Width(Width)</pre>
+      <pre>				.Width(Width),</pre>
+      <pre>				.ResetValue(ResetValue)</pre>
       <pre>			) u_impl_xilinx(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.rst_ni(rst_ni),</pre>
@@ -3929,8 +3929,8 @@
       <pre>		end</pre>
       <pre>		else begin : gen_generic</pre>
       <pre>			prim_generic_flop #(</pre>
-      <pre>				.ResetValue(ResetValue),</pre>
-      <pre>				.Width(Width)</pre>
+      <pre>				.Width(Width),</pre>
+      <pre>				.ResetValue(ResetValue)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.rst_ni(rst_ni),</pre>
@@ -3980,10 +3980,10 @@
       <pre>	generate</pre>
       <pre>		if (1) begin : gen_generic</pre>
       <pre>			prim_generic_ram_2p #(</pre>
-      <pre>				.MemInitFile(MemInitFile),</pre>
-      <pre>				.Depth(Depth),</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
-      <pre>				.Width(Width)</pre>
+      <pre>				.Width(Width),</pre>
+      <pre>				.Depth(Depth),</pre>
+      <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_a_i(clk_a_i),</pre>
       <pre>				.clk_b_i(clk_b_i),</pre>
@@ -4090,8 +4090,8 @@
       <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
       <pre>				.Width(Width),</pre>
-      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
+      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_badbit(</pre>
       <pre>				.clk_i(clk_i),</pre>
@@ -4106,8 +4106,8 @@
       <pre>		else begin : gen_generic</pre>
       <pre>			prim_generic_ram_1p #(</pre>
       <pre>				.Width(Width),</pre>
-      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
+      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_i(clk_i),</pre>
@@ -13846,53 +13846,85 @@
       <pre>		if (ICache) begin : gen_rams</pre>
       <pre>			genvar way;</pre>
       <pre>			for (way = 0; way &lt; ibex_pkg_IC_NUM_WAYS; way = way + 1) begin : gen_rams_inner</pre>
-      <pre>				prim_ram_1p_scr #(</pre>
-      <pre>					.Width(TagSizeECC),</pre>
-      <pre>					.Depth(ibex_pkg_IC_NUM_LINES),</pre>
-      <pre>					.DataBitsPerMask(TagSizeECC),</pre>
-      <pre>					.EnableParity(0),</pre>
-      <pre>					.DiffWidth(TagSizeECC),</pre>
-      <pre>					.NumAddrScrRounds(NumAddrScrRounds),</pre>
-      <pre>					.NumDiffRounds(NumDiffRounds)</pre>
-      <pre>				) tag_bank(</pre>
-      <pre>					.clk_i(clk_i),</pre>
-      <pre>					.rst_ni(rst_ni),</pre>
-      <pre>					.key_valid_i(scramble_key_valid_q),</pre>
-      <pre>					.key_i(scramble_key_q),</pre>
-      <pre>					.nonce_i(scramble_nonce_q),</pre>
-      <pre>					.req_i(ic_tag_req[way]),</pre>
-      <pre>					.write_i(ic_tag_write),</pre>
-      <pre>					.addr_i(ic_tag_addr),</pre>
-      <pre>					.wdata_i(ic_tag_wdata),</pre>
-      <pre>					.wmask_i({TagSizeECC {1&#39;b1}}),</pre>
-      <pre>					.intg_error_i(1&#39;b0),</pre>
-      <pre>					.rdata_o(ic_tag_rdata[(1 - way) * TagSizeECC+:TagSizeECC]),</pre>
-      <pre>					.cfg_i(ram_cfg_i)</pre>
-      <pre>				);</pre>
-      <pre>				prim_ram_1p_scr #(</pre>
-      <pre>					.Width(LineSizeECC),</pre>
-      <pre>					.Depth(ibex_pkg_IC_NUM_LINES),</pre>
-      <pre>					.DataBitsPerMask(LineSizeECC),</pre>
-      <pre>					.ReplicateKeyStream(1),</pre>
-      <pre>					.EnableParity(0),</pre>
-      <pre>					.DiffWidth(LineSizeECC),</pre>
-      <pre>					.NumAddrScrRounds(NumAddrScrRounds),</pre>
-      <pre>					.NumDiffRounds(NumDiffRounds)</pre>
-      <pre>				) data_bank(</pre>
-      <pre>					.clk_i(clk_i),</pre>
-      <pre>					.rst_ni(rst_ni),</pre>
-      <pre>					.key_valid_i(scramble_key_valid_q),</pre>
-      <pre>					.key_i(scramble_key_q),</pre>
-      <pre>					.nonce_i(scramble_nonce_q),</pre>
-      <pre>					.req_i(ic_data_req[way]),</pre>
-      <pre>					.write_i(ic_data_write),</pre>
-      <pre>					.addr_i(ic_data_addr),</pre>
-      <pre>					.wdata_i(ic_data_wdata),</pre>
-      <pre>					.wmask_i({LineSizeECC {1&#39;b1}}),</pre>
-      <pre>					.intg_error_i(1&#39;b0),</pre>
-      <pre>					.rdata_o(ic_data_rdata[(1 - way) * LineSizeECC+:LineSizeECC]),</pre>
-      <pre>					.cfg_i(ram_cfg_i)</pre>
-      <pre>				);</pre>
+      <pre>				if (ICacheScramble) begin : gen_scramble_rams</pre>
+      <pre>					prim_ram_1p_scr #(</pre>
+      <pre>						.Width(TagSizeECC),</pre>
+      <pre>						.Depth(ibex_pkg_IC_NUM_LINES),</pre>
+      <pre>						.DataBitsPerMask(TagSizeECC),</pre>
+      <pre>						.EnableParity(0),</pre>
+      <pre>						.DiffWidth(TagSizeECC),</pre>
+      <pre>						.NumAddrScrRounds(NumAddrScrRounds),</pre>
+      <pre>						.NumDiffRounds(NumDiffRounds)</pre>
+      <pre>					) tag_bank(</pre>
+      <pre>						.clk_i(clk_i),</pre>
+      <pre>						.rst_ni(rst_ni),</pre>
+      <pre>						.key_valid_i(scramble_key_valid_q),</pre>
+      <pre>						.key_i(scramble_key_q),</pre>
+      <pre>						.nonce_i(scramble_nonce_q),</pre>
+      <pre>						.req_i(ic_tag_req[way]),</pre>
+      <pre>						.write_i(ic_tag_write),</pre>
+      <pre>						.addr_i(ic_tag_addr),</pre>
+      <pre>						.wdata_i(ic_tag_wdata),</pre>
+      <pre>						.wmask_i({TagSizeECC {1&#39;b1}}),</pre>
+      <pre>						.intg_error_i(1&#39;b0),</pre>
+      <pre>						.rdata_o(ic_tag_rdata[(1 - way) * TagSizeECC+:TagSizeECC]),</pre>
+      <pre>						.cfg_i(ram_cfg_i)</pre>
+      <pre>					);</pre>
+      <pre>					prim_ram_1p_scr #(</pre>
+      <pre>						.Width(LineSizeECC),</pre>
+      <pre>						.Depth(ibex_pkg_IC_NUM_LINES),</pre>
+      <pre>						.DataBitsPerMask(LineSizeECC),</pre>
+      <pre>						.ReplicateKeyStream(1),</pre>
+      <pre>						.EnableParity(0),</pre>
+      <pre>						.DiffWidth(LineSizeECC),</pre>
+      <pre>						.NumAddrScrRounds(NumAddrScrRounds),</pre>
+      <pre>						.NumDiffRounds(NumDiffRounds)</pre>
+      <pre>					) data_bank(</pre>
+      <pre>						.clk_i(clk_i),</pre>
+      <pre>						.rst_ni(rst_ni),</pre>
+      <pre>						.key_valid_i(scramble_key_valid_q),</pre>
+      <pre>						.key_i(scramble_key_q),</pre>
+      <pre>						.nonce_i(scramble_nonce_q),</pre>
+      <pre>						.req_i(ic_data_req[way]),</pre>
+      <pre>						.write_i(ic_data_write),</pre>
+      <pre>						.addr_i(ic_data_addr),</pre>
+      <pre>						.wdata_i(ic_data_wdata),</pre>
+      <pre>						.wmask_i({LineSizeECC {1&#39;b1}}),</pre>
+      <pre>						.intg_error_i(1&#39;b0),</pre>
+      <pre>						.rdata_o(ic_data_rdata[(1 - way) * LineSizeECC+:LineSizeECC]),</pre>
+      <pre>						.cfg_i(ram_cfg_i)</pre>
+      <pre>					);</pre>
+      <pre>				end</pre>
+      <pre>				else begin : gen_noscramble_rams</pre>
+      <pre>					prim_ram_1p #(</pre>
+      <pre>						.Width(TagSizeECC),</pre>
+      <pre>						.Depth(ibex_pkg_IC_NUM_LINES),</pre>
+      <pre>						.DataBitsPerMask(TagSizeECC)</pre>
+      <pre>					) tag_bank(</pre>
+      <pre>						.clk_i(clk_i),</pre>
+      <pre>						.req_i(ic_tag_req[way]),</pre>
+      <pre>						.write_i(ic_tag_write),</pre>
+      <pre>						.addr_i(ic_tag_addr),</pre>
+      <pre>						.wdata_i(ic_tag_wdata),</pre>
+      <pre>						.wmask_i({TagSizeECC {1&#39;b1}}),</pre>
+      <pre>						.rdata_o(ic_tag_rdata[(1 - way) * TagSizeECC+:TagSizeECC]),</pre>
+      <pre>						.cfg_i(ram_cfg_i)</pre>
+      <pre>					);</pre>
+      <pre>					prim_ram_1p #(</pre>
+      <pre>						.Width(LineSizeECC),</pre>
+      <pre>						.Depth(ibex_pkg_IC_NUM_LINES),</pre>
+      <pre>						.DataBitsPerMask(LineSizeECC)</pre>
+      <pre>					) data_bank(</pre>
+      <pre>						.clk_i(clk_i),</pre>
+      <pre>						.req_i(ic_data_req[way]),</pre>
+      <pre>						.write_i(ic_data_write),</pre>
+      <pre>						.addr_i(ic_data_addr),</pre>
+      <pre>						.wdata_i(ic_data_wdata),</pre>
+      <pre>						.wmask_i({LineSizeECC {1&#39;b1}}),</pre>
+      <pre>						.rdata_o(ic_data_rdata[(1 - way) * LineSizeECC+:LineSizeECC]),</pre>
+      <pre>						.cfg_i(ram_cfg_i)</pre>
+      <pre>					);</pre>
+      <pre>				end</pre>
       <pre>			end</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_norams</pre>
