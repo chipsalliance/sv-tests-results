@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-05-30 02:03:28</dd></div>
-        <div><dt>time elapsed</dt><dd>5.828s</dd></div>
-        <div><dt>ram usage</dt><dd>423980 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-05-31 02:06:29</dd></div>
+        <div><dt>time elapsed</dt><dd>5.680s</dd></div>
+        <div><dt>ram usage</dt><dd>424252 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -3918,8 +3918,8 @@
       <pre>	generate</pre>
       <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
-      <pre>				.Width(Width),</pre>
-      <pre>				.ResetValue(ResetValue)</pre>
+      <pre>				.ResetValue(ResetValue),</pre>
+      <pre>				.Width(Width)</pre>
       <pre>			) u_impl_xilinx(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.rst_ni(rst_ni),</pre>
@@ -3929,8 +3929,8 @@
       <pre>		end</pre>
       <pre>		else begin : gen_generic</pre>
       <pre>			prim_generic_flop #(</pre>
-      <pre>				.Width(Width),</pre>
-      <pre>				.ResetValue(ResetValue)</pre>
+      <pre>				.ResetValue(ResetValue),</pre>
+      <pre>				.Width(Width)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.rst_ni(rst_ni),</pre>
@@ -3980,10 +3980,10 @@
       <pre>	generate</pre>
       <pre>		if (1) begin : gen_generic</pre>
       <pre>			prim_generic_ram_2p #(</pre>
+      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
       <pre>				.Width(Width),</pre>
-      <pre>				.MemInitFile(MemInitFile),</pre>
-      <pre>				.DataBitsPerMask(DataBitsPerMask)</pre>
+      <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_generic(</pre>
       <pre>				.clk_a_i(clk_a_i),</pre>
       <pre>				.clk_b_i(clk_b_i),</pre>
@@ -4089,8 +4089,8 @@
       <pre>	generate</pre>
       <pre>		if (Impl == 32&#39;sd2) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
-      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
+      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Width(Width),</pre>
       <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_badbit(</pre>
@@ -4105,8 +4105,8 @@
       <pre>		end</pre>
       <pre>		else begin : gen_generic</pre>
       <pre>			prim_generic_ram_1p #(</pre>
-      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
+      <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Width(Width),</pre>
       <pre>				.MemInitFile(MemInitFile)</pre>
       <pre>			) u_impl_generic(</pre>
@@ -5771,6 +5771,10 @@
       <pre>			illegal_insn_q &lt;= illegal_insn_d;</pre>
       <pre>		end</pre>
       <pre>	end</pre>
+      <pre>	wire fcov_debug_wakeup;</pre>
+      <pre>	assign fcov_debug_wakeup = ((ctrl_fsm_cs == 4&#39;d3) &amp; (ctrl_fsm_ns == 4&#39;d4)) &amp; ((debug_req_i || debug_mode_q) || debug_single_step_i);</pre>
+      <pre>	wire unused_fcov_debug_wakeup;</pre>
+      <pre>	assign unused_fcov_debug_wakeup = fcov_debug_wakeup;</pre>
       <pre>	wire fcov_interrupt_taken;</pre>
       <pre>	assign fcov_interrupt_taken = (ctrl_fsm_cs != 4&#39;d7) &amp; (ctrl_fsm_ns == 4&#39;d7);</pre>
       <pre>	wire unused_fcov_interrupt_taken;</pre>
@@ -10850,8 +10854,6 @@
       <pre>	assign instr_addr_o = instr_addr_w_aligned;</pre>
       <pre>endmodule</pre>
       <pre>module ibex_pmp (</pre>
-      <pre>	clk_i,</pre>
-      <pre>	rst_ni,</pre>
       <pre>	csr_pmp_cfg_i,</pre>
       <pre>	csr_pmp_addr_i,</pre>
       <pre>	csr_pmp_mseccfg_i,</pre>
@@ -10863,8 +10865,6 @@
       <pre>	parameter [31:0] PMPGranularity = 0;</pre>
       <pre>	parameter [31:0] PMPNumChan = 2;</pre>
       <pre>	parameter [31:0] PMPNumRegions = 4;</pre>
-      <pre>	input wire clk_i;</pre>
-      <pre>	input wire rst_ni;</pre>
       <pre>	input wire [(PMPNumRegions * 6) - 1:0] csr_pmp_cfg_i;</pre>
       <pre>	input wire [(PMPNumRegions * 34) - 1:0] csr_pmp_addr_i;</pre>
       <pre>	input wire [2:0] csr_pmp_mseccfg_i;</pre>
@@ -10879,9 +10879,85 @@
       <pre>	wire [(PMPNumChan * PMPNumRegions) - 1:0] region_match_eq;</pre>
       <pre>	reg [(PMPNumChan * PMPNumRegions) - 1:0] region_match_all;</pre>
       <pre>	wire [(PMPNumChan * PMPNumRegions) - 1:0] region_basic_perm_check;</pre>
-      <pre>	reg [(PMPNumChan * PMPNumRegions) - 1:0] region_mml_perm_check;</pre>
-      <pre>	wire [(PMPNumChan * PMPNumRegions) - 1:0] region_orig_perm_check;</pre>
-      <pre>	reg [PMPNumChan - 1:0] access_fault;</pre>
+      <pre>	wire [(PMPNumChan * PMPNumRegions) - 1:0] region_perm_check;</pre>
+      <pre>	function automatic mml_perm_check;</pre>
+      <pre>		input reg [5:0] csr_pmp_cfg;</pre>
+      <pre>		input reg [1:0] pmp_req_type;</pre>
+      <pre>		input reg [1:0] priv_mode;</pre>
+      <pre>		input reg permission_check;</pre>
+      <pre>		reg result;</pre>
+      <pre>		reg unused_cfg;</pre>
+      <pre>		begin</pre>
+      <pre>			result = 1&#39;b0;</pre>
+      <pre>			unused_cfg = |csr_pmp_cfg[4-:2];</pre>
+      <pre>			if (!csr_pmp_cfg[0] &amp;&amp; csr_pmp_cfg[1])</pre>
+      <pre>				case ({csr_pmp_cfg[5], csr_pmp_cfg[2]})</pre>
+      <pre>					2&#39;b00: result = (pmp_req_type == 2&#39;b10) | ((pmp_req_type == 2&#39;b01) &amp; (priv_mode == 2&#39;b11));</pre>
+      <pre>					2&#39;b01: result = (pmp_req_type == 2&#39;b10) | (pmp_req_type == 2&#39;b01);</pre>
+      <pre>					2&#39;b10: result = pmp_req_type == 2&#39;b00;</pre>
+      <pre>					2&#39;b11: result = (pmp_req_type == 2&#39;b00) | ((pmp_req_type == 2&#39;b10) &amp; (priv_mode == 2&#39;b11));</pre>
+      <pre>					default:</pre>
+      <pre>						;</pre>
+      <pre>				endcase</pre>
+      <pre>			else if (((csr_pmp_cfg[0] &amp; csr_pmp_cfg[1]) &amp; csr_pmp_cfg[2]) &amp; csr_pmp_cfg[5])</pre>
+      <pre>				result = pmp_req_type == 2&#39;b10;</pre>
+      <pre>			else</pre>
+      <pre>				result = permission_check &amp; (priv_mode == 2&#39;b11 ? csr_pmp_cfg[5] : ~csr_pmp_cfg[5]);</pre>
+      <pre>			mml_perm_check = result;</pre>
+      <pre>		end</pre>
+      <pre>	endfunction</pre>
+      <pre>	function automatic orig_perm_check;</pre>
+      <pre>		input reg pmp_cfg_lock;</pre>
+      <pre>		input reg [1:0] priv_mode;</pre>
+      <pre>		input reg permission_check;</pre>
+      <pre>		orig_perm_check = (priv_mode == 2&#39;b11 ? ~pmp_cfg_lock | permission_check : permission_check);</pre>
+      <pre>	endfunction</pre>
+      <pre>	function automatic perm_check_wrapper;</pre>
+      <pre>		input reg csr_pmp_mseccfg_mml;</pre>
+      <pre>		input reg [5:0] csr_pmp_cfg;</pre>
+      <pre>		input reg [1:0] pmp_req_type;</pre>
+      <pre>		input reg [1:0] priv_mode;</pre>
+      <pre>		input reg permission_check;</pre>
+      <pre>		if (csr_pmp_mseccfg_mml)</pre>
+      <pre>			perm_check_wrapper = mml_perm_check(csr_pmp_cfg, pmp_req_type, priv_mode, permission_check);</pre>
+      <pre>		else</pre>
+      <pre>			perm_check_wrapper = orig_perm_check(csr_pmp_cfg[5], priv_mode, permission_check);</pre>
+      <pre>	endfunction</pre>
+      <pre>	function automatic access_fault_check;</pre>
+      <pre>		input reg csr_pmp_mseccfg_mmwp;</pre>
+      <pre>		input reg [PMPNumRegions - 1:0] match_all;</pre>
+      <pre>		input reg [1:0] priv_mode;</pre>
+      <pre>		input reg [PMPNumRegions - 1:0] final_perm_check;</pre>
+      <pre>		reg access_fail;</pre>
+      <pre>		reg [0:1] _sv2v_jump;</pre>
+      <pre>		begin</pre>
+      <pre>			access_fail = csr_pmp_mseccfg_mmwp | (priv_mode != 2&#39;b11);</pre>
+      <pre>			_sv2v_jump = 2&#39;b00;</pre>
+      <pre>			begin : sv2v_autoblock_1</pre>
+      <pre>				reg signed [31:0] r;</pre>
+      <pre>				begin : sv2v_autoblock_2</pre>
+      <pre>					reg signed [31:0] _sv2v_value_on_break;</pre>
+      <pre>					for (r = 0; r &lt; PMPNumRegions; r = r + 1)</pre>
+      <pre>						if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
+      <pre>							_sv2v_jump = 2&#39;b00;</pre>
+      <pre>							if (match_all[r]) begin</pre>
+      <pre>								access_fail = ~final_perm_check[r];</pre>
+      <pre>								_sv2v_jump = 2&#39;b10;</pre>
+      <pre>							end</pre>
+      <pre>							_sv2v_value_on_break = r;</pre>
+      <pre>						end</pre>
+      <pre>					if (!(_sv2v_jump &lt; 2&#39;b10))</pre>
+      <pre>						r = _sv2v_value_on_break;</pre>
+      <pre>					if (_sv2v_jump != 2&#39;b11)</pre>
+      <pre>						_sv2v_jump = 2&#39;b00;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			if (_sv2v_jump == 2&#39;b00) begin</pre>
+      <pre>				access_fault_check = access_fail;</pre>
+      <pre>				_sv2v_jump = 2&#39;b11;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>	endfunction</pre>
       <pre>	genvar r;</pre>
       <pre>	generate</pre>
       <pre>		for (r = 0; r &lt; PMPNumRegions; r = r + 1) begin : g_addr_exp</pre>
@@ -10926,39 +11002,11 @@
       <pre>					endcase</pre>
       <pre>				end</pre>
       <pre>				assign region_basic_perm_check[(c * PMPNumRegions) + r] = (((pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b00) &amp; csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 2]) | ((pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b01) &amp; csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 1])) | ((pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b10) &amp; csr_pmp_cfg_i[((PMPNumRegions - 1) - r) * 6]);</pre>
-      <pre>				assign region_orig_perm_check[(c * PMPNumRegions) + r] = (priv_mode_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b11 ? ~csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 5] | region_basic_perm_check[(c * PMPNumRegions) + r] : region_basic_perm_check[(c * PMPNumRegions) + r]);</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					region_mml_perm_check[(c * PMPNumRegions) + r] = 1&#39;b0;</pre>
-      <pre>					if (!csr_pmp_cfg_i[((PMPNumRegions - 1) - r) * 6] &amp;&amp; csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 1])</pre>
-      <pre>						case ({csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 5], csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 2]})</pre>
-      <pre>							2&#39;b00: region_mml_perm_check[(c * PMPNumRegions) + r] = (pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b10) | ((pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b01) &amp; (priv_mode_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b11));</pre>
-      <pre>							2&#39;b01: region_mml_perm_check[(c * PMPNumRegions) + r] = (pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b10) | (pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b01);</pre>
-      <pre>							2&#39;b10: region_mml_perm_check[(c * PMPNumRegions) + r] = pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b00;</pre>
-      <pre>							2&#39;b11: region_mml_perm_check[(c * PMPNumRegions) + r] = (pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b00) | ((pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b10) &amp; (priv_mode_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b11));</pre>
-      <pre>							default:</pre>
-      <pre>								;</pre>
-      <pre>						endcase</pre>
-      <pre>					else if (((csr_pmp_cfg_i[((PMPNumRegions - 1) - r) * 6] &amp; csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 1]) &amp; csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 2]) &amp; csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 5])</pre>
-      <pre>						region_mml_perm_check[(c * PMPNumRegions) + r] = pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b10;</pre>
-      <pre>					else</pre>
-      <pre>						region_mml_perm_check[(c * PMPNumRegions) + r] = (priv_mode_i[((PMPNumChan - 1) - c) * 2+:2] == 2&#39;b11 ? csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 5] &amp; region_basic_perm_check[(c * PMPNumRegions) + r] : ~csr_pmp_cfg_i[(((PMPNumRegions - 1) - r) * 6) + 5] &amp; region_basic_perm_check[(c * PMPNumRegions) + r]);</pre>
-      <pre>				end</pre>
+      <pre>				assign region_perm_check[(c * PMPNumRegions) + r] = perm_check_wrapper(csr_pmp_mseccfg_i[0], csr_pmp_cfg_i[((PMPNumRegions - 1) - r) * 6+:6], pmp_req_type_i[((PMPNumChan - 1) - c) * 2+:2], priv_mode_i[((PMPNumChan - 1) - c) * 2+:2], region_basic_perm_check[(c * PMPNumRegions) + r]);</pre>
       <pre>			end</pre>
-      <pre>			always @(*) begin</pre>
-      <pre>				access_fault[c] = csr_pmp_mseccfg_i[1] | (priv_mode_i[((PMPNumChan - 1) - c) * 2+:2] != 2&#39;b11);</pre>
-      <pre>				begin : sv2v_autoblock_1</pre>
-      <pre>					reg signed [31:0] r;</pre>
-      <pre>					for (r = PMPNumRegions - 1; r &gt;= 0; r = r - 1)</pre>
-      <pre>						if (region_match_all[(c * PMPNumRegions) + r])</pre>
-      <pre>							if (csr_pmp_mseccfg_i[0])</pre>
-      <pre>								access_fault[c] = ~region_mml_perm_check[(c * PMPNumRegions) + r];</pre>
-      <pre>							else</pre>
-      <pre>								access_fault[c] = ~region_orig_perm_check[(c * PMPNumRegions) + r];</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			assign pmp_req_err_o[c] = access_fault[c];</pre>
+      <pre>			assign pmp_req_err_o[c] = access_fault_check(csr_pmp_mseccfg_i[1], region_match_all[c * PMPNumRegions+:PMPNumRegions], priv_mode_i[((PMPNumChan - 1) - c) * 2+:2], region_perm_check[c * PMPNumRegions+:PMPNumRegions]);</pre>
       <pre>			wire fcov_pmp_region_override;</pre>
-      <pre>			assign fcov_pmp_region_override = ~pmp_req_err_o[c] &amp; |(region_match_all[c * PMPNumRegions+:PMPNumRegions] &amp; (csr_pmp_mseccfg_i[0] ? ~region_mml_perm_check[c * PMPNumRegions+:PMPNumRegions] : ~region_orig_perm_check[c * PMPNumRegions+:PMPNumRegions]));</pre>
+      <pre>			assign fcov_pmp_region_override = ~pmp_req_err_o[c] &amp; |(region_match_all[c * PMPNumRegions+:PMPNumRegions] &amp; ~region_perm_check[c * PMPNumRegions+:PMPNumRegions]);</pre>
       <pre>			wire unused_fcov_pmp_region_override;</pre>
       <pre>			assign unused_fcov_pmp_region_override = fcov_pmp_region_override;</pre>
       <pre>		end</pre>
@@ -11396,7 +11444,7 @@
       <pre>	output wire alert_major_bus_o;</pre>
       <pre>	output wire icache_inval_o;</pre>
       <pre>	output wire core_busy_o;</pre>
-      <pre>	localparam [31:0] PMP_NUM_CHAN = 3;</pre>
+      <pre>	localparam [31:0] PMPNumChan = 3;</pre>
       <pre>	localparam [0:0] DataIndTiming = SecureIbex;</pre>
       <pre>	localparam [0:0] PCIncrCheck = SecureIbex;</pre>
       <pre>	localparam [0:0] ShadowCSR = 1&#39;b0;</pre>
@@ -12053,11 +12101,9 @@
       <pre>			assign pmp_priv_lvl[0+:2] = priv_mode_lsu;</pre>
       <pre>			ibex_pmp #(</pre>
       <pre>				.PMPGranularity(PMPGranularity),</pre>
-      <pre>				.PMPNumChan(PMP_NUM_CHAN),</pre>
+      <pre>				.PMPNumChan(PMPNumChan),</pre>
       <pre>				.PMPNumRegions(PMPNumRegions)</pre>
       <pre>			) pmp_i(</pre>
-      <pre>				.clk_i(clk_i),</pre>
-      <pre>				.rst_ni(rst_ni),</pre>
       <pre>				.csr_pmp_cfg_i(csr_pmp_cfg),</pre>
       <pre>				.csr_pmp_addr_i(csr_pmp_addr),</pre>
       <pre>				.csr_pmp_mseccfg_i(csr_pmp_mseccfg),</pre>
@@ -12098,6 +12144,7 @@
       <pre>	assign fcov_csr_write = (cs_registers_i.csr_wr &amp;&amp; csr_access) &amp;&amp; (csr_op_en || illegal_insn_id);</pre>
       <pre>	wire unused_fcov_csr_write;</pre>
       <pre>	assign unused_fcov_csr_write = fcov_csr_write;</pre>
+      <pre>	localparam [31:0] ibex_pkg_PMP_CFG_W = 8;</pre>
       <pre>	generate</pre>
       <pre>		if (PMPEnable) begin : g_pmp_fcov_signals</pre>
       <pre>			wire [PMPNumRegions - 1:0] fcov_pmp_region_ichan_priority;</pre>
@@ -12119,6 +12166,10 @@
       <pre>				assign fcov_pmp_region_dchan_access = g_pmp.pmp_i.region_match_all[ibex_pkg_PMP_D][i_region] &amp; data_req_out;</pre>
       <pre>				wire unused_fcov_pmp_region_dchan_access;</pre>
       <pre>				assign unused_fcov_pmp_region_dchan_access = fcov_pmp_region_dchan_access;</pre>
+      <pre>				wire fcov_warl_check_pmpcfg;</pre>
+      <pre>				assign fcov_warl_check_pmpcfg = fcov_csr_write &amp;&amp; (cs_registers_i.g_pmp_registers.g_pmp_csrs[i_region].u_pmp_cfg_csr.wr_data_i != {cs_registers_i.csr_wdata_int[(i_region % 4) * ibex_pkg_PMP_CFG_W+:5], cs_registers_i.csr_wdata_int[((i_region % 4) * ibex_pkg_PMP_CFG_W) + 7]});</pre>
+      <pre>				wire unused_fcov_warl_check_pmpcfg;</pre>
+      <pre>				assign unused_fcov_warl_check_pmpcfg = fcov_warl_check_pmpcfg;</pre>
       <pre>				if (i_region &gt; 0) begin : g_region_priority</pre>
       <pre>					assign fcov_pmp_region_ichan_priority[i_region] = g_pmp.pmp_i.region_match_all[ibex_pkg_PMP_I][i_region] &amp; ~|g_pmp.pmp_i.region_match_all[ibex_pkg_PMP_I][i_region - 1:0];</pre>
       <pre>					assign fcov_pmp_region_ichan2_priority[i_region] = g_pmp.pmp_i.region_match_all[ibex_pkg_PMP_I2][i_region] &amp; ~|g_pmp.pmp_i.region_match_all[ibex_pkg_PMP_I2][i_region - 1:0];</pre>
