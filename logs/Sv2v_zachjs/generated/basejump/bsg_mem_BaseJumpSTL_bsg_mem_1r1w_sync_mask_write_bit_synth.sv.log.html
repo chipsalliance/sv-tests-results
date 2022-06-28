@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-06-26 01:43:28</dd></div>
-        <div><dt>time elapsed</dt><dd>0.071s</dd></div>
-        <div><dt>ram usage</dt><dd>66432 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-06-28 01:44:07</dd></div>
+        <div><dt>time elapsed</dt><dd>0.081s</dd></div>
+        <div><dt>ram usage</dt><dd>69628 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -70,6 +70,7 @@
       <pre>	parameter els_p = 0;</pre>
       <pre>	parameter read_write_same_addr_p = 0;</pre>
       <pre>	parameter addr_width_lp = (els_p == 1 ? 1 : $clog2(els_p));</pre>
+      <pre>	parameter latch_last_read_p = 0;</pre>
       <pre>	parameter disable_collision_warning_p = 1;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
@@ -88,7 +89,11 @@
       <pre>		end</pre>
       <pre>		else begin : nz</pre>
       <pre>			reg [width_p - 1:0] mem [els_p - 1:0];</pre>
+      <pre>			wire read_en;</pre>
+      <pre>			wire [width_p - 1:0] data_out;</pre>
       <pre>			reg [addr_width_lp - 1:0] r_addr_r;</pre>
+      <pre>			assign read_en = r_v_i;</pre>
+      <pre>			assign data_out = mem[r_addr_r];</pre>
       <pre>			always @(posedge clk_i) begin</pre>
       <pre>				if (r_v_i)</pre>
       <pre>					r_addr_r &lt;= r_addr_i;</pre>
@@ -100,9 +105,25 @@
       <pre>					r_addr_r &lt;= 1&#39;sbx;</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			assign r_data_o = mem[r_addr_r];</pre>
+      <pre>			if (latch_last_read_p) begin : llr</pre>
+      <pre>				wire read_en_r;</pre>
+      <pre>				bsg_dff #(.width_p(1)) read_en_dff(</pre>
+      <pre>					.clk_i(clk_i),</pre>
+      <pre>					.data_i(read_en),</pre>
+      <pre>					.data_o(read_en_r)</pre>
+      <pre>				);</pre>
+      <pre>				bsg_dff_en_bypass #(.width_p(width_p)) dff_bypass(</pre>
+      <pre>					.clk_i(clk_i),</pre>
+      <pre>					.en_i(read_en_r),</pre>
+      <pre>					.data_i(data_out),</pre>
+      <pre>					.data_o(r_data_o)</pre>
+      <pre>				);</pre>
+      <pre>			end</pre>
+      <pre>			else begin : no_llr</pre>
+      <pre>				assign r_data_o = data_out;</pre>
+      <pre>			end</pre>
       <pre>			genvar i;</pre>
-      <pre>			for (i = 0; i &lt; width_p; i = i + 1) begin : genblk1</pre>
+      <pre>			for (i = 0; i &lt; width_p; i = i + 1) begin : genblk2</pre>
       <pre>				always @(posedge clk_i)</pre>
       <pre>					if (w_v_i &amp;&amp; w_mask_i[i])</pre>
       <pre>						mem[w_addr_i][i] &lt;= w_data_i[i];</pre>

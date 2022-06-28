@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-06-26 01:43:23</dd></div>
-        <div><dt>time elapsed</dt><dd>0.065s</dd></div>
-        <div><dt>ram usage</dt><dd>63492 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-06-28 01:44:09</dd></div>
+        <div><dt>time elapsed</dt><dd>0.078s</dd></div>
+        <div><dt>ram usage</dt><dd>67508 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -69,6 +69,8 @@
       <pre>	parameter els_p = 0;</pre>
       <pre>	parameter read_write_same_addr_p = 0;</pre>
       <pre>	parameter addr_width_lp = (els_p == 1 ? 1 : $clog2(els_p));</pre>
+      <pre>	parameter latch_last_read_p = 0;</pre>
+      <pre>	parameter verbose_p = 1;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
       <pre>	input w_v_i;</pre>
@@ -85,18 +87,40 @@
       <pre>		end</pre>
       <pre>		else begin : nz</pre>
       <pre>			reg [width_p - 1:0] mem [els_p - 1:0];</pre>
+      <pre>			wire read_en;</pre>
+      <pre>			wire [width_p - 1:0] data_out;</pre>
       <pre>			reg [addr_width_lp - 1:0] r_addr_r;</pre>
+      <pre>			assign read_en = r_v_i;</pre>
+      <pre>			assign data_out = mem[r_addr_r];</pre>
       <pre>			always @(posedge clk_i)</pre>
       <pre>				if (r_v_i)</pre>
       <pre>					r_addr_r &lt;= r_addr_i;</pre>
       <pre>				else</pre>
       <pre>					r_addr_r &lt;= 1&#39;sbx;</pre>
-      <pre>			assign r_data_o = mem[r_addr_r];</pre>
+      <pre>			if (latch_last_read_p) begin : llr</pre>
+      <pre>				wire read_en_r;</pre>
+      <pre>				bsg_dff #(.width_p(1)) read_en_dff(</pre>
+      <pre>					.clk_i(clk_i),</pre>
+      <pre>					.data_i(read_en),</pre>
+      <pre>					.data_o(read_en_r)</pre>
+      <pre>				);</pre>
+      <pre>				bsg_dff_en_bypass #(.width_p(width_p)) dff_bypass(</pre>
+      <pre>					.clk_i(clk_i),</pre>
+      <pre>					.en_i(read_en_r),</pre>
+      <pre>					.data_i(data_out),</pre>
+      <pre>					.data_o(r_data_o)</pre>
+      <pre>				);</pre>
+      <pre>			end</pre>
+      <pre>			else begin : no_llr</pre>
+      <pre>				assign r_data_o = data_out;</pre>
+      <pre>			end</pre>
       <pre>			always @(posedge clk_i)</pre>
       <pre>				if (w_v_i)</pre>
       <pre>					mem[w_addr_i] &lt;= w_data_i;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
+      <pre>	initial if (verbose_p)</pre>
+      <pre>		$display(&#34;## %L: instantiating width_p=%d, els_p=%d (%m)&#34;, width_p, els_p);</pre>
       <pre>endmodule</pre>
       <pre>module bsg_mem_1r1w_sync_synth__abstract;</pre>
       <pre>	</pre>
