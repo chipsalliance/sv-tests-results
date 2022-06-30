@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/ibex'] = [["cores","ibex",0,"logs/UhdmYosys/generated/fusesoc/ibex-synth.sv.log.html","build/lowrisc_ibex_top_artya7_0.1/src/lowrisc_ibex_ibex_pkg_0.1/rtl/ibex_pkg.sv.html"]]
+config_loader_data['uhdmyosys/ibex'] = [["cores","ibex",1,"logs/UhdmYosys/generated/fusesoc/ibex-synth.sv.log.html","build/lowrisc_ibex_top_artya7_0.1/src/lowrisc_ibex_ibex_pkg_0.1/rtl/ibex_pkg.sv.html"]]
