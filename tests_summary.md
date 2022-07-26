@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Yosys              |           0|         0|    0|      0|        5140|
-|moore_parse        |           0|         0|    0|      0|        4987|
-|moore              |           0|         0|    0|      0|        5078|
-|UhdmYosys          |           0|         0|    0|      0|        5140|
-|Slang_parse        |           0|         0|    0|      0|        5078|
-|tree_sitter_verilog|           0|         0|    0|      0|        4987|
-|Verilator          |           0|         0|    0|      0|        5155|
-|VeribleExtractor   |           0|         0|    0|      0|        4987|
-|UhdmVerilator      |           0|         0|    0|      0|        5155|
-|Odin               |           0|         0|    0|      0|        5078|
-|Verible            |           0|         0|    0|      0|        4987|
-|Surelog            |           0|         0|    0|      0|        5140|
-|Icarus             |           0|         0|    0|      0|        4987|
-|Slang              |           0|         0|    0|      0|        5140|
-|Sv2v_zachjs        |           0|         0|    0|      0|        5140|
-|sv_parser          |           0|         0|    0|      0|        5078|
+|UhdmVerilator      |           1|         0|   17|     15|        5139|
+|sv_parser          |           0|         0|   17|     15|        5063|
+|Verilator          |           0|         1|   17|     15|        5139|
+|Verible            |           0|         0|   17|     15|        4972|
+|Odin               |           0|         0|   17|     15|        5063|
+|Slang              |           0|         0|   17|     15|        5125|
+|Icarus             |           0|         0|   17|     15|        4972|
+|tree_sitter_verilog|           0|         0|   17|     15|        4972|
+|moore              |           0|         0|   17|     15|        5063|
+|moore_parse        |           0|         0|   17|     15|        4972|
+|Yosys              |           0|         0|   17|     15|        5125|
+|UhdmYosys          |           0|         0|   17|     15|        5125|
+|VeribleExtractor   |           0|         0|   17|     15|        4972|
+|Slang_parse        |           0|         0|   17|     15|        5063|
+|Sv2v_zachjs        |           0|         0|   17|     15|        5125|
+|Surelog            |           0|         0|   17|     15|        5125|
