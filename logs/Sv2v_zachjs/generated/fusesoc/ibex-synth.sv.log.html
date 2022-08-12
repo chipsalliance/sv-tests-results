@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-08-10 14:28:46</dd></div>
-        <div><dt>time elapsed</dt><dd>5.295s</dd></div>
-        <div><dt>ram usage</dt><dd>407852 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-08-12 01:57:34</dd></div>
+        <div><dt>time elapsed</dt><dd>4.191s</dd></div>
+        <div><dt>ram usage</dt><dd>407664 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -1825,6 +1825,7 @@
       <pre>	ic_data_wdata_o,</pre>
       <pre>	ic_data_rdata_i,</pre>
       <pre>	ic_scr_key_valid_i,</pre>
+      <pre>	ic_scr_key_req_o,</pre>
       <pre>	icache_enable_i,</pre>
       <pre>	icache_inval_i,</pre>
       <pre>	busy_o,</pre>
@@ -1874,6 +1875,7 @@
       <pre>	output wire [LineSizeECC - 1:0] ic_data_wdata_o;</pre>
       <pre>	input wire [(ibex_pkg_IC_NUM_WAYS * LineSizeECC) - 1:0] ic_data_rdata_i;</pre>
       <pre>	input wire ic_scr_key_valid_i;</pre>
+      <pre>	output reg ic_scr_key_req_o;</pre>
       <pre>	input wire icache_enable_i;</pre>
       <pre>	input wire icache_inval_i;</pre>
       <pre>	output wire busy_o;</pre>
@@ -2022,16 +2024,14 @@
       <pre>	reg line_err_muxed;</pre>
       <pre>	wire [31:0] output_data;</pre>
       <pre>	wire output_err;</pre>
-      <pre>	wire start_inval;</pre>
-      <pre>	wire inval_done;</pre>
-      <pre>	wire inval_lock;</pre>
-      <pre>	wire inval_req_d;</pre>
-      <pre>	reg inval_req_q;</pre>
-      <pre>	reg reset_inval_q;</pre>
-      <pre>	wire inval_prog_d;</pre>
-      <pre>	reg inval_prog_q;</pre>
-      <pre>	wire [ibex_pkg_IC_INDEX_W - 1:0] inval_index_d;</pre>
+      <pre>	reg [1:0] inval_state_q;</pre>
+      <pre>	reg [1:0] inval_state_d;</pre>
+      <pre>	reg inval_write_req;</pre>
+      <pre>	reg inval_block_cache;</pre>
+      <pre>	reg [ibex_pkg_IC_INDEX_W - 1:0] inval_index_d;</pre>
       <pre>	reg [ibex_pkg_IC_INDEX_W - 1:0] inval_index_q;</pre>
+      <pre>	reg inval_index_en;</pre>
+      <pre>	wire inval_active;</pre>
       <pre>	assign lookup_addr_aligned = {lookup_addr_ic0[31:ibex_pkg_IC_LINE_W], {ibex_pkg_IC_LINE_W {1&#39;b0}}};</pre>
       <pre>	assign prefetch_addr_d = (lookup_grant_ic0 ? lookup_addr_aligned + {{(ibex_pkg_ADDR_W - ibex_pkg_IC_LINE_W) - 1 {1&#39;b0}}, 1&#39;b1, {ibex_pkg_IC_LINE_W {1&#39;b0}}} : addr_i);</pre>
       <pre>	assign prefetch_addr_en = branch_i | lookup_grant_ic0;</pre>
@@ -2055,15 +2055,15 @@
       <pre>	assign lookup_index_ic0 = lookup_addr_ic0[ibex_pkg_IC_INDEX_HI:ibex_pkg_IC_LINE_W];</pre>
       <pre>	assign fill_req_ic0 = |fill_ram_req;</pre>
       <pre>	assign fill_index_ic0 = fill_ram_req_addr[ibex_pkg_IC_INDEX_HI:ibex_pkg_IC_LINE_W];</pre>
-      <pre>	assign fill_tag_ic0 = {~inval_prog_q &amp; ~ecc_write_req, fill_ram_req_addr[31:ibex_pkg_IC_INDEX_HI + 1]};</pre>
+      <pre>	assign fill_tag_ic0 = {~inval_write_req &amp; ~ecc_write_req, fill_ram_req_addr[31:ibex_pkg_IC_INDEX_HI + 1]};</pre>
       <pre>	assign fill_wdata_ic0 = fill_ram_req_data;</pre>
       <pre>	assign lookup_grant_ic0 = lookup_req_ic0;</pre>
-      <pre>	assign fill_grant_ic0 = ((fill_req_ic0 &amp; ~lookup_req_ic0) &amp; ~inval_prog_q) &amp; ~ecc_write_req;</pre>
-      <pre>	assign lookup_actual_ic0 = ((((lookup_grant_ic0 &amp; icache_enable_i) &amp; ~inval_prog_q) &amp; ~icache_inval_i) &amp; ~inval_lock) &amp; ~start_inval;</pre>
-      <pre>	assign tag_req_ic0 = ((lookup_req_ic0 | fill_req_ic0) | inval_prog_q) | ecc_write_req;</pre>
-      <pre>	assign tag_index_ic0 = (inval_prog_q ? inval_index_q : (ecc_write_req ? ecc_write_index : (fill_grant_ic0 ? fill_index_ic0 : lookup_index_ic0)));</pre>
+      <pre>	assign fill_grant_ic0 = ((fill_req_ic0 &amp; ~lookup_req_ic0) &amp; ~inval_write_req) &amp; ~ecc_write_req;</pre>
+      <pre>	assign lookup_actual_ic0 = (lookup_grant_ic0 &amp; icache_enable_i) &amp; ~inval_block_cache;</pre>
+      <pre>	assign tag_req_ic0 = ((lookup_req_ic0 | fill_req_ic0) | inval_write_req) | ecc_write_req;</pre>
+      <pre>	assign tag_index_ic0 = (inval_write_req ? inval_index_q : (ecc_write_req ? ecc_write_index : (fill_grant_ic0 ? fill_index_ic0 : lookup_index_ic0)));</pre>
       <pre>	assign tag_banks_ic0 = (ecc_write_req ? ecc_write_ways : (fill_grant_ic0 ? fill_ram_req_way : {ibex_pkg_IC_NUM_WAYS {1&#39;b1}}));</pre>
-      <pre>	assign tag_write_ic0 = (fill_grant_ic0 | inval_prog_q) | ecc_write_req;</pre>
+      <pre>	assign tag_write_ic0 = (fill_grant_ic0 | inval_write_req) | ecc_write_req;</pre>
       <pre>	assign data_req_ic0 = lookup_req_ic0 | fill_req_ic0;</pre>
       <pre>	assign data_index_ic0 = tag_index_ic0;</pre>
       <pre>	assign data_banks_ic0 = tag_banks_ic0;</pre>
@@ -2252,10 +2252,10 @@
       <pre>					cache_cnt_q &lt;= 1&#39;sb0;</pre>
       <pre>				else</pre>
       <pre>					cache_cnt_q &lt;= cache_cnt_d;</pre>
-      <pre>			assign fill_cache_new = ((((branch_i | |cache_cnt_q) &amp; icache_enable_i) &amp; ~icache_inval_i) &amp; ~inval_lock) &amp; ~inval_prog_q;</pre>
+      <pre>			assign fill_cache_new = ((branch_i | |cache_cnt_q) &amp; icache_enable_i) &amp; ~inval_block_cache;</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_cache_all</pre>
-      <pre>			assign fill_cache_new = (icache_enable_i &amp; ~start_inval) &amp; ~inval_prog_q;</pre>
+      <pre>			assign fill_cache_new = icache_enable_i &amp; ~inval_block_cache;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	always @(*) begin</pre>
@@ -2285,7 +2285,7 @@
       <pre>			assign fill_older_d[fb * NUM_FB+:NUM_FB] = (fill_alloc[fb] ? fill_busy_q : fill_older_q[fb * NUM_FB+:NUM_FB]) &amp; ~fill_done;</pre>
       <pre>			assign fill_done[fb] = ((((fill_ram_done_q[fb] | fill_hit_q[fb]) | ~fill_cache_q[fb]) | |fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS]) &amp; ((fill_out_done[fb] | fill_stale_q[fb]) | branch_i)) &amp; fill_rvd_done[fb];</pre>
       <pre>			assign fill_stale_d[fb] = fill_busy_q[fb] &amp; (branch_i | fill_stale_q[fb]);</pre>
-      <pre>			assign fill_cache_d[fb] = (fill_alloc[fb] &amp; fill_cache_new) | ((((fill_cache_q[fb] &amp; fill_busy_q[fb]) &amp; icache_enable_i) &amp; ~icache_inval_i) &amp; ~inval_lock);</pre>
+      <pre>			assign fill_cache_d[fb] = (fill_alloc[fb] &amp; fill_cache_new) | (((fill_cache_q[fb] &amp; fill_busy_q[fb]) &amp; icache_enable_i) &amp; ~icache_inval_i);</pre>
       <pre>			assign fill_hit_ic1[fb] = ((lookup_valid_ic1 &amp; fill_in_ic1[fb]) &amp; tag_hit_ic1) &amp; ~ecc_err_ic1;</pre>
       <pre>			assign fill_hit_d[fb] = fill_hit_ic1[fb] | (fill_hit_q[fb] &amp; fill_busy_q[fb]);</pre>
       <pre>			assign fill_ext_req[fb] = fill_busy_q[fb] &amp; ~fill_ext_done_d[fb];</pre>
@@ -2518,41 +2518,68 @@
       <pre>	assign addr_o = {output_addr_q, 1&#39;b0};</pre>
       <pre>	assign err_o = (skid_valid_q &amp; skid_err_q) | (~skid_complete_instr &amp; output_err);</pre>
       <pre>	assign err_plus2_o = skid_valid_q &amp; ~skid_err_q;</pre>
-      <pre>	assign inval_req_d = (inval_req_q | icache_inval_i) &amp; ~(inval_done &amp; inval_prog_q);</pre>
+      <pre>	always @(*) begin</pre>
+      <pre>		inval_state_d = inval_state_q;</pre>
+      <pre>		inval_index_d = inval_index_q;</pre>
+      <pre>		inval_index_en = 1&#39;b0;</pre>
+      <pre>		inval_write_req = 1&#39;b0;</pre>
+      <pre>		ic_scr_key_req_o = 1&#39;b0;</pre>
+      <pre>		inval_block_cache = 1&#39;b1;</pre>
+      <pre>		case (inval_state_q)</pre>
+      <pre>			2&#39;d0: begin</pre>
+      <pre>				inval_state_d = 2&#39;d1;</pre>
+      <pre>				if (~ic_scr_key_valid_i)</pre>
+      <pre>					ic_scr_key_req_o = 1&#39;b1;</pre>
+      <pre>			end</pre>
+      <pre>			2&#39;d1:</pre>
+      <pre>				if (ic_scr_key_valid_i) begin</pre>
+      <pre>					inval_state_d = 2&#39;d2;</pre>
+      <pre>					inval_index_d = 1&#39;sb0;</pre>
+      <pre>					inval_index_en = 1&#39;b1;</pre>
+      <pre>				end</pre>
+      <pre>			2&#39;d2: begin</pre>
+      <pre>				inval_write_req = 1&#39;b1;</pre>
+      <pre>				inval_index_d = inval_index_q + {{ibex_pkg_IC_INDEX_W - 1 {1&#39;b0}}, 1&#39;b1};</pre>
+      <pre>				inval_index_en = 1&#39;b1;</pre>
+      <pre>				if (icache_inval_i) begin</pre>
+      <pre>					ic_scr_key_req_o = 1&#39;b1;</pre>
+      <pre>					inval_state_d = 2&#39;d1;</pre>
+      <pre>				end</pre>
+      <pre>				else if (&amp;inval_index_q)</pre>
+      <pre>					inval_state_d = 2&#39;d3;</pre>
+      <pre>			end</pre>
+      <pre>			2&#39;d3:</pre>
+      <pre>				if (icache_inval_i) begin</pre>
+      <pre>					ic_scr_key_req_o = 1&#39;b1;</pre>
+      <pre>					inval_state_d = 2&#39;d1;</pre>
+      <pre>				end</pre>
+      <pre>				else</pre>
+      <pre>					inval_block_cache = 1&#39;b0;</pre>
+      <pre>			default:</pre>
+      <pre>				;</pre>
+      <pre>		endcase</pre>
+      <pre>	end</pre>
+      <pre>	assign inval_active = inval_state_q != 2&#39;d3;</pre>
       <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>		if (!rst_ni)</pre>
-      <pre>			inval_req_q &lt;= 1&#39;b0;</pre>
+      <pre>			inval_state_q &lt;= 2&#39;d0;</pre>
       <pre>		else</pre>
-      <pre>			inval_req_q &lt;= inval_req_d;</pre>
-      <pre>	assign inval_lock = inval_req_d &amp; ~ic_scr_key_valid_i;</pre>
-      <pre>	assign start_inval = (~inval_lock &amp; (~reset_inval_q | inval_req_q)) &amp; ~inval_prog_q;</pre>
-      <pre>	assign inval_prog_d = ~inval_lock &amp; (start_inval | (inval_prog_q &amp; ~inval_done));</pre>
-      <pre>	assign inval_done = &amp;inval_index_q;</pre>
-      <pre>	assign inval_index_d = (start_inval ? {ibex_pkg_IC_INDEX_W {1&#39;sb0}} : inval_index_q + {{ibex_pkg_IC_INDEX_W - 1 {1&#39;b0}}, 1&#39;b1});</pre>
-      <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
-      <pre>		if (!rst_ni) begin</pre>
-      <pre>			inval_prog_q &lt;= 1&#39;b0;</pre>
-      <pre>			reset_inval_q &lt;= 1&#39;b0;</pre>
-      <pre>		end</pre>
-      <pre>		else begin</pre>
-      <pre>			inval_prog_q &lt;= inval_prog_d;</pre>
-      <pre>			reset_inval_q &lt;= 1&#39;b1;</pre>
-      <pre>		end</pre>
+      <pre>			inval_state_q &lt;= inval_state_d;</pre>
       <pre>	generate</pre>
       <pre>		if (ResetAll) begin : g_inval_index_ra</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>				if (!rst_ni)</pre>
       <pre>					inval_index_q &lt;= 1&#39;sb0;</pre>
-      <pre>				else if (inval_prog_d)</pre>
+      <pre>				else if (inval_index_en)</pre>
       <pre>					inval_index_q &lt;= inval_index_d;</pre>
       <pre>		end</pre>
       <pre>		else begin : g_inval_index_nr</pre>
       <pre>			always @(posedge clk_i)</pre>
-      <pre>				if (inval_prog_d)</pre>
+      <pre>				if (inval_index_en)</pre>
       <pre>					inval_index_q &lt;= inval_index_d;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign busy_o = inval_req_q | |(fill_busy_q &amp; ~fill_rvd_done);</pre>
+      <pre>	assign busy_o = inval_active | |(fill_busy_q &amp; ~fill_rvd_done);</pre>
       <pre>	initial begin : size_param_legal</pre>
       <pre>		</pre>
       <pre>	end</pre>
@@ -6005,7 +6032,7 @@
       <pre>	input wire dside_wait_i;</pre>
       <pre>	input wire mul_wait_i;</pre>
       <pre>	input wire div_wait_i;</pre>
-      <pre>	localparam [31:0] RV32BEnabled = (RV32B == 32&#39;sd0 ? 0 : 1);</pre>
+      <pre>	localparam [31:0] RV32BExtra = ((RV32B == 32&#39;sd2) || (RV32B == 32&#39;sd3) ? 1 : 0);</pre>
       <pre>	localparam [31:0] RV32MEnabled = (RV32M == 32&#39;sd0 ? 0 : 1);</pre>
       <pre>	localparam [31:0] PMPAddrWidth = (PMPGranularity &gt; 0 ? 33 - PMPGranularity : 32);</pre>
       <pre>	localparam [1:0] ibex_pkg_CSR_MISA_MXL = 2&#39;d1;</pre>
@@ -6013,7 +6040,7 @@
       <pre>		input reg [31:0] inp;</pre>
       <pre>		sv2v_cast_32 = inp;</pre>
       <pre>	endfunction</pre>
-      <pre>	localparam [31:0] MISA_VALUE = (((((((((((0 | (RV32BEnabled &lt;&lt; 1)) | 4) | 0) | (sv2v_cast_32(RV32E) &lt;&lt; 4)) | 0) | (sv2v_cast_32(!RV32E) &lt;&lt; 8)) | (RV32MEnabled &lt;&lt; 12)) | 0) | 0) | 1048576) | 0) | (sv2v_cast_32(ibex_pkg_CSR_MISA_MXL) &lt;&lt; 30);</pre>
+      <pre>	localparam [31:0] MISA_VALUE = (((((((((((0 | 0) | 4) | 0) | (sv2v_cast_32(RV32E) &lt;&lt; 4)) | 0) | (sv2v_cast_32(!RV32E) &lt;&lt; 8)) | (RV32MEnabled &lt;&lt; 12)) | 0) | 0) | 1048576) | (RV32BExtra &lt;&lt; 23)) | (sv2v_cast_32(ibex_pkg_CSR_MISA_MXL) &lt;&lt; 30);</pre>
       <pre>	reg [31:0] exception_pc;</pre>
       <pre>	reg [1:0] priv_lvl_q;</pre>
       <pre>	reg [1:0] priv_lvl_d;</pre>
@@ -6291,7 +6318,7 @@
       <pre>					mstatus_en = 1&#39;b1;</pre>
       <pre>					mstatus_d = {csr_wdata_int[ibex_pkg_CSR_MSTATUS_MIE_BIT], csr_wdata_int[ibex_pkg_CSR_MSTATUS_MPIE_BIT], sv2v_cast_2(csr_wdata_int[ibex_pkg_CSR_MSTATUS_MPP_BIT_HIGH:ibex_pkg_CSR_MSTATUS_MPP_BIT_LOW]), csr_wdata_int[ibex_pkg_CSR_MSTATUS_MPRV_BIT], csr_wdata_int[ibex_pkg_CSR_MSTATUS_TW_BIT]};</pre>
       <pre>					if ((mstatus_d[3-:2] != 2&#39;b11) &amp;&amp; (mstatus_d[3-:2] != 2&#39;b00))</pre>
-      <pre>						mstatus_d[3-:2] = 2&#39;b11;</pre>
+      <pre>						mstatus_d[3-:2] = 2&#39;b00;</pre>
       <pre>				end</pre>
       <pre>				12&#39;h304: mie_en = 1&#39;b1;</pre>
       <pre>				12&#39;h340: mscratch_en = 1&#39;b1;</pre>
@@ -6303,7 +6330,7 @@
       <pre>					dcsr_d = csr_wdata_int;</pre>
       <pre>					dcsr_d[31-:4] = 4&#39;d4;</pre>
       <pre>					if ((dcsr_d[1-:2] != 2&#39;b11) &amp;&amp; (dcsr_d[1-:2] != 2&#39;b00))</pre>
-      <pre>						dcsr_d[1-:2] = 2&#39;b11;</pre>
+      <pre>						dcsr_d[1-:2] = 2&#39;b00;</pre>
       <pre>					dcsr_d[8-:3] = dcsr_q[8-:3];</pre>
       <pre>					dcsr_d[11] = 1&#39;b0;</pre>
       <pre>					dcsr_d[3] = 1&#39;b0;</pre>
@@ -6764,7 +6791,8 @@
       <pre>			for (i = 0; i &lt; 32; i = i + 1)</pre>
       <pre>				begin : gen_mhpmevent_active</pre>
       <pre>					mhpmevent[i] = 1&#39;sb0;</pre>
-      <pre>					mhpmevent[i][i] = 1&#39;b1;</pre>
+      <pre>					if (i &gt;= 3)</pre>
+      <pre>						mhpmevent[i][i - 3] = 1&#39;b1;</pre>
       <pre>				end</pre>
       <pre>		end</pre>
       <pre>		mhpmevent[1] = 1&#39;sb0;</pre>
@@ -6844,7 +6872,7 @@
       <pre>			wire [(29 - MHPMCounterNum) - 1:0] unused_mhphcounter_we;</pre>
       <pre>			wire [(29 - MHPMCounterNum) - 1:0] unused_mhphcounterh_we;</pre>
       <pre>			wire [(29 - MHPMCounterNum) - 1:0] unused_mhphcounter_incr;</pre>
-      <pre>			assign mcountinhibit = {{29 - MHPMCounterNum {1&#39;b1}}, mcountinhibit_q};</pre>
+      <pre>			assign mcountinhibit = {{29 - MHPMCounterNum {1&#39;b0}}, mcountinhibit_q};</pre>
       <pre>			assign unused_mhphcounter_we = mhpmcounter_we[31:MHPMCounterNum + 3];</pre>
       <pre>			assign unused_mhphcounterh_we = mhpmcounterh_we[31:MHPMCounterNum + 3];</pre>
       <pre>			assign unused_mhphcounter_incr = mhpmcounter_incr[31:MHPMCounterNum + 3];</pre>
@@ -9113,6 +9141,7 @@
       <pre>	ic_data_wdata_o,</pre>
       <pre>	ic_data_rdata_i,</pre>
       <pre>	ic_scr_key_valid_i,</pre>
+      <pre>	ic_scr_key_req_o,</pre>
       <pre>	instr_valid_id_o,</pre>
       <pre>	instr_new_id_o,</pre>
       <pre>	instr_rdata_id_o,</pre>
@@ -9201,6 +9230,7 @@
       <pre>	output wire [LineSizeECC - 1:0] ic_data_wdata_o;</pre>
       <pre>	input wire [(ibex_pkg_IC_NUM_WAYS * LineSizeECC) - 1:0] ic_data_rdata_i;</pre>
       <pre>	input wire ic_scr_key_valid_i;</pre>
+      <pre>	output wire ic_scr_key_req_o;</pre>
       <pre>	output wire instr_valid_id_o;</pre>
       <pre>	output wire instr_new_id_o;</pre>
       <pre>	output reg [31:0] instr_rdata_id_o;</pre>
@@ -9370,6 +9400,7 @@
       <pre>				.ic_data_wdata_o(ic_data_wdata_o),</pre>
       <pre>				.ic_data_rdata_i(ic_data_rdata_i),</pre>
       <pre>				.ic_scr_key_valid_i(ic_scr_key_valid_i),</pre>
+      <pre>				.ic_scr_key_req_o(ic_scr_key_req_o),</pre>
       <pre>				.icache_enable_i(icache_enable_i),</pre>
       <pre>				.icache_inval_i(icache_inval_i),</pre>
       <pre>				.busy_o(prefetch_busy),</pre>
@@ -9415,6 +9446,7 @@
       <pre>			assign ic_data_write_o = &#39;b0;</pre>
       <pre>			assign ic_data_addr_o = &#39;b0;</pre>
       <pre>			assign ic_data_wdata_o = &#39;b0;</pre>
+      <pre>			assign ic_scr_key_req_o = &#39;b0;</pre>
       <pre>			assign icache_ecc_error_o = &#39;b0;</pre>
       <pre>			export &#34;DPI-C&#34; function simutil_get_scramble_key;</pre>
       <pre>			export &#34;DPI-C&#34; function simutil_get_scramble_nonce;</pre>
@@ -11397,6 +11429,7 @@
       <pre>	ic_data_wdata_o,</pre>
       <pre>	ic_data_rdata_i,</pre>
       <pre>	ic_scr_key_valid_i,</pre>
+      <pre>	ic_scr_key_req_o,</pre>
       <pre>	irq_software_i,</pre>
       <pre>	irq_timer_i,</pre>
       <pre>	irq_external_i,</pre>
@@ -11410,7 +11443,6 @@
       <pre>	alert_minor_o,</pre>
       <pre>	alert_major_internal_o,</pre>
       <pre>	alert_major_bus_o,</pre>
-      <pre>	icache_inval_o,</pre>
       <pre>	core_busy_o</pre>
       <pre>);</pre>
       <pre>	parameter [0:0] PMPEnable = 1&#39;b0;</pre>
@@ -11493,6 +11525,7 @@
       <pre>	output wire [LineSizeECC - 1:0] ic_data_wdata_o;</pre>
       <pre>	input wire [(ibex_pkg_IC_NUM_WAYS * LineSizeECC) - 1:0] ic_data_rdata_i;</pre>
       <pre>	input wire ic_scr_key_valid_i;</pre>
+      <pre>	output wire ic_scr_key_req_o;</pre>
       <pre>	input wire irq_software_i;</pre>
       <pre>	input wire irq_timer_i;</pre>
       <pre>	input wire irq_external_i;</pre>
@@ -11506,7 +11539,6 @@
       <pre>	output wire alert_minor_o;</pre>
       <pre>	output wire alert_major_internal_o;</pre>
       <pre>	output wire alert_major_bus_o;</pre>
-      <pre>	output wire icache_inval_o;</pre>
       <pre>	output wire core_busy_o;</pre>
       <pre>	localparam [31:0] PMPNumChan = 3;</pre>
       <pre>	localparam [0:0] DataIndTiming = SecureIbex;</pre>
@@ -11706,6 +11738,7 @@
       <pre>		.ic_data_wdata_o(ic_data_wdata_o),</pre>
       <pre>		.ic_data_rdata_i(ic_data_rdata_i),</pre>
       <pre>		.ic_scr_key_valid_i(ic_scr_key_valid_i),</pre>
+      <pre>		.ic_scr_key_req_o(ic_scr_key_req_o),</pre>
       <pre>		.instr_valid_id_o(instr_valid_id),</pre>
       <pre>		.instr_new_id_o(instr_new_id),</pre>
       <pre>		.instr_rdata_id_o(instr_rdata_id),</pre>
@@ -11886,7 +11919,6 @@
       <pre>		.perf_div_wait_o(perf_div_wait),</pre>
       <pre>		.instr_id_done_o(instr_id_done)</pre>
       <pre>	);</pre>
-      <pre>	assign icache_inval_o = icache_inval;</pre>
       <pre>	assign unused_illegal_insn_id = illegal_insn_id;</pre>
       <pre>	ibex_ex_block #(</pre>
       <pre>		.RV32M(RV32M),</pre>
@@ -13186,6 +13218,7 @@
       <pre>	ic_data_wdata_i,</pre>
       <pre>	ic_data_rdata_i,</pre>
       <pre>	ic_scr_key_valid_i,</pre>
+      <pre>	ic_scr_key_req_i,</pre>
       <pre>	irq_software_i,</pre>
       <pre>	irq_timer_i,</pre>
       <pre>	irq_external_i,</pre>
@@ -13199,7 +13232,6 @@
       <pre>	alert_minor_o,</pre>
       <pre>	alert_major_internal_o,</pre>
       <pre>	alert_major_bus_o,</pre>
-      <pre>	icache_inval_i,</pre>
       <pre>	core_busy_i,</pre>
       <pre>	test_en_i,</pre>
       <pre>	scan_rst_ni</pre>
@@ -13285,6 +13317,7 @@
       <pre>	input wire [LineSizeECC - 1:0] ic_data_wdata_i;</pre>
       <pre>	input wire [(ibex_pkg_IC_NUM_WAYS * LineSizeECC) - 1:0] ic_data_rdata_i;</pre>
       <pre>	input wire ic_scr_key_valid_i;</pre>
+      <pre>	input wire ic_scr_key_req_i;</pre>
       <pre>	input wire irq_software_i;</pre>
       <pre>	input wire irq_timer_i;</pre>
       <pre>	input wire irq_external_i;</pre>
@@ -13298,7 +13331,6 @@
       <pre>	output wire alert_minor_o;</pre>
       <pre>	output wire alert_major_internal_o;</pre>
       <pre>	output wire alert_major_bus_o;</pre>
-      <pre>	input wire icache_inval_i;</pre>
       <pre>	input wire core_busy_i;</pre>
       <pre>	input wire test_en_i;</pre>
       <pre>	input wire scan_rst_ni;</pre>
@@ -13425,10 +13457,10 @@
       <pre>	assign core_outputs_in[1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))] = ic_data_write_i;</pre>
       <pre>	assign core_outputs_in[ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)-:((ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)) &gt;= (LineSizeECC + 164) ? ((ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)) - (LineSizeECC + 164)) + 1 : ((LineSizeECC + 164) - (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))) + 1)] = ic_data_addr_i;</pre>
       <pre>	assign core_outputs_in[LineSizeECC + 163-:((LineSizeECC + 163) &gt;= 164 ? LineSizeECC + 0 : 165 - (LineSizeECC + 163))] = ic_data_wdata_i;</pre>
-      <pre>	assign core_outputs_in[163] = irq_pending_i;</pre>
-      <pre>	assign core_outputs_in[162-:160] = crash_dump_i;</pre>
-      <pre>	assign core_outputs_in[2] = double_fault_seen_i;</pre>
-      <pre>	assign core_outputs_in[1] = icache_inval_i;</pre>
+      <pre>	assign core_outputs_in[163] = ic_scr_key_req_i;</pre>
+      <pre>	assign core_outputs_in[162] = irq_pending_i;</pre>
+      <pre>	assign core_outputs_in[161-:160] = crash_dump_i;</pre>
+      <pre>	assign core_outputs_in[1] = double_fault_seen_i;</pre>
       <pre>	assign core_outputs_in[0] = core_busy_i;</pre>
       <pre>	always @(posedge clk_i) begin</pre>
       <pre>		begin : sv2v_autoblock_3</pre>
@@ -13510,20 +13542,20 @@
       <pre>		.ic_data_wdata_o(shadow_outputs_d[LineSizeECC + 163-:((LineSizeECC + 163) &gt;= 164 ? LineSizeECC + 0 : 165 - (LineSizeECC + 163))]),</pre>
       <pre>		.ic_data_rdata_i(shadow_data_rdata_q[0]),</pre>
       <pre>		.ic_scr_key_valid_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24)]),</pre>
+      <pre>		.ic_scr_key_req_o(shadow_outputs_d[163]),</pre>
       <pre>		.irq_software_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 24 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 0)]),</pre>
       <pre>		.irq_timer_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 23 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 1)]),</pre>
       <pre>		.irq_external_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 22 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 2)]),</pre>
       <pre>		.irq_fast_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 21 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 3) : (0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 21 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 3)) + 14)-:15]),</pre>
       <pre>		.irq_nm_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 6 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 18)]),</pre>
-      <pre>		.irq_pending_o(shadow_outputs_d[163]),</pre>
+      <pre>		.irq_pending_o(shadow_outputs_d[162]),</pre>
       <pre>		.debug_req_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 5 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 19)]),</pre>
-      <pre>		.crash_dump_o(shadow_outputs_d[162-:160]),</pre>
-      <pre>		.double_fault_seen_o(shadow_outputs_d[2]),</pre>
+      <pre>		.crash_dump_o(shadow_outputs_d[161-:160]),</pre>
+      <pre>		.double_fault_seen_o(shadow_outputs_d[1]),</pre>
       <pre>		.fetch_enable_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 4 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 20) : (0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 4 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 20)) + 3)-:4]),</pre>
       <pre>		.alert_minor_o(shadow_alert_minor),</pre>
       <pre>		.alert_major_internal_o(shadow_alert_major_internal),</pre>
       <pre>		.alert_major_bus_o(shadow_alert_major_bus),</pre>
-      <pre>		.icache_inval_o(shadow_outputs_d[1]),</pre>
       <pre>		.core_busy_o(shadow_outputs_d[0])</pre>
       <pre>	);</pre>
       <pre>	always @(posedge clk_i) shadow_outputs_q &lt;= shadow_outputs_d;</pre>
@@ -13703,13 +13735,13 @@
       <pre>	wire [ibex_pkg_IC_INDEX_W - 1:0] ic_data_addr;</pre>
       <pre>	wire [LineSizeECC - 1:0] ic_data_wdata;</pre>
       <pre>	wire [(ibex_pkg_IC_NUM_WAYS * LineSizeECC) - 1:0] ic_data_rdata;</pre>
+      <pre>	wire ic_scr_key_req;</pre>
       <pre>	wire core_alert_major_internal;</pre>
       <pre>	wire core_alert_major_bus;</pre>
       <pre>	wire core_alert_minor;</pre>
       <pre>	wire lockstep_alert_major_internal;</pre>
       <pre>	wire lockstep_alert_major_bus;</pre>
       <pre>	wire lockstep_alert_minor;</pre>
-      <pre>	wire icache_inval;</pre>
       <pre>	reg [127:0] scramble_key_q;</pre>
       <pre>	reg [63:0] scramble_nonce_q;</pre>
       <pre>	wire scramble_key_valid_d;</pre>
@@ -13823,6 +13855,7 @@
       <pre>		.ic_data_wdata_o(ic_data_wdata),</pre>
       <pre>		.ic_data_rdata_i(ic_data_rdata),</pre>
       <pre>		.ic_scr_key_valid_i(scramble_key_valid_q),</pre>
+      <pre>		.ic_scr_key_req_o(ic_scr_key_req),</pre>
       <pre>		.irq_software_i(irq_software_i),</pre>
       <pre>		.irq_timer_i(irq_timer_i),</pre>
       <pre>		.irq_external_i(irq_external_i),</pre>
@@ -13836,7 +13869,6 @@
       <pre>		.alert_minor_o(core_alert_minor),</pre>
       <pre>		.alert_major_internal_o(core_alert_major_internal),</pre>
       <pre>		.alert_major_bus_o(core_alert_major_bus),</pre>
-      <pre>		.icache_inval_o(icache_inval),</pre>
       <pre>		.core_busy_o(core_busy_d)</pre>
       <pre>	);</pre>
       <pre>	wire rf_alert_major_internal;</pre>
@@ -13913,7 +13945,7 @@
       <pre>			);</pre>
       <pre>		end</pre>
       <pre>		if (ICacheScramble) begin : gen_scramble</pre>
-      <pre>			assign scramble_key_valid_d = (scramble_req_q ? scramble_key_valid_i : (icache_inval ? 1&#39;b0 : scramble_key_valid_q));</pre>
+      <pre>			assign scramble_key_valid_d = (scramble_req_q ? scramble_key_valid_i : (ic_scr_key_req ? 1&#39;b0 : scramble_key_valid_q));</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>				if (!rst_ni) begin</pre>
       <pre>					scramble_key_q &lt;= RndCnstIbexKey;</pre>
@@ -13932,11 +13964,11 @@
       <pre>					scramble_key_valid_q &lt;= scramble_key_valid_d;</pre>
       <pre>					scramble_req_q &lt;= scramble_req_d;</pre>
       <pre>				end</pre>
-      <pre>			assign scramble_req_d = (scramble_req_q ? ~scramble_key_valid_i : icache_inval);</pre>
+      <pre>			assign scramble_req_d = (scramble_req_q ? ~scramble_key_valid_i : ic_scr_key_req);</pre>
       <pre>			assign scramble_req_o = scramble_req_q;</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_noscramble</pre>
-      <pre>			reg unused_scramble_inputs = (((((((scramble_key_valid_i &amp; |scramble_key_i) &amp; |RndCnstIbexKey) &amp; |scramble_nonce_i) &amp; |RndCnstIbexNonce) &amp; scramble_req_q) &amp; icache_inval) &amp; scramble_key_valid_d) &amp; scramble_req_d;</pre>
+      <pre>			reg unused_scramble_inputs = (((((((scramble_key_valid_i &amp; |scramble_key_i) &amp; |RndCnstIbexKey) &amp; |scramble_nonce_i) &amp; |RndCnstIbexNonce) &amp; scramble_req_q) &amp; ic_scr_key_req) &amp; scramble_key_valid_d) &amp; scramble_req_d;</pre>
       <pre>			assign scramble_req_d = 1&#39;b0;</pre>
       <pre>			wire [1:1] sv2v_tmp_AE3A4;</pre>
       <pre>			assign sv2v_tmp_AE3A4 = 1&#39;b0;</pre>
@@ -14105,6 +14137,7 @@
       <pre>			wire [ibex_pkg_IC_INDEX_W - 1:0] ic_data_addr_local;</pre>
       <pre>			wire [LineSizeECC - 1:0] ic_data_wdata_local;</pre>
       <pre>			wire scramble_key_valid_local;</pre>
+      <pre>			wire ic_scr_key_req_local;</pre>
       <pre>			wire irq_software_local;</pre>
       <pre>			wire irq_timer_local;</pre>
       <pre>			wire irq_external_local;</pre>
@@ -14115,10 +14148,9 @@
       <pre>			wire [159:0] crash_dump_local;</pre>
       <pre>			wire double_fault_seen_local;</pre>
       <pre>			wire [3:0] fetch_enable_local;</pre>
-      <pre>			wire icache_inval_local;</pre>
       <pre>			wire core_busy_local;</pre>
-      <pre>			assign buf_in = {hart_id_i, boot_addr_i, instr_req_o, instr_gnt_i, instr_rvalid_i, instr_addr_o, instr_rdata_core, instr_err_i, data_req_o, data_gnt_i, data_rvalid_i, data_we_o, data_be_o, data_addr_o, data_wdata_core, data_rdata_core, data_err_i, dummy_instr_id, rf_raddr_a, rf_raddr_b, rf_waddr_wb, rf_we_wb, rf_wdata_wb_ecc, rf_rdata_a_ecc, rf_rdata_b_ecc, ic_tag_req, ic_tag_write, ic_tag_addr, ic_tag_wdata, ic_data_req, ic_data_write, ic_data_addr, ic_data_wdata, scramble_key_valid_q, irq_software_i, irq_timer_i, irq_external_i, irq_fast_i, irq_nm_i, irq_pending, debug_req_i, crash_dump_o, double_fault_seen_o, fetch_enable_i, icache_inval, core_busy_d};</pre>
-      <pre>			assign {hart_id_local, boot_addr_local, instr_req_local, instr_gnt_local, instr_rvalid_local, instr_addr_local, instr_rdata_local, instr_err_local, data_req_local, data_gnt_local, data_rvalid_local, data_we_local, data_be_local, data_addr_local, data_wdata_local, data_rdata_local, data_err_local, dummy_instr_id_local, rf_raddr_a_local, rf_raddr_b_local, rf_waddr_wb_local, rf_we_wb_local, rf_wdata_wb_ecc_local, rf_rdata_a_ecc_local, rf_rdata_b_ecc_local, ic_tag_req_local, ic_tag_write_local, ic_tag_addr_local, ic_tag_wdata_local, ic_data_req_local, ic_data_write_local, ic_data_addr_local, ic_data_wdata_local, scramble_key_valid_local, irq_software_local, irq_timer_local, irq_external_local, irq_fast_local, irq_nm_local, irq_pending_local, debug_req_local, crash_dump_local, double_fault_seen_local, fetch_enable_local, icache_inval_local, core_busy_local} = buf_out;</pre>
+      <pre>			assign buf_in = {hart_id_i, boot_addr_i, instr_req_o, instr_gnt_i, instr_rvalid_i, instr_addr_o, instr_rdata_core, instr_err_i, data_req_o, data_gnt_i, data_rvalid_i, data_we_o, data_be_o, data_addr_o, data_wdata_core, data_rdata_core, data_err_i, dummy_instr_id, rf_raddr_a, rf_raddr_b, rf_waddr_wb, rf_we_wb, rf_wdata_wb_ecc, rf_rdata_a_ecc, rf_rdata_b_ecc, ic_tag_req, ic_tag_write, ic_tag_addr, ic_tag_wdata, ic_data_req, ic_data_write, ic_data_addr, ic_data_wdata, scramble_key_valid_q, ic_scr_key_req, irq_software_i, irq_timer_i, irq_external_i, irq_fast_i, irq_nm_i, irq_pending, debug_req_i, crash_dump_o, double_fault_seen_o, fetch_enable_i, core_busy_d};</pre>
+      <pre>			assign {hart_id_local, boot_addr_local, instr_req_local, instr_gnt_local, instr_rvalid_local, instr_addr_local, instr_rdata_local, instr_err_local, data_req_local, data_gnt_local, data_rvalid_local, data_we_local, data_be_local, data_addr_local, data_wdata_local, data_rdata_local, data_err_local, dummy_instr_id_local, rf_raddr_a_local, rf_raddr_b_local, rf_waddr_wb_local, rf_we_wb_local, rf_wdata_wb_ecc_local, rf_rdata_a_ecc_local, rf_rdata_b_ecc_local, ic_tag_req_local, ic_tag_write_local, ic_tag_addr_local, ic_tag_wdata_local, ic_data_req_local, ic_data_write_local, ic_data_addr_local, ic_data_wdata_local, scramble_key_valid_local, ic_scr_key_req_local, irq_software_local, irq_timer_local, irq_external_local, irq_fast_local, irq_nm_local, irq_pending_local, debug_req_local, crash_dump_local, double_fault_seen_local, fetch_enable_local, core_busy_local} = buf_out;</pre>
       <pre>			prim_buf #(.Width(NumBufferBits)) u_signals_prim_buf(</pre>
       <pre>				.in_i(buf_in),</pre>
       <pre>				.out_o(buf_out)</pre>
@@ -14207,6 +14239,7 @@
       <pre>				.ic_data_wdata_i(ic_data_wdata_local),</pre>
       <pre>				.ic_data_rdata_i(ic_data_rdata_local),</pre>
       <pre>				.ic_scr_key_valid_i(scramble_key_valid_local),</pre>
+      <pre>				.ic_scr_key_req_i(ic_scr_key_req_local),</pre>
       <pre>				.irq_software_i(irq_software_local),</pre>
       <pre>				.irq_timer_i(irq_timer_local),</pre>
       <pre>				.irq_external_i(irq_external_local),</pre>
@@ -14220,7 +14253,6 @@
       <pre>				.alert_minor_o(lockstep_alert_minor_local),</pre>
       <pre>				.alert_major_internal_o(lockstep_alert_major_internal_local),</pre>
       <pre>				.alert_major_bus_o(lockstep_alert_major_bus_local),</pre>
-      <pre>				.icache_inval_i(icache_inval_local),</pre>
       <pre>				.core_busy_i(core_busy_local),</pre>
       <pre>				.test_en_i(test_en_i),</pre>
       <pre>				.scan_rst_ni(scan_rst_ni)</pre>

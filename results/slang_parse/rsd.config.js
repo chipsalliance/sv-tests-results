@@ -1,1 +1,1 @@
-config_loader_data['slang_parse/rsd'] = [["cores","rsd",1,"logs/Slang_parse/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
+config_loader_data['slang_parse/rsd'] = [["cores","rsd",0,"logs/Slang_parse/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
