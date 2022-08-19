@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-08-18 02:06:14</dd></div>
-        <div><dt>time elapsed</dt><dd>5.866s</dd></div>
-        <div><dt>ram usage</dt><dd>407652 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-08-19 02:01:52</dd></div>
+        <div><dt>time elapsed</dt><dd>4.023s</dd></div>
+        <div><dt>ram usage</dt><dd>407776 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -3765,7 +3765,7 @@
       <pre>	output wire [Width - 1:0] out_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_buf #(.Width(Width)) u_impl_xilinx(</pre>
       <pre>				.in_i(in_i),</pre>
       <pre>				.out_o(out_o)</pre>
@@ -3793,7 +3793,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_gating #(</pre>
       <pre>				.FpgaBufGlobal(FpgaBufGlobal),</pre>
       <pre>				.NoFpgaGate(NoFpgaGate)</pre>
@@ -3830,7 +3830,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_mux2 #(.NoFpgaBufG(NoFpgaBufG)) u_impl_xilinx(</pre>
       <pre>				.clk0_i(clk0_i),</pre>
       <pre>				.clk1_i(clk1_i),</pre>
@@ -3862,7 +3862,7 @@
       <pre>	output wire [Width - 1:0] q_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
       <pre>				.ResetValue(ResetValue),</pre>
       <pre>				.Width(Width)</pre>
@@ -4140,7 +4140,7 @@
       <pre>	input wire [9:0] cfg_i;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_badbit</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
@@ -6032,6 +6032,30 @@
       <pre>	input wire dside_wait_i;</pre>
       <pre>	input wire mul_wait_i;</pre>
       <pre>	input wire div_wait_i;</pre>
+      <pre>	function automatic is_mml_m_exec_cfg;</pre>
+      <pre>		input reg [5:0] pmp_cfg;</pre>
+      <pre>		reg unused_cfg;</pre>
+      <pre>		reg [0:1] _sv2v_jump;</pre>
+      <pre>		begin</pre>
+      <pre>			_sv2v_jump = 2&#39;b00;</pre>
+      <pre>			unused_cfg = ^{pmp_cfg[4-:2]};</pre>
+      <pre>			if (pmp_cfg[5])</pre>
+      <pre>				case ({pmp_cfg[0], pmp_cfg[1], pmp_cfg[2]})</pre>
+      <pre>					3&#39;b001, 3&#39;b010, 3&#39;b011, 3&#39;b101: begin</pre>
+      <pre>						is_mml_m_exec_cfg = 1&#39;b1;</pre>
+      <pre>						_sv2v_jump = 2&#39;b11;</pre>
+      <pre>					end</pre>
+      <pre>					default: begin</pre>
+      <pre>						is_mml_m_exec_cfg = 1&#39;b0;</pre>
+      <pre>						_sv2v_jump = 2&#39;b11;</pre>
+      <pre>					end</pre>
+      <pre>				endcase</pre>
+      <pre>			if (_sv2v_jump == 2&#39;b00) begin</pre>
+      <pre>				is_mml_m_exec_cfg = 1&#39;b0;</pre>
+      <pre>				_sv2v_jump = 2&#39;b11;</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>	endfunction</pre>
       <pre>	localparam [31:0] RV32BExtra = ((RV32B == 32&#39;sd2) || (RV32B == 32&#39;sd3) ? 1 : 0);</pre>
       <pre>	localparam [31:0] RV32MEnabled = (RV32M == 32&#39;sd0 ? 0 : 1);</pre>
       <pre>	localparam [31:0] PMPAddrWidth = (PMPGranularity &gt; 0 ? 33 - PMPGranularity : 32);</pre>
@@ -6626,6 +6650,7 @@
       <pre>			wire pmp_mseccfg_err;</pre>
       <pre>			wire [5:0] pmp_cfg [0:PMPNumRegions - 1];</pre>
       <pre>			wire [PMPNumRegions - 1:0] pmp_cfg_locked;</pre>
+      <pre>			wire [PMPNumRegions - 1:0] pmp_cfg_wr_suppress;</pre>
       <pre>			reg [5:0] pmp_cfg_wdata [0:PMPNumRegions - 1];</pre>
       <pre>			wire [PMPAddrWidth - 1:0] pmp_addr [0:PMPNumRegions - 1];</pre>
       <pre>			wire [PMPNumRegions - 1:0] pmp_cfg_we;</pre>
@@ -6665,7 +6690,7 @@
       <pre>				end</pre>
       <pre>			end</pre>
       <pre>			for (i = 0; i &lt; PMPNumRegions; i = i + 1) begin : g_pmp_csrs</pre>
-      <pre>				assign pmp_cfg_we[i] = (csr_we_int &amp; ~pmp_cfg_locked[i]) &amp; (csr_addr == (ibex_pkg_CSR_OFF_PMP_CFG + (i[11:0] &gt;&gt; 2)));</pre>
+      <pre>				assign pmp_cfg_we[i] = ((csr_we_int &amp; ~pmp_cfg_locked[i]) &amp; ~pmp_cfg_wr_suppress[i]) &amp; (csr_addr == (ibex_pkg_CSR_OFF_PMP_CFG + (i[11:0] &gt;&gt; 2)));</pre>
       <pre>				wire [1:1] sv2v_tmp_43D04;</pre>
       <pre>				assign sv2v_tmp_43D04 = csr_wdata_int[((i % 4) * ibex_pkg_PMP_CFG_W) + 7];</pre>
       <pre>				always @(*) pmp_cfg_wdata[i][5] = sv2v_tmp_43D04;</pre>
@@ -6699,6 +6724,7 @@
       <pre>					.rd_error_o(pmp_cfg_err[i])</pre>
       <pre>				);</pre>
       <pre>				assign pmp_cfg_locked[i] = pmp_cfg[i][5] &amp; ~pmp_mseccfg_q[2];</pre>
+      <pre>				assign pmp_cfg_wr_suppress[i] = (pmp_mseccfg_q[0] &amp; ~pmp_mseccfg[2]) &amp; is_mml_m_exec_cfg(pmp_cfg_wdata[i]);</pre>
       <pre>				if (i &lt; (PMPNumRegions - 1)) begin : g_lower</pre>
       <pre>					assign pmp_addr_we[i] = ((csr_we_int &amp; ~pmp_cfg_locked[i]) &amp; (~pmp_cfg_locked[i + 1] | (pmp_cfg[i + 1][4-:2] != 2&#39;b01))) &amp; (csr_addr == (ibex_pkg_CSR_OFF_PMP_ADDR + i[11:0]));</pre>
       <pre>				end</pre>

@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-08-18 01:46:58</dd></div>
-        <div><dt>time elapsed</dt><dd>0.044s</dd></div>
-        <div><dt>ram usage</dt><dd>39712 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-08-19 01:45:58</dd></div>
+        <div><dt>time elapsed</dt><dd>0.035s</dd></div>
+        <div><dt>ram usage</dt><dd>40648 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -84,10 +84,11 @@
       <pre>		.frame(frame),</pre>
       <pre>		.line(line)</pre>
       <pre>	);</pre>
+      <pre>	localparam LIB_RES = &#34;../../../lib/res&#34;;</pre>
       <pre>	localparam CHANW = 4;</pre>
       <pre>	localparam COLRW = 12;</pre>
       <pre>	localparam CIDXW = 4;</pre>
-      <pre>	localparam PAL_FILE = &#34;../../../lib/res/palettes/sweetie16_4b.mem&#34;;</pre>
+      <pre>	localparam PAL_FILE = {LIB_RES, &#34;/palettes/sweetie16_4b.mem&#34;};</pre>
       <pre>	localparam FB_WIDTH = 320;</pre>
       <pre>	localparam FB_HEIGHT = 180;</pre>
       <pre>	localparam FB_SCALE = 2;</pre>
@@ -96,20 +97,20 @@
       <pre>	localparam FB_PIXELS = 57600;</pre>
       <pre>	localparam FB_ADDRW = 16;</pre>
       <pre>	localparam FB_DATAW = CIDXW;</pre>
-      <pre>	localparam FB_IMAGE = &#34;&#34;;</pre>
-      <pre>	reg fb_we;</pre>
       <pre>	wire [15:0] fb_addr_write;</pre>
       <pre>	reg [15:0] fb_addr_read;</pre>
       <pre>	wire [3:0] fb_colr_write;</pre>
       <pre>	wire [3:0] fb_colr_read;</pre>
+      <pre>	localparam LAT_ADDR = 3;</pre>
+      <pre>	reg [2:0] fb_we_sr;</pre>
       <pre>	bram_sdp #(</pre>
       <pre>		.WIDTH(FB_DATAW),</pre>
       <pre>		.DEPTH(FB_PIXELS),</pre>
-      <pre>		.INIT_F(FB_IMAGE)</pre>
+      <pre>		.INIT_F(&#34;&#34;)</pre>
       <pre>	) bram_inst(</pre>
       <pre>		.clk_write(clk_sys),</pre>
       <pre>		.clk_read(clk_sys),</pre>
-      <pre>		.we(fb_we),</pre>
+      <pre>		.we(fb_we_sr[0]),</pre>
       <pre>		.addr_write(fb_addr_write),</pre>
       <pre>		.addr_read(fb_addr_read),</pre>
       <pre>		.data_in(fb_colr_write),</pre>
@@ -136,13 +137,13 @@
       <pre>		.flag_src(line &amp;&amp; (sy == FB_OFFY)),</pre>
       <pre>		.flag_dst(line0_sys)</pre>
       <pre>	);</pre>
-      <pre>	localparam FRAME_WAIT = 120;</pre>
-      <pre>	reg [6:0] cnt_frame_wait;</pre>
+      <pre>	localparam FRAME_WAIT = 200;</pre>
+      <pre>	reg [7:0] cnt_frame_wait;</pre>
       <pre>	reg draw_oe;</pre>
       <pre>	always @(posedge clk_sys) begin</pre>
       <pre>		draw_oe &lt;= 0;</pre>
       <pre>		if (frame_sys)</pre>
-      <pre>			if (cnt_frame_wait != 119)</pre>
+      <pre>			if (cnt_frame_wait != 199)</pre>
       <pre>				cnt_frame_wait &lt;= cnt_frame_wait + 1;</pre>
       <pre>			else</pre>
       <pre>				draw_oe &lt;= 1;</pre>
@@ -151,7 +152,7 @@
       <pre>	wire drawing;</pre>
       <pre>	wire signed [CORDW - 1:0] drx;</pre>
       <pre>	wire signed [CORDW - 1:0] dry;</pre>
-      <pre>	render_triangles #(</pre>
+      <pre>	render_line #(</pre>
       <pre>		.CORDW(CORDW),</pre>
       <pre>		.CIDXW(CIDXW),</pre>
       <pre>		.SCALE(DRAW_SCALE)</pre>
@@ -180,7 +181,11 @@
       <pre>		.addr(fb_addr_write),</pre>
       <pre>		.clip()</pre>
       <pre>	);</pre>
-      <pre>	always @(posedge clk_sys) fb_we &lt;= drawing;</pre>
+      <pre>	always @(posedge clk_sys) begin</pre>
+      <pre>		fb_we_sr &lt;= {drawing, fb_we_sr[2:1]};</pre>
+      <pre>		if (rst_sys)</pre>
+      <pre>			fb_we_sr &lt;= 0;</pre>
+      <pre>	end</pre>
       <pre>	reg [1:0] cnt_lb_line;</pre>
       <pre>	always @(posedge clk_sys)</pre>
       <pre>		if (line0_sys)</pre>
@@ -208,11 +213,11 @@
       <pre>			fb_addr_read &lt;= 0;</pre>
       <pre>	end</pre>
       <pre>	reg lb_en_out;</pre>
-      <pre>	localparam LB_LAT = 3;</pre>
-      <pre>	always @(posedge clk_pix) lb_en_out &lt;= (((sy &gt;= FB_OFFY) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= (FB_OFFX - LB_LAT))) &amp;&amp; (sx &lt; 637);</pre>
+      <pre>	localparam LAT_LB = 3;</pre>
+      <pre>	always @(posedge clk_pix) lb_en_out &lt;= (((sy &gt;= FB_OFFY) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= (FB_OFFX - LAT_LB))) &amp;&amp; (sx &lt; 637);</pre>
       <pre>	wire [3:0] lb_colr_out;</pre>
       <pre>	linebuffer_simple #(</pre>
-      <pre>		.DATAW(CIDXW),</pre>
+      <pre>		.DATAW(FB_DATAW),</pre>
       <pre>		.LEN(FB_WIDTH)</pre>
       <pre>	) linebuffer_instance(</pre>
       <pre>		.clk_sys(clk_sys),</pre>

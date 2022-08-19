@@ -1,1 +1,1 @@
-config_loader_data['odin/10.3.2'] = [["","cont_assignment",1,"logs/Odin/chapter-10/10.3.2--cont-assignment.sv.log.html","tests/chapter-10/10.3.2--cont-assignment.sv.html"]]
+config_loader_data['odin/10.3.2'] = [["","cont_assignment",0,"logs/Odin/chapter-10/10.3.2--cont-assignment.sv.log.html","tests/chapter-10/10.3.2--cont-assignment.sv.html"]]
