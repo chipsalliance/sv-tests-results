@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-08-25 01:40:47</dd></div>
-        <div><dt>time elapsed</dt><dd>0.054s</dd></div>
-        <div><dt>ram usage</dt><dd>70608 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-08-26 01:46:02</dd></div>
+        <div><dt>time elapsed</dt><dd>0.071s</dd></div>
+        <div><dt>ram usage</dt><dd>73088 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -70,6 +70,7 @@
       <pre>	parameter lg_size_p = 0;</pre>
       <pre>	parameter width_p = 0;</pre>
       <pre>	parameter control_width_p = 0;</pre>
+      <pre>	parameter and_data_with_valid_p = 0;</pre>
       <pre>	input w_clk_i;</pre>
       <pre>	input w_reset_i;</pre>
       <pre>	input w_enq_i;</pre>
@@ -89,6 +90,23 @@
       <pre>	wire [lg_size_p:0] w_ptr_binary_r;</pre>
       <pre>	wire r_valid_o_tmp;</pre>
       <pre>	assign r_valid_o = r_valid_o_tmp;</pre>
+      <pre>	wire [width_p - 1:0] r_data_o_tmp;</pre>
+      <pre>	generate</pre>
+      <pre>		if (and_data_with_valid_p) begin : fi</pre>
+      <pre>			wire [width_p - 1:0] r_valid_o_exp = {width_p {r_valid_o_tmp}};</pre>
+      <pre>			bsg_and #(</pre>
+      <pre>				.width_p(width_p),</pre>
+      <pre>				.harden_p(1)</pre>
+      <pre>			) ba(</pre>
+      <pre>				.a_i(r_data_o_tmp),</pre>
+      <pre>				.b_i(r_valid_o_exp),</pre>
+      <pre>				.o(r_data_o)</pre>
+      <pre>			);</pre>
+      <pre>		end</pre>
+      <pre>		else begin : fi</pre>
+      <pre>			assign r_data_o = r_data_o_tmp;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	bsg_mem_1r1w #(</pre>
       <pre>		.width_p(width_p - control_width_p),</pre>
       <pre>		.els_p(size_lp),</pre>
@@ -101,7 +119,7 @@
       <pre>		.w_data_i(w_data_i[0+:width_p - control_width_p]),</pre>
       <pre>		.r_v_i(r_valid_o_tmp),</pre>
       <pre>		.r_addr_i(r_ptr_binary_r[0+:lg_size_p]),</pre>
-      <pre>		.r_data_o(r_data_o[0+:width_p - control_width_p])</pre>
+      <pre>		.r_data_o(r_data_o_tmp[0+:width_p - control_width_p])</pre>
       <pre>	);</pre>
       <pre>	generate</pre>
       <pre>		if (control_width_p &gt; 0) begin : ctrl</pre>
@@ -117,7 +135,7 @@
       <pre>				.w_data_i(w_data_i[width_p - 1-:control_width_p]),</pre>
       <pre>				.r_v_i(r_valid_o_tmp),</pre>
       <pre>				.r_addr_i(r_ptr_binary_r[0+:lg_size_p]),</pre>
-      <pre>				.r_data_o(r_data_o[width_p - 1-:control_width_p])</pre>
+      <pre>				.r_data_o(r_data_o_tmp[width_p - 1-:control_width_p])</pre>
       <pre>			);</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
