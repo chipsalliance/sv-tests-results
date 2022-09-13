@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-09-12 01:48:04</dd></div>
-        <div><dt>time elapsed</dt><dd>0.044s</dd></div>
-        <div><dt>ram usage</dt><dd>42304 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-09-13 01:46:27</dd></div>
+        <div><dt>time elapsed</dt><dd>0.039s</dd></div>
+        <div><dt>ram usage</dt><dd>42908 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -113,8 +113,7 @@
       <pre>	reg [13:0] fb_addr_read;</pre>
       <pre>	wire [1:0] fb_colr_write;</pre>
       <pre>	wire [1:0] fb_colr_read;</pre>
-      <pre>	localparam LAT_ADDR = 3;</pre>
-      <pre>	reg [2:0] fb_we_sr;</pre>
+      <pre>	reg fb_we;</pre>
       <pre>	bram_sdp #(</pre>
       <pre>		.WIDTH(FB_DATAW),</pre>
       <pre>		.DEPTH(FB_PIXELS),</pre>
@@ -122,7 +121,7 @@
       <pre>	) bram_inst(</pre>
       <pre>		.clk_write(clk_sys),</pre>
       <pre>		.clk_read(clk_sys),</pre>
-      <pre>		.we(fb_we_sr[0]),</pre>
+      <pre>		.we(fb_we),</pre>
       <pre>		.addr_write(fb_addr_write),</pre>
       <pre>		.addr_read(fb_addr_read),</pre>
       <pre>		.data_in(fb_colr_write),</pre>
@@ -149,22 +148,24 @@
       <pre>		.flag_src(line &amp;&amp; (sy == FB_OFFY)),</pre>
       <pre>		.flag_dst(line0_sys)</pre>
       <pre>	);</pre>
-      <pre>	localparam FRAME_WAIT = 200;</pre>
-      <pre>	reg [7:0] cnt_frame_wait;</pre>
+      <pre>	localparam FRAME_WAIT = 300;</pre>
+      <pre>	reg [8:0] cnt_frame_wait;</pre>
       <pre>	reg draw_oe;</pre>
       <pre>	always @(posedge clk_sys) begin</pre>
       <pre>		draw_oe &lt;= 0;</pre>
-      <pre>		if (frame_sys)</pre>
-      <pre>			if (cnt_frame_wait != 199)</pre>
+      <pre>		if (cnt_frame_wait != 299) begin</pre>
+      <pre>			if (frame_sys)</pre>
       <pre>				cnt_frame_wait &lt;= cnt_frame_wait + 1;</pre>
-      <pre>			else</pre>
-      <pre>				draw_oe &lt;= 1;</pre>
+      <pre>		end</pre>
+      <pre>		else if (frame_sys)</pre>
+      <pre>			draw_oe &lt;= 1;</pre>
       <pre>	end</pre>
       <pre>	parameter DRAW_SCALE = 1;</pre>
       <pre>	wire drawing;</pre>
+      <pre>	wire clip;</pre>
       <pre>	wire signed [15:0] drx;</pre>
       <pre>	wire signed [15:0] dry;</pre>
-      <pre>	render_line_sm #(</pre>
+      <pre>	render_line #(</pre>
       <pre>		.CORDW(CORDW),</pre>
       <pre>		.CIDXW(CIDXW),</pre>
       <pre>		.SCALE(DRAW_SCALE)</pre>
@@ -191,13 +192,16 @@
       <pre>		.offx(0),</pre>
       <pre>		.offy(0),</pre>
       <pre>		.addr(fb_addr_write),</pre>
-      <pre>		.clip()</pre>
+      <pre>		.clip(clip)</pre>
       <pre>	);</pre>
+      <pre>	localparam LAT_ADDR = 3;</pre>
+      <pre>	reg [2:0] fb_we_sr;</pre>
       <pre>	always @(posedge clk_sys) begin</pre>
       <pre>		fb_we_sr &lt;= {drawing, fb_we_sr[2:1]};</pre>
       <pre>		if (rst_sys)</pre>
       <pre>			fb_we_sr &lt;= 0;</pre>
       <pre>	end</pre>
+      <pre>	always @(*) fb_we = fb_we_sr[0] &amp;&amp; !clip;</pre>
       <pre>	reg [2:0] cnt_lb_line;</pre>
       <pre>	always @(posedge clk_sys)</pre>
       <pre>		if (line0_sys)</pre>

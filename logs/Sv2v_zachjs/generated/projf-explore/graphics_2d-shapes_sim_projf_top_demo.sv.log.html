@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-09-12 01:48:06</dd></div>
-        <div><dt>time elapsed</dt><dd>0.046s</dd></div>
-        <div><dt>ram usage</dt><dd>45244 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-09-13 01:46:24</dd></div>
+        <div><dt>time elapsed</dt><dd>0.042s</dd></div>
+        <div><dt>ram usage</dt><dd>41220 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -88,7 +88,7 @@
       <pre>	localparam CHANW = 4;</pre>
       <pre>	localparam COLRW = 12;</pre>
       <pre>	localparam CIDXW = 4;</pre>
-      <pre>	localparam PAL_FILE = {LIB_RES, &#34;/palettes/pico8_4b.mem&#34;};</pre>
+      <pre>	localparam PAL_FILE = {LIB_RES, &#34;/palettes/sweetie16_4b.mem&#34;};</pre>
       <pre>	localparam FB_WIDTH = 320;</pre>
       <pre>	localparam FB_HEIGHT = 180;</pre>
       <pre>	localparam FB_SCALE = 2;</pre>
@@ -101,8 +101,7 @@
       <pre>	reg [15:0] fb_addr_read;</pre>
       <pre>	wire [3:0] fb_colr_write;</pre>
       <pre>	wire [3:0] fb_colr_read;</pre>
-      <pre>	localparam LAT_ADDR = 3;</pre>
-      <pre>	reg [2:0] fb_we_sr;</pre>
+      <pre>	reg fb_we;</pre>
       <pre>	bram_sdp #(</pre>
       <pre>		.WIDTH(FB_DATAW),</pre>
       <pre>		.DEPTH(FB_PIXELS),</pre>
@@ -110,7 +109,7 @@
       <pre>	) bram_inst(</pre>
       <pre>		.clk_write(clk_sys),</pre>
       <pre>		.clk_read(clk_sys),</pre>
-      <pre>		.we(fb_we_sr[0]),</pre>
+      <pre>		.we(fb_we),</pre>
       <pre>		.addr_write(fb_addr_write),</pre>
       <pre>		.addr_read(fb_addr_read),</pre>
       <pre>		.data_in(fb_colr_write),</pre>
@@ -140,17 +139,21 @@
       <pre>	localparam FRAME_WAIT = 200;</pre>
       <pre>	reg [7:0] cnt_frame_wait;</pre>
       <pre>	reg draw_oe;</pre>
-      <pre>	always @(posedge clk_sys)</pre>
-      <pre>		if (frame_sys)</pre>
-      <pre>			if (cnt_frame_wait != 199)</pre>
+      <pre>	always @(posedge clk_sys) begin</pre>
+      <pre>		draw_oe &lt;= 0;</pre>
+      <pre>		if (cnt_frame_wait != 199) begin</pre>
+      <pre>			if (frame_sys)</pre>
       <pre>				cnt_frame_wait &lt;= cnt_frame_wait + 1;</pre>
-      <pre>			else</pre>
-      <pre>				draw_oe &lt;= 1;</pre>
+      <pre>		end</pre>
+      <pre>		else if (line_sys)</pre>
+      <pre>			draw_oe &lt;= 1;</pre>
+      <pre>	end</pre>
       <pre>	parameter DRAW_SCALE = 1;</pre>
       <pre>	wire drawing;</pre>
+      <pre>	wire clip;</pre>
       <pre>	wire signed [CORDW - 1:0] drx;</pre>
       <pre>	wire signed [CORDW - 1:0] dry;</pre>
-      <pre>	render_castle #(</pre>
+      <pre>	render_rects #(</pre>
       <pre>		.CORDW(CORDW),</pre>
       <pre>		.CIDXW(CIDXW),</pre>
       <pre>		.SCALE(DRAW_SCALE)</pre>
@@ -177,13 +180,16 @@
       <pre>		.offx(0),</pre>
       <pre>		.offy(0),</pre>
       <pre>		.addr(fb_addr_write),</pre>
-      <pre>		.clip()</pre>
+      <pre>		.clip(clip)</pre>
       <pre>	);</pre>
+      <pre>	localparam LAT_ADDR = 3;</pre>
+      <pre>	reg [2:0] fb_we_sr;</pre>
       <pre>	always @(posedge clk_sys) begin</pre>
       <pre>		fb_we_sr &lt;= {drawing, fb_we_sr[2:1]};</pre>
       <pre>		if (rst_sys)</pre>
       <pre>			fb_we_sr &lt;= 0;</pre>
       <pre>	end</pre>
+      <pre>	always @(*) fb_we = fb_we_sr[0] &amp;&amp; !clip;</pre>
       <pre>	reg [1:0] cnt_lb_line;</pre>
       <pre>	always @(posedge clk_sys)</pre>
       <pre>		if (line0_sys)</pre>
@@ -242,29 +248,6 @@
       <pre>		.colr_in(0),</pre>
       <pre>		.colr_out(fb_pix_colr)</pre>
       <pre>	);</pre>
-      <pre>	reg [11:0] bg_colr;</pre>
-      <pre>	always @(posedge clk_pix)</pre>
-      <pre>		if (line)</pre>
-      <pre>			if (sy == 0)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h000;</pre>
-      <pre>			else if (sy == 60)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h239;</pre>
-      <pre>			else if (sy == 130)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h24a;</pre>
-      <pre>			else if (sy == 175)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h25b;</pre>
-      <pre>			else if (sy == 210)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h26c;</pre>
-      <pre>			else if (sy == 240)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h27d;</pre>
-      <pre>			else if (sy == 265)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h29e;</pre>
-      <pre>			else if (sy == 285)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h2bf;</pre>
-      <pre>			else if (sy == 302)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h260;</pre>
-      <pre>			else if (sy == 420)</pre>
-      <pre>				bg_colr &lt;= 12&#39;h000;</pre>
       <pre>	reg paint_area;</pre>
       <pre>	reg [3:0] paint_r;</pre>
       <pre>	reg [3:0] paint_g;</pre>
@@ -273,17 +256,14 @@
       <pre>		paint_area = (((sy &gt;= FB_OFFY) &amp;&amp; (sy &lt; 420)) &amp;&amp; (sx &gt;= FB_OFFX)) &amp;&amp; (sx &lt; 640);</pre>
       <pre>		{paint_r, paint_g, paint_b} = (de &amp;&amp; paint_area ? fb_pix_colr : 12&#39;h000);</pre>
       <pre>	end</pre>
-      <pre>	localparam BG_ENABLED = 1;</pre>
-      <pre>	reg show_bg;</pre>
-      <pre>	always @(*) show_bg = (BG_ENABLED &amp;&amp; de) &amp;&amp; ({paint_r, paint_g, paint_b} == 12&#39;h000);</pre>
       <pre>	always @(posedge clk_pix) begin</pre>
       <pre>		sdl_sx &lt;= sx;</pre>
       <pre>		sdl_sy &lt;= sy;</pre>
       <pre>		sdl_de &lt;= de;</pre>
       <pre>		sdl_frame &lt;= frame;</pre>
-      <pre>		sdl_r &lt;= {2 {(show_bg ? bg_colr[11:8] : paint_r)}};</pre>
-      <pre>		sdl_g &lt;= {2 {(show_bg ? bg_colr[7:4] : paint_g)}};</pre>
-      <pre>		sdl_b &lt;= {2 {(show_bg ? bg_colr[3:0] : paint_b)}};</pre>
+      <pre>		sdl_r &lt;= {2 {paint_r}};</pre>
+      <pre>		sdl_g &lt;= {2 {paint_g}};</pre>
+      <pre>		sdl_b &lt;= {2 {paint_b}};</pre>
       <pre>	end</pre>
       <pre>endmodule</pre>
       <pre></pre>
