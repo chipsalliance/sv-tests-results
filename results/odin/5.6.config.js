@@ -1,1 +1,1 @@
-config_loader_data['odin/5.6'] = [["","identifiers",0,"logs/Odin/chapter-5/5.6--identifiers.sv.log.html","tests/chapter-5/5.6--identifiers.sv.html"],["","wrong-identifiers",1,"logs/Odin/chapter-5/5.6--wrong-identifiers.sv.log.html","tests/chapter-5/5.6--wrong-identifiers.sv.html"]]
+config_loader_data['odin/5.6'] = [["","identifiers",1,"logs/Odin/chapter-5/5.6--identifiers.sv.log.html","tests/chapter-5/5.6--identifiers.sv.html"],["","wrong-identifiers",1,"logs/Odin/chapter-5/5.6--wrong-identifiers.sv.log.html","tests/chapter-5/5.6--wrong-identifiers.sv.html"]]
