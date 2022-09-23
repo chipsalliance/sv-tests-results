@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-09-22 01:57:59</dd></div>
-        <div><dt>time elapsed</dt><dd>4.052s</dd></div>
-        <div><dt>ram usage</dt><dd>407708 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-09-23 02:08:52</dd></div>
+        <div><dt>time elapsed</dt><dd>6.224s</dd></div>
+        <div><dt>ram usage</dt><dd>419624 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -5925,6 +5925,7 @@
       <pre>	dummy_instr_seed_o,</pre>
       <pre>	icache_enable_o,</pre>
       <pre>	csr_shadow_err_o,</pre>
+      <pre>	ic_scr_key_valid_i,</pre>
       <pre>	csr_save_if_i,</pre>
       <pre>	csr_save_id_i,</pre>
       <pre>	csr_save_wb_i,</pre>
@@ -6009,6 +6010,7 @@
       <pre>	output wire [31:0] dummy_instr_seed_o;</pre>
       <pre>	output wire icache_enable_o;</pre>
       <pre>	output wire csr_shadow_err_o;</pre>
+      <pre>	input wire ic_scr_key_valid_i;</pre>
       <pre>	input wire csr_save_if_i;</pre>
       <pre>	input wire csr_save_id_i;</pre>
       <pre>	input wire csr_save_wb_i;</pre>
@@ -6132,12 +6134,14 @@
       <pre>	wire [31:0] tselect_rdata;</pre>
       <pre>	wire [31:0] tmatch_control_rdata;</pre>
       <pre>	wire [31:0] tmatch_value_rdata;</pre>
-      <pre>	wire [7:0] cpuctrl_q;</pre>
-      <pre>	reg [7:0] cpuctrl_d;</pre>
-      <pre>	wire [7:0] cpuctrl_wdata_raw;</pre>
-      <pre>	wire [7:0] cpuctrl_wdata;</pre>
-      <pre>	reg cpuctrl_we;</pre>
-      <pre>	wire cpuctrl_err;</pre>
+      <pre>	wire [7:0] cpuctrlsts_part_q;</pre>
+      <pre>	reg [7:0] cpuctrlsts_part_d;</pre>
+      <pre>	wire [7:0] cpuctrlsts_part_wdata_raw;</pre>
+      <pre>	wire [7:0] cpuctrlsts_part_wdata;</pre>
+      <pre>	reg cpuctrlsts_part_we;</pre>
+      <pre>	wire cpuctrlsts_part_err;</pre>
+      <pre>	wire cpuctrlsts_ic_scr_key_valid_q;</pre>
+      <pre>	wire cpuctrlsts_ic_scr_key_err;</pre>
       <pre>	reg [31:0] csr_wdata_int;</pre>
       <pre>	reg [31:0] csr_rdata_int;</pre>
       <pre>	wire csr_we_int;</pre>
@@ -6299,7 +6303,7 @@
       <pre>				csr_rdata_int = 1&#39;sb0;</pre>
       <pre>				illegal_csr = ~DbgTriggerEn;</pre>
       <pre>			end</pre>
-      <pre>			12&#39;h7c0: csr_rdata_int = {{24 {1&#39;b0}}, cpuctrl_q};</pre>
+      <pre>			12&#39;h7c0: csr_rdata_int = {{23 {1&#39;b0}}, cpuctrlsts_ic_scr_key_valid_q, cpuctrlsts_part_q};</pre>
       <pre>			12&#39;h7c1: csr_rdata_int = 1&#39;sb0;</pre>
       <pre>			default: illegal_csr = 1&#39;b1;</pre>
       <pre>		endcase</pre>
@@ -6340,8 +6344,8 @@
       <pre>		mcountinhibit_we = 1&#39;b0;</pre>
       <pre>		mhpmcounter_we = 1&#39;sb0;</pre>
       <pre>		mhpmcounterh_we = 1&#39;sb0;</pre>
-      <pre>		cpuctrl_we = 1&#39;b0;</pre>
-      <pre>		cpuctrl_d = cpuctrl_q;</pre>
+      <pre>		cpuctrlsts_part_we = 1&#39;b0;</pre>
+      <pre>		cpuctrlsts_part_d = cpuctrlsts_part_q;</pre>
       <pre>		double_fault_seen_o = 1&#39;b0;</pre>
       <pre>		if (csr_we_int)</pre>
       <pre>			case (csr_addr_i)</pre>
@@ -6380,8 +6384,8 @@
       <pre>				12&#39;hb00, 12&#39;hb02, 12&#39;hb03, 12&#39;hb04, 12&#39;hb05, 12&#39;hb06, 12&#39;hb07, 12&#39;hb08, 12&#39;hb09, 12&#39;hb0a, 12&#39;hb0b, 12&#39;hb0c, 12&#39;hb0d, 12&#39;hb0e, 12&#39;hb0f, 12&#39;hb10, 12&#39;hb11, 12&#39;hb12, 12&#39;hb13, 12&#39;hb14, 12&#39;hb15, 12&#39;hb16, 12&#39;hb17, 12&#39;hb18, 12&#39;hb19, 12&#39;hb1a, 12&#39;hb1b, 12&#39;hb1c, 12&#39;hb1d, 12&#39;hb1e, 12&#39;hb1f: mhpmcounter_we[mhpmcounter_idx] = 1&#39;b1;</pre>
       <pre>				12&#39;hb80, 12&#39;hb82, 12&#39;hb83, 12&#39;hb84, 12&#39;hb85, 12&#39;hb86, 12&#39;hb87, 12&#39;hb88, 12&#39;hb89, 12&#39;hb8a, 12&#39;hb8b, 12&#39;hb8c, 12&#39;hb8d, 12&#39;hb8e, 12&#39;hb8f, 12&#39;hb90, 12&#39;hb91, 12&#39;hb92, 12&#39;hb93, 12&#39;hb94, 12&#39;hb95, 12&#39;hb96, 12&#39;hb97, 12&#39;hb98, 12&#39;hb99, 12&#39;hb9a, 12&#39;hb9b, 12&#39;hb9c, 12&#39;hb9d, 12&#39;hb9e, 12&#39;hb9f: mhpmcounterh_we[mhpmcounter_idx] = 1&#39;b1;</pre>
       <pre>				12&#39;h7c0: begin</pre>
-      <pre>					cpuctrl_d = cpuctrl_wdata;</pre>
-      <pre>					cpuctrl_we = 1&#39;b1;</pre>
+      <pre>					cpuctrlsts_part_d = cpuctrlsts_part_wdata;</pre>
+      <pre>					cpuctrlsts_part_we = 1&#39;b1;</pre>
       <pre>				end</pre>
       <pre>				default:</pre>
       <pre>					;</pre>
@@ -6416,11 +6420,11 @@
       <pre>					mcause_d = csr_mcause_i;</pre>
       <pre>					mstack_en = 1&#39;b1;</pre>
       <pre>					if (!(mcause_d[5] || mcause_d[6])) begin</pre>
-      <pre>						cpuctrl_we = 1&#39;b1;</pre>
-      <pre>						cpuctrl_d[6] = 1&#39;b1;</pre>
-      <pre>						if (cpuctrl_q[6]) begin</pre>
+      <pre>						cpuctrlsts_part_we = 1&#39;b1;</pre>
+      <pre>						cpuctrlsts_part_d[6] = 1&#39;b1;</pre>
+      <pre>						if (cpuctrlsts_part_q[6]) begin</pre>
       <pre>							double_fault_seen_o = 1&#39;b1;</pre>
-      <pre>							cpuctrl_d[7] = 1&#39;b1;</pre>
+      <pre>							cpuctrlsts_part_d[7] = 1&#39;b1;</pre>
       <pre>						end</pre>
       <pre>					end</pre>
       <pre>				end</pre>
@@ -6432,8 +6436,8 @@
       <pre>				mstatus_d[5] = mstatus_q[4];</pre>
       <pre>				if (mstatus_q[3-:2] != 2&#39;b11)</pre>
       <pre>					mstatus_d[1] = 1&#39;b0;</pre>
-      <pre>				cpuctrl_we = 1&#39;b1;</pre>
-      <pre>				cpuctrl_d[6] = 1&#39;b0;</pre>
+      <pre>				cpuctrlsts_part_we = 1&#39;b1;</pre>
+      <pre>				cpuctrlsts_part_d[6] = 1&#39;b0;</pre>
       <pre>				if (nmi_mode_i) begin</pre>
       <pre>					mstatus_d[4] = mstack_q[2];</pre>
       <pre>					mstatus_d[3-:2] = mstack_q[1-:2];</pre>
@@ -7005,64 +7009,80 @@
       <pre>			assign trigger_match_o = &#39;b0;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign cpuctrl_wdata_raw = csr_wdata_int[7:0];</pre>
+      <pre>	assign cpuctrlsts_part_wdata_raw = csr_wdata_int[7:0];</pre>
       <pre>	generate</pre>
       <pre>		if (DataIndTiming) begin : gen_dit</pre>
-      <pre>			assign cpuctrl_wdata[1] = cpuctrl_wdata_raw[1];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[1] = cpuctrlsts_part_wdata_raw[1];</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_no_dit</pre>
       <pre>			wire unused_dit;</pre>
-      <pre>			assign unused_dit = cpuctrl_wdata_raw[1];</pre>
-      <pre>			assign cpuctrl_wdata[1] = 1&#39;b0;</pre>
+      <pre>			assign unused_dit = cpuctrlsts_part_wdata_raw[1];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[1] = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign data_ind_timing_o = cpuctrl_q[1];</pre>
+      <pre>	assign data_ind_timing_o = cpuctrlsts_part_q[1];</pre>
       <pre>	generate</pre>
       <pre>		if (DummyInstructions) begin : gen_dummy</pre>
-      <pre>			assign cpuctrl_wdata[2] = cpuctrl_wdata_raw[2];</pre>
-      <pre>			assign cpuctrl_wdata[5-:3] = cpuctrl_wdata_raw[5-:3];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[2] = cpuctrlsts_part_wdata_raw[2];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[5-:3] = cpuctrlsts_part_wdata_raw[5-:3];</pre>
       <pre>			assign dummy_instr_seed_en_o = csr_we_int &amp;&amp; (csr_addr == 12&#39;h7c1);</pre>
       <pre>			assign dummy_instr_seed_o = csr_wdata_int;</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_no_dummy</pre>
       <pre>			wire unused_dummy_en;</pre>
       <pre>			wire [2:0] unused_dummy_mask;</pre>
-      <pre>			assign unused_dummy_en = cpuctrl_wdata_raw[2];</pre>
-      <pre>			assign unused_dummy_mask = cpuctrl_wdata_raw[5-:3];</pre>
-      <pre>			assign cpuctrl_wdata[2] = 1&#39;b0;</pre>
-      <pre>			assign cpuctrl_wdata[5-:3] = 3&#39;b000;</pre>
+      <pre>			assign unused_dummy_en = cpuctrlsts_part_wdata_raw[2];</pre>
+      <pre>			assign unused_dummy_mask = cpuctrlsts_part_wdata_raw[5-:3];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[2] = 1&#39;b0;</pre>
+      <pre>			assign cpuctrlsts_part_wdata[5-:3] = 3&#39;b000;</pre>
       <pre>			assign dummy_instr_seed_en_o = 1&#39;b0;</pre>
       <pre>			assign dummy_instr_seed_o = 1&#39;sb0;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign dummy_instr_en_o = cpuctrl_q[2];</pre>
-      <pre>	assign dummy_instr_mask_o = cpuctrl_q[5-:3];</pre>
+      <pre>	assign dummy_instr_en_o = cpuctrlsts_part_q[2];</pre>
+      <pre>	assign dummy_instr_mask_o = cpuctrlsts_part_q[5-:3];</pre>
       <pre>	generate</pre>
       <pre>		if (ICache) begin : gen_icache_enable</pre>
-      <pre>			assign cpuctrl_wdata[0] = cpuctrl_wdata_raw[0];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[0] = cpuctrlsts_part_wdata_raw[0];</pre>
+      <pre>			ibex_csr #(</pre>
+      <pre>				.Width(1),</pre>
+      <pre>				.ShadowCopy(ShadowCSR),</pre>
+      <pre>				.ResetValue(1&#39;b0)</pre>
+      <pre>			) u_cpuctrlsts_ic_scr_key_valid_q_csr(</pre>
+      <pre>				.clk_i(clk_i),</pre>
+      <pre>				.rst_ni(rst_ni),</pre>
+      <pre>				.wr_data_i(ic_scr_key_valid_i),</pre>
+      <pre>				.wr_en_i(1&#39;b1),</pre>
+      <pre>				.rd_data_o(cpuctrlsts_ic_scr_key_valid_q),</pre>
+      <pre>				.rd_error_o(cpuctrlsts_ic_scr_key_err)</pre>
+      <pre>			);</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_no_icache</pre>
       <pre>			wire unused_icen;</pre>
-      <pre>			assign unused_icen = cpuctrl_wdata_raw[0];</pre>
-      <pre>			assign cpuctrl_wdata[0] = 1&#39;b0;</pre>
+      <pre>			assign unused_icen = cpuctrlsts_part_wdata_raw[0];</pre>
+      <pre>			assign cpuctrlsts_part_wdata[0] = 1&#39;b0;</pre>
+      <pre>			wire unused_ic_scr_key_valid;</pre>
+      <pre>			assign unused_ic_scr_key_valid = ic_scr_key_valid_i;</pre>
+      <pre>			assign cpuctrlsts_ic_scr_key_valid_q = 1&#39;b0;</pre>
+      <pre>			assign cpuctrlsts_ic_scr_key_err = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign cpuctrl_wdata[7] = cpuctrl_wdata_raw[7];</pre>
-      <pre>	assign cpuctrl_wdata[6] = cpuctrl_wdata_raw[6];</pre>
-      <pre>	assign icache_enable_o = cpuctrl_q[0];</pre>
+      <pre>	assign cpuctrlsts_part_wdata[7] = cpuctrlsts_part_wdata_raw[7];</pre>
+      <pre>	assign cpuctrlsts_part_wdata[6] = cpuctrlsts_part_wdata_raw[6];</pre>
+      <pre>	assign icache_enable_o = cpuctrlsts_part_q[0];</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(8),</pre>
       <pre>		.ShadowCopy(ShadowCSR),</pre>
       <pre>		.ResetValue(1&#39;sb0)</pre>
-      <pre>	) u_cpuctrl_csr(</pre>
+      <pre>	) u_cpuctrlsts_part_csr(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.rst_ni(rst_ni),</pre>
-      <pre>		.wr_data_i({cpuctrl_d}),</pre>
-      <pre>		.wr_en_i(cpuctrl_we),</pre>
-      <pre>		.rd_data_o(cpuctrl_q),</pre>
-      <pre>		.rd_error_o(cpuctrl_err)</pre>
+      <pre>		.wr_data_i({cpuctrlsts_part_d}),</pre>
+      <pre>		.wr_en_i(cpuctrlsts_part_we),</pre>
+      <pre>		.rd_data_o(cpuctrlsts_part_q),</pre>
+      <pre>		.rd_error_o(cpuctrlsts_part_err)</pre>
       <pre>	);</pre>
-      <pre>	assign csr_shadow_err_o = ((mstatus_err | mtvec_err) | pmp_csr_err) | cpuctrl_err;</pre>
+      <pre>	assign csr_shadow_err_o = (((mstatus_err | mtvec_err) | pmp_csr_err) | cpuctrlsts_part_err) | cpuctrlsts_ic_scr_key_err;</pre>
       <pre>endmodule</pre>
       <pre>module ibex_csr (</pre>
       <pre>	clk_i,</pre>
@@ -12195,6 +12215,7 @@
       <pre>		.dummy_instr_seed_o(dummy_instr_seed),</pre>
       <pre>		.icache_enable_o(icache_enable),</pre>
       <pre>		.csr_shadow_err_o(csr_shadow_err),</pre>
+      <pre>		.ic_scr_key_valid_i(ic_scr_key_valid_i),</pre>
       <pre>		.csr_save_if_i(csr_save_if),</pre>
       <pre>		.csr_save_id_i(csr_save_id),</pre>
       <pre>		.csr_save_wb_i(csr_save_wb),</pre>
