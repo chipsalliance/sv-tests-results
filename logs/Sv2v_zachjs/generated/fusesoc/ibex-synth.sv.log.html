@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-09-27 16:23:31</dd></div>
-        <div><dt>time elapsed</dt><dd>5.847s</dd></div>
-        <div><dt>ram usage</dt><dd>419964 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-09-28 02:06:56</dd></div>
+        <div><dt>time elapsed</dt><dd>5.736s</dd></div>
+        <div><dt>ram usage</dt><dd>421556 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -5293,6 +5293,7 @@
       <pre>	debug_cause_o,</pre>
       <pre>	debug_csr_save_o,</pre>
       <pre>	debug_mode_o,</pre>
+      <pre>	debug_mode_entering_o,</pre>
       <pre>	debug_single_step_i,</pre>
       <pre>	debug_ebreakm_i,</pre>
       <pre>	debug_ebreaku_i,</pre>
@@ -5360,6 +5361,7 @@
       <pre>	output reg [2:0] debug_cause_o;</pre>
       <pre>	output reg debug_csr_save_o;</pre>
       <pre>	output wire debug_mode_o;</pre>
+      <pre>	output reg debug_mode_entering_o;</pre>
       <pre>	input wire debug_single_step_i;</pre>
       <pre>	input wire debug_ebreakm_i;</pre>
       <pre>	input wire debug_ebreaku_i;</pre>
@@ -5592,6 +5594,7 @@
       <pre>		debug_csr_save_o = 1&#39;b0;</pre>
       <pre>		debug_cause_o = 3&#39;h1;</pre>
       <pre>		debug_mode_d = debug_mode_q;</pre>
+      <pre>		debug_mode_entering_o = 1&#39;b0;</pre>
       <pre>		nmi_mode_d = nmi_mode_q;</pre>
       <pre>		perf_tbranch_o = 1&#39;b0;</pre>
       <pre>		perf_jump_o = 1&#39;b0;</pre>
@@ -5704,6 +5707,7 @@
       <pre>				else</pre>
       <pre>					debug_cause_o = 3&#39;h4;</pre>
       <pre>				debug_mode_d = 1&#39;b1;</pre>
+      <pre>				debug_mode_entering_o = 1&#39;b1;</pre>
       <pre>				ctrl_fsm_ns = 4&#39;d5;</pre>
       <pre>			end</pre>
       <pre>			4&#39;d9: begin</pre>
@@ -5718,6 +5722,7 @@
       <pre>					debug_cause_o = 3&#39;h1;</pre>
       <pre>				end</pre>
       <pre>				debug_mode_d = 1&#39;b1;</pre>
+      <pre>				debug_mode_entering_o = 1&#39;b1;</pre>
       <pre>				ctrl_fsm_ns = 4&#39;d5;</pre>
       <pre>			end</pre>
       <pre>			4&#39;d6: begin</pre>
@@ -5908,6 +5913,7 @@
       <pre>	csr_pmp_addr_o,</pre>
       <pre>	csr_pmp_mseccfg_o,</pre>
       <pre>	debug_mode_i,</pre>
+      <pre>	debug_mode_entering_i,</pre>
       <pre>	debug_cause_i,</pre>
       <pre>	debug_csr_save_i,</pre>
       <pre>	csr_depc_o,</pre>
@@ -5993,6 +5999,7 @@
       <pre>	output wire [(PMPNumRegions * 34) - 1:0] csr_pmp_addr_o;</pre>
       <pre>	output wire [2:0] csr_pmp_mseccfg_o;</pre>
       <pre>	input wire debug_mode_i;</pre>
+      <pre>	input wire debug_mode_entering_i;</pre>
       <pre>	input wire [2:0] debug_cause_i;</pre>
       <pre>	input wire debug_csr_save_i;</pre>
       <pre>	output wire [31:0] csr_depc_o;</pre>
@@ -7069,7 +7076,7 @@
       <pre>	endgenerate</pre>
       <pre>	assign cpuctrlsts_part_wdata[7] = cpuctrlsts_part_wdata_raw[7];</pre>
       <pre>	assign cpuctrlsts_part_wdata[6] = cpuctrlsts_part_wdata_raw[6];</pre>
-      <pre>	assign icache_enable_o = cpuctrlsts_part_q[0];</pre>
+      <pre>	assign icache_enable_o = cpuctrlsts_part_q[0] &amp; ~(debug_mode_i | debug_mode_entering_i);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(8),</pre>
       <pre>		.ShadowCopy(ShadowCSR),</pre>
@@ -8483,6 +8490,7 @@
       <pre>	lsu_store_err_i,</pre>
       <pre>	lsu_load_intg_err_i,</pre>
       <pre>	debug_mode_o,</pre>
+      <pre>	debug_mode_entering_o,</pre>
       <pre>	debug_cause_o,</pre>
       <pre>	debug_csr_save_o,</pre>
       <pre>	debug_req_i,</pre>
@@ -8604,6 +8612,7 @@
       <pre>	input wire lsu_store_err_i;</pre>
       <pre>	input wire lsu_load_intg_err_i;</pre>
       <pre>	output wire debug_mode_o;</pre>
+      <pre>	output wire debug_mode_entering_o;</pre>
       <pre>	output wire [2:0] debug_cause_o;</pre>
       <pre>	output wire debug_csr_save_o;</pre>
       <pre>	input wire debug_req_i;</pre>
@@ -8939,6 +8948,7 @@
       <pre>		.csr_mtval_o(csr_mtval_o),</pre>
       <pre>		.priv_mode_i(priv_mode_i),</pre>
       <pre>		.debug_mode_o(debug_mode_o),</pre>
+      <pre>		.debug_mode_entering_o(debug_mode_entering_o),</pre>
       <pre>		.debug_cause_o(debug_cause_o),</pre>
       <pre>		.debug_csr_save_o(debug_csr_save_o),</pre>
       <pre>		.debug_req_i(debug_req_i),</pre>
@@ -11728,6 +11738,7 @@
       <pre>	wire [1:0] priv_mode_id;</pre>
       <pre>	wire [1:0] priv_mode_lsu;</pre>
       <pre>	wire debug_mode;</pre>
+      <pre>	wire debug_mode_entering;</pre>
       <pre>	wire [2:0] debug_cause;</pre>
       <pre>	wire debug_csr_save;</pre>
       <pre>	wire debug_single_step;</pre>
@@ -11937,6 +11948,7 @@
       <pre>		.irq_nm_i(irq_nm_i),</pre>
       <pre>		.nmi_mode_o(nmi_mode),</pre>
       <pre>		.debug_mode_o(debug_mode),</pre>
+      <pre>		.debug_mode_entering_o(debug_mode_entering),</pre>
       <pre>		.debug_cause_o(debug_cause),</pre>
       <pre>		.debug_csr_save_o(debug_csr_save),</pre>
       <pre>		.debug_req_i(debug_req_i),</pre>
@@ -12199,6 +12211,7 @@
       <pre>		.csr_pmp_mseccfg_o(csr_pmp_mseccfg),</pre>
       <pre>		.csr_depc_o(csr_depc),</pre>
       <pre>		.debug_mode_i(debug_mode),</pre>
+      <pre>		.debug_mode_entering_i(debug_mode_entering),</pre>
       <pre>		.debug_cause_i(debug_cause),</pre>
       <pre>		.debug_csr_save_i(debug_csr_save),</pre>
       <pre>		.debug_single_step_o(debug_single_step),</pre>
@@ -12955,8 +12968,7 @@
       <pre>	output wire err_o;</pre>
       <pre>	localparam [31:0] ADDR_WIDTH = (RV32E ? 4 : 5);</pre>
       <pre>	localparam [31:0] NUM_WORDS = 2 ** ADDR_WIDTH;</pre>
-      <pre>	wire [(NUM_WORDS * DataWidth) - 1:0] rf_reg;</pre>
-      <pre>	reg [((NUM_WORDS - 1) &gt;= 1 ? ((NUM_WORDS - 1) * DataWidth) + (DataWidth - 1) : ((3 - NUM_WORDS) * DataWidth) + (((NUM_WORDS - 1) * DataWidth) - 1)):((NUM_WORDS - 1) &gt;= 1 ? DataWidth : (NUM_WORDS - 1) * DataWidth)] rf_reg_q;</pre>
+      <pre>	wire [DataWidth - 1:0] rf_reg [0:NUM_WORDS - 1];</pre>
       <pre>	reg [NUM_WORDS - 1:0] we_a_dec;</pre>
       <pre>	function automatic [4:0] sv2v_cast_5;</pre>
       <pre>		input reg [4:0] inp;</pre>
@@ -12998,11 +13010,13 @@
       <pre>	genvar i;</pre>
       <pre>	generate</pre>
       <pre>		for (i = 1; i &lt; NUM_WORDS; i = i + 1) begin : g_rf_flops</pre>
+      <pre>			reg [DataWidth - 1:0] rf_reg_q;</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>				if (!rst_ni)</pre>
-      <pre>					rf_reg_q[((NUM_WORDS - 1) &gt;= 1 ? i : 1 - (i - (NUM_WORDS - 1))) * DataWidth+:DataWidth] &lt;= WordZeroVal;</pre>
+      <pre>					rf_reg_q &lt;= WordZeroVal;</pre>
       <pre>				else if (we_a_dec[i])</pre>
-      <pre>					rf_reg_q[((NUM_WORDS - 1) &gt;= 1 ? i : 1 - (i - (NUM_WORDS - 1))) * DataWidth+:DataWidth] &lt;= wdata_a_i;</pre>
+      <pre>					rf_reg_q &lt;= wdata_a_i;</pre>
+      <pre>			assign rf_reg[i] = rf_reg_q;</pre>
       <pre>		end</pre>
       <pre>		if (DummyInstructions) begin : g_dummy_r0</pre>
       <pre>			wire we_r0_dummy;</pre>
@@ -13013,17 +13027,16 @@
       <pre>					rf_r0_q &lt;= WordZeroVal;</pre>
       <pre>				else if (we_r0_dummy)</pre>
       <pre>					rf_r0_q &lt;= wdata_a_i;</pre>
-      <pre>			assign rf_reg[0+:DataWidth] = (dummy_instr_id_i ? rf_r0_q : WordZeroVal);</pre>
+      <pre>			assign rf_reg[0] = (dummy_instr_id_i ? rf_r0_q : WordZeroVal);</pre>
       <pre>		end</pre>
       <pre>		else begin : g_normal_r0</pre>
       <pre>			wire unused_dummy_instr_id;</pre>
       <pre>			assign unused_dummy_instr_id = dummy_instr_id_i;</pre>
-      <pre>			assign rf_reg[0+:DataWidth] = WordZeroVal;</pre>
+      <pre>			assign rf_reg[0] = WordZeroVal;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign rf_reg[DataWidth * (((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : ((NUM_WORDS - 1) + ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)) - 1) - (((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS) - 1))+:DataWidth * ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)] = rf_reg_q[DataWidth * ((NUM_WORDS - 1) &gt;= 1 ? ((NUM_WORDS - 1) &gt;= 1 ? ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : ((NUM_WORDS - 1) + ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)) - 1) - (((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS) - 1) : ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : ((NUM_WORDS - 1) + ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)) - 1)) : 1 - (((NUM_WORDS - 1) &gt;= 1 ? ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : ((NUM_WORDS - 1) + ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)) - 1) - (((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS) - 1) : ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : ((NUM_WORDS - 1) + ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)) - 1)) - (NUM_WORDS - 1)))+:DataWidth * ((NUM_WORDS - 1) &gt;= 1 ? NUM_WORDS - 1 : 3 - NUM_WORDS)];</pre>
-      <pre>	assign rdata_a_o = rf_reg[raddr_a_i * DataWidth+:DataWidth];</pre>
-      <pre>	assign rdata_b_o = rf_reg[raddr_b_i * DataWidth+:DataWidth];</pre>
+      <pre>	assign rdata_a_o = rf_reg[raddr_a_i];</pre>
+      <pre>	assign rdata_b_o = rf_reg[raddr_b_i];</pre>
       <pre>	wire unused_test_en;</pre>
       <pre>	assign unused_test_en = test_en_i;</pre>
       <pre>endmodule</pre>
