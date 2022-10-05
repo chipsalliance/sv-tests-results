@@ -1,1 +1,1 @@
-config_loader_data['verilator/11.11'] = [["","min_max_avg_delay",1,"logs/Verilator/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]
+config_loader_data['verilator/11.11'] = [["","min_max_avg_delay",0,"logs/Verilator/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]
