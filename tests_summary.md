@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Sv2v_zachjs        |           0|         0|    0|      0|        5120|
-|moore              |           0|         0|    0|      0|        5058|
-|tree_sitter_verilog|           0|         0|    0|      0|        4967|
-|Slang_parse        |           0|         0|    0|      0|        5058|
-|Slang              |           0|         0|    0|      0|        5120|
-|moore_parse        |           0|         0|    0|      0|        4967|
-|Verilator          |           0|         4|    0|      0|        5131|
-|Surelog            |           0|         0|    0|      0|        5120|
-|Icarus             |           0|         0|    0|      0|        4967|
-|Verible            |           0|         0|    0|      0|        4967|
-|Yosys              |           1|         0|    0|      0|        5119|
-|UhdmVerilator      |           0|         0|    0|      0|        5135|
-|Odin               |           0|         0|    0|      0|        5058|
-|UhdmYosys          |           0|         0|    0|      0|        5120|
-|sv_parser          |           0|         0|    0|      0|        5058|
-|VeribleExtractor   |          10|         0|    0|      0|        4957|
+|Slang              |           0|         0|   12|     11|        5109|
+|Surelog            |           0|         0|   12|     11|        5109|
+|moore              |           0|         0|   12|     11|        5047|
+|Sv2v_zachjs        |           0|         0|   12|     11|        5109|
+|tree_sitter_verilog|           0|         0|   12|     11|        4956|
+|Yosys              |           0|         0|   12|     11|        5109|
+|UhdmYosys          |           0|         0|   12|     11|        5109|
+|Verible            |           0|         0|   12|     11|        4956|
+|Verilator          |           0|         0|   12|     11|        5124|
+|UhdmVerilator      |           0|         0|   12|     11|        5124|
+|Slang_parse        |           0|         0|   12|     11|        5047|
+|sv_parser          |           0|         0|   12|     11|        5047|
+|moore_parse        |           0|         0|   12|     11|        4956|
+|VeribleExtractor   |           4|         4|   12|     11|        4948|
+|Odin               |           0|         0|   12|     11|        5047|
+|Icarus             |           0|         0|   12|     11|        4956|
