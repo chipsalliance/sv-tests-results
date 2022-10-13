@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-12 01:45:22</dd></div>
-        <div><dt>time elapsed</dt><dd>0.105s</dd></div>
-        <div><dt>ram usage</dt><dd>101476 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-13 01:46:39</dd></div>
+        <div><dt>time elapsed</dt><dd>0.130s</dd></div>
+        <div><dt>ram usage</dt><dd>104048 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -108,13 +108,14 @@
       <pre>	parameter addr_width_p = 0;</pre>
       <pre>	parameter block_size_in_words_p = 0;</pre>
       <pre>	parameter data_width_p = 0;</pre>
+      <pre>	parameter mask_width_p = 0;</pre>
       <pre>	parameter num_cache_p = 0;</pre>
       <pre>	parameter tag_fifo_els_p = num_cache_p;</pre>
       <pre>	parameter axi_id_width_p = 0;</pre>
       <pre>	parameter axi_data_width_p = 0;</pre>
       <pre>	parameter axi_burst_len_p = 0;</pre>
       <pre>	parameter lg_num_cache_lp = (num_cache_p == 1 ? 1 : $clog2(num_cache_p));</pre>
-      <pre>	parameter dma_pkt_width_lp = 1 + addr_width_p;</pre>
+      <pre>	parameter dma_pkt_width_lp = (1 + addr_width_p) + mask_width_p;</pre>
       <pre>	parameter axi_strb_width_lp = axi_data_width_p &gt;&gt; 3;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
@@ -164,18 +165,18 @@
       <pre>	input axi_rlast_i;</pre>
       <pre>	input axi_rvalid_i;</pre>
       <pre>	output wire axi_rready_o;</pre>
-      <pre>	wire [(num_cache_p * (1 + addr_width_p)) - 1:0] dma_pkt;</pre>
+      <pre>	wire [(num_cache_p * ((1 + addr_width_p) + mask_width_p)) - 1:0] dma_pkt;</pre>
       <pre>	assign dma_pkt = dma_pkt_i;</pre>
       <pre>	wire [num_cache_p - 1:0] read_rr_v_li;</pre>
       <pre>	wire [num_cache_p - 1:0] read_rr_yumi_lo;</pre>
       <pre>	wire read_rr_v_lo;</pre>
-      <pre>	wire [(1 + addr_width_p) - 1:0] read_rr_dma_pkt;</pre>
+      <pre>	wire [((1 + addr_width_p) + mask_width_p) - 1:0] read_rr_dma_pkt;</pre>
       <pre>	wire [lg_num_cache_lp - 1:0] read_rr_tag_lo;</pre>
       <pre>	wire read_rr_yumi_li;</pre>
       <pre>	genvar i;</pre>
       <pre>	generate</pre>
       <pre>		for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk1</pre>
-      <pre>			assign read_rr_v_li[i] = dma_pkt_v_i[i] &amp; ~dma_pkt[(i * (1 + addr_width_p)) + (addr_width_p + 0)];</pre>
+      <pre>			assign read_rr_v_li[i] = dma_pkt_v_i[i] &amp; ~dma_pkt[(i * ((1 + addr_width_p) + mask_width_p)) + (1 + (addr_width_p + (mask_width_p - 1)))];</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	bsg_round_robin_n_to_1 #(</pre>
@@ -196,12 +197,12 @@
       <pre>	wire [num_cache_p - 1:0] write_rr_v_li;</pre>
       <pre>	wire [num_cache_p - 1:0] write_rr_yumi_lo;</pre>
       <pre>	wire write_rr_v_lo;</pre>
-      <pre>	wire [(1 + addr_width_p) - 1:0] write_rr_dma_pkt;</pre>
+      <pre>	wire [((1 + addr_width_p) + mask_width_p) - 1:0] write_rr_dma_pkt;</pre>
       <pre>	wire [lg_num_cache_lp - 1:0] write_rr_tag_lo;</pre>
       <pre>	wire write_rr_yumi_li;</pre>
       <pre>	generate</pre>
       <pre>		for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk2</pre>
-      <pre>			assign write_rr_v_li[i] = dma_pkt_v_i[i] &amp; dma_pkt[(i * (1 + addr_width_p)) + (addr_width_p + 0)];</pre>
+      <pre>			assign write_rr_v_li[i] = dma_pkt_v_i[i] &amp; dma_pkt[(i * ((1 + addr_width_p) + mask_width_p)) + (1 + (addr_width_p + (mask_width_p - 1)))];</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	bsg_round_robin_n_to_1 #(</pre>
@@ -221,7 +222,7 @@
       <pre>	);</pre>
       <pre>	generate</pre>
       <pre>		for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk3</pre>
-      <pre>			assign dma_pkt_yumi_o[i] = (dma_pkt[(i * (1 + addr_width_p)) + (addr_width_p + 0)] ? write_rr_yumi_lo[i] : read_rr_yumi_lo[i]);</pre>
+      <pre>			assign dma_pkt_yumi_o[i] = (dma_pkt[(i * ((1 + addr_width_p) + mask_width_p)) + (1 + (addr_width_p + (mask_width_p - 1)))] ? write_rr_yumi_lo[i] : read_rr_yumi_lo[i]);</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	bsg_cache_to_axi_rx #(</pre>
@@ -239,7 +240,7 @@
       <pre>		.v_i(read_rr_v_lo),</pre>
       <pre>		.yumi_o(read_rr_yumi_li),</pre>
       <pre>		.cache_id_i(read_rr_tag_lo),</pre>
-      <pre>		.addr_i(read_rr_dma_pkt[addr_width_p - 1-:addr_width_p]),</pre>
+      <pre>		.addr_i(read_rr_dma_pkt[addr_width_p + (mask_width_p - 1)-:((addr_width_p + (mask_width_p - 1)) &gt;= (mask_width_p + 0) ? ((addr_width_p + (mask_width_p - 1)) - (mask_width_p + 0)) + 1 : ((mask_width_p + 0) - (addr_width_p + (mask_width_p - 1))) + 1)]),</pre>
       <pre>		.dma_data_o(dma_data_o),</pre>
       <pre>		.dma_data_v_o(dma_data_v_o),</pre>
       <pre>		.dma_data_ready_i(dma_data_ready_i),</pre>
@@ -265,6 +266,7 @@
       <pre>		.num_cache_p(num_cache_p),</pre>
       <pre>		.addr_width_p(addr_width_p),</pre>
       <pre>		.data_width_p(data_width_p),</pre>
+      <pre>		.mask_width_p(mask_width_p),</pre>
       <pre>		.block_size_in_words_p(block_size_in_words_p),</pre>
       <pre>		.tag_fifo_els_p(tag_fifo_els_p),</pre>
       <pre>		.axi_id_width_p(axi_id_width_p),</pre>
@@ -276,7 +278,8 @@
       <pre>		.v_i(write_rr_v_lo),</pre>
       <pre>		.yumi_o(write_rr_yumi_li),</pre>
       <pre>		.cache_id_i(write_rr_tag_lo),</pre>
-      <pre>		.addr_i(write_rr_dma_pkt[addr_width_p - 1-:addr_width_p]),</pre>
+      <pre>		.addr_i(write_rr_dma_pkt[addr_width_p + (mask_width_p - 1)-:((addr_width_p + (mask_width_p - 1)) &gt;= (mask_width_p + 0) ? ((addr_width_p + (mask_width_p - 1)) - (mask_width_p + 0)) + 1 : ((mask_width_p + 0) - (addr_width_p + (mask_width_p - 1))) + 1)]),</pre>
+      <pre>		.mask_i(write_rr_dma_pkt[mask_width_p - 1-:mask_width_p]),</pre>
       <pre>		.dma_data_i(dma_data_i),</pre>
       <pre>		.dma_data_v_i(dma_data_v_i),</pre>
       <pre>		.dma_data_yumi_o(dma_data_yumi_o),</pre>

@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-12 01:45:13</dd></div>
-        <div><dt>time elapsed</dt><dd>0.151s</dd></div>
-        <div><dt>ram usage</dt><dd>124848 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-13 01:46:53</dd></div>
+        <div><dt>time elapsed</dt><dd>0.265s</dd></div>
+        <div><dt>ram usage</dt><dd>131032 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -76,11 +76,12 @@
       <pre>);</pre>
       <pre>	parameter dma_addr_width_p = 0;</pre>
       <pre>	parameter dma_burst_len_p = 0;</pre>
+      <pre>	parameter dma_mask_width_p = 0;</pre>
       <pre>	parameter wh_flit_width_p = 0;</pre>
       <pre>	parameter wh_cid_width_p = 0;</pre>
       <pre>	parameter wh_len_width_p = 0;</pre>
       <pre>	parameter wh_cord_width_p = 0;</pre>
-      <pre>	parameter dma_pkt_width_lp = 1 + dma_addr_width_p;</pre>
+      <pre>	parameter dma_pkt_width_lp = (1 + dma_addr_width_p) + dma_mask_width_p;</pre>
       <pre>	parameter wh_link_sif_width_lp = wh_flit_width_p + 2;</pre>
       <pre>	parameter dma_data_width_lp = wh_flit_width_p;</pre>
       <pre>	parameter buffer_return_p = 1;</pre>
@@ -108,7 +109,7 @@
       <pre>	wire dma_pkt_ready_lo;</pre>
       <pre>	wire dma_pkt_v_lo;</pre>
       <pre>	reg dma_pkt_yumi_li;</pre>
-      <pre>	wire [(1 + dma_addr_width_p) - 1:0] dma_pkt_lo;</pre>
+      <pre>	wire [((1 + dma_addr_width_p) + dma_mask_width_p) - 1:0] dma_pkt_lo;</pre>
       <pre>	bsg_two_fifo #(.width_p(dma_pkt_width_lp)) dma_pkt_fifo(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.reset_i(reset_i),</pre>
@@ -161,18 +162,19 @@
       <pre>		.up_i(send_up_li),</pre>
       <pre>		.count_o(send_count_lo)</pre>
       <pre>	);</pre>
-      <pre>	reg [1:0] send_state_n;</pre>
-      <pre>	reg [1:0] send_state_r;</pre>
-      <pre>	wire [((((((((((wh_flit_width_p - (wh_cord_width_p * 2)) - 1) - wh_len_width_p) - (wh_cid_width_p * 2)) + 1) + wh_cid_width_p) + wh_cord_width_p) + wh_cid_width_p) + wh_len_width_p) + wh_cord_width_p) - 1:0] header_flit;</pre>
-      <pre>	assign header_flit[((((wh_flit_width_p - (wh_cord_width_p * 2)) - 1) - wh_len_width_p) - (wh_cid_width_p * 2)) + (1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))-:((((((wh_flit_width_p - (wh_cord_width_p * 2)) - 1) - wh_len_width_p) - (wh_cid_width_p * 2)) + (1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))) &gt;= (1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))))) ? ((((((wh_flit_width_p - (wh_cord_width_p * 2)) - 1) - wh_len_width_p) - (wh_cid_width_p * 2)) + (1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))) - (1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))))))) + 1 : ((1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))))) - (((((wh_flit_width_p - (wh_cord_width_p * 2)) - 1) - wh_len_width_p) - (wh_cid_width_p * 2)) + (1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))))) + 1)] = 1&#39;sb0;</pre>
-      <pre>	assign header_flit[1 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))] = dma_pkt_lo[dma_addr_width_p + 0];</pre>
+      <pre>	reg [2:0] send_state_n;</pre>
+      <pre>	reg [2:0] send_state_r;</pre>
+      <pre>	wire mask_all_one = &amp;dma_pkt_lo[dma_mask_width_p - 1-:dma_mask_width_p];</pre>
+      <pre>	wire [((((((((((wh_flit_width_p - (wh_cord_width_p * 2)) - 2) - wh_len_width_p) - (wh_cid_width_p * 2)) + 2) + wh_cid_width_p) + wh_cord_width_p) + wh_cid_width_p) + wh_len_width_p) + wh_cord_width_p) - 1:0] header_flit;</pre>
+      <pre>	assign header_flit[((((wh_flit_width_p - (wh_cord_width_p * 2)) - 2) - wh_len_width_p) - (wh_cid_width_p * 2)) + (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))-:((((((wh_flit_width_p - (wh_cord_width_p * 2)) - 2) - wh_len_width_p) - (wh_cid_width_p * 2)) + (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))) &gt;= (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))))) ? ((((((wh_flit_width_p - (wh_cord_width_p * 2)) - 2) - wh_len_width_p) - (wh_cid_width_p * 2)) + (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))) - (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))))))) + 1 : ((2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))))) - (((((wh_flit_width_p - (wh_cord_width_p * 2)) - 2) - wh_len_width_p) - (wh_cid_width_p * 2)) + (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))))) + 1)] = 1&#39;sb0;</pre>
+      <pre>	assign header_flit[2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))-:((2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))) &gt;= (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))))) ? ((2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))) - (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))))) + 1 : ((wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))))) - (2 + (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))))) + 1)] = (dma_pkt_lo[1 + (dma_addr_width_p + (dma_mask_width_p - 1))] ? (mask_all_one ? 2&#39;b10 : 2&#39;b11) : 2&#39;b00);</pre>
       <pre>	assign header_flit[wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))-:((wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))) &gt;= (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))) ? ((wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))) - (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))))) + 1 : ((wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))) - (wh_cid_width_p + (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))))) + 1)] = my_wh_cid_i;</pre>
       <pre>	assign header_flit[wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))-:((wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))) &gt;= (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))) ? ((wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))) - (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0)))) + 1 : ((wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p + 0))) - (wh_cord_width_p + (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))))) + 1)] = my_wh_cord_i;</pre>
       <pre>	function automatic signed [wh_len_width_p - 1:0] sv2v_cast_D9A49_signed;</pre>
       <pre>		input reg signed [wh_len_width_p - 1:0] inp;</pre>
       <pre>		sv2v_cast_D9A49_signed = inp;</pre>
       <pre>	endfunction</pre>
-      <pre>	assign header_flit[wh_len_width_p + (wh_cord_width_p - 1)-:((wh_len_width_p + (wh_cord_width_p - 1)) &gt;= (wh_cord_width_p + 0) ? ((wh_len_width_p + (wh_cord_width_p - 1)) - (wh_cord_width_p + 0)) + 1 : ((wh_cord_width_p + 0) - (wh_len_width_p + (wh_cord_width_p - 1))) + 1)] = (dma_pkt_lo[dma_addr_width_p + 0] ? sv2v_cast_D9A49_signed(1 + dma_burst_len_p) : sv2v_cast_D9A49_signed(1));</pre>
+      <pre>	assign header_flit[wh_len_width_p + (wh_cord_width_p - 1)-:((wh_len_width_p + (wh_cord_width_p - 1)) &gt;= (wh_cord_width_p + 0) ? ((wh_len_width_p + (wh_cord_width_p - 1)) - (wh_cord_width_p + 0)) + 1 : ((wh_cord_width_p + 0) - (wh_len_width_p + (wh_cord_width_p - 1))) + 1)] = (dma_pkt_lo[1 + (dma_addr_width_p + (dma_mask_width_p - 1))] ? (mask_all_one ? sv2v_cast_D9A49_signed(1 + dma_burst_len_p) : sv2v_cast_D9A49_signed(2 + dma_burst_len_p)) : sv2v_cast_D9A49_signed(1));</pre>
       <pre>	assign header_flit[wh_cord_width_p - 1-:wh_cord_width_p] = dest_wh_cord_i;</pre>
       <pre>	assign header_flit[wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))-:((wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))) &gt;= (wh_len_width_p + (wh_cord_width_p + 0)) ? ((wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1))) - (wh_len_width_p + (wh_cord_width_p + 0))) + 1 : ((wh_len_width_p + (wh_cord_width_p + 0)) - (wh_cid_width_p + (wh_len_width_p + (wh_cord_width_p - 1)))) + 1)] = dest_wh_cid_i;</pre>
       <pre>	function automatic [wh_flit_width_p - 1:0] sv2v_cast_76210;</pre>
@@ -188,33 +190,41 @@
       <pre>		wh_link_sif_out[wh_flit_width_p - 1-:wh_flit_width_p] = dma_data_i;</pre>
       <pre>		dma_data_yumi_o = 1&#39;b0;</pre>
       <pre>		case (send_state_r)</pre>
-      <pre>			2&#39;d0: send_state_n = 2&#39;d1;</pre>
-      <pre>			2&#39;d1: begin</pre>
+      <pre>			3&#39;d0: send_state_n = 3&#39;d1;</pre>
+      <pre>			3&#39;d1: begin</pre>
       <pre>				wh_link_sif_out[wh_flit_width_p - 1-:wh_flit_width_p] = header_flit;</pre>
       <pre>				if (dma_pkt_v_lo) begin</pre>
       <pre>					wh_link_sif_out[wh_flit_width_p + 1] = 1&#39;b1;</pre>
-      <pre>					send_state_n = (wh_link_sif_in[wh_flit_width_p + 0] &amp; wh_link_sif_out[wh_flit_width_p + 1] ? 2&#39;d2 : 2&#39;d1);</pre>
+      <pre>					send_state_n = (wh_link_sif_in[wh_flit_width_p + 0] ? 3&#39;d2 : 3&#39;d1);</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			2&#39;d2: begin</pre>
-      <pre>				wh_link_sif_out[wh_flit_width_p - 1-:wh_flit_width_p] = sv2v_cast_76210(dma_pkt_lo[dma_addr_width_p - 1-:dma_addr_width_p]);</pre>
+      <pre>			3&#39;d2: begin</pre>
+      <pre>				wh_link_sif_out[wh_flit_width_p - 1-:wh_flit_width_p] = sv2v_cast_76210(dma_pkt_lo[dma_addr_width_p + (dma_mask_width_p - 1)-:((dma_addr_width_p + (dma_mask_width_p - 1)) &gt;= (dma_mask_width_p + 0) ? ((dma_addr_width_p + (dma_mask_width_p - 1)) - (dma_mask_width_p + 0)) + 1 : ((dma_mask_width_p + 0) - (dma_addr_width_p + (dma_mask_width_p - 1))) + 1)]);</pre>
       <pre>				if (dma_pkt_v_lo) begin</pre>
       <pre>					wh_link_sif_out[wh_flit_width_p + 1] = 1&#39;b1;</pre>
-      <pre>					dma_pkt_yumi_li = wh_link_sif_in[wh_flit_width_p + 0] &amp; wh_link_sif_out[wh_flit_width_p + 1];</pre>
-      <pre>					send_state_n = (dma_pkt_yumi_li ? (dma_pkt_lo[dma_addr_width_p + 0] ? 2&#39;d3 : 2&#39;d1) : 2&#39;d2);</pre>
+      <pre>					dma_pkt_yumi_li = (dma_pkt_lo[1 + (dma_addr_width_p + (dma_mask_width_p - 1))] ? (mask_all_one ? wh_link_sif_in[wh_flit_width_p + 0] : 1&#39;b0) : wh_link_sif_in[wh_flit_width_p + 0]);</pre>
+      <pre>					send_state_n = (wh_link_sif_in[wh_flit_width_p + 0] ? (dma_pkt_lo[1 + (dma_addr_width_p + (dma_mask_width_p - 1))] ? (mask_all_one ? 3&#39;d4 : 3&#39;d3) : 3&#39;d1) : 3&#39;d2);</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			2&#39;d3: begin</pre>
+      <pre>			3&#39;d3: begin</pre>
+      <pre>				wh_link_sif_out[wh_flit_width_p - 1-:wh_flit_width_p] = sv2v_cast_76210(dma_pkt_lo[dma_mask_width_p - 1-:dma_mask_width_p]);</pre>
+      <pre>				if (dma_pkt_v_lo) begin</pre>
+      <pre>					wh_link_sif_out[wh_flit_width_p + 1] = 1&#39;b1;</pre>
+      <pre>					dma_pkt_yumi_li = wh_link_sif_in[wh_flit_width_p + 0];</pre>
+      <pre>					send_state_n = (wh_link_sif_in[wh_flit_width_p + 0] ? 3&#39;d4 : 3&#39;d3);</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			3&#39;d4: begin</pre>
       <pre>				wh_link_sif_out[wh_flit_width_p - 1-:wh_flit_width_p] = dma_data_i;</pre>
       <pre>				if (dma_data_v_i) begin</pre>
       <pre>					wh_link_sif_out[wh_flit_width_p + 1] = 1&#39;b1;</pre>
       <pre>					dma_data_yumi_o = wh_link_sif_in[wh_flit_width_p + 0] &amp; wh_link_sif_out[wh_flit_width_p + 1];</pre>
       <pre>					send_up_li = dma_data_yumi_o &amp; (send_count_lo != (dma_burst_len_p - 1));</pre>
       <pre>					send_clear_li = dma_data_yumi_o &amp; (send_count_lo == (dma_burst_len_p - 1));</pre>
-      <pre>					send_state_n = (send_clear_li ? 2&#39;d1 : 2&#39;d3);</pre>
+      <pre>					send_state_n = (send_clear_li ? 3&#39;d1 : 3&#39;d4);</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			default: send_state_n = 2&#39;d1;</pre>
+      <pre>			default: send_state_n = 3&#39;d1;</pre>
       <pre>		endcase</pre>
       <pre>	end</pre>
       <pre>	reg recv_clear_li;</pre>
@@ -257,7 +267,7 @@
       <pre>	end</pre>
       <pre>	always @(posedge clk_i)</pre>
       <pre>		if (reset_i) begin</pre>
-      <pre>			send_state_r &lt;= 2&#39;d0;</pre>
+      <pre>			send_state_r &lt;= 3&#39;d0;</pre>
       <pre>			recv_state_r &lt;= 2&#39;d0;</pre>
       <pre>		end</pre>
       <pre>		else begin</pre>

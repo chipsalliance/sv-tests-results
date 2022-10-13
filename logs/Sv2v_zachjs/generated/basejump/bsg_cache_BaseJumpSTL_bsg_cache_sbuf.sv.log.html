@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-12 01:45:16</dd></div>
-        <div><dt>time elapsed</dt><dd>0.120s</dd></div>
-        <div><dt>ram usage</dt><dd>107460 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-13 01:46:35</dd></div>
+        <div><dt>time elapsed</dt><dd>0.122s</dd></div>
+        <div><dt>ram usage</dt><dd>98776 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -80,10 +80,10 @@
       <pre>	input [sbuf_entry_width_lp - 1:0] sbuf_entry_i;</pre>
       <pre>	input v_i;</pre>
       <pre>	output wire [sbuf_entry_width_lp - 1:0] sbuf_entry_o;</pre>
-      <pre>	output reg v_o;</pre>
+      <pre>	output wire v_o;</pre>
       <pre>	input wire yumi_i;</pre>
-      <pre>	output reg empty_o;</pre>
-      <pre>	output reg full_o;</pre>
+      <pre>	output wire empty_o;</pre>
+      <pre>	output wire full_o;</pre>
       <pre>	input [addr_width_p - 1:0] bypass_addr_i;</pre>
       <pre>	input bypass_v_i;</pre>
       <pre>	output reg [data_width_p - 1:0] bypass_data_o;</pre>
@@ -91,77 +91,24 @@
       <pre>	localparam lg_data_mask_width_lp = ((data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
       <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p))) - 1:0] el0;</pre>
       <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p))) - 1:0] el1;</pre>
-      <pre>	reg [1:0] num_els_r;</pre>
-      <pre>	reg el0_valid;</pre>
-      <pre>	reg el1_valid;</pre>
-      <pre>	reg mux1_sel;</pre>
-      <pre>	reg mux0_sel;</pre>
-      <pre>	reg el0_enable;</pre>
-      <pre>	reg el1_enable;</pre>
-      <pre>	always @(*)</pre>
-      <pre>		case (num_els_r)</pre>
-      <pre>			0: begin</pre>
-      <pre>				v_o = v_i;</pre>
-      <pre>				empty_o = 1;</pre>
-      <pre>				full_o = 0;</pre>
-      <pre>				el0_valid = 0;</pre>
-      <pre>				el1_valid = 0;</pre>
-      <pre>				el0_enable = 0;</pre>
-      <pre>				el1_enable = v_i &amp; ~yumi_i;</pre>
-      <pre>				mux0_sel = 0;</pre>
-      <pre>				mux1_sel = 0;</pre>
-      <pre>			end</pre>
-      <pre>			1: begin</pre>
-      <pre>				v_o = 1;</pre>
-      <pre>				empty_o = 0;</pre>
-      <pre>				full_o = 0;</pre>
-      <pre>				el0_valid = 0;</pre>
-      <pre>				el1_valid = 1;</pre>
-      <pre>				el0_enable = v_i &amp; ~yumi_i;</pre>
-      <pre>				el1_enable = v_i &amp; yumi_i;</pre>
-      <pre>				mux0_sel = 0;</pre>
-      <pre>				mux1_sel = 1;</pre>
-      <pre>			end</pre>
-      <pre>			2: begin</pre>
-      <pre>				v_o = 1;</pre>
-      <pre>				empty_o = 0;</pre>
-      <pre>				full_o = 1;</pre>
-      <pre>				el0_valid = 1;</pre>
-      <pre>				el1_valid = 1;</pre>
-      <pre>				el0_enable = v_i &amp; yumi_i;</pre>
-      <pre>				el1_enable = yumi_i;</pre>
-      <pre>				mux0_sel = 1;</pre>
-      <pre>				mux1_sel = 1;</pre>
-      <pre>			end</pre>
-      <pre>			default: begin</pre>
-      <pre>				v_o = 0;</pre>
-      <pre>				empty_o = 0;</pre>
-      <pre>				full_o = 0;</pre>
-      <pre>				el0_valid = 0;</pre>
-      <pre>				el1_valid = 0;</pre>
-      <pre>				el0_enable = 0;</pre>
-      <pre>				el1_enable = 0;</pre>
-      <pre>				mux0_sel = 0;</pre>
-      <pre>				mux1_sel = 0;</pre>
-      <pre>			end</pre>
-      <pre>		endcase</pre>
-      <pre>	always @(posedge clk_i)</pre>
-      <pre>		if (reset_i)</pre>
-      <pre>			num_els_r &lt;= 2&#39;b00;</pre>
-      <pre>		else</pre>
-      <pre>			num_els_r &lt;= (num_els_r + v_i) - (v_o &amp; yumi_i);</pre>
+      <pre>	wire el0_valid;</pre>
+      <pre>	wire el1_valid;</pre>
       <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p))) - 1:0] sbuf_entry_in;</pre>
       <pre>	assign sbuf_entry_in = sbuf_entry_i;</pre>
-      <pre>	bsg_cache_sbuf_queue #(.width_p(sbuf_entry_width_lp)) sbq(</pre>
+      <pre>	bsg_cache_buffer_queue #(.width_p(sbuf_entry_width_lp)) q0(</pre>
       <pre>		.clk_i(clk_i),</pre>
+      <pre>		.reset_i(reset_i),</pre>
+      <pre>		.v_i(v_i),</pre>
       <pre>		.data_i(sbuf_entry_in),</pre>
-      <pre>		.el0_en_i(el0_enable),</pre>
-      <pre>		.el1_en_i(el1_enable),</pre>
-      <pre>		.mux0_sel_i(mux0_sel),</pre>
-      <pre>		.mux1_sel_i(mux1_sel),</pre>
+      <pre>		.v_o(v_o),</pre>
+      <pre>		.data_o(sbuf_entry_o),</pre>
+      <pre>		.yumi_i(yumi_i),</pre>
+      <pre>		.el0_valid_o(el0_valid),</pre>
+      <pre>		.el1_valid_o(el1_valid),</pre>
       <pre>		.el0_snoop_o(el0),</pre>
       <pre>		.el1_snoop_o(el1),</pre>
-      <pre>		.data_o(sbuf_entry_o)</pre>
+      <pre>		.empty_o(empty_o),</pre>
+      <pre>		.full_o(full_o)</pre>
       <pre>	);</pre>
       <pre>	wire tag_hit0;</pre>
       <pre>	wire tag_hit0_n;</pre>
@@ -214,9 +161,6 @@
       <pre>			bypass_mask_o &lt;= bypass_mask_n;</pre>
       <pre>			bypass_data_o &lt;= bypass_data_n;</pre>
       <pre>		end</pre>
-      <pre>	always @(negedge clk_i)</pre>
-      <pre>		if (~reset_i &amp; (num_els_r !== 2&#39;bxx))</pre>
-      <pre>			;</pre>
       <pre>endmodule</pre>
       <pre>module bsg_cache_sbuf__abstract;</pre>
       <pre>	</pre>

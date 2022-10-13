@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-12 01:45:08</dd></div>
-        <div><dt>time elapsed</dt><dd>0.075s</dd></div>
-        <div><dt>ram usage</dt><dd>73032 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-13 01:46:53</dd></div>
+        <div><dt>time elapsed</dt><dd>0.084s</dd></div>
+        <div><dt>ram usage</dt><dd>76220 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -60,6 +60,7 @@
       <pre>	reset_i,</pre>
       <pre>	v_i,</pre>
       <pre>	tag_i,</pre>
+      <pre>	mask_i,</pre>
       <pre>	ready_o,</pre>
       <pre>	dma_data_i,</pre>
       <pre>	dma_data_v_i,</pre>
@@ -73,8 +74,10 @@
       <pre>	parameter num_cache_p = 0;</pre>
       <pre>	parameter data_width_p = 0;</pre>
       <pre>	parameter block_size_in_words_p = 0;</pre>
+      <pre>	parameter dma_mask_width_p = 0;</pre>
       <pre>	parameter dram_ctrl_burst_len_p = 0;</pre>
       <pre>	localparam mask_width_lp = data_width_p &gt;&gt; 3;</pre>
+      <pre>	localparam dma_byte_mask_width_lp = block_size_in_words_p * mask_width_lp;</pre>
       <pre>	localparam num_req_lp = block_size_in_words_p / dram_ctrl_burst_len_p;</pre>
       <pre>	localparam lg_num_cache_lp = (num_cache_p == 1 ? 1 : $clog2(num_cache_p));</pre>
       <pre>	localparam lg_dram_ctrl_burst_len_lp = (dram_ctrl_burst_len_p == 1 ? 1 : $clog2(dram_ctrl_burst_len_p));</pre>
@@ -82,6 +85,7 @@
       <pre>	input reset_i;</pre>
       <pre>	input v_i;</pre>
       <pre>	input [lg_num_cache_lp - 1:0] tag_i;</pre>
+      <pre>	input [dma_mask_width_p - 1:0] mask_i;</pre>
       <pre>	output wire ready_o;</pre>
       <pre>	input [(num_cache_p * data_width_p) - 1:0] dma_data_i;</pre>
       <pre>	input [num_cache_p - 1:0] dma_data_v_i;</pre>
@@ -91,30 +95,31 @@
       <pre>	output wire [mask_width_lp - 1:0] app_wdf_mask_o;</pre>
       <pre>	output reg app_wdf_end_o;</pre>
       <pre>	input app_wdf_rdy_i;</pre>
-      <pre>	wire [lg_num_cache_lp - 1:0] tag_fifo_data_lo;</pre>
+      <pre>	wire [lg_num_cache_lp - 1:0] tag_lo;</pre>
+      <pre>	wire [dma_mask_width_p - 1:0] mask_lo;</pre>
       <pre>	wire tag_fifo_v_lo;</pre>
       <pre>	reg tag_fifo_yumi_li;</pre>
       <pre>	bsg_fifo_1r1w_small #(</pre>
-      <pre>		.width_p(lg_num_cache_lp),</pre>
+      <pre>		.width_p(lg_num_cache_lp + dma_mask_width_p),</pre>
       <pre>		.els_p(num_cache_p * num_req_lp)</pre>
       <pre>	) tag_fifo(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.reset_i(reset_i),</pre>
       <pre>		.v_i(v_i),</pre>
-      <pre>		.data_i(tag_i),</pre>
+      <pre>		.data_i({tag_i, mask_i}),</pre>
       <pre>		.ready_o(ready_o),</pre>
       <pre>		.v_o(tag_fifo_v_lo),</pre>
-      <pre>		.data_o(tag_fifo_data_lo),</pre>
+      <pre>		.data_o({tag_lo, mask_lo}),</pre>
       <pre>		.yumi_i(tag_fifo_yumi_li)</pre>
       <pre>	);</pre>
       <pre>	wire [num_cache_p - 1:0] cache_sel;</pre>
       <pre>	bsg_decode_with_v #(.num_out_p(num_cache_p)) demux(</pre>
-      <pre>		.i(tag_fifo_data_lo),</pre>
+      <pre>		.i(tag_lo),</pre>
       <pre>		.v_i(tag_fifo_v_lo),</pre>
       <pre>		.o(cache_sel)</pre>
       <pre>	);</pre>
       <pre>	assign dma_data_yumi_o = (cache_sel &amp; dma_data_v_i) &amp; {num_cache_p {app_wdf_rdy_i}};</pre>
-      <pre>	assign app_wdf_wren_o = tag_fifo_v_lo &amp; dma_data_v_i[tag_fifo_data_lo];</pre>
+      <pre>	assign app_wdf_wren_o = tag_fifo_v_lo &amp; dma_data_v_i[tag_lo];</pre>
       <pre>	wire [lg_dram_ctrl_burst_len_lp - 1:0] count_lo;</pre>
       <pre>	reg up_li;</pre>
       <pre>	reg clear_li;</pre>
@@ -127,6 +132,22 @@
       <pre>		.clear_i(clear_li),</pre>
       <pre>		.up_i(up_li),</pre>
       <pre>		.count_o(count_lo)</pre>
+      <pre>	);</pre>
+      <pre>	wire [dma_byte_mask_width_lp - 1:0] byte_mask_lo;</pre>
+      <pre>	bsg_expand_bitmask #(</pre>
+      <pre>		.in_width_p(dma_mask_width_p),</pre>
+      <pre>		.expand_p(dma_byte_mask_width_lp / dma_mask_width_p)</pre>
+      <pre>	) expand(</pre>
+      <pre>		.i(mask_lo),</pre>
+      <pre>		.o(byte_mask_lo)</pre>
+      <pre>	);</pre>
+      <pre>	bsg_mux #(</pre>
+      <pre>		.width_p(mask_width_lp),</pre>
+      <pre>		.els_p(dram_ctrl_burst_len_p)</pre>
+      <pre>	) wdf_mask_mux(</pre>
+      <pre>		.data_i(~byte_mask_lo[(dma_byte_mask_width_lp / num_req_lp) - 1:0]),</pre>
+      <pre>		.sel_i(count_lo),</pre>
+      <pre>		.data_o(app_wdf_mask_o)</pre>
       <pre>	);</pre>
       <pre>	wire take_word;</pre>
       <pre>	assign take_word = app_wdf_wren_o &amp; app_wdf_rdy_i;</pre>
@@ -143,8 +164,7 @@
       <pre>			app_wdf_end_o = 1&#39;b0;</pre>
       <pre>			tag_fifo_yumi_li = 1&#39;b0;</pre>
       <pre>		end</pre>
-      <pre>	assign app_wdf_data_o = dma_data_i[tag_fifo_data_lo * data_width_p+:data_width_p];</pre>
-      <pre>	assign app_wdf_mask_o = 1&#39;sb0;</pre>
+      <pre>	assign app_wdf_data_o = dma_data_i[tag_lo * data_width_p+:data_width_p];</pre>
       <pre>endmodule</pre>
       <pre>module bsg_cache_to_dram_ctrl_tx__abstract;</pre>
       <pre>	</pre>
