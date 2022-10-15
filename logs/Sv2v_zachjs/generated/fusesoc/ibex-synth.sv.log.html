@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-14 02:06:35</dd></div>
-        <div><dt>time elapsed</dt><dd>5.452s</dd></div>
-        <div><dt>ram usage</dt><dd>407660 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-15 02:08:53</dd></div>
+        <div><dt>time elapsed</dt><dd>6.242s</dd></div>
+        <div><dt>ram usage</dt><dd>408684 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -3765,7 +3765,7 @@
       <pre>	output wire [Width - 1:0] out_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_buf #(.Width(Width)) u_impl_xilinx(</pre>
       <pre>				.in_i(in_i),</pre>
       <pre>				.out_o(out_o)</pre>
@@ -3793,7 +3793,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_gating #(</pre>
       <pre>				.FpgaBufGlobal(FpgaBufGlobal),</pre>
       <pre>				.NoFpgaGate(NoFpgaGate)</pre>
@@ -3830,7 +3830,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_mux2 #(.NoFpgaBufG(NoFpgaBufG)) u_impl_xilinx(</pre>
       <pre>				.clk0_i(clk0_i),</pre>
       <pre>				.clk1_i(clk1_i),</pre>
@@ -3862,7 +3862,7 @@
       <pre>	output wire [Width - 1:0] q_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
       <pre>				.ResetValue(ResetValue),</pre>
       <pre>				.Width(Width)</pre>
@@ -4140,7 +4140,7 @@
       <pre>	input wire [9:0] cfg_i;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_badbit</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
@@ -5277,8 +5277,8 @@
       <pre>	exc_cause_o,</pre>
       <pre>	lsu_addr_last_i,</pre>
       <pre>	load_err_i,</pre>
-      <pre>	load_intg_err_i,</pre>
       <pre>	store_err_i,</pre>
+      <pre>	mem_resp_intg_err_i,</pre>
       <pre>	wb_exception_o,</pre>
       <pre>	id_exception_o,</pre>
       <pre>	branch_set_i,</pre>
@@ -5345,8 +5345,8 @@
       <pre>	output reg [6:0] exc_cause_o;</pre>
       <pre>	input wire [31:0] lsu_addr_last_i;</pre>
       <pre>	input wire load_err_i;</pre>
-      <pre>	input wire load_intg_err_i;</pre>
       <pre>	input wire store_err_i;</pre>
+      <pre>	input wire mem_resp_intg_err_i;</pre>
       <pre>	output wire wb_exception_o;</pre>
       <pre>	output wire id_exception_o;</pre>
       <pre>	input wire branch_set_i;</pre>
@@ -5358,7 +5358,7 @@
       <pre>	input wire irq_nm_ext_i;</pre>
       <pre>	output wire nmi_mode_o;</pre>
       <pre>	input wire debug_req_i;</pre>
-      <pre>	output reg [2:0] debug_cause_o;</pre>
+      <pre>	output wire [2:0] debug_cause_o;</pre>
       <pre>	output reg debug_csr_save_o;</pre>
       <pre>	output wire debug_mode_o;</pre>
       <pre>	output reg debug_mode_entering_o;</pre>
@@ -5386,6 +5386,8 @@
       <pre>	reg nmi_mode_d;</pre>
       <pre>	reg debug_mode_q;</pre>
       <pre>	reg debug_mode_d;</pre>
+      <pre>	wire [2:0] debug_cause_d;</pre>
+      <pre>	reg [2:0] debug_cause_q;</pre>
       <pre>	reg load_err_q;</pre>
       <pre>	wire load_err_d;</pre>
       <pre>	reg store_err_q;</pre>
@@ -5498,44 +5500,44 @@
       <pre>			assign wb_exception_o = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>		if (MemECC) begin : g_intg_irq_int</pre>
-      <pre>			reg load_intg_err_irq_pending_q;</pre>
-      <pre>			wire load_intg_err_irq_pending_d;</pre>
-      <pre>			reg [31:0] load_intg_err_addr_q;</pre>
-      <pre>			reg [31:0] load_intg_err_addr_d;</pre>
-      <pre>			reg load_intg_err_irq_set;</pre>
-      <pre>			reg load_intg_err_irq_clear;</pre>
+      <pre>			reg mem_resp_intg_err_irq_pending_q;</pre>
+      <pre>			wire mem_resp_intg_err_irq_pending_d;</pre>
+      <pre>			reg [31:0] mem_resp_intg_err_addr_q;</pre>
+      <pre>			reg [31:0] mem_resp_intg_err_addr_d;</pre>
+      <pre>			reg mem_resp_intg_err_irq_set;</pre>
+      <pre>			reg mem_resp_intg_err_irq_clear;</pre>
       <pre>			wire entering_nmi;</pre>
       <pre>			assign entering_nmi = nmi_mode_d &amp; ~nmi_mode_q;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				load_intg_err_addr_d = load_intg_err_addr_q;</pre>
-      <pre>				load_intg_err_irq_set = 1&#39;b0;</pre>
-      <pre>				load_intg_err_irq_clear = 1&#39;b0;</pre>
-      <pre>				if (load_intg_err_irq_pending_q) begin</pre>
+      <pre>				mem_resp_intg_err_addr_d = mem_resp_intg_err_addr_q;</pre>
+      <pre>				mem_resp_intg_err_irq_set = 1&#39;b0;</pre>
+      <pre>				mem_resp_intg_err_irq_clear = 1&#39;b0;</pre>
+      <pre>				if (mem_resp_intg_err_irq_pending_q) begin</pre>
       <pre>					if (entering_nmi &amp; !irq_nm_ext_i)</pre>
-      <pre>						load_intg_err_irq_clear = 1&#39;b1;</pre>
+      <pre>						mem_resp_intg_err_irq_clear = 1&#39;b1;</pre>
       <pre>				end</pre>
-      <pre>				else if (load_intg_err_i) begin</pre>
-      <pre>					load_intg_err_addr_d = lsu_addr_last_i;</pre>
-      <pre>					load_intg_err_irq_set = 1&#39;b1;</pre>
+      <pre>				else if (mem_resp_intg_err_i) begin</pre>
+      <pre>					mem_resp_intg_err_addr_d = lsu_addr_last_i;</pre>
+      <pre>					mem_resp_intg_err_irq_set = 1&#39;b1;</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			assign load_intg_err_irq_pending_d = (load_intg_err_irq_pending_q &amp; ~load_intg_err_irq_clear) | load_intg_err_irq_set;</pre>
+      <pre>			assign mem_resp_intg_err_irq_pending_d = (mem_resp_intg_err_irq_pending_q &amp; ~mem_resp_intg_err_irq_clear) | mem_resp_intg_err_irq_set;</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>				if (!rst_ni) begin</pre>
-      <pre>					load_intg_err_irq_pending_q &lt;= 1&#39;b0;</pre>
-      <pre>					load_intg_err_addr_q &lt;= 1&#39;sb0;</pre>
+      <pre>					mem_resp_intg_err_irq_pending_q &lt;= 1&#39;b0;</pre>
+      <pre>					mem_resp_intg_err_addr_q &lt;= 1&#39;sb0;</pre>
       <pre>				end</pre>
       <pre>				else begin</pre>
-      <pre>					load_intg_err_irq_pending_q &lt;= load_intg_err_irq_pending_d;</pre>
-      <pre>					load_intg_err_addr_q &lt;= load_intg_err_addr_d;</pre>
+      <pre>					mem_resp_intg_err_irq_pending_q &lt;= mem_resp_intg_err_irq_pending_d;</pre>
+      <pre>					mem_resp_intg_err_addr_q &lt;= mem_resp_intg_err_addr_d;</pre>
       <pre>				end</pre>
-      <pre>			assign irq_nm_int = load_intg_err_irq_set | load_intg_err_irq_pending_q;</pre>
+      <pre>			assign irq_nm_int = mem_resp_intg_err_irq_set | mem_resp_intg_err_irq_pending_q;</pre>
       <pre>			assign irq_nm_int_cause = 5&#39;b00000;</pre>
-      <pre>			assign irq_nm_int_mtval = load_intg_err_addr_q;</pre>
+      <pre>			assign irq_nm_int_mtval = mem_resp_intg_err_addr_q;</pre>
       <pre>		end</pre>
       <pre>		else begin : g_no_intg_irq_int</pre>
-      <pre>			wire unused_load_intg_err_i;</pre>
-      <pre>			assign unused_load_intg_err_i = load_intg_err_i;</pre>
+      <pre>			wire unused_mem_resp_intg_err_i;</pre>
+      <pre>			assign unused_mem_resp_intg_err_i = mem_resp_intg_err_i;</pre>
       <pre>			assign irq_nm_int = 1&#39;b0;</pre>
       <pre>			assign irq_nm_int_cause = 5&#39;d0;</pre>
       <pre>			assign irq_nm_int_mtval = 1&#39;sb0;</pre>
@@ -5558,6 +5560,13 @@
       <pre>		end</pre>
       <pre>	end</pre>
       <pre>	assign unused_irq_timer = irqs_i[16];</pre>
+      <pre>	assign debug_cause_d = (trigger_match_i ? 3&#39;h2 : (ebrk_insn_prio ? 3&#39;h1 : (debug_req_i ? 3&#39;h3 : (do_single_step_d ? 3&#39;h4 : 3&#39;h0))));</pre>
+      <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
+      <pre>		if (!rst_ni)</pre>
+      <pre>			debug_cause_q &lt;= 3&#39;h0;</pre>
+      <pre>		else</pre>
+      <pre>			debug_cause_q &lt;= debug_cause_d;</pre>
+      <pre>	assign debug_cause_o = debug_cause_q;</pre>
       <pre>	localparam [6:0] ibex_pkg_ExcCauseBreakpoint = 7&#39;b0000011;</pre>
       <pre>	localparam [6:0] ibex_pkg_ExcCauseEcallMMode = 7&#39;b0001011;</pre>
       <pre>	localparam [6:0] ibex_pkg_ExcCauseEcallUMode = 7&#39;b0001000;</pre>
@@ -5594,7 +5603,6 @@
       <pre>		retain_id = 1&#39;b0;</pre>
       <pre>		flush_id = 1&#39;b0;</pre>
       <pre>		debug_csr_save_o = 1&#39;b0;</pre>
-      <pre>		debug_cause_o = 3&#39;h1;</pre>
       <pre>		debug_mode_d = debug_mode_q;</pre>
       <pre>		debug_mode_entering_o = 1&#39;b0;</pre>
       <pre>		nmi_mode_d = nmi_mode_q;</pre>
@@ -5702,12 +5710,6 @@
       <pre>				csr_save_if_o = 1&#39;b1;</pre>
       <pre>				debug_csr_save_o = 1&#39;b1;</pre>
       <pre>				csr_save_cause_o = 1&#39;b1;</pre>
-      <pre>				if (trigger_match_i)</pre>
-      <pre>					debug_cause_o = 3&#39;h2;</pre>
-      <pre>				else if (debug_req_i)</pre>
-      <pre>					debug_cause_o = 3&#39;h3;</pre>
-      <pre>				else</pre>
-      <pre>					debug_cause_o = 3&#39;h4;</pre>
       <pre>				debug_mode_d = 1&#39;b1;</pre>
       <pre>				debug_mode_entering_o = 1&#39;b1;</pre>
       <pre>				ctrl_fsm_ns = 4&#39;d5;</pre>
@@ -5721,7 +5723,6 @@
       <pre>					csr_save_cause_o = 1&#39;b1;</pre>
       <pre>					csr_save_id_o = 1&#39;b1;</pre>
       <pre>					debug_csr_save_o = 1&#39;b1;</pre>
-      <pre>					debug_cause_o = 3&#39;h1;</pre>
       <pre>				end</pre>
       <pre>				debug_mode_d = 1&#39;b1;</pre>
       <pre>				debug_mode_entering_o = 1&#39;b1;</pre>
@@ -8493,8 +8494,9 @@
       <pre>	irq_nm_i,</pre>
       <pre>	nmi_mode_o,</pre>
       <pre>	lsu_load_err_i,</pre>
+      <pre>	lsu_load_resp_intg_err_i,</pre>
       <pre>	lsu_store_err_i,</pre>
-      <pre>	lsu_load_intg_err_i,</pre>
+      <pre>	lsu_store_resp_intg_err_i,</pre>
       <pre>	debug_mode_o,</pre>
       <pre>	debug_mode_entering_o,</pre>
       <pre>	debug_cause_o,</pre>
@@ -8615,8 +8617,9 @@
       <pre>	input wire irq_nm_i;</pre>
       <pre>	output wire nmi_mode_o;</pre>
       <pre>	input wire lsu_load_err_i;</pre>
+      <pre>	input wire lsu_load_resp_intg_err_i;</pre>
       <pre>	input wire lsu_store_err_i;</pre>
-      <pre>	input wire lsu_load_intg_err_i;</pre>
+      <pre>	input wire lsu_store_resp_intg_err_i;</pre>
       <pre>	output wire debug_mode_o;</pre>
       <pre>	output wire debug_mode_entering_o;</pre>
       <pre>	output wire [2:0] debug_cause_o;</pre>
@@ -8691,6 +8694,7 @@
       <pre>	wire stall_wb;</pre>
       <pre>	wire flush_id;</pre>
       <pre>	wire multicycle_done;</pre>
+      <pre>	wire mem_resp_intg_err;</pre>
       <pre>	wire [31:0] imm_i_type;</pre>
       <pre>	wire [31:0] imm_s_type;</pre>
       <pre>	wire [31:0] imm_b_type;</pre>
@@ -8899,6 +8903,7 @@
       <pre>	assign illegal_dret_insn = dret_insn_dec &amp; ~debug_mode_o;</pre>
       <pre>	assign illegal_umode_insn = (priv_mode_i != 2&#39;b11) &amp; (mret_insn_dec | (csr_mstatus_tw_i &amp; wfi_insn_dec));</pre>
       <pre>	assign illegal_insn_o = instr_valid_i &amp; (((illegal_insn_dec | illegal_csr_insn_i) | illegal_dret_insn) | illegal_umode_insn);</pre>
+      <pre>	assign mem_resp_intg_err = lsu_load_resp_intg_err_i | lsu_store_resp_intg_err_i;</pre>
       <pre>	ibex_controller #(</pre>
       <pre>		.WritebackStage(WritebackStage),</pre>
       <pre>		.BranchPredictor(BranchPredictor),</pre>
@@ -8933,7 +8938,7 @@
       <pre>		.exc_cause_o(exc_cause_o),</pre>
       <pre>		.lsu_addr_last_i(lsu_addr_last_i),</pre>
       <pre>		.load_err_i(lsu_load_err_i),</pre>
-      <pre>		.load_intg_err_i(lsu_load_intg_err_i),</pre>
+      <pre>		.mem_resp_intg_err_i(mem_resp_intg_err),</pre>
       <pre>		.store_err_i(lsu_store_err_i),</pre>
       <pre>		.wb_exception_o(wb_exception),</pre>
       <pre>		.id_exception_o(id_exception),</pre>
@@ -9816,8 +9821,9 @@
       <pre>	lsu_req_done_o,</pre>
       <pre>	lsu_resp_valid_o,</pre>
       <pre>	load_err_o,</pre>
+      <pre>	load_resp_intg_err_o,</pre>
       <pre>	store_err_o,</pre>
-      <pre>	load_intg_err_o,</pre>
+      <pre>	store_resp_intg_err_o,</pre>
       <pre>	busy_o,</pre>
       <pre>	perf_load_o,</pre>
       <pre>	perf_store_o</pre>
@@ -9849,8 +9855,9 @@
       <pre>	output wire lsu_req_done_o;</pre>
       <pre>	output wire lsu_resp_valid_o;</pre>
       <pre>	output wire load_err_o;</pre>
+      <pre>	output wire load_resp_intg_err_o;</pre>
       <pre>	output wire store_err_o;</pre>
-      <pre>	output wire load_intg_err_o;</pre>
+      <pre>	output wire store_resp_intg_err_o;</pre>
       <pre>	output wire busy_o;</pre>
       <pre>	output reg perf_load_o;</pre>
       <pre>	output reg perf_store_o;</pre>
@@ -10155,7 +10162,8 @@
       <pre>	assign addr_last_o = addr_last_q;</pre>
       <pre>	assign load_err_o = (data_or_pmp_err &amp; ~data_we_q) &amp; lsu_resp_valid_o;</pre>
       <pre>	assign store_err_o = (data_or_pmp_err &amp; data_we_q) &amp; lsu_resp_valid_o;</pre>
-      <pre>	assign load_intg_err_o = (data_intg_err &amp; data_rvalid_i) &amp; ~data_we_q;</pre>
+      <pre>	assign load_resp_intg_err_o = (data_intg_err &amp; data_rvalid_i) &amp; ~data_we_q;</pre>
+      <pre>	assign store_resp_intg_err_o = (data_intg_err &amp; data_rvalid_i) &amp; data_we_q;</pre>
       <pre>	assign busy_o = ls_fsm_cs != 3&#39;d0;</pre>
       <pre>	wire fcov_mis_2_en_d;</pre>
       <pre>	reg fcov_mis_2_en_q;</pre>
@@ -11654,7 +11662,8 @@
       <pre>	wire instr_intg_err;</pre>
       <pre>	wire lsu_load_err;</pre>
       <pre>	wire lsu_store_err;</pre>
-      <pre>	wire lsu_load_intg_err;</pre>
+      <pre>	wire lsu_load_resp_intg_err;</pre>
+      <pre>	wire lsu_store_resp_intg_err;</pre>
       <pre>	wire lsu_addr_incr_req;</pre>
       <pre>	wire [31:0] lsu_addr_last;</pre>
       <pre>	wire [31:0] branch_target_ex;</pre>
@@ -11946,8 +11955,9 @@
       <pre>		.lsu_addr_incr_req_i(lsu_addr_incr_req),</pre>
       <pre>		.lsu_addr_last_i(lsu_addr_last),</pre>
       <pre>		.lsu_load_err_i(lsu_load_err),</pre>
-      <pre>		.lsu_load_intg_err_i(lsu_load_intg_err),</pre>
+      <pre>		.lsu_load_resp_intg_err_i(lsu_load_resp_intg_err),</pre>
       <pre>		.lsu_store_err_i(lsu_store_err),</pre>
+      <pre>		.lsu_store_resp_intg_err_i(lsu_store_resp_intg_err),</pre>
       <pre>		.csr_mstatus_mie_i(csr_mstatus_mie),</pre>
       <pre>		.irq_pending_i(irq_pending_o),</pre>
       <pre>		.irqs_i(irqs),</pre>
@@ -12057,8 +12067,9 @@
       <pre>		.addr_last_o(lsu_addr_last),</pre>
       <pre>		.lsu_resp_valid_o(lsu_resp_valid),</pre>
       <pre>		.load_err_o(lsu_load_err),</pre>
+      <pre>		.load_resp_intg_err_o(lsu_load_resp_intg_err),</pre>
       <pre>		.store_err_o(lsu_store_err),</pre>
-      <pre>		.load_intg_err_o(lsu_load_intg_err),</pre>
+      <pre>		.store_resp_intg_err_o(lsu_store_resp_intg_err),</pre>
       <pre>		.busy_o(lsu_busy),</pre>
       <pre>		.perf_load_o(perf_load),</pre>
       <pre>		.perf_store_o(perf_store)</pre>
@@ -12148,7 +12159,7 @@
       <pre>	assign crash_dump_o[31-:32] = crash_dump_mtval;</pre>
       <pre>	assign alert_minor_o = icache_ecc_error;</pre>
       <pre>	assign alert_major_internal_o = (rf_ecc_err_comb | pc_mismatch_alert) | csr_shadow_err;</pre>
-      <pre>	assign alert_major_bus_o = lsu_load_intg_err | instr_intg_err;</pre>
+      <pre>	assign alert_major_bus_o = (lsu_load_resp_intg_err | lsu_store_resp_intg_err) | instr_intg_err;</pre>
       <pre>	wire outstanding_load_resp;</pre>
       <pre>	wire outstanding_store_resp;</pre>
       <pre>	wire outstanding_load_id;</pre>
