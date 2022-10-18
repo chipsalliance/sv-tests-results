@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-17 02:04:38</dd></div>
-        <div><dt>time elapsed</dt><dd>5.519s</dd></div>
-        <div><dt>ram usage</dt><dd>408692 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-18 02:02:53</dd></div>
+        <div><dt>time elapsed</dt><dd>5.516s</dd></div>
+        <div><dt>ram usage</dt><dd>407664 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -5269,6 +5269,7 @@
       <pre>	instr_valid_clear_o,</pre>
       <pre>	id_in_ready_o,</pre>
       <pre>	controller_run_o,</pre>
+      <pre>	instr_exec_i,</pre>
       <pre>	instr_req_o,</pre>
       <pre>	pc_set_o,</pre>
       <pre>	pc_mux_o,</pre>
@@ -5337,6 +5338,7 @@
       <pre>	output wire instr_valid_clear_o;</pre>
       <pre>	output wire id_in_ready_o;</pre>
       <pre>	output reg controller_run_o;</pre>
+      <pre>	input wire instr_exec_i;</pre>
       <pre>	output reg instr_req_o;</pre>
       <pre>	output reg pc_set_o;</pre>
       <pre>	output reg [2:0] pc_mux_o;</pre>
@@ -5801,6 +5803,8 @@
       <pre>				ctrl_fsm_ns = 4&#39;d0;</pre>
       <pre>			end</pre>
       <pre>		endcase</pre>
+      <pre>		if (~instr_exec_i)</pre>
+      <pre>			halt_if = 1&#39;b1;</pre>
       <pre>	end</pre>
       <pre>	assign flush_id_o = flush_id;</pre>
       <pre>	assign debug_mode_o = debug_mode_q;</pre>
@@ -8435,6 +8439,7 @@
       <pre>	instr_first_cycle_id_o,</pre>
       <pre>	instr_valid_clear_o,</pre>
       <pre>	id_in_ready_o,</pre>
+      <pre>	instr_exec_i,</pre>
       <pre>	icache_inval_o,</pre>
       <pre>	branch_decision_i,</pre>
       <pre>	pc_set_o,</pre>
@@ -8558,6 +8563,7 @@
       <pre>	output wire instr_first_cycle_id_o;</pre>
       <pre>	output wire instr_valid_clear_o;</pre>
       <pre>	output wire id_in_ready_o;</pre>
+      <pre>	input wire instr_exec_i;</pre>
       <pre>	output wire icache_inval_o;</pre>
       <pre>	input wire branch_decision_i;</pre>
       <pre>	output wire pc_set_o;</pre>
@@ -8930,6 +8936,7 @@
       <pre>		.instr_valid_clear_o(instr_valid_clear_o),</pre>
       <pre>		.id_in_ready_o(id_in_ready_o),</pre>
       <pre>		.controller_run_o(controller_run),</pre>
+      <pre>		.instr_exec_i(instr_exec_i),</pre>
       <pre>		.instr_req_o(instr_req_o),</pre>
       <pre>		.pc_set_o(pc_set_o),</pre>
       <pre>		.pc_mux_o(pc_mux_o),</pre>
@@ -11724,6 +11731,7 @@
       <pre>	wire lsu_resp_err;</pre>
       <pre>	wire instr_req_int;</pre>
       <pre>	wire instr_req_gated;</pre>
+      <pre>	wire instr_exec;</pre>
       <pre>	wire en_wb;</pre>
       <pre>	wire [1:0] instr_type_wb;</pre>
       <pre>	wire ready_wb;</pre>
@@ -11870,11 +11878,13 @@
       <pre>	generate</pre>
       <pre>		if (SecureIbex) begin : g_instr_req_gated_secure</pre>
       <pre>			assign instr_req_gated = instr_req_int &amp; (fetch_enable_i == ibex_pkg_FetchEnableOn);</pre>
+      <pre>			assign instr_exec = fetch_enable_i == ibex_pkg_FetchEnableOn;</pre>
       <pre>		end</pre>
       <pre>		else begin : g_instr_req_gated_non_secure</pre>
       <pre>			wire unused_fetch_enable;</pre>
       <pre>			assign unused_fetch_enable = ^fetch_enable_i[3:1];</pre>
       <pre>			assign instr_req_gated = instr_req_int &amp; fetch_enable_i[0];</pre>
+      <pre>			assign instr_exec = fetch_enable_i[0];</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	ibex_id_stage #(</pre>
@@ -11901,6 +11911,7 @@
       <pre>		.instr_first_cycle_id_o(instr_first_cycle_id),</pre>
       <pre>		.instr_valid_clear_o(instr_valid_clear),</pre>
       <pre>		.id_in_ready_o(id_in_ready),</pre>
+      <pre>		.instr_exec_i(instr_exec),</pre>
       <pre>		.instr_req_o(instr_req_int),</pre>
       <pre>		.pc_set_o(pc_set),</pre>
       <pre>		.pc_mux_o(pc_mux_id),</pre>
@@ -12176,6 +12187,18 @@
       <pre>			assign outstanding_store_resp = outstanding_store_id;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
+      <pre>	reg [31:0] pc_at_fetch_disable;</pre>
+      <pre>	reg [3:0] last_fetch_enable;</pre>
+      <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
+      <pre>		if (!rst_ni) begin</pre>
+      <pre>			pc_at_fetch_disable &lt;= 1&#39;sb0;</pre>
+      <pre>			last_fetch_enable &lt;= 1&#39;sb0;</pre>
+      <pre>		end</pre>
+      <pre>		else begin</pre>
+      <pre>			last_fetch_enable &lt;= fetch_enable_i;</pre>
+      <pre>			if ((fetch_enable_i != ibex_pkg_FetchEnableOn) &amp;&amp; (last_fetch_enable == ibex_pkg_FetchEnableOn))</pre>
+      <pre>				pc_at_fetch_disable &lt;= pc_id;</pre>
+      <pre>		end</pre>
       <pre>	assign csr_wdata = alu_operand_a_ex;</pre>
       <pre>	function automatic [11:0] sv2v_cast_12;</pre>
       <pre>		input reg [11:0] inp;</pre>
