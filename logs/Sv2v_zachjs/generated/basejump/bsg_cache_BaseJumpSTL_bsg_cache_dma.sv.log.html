@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-26 09:30:32</dd></div>
-        <div><dt>time elapsed</dt><dd>0.138s</dd></div>
-        <div><dt>ram usage</dt><dd>123672 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-10 01:44:18</dd></div>
+        <div><dt>time elapsed</dt><dd>0.134s</dd></div>
+        <div><dt>ram usage</dt><dd>112228 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -62,7 +62,6 @@
       <pre>	dma_way_i,</pre>
       <pre>	dma_addr_i,</pre>
       <pre>	done_o,</pre>
-      <pre>	track_data_we_i,</pre>
       <pre>	snoop_word_o,</pre>
       <pre>	dma_pkt_o,</pre>
       <pre>	dma_pkt_v_o,</pre>
@@ -79,8 +78,6 @@
       <pre>	data_mem_w_mask_o,</pre>
       <pre>	data_mem_data_o,</pre>
       <pre>	data_mem_data_i,</pre>
-      <pre>	track_miss_i,</pre>
-      <pre>	track_mem_data_i,</pre>
       <pre>	dma_evict_o</pre>
       <pre>);</pre>
       <pre>	parameter addr_width_p = 0;</pre>
@@ -88,7 +85,6 @@
       <pre>	parameter block_size_in_words_p = 0;</pre>
       <pre>	parameter sets_p = 0;</pre>
       <pre>	parameter ways_p = 0;</pre>
-      <pre>	parameter word_tracking_p = 0;</pre>
       <pre>	parameter dma_data_width_p = data_width_p;</pre>
       <pre>	parameter lg_block_size_in_words_lp = (block_size_in_words_p == 1 ? 1 : $clog2(block_size_in_words_p));</pre>
       <pre>	parameter lg_sets_lp = (sets_p == 1 ? 1 : $clog2(sets_p));</pre>
@@ -101,7 +97,7 @@
       <pre>	parameter lg_burst_size_in_words_lp = (burst_size_in_words_lp == 1 ? 1 : $clog2(burst_size_in_words_lp));</pre>
       <pre>	parameter data_mem_els_lp = sets_p * burst_len_lp;</pre>
       <pre>	parameter lg_data_mem_els_lp = (data_mem_els_lp == 1 ? 1 : $clog2(data_mem_els_lp));</pre>
-      <pre>	parameter bsg_cache_dma_pkt_width_lp = (1 + addr_width_p) + block_size_in_words_p;</pre>
+      <pre>	parameter bsg_cache_dma_pkt_width_lp = 1 + addr_width_p;</pre>
       <pre>	parameter debug_p = 0;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
@@ -109,7 +105,6 @@
       <pre>	input [lg_ways_lp - 1:0] dma_way_i;</pre>
       <pre>	input [addr_width_p - 1:0] dma_addr_i;</pre>
       <pre>	output reg done_o;</pre>
-      <pre>	input track_data_we_i;</pre>
       <pre>	output reg [data_width_p - 1:0] snoop_word_o;</pre>
       <pre>	output wire [bsg_cache_dma_pkt_width_lp - 1:0] dma_pkt_o;</pre>
       <pre>	output reg dma_pkt_v_o;</pre>
@@ -126,8 +121,6 @@
       <pre>	output wire [(ways_p * dma_data_mask_width_lp) - 1:0] data_mem_w_mask_o;</pre>
       <pre>	output wire [(ways_p * dma_data_width_p) - 1:0] data_mem_data_o;</pre>
       <pre>	input [(ways_p * dma_data_width_p) - 1:0] data_mem_data_i;</pre>
-      <pre>	input track_miss_i;</pre>
-      <pre>	input [(ways_p * block_size_in_words_p) - 1:0] track_mem_data_i;</pre>
       <pre>	output reg dma_evict_o;</pre>
       <pre>	localparam counter_width_lp = ((burst_len_lp + 1) == 1 ? 1 : $clog2(burst_len_lp + 1));</pre>
       <pre>	localparam byte_offset_width_lp = ((data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
@@ -137,10 +130,7 @@
       <pre>	reg counter_clear;</pre>
       <pre>	reg counter_up;</pre>
       <pre>	wire [counter_width_lp - 1:0] counter_r;</pre>
-      <pre>	bsg_counter_clear_up #(</pre>
-      <pre>		.max_val_p(burst_len_lp),</pre>
-      <pre>		.init_val_p(1&#39;sb0)</pre>
-      <pre>	) dma_counter(</pre>
+      <pre>	bsg_counter_clear_up #(.max_val_p(burst_len_lp)) dma_counter(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.reset_i(reset_i),</pre>
       <pre>		.clear_i(counter_clear),</pre>
@@ -149,7 +139,7 @@
       <pre>	);</pre>
       <pre>	wire counter_fill_max = counter_r == (burst_len_lp - 1);</pre>
       <pre>	wire counter_evict_max = counter_r == burst_len_lp;</pre>
-      <pre>	reg [((1 + addr_width_p) + block_size_in_words_p) - 1:0] dma_pkt;</pre>
+      <pre>	reg [(1 + addr_width_p) - 1:0] dma_pkt;</pre>
       <pre>	wire in_fifo_v_lo;</pre>
       <pre>	wire [dma_data_width_p - 1:0] in_fifo_data_lo;</pre>
       <pre>	reg in_fifo_yumi_li;</pre>
@@ -181,10 +171,6 @@
       <pre>	);</pre>
       <pre>	assign dma_pkt_o = dma_pkt;</pre>
       <pre>	wire [ways_p - 1:0] dma_way_mask;</pre>
-      <pre>	wire [(ways_p * dma_data_mask_width_lp) - 1:0] dma_way_mask_expanded;</pre>
-      <pre>	wire [burst_size_in_words_lp - 1:0] track_bits_offset_picked;</pre>
-      <pre>	wire [dma_data_mask_width_lp - 1:0] track_bits_offset_picked_expanded;</pre>
-      <pre>	wire [dma_data_mask_width_lp - 1:0] data_mem_w_mask_way_picked;</pre>
       <pre>	bsg_decode #(.num_out_p(ways_p)) dma_way_demux(</pre>
       <pre>		.i(dma_way_i),</pre>
       <pre>		.o(dma_way_mask)</pre>
@@ -194,34 +180,8 @@
       <pre>		.expand_p(dma_data_mask_width_lp)</pre>
       <pre>	) expand0(</pre>
       <pre>		.i(dma_way_mask),</pre>
-      <pre>		.o(dma_way_mask_expanded)</pre>
+      <pre>		.o(data_mem_w_mask_o)</pre>
       <pre>	);</pre>
-      <pre>	reg [(ways_p * block_size_in_words_p) - 1:0] track_mem_data_r;</pre>
-      <pre>	wire [block_size_in_words_p - 1:0] track_data_way_picked;</pre>
-      <pre>	bsg_mux #(</pre>
-      <pre>		.width_p(block_size_in_words_p),</pre>
-      <pre>		.els_p(ways_p)</pre>
-      <pre>	) track_way_mux(</pre>
-      <pre>		.data_i(track_mem_data_r),</pre>
-      <pre>		.sel_i(dma_way_i),</pre>
-      <pre>		.data_o(track_data_way_picked)</pre>
-      <pre>	);</pre>
-      <pre>	bsg_mux #(</pre>
-      <pre>		.width_p(burst_size_in_words_lp),</pre>
-      <pre>		.els_p(burst_len_lp)</pre>
-      <pre>	) track_offset_mux(</pre>
-      <pre>		.data_i(track_data_way_picked),</pre>
-      <pre>		.sel_i(counter_r[0+:lg_burst_len_lp]),</pre>
-      <pre>		.data_o(track_bits_offset_picked)</pre>
-      <pre>	);</pre>
-      <pre>	bsg_expand_bitmask #(</pre>
-      <pre>		.in_width_p(burst_size_in_words_lp),</pre>
-      <pre>		.expand_p(data_mask_width_lp)</pre>
-      <pre>	) expand1(</pre>
-      <pre>		.i(track_bits_offset_picked),</pre>
-      <pre>		.o(track_bits_offset_picked_expanded)</pre>
-      <pre>	);</pre>
-      <pre>	assign data_mem_w_mask_way_picked = (word_tracking_p &amp; track_miss_i ? ~track_bits_offset_picked_expanded : {dma_data_mask_width_lp {1&#39;b1}});</pre>
       <pre>	generate</pre>
       <pre>		if (burst_len_lp == 1) begin : genblk1</pre>
       <pre>			assign data_mem_addr_o = dma_addr_i[block_offset_width_lp+:lg_sets_lp];</pre>
@@ -231,7 +191,6 @@
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	assign data_mem_data_o = {ways_p {in_fifo_data_lo}};</pre>
-      <pre>	assign data_mem_w_mask_o = dma_way_mask_expanded &amp; {ways_p {data_mem_w_mask_way_picked}};</pre>
       <pre>	bsg_mux #(</pre>
       <pre>		.width_p(dma_data_width_p),</pre>
       <pre>		.els_p(ways_p)</pre>
@@ -243,9 +202,8 @@
       <pre>	always @(*) begin</pre>
       <pre>		done_o = 1&#39;b0;</pre>
       <pre>		dma_pkt_v_o = 1&#39;b0;</pre>
-      <pre>		dma_pkt[1 + (addr_width_p + (block_size_in_words_p - 1))] = 1&#39;b0;</pre>
-      <pre>		dma_pkt[addr_width_p + (block_size_in_words_p - 1)-:((addr_width_p + (block_size_in_words_p - 1)) &gt;= (block_size_in_words_p + 0) ? ((addr_width_p + (block_size_in_words_p - 1)) - (block_size_in_words_p + 0)) + 1 : ((block_size_in_words_p + 0) - (addr_width_p + (block_size_in_words_p - 1))) + 1)] = {dma_addr_i[addr_width_p - 1:block_offset_width_lp], {block_offset_width_lp {1&#39;b0}}};</pre>
-      <pre>		dma_pkt[block_size_in_words_p - 1-:block_size_in_words_p] = 1&#39;sb0;</pre>
+      <pre>		dma_pkt[addr_width_p + 0] = 1&#39;b0;</pre>
+      <pre>		dma_pkt[addr_width_p - 1-:addr_width_p] = {dma_addr_i[addr_width_p - 1:block_offset_width_lp], {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>		data_mem_v_o = 1&#39;b0;</pre>
       <pre>		data_mem_w_o = 1&#39;b0;</pre>
       <pre>		in_fifo_yumi_li = 1&#39;b0;</pre>
@@ -260,20 +218,19 @@
       <pre>				counter_up = 1&#39;b0;</pre>
       <pre>				data_mem_v_o = 1&#39;b0;</pre>
       <pre>				dma_pkt_v_o = 1&#39;b0;</pre>
-      <pre>				dma_pkt[1 + (addr_width_p + (block_size_in_words_p - 1))] = 1&#39;b0;</pre>
+      <pre>				dma_pkt[addr_width_p + 0] = 1&#39;b0;</pre>
       <pre>				done_o = 1&#39;b0;</pre>
       <pre>				dma_state_n = 2&#39;d0;</pre>
       <pre>				case (dma_cmd_i)</pre>
       <pre>					4&#39;b0001: begin</pre>
       <pre>						dma_pkt_v_o = 1&#39;b1;</pre>
-      <pre>						dma_pkt[1 + (addr_width_p + (block_size_in_words_p - 1))] = 1&#39;b0;</pre>
+      <pre>						dma_pkt[addr_width_p + 0] = 1&#39;b0;</pre>
       <pre>						done_o = dma_pkt_yumi_i;</pre>
       <pre>						dma_state_n = 2&#39;d0;</pre>
       <pre>					end</pre>
       <pre>					4&#39;b0010: begin</pre>
       <pre>						dma_pkt_v_o = 1&#39;b1;</pre>
-      <pre>						dma_pkt[1 + (addr_width_p + (block_size_in_words_p - 1))] = 1&#39;b1;</pre>
-      <pre>						dma_pkt[block_size_in_words_p - 1-:block_size_in_words_p] = (word_tracking_p ? track_data_way_picked : {block_size_in_words_p {1&#39;b1}});</pre>
+      <pre>						dma_pkt[addr_width_p + 0] = 1&#39;b1;</pre>
       <pre>						done_o = dma_pkt_yumi_i;</pre>
       <pre>						dma_state_n = 2&#39;d0;</pre>
       <pre>					end</pre>
@@ -284,7 +241,7 @@
       <pre>					4&#39;b1000: begin</pre>
       <pre>						counter_clear = 1&#39;b1;</pre>
       <pre>						counter_up = 1&#39;b1;</pre>
-      <pre>						data_mem_v_o = |track_bits_offset_picked;</pre>
+      <pre>						data_mem_v_o = 1&#39;b1;</pre>
       <pre>						dma_state_n = 2&#39;d2;</pre>
       <pre>					end</pre>
       <pre>					4&#39;b0000:</pre>
@@ -307,7 +264,7 @@
       <pre>				counter_up = out_fifo_ready_lo &amp; ~counter_evict_max;</pre>
       <pre>				counter_clear = out_fifo_ready_lo &amp; counter_evict_max;</pre>
       <pre>				out_fifo_v_li = 1&#39;b1;</pre>
-      <pre>				data_mem_v_o = (out_fifo_ready_lo &amp; ~counter_evict_max) &amp; |track_bits_offset_picked;</pre>
+      <pre>				data_mem_v_o = out_fifo_ready_lo &amp; ~counter_evict_max;</pre>
       <pre>				done_o = counter_evict_max &amp; out_fifo_ready_lo;</pre>
       <pre>				dma_evict_o = 1&#39;b1;</pre>
       <pre>			end</pre>
@@ -344,13 +301,11 @@
       <pre>			dma_state_r &lt;= dma_state_n;</pre>
       <pre>			if (snoop_word_we)</pre>
       <pre>				snoop_word_o &lt;= snoop_word_n;</pre>
-      <pre>			if (track_data_we_i)</pre>
-      <pre>				track_mem_data_r &lt;= track_mem_data_i;</pre>
       <pre>		end</pre>
       <pre>	always @(posedge clk_i)</pre>
       <pre>		if (debug_p)</pre>
       <pre>			if (dma_pkt_v_o &amp; dma_pkt_yumi_i)</pre>
-      <pre>				$display(&#34;&lt;VCACHE&gt; DMA_PKT we:%0d addr:%8h // %8t&#34;, dma_pkt[1 + (addr_width_p + (block_size_in_words_p - 1))], dma_pkt[addr_width_p + (block_size_in_words_p - 1)-:((addr_width_p + (block_size_in_words_p - 1)) &gt;= (block_size_in_words_p + 0) ? ((addr_width_p + (block_size_in_words_p - 1)) - (block_size_in_words_p + 0)) + 1 : ((block_size_in_words_p + 0) - (addr_width_p + (block_size_in_words_p - 1))) + 1)], $time);</pre>
+      <pre>				$display(&#34;&lt;VCACHE&gt; DMA_PKT we:%0d addr:%8h // %8t&#34;, dma_pkt[addr_width_p + 0], dma_pkt[addr_width_p - 1-:addr_width_p], $time);</pre>
       <pre>endmodule</pre>
       <pre>module bsg_cache_dma__abstract;</pre>
       <pre>	</pre>
