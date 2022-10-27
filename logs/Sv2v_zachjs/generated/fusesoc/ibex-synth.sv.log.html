@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-10 02:03:33</dd></div>
-        <div><dt>time elapsed</dt><dd>5.523s</dd></div>
-        <div><dt>ram usage</dt><dd>408648 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-27 02:09:51</dd></div>
+        <div><dt>time elapsed</dt><dd>5.548s</dd></div>
+        <div><dt>ram usage</dt><dd>408980 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -3765,7 +3765,7 @@
       <pre>	output wire [Width - 1:0] out_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_buf #(.Width(Width)) u_impl_xilinx(</pre>
       <pre>				.in_i(in_i),</pre>
       <pre>				.out_o(out_o)</pre>
@@ -3793,7 +3793,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_gating #(</pre>
       <pre>				.FpgaBufGlobal(FpgaBufGlobal),</pre>
       <pre>				.NoFpgaGate(NoFpgaGate)</pre>
@@ -3830,7 +3830,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_mux2 #(.NoFpgaBufG(NoFpgaBufG)) u_impl_xilinx(</pre>
       <pre>				.clk0_i(clk0_i),</pre>
       <pre>				.clk1_i(clk1_i),</pre>
@@ -3862,7 +3862,7 @@
       <pre>	output wire [Width - 1:0] q_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
       <pre>				.ResetValue(ResetValue),</pre>
       <pre>				.Width(Width)</pre>
@@ -4140,7 +4140,7 @@
       <pre>	input wire [9:0] cfg_i;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
@@ -5269,6 +5269,7 @@
       <pre>	instr_valid_clear_o,</pre>
       <pre>	id_in_ready_o,</pre>
       <pre>	controller_run_o,</pre>
+      <pre>	instr_exec_i,</pre>
       <pre>	instr_req_o,</pre>
       <pre>	pc_set_o,</pre>
       <pre>	pc_mux_o,</pre>
@@ -5277,8 +5278,8 @@
       <pre>	exc_cause_o,</pre>
       <pre>	lsu_addr_last_i,</pre>
       <pre>	load_err_i,</pre>
-      <pre>	load_intg_err_i,</pre>
       <pre>	store_err_i,</pre>
+      <pre>	mem_resp_intg_err_i,</pre>
       <pre>	wb_exception_o,</pre>
       <pre>	id_exception_o,</pre>
       <pre>	branch_set_i,</pre>
@@ -5337,6 +5338,7 @@
       <pre>	output wire instr_valid_clear_o;</pre>
       <pre>	output wire id_in_ready_o;</pre>
       <pre>	output reg controller_run_o;</pre>
+      <pre>	input wire instr_exec_i;</pre>
       <pre>	output reg instr_req_o;</pre>
       <pre>	output reg pc_set_o;</pre>
       <pre>	output reg [2:0] pc_mux_o;</pre>
@@ -5345,8 +5347,8 @@
       <pre>	output reg [6:0] exc_cause_o;</pre>
       <pre>	input wire [31:0] lsu_addr_last_i;</pre>
       <pre>	input wire load_err_i;</pre>
-      <pre>	input wire load_intg_err_i;</pre>
       <pre>	input wire store_err_i;</pre>
+      <pre>	input wire mem_resp_intg_err_i;</pre>
       <pre>	output wire wb_exception_o;</pre>
       <pre>	output wire id_exception_o;</pre>
       <pre>	input wire branch_set_i;</pre>
@@ -5358,7 +5360,7 @@
       <pre>	input wire irq_nm_ext_i;</pre>
       <pre>	output wire nmi_mode_o;</pre>
       <pre>	input wire debug_req_i;</pre>
-      <pre>	output reg [2:0] debug_cause_o;</pre>
+      <pre>	output wire [2:0] debug_cause_o;</pre>
       <pre>	output reg debug_csr_save_o;</pre>
       <pre>	output wire debug_mode_o;</pre>
       <pre>	output reg debug_mode_entering_o;</pre>
@@ -5386,6 +5388,8 @@
       <pre>	reg nmi_mode_d;</pre>
       <pre>	reg debug_mode_q;</pre>
       <pre>	reg debug_mode_d;</pre>
+      <pre>	wire [2:0] debug_cause_d;</pre>
+      <pre>	reg [2:0] debug_cause_q;</pre>
       <pre>	reg load_err_q;</pre>
       <pre>	wire load_err_d;</pre>
       <pre>	reg store_err_q;</pre>
@@ -5414,6 +5418,7 @@
       <pre>	reg enter_debug_mode_prio_q;</pre>
       <pre>	wire enter_debug_mode;</pre>
       <pre>	wire ebreak_into_debug;</pre>
+      <pre>	wire irq_enabled;</pre>
       <pre>	wire handle_irq;</pre>
       <pre>	wire id_wb_pending;</pre>
       <pre>	wire irq_nm;</pre>
@@ -5497,44 +5502,44 @@
       <pre>			assign wb_exception_o = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>		if (MemECC) begin : g_intg_irq_int</pre>
-      <pre>			reg load_intg_err_irq_pending_q;</pre>
-      <pre>			wire load_intg_err_irq_pending_d;</pre>
-      <pre>			reg [31:0] load_intg_err_addr_q;</pre>
-      <pre>			reg [31:0] load_intg_err_addr_d;</pre>
-      <pre>			reg load_intg_err_irq_set;</pre>
-      <pre>			reg load_intg_err_irq_clear;</pre>
+      <pre>			reg mem_resp_intg_err_irq_pending_q;</pre>
+      <pre>			wire mem_resp_intg_err_irq_pending_d;</pre>
+      <pre>			reg [31:0] mem_resp_intg_err_addr_q;</pre>
+      <pre>			reg [31:0] mem_resp_intg_err_addr_d;</pre>
+      <pre>			reg mem_resp_intg_err_irq_set;</pre>
+      <pre>			reg mem_resp_intg_err_irq_clear;</pre>
       <pre>			wire entering_nmi;</pre>
       <pre>			assign entering_nmi = nmi_mode_d &amp; ~nmi_mode_q;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				load_intg_err_addr_d = load_intg_err_addr_q;</pre>
-      <pre>				load_intg_err_irq_set = 1&#39;b0;</pre>
-      <pre>				load_intg_err_irq_clear = 1&#39;b0;</pre>
-      <pre>				if (load_intg_err_irq_pending_q) begin</pre>
+      <pre>				mem_resp_intg_err_addr_d = mem_resp_intg_err_addr_q;</pre>
+      <pre>				mem_resp_intg_err_irq_set = 1&#39;b0;</pre>
+      <pre>				mem_resp_intg_err_irq_clear = 1&#39;b0;</pre>
+      <pre>				if (mem_resp_intg_err_irq_pending_q) begin</pre>
       <pre>					if (entering_nmi &amp; !irq_nm_ext_i)</pre>
-      <pre>						load_intg_err_irq_clear = 1&#39;b1;</pre>
+      <pre>						mem_resp_intg_err_irq_clear = 1&#39;b1;</pre>
       <pre>				end</pre>
-      <pre>				else if (load_intg_err_i) begin</pre>
-      <pre>					load_intg_err_addr_d = lsu_addr_last_i;</pre>
-      <pre>					load_intg_err_irq_set = 1&#39;b1;</pre>
+      <pre>				else if (mem_resp_intg_err_i) begin</pre>
+      <pre>					mem_resp_intg_err_addr_d = lsu_addr_last_i;</pre>
+      <pre>					mem_resp_intg_err_irq_set = 1&#39;b1;</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			assign load_intg_err_irq_pending_d = (load_intg_err_irq_pending_q &amp; ~load_intg_err_irq_clear) | load_intg_err_irq_set;</pre>
+      <pre>			assign mem_resp_intg_err_irq_pending_d = (mem_resp_intg_err_irq_pending_q &amp; ~mem_resp_intg_err_irq_clear) | mem_resp_intg_err_irq_set;</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
       <pre>				if (!rst_ni) begin</pre>
-      <pre>					load_intg_err_irq_pending_q &lt;= 1&#39;b0;</pre>
-      <pre>					load_intg_err_addr_q &lt;= 1&#39;sb0;</pre>
+      <pre>					mem_resp_intg_err_irq_pending_q &lt;= 1&#39;b0;</pre>
+      <pre>					mem_resp_intg_err_addr_q &lt;= 1&#39;sb0;</pre>
       <pre>				end</pre>
       <pre>				else begin</pre>
-      <pre>					load_intg_err_irq_pending_q &lt;= load_intg_err_irq_pending_d;</pre>
-      <pre>					load_intg_err_addr_q &lt;= load_intg_err_addr_d;</pre>
+      <pre>					mem_resp_intg_err_irq_pending_q &lt;= mem_resp_intg_err_irq_pending_d;</pre>
+      <pre>					mem_resp_intg_err_addr_q &lt;= mem_resp_intg_err_addr_d;</pre>
       <pre>				end</pre>
-      <pre>			assign irq_nm_int = load_intg_err_irq_set | load_intg_err_irq_pending_q;</pre>
+      <pre>			assign irq_nm_int = mem_resp_intg_err_irq_set | mem_resp_intg_err_irq_pending_q;</pre>
       <pre>			assign irq_nm_int_cause = 5&#39;b00000;</pre>
-      <pre>			assign irq_nm_int_mtval = load_intg_err_addr_q;</pre>
+      <pre>			assign irq_nm_int_mtval = mem_resp_intg_err_addr_q;</pre>
       <pre>		end</pre>
       <pre>		else begin : g_no_intg_irq_int</pre>
-      <pre>			wire unused_load_intg_err_i;</pre>
-      <pre>			assign unused_load_intg_err_i = load_intg_err_i;</pre>
+      <pre>			wire unused_mem_resp_intg_err_i;</pre>
+      <pre>			assign unused_mem_resp_intg_err_i = mem_resp_intg_err_i;</pre>
       <pre>			assign irq_nm_int = 1&#39;b0;</pre>
       <pre>			assign irq_nm_int_cause = 5&#39;d0;</pre>
       <pre>			assign irq_nm_int_mtval = 1&#39;sb0;</pre>
@@ -5545,7 +5550,8 @@
       <pre>	assign enter_debug_mode = enter_debug_mode_prio_d | (trigger_match_i &amp; ~debug_mode_q);</pre>
       <pre>	assign ebreak_into_debug = (priv_mode_i == 2&#39;b11 ? debug_ebreakm_i : (priv_mode_i == 2&#39;b00 ? debug_ebreaku_i : 1&#39;b0));</pre>
       <pre>	assign irq_nm = irq_nm_ext_i | irq_nm_int;</pre>
-      <pre>	assign handle_irq = (~debug_mode_q &amp; ~nmi_mode_q) &amp; (irq_nm | (irq_pending_i &amp; csr_mstatus_mie_i));</pre>
+      <pre>	assign irq_enabled = csr_mstatus_mie_i | (priv_mode_i == 2&#39;b00);</pre>
+      <pre>	assign handle_irq = ((~debug_mode_q &amp; ~debug_single_step_i) &amp; ~nmi_mode_q) &amp; (irq_nm | (irq_pending_i &amp; irq_enabled));</pre>
       <pre>	always @(*) begin : gen_mfip_id</pre>
       <pre>		mfip_id = 4&#39;d0;</pre>
       <pre>		begin : sv2v_autoblock_1</pre>
@@ -5556,6 +5562,13 @@
       <pre>		end</pre>
       <pre>	end</pre>
       <pre>	assign unused_irq_timer = irqs_i[16];</pre>
+      <pre>	assign debug_cause_d = (trigger_match_i ? 3&#39;h2 : (ebrk_insn_prio &amp; ebreak_into_debug ? 3&#39;h1 : (debug_req_i ? 3&#39;h3 : (do_single_step_d ? 3&#39;h4 : 3&#39;h0))));</pre>
+      <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
+      <pre>		if (!rst_ni)</pre>
+      <pre>			debug_cause_q &lt;= 3&#39;h0;</pre>
+      <pre>		else</pre>
+      <pre>			debug_cause_q &lt;= debug_cause_d;</pre>
+      <pre>	assign debug_cause_o = debug_cause_q;</pre>
       <pre>	localparam [6:0] ibex_pkg_ExcCauseBreakpoint = 7&#39;b0000011;</pre>
       <pre>	localparam [6:0] ibex_pkg_ExcCauseEcallMMode = 7&#39;b0001011;</pre>
       <pre>	localparam [6:0] ibex_pkg_ExcCauseEcallUMode = 7&#39;b0001000;</pre>
@@ -5592,7 +5605,6 @@
       <pre>		retain_id = 1&#39;b0;</pre>
       <pre>		flush_id = 1&#39;b0;</pre>
       <pre>		debug_csr_save_o = 1&#39;b0;</pre>
-      <pre>		debug_cause_o = 3&#39;h1;</pre>
       <pre>		debug_mode_d = debug_mode_q;</pre>
       <pre>		debug_mode_entering_o = 1&#39;b0;</pre>
       <pre>		nmi_mode_d = nmi_mode_q;</pre>
@@ -5700,12 +5712,6 @@
       <pre>				csr_save_if_o = 1&#39;b1;</pre>
       <pre>				debug_csr_save_o = 1&#39;b1;</pre>
       <pre>				csr_save_cause_o = 1&#39;b1;</pre>
-      <pre>				if (trigger_match_i)</pre>
-      <pre>					debug_cause_o = 3&#39;h2;</pre>
-      <pre>				else if (debug_req_i)</pre>
-      <pre>					debug_cause_o = 3&#39;h3;</pre>
-      <pre>				else</pre>
-      <pre>					debug_cause_o = 3&#39;h4;</pre>
       <pre>				debug_mode_d = 1&#39;b1;</pre>
       <pre>				debug_mode_entering_o = 1&#39;b1;</pre>
       <pre>				ctrl_fsm_ns = 4&#39;d5;</pre>
@@ -5719,7 +5725,6 @@
       <pre>					csr_save_cause_o = 1&#39;b1;</pre>
       <pre>					csr_save_id_o = 1&#39;b1;</pre>
       <pre>					debug_csr_save_o = 1&#39;b1;</pre>
-      <pre>					debug_cause_o = 3&#39;h1;</pre>
       <pre>				end</pre>
       <pre>				debug_mode_d = 1&#39;b1;</pre>
       <pre>				debug_mode_entering_o = 1&#39;b1;</pre>
@@ -5798,6 +5803,8 @@
       <pre>				ctrl_fsm_ns = 4&#39;d0;</pre>
       <pre>			end</pre>
       <pre>		endcase</pre>
+      <pre>		if (~instr_exec_i)</pre>
+      <pre>			halt_if = 1&#39;b1;</pre>
       <pre>	end</pre>
       <pre>	assign flush_id_o = flush_id;</pre>
       <pre>	assign debug_mode_o = debug_mode_q;</pre>
@@ -8432,6 +8439,7 @@
       <pre>	instr_first_cycle_id_o,</pre>
       <pre>	instr_valid_clear_o,</pre>
       <pre>	id_in_ready_o,</pre>
+      <pre>	instr_exec_i,</pre>
       <pre>	icache_inval_o,</pre>
       <pre>	branch_decision_i,</pre>
       <pre>	pc_set_o,</pre>
@@ -8491,8 +8499,9 @@
       <pre>	irq_nm_i,</pre>
       <pre>	nmi_mode_o,</pre>
       <pre>	lsu_load_err_i,</pre>
+      <pre>	lsu_load_resp_intg_err_i,</pre>
       <pre>	lsu_store_err_i,</pre>
-      <pre>	lsu_load_intg_err_i,</pre>
+      <pre>	lsu_store_resp_intg_err_i,</pre>
       <pre>	debug_mode_o,</pre>
       <pre>	debug_mode_entering_o,</pre>
       <pre>	debug_cause_o,</pre>
@@ -8554,6 +8563,7 @@
       <pre>	output wire instr_first_cycle_id_o;</pre>
       <pre>	output wire instr_valid_clear_o;</pre>
       <pre>	output wire id_in_ready_o;</pre>
+      <pre>	input wire instr_exec_i;</pre>
       <pre>	output wire icache_inval_o;</pre>
       <pre>	input wire branch_decision_i;</pre>
       <pre>	output wire pc_set_o;</pre>
@@ -8613,8 +8623,9 @@
       <pre>	input wire irq_nm_i;</pre>
       <pre>	output wire nmi_mode_o;</pre>
       <pre>	input wire lsu_load_err_i;</pre>
+      <pre>	input wire lsu_load_resp_intg_err_i;</pre>
       <pre>	input wire lsu_store_err_i;</pre>
-      <pre>	input wire lsu_load_intg_err_i;</pre>
+      <pre>	input wire lsu_store_resp_intg_err_i;</pre>
       <pre>	output wire debug_mode_o;</pre>
       <pre>	output wire debug_mode_entering_o;</pre>
       <pre>	output wire [2:0] debug_cause_o;</pre>
@@ -8689,6 +8700,7 @@
       <pre>	wire stall_wb;</pre>
       <pre>	wire flush_id;</pre>
       <pre>	wire multicycle_done;</pre>
+      <pre>	wire mem_resp_intg_err;</pre>
       <pre>	wire [31:0] imm_i_type;</pre>
       <pre>	wire [31:0] imm_s_type;</pre>
       <pre>	wire [31:0] imm_b_type;</pre>
@@ -8897,6 +8909,7 @@
       <pre>	assign illegal_dret_insn = dret_insn_dec &amp; ~debug_mode_o;</pre>
       <pre>	assign illegal_umode_insn = (priv_mode_i != 2&#39;b11) &amp; (mret_insn_dec | (csr_mstatus_tw_i &amp; wfi_insn_dec));</pre>
       <pre>	assign illegal_insn_o = instr_valid_i &amp; (((illegal_insn_dec | illegal_csr_insn_i) | illegal_dret_insn) | illegal_umode_insn);</pre>
+      <pre>	assign mem_resp_intg_err = lsu_load_resp_intg_err_i | lsu_store_resp_intg_err_i;</pre>
       <pre>	ibex_controller #(</pre>
       <pre>		.WritebackStage(WritebackStage),</pre>
       <pre>		.BranchPredictor(BranchPredictor),</pre>
@@ -8923,6 +8936,7 @@
       <pre>		.instr_valid_clear_o(instr_valid_clear_o),</pre>
       <pre>		.id_in_ready_o(id_in_ready_o),</pre>
       <pre>		.controller_run_o(controller_run),</pre>
+      <pre>		.instr_exec_i(instr_exec_i),</pre>
       <pre>		.instr_req_o(instr_req_o),</pre>
       <pre>		.pc_set_o(pc_set_o),</pre>
       <pre>		.pc_mux_o(pc_mux_o),</pre>
@@ -8931,7 +8945,7 @@
       <pre>		.exc_cause_o(exc_cause_o),</pre>
       <pre>		.lsu_addr_last_i(lsu_addr_last_i),</pre>
       <pre>		.load_err_i(lsu_load_err_i),</pre>
-      <pre>		.load_intg_err_i(lsu_load_intg_err_i),</pre>
+      <pre>		.mem_resp_intg_err_i(mem_resp_intg_err),</pre>
       <pre>		.store_err_i(lsu_store_err_i),</pre>
       <pre>		.wb_exception_o(wb_exception),</pre>
       <pre>		.id_exception_o(id_exception),</pre>
@@ -9814,8 +9828,9 @@
       <pre>	lsu_req_done_o,</pre>
       <pre>	lsu_resp_valid_o,</pre>
       <pre>	load_err_o,</pre>
+      <pre>	load_resp_intg_err_o,</pre>
       <pre>	store_err_o,</pre>
-      <pre>	load_intg_err_o,</pre>
+      <pre>	store_resp_intg_err_o,</pre>
       <pre>	busy_o,</pre>
       <pre>	perf_load_o,</pre>
       <pre>	perf_store_o</pre>
@@ -9847,8 +9862,9 @@
       <pre>	output wire lsu_req_done_o;</pre>
       <pre>	output wire lsu_resp_valid_o;</pre>
       <pre>	output wire load_err_o;</pre>
+      <pre>	output wire load_resp_intg_err_o;</pre>
       <pre>	output wire store_err_o;</pre>
-      <pre>	output wire load_intg_err_o;</pre>
+      <pre>	output wire store_resp_intg_err_o;</pre>
       <pre>	output wire busy_o;</pre>
       <pre>	output reg perf_load_o;</pre>
       <pre>	output reg perf_store_o;</pre>
@@ -10153,7 +10169,8 @@
       <pre>	assign addr_last_o = addr_last_q;</pre>
       <pre>	assign load_err_o = (data_or_pmp_err &amp; ~data_we_q) &amp; lsu_resp_valid_o;</pre>
       <pre>	assign store_err_o = (data_or_pmp_err &amp; data_we_q) &amp; lsu_resp_valid_o;</pre>
-      <pre>	assign load_intg_err_o = (data_intg_err &amp; data_rvalid_i) &amp; ~data_we_q;</pre>
+      <pre>	assign load_resp_intg_err_o = (data_intg_err &amp; data_rvalid_i) &amp; ~data_we_q;</pre>
+      <pre>	assign store_resp_intg_err_o = (data_intg_err &amp; data_rvalid_i) &amp; data_we_q;</pre>
       <pre>	assign busy_o = ls_fsm_cs != 3&#39;d0;</pre>
       <pre>	wire fcov_mis_2_en_d;</pre>
       <pre>	reg fcov_mis_2_en_q;</pre>
@@ -11608,7 +11625,7 @@
       <pre>	output wire alert_minor_o;</pre>
       <pre>	output wire alert_major_internal_o;</pre>
       <pre>	output wire alert_major_bus_o;</pre>
-      <pre>	output wire core_busy_o;</pre>
+      <pre>	output wire [3:0] core_busy_o;</pre>
       <pre>	localparam [31:0] PMPNumChan = 3;</pre>
       <pre>	localparam [0:0] DataIndTiming = SecureIbex;</pre>
       <pre>	localparam [0:0] PCIncrCheck = SecureIbex;</pre>
@@ -11652,7 +11669,8 @@
       <pre>	wire instr_intg_err;</pre>
       <pre>	wire lsu_load_err;</pre>
       <pre>	wire lsu_store_err;</pre>
-      <pre>	wire lsu_load_intg_err;</pre>
+      <pre>	wire lsu_load_resp_intg_err;</pre>
+      <pre>	wire lsu_store_resp_intg_err;</pre>
       <pre>	wire lsu_addr_incr_req;</pre>
       <pre>	wire [31:0] lsu_addr_last;</pre>
       <pre>	wire [31:0] branch_target_ex;</pre>
@@ -11713,6 +11731,7 @@
       <pre>	wire lsu_resp_err;</pre>
       <pre>	wire instr_req_int;</pre>
       <pre>	wire instr_req_gated;</pre>
+      <pre>	wire instr_exec;</pre>
       <pre>	wire en_wb;</pre>
       <pre>	wire [1:0] instr_type_wb;</pre>
       <pre>	wire ready_wb;</pre>
@@ -11766,7 +11785,31 @@
       <pre>	wire perf_store;</pre>
       <pre>	wire illegal_insn_id;</pre>
       <pre>	wire unused_illegal_insn_id;</pre>
-      <pre>	assign core_busy_o = (ctrl_busy | if_busy) | lsu_busy;</pre>
+      <pre>	localparam [3:0] ibex_pkg_IbexMuBiOff = 4&#39;b1010;</pre>
+      <pre>	localparam [3:0] ibex_pkg_IbexMuBiOn = 4&#39;b0101;</pre>
+      <pre>	generate</pre>
+      <pre>		if (SecureIbex) begin : g_core_busy_secure</pre>
+      <pre>			localparam [31:0] NumBusySignals = 3;</pre>
+      <pre>			localparam [31:0] NumBusyBits = 12;</pre>
+      <pre>			wire [11:0] busy_bits_buf;</pre>
+      <pre>			prim_buf #(.Width(NumBusyBits)) u_fetch_enable_buf(</pre>
+      <pre>				.in_i({4 {ctrl_busy, if_busy, lsu_busy}}),</pre>
+      <pre>				.out_o(busy_bits_buf)</pre>
+      <pre>			);</pre>
+      <pre>			genvar i;</pre>
+      <pre>			for (i = 0; i &lt; 4; i = i + 1) begin : g_core_busy_bits</pre>
+      <pre>				if (ibex_pkg_IbexMuBiOn[i] == 1&#39;b1) begin : g_pos</pre>
+      <pre>					assign core_busy_o[i] = |busy_bits_buf[i * NumBusySignals+:NumBusySignals];</pre>
+      <pre>				end</pre>
+      <pre>				else begin : g_neg</pre>
+      <pre>					assign core_busy_o[i] = ~|busy_bits_buf[i * NumBusySignals+:NumBusySignals];</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>		else begin : g_core_busy_non_secure</pre>
+      <pre>			assign core_busy_o = ((ctrl_busy || if_busy) || lsu_busy ? ibex_pkg_IbexMuBiOn : ibex_pkg_IbexMuBiOff);</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	localparam [31:0] ibex_pkg_PMP_I = 0;</pre>
       <pre>	localparam [31:0] ibex_pkg_PMP_I2 = 1;</pre>
       <pre>	ibex_if_stage #(</pre>
@@ -11848,22 +11891,22 @@
       <pre>		.if_busy_o(if_busy)</pre>
       <pre>	);</pre>
       <pre>	assign perf_iside_wait = id_in_ready &amp; ~instr_valid_id;</pre>
-      <pre>	localparam [3:0] ibex_pkg_FetchEnableOn = 4&#39;b0101;</pre>
-      <pre>	initial begin : FetchEnableSecureOnBottomBitSet</pre>
+      <pre>	initial begin : IbexMuBiSecureOnBottomBitSet</pre>
       <pre>		</pre>
       <pre>	end</pre>
-      <pre>	localparam [3:0] ibex_pkg_FetchEnableOff = 4&#39;b1010;</pre>
-      <pre>	initial begin : FetchEnableSecureOffBottomBitClear</pre>
+      <pre>	initial begin : IbexMuBiSecureOffBottomBitClear</pre>
       <pre>		</pre>
       <pre>	end</pre>
       <pre>	generate</pre>
       <pre>		if (SecureIbex) begin : g_instr_req_gated_secure</pre>
-      <pre>			assign instr_req_gated = instr_req_int &amp; (fetch_enable_i == ibex_pkg_FetchEnableOn);</pre>
+      <pre>			assign instr_req_gated = instr_req_int &amp; (fetch_enable_i == ibex_pkg_IbexMuBiOn);</pre>
+      <pre>			assign instr_exec = fetch_enable_i == ibex_pkg_IbexMuBiOn;</pre>
       <pre>		end</pre>
       <pre>		else begin : g_instr_req_gated_non_secure</pre>
       <pre>			wire unused_fetch_enable;</pre>
       <pre>			assign unused_fetch_enable = ^fetch_enable_i[3:1];</pre>
       <pre>			assign instr_req_gated = instr_req_int &amp; fetch_enable_i[0];</pre>
+      <pre>			assign instr_exec = fetch_enable_i[0];</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	ibex_id_stage #(</pre>
@@ -11890,6 +11933,7 @@
       <pre>		.instr_first_cycle_id_o(instr_first_cycle_id),</pre>
       <pre>		.instr_valid_clear_o(instr_valid_clear),</pre>
       <pre>		.id_in_ready_o(id_in_ready),</pre>
+      <pre>		.instr_exec_i(instr_exec),</pre>
       <pre>		.instr_req_o(instr_req_int),</pre>
       <pre>		.pc_set_o(pc_set),</pre>
       <pre>		.pc_mux_o(pc_mux_id),</pre>
@@ -11944,8 +11988,9 @@
       <pre>		.lsu_addr_incr_req_i(lsu_addr_incr_req),</pre>
       <pre>		.lsu_addr_last_i(lsu_addr_last),</pre>
       <pre>		.lsu_load_err_i(lsu_load_err),</pre>
-      <pre>		.lsu_load_intg_err_i(lsu_load_intg_err),</pre>
+      <pre>		.lsu_load_resp_intg_err_i(lsu_load_resp_intg_err),</pre>
       <pre>		.lsu_store_err_i(lsu_store_err),</pre>
+      <pre>		.lsu_store_resp_intg_err_i(lsu_store_resp_intg_err),</pre>
       <pre>		.csr_mstatus_mie_i(csr_mstatus_mie),</pre>
       <pre>		.irq_pending_i(irq_pending_o),</pre>
       <pre>		.irqs_i(irqs),</pre>
@@ -12055,8 +12100,9 @@
       <pre>		.addr_last_o(lsu_addr_last),</pre>
       <pre>		.lsu_resp_valid_o(lsu_resp_valid),</pre>
       <pre>		.load_err_o(lsu_load_err),</pre>
+      <pre>		.load_resp_intg_err_o(lsu_load_resp_intg_err),</pre>
       <pre>		.store_err_o(lsu_store_err),</pre>
-      <pre>		.load_intg_err_o(lsu_load_intg_err),</pre>
+      <pre>		.store_resp_intg_err_o(lsu_store_resp_intg_err),</pre>
       <pre>		.busy_o(lsu_busy),</pre>
       <pre>		.perf_load_o(perf_load),</pre>
       <pre>		.perf_store_o(perf_store)</pre>
@@ -12146,7 +12192,7 @@
       <pre>	assign crash_dump_o[31-:32] = crash_dump_mtval;</pre>
       <pre>	assign alert_minor_o = icache_ecc_error;</pre>
       <pre>	assign alert_major_internal_o = (rf_ecc_err_comb | pc_mismatch_alert) | csr_shadow_err;</pre>
-      <pre>	assign alert_major_bus_o = lsu_load_intg_err | instr_intg_err;</pre>
+      <pre>	assign alert_major_bus_o = (lsu_load_resp_intg_err | lsu_store_resp_intg_err) | instr_intg_err;</pre>
       <pre>	wire outstanding_load_resp;</pre>
       <pre>	wire outstanding_store_resp;</pre>
       <pre>	wire outstanding_load_id;</pre>
@@ -12163,6 +12209,18 @@
       <pre>			assign outstanding_store_resp = outstanding_store_id;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
+      <pre>	reg [31:0] pc_at_fetch_disable;</pre>
+      <pre>	reg [3:0] last_fetch_enable;</pre>
+      <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
+      <pre>		if (!rst_ni) begin</pre>
+      <pre>			pc_at_fetch_disable &lt;= 1&#39;sb0;</pre>
+      <pre>			last_fetch_enable &lt;= 1&#39;sb0;</pre>
+      <pre>		end</pre>
+      <pre>		else begin</pre>
+      <pre>			last_fetch_enable &lt;= fetch_enable_i;</pre>
+      <pre>			if ((fetch_enable_i != ibex_pkg_IbexMuBiOn) &amp;&amp; (last_fetch_enable == ibex_pkg_IbexMuBiOn))</pre>
+      <pre>				pc_at_fetch_disable &lt;= pc_id;</pre>
+      <pre>		end</pre>
       <pre>	assign csr_wdata = alu_operand_a_ex;</pre>
       <pre>	function automatic [11:0] sv2v_cast_12;</pre>
       <pre>		input reg [11:0] inp;</pre>
@@ -13404,7 +13462,7 @@
       <pre>	output wire alert_minor_o;</pre>
       <pre>	output wire alert_major_internal_o;</pre>
       <pre>	output wire alert_major_bus_o;</pre>
-      <pre>	input wire core_busy_i;</pre>
+      <pre>	input wire [3:0] core_busy_i;</pre>
       <pre>	input wire test_en_i;</pre>
       <pre>	input wire scan_rst_ni;</pre>
       <pre>	localparam [31:0] LockstepOffsetW = $clog2(LockstepOffset);</pre>
@@ -13505,43 +13563,43 @@
       <pre>			shadow_tag_rdata_q[LockstepOffset - 1] &lt;= ic_tag_rdata_i;</pre>
       <pre>			shadow_data_rdata_q[LockstepOffset - 1] &lt;= ic_data_rdata_i;</pre>
       <pre>		end</pre>
-      <pre>	reg [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (OutputsOffset * ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164)) - 1 : (OutputsOffset * (1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163))) + ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 162)):(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163)] core_outputs_q;</pre>
-      <pre>	wire [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163:0] core_outputs_in;</pre>
-      <pre>	wire [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163:0] shadow_outputs_d;</pre>
-      <pre>	reg [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163:0] shadow_outputs_q;</pre>
-      <pre>	assign core_outputs_in[71 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))] = instr_req_i;</pre>
-      <pre>	assign core_outputs_in[70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))-:((70 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) &gt;= (38 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) ? ((70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) - (38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))))) + 1 : ((38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))))) - (70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))))) + 1)] = instr_addr_i;</pre>
-      <pre>	assign core_outputs_in[38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))] = data_req_i;</pre>
-      <pre>	assign core_outputs_in[37 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))] = data_we_i;</pre>
-      <pre>	assign core_outputs_in[36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))-:((36 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) &gt;= (32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) ? ((36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))))) + 1 : ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))))) - (36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))))) + 1)] = data_be_i;</pre>
-      <pre>	assign core_outputs_in[32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))-:((32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) &gt;= (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))) ? ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))))) + 1 : ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))))) + 1)] = data_addr_i;</pre>
-      <pre>	assign core_outputs_in[MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))-:((MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))) &gt;= (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) - (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) + 1)] = data_wdata_i;</pre>
-      <pre>	assign core_outputs_in[17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))] = dummy_instr_id_i;</pre>
-      <pre>	assign core_outputs_in[16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))-:((16 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) &gt;= (11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) + 1)] = rf_raddr_a_i;</pre>
-      <pre>	assign core_outputs_in[11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))-:((11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) &gt;= (6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) + 1)] = rf_raddr_b_i;</pre>
-      <pre>	assign core_outputs_in[6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))-:((6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) &gt;= (1 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) - (1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) + 1)] = rf_waddr_wb_i;</pre>
-      <pre>	assign core_outputs_in[1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))] = rf_we_wb_i;</pre>
-      <pre>	assign core_outputs_in[RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))-:((RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))) ? ((RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) - (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) + 1)] = rf_wdata_wb_ecc_i;</pre>
-      <pre>	assign core_outputs_in[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))-:((3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) - (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))) + 1)] = ic_tag_req_i;</pre>
-      <pre>	assign core_outputs_in[1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))] = ic_tag_write_i;</pre>
-      <pre>	assign core_outputs_in[ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))-:((ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))) &gt;= (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))) ? ((ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))) + 1 : ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))) - (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))) + 1)] = ic_tag_addr_i;</pre>
-      <pre>	assign core_outputs_in[TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))-:((TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))) ? ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))) + 1)] = ic_tag_wdata_i;</pre>
-      <pre>	assign core_outputs_in[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))-:((3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))) - (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))) + 1)] = ic_data_req_i;</pre>
-      <pre>	assign core_outputs_in[1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))] = ic_data_write_i;</pre>
-      <pre>	assign core_outputs_in[ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)-:((ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)) &gt;= (LineSizeECC + 164) ? ((ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)) - (LineSizeECC + 164)) + 1 : ((LineSizeECC + 164) - (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))) + 1)] = ic_data_addr_i;</pre>
-      <pre>	assign core_outputs_in[LineSizeECC + 163-:((LineSizeECC + 163) &gt;= 164 ? LineSizeECC + 0 : 165 - (LineSizeECC + 163))] = ic_data_wdata_i;</pre>
-      <pre>	assign core_outputs_in[163] = ic_scr_key_req_i;</pre>
-      <pre>	assign core_outputs_in[162] = irq_pending_i;</pre>
-      <pre>	assign core_outputs_in[161-:160] = crash_dump_i;</pre>
-      <pre>	assign core_outputs_in[1] = double_fault_seen_i;</pre>
-      <pre>	assign core_outputs_in[0] = core_busy_i;</pre>
+      <pre>	reg [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (OutputsOffset * ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167)) - 1 : (OutputsOffset * (1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166))) + ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 165)):(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166)] core_outputs_q;</pre>
+      <pre>	wire [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166:0] core_outputs_in;</pre>
+      <pre>	wire [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166:0] shadow_outputs_d;</pre>
+      <pre>	reg [(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166:0] shadow_outputs_q;</pre>
+      <pre>	assign core_outputs_in[71 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))] = instr_req_i;</pre>
+      <pre>	assign core_outputs_in[70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))-:((70 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) &gt;= (38 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) ? ((70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) - (38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))))) + 1 : ((38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))))) - (70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))))) + 1)] = instr_addr_i;</pre>
+      <pre>	assign core_outputs_in[38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))] = data_req_i;</pre>
+      <pre>	assign core_outputs_in[37 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))] = data_we_i;</pre>
+      <pre>	assign core_outputs_in[36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))-:((36 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) &gt;= (32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) ? ((36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))))) + 1 : ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))))) - (36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))))) + 1)] = data_be_i;</pre>
+      <pre>	assign core_outputs_in[32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))-:((32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) &gt;= (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))) ? ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))))) + 1 : ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))))) + 1)] = data_addr_i;</pre>
+      <pre>	assign core_outputs_in[MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))-:((MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))) &gt;= (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) - (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) + 1)] = data_wdata_i;</pre>
+      <pre>	assign core_outputs_in[17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))] = dummy_instr_id_i;</pre>
+      <pre>	assign core_outputs_in[16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))-:((16 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) &gt;= (11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) + 1)] = rf_raddr_a_i;</pre>
+      <pre>	assign core_outputs_in[11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))-:((11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) &gt;= (6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) + 1)] = rf_raddr_b_i;</pre>
+      <pre>	assign core_outputs_in[6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))-:((6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) &gt;= (1 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) - (1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) + 1)] = rf_waddr_wb_i;</pre>
+      <pre>	assign core_outputs_in[1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))] = rf_we_wb_i;</pre>
+      <pre>	assign core_outputs_in[RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))-:((RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))) ? ((RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) - (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) + 1)] = rf_wdata_wb_ecc_i;</pre>
+      <pre>	assign core_outputs_in[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))-:((3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) - (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))) + 1)] = ic_tag_req_i;</pre>
+      <pre>	assign core_outputs_in[1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))] = ic_tag_write_i;</pre>
+      <pre>	assign core_outputs_in[ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))-:((ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))) &gt;= (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))) ? ((ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))) + 1 : ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))) - (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))) + 1)] = ic_tag_addr_i;</pre>
+      <pre>	assign core_outputs_in[TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))-:((TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))) ? ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))) + 1)] = ic_tag_wdata_i;</pre>
+      <pre>	assign core_outputs_in[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))-:((3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))) - (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))) + 1)] = ic_data_req_i;</pre>
+      <pre>	assign core_outputs_in[1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))] = ic_data_write_i;</pre>
+      <pre>	assign core_outputs_in[ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)-:((ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)) &gt;= (LineSizeECC + 167) ? ((ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)) - (LineSizeECC + 167)) + 1 : ((LineSizeECC + 167) - (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))) + 1)] = ic_data_addr_i;</pre>
+      <pre>	assign core_outputs_in[LineSizeECC + 166-:((LineSizeECC + 166) &gt;= 167 ? LineSizeECC + 0 : 168 - (LineSizeECC + 166))] = ic_data_wdata_i;</pre>
+      <pre>	assign core_outputs_in[166] = ic_scr_key_req_i;</pre>
+      <pre>	assign core_outputs_in[165] = irq_pending_i;</pre>
+      <pre>	assign core_outputs_in[164-:160] = crash_dump_i;</pre>
+      <pre>	assign core_outputs_in[4] = double_fault_seen_i;</pre>
+      <pre>	assign core_outputs_in[3-:4] = core_busy_i;</pre>
       <pre>	always @(posedge clk_i) begin</pre>
       <pre>		begin : sv2v_autoblock_3</pre>
       <pre>			reg [31:0] i;</pre>
       <pre>			for (i = 0; i &lt; (OutputsOffset - 1); i = i + 1)</pre>
-      <pre>				core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) + (i * (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163)))+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163))] &lt;= core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) + ((i + 1) * (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163)))+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163))];</pre>
+      <pre>				core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) + (i * (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166)))+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166))] &lt;= core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) + ((i + 1) * (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166)))+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166))];</pre>
       <pre>		end</pre>
-      <pre>		core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) + ((OutputsOffset - 1) * (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163)))+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163))] &lt;= core_outputs_in;</pre>
+      <pre>		core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) + ((OutputsOffset - 1) * (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166)))+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166))] &lt;= core_outputs_in;</pre>
       <pre>	end</pre>
       <pre>	wire shadow_alert_minor;</pre>
       <pre>	wire shadow_alert_major_internal;</pre>
@@ -13581,59 +13639,59 @@
       <pre>		.rst_ni(rst_shadow_n),</pre>
       <pre>		.hart_id_i(hart_id_i),</pre>
       <pre>		.boot_addr_i(boot_addr_i),</pre>
-      <pre>		.instr_req_o(shadow_outputs_d[71 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))]),</pre>
+      <pre>		.instr_req_o(shadow_outputs_d[71 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))]),</pre>
       <pre>		.instr_gnt_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 2 + (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (2 + (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))))]),</pre>
       <pre>		.instr_rvalid_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 1 + (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (1 + (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))))]),</pre>
-      <pre>		.instr_addr_o(shadow_outputs_d[70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))-:((70 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) &gt;= (38 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) ? ((70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) - (38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))))) + 1 : ((38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))))) - (70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))))) + 1)]),</pre>
+      <pre>		.instr_addr_o(shadow_outputs_d[70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))-:((70 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) &gt;= (38 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) ? ((70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) - (38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))))) + 1 : ((38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))))) - (70 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))))) + 1)]),</pre>
       <pre>		.instr_rdata_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))) : ((0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))))) + ((MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) &gt;= (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 25))))) ? ((MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) - (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 25)))))) + 1 : ((3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 25))))) - (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))) + 1)) - 1)-:((MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) &gt;= (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 25))))) ? ((MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) - (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 25)))))) + 1 : ((3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 25))))) - (MemDataWidth + (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))) + 1)]),</pre>
       <pre>		.instr_err_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (3 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))]),</pre>
-      <pre>		.data_req_o(shadow_outputs_d[38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))]),</pre>
+      <pre>		.data_req_o(shadow_outputs_d[38 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))]),</pre>
       <pre>		.data_gnt_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 2 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (2 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))]),</pre>
       <pre>		.data_rvalid_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 1 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (1 + (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))))]),</pre>
-      <pre>		.data_we_o(shadow_outputs_d[37 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))]),</pre>
-      <pre>		.data_be_o(shadow_outputs_d[36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))-:((36 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) &gt;= (32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) ? ((36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))))) + 1 : ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))))) - (36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))))) + 1)]),</pre>
-      <pre>		.data_addr_o(shadow_outputs_d[32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))-:((32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) &gt;= (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))) ? ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))))) + 1 : ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))))) + 1)]),</pre>
-      <pre>		.data_wdata_o(shadow_outputs_d[MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))-:((MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))) &gt;= (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) - (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))))) + 1)]),</pre>
+      <pre>		.data_we_o(shadow_outputs_d[37 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))]),</pre>
+      <pre>		.data_be_o(shadow_outputs_d[36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))-:((36 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) &gt;= (32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) ? ((36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))))) + 1 : ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))))) - (36 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))))) + 1)]),</pre>
+      <pre>		.data_addr_o(shadow_outputs_d[32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))-:((32 + (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) &gt;= (MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))) ? ((32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))))) + 1 : ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) - (32 + (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))))) + 1)]),</pre>
+      <pre>		.data_wdata_o(shadow_outputs_d[MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))-:((MemDataWidth + (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))) &gt;= (17 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) - (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (MemDataWidth + (17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))))) + 1)]),</pre>
       <pre>		.data_rdata_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))) : ((0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))))) + ((MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) &gt;= (1 + (RegFileDataWidth + (RegFileDataWidth + 25))) ? ((MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) - (1 + (RegFileDataWidth + (RegFileDataWidth + 25)))) + 1 : ((1 + (RegFileDataWidth + (RegFileDataWidth + 25))) - (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))) + 1)) - 1)-:((MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) &gt;= (1 + (RegFileDataWidth + (RegFileDataWidth + 25))) ? ((MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24)))) - (1 + (RegFileDataWidth + (RegFileDataWidth + 25)))) + 1 : ((1 + (RegFileDataWidth + (RegFileDataWidth + 25))) - (MemDataWidth + (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))) + 1)]),</pre>
       <pre>		.data_err_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 1 + (RegFileDataWidth + (RegFileDataWidth + 24)) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (1 + (RegFileDataWidth + (RegFileDataWidth + 24))))]),</pre>
-      <pre>		.dummy_instr_id_o(shadow_outputs_d[17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))]),</pre>
-      <pre>		.rf_raddr_a_o(shadow_outputs_d[16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))-:((16 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) &gt;= (11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) + 1)]),</pre>
-      <pre>		.rf_raddr_b_o(shadow_outputs_d[11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))-:((11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) &gt;= (6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) + 1)]),</pre>
-      <pre>		.rf_waddr_wb_o(shadow_outputs_d[6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))-:((6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) &gt;= (1 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) ? ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) - (1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))))) + 1 : ((1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))))) + 1)]),</pre>
-      <pre>		.rf_we_wb_o(shadow_outputs_d[1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))]),</pre>
-      <pre>		.rf_wdata_wb_ecc_o(shadow_outputs_d[RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))-:((RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))) ? ((RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) - (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))))) + 1)]),</pre>
+      <pre>		.dummy_instr_id_o(shadow_outputs_d[17 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))]),</pre>
+      <pre>		.rf_raddr_a_o(shadow_outputs_d[16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))-:((16 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) &gt;= (11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (16 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) + 1)]),</pre>
+      <pre>		.rf_raddr_b_o(shadow_outputs_d[11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))-:((11 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) &gt;= (6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (11 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) + 1)]),</pre>
+      <pre>		.rf_waddr_wb_o(shadow_outputs_d[6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))-:((6 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) &gt;= (1 + (RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) ? ((6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) - (1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))))) + 1 : ((1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))))) - (6 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))))) + 1)]),</pre>
+      <pre>		.rf_we_wb_o(shadow_outputs_d[1 + (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))]),</pre>
+      <pre>		.rf_wdata_wb_ecc_o(shadow_outputs_d[RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))-:((RegFileDataWidth + (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))) ? ((RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) - (RegFileDataWidth + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))))) + 1)]),</pre>
       <pre>		.rf_rdata_a_ecc_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? RegFileDataWidth + (RegFileDataWidth + 24) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (RegFileDataWidth + (RegFileDataWidth + 24))) : ((0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? RegFileDataWidth + (RegFileDataWidth + 24) : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (RegFileDataWidth + (RegFileDataWidth + 24)))) + ((RegFileDataWidth + (RegFileDataWidth + 24)) &gt;= (RegFileDataWidth + 25) ? ((RegFileDataWidth + (RegFileDataWidth + 24)) - (RegFileDataWidth + 25)) + 1 : ((RegFileDataWidth + 25) - (RegFileDataWidth + (RegFileDataWidth + 24))) + 1)) - 1)-:((RegFileDataWidth + (RegFileDataWidth + 24)) &gt;= (RegFileDataWidth + 25) ? ((RegFileDataWidth + (RegFileDataWidth + 24)) - (RegFileDataWidth + 25)) + 1 : ((RegFileDataWidth + 25) - (RegFileDataWidth + (RegFileDataWidth + 24))) + 1)]),</pre>
       <pre>		.rf_rdata_b_ecc_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? RegFileDataWidth + 24 : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (RegFileDataWidth + 24)) : ((0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? RegFileDataWidth + 24 : (((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) - (RegFileDataWidth + 24))) + ((RegFileDataWidth + 24) &gt;= 25 ? RegFileDataWidth + 0 : 26 - (RegFileDataWidth + 24))) - 1)-:((RegFileDataWidth + 24) &gt;= 25 ? RegFileDataWidth + 0 : 26 - (RegFileDataWidth + 24))]),</pre>
-      <pre>		.ic_tag_req_o(shadow_outputs_d[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))-:((3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))))) - (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))))) + 1)]),</pre>
-      <pre>		.ic_tag_write_o(shadow_outputs_d[1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))]),</pre>
-      <pre>		.ic_tag_addr_o(shadow_outputs_d[ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))-:((ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))) &gt;= (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))) ? ((ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))))) + 1 : ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))) - (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))))) + 1)]),</pre>
-      <pre>		.ic_tag_wdata_o(shadow_outputs_d[TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))-:((TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))) ? ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))))) + 1)]),</pre>
+      <pre>		.ic_tag_req_o(shadow_outputs_d[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))-:((3 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))))) - (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))))) + 1)]),</pre>
+      <pre>		.ic_tag_write_o(shadow_outputs_d[1 + (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))]),</pre>
+      <pre>		.ic_tag_addr_o(shadow_outputs_d[ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))-:((ibex_pkg_IC_INDEX_W + (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))) &gt;= (TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))) ? ((ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))))) + 1 : ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))) - (ibex_pkg_IC_INDEX_W + (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))))) + 1)]),</pre>
+      <pre>		.ic_tag_wdata_o(shadow_outputs_d[TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))-:((TagSizeECC + (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))) &gt;= (3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))) ? ((TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))))) + 1 : ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))) - (TagSizeECC + (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))))) + 1)]),</pre>
       <pre>		.ic_tag_rdata_i(shadow_tag_rdata_q[0]),</pre>
-      <pre>		.ic_data_req_o(shadow_outputs_d[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))-:((3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)))) - (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164)))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 164))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))))) + 1)]),</pre>
-      <pre>		.ic_data_write_o(shadow_outputs_d[1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))]),</pre>
-      <pre>		.ic_data_addr_o(shadow_outputs_d[ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)-:((ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)) &gt;= (LineSizeECC + 164) ? ((ibex_pkg_IC_INDEX_W + (LineSizeECC + 163)) - (LineSizeECC + 164)) + 1 : ((LineSizeECC + 164) - (ibex_pkg_IC_INDEX_W + (LineSizeECC + 163))) + 1)]),</pre>
-      <pre>		.ic_data_wdata_o(shadow_outputs_d[LineSizeECC + 163-:((LineSizeECC + 163) &gt;= 164 ? LineSizeECC + 0 : 165 - (LineSizeECC + 163))]),</pre>
+      <pre>		.ic_data_req_o(shadow_outputs_d[ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))-:((3 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))) &gt;= (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))) ? ((ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)))) - (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167)))) + 1 : ((1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 167))) - (ibex_pkg_IC_NUM_WAYS + (1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))))) + 1)]),</pre>
+      <pre>		.ic_data_write_o(shadow_outputs_d[1 + (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))]),</pre>
+      <pre>		.ic_data_addr_o(shadow_outputs_d[ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)-:((ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)) &gt;= (LineSizeECC + 167) ? ((ibex_pkg_IC_INDEX_W + (LineSizeECC + 166)) - (LineSizeECC + 167)) + 1 : ((LineSizeECC + 167) - (ibex_pkg_IC_INDEX_W + (LineSizeECC + 166))) + 1)]),</pre>
+      <pre>		.ic_data_wdata_o(shadow_outputs_d[LineSizeECC + 166-:((LineSizeECC + 166) &gt;= 167 ? LineSizeECC + 0 : 168 - (LineSizeECC + 166))]),</pre>
       <pre>		.ic_data_rdata_i(shadow_data_rdata_q[0]),</pre>
       <pre>		.ic_scr_key_valid_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24)]),</pre>
-      <pre>		.ic_scr_key_req_o(shadow_outputs_d[163]),</pre>
+      <pre>		.ic_scr_key_req_o(shadow_outputs_d[166]),</pre>
       <pre>		.irq_software_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 24 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 0)]),</pre>
       <pre>		.irq_timer_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 23 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 1)]),</pre>
       <pre>		.irq_external_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 22 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 2)]),</pre>
       <pre>		.irq_fast_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 21 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 3) : (0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 21 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 3)) + 14)-:15]),</pre>
       <pre>		.irq_nm_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 6 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 18)]),</pre>
-      <pre>		.irq_pending_o(shadow_outputs_d[162]),</pre>
+      <pre>		.irq_pending_o(shadow_outputs_d[165]),</pre>
       <pre>		.debug_req_i(shadow_inputs_q[0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 5 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 19)]),</pre>
-      <pre>		.crash_dump_o(shadow_outputs_d[161-:160]),</pre>
-      <pre>		.double_fault_seen_o(shadow_outputs_d[1]),</pre>
+      <pre>		.crash_dump_o(shadow_outputs_d[164-:160]),</pre>
+      <pre>		.double_fault_seen_o(shadow_outputs_d[4]),</pre>
       <pre>		.fetch_enable_i(shadow_inputs_q[((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 4 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 20) : (0 + ((((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 24) &gt;= 0 ? 4 : ((((((2 + MemDataWidth) + 3) + MemDataWidth) + 1) + RegFileDataWidth) + RegFileDataWidth) + 20)) + 3)-:4]),</pre>
       <pre>		.alert_minor_o(shadow_alert_minor),</pre>
       <pre>		.alert_major_internal_o(shadow_alert_major_internal),</pre>
       <pre>		.alert_major_bus_o(shadow_alert_major_bus),</pre>
-      <pre>		.core_busy_o(shadow_outputs_d[0])</pre>
+      <pre>		.core_busy_o(shadow_outputs_d[3-:4])</pre>
       <pre>	);</pre>
       <pre>	always @(posedge clk_i) shadow_outputs_q &lt;= shadow_outputs_d;</pre>
       <pre>	wire outputs_mismatch;</pre>
-      <pre>	assign outputs_mismatch = enable_cmp_q &amp; (shadow_outputs_q != core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) + 0+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 164 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 163))]);</pre>
+      <pre>	assign outputs_mismatch = enable_cmp_q &amp; (shadow_outputs_q != core_outputs_q[(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? 0 : (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) + 0+:(((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + 3) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + 3) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166) &gt;= 0 ? (((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 167 : 1 - ((((((((((((71 + MemDataWidth) + 17) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 166))]);</pre>
       <pre>	assign alert_major_internal_o = outputs_mismatch | shadow_alert_major_internal;</pre>
       <pre>	assign alert_major_bus_o = shadow_alert_major_bus;</pre>
       <pre>	assign alert_minor_o = shadow_alert_minor;</pre>
@@ -13781,8 +13839,8 @@
       <pre>	localparam [31:0] NumAddrScrRounds = (ICacheScramble ? 2 : 0);</pre>
       <pre>	localparam [31:0] NumDiffRounds = NumAddrScrRounds;</pre>
       <pre>	wire clk;</pre>
-      <pre>	wire core_busy_d;</pre>
-      <pre>	reg core_busy_q;</pre>
+      <pre>	wire [3:0] core_busy_d;</pre>
+      <pre>	reg [3:0] core_busy_q;</pre>
       <pre>	wire clock_en;</pre>
       <pre>	wire irq_pending;</pre>
       <pre>	wire dummy_instr_id;</pre>
@@ -13822,12 +13880,33 @@
       <pre>	wire scramble_req_d;</pre>
       <pre>	reg scramble_req_q;</pre>
       <pre>	wire [3:0] fetch_enable_buf;</pre>
-      <pre>	always @(posedge clk_i or negedge rst_ni)</pre>
-      <pre>		if (!rst_ni)</pre>
-      <pre>			core_busy_q &lt;= 1&#39;b0;</pre>
-      <pre>		else</pre>
-      <pre>			core_busy_q &lt;= core_busy_d;</pre>
-      <pre>	assign clock_en = ((core_busy_q | debug_req_i) | irq_pending) | irq_nm_i;</pre>
+      <pre>	localparam [3:0] ibex_pkg_IbexMuBiOff = 4&#39;b1010;</pre>
+      <pre>	generate</pre>
+      <pre>		if (SecureIbex) begin : g_clock_en_secure</pre>
+      <pre>			wire [4:1] sv2v_tmp_u_prim_core_busy_flop_q_o;</pre>
+      <pre>			always @(*) core_busy_q = sv2v_tmp_u_prim_core_busy_flop_q_o;</pre>
+      <pre>			prim_flop #(</pre>
+      <pre>				.Width(4),</pre>
+      <pre>				.ResetValue(ibex_pkg_IbexMuBiOff)</pre>
+      <pre>			) u_prim_core_busy_flop(</pre>
+      <pre>				.clk_i(clk_i),</pre>
+      <pre>				.rst_ni(rst_ni),</pre>
+      <pre>				.d_i(core_busy_d),</pre>
+      <pre>				.q_o(sv2v_tmp_u_prim_core_busy_flop_q_o)</pre>
+      <pre>			);</pre>
+      <pre>			assign clock_en = (((core_busy_q != ibex_pkg_IbexMuBiOff) | debug_req_i) | irq_pending) | irq_nm_i;</pre>
+      <pre>		end</pre>
+      <pre>		else begin : g_clock_en_non_secure</pre>
+      <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
+      <pre>				if (!rst_ni)</pre>
+      <pre>					core_busy_q &lt;= ibex_pkg_IbexMuBiOff;</pre>
+      <pre>				else</pre>
+      <pre>					core_busy_q &lt;= core_busy_d;</pre>
+      <pre>			assign clock_en = ((core_busy_q[0] | debug_req_i) | irq_pending) | irq_nm_i;</pre>
+      <pre>			wire unused_core_busy;</pre>
+      <pre>			assign unused_core_busy = ^core_busy_q[3:1];</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	assign core_sleep_o = ~clock_en;</pre>
       <pre>	prim_clock_gating core_clock_gate_i(</pre>
       <pre>		.clk_i(clk_i),</pre>
@@ -14173,7 +14252,7 @@
       <pre>			assign data_wdata_intg_o = 1&#39;sb0;</pre>
       <pre>		end</pre>
       <pre>		if (Lockstep) begin : gen_lockstep</pre>
-      <pre>			localparam signed [31:0] NumBufferBits = ((((((((((((((((99 + MemDataWidth) + 41) + MemDataWidth) + MemDataWidth) + 18) + RegFileDataWidth) + RegFileDataWidth) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 189;</pre>
+      <pre>			localparam signed [31:0] NumBufferBits = ((((((((((((((((99 + MemDataWidth) + 41) + MemDataWidth) + MemDataWidth) + 18) + RegFileDataWidth) + RegFileDataWidth) + RegFileDataWidth) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + TagSizeECC) + ibex_pkg_IC_NUM_WAYS) + 1) + ibex_pkg_IC_INDEX_W) + LineSizeECC) + 192;</pre>
       <pre>			wire [NumBufferBits - 1:0] buf_in;</pre>
       <pre>			wire [NumBufferBits - 1:0] buf_out;</pre>
       <pre>			wire [31:0] hart_id_local;</pre>
@@ -14221,7 +14300,7 @@
       <pre>			wire [159:0] crash_dump_local;</pre>
       <pre>			wire double_fault_seen_local;</pre>
       <pre>			wire [3:0] fetch_enable_local;</pre>
-      <pre>			wire core_busy_local;</pre>
+      <pre>			wire [3:0] core_busy_local;</pre>
       <pre>			assign buf_in = {hart_id_i, boot_addr_i, instr_req_o, instr_gnt_i, instr_rvalid_i, instr_addr_o, instr_rdata_core, instr_err_i, data_req_o, data_gnt_i, data_rvalid_i, data_we_o, data_be_o, data_addr_o, data_wdata_core, data_rdata_core, data_err_i, dummy_instr_id, rf_raddr_a, rf_raddr_b, rf_waddr_wb, rf_we_wb, rf_wdata_wb_ecc, rf_rdata_a_ecc, rf_rdata_b_ecc, ic_tag_req, ic_tag_write, ic_tag_addr, ic_tag_wdata, ic_data_req, ic_data_write, ic_data_addr, ic_data_wdata, scramble_key_valid_q, ic_scr_key_req, irq_software_i, irq_timer_i, irq_external_i, irq_fast_i, irq_nm_i, irq_pending, debug_req_i, crash_dump_o, double_fault_seen_o, fetch_enable_i, core_busy_d};</pre>
       <pre>			assign {hart_id_local, boot_addr_local, instr_req_local, instr_gnt_local, instr_rvalid_local, instr_addr_local, instr_rdata_local, instr_err_local, data_req_local, data_gnt_local, data_rvalid_local, data_we_local, data_be_local, data_addr_local, data_wdata_local, data_rdata_local, data_err_local, dummy_instr_id_local, rf_raddr_a_local, rf_raddr_b_local, rf_waddr_wb_local, rf_we_wb_local, rf_wdata_wb_ecc_local, rf_rdata_a_ecc_local, rf_rdata_b_ecc_local, ic_tag_req_local, ic_tag_write_local, ic_tag_addr_local, ic_tag_wdata_local, ic_data_req_local, ic_data_write_local, ic_data_addr_local, ic_data_wdata_local, scramble_key_valid_local, ic_scr_key_req_local, irq_software_local, irq_timer_local, irq_external_local, irq_fast_local, irq_nm_local, irq_pending_local, debug_req_local, crash_dump_local, double_fault_seen_local, fetch_enable_local, core_busy_local} = buf_out;</pre>
       <pre>			prim_buf #(.Width(NumBufferBits)) u_signals_prim_buf(</pre>

@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|sv_parser          |           7|         0|    6|      8|        5046|
-|UhdmYosys          |          33|        41|    6|      8|        5041|
-|Slang_parse        |           0|         0|    6|      8|        5053|
-|Odin               |           0|         0|    6|      8|        5053|
-|Verible            |           0|         0|    6|      8|        4962|
-|Verilator          |          19|         0|    6|      8|        5111|
-|moore              |          11|         1|    6|      8|        5041|
-|Sv2v_zachjs        |           7|         0|    6|      8|        5108|
-|tree_sitter_verilog|           0|         0|    6|      8|        4962|
-|UhdmVerilator      |           0|         0|    6|      8|        5130|
-|VeribleExtractor   |          10|         0|    6|      8|        4952|
-|Surelog            |           0|        27|    6|      8|        5088|
-|moore_parse        |          12|         0|    6|      8|        4950|
-|Slang              |           0|         0|    6|      8|        5115|
-|Yosys              |           0|         0|    6|      8|        5115|
-|Icarus             |           0|         0|    6|      8|        4962|
+|Icarus             |           0|         0|    8|      6|        4962|
+|VeribleExtractor   |           0|        10|    8|      6|        4952|
+|Surelog            |         117|         0|    8|      6|        4998|
+|Slang              |           0|         0|    8|      6|        5115|
+|Slang_parse        |           0|         0|    8|      6|        5053|
+|UhdmYosys          |          41|        33|    8|      6|        5041|
+|tree_sitter_verilog|           0|         0|    8|      6|        4962|
+|Sv2v_zachjs        |           0|         7|    8|      6|        5108|
+|Yosys              |           0|         0|    8|      6|        5115|
+|sv_parser          |           0|         7|    8|      6|        5046|
+|Verible            |           0|         0|    8|      6|        4962|
+|UhdmVerilator      |           0|         0|    8|      6|        5130|
+|moore_parse        |           0|        12|    8|      6|        4950|
+|Odin               |           0|         0|    8|      6|        5053|
+|Verilator          |           0|        19|    8|      6|        5111|
+|moore              |           1|        11|    8|      6|        5041|

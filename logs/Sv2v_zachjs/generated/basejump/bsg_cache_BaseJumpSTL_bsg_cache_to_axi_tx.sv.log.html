@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-10-10 01:44:19</dd></div>
-        <div><dt>time elapsed</dt><dd>0.111s</dd></div>
-        <div><dt>ram usage</dt><dd>98164 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-10-27 01:43:46</dd></div>
+        <div><dt>time elapsed</dt><dd>0.125s</dd></div>
+        <div><dt>ram usage</dt><dd>102672 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -62,6 +62,7 @@
       <pre>	yumi_o,</pre>
       <pre>	cache_id_i,</pre>
       <pre>	addr_i,</pre>
+      <pre>	mask_i,</pre>
       <pre>	dma_data_i,</pre>
       <pre>	dma_data_v_i,</pre>
       <pre>	dma_data_yumi_o,</pre>
@@ -89,20 +90,24 @@
       <pre>	parameter num_cache_p = 0;</pre>
       <pre>	parameter addr_width_p = 0;</pre>
       <pre>	parameter data_width_p = 0;</pre>
+      <pre>	parameter mask_width_p = 0;</pre>
       <pre>	parameter block_size_in_words_p = 0;</pre>
       <pre>	parameter tag_fifo_els_p = num_cache_p;</pre>
       <pre>	parameter axi_id_width_p = 0;</pre>
       <pre>	parameter axi_data_width_p = 0;</pre>
       <pre>	parameter axi_burst_len_p = 0;</pre>
       <pre>	parameter lg_num_cache_lp = (num_cache_p == 1 ? 1 : $clog2(num_cache_p));</pre>
+      <pre>	parameter strb_width_lp = data_width_p &gt;&gt; 3;</pre>
       <pre>	parameter axi_strb_width_lp = axi_data_width_p &gt;&gt; 3;</pre>
       <pre>	parameter data_width_ratio_lp = axi_data_width_p / data_width_p;</pre>
+      <pre>	parameter byte_mask_width_lp = block_size_in_words_p * strb_width_lp;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
       <pre>	input v_i;</pre>
       <pre>	output wire yumi_o;</pre>
       <pre>	input [lg_num_cache_lp - 1:0] cache_id_i;</pre>
       <pre>	input [addr_width_p - 1:0] addr_i;</pre>
+      <pre>	input [mask_width_p - 1:0] mask_i;</pre>
       <pre>	input [(num_cache_p * data_width_p) - 1:0] dma_data_i;</pre>
       <pre>	input [num_cache_p - 1:0] dma_data_v_i;</pre>
       <pre>	output wire [num_cache_p - 1:0] dma_data_yumi_o;</pre>
@@ -170,27 +175,36 @@
       <pre>	wire sipo_v_li;</pre>
       <pre>	wire sipo_ready_lo;</pre>
       <pre>	wire [data_width_p - 1:0] sipo_data_li;</pre>
+      <pre>	wire [strb_width_lp - 1:0] sipo_strb_li;</pre>
       <pre>	wire [$clog2(data_width_ratio_lp + 1) - 1:0] sipo_yumi_cnt_li;</pre>
       <pre>	wire [data_width_ratio_lp - 1:0] sipo_v_lo;</pre>
       <pre>	wire [num_cache_p - 1:0] cache_sel;</pre>
+      <pre>	wire [byte_mask_width_lp - 1:0] byte_mask_lo;</pre>
       <pre>	bsg_decode_with_v #(.num_out_p(num_cache_p)) demux(</pre>
       <pre>		.i(tag_lo),</pre>
       <pre>		.v_i(tag_fifo_v_lo),</pre>
       <pre>		.o(cache_sel)</pre>
       <pre>	);</pre>
+      <pre>	bsg_expand_bitmask #(</pre>
+      <pre>		.in_width_p(mask_width_p),</pre>
+      <pre>		.expand_p(byte_mask_width_lp / mask_width_p)</pre>
+      <pre>	) expand(</pre>
+      <pre>		.i(mask_i),</pre>
+      <pre>		.o(byte_mask_lo)</pre>
+      <pre>	);</pre>
       <pre>	assign sipo_data_li = dma_data_i[tag_lo * data_width_p+:data_width_p];</pre>
       <pre>	assign dma_data_yumi_o = (cache_sel &amp; dma_data_v_i) &amp; {num_cache_p {sipo_ready_lo}};</pre>
       <pre>	bsg_serial_in_parallel_out #(</pre>
-      <pre>		.width_p(data_width_p),</pre>
+      <pre>		.width_p(data_width_p + strb_width_lp),</pre>
       <pre>		.els_p(data_width_ratio_lp)</pre>
       <pre>	) sipo(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.reset_i(reset_i),</pre>
       <pre>		.valid_i(sipo_v_li),</pre>
-      <pre>		.data_i(sipo_data_li),</pre>
+      <pre>		.data_i({sipo_strb_li, sipo_data_li}),</pre>
       <pre>		.ready_o(sipo_ready_lo),</pre>
       <pre>		.valid_o(sipo_v_lo),</pre>
-      <pre>		.data_o(axi_wdata_o),</pre>
+      <pre>		.data_o({axi_wstrb_o, axi_wdata_o}),</pre>
       <pre>		.yumi_cnt_i(sipo_yumi_cnt_li)</pre>
       <pre>	);</pre>
       <pre>	assign axi_wvalid_o = &amp;sipo_v_lo;</pre>
@@ -200,7 +214,6 @@
       <pre>		sv2v_cast_3BD19_signed = inp;</pre>
       <pre>	endfunction</pre>
       <pre>	assign sipo_yumi_cnt_li = (axi_wvalid_o &amp; axi_wready_i ? sv2v_cast_3BD19_signed(data_width_ratio_lp) : {$clog2(data_width_ratio_lp + 1) {1&#39;sb0}});</pre>
-      <pre>	assign axi_wstrb_o = {axi_strb_width_lp {1&#39;b1}};</pre>
       <pre>	wire [(block_size_in_words_p == 1 ? 1 : $clog2(block_size_in_words_p)) - 1:0] word_count_lo;</pre>
       <pre>	reg word_up_li;</pre>
       <pre>	reg word_clear_li;</pre>
@@ -213,6 +226,14 @@
       <pre>		.clear_i(word_clear_li),</pre>
       <pre>		.up_i(word_up_li),</pre>
       <pre>		.count_o(word_count_lo)</pre>
+      <pre>	);</pre>
+      <pre>	bsg_mux #(</pre>
+      <pre>		.width_p(strb_width_lp),</pre>
+      <pre>		.els_p(block_size_in_words_p)</pre>
+      <pre>	) wstrb_mux(</pre>
+      <pre>		.data_i(byte_mask_lo),</pre>
+      <pre>		.sel_i(word_count_lo),</pre>
+      <pre>		.data_o(sipo_strb_li)</pre>
       <pre>	);</pre>
       <pre>	wire pop_word;</pre>
       <pre>	assign pop_word = (dma_data_v_i[tag_lo] &amp; dma_data_yumi_o[tag_lo]) &amp; tag_fifo_v_lo;</pre>
