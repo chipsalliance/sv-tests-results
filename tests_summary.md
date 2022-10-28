@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Icarus             |           0|         0|    8|      6|        4962|
-|VeribleExtractor   |           0|        10|    8|      6|        4952|
-|Surelog            |         117|         0|    8|      6|        4998|
-|Slang              |           0|         0|    8|      6|        5115|
-|Slang_parse        |           0|         0|    8|      6|        5053|
-|UhdmYosys          |          41|        33|    8|      6|        5041|
-|tree_sitter_verilog|           0|         0|    8|      6|        4962|
-|Sv2v_zachjs        |           0|         7|    8|      6|        5108|
-|Yosys              |           0|         0|    8|      6|        5115|
-|sv_parser          |           0|         7|    8|      6|        5046|
-|Verible            |           0|         0|    8|      6|        4962|
-|UhdmVerilator      |           0|         0|    8|      6|        5130|
-|moore_parse        |           0|        12|    8|      6|        4950|
-|Odin               |           0|         0|    8|      6|        5053|
-|Verilator          |           0|        19|    8|      6|        5111|
-|moore              |           1|        11|    8|      6|        5041|
+|Icarus             |           0|         0|    1|      0|        4970|
+|Slang_parse        |           0|         0|    1|      0|        5061|
+|moore_parse        |           0|         0|    1|      0|        4970|
+|Yosys              |           0|         0|    1|      0|        5123|
+|VeribleExtractor   |           0|         0|    1|      0|        4970|
+|moore              |           0|         0|    1|      0|        5061|
+|UhdmYosys          |           0|         0|    1|      0|        5123|
+|Verible            |           0|         0|    1|      0|        4970|
+|Surelog            |          23|         9|    1|      0|        5091|
+|Slang              |           0|         0|    1|      0|        5123|
+|UhdmVerilator      |           0|         0|    1|      0|        5138|
+|sv_parser          |           0|         0|    1|      0|        5061|
+|Verilator          |           0|         0|    1|      0|        5138|
+|Odin               |           0|         0|    1|      0|        5061|
+|Sv2v_zachjs        |           0|         0|    1|      0|        5123|
+|tree_sitter_verilog|           0|         0|    1|      0|        4970|
