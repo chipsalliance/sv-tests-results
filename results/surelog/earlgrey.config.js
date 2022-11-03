@@ -1,1 +1,1 @@
-config_loader_data['surelog/earlgrey'] = [["cores","earlgrey",1,"logs/Surelog/generated/fusesoc/earlgrey-synth.sv.log.html","build/lowrisc_systems_chip_earlgrey_nexysvideo_0.1/src/lowrisc_constants_jtag_id_pkg_0/rtl/jtag_id_pkg.sv.html"]]
+config_loader_data['surelog/earlgrey'] = [["cores","earlgrey",0,"logs/Surelog/generated/fusesoc/earlgrey-synth.sv.log.html","build/lowrisc_systems_chip_earlgrey_nexysvideo_0.1/src/lowrisc_constants_jtag_id_pkg_0/rtl/jtag_id_pkg.sv.html"]]
