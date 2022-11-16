@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-11-15 11:05:35</dd></div>
-        <div><dt>time elapsed</dt><dd>4.419s</dd></div>
-        <div><dt>ram usage</dt><dd>410124 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-11-16 02:10:01</dd></div>
+        <div><dt>time elapsed</dt><dd>5.565s</dd></div>
+        <div><dt>ram usage</dt><dd>405960 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -14555,17 +14555,23 @@
       <pre>					else</pre>
       <pre>						pending_dside_accesses_shifted[i] = 1&#39;sb0;</pre>
       <pre>			end</pre>
-      <pre>			always @(*) begin</pre>
-      <pre>				pending_dside_accesses_d[i] = pending_dside_accesses_shifted[i];</pre>
-      <pre>				if (data_req_o &amp;&amp; data_gnt_i)</pre>
-      <pre>					if ((i == 0) &amp;&amp; !pending_dside_accesses_shifted[i][1]) begin</pre>
+      <pre>			if (i == 0) begin : g_track_first_entry</pre>
+      <pre>				always @(*) begin</pre>
+      <pre>					pending_dside_accesses_d[i] = pending_dside_accesses_shifted[i];</pre>
+      <pre>					if ((data_req_o &amp;&amp; data_gnt_i) &amp;&amp; !pending_dside_accesses_shifted[i][1]) begin</pre>
       <pre>						pending_dside_accesses_d[i][1] = 1&#39;b1;</pre>
       <pre>						pending_dside_accesses_d[i][0] = ~data_we_o;</pre>
       <pre>					end</pre>
-      <pre>					else if (pending_dside_accesses_shifted[i - 1][1] &amp; !pending_dside_accesses_shifted[i][1]) begin</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>			else begin : g_track_other_entries</pre>
+      <pre>				always @(*) begin</pre>
+      <pre>					pending_dside_accesses_d[i] = pending_dside_accesses_shifted[i];</pre>
+      <pre>					if (((data_req_o &amp;&amp; data_gnt_i) &amp;&amp; pending_dside_accesses_shifted[i - 1][1]) &amp;&amp; !pending_dside_accesses_shifted[i][1]) begin</pre>
       <pre>						pending_dside_accesses_d[i][1] = 1&#39;b1;</pre>
       <pre>						pending_dside_accesses_d[i][0] = ~data_we_o;</pre>
       <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			end</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
