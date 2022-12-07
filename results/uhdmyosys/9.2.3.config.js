@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/9.2.3'] = [["","final",1,"logs/UhdmYosys/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]
+config_loader_data['uhdmyosys/9.2.3'] = [["","final",0,"logs/UhdmYosys/chapter-9/9.2.3--final.sv.log.html","tests/chapter-9/9.2.3--final.sv.html"]]

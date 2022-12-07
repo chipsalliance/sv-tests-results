@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/16.17'] = [["","expect_test",1,"logs/UhdmYosys/chapter-16/16.17--expect.sv.log.html","tests/chapter-16/16.17--expect.sv.html"]]
+config_loader_data['uhdmyosys/16.17'] = [["","expect_test",0,"logs/UhdmYosys/chapter-16/16.17--expect.sv.log.html","tests/chapter-16/16.17--expect.sv.html"]]
