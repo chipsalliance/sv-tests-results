@@ -216,7 +216,9 @@
 <span class="normal"><a href="#l-208">208</a></span>
 <span class="normal"><a href="#l-209">209</a></span>
 <span class="normal"><a href="#l-210">210</a></span>
-<span class="normal"><a href="#l-211">211</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/*</span>
+<span class="normal"><a href="#l-211">211</a></span>
+<span class="normal"><a href="#l-212">212</a></span>
+<span class="normal"><a href="#l-213">213</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/*</span>
 <a id="l-2" name="l-2"></a><span class="cm"> * bp_fe_controller.v</span>
 <a id="l-3" name="l-3"></a><span class="cm"> */</span><span class="w"></span>
 <a id="l-4" name="l-4"></a>
@@ -242,7 +244,7 @@
 <a id="l-24" name="l-24"></a>
 <a id="l-25" name="l-25"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w">                                     </span><span class="n">redirect_v_o</span><span class="w"></span>
 <a id="l-26" name="l-26"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">vaddr_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w">                 </span><span class="n">redirect_pc_o</span><span class="w"></span>
-<a id="l-27" name="l-27"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">instr_half_width_gp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w">           </span><span class="n">redirect_instr_o</span><span class="w"></span>
+<a id="l-27" name="l-27"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">hinstr_width_gp</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w">               </span><span class="n">redirect_instr_o</span><span class="w"></span>
 <a id="l-28" name="l-28"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w">                                     </span><span class="n">redirect_resume_v_o</span><span class="w"></span>
 <a id="l-29" name="l-29"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w">                                     </span><span class="n">redirect_br_v_o</span><span class="w"></span>
 <a id="l-30" name="l-30"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="kt">logic</span><span class="w">                                     </span><span class="n">redirect_br_taken_o</span><span class="w"></span>
@@ -395,38 +397,40 @@
 <a id="l-177" name="l-177"></a><span class="w">                        </span><span class="o">?</span><span class="w"> </span><span class="n">e_fence</span><span class="w"></span>
 <a id="l-178" name="l-178"></a><span class="w">                        </span><span class="o">:</span><span class="w"> </span><span class="n">cmd_complex_v</span><span class="w"></span>
 <a id="l-179" name="l-179"></a><span class="w">                          </span><span class="o">?</span><span class="w"> </span><span class="n">e_resume</span><span class="w"></span>
-<a id="l-180" name="l-180"></a><span class="w">                          </span><span class="o">:</span><span class="w"> </span><span class="n">fetch_exception_yumi_i</span><span class="w"></span>
-<a id="l-181" name="l-181"></a><span class="w">                            </span><span class="o">?</span><span class="w"> </span><span class="n">e_wait</span><span class="w"></span>
-<a id="l-182" name="l-182"></a><span class="w">                            </span><span class="o">:</span><span class="w"> </span><span class="n">if1_we_o</span><span class="w"></span>
-<a id="l-183" name="l-183"></a><span class="w">                              </span><span class="o">?</span><span class="w"> </span><span class="n">e_run</span><span class="w"></span>
-<a id="l-184" name="l-184"></a><span class="w">                              </span><span class="o">:</span><span class="w"> </span><span class="n">state_r</span><span class="p">;</span><span class="w"></span>
-<a id="l-185" name="l-185"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-186" name="l-186"></a><span class="w">        </span><span class="nl">e_resume:</span><span class="w"></span>
-<a id="l-187" name="l-187"></a><span class="w">          </span><span class="k">begin</span><span class="w"></span>
-<a id="l-188" name="l-188"></a><span class="w">            </span><span class="n">icache_v_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fe_cmd_v_i</span><span class="p">;</span><span class="w"></span>
-<a id="l-189" name="l-189"></a><span class="w">            </span><span class="n">if1_we_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">icache_yumi_i</span><span class="p">;</span><span class="w"></span>
-<a id="l-190" name="l-190"></a><span class="w">            </span><span class="n">itlb_r_v_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">icache_yumi_i</span><span class="p">;</span><span class="w"></span>
-<a id="l-191" name="l-191"></a><span class="w">            </span><span class="n">state_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">if1_we_o</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">e_run</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">e_resume</span><span class="p">;</span><span class="w"></span>
-<a id="l-192" name="l-192"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-193" name="l-193"></a><span class="w">        </span><span class="nl">e_fence:</span><span class="w"></span>
-<a id="l-194" name="l-194"></a><span class="w">          </span><span class="k">begin</span><span class="w"></span>
-<a id="l-195" name="l-195"></a><span class="w">            </span><span class="n">icache_v_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fe_cmd_v_i</span><span class="p">;</span><span class="w"></span>
-<a id="l-196" name="l-196"></a><span class="w">            </span><span class="n">state_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">icache_yumi_i</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">e_resume</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">e_fence</span><span class="p">;</span><span class="w"></span>
-<a id="l-197" name="l-197"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
-<a id="l-198" name="l-198"></a><span class="w">        </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="k">end</span><span class="w"></span>
-<a id="l-199" name="l-199"></a><span class="w">      </span><span class="k">endcase</span><span class="w"></span>
-<a id="l-200" name="l-200"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
-<a id="l-201" name="l-201"></a>
-<a id="l-202" name="l-202"></a><span class="w">  </span><span class="c1">// synopsys sync_set_reset &quot;reset_i&quot;</span>
-<a id="l-203" name="l-203"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="p">)</span><span class="w"></span>
-<a id="l-204" name="l-204"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span><span class="w"></span>
-<a id="l-205" name="l-205"></a><span class="w">        </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">e_reset</span><span class="p">;</span><span class="w"></span>
-<a id="l-206" name="l-206"></a><span class="w">    </span><span class="k">else</span><span class="w"></span>
-<a id="l-207" name="l-207"></a><span class="w">      </span><span class="k">begin</span><span class="w"></span>
-<a id="l-208" name="l-208"></a><span class="w">        </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_n</span><span class="p">;</span><span class="w"></span>
-<a id="l-209" name="l-209"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
-<a id="l-210" name="l-210"></a>
-<a id="l-211" name="l-211"></a><span class="k">endmodule</span><span class="w"></span>
+<a id="l-180" name="l-180"></a><span class="w">                          </span><span class="o">:</span><span class="w"> </span><span class="n">cmd_immediate_v</span><span class="w"></span>
+<a id="l-181" name="l-181"></a><span class="w">                            </span><span class="o">?</span><span class="w"> </span><span class="n">e_run</span><span class="w"></span>
+<a id="l-182" name="l-182"></a><span class="w">                            </span><span class="o">:</span><span class="w"> </span><span class="n">fetch_exception_yumi_i</span><span class="w"></span>
+<a id="l-183" name="l-183"></a><span class="w">                              </span><span class="o">?</span><span class="w"> </span><span class="n">e_wait</span><span class="w"></span>
+<a id="l-184" name="l-184"></a><span class="w">                              </span><span class="o">:</span><span class="w"> </span><span class="n">if1_we_o</span><span class="w"></span>
+<a id="l-185" name="l-185"></a><span class="w">                                </span><span class="o">?</span><span class="w"> </span><span class="n">e_run</span><span class="w"></span>
+<a id="l-186" name="l-186"></a><span class="w">                                </span><span class="o">:</span><span class="w"> </span><span class="n">state_r</span><span class="p">;</span><span class="w"></span>
+<a id="l-187" name="l-187"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-188" name="l-188"></a><span class="w">        </span><span class="nl">e_resume:</span><span class="w"></span>
+<a id="l-189" name="l-189"></a><span class="w">          </span><span class="k">begin</span><span class="w"></span>
+<a id="l-190" name="l-190"></a><span class="w">            </span><span class="n">icache_v_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fe_cmd_v_i</span><span class="p">;</span><span class="w"></span>
+<a id="l-191" name="l-191"></a><span class="w">            </span><span class="n">if1_we_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">icache_yumi_i</span><span class="p">;</span><span class="w"></span>
+<a id="l-192" name="l-192"></a><span class="w">            </span><span class="n">itlb_r_v_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">icache_yumi_i</span><span class="p">;</span><span class="w"></span>
+<a id="l-193" name="l-193"></a><span class="w">            </span><span class="n">state_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">if1_we_o</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">e_run</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">e_resume</span><span class="p">;</span><span class="w"></span>
+<a id="l-194" name="l-194"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-195" name="l-195"></a><span class="w">        </span><span class="nl">e_fence:</span><span class="w"></span>
+<a id="l-196" name="l-196"></a><span class="w">          </span><span class="k">begin</span><span class="w"></span>
+<a id="l-197" name="l-197"></a><span class="w">            </span><span class="n">icache_v_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fe_cmd_v_i</span><span class="p">;</span><span class="w"></span>
+<a id="l-198" name="l-198"></a><span class="w">            </span><span class="n">state_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">icache_yumi_i</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">e_resume</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">e_fence</span><span class="p">;</span><span class="w"></span>
+<a id="l-199" name="l-199"></a><span class="w">          </span><span class="k">end</span><span class="w"></span>
+<a id="l-200" name="l-200"></a><span class="w">        </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="k">end</span><span class="w"></span>
+<a id="l-201" name="l-201"></a><span class="w">      </span><span class="k">endcase</span><span class="w"></span>
+<a id="l-202" name="l-202"></a><span class="w">    </span><span class="k">end</span><span class="w"></span>
+<a id="l-203" name="l-203"></a>
+<a id="l-204" name="l-204"></a><span class="w">  </span><span class="c1">// synopsys sync_set_reset &quot;reset_i&quot;</span>
+<a id="l-205" name="l-205"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="p">)</span><span class="w"></span>
+<a id="l-206" name="l-206"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span><span class="w"></span>
+<a id="l-207" name="l-207"></a><span class="w">        </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">e_reset</span><span class="p">;</span><span class="w"></span>
+<a id="l-208" name="l-208"></a><span class="w">    </span><span class="k">else</span><span class="w"></span>
+<a id="l-209" name="l-209"></a><span class="w">      </span><span class="k">begin</span><span class="w"></span>
+<a id="l-210" name="l-210"></a><span class="w">        </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_n</span><span class="p">;</span><span class="w"></span>
+<a id="l-211" name="l-211"></a><span class="w">      </span><span class="k">end</span><span class="w"></span>
+<a id="l-212" name="l-212"></a>
+<a id="l-213" name="l-213"></a><span class="k">endmodule</span><span class="w"></span>
 </pre></div></td></tr></table></div>
 
   </body>
