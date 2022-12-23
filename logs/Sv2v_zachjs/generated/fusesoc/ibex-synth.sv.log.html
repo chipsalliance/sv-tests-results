@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2022-12-22 01:57:33</dd></div>
-        <div><dt>time elapsed</dt><dd>4.533s</dd></div>
-        <div><dt>ram usage</dt><dd>408932 KB</dd></div>
+        <div><dt>completed</dt><dd>2022-12-23 02:02:41</dd></div>
+        <div><dt>time elapsed</dt><dd>5.467s</dd></div>
+        <div><dt>ram usage</dt><dd>410124 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -6054,25 +6054,16 @@
       <pre>	function automatic is_mml_m_exec_cfg;</pre>
       <pre>		input reg [5:0] pmp_cfg;</pre>
       <pre>		reg unused_cfg;</pre>
-      <pre>		reg [0:1] _sv2v_jump;</pre>
+      <pre>		reg value;</pre>
       <pre>		begin</pre>
-      <pre>			_sv2v_jump = 2&#39;b00;</pre>
       <pre>			unused_cfg = ^{pmp_cfg[4-:2]};</pre>
+      <pre>			value = 1&#39;b0;</pre>
       <pre>			if (pmp_cfg[5])</pre>
       <pre>				case ({pmp_cfg[0], pmp_cfg[1], pmp_cfg[2]})</pre>
-      <pre>					3&#39;b001, 3&#39;b010, 3&#39;b011, 3&#39;b101: begin</pre>
-      <pre>						is_mml_m_exec_cfg = 1&#39;b1;</pre>
-      <pre>						_sv2v_jump = 2&#39;b11;</pre>
-      <pre>					end</pre>
-      <pre>					default: begin</pre>
-      <pre>						is_mml_m_exec_cfg = 1&#39;b0;</pre>
-      <pre>						_sv2v_jump = 2&#39;b11;</pre>
-      <pre>					end</pre>
+      <pre>					3&#39;b001, 3&#39;b010, 3&#39;b011, 3&#39;b101: value = 1&#39;b1;</pre>
+      <pre>					default: value = 1&#39;b0;</pre>
       <pre>				endcase</pre>
-      <pre>			if (_sv2v_jump == 2&#39;b00) begin</pre>
-      <pre>				is_mml_m_exec_cfg = 1&#39;b0;</pre>
-      <pre>				_sv2v_jump = 2&#39;b11;</pre>
-      <pre>			end</pre>
+      <pre>			is_mml_m_exec_cfg = value;</pre>
       <pre>		end</pre>
       <pre>	endfunction</pre>
       <pre>	localparam [31:0] RV32BExtra = ((RV32B == 32&#39;sd2) || (RV32B == 32&#39;sd3) ? 1 : 0);</pre>
@@ -11123,10 +11114,7 @@
       <pre>		input reg [1:0] pmp_req_type;</pre>
       <pre>		input reg [1:0] priv_mode;</pre>
       <pre>		input reg permission_check;</pre>
-      <pre>		if (csr_pmp_mseccfg_mml)</pre>
-      <pre>			perm_check_wrapper = mml_perm_check(csr_pmp_cfg, pmp_req_type, priv_mode, permission_check);</pre>
-      <pre>		else</pre>
-      <pre>			perm_check_wrapper = orig_perm_check(csr_pmp_cfg[5], priv_mode, permission_check);</pre>
+      <pre>		perm_check_wrapper = (csr_pmp_mseccfg_mml ? mml_perm_check(csr_pmp_cfg, pmp_req_type, priv_mode, permission_check) : orig_perm_check(csr_pmp_cfg[5], priv_mode, permission_check));</pre>
       <pre>	endfunction</pre>
       <pre>	function automatic access_fault_check;</pre>
       <pre>		input reg csr_pmp_mseccfg_mmwp;</pre>
@@ -11136,33 +11124,19 @@
       <pre>		input reg [1:0] priv_mode;</pre>
       <pre>		input reg [PMPNumRegions - 1:0] final_perm_check;</pre>
       <pre>		reg access_fail;</pre>
-      <pre>		reg [0:1] _sv2v_jump;</pre>
+      <pre>		reg matched;</pre>
       <pre>		begin</pre>
       <pre>			access_fail = (csr_pmp_mseccfg_mmwp | (priv_mode != 2&#39;b11)) | (csr_pmp_mseccfg_mml &amp;&amp; (pmp_req_type == 2&#39;b00));</pre>
-      <pre>			_sv2v_jump = 2&#39;b00;</pre>
+      <pre>			matched = 1&#39;b0;</pre>
       <pre>			begin : sv2v_autoblock_1</pre>
       <pre>				reg signed [31:0] r;</pre>
-      <pre>				begin : sv2v_autoblock_2</pre>
-      <pre>					reg signed [31:0] _sv2v_value_on_break;</pre>
-      <pre>					for (r = 0; r &lt; PMPNumRegions; r = r + 1)</pre>
-      <pre>						if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
-      <pre>							_sv2v_jump = 2&#39;b00;</pre>
-      <pre>							if (match_all[r]) begin</pre>
-      <pre>								access_fail = ~final_perm_check[r];</pre>
-      <pre>								_sv2v_jump = 2&#39;b10;</pre>
-      <pre>							end</pre>
-      <pre>							_sv2v_value_on_break = r;</pre>
-      <pre>						end</pre>
-      <pre>					if (!(_sv2v_jump &lt; 2&#39;b10))</pre>
-      <pre>						r = _sv2v_value_on_break;</pre>
-      <pre>					if (_sv2v_jump != 2&#39;b11)</pre>
-      <pre>						_sv2v_jump = 2&#39;b00;</pre>
-      <pre>				end</pre>
+      <pre>				for (r = 0; r &lt; PMPNumRegions; r = r + 1)</pre>
+      <pre>					if (!matched &amp;&amp; match_all[r]) begin</pre>
+      <pre>						access_fail = ~final_perm_check[r];</pre>
+      <pre>						matched = 1&#39;b1;</pre>
+      <pre>					end</pre>
       <pre>			end</pre>
-      <pre>			if (_sv2v_jump == 2&#39;b00) begin</pre>
-      <pre>				access_fault_check = access_fail;</pre>
-      <pre>				_sv2v_jump = 2&#39;b11;</pre>
-      <pre>			end</pre>
+      <pre>			access_fault_check = access_fail;</pre>
       <pre>		end</pre>
       <pre>	endfunction</pre>
       <pre>	genvar r;</pre>
