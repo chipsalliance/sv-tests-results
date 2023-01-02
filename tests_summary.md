@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Sv2v_zachjs        |           0|         0|    0|      0|        4728|
 |Icarus             |           0|         0|    0|      0|        4575|
-|moore              |           0|         0|    0|      0|        4666|
-|moore_parse        |           0|         0|    0|      0|        4575|
-|UhdmYosys          |           0|         0|    0|      0|        4728|
-|VeribleExtractor   |           0|         0|    0|      0|        4575|
-|Odin               |           0|         0|    0|      0|        4666|
-|Slang_parse        |           0|         0|    0|      0|        4666|
 |Verilator          |           0|         0|    0|      0|        4743|
-|sv_parser          |           0|         0|    0|      0|        4666|
-|Yosys              |           0|         0|    0|      0|        4728|
-|Verible            |           0|         0|    0|      0|        4575|
-|UhdmVerilator      |           1|         0|    0|      0|        4742|
 |Slang              |           0|         0|    0|      0|        4728|
+|sv_parser          |           0|         0|    0|      0|        4666|
+|UhdmYosys          |           0|         0|    0|      0|        4728|
+|Slang_parse        |           0|         0|    0|      0|        4666|
+|UhdmVerilator      |           0|         1|    0|      0|        4742|
+|moore_parse        |           0|         0|    0|      0|        4575|
+|Odin               |           0|         0|    0|      0|        4666|
+|Yosys              |           1|         0|    0|      0|        4727|
+|Sv2v_zachjs        |           0|         0|    0|      0|        4728|
 |tree_sitter_verilog|           0|         0|    0|      0|        4575|
+|VeribleExtractor   |           0|         0|    0|      0|        4575|
+|moore              |           0|         0|    0|      0|        4666|
 |Surelog            |           0|         0|    0|      0|        4728|
+|Verible            |           0|         0|    0|      0|        4575|
