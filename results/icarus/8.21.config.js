@@ -1,1 +1,1 @@
-config_loader_data['icarus/8.21'] = [["","abstract_class",0,"logs/Icarus/chapter-8/8.21--abstract_class.sv.log.html","tests/chapter-8/8.21--abstract_class.sv.html"]]
+config_loader_data['icarus/8.21'] = [["","abstract_class",0,"logs/Icarus/chapter-8/8.21--abstract_class.sv.log.html","tests/chapter-8/8.21--abstract_class.sv.html"],["","abstract_class_inst",1,"logs/Icarus/chapter-8/8.21--abstract_class_inst.sv.log.html","tests/chapter-8/8.21--abstract_class_inst.sv.html"]]

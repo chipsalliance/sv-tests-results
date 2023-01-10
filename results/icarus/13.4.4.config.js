@@ -1,1 +1,1 @@
-config_loader_data['icarus/13.4.4'] = [["","function_fork_valid",1,"logs/Icarus/chapter-13/13.4.4--fork-valid.sv.log.html","tests/chapter-13/13.4.4--fork-valid.sv.html"]]
+config_loader_data['icarus/13.4.4'] = [["","function_fork_invalid",0,"logs/Icarus/chapter-13/13.4.4--fork-invalid.sv.log.html","tests/chapter-13/13.4.4--fork-invalid.sv.html"],["","function_fork_valid",1,"logs/Icarus/chapter-13/13.4.4--fork-valid.sv.log.html","tests/chapter-13/13.4.4--fork-valid.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['icarus/22.10'] = [["","22.10--celldefine-basic-1",1,"logs/Icarus/chapter-22/22.10--celldefine-basic-1.sv.log.html","tests/chapter-22/22.10--celldefine-basic-1.sv.html"],["","22.10--celldefine-basic-2",1,"logs/Icarus/chapter-22/22.10--celldefine-basic-2.sv.log.html","tests/chapter-22/22.10--celldefine-basic-2.sv.html"]]
