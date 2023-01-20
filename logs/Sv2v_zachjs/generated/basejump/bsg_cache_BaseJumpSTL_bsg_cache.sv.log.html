@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-01-18 10:59:46</dd></div>
-        <div><dt>time elapsed</dt><dd>0.314s</dd></div>
-        <div><dt>ram usage</dt><dd>146876 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-01-20 01:40:02</dd></div>
+        <div><dt>time elapsed</dt><dd>0.281s</dd></div>
+        <div><dt>ram usage</dt><dd>147192 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -60,7 +60,7 @@
       <pre>	reset_i,</pre>
       <pre>	cache_pkt_i,</pre>
       <pre>	v_i,</pre>
-      <pre>	ready_o,</pre>
+      <pre>	yumi_o,</pre>
       <pre>	data_o,</pre>
       <pre>	v_o,</pre>
       <pre>	yumi_i,</pre>
@@ -91,7 +91,7 @@
       <pre>	input reset_i;</pre>
       <pre>	input [bsg_cache_pkt_width_lp - 1:0] cache_pkt_i;</pre>
       <pre>	input v_i;</pre>
-      <pre>	output wire ready_o;</pre>
+      <pre>	output wire yumi_o;</pre>
       <pre>	output reg [data_width_p - 1:0] data_o;</pre>
       <pre>	output wire v_o;</pre>
       <pre>	input yumi_i;</pre>
@@ -145,6 +145,7 @@
       <pre>			assign ld_data_mem_addr = {addr_index, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp]};</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
+      <pre>	wire tl_we;</pre>
       <pre>	reg v_tl_r;</pre>
       <pre>	reg [20:0] decode_tl_r;</pre>
       <pre>	reg [data_mask_width_lp - 1:0] mask_tl_r;</pre>
@@ -156,7 +157,7 @@
       <pre>			v_tl_r &lt;= 1&#39;b0;</pre>
       <pre>			{mask_tl_r, addr_tl_r, data_tl_r, decode_tl_r} &lt;= 1&#39;sb0;</pre>
       <pre>		end</pre>
-      <pre>		else if (ready_o) begin</pre>
+      <pre>		else if (tl_we) begin</pre>
       <pre>			v_tl_r &lt;= v_i;</pre>
       <pre>			if (v_i) begin</pre>
       <pre>				mask_tl_r &lt;= cache_pkt[(data_width_p &gt;&gt; 3) - 1-:data_width_p &gt;&gt; 3];</pre>
@@ -770,7 +771,8 @@
       <pre>	assign v_we = (v_v_r ? v_o &amp; yumi_i : 1&#39;b1);</pre>
       <pre>	assign sbuf_hazard = (sbuf_full_lo &amp; ((v_o &amp; yumi_i) &amp; (decode_v_r[15] | decode_v_r[4]))) &amp; (v_i &amp; (decode[16] | decode[4]));</pre>
       <pre>	wire tl_ready = (miss_v ? ((((~(decode[14] &amp; v_i) &amp; ~miss_tag_mem_v_lo) &amp; ~miss_track_mem_v_lo) &amp; ~dma_data_mem_v_lo) &amp; ~recover_lo) &amp; ~dma_evict_lo : 1&#39;b1) &amp; ~sbuf_hazard;</pre>
-      <pre>	assign ready_o = (v_tl_r ? v_we &amp; tl_ready : tl_ready);</pre>
+      <pre>	assign tl_we = tl_ready &amp; (v_tl_r ? v_we : 1&#39;b1);</pre>
+      <pre>	assign yumi_o = v_i &amp; tl_we;</pre>
       <pre>	wire tagst_valid;</pre>
       <pre>	wire tagst_lock;</pre>
       <pre>	wire [tag_width_lp - 1:0] tagst_tag;</pre>
@@ -778,13 +780,13 @@
       <pre>	assign tagst_valid = cache_pkt[(data_width_p + ((data_width_p &gt;&gt; 3) - 1)) - ((data_width_p - 1) - (data_width_p - 1))];</pre>
       <pre>	assign tagst_lock = cache_pkt[(data_width_p + ((data_width_p &gt;&gt; 3) - 1)) - ((data_width_p - 1) - (data_width_p - 2))];</pre>
       <pre>	assign tagst_tag = cache_pkt[(data_width_p + ((data_width_p &gt;&gt; 3) - 1)) - (data_width_p - 1)+:tag_width_lp];</pre>
-      <pre>	assign tagst_write_en = (decode[14] &amp; ready_o) &amp; v_i;</pre>
+      <pre>	assign tagst_write_en = decode[14] &amp; yumi_o;</pre>
       <pre>	wire [ways_p - 1:0] addr_way_decode;</pre>
       <pre>	bsg_decode #(.num_out_p(ways_p)) addr_way_demux(</pre>
       <pre>		.i(addr_way),</pre>
       <pre>		.o(addr_way_decode)</pre>
       <pre>	);</pre>
-      <pre>	assign tag_mem_v_li = ((((decode[5] &amp; ready_o) &amp; v_i) | ((recover_lo &amp; decode_tl_r[5]) &amp; v_tl_r)) | miss_tag_mem_v_lo) | ((decode[14] &amp; ready_o) &amp; v_i);</pre>
+      <pre>	assign tag_mem_v_li = (((decode[5] &amp; yumi_o) | ((recover_lo &amp; decode_tl_r[5]) &amp; v_tl_r)) | miss_tag_mem_v_lo) | (decode[14] &amp; yumi_o);</pre>
       <pre>	assign tag_mem_w_li = (miss_v ? miss_tag_mem_v_lo &amp; miss_tag_mem_w_lo : tagst_write_en);</pre>
       <pre>	always @(*)</pre>
       <pre>		if (miss_v) begin</pre>
@@ -803,16 +805,16 @@
       <pre>					end</pre>
       <pre>			end</pre>
       <pre>		end</pre>
-      <pre>	assign data_mem_v_li = ((((v_i &amp; ready_o) &amp; (decode[16] | decode[4])) | ((v_tl_r &amp; recover_lo) &amp; (decode_tl_r[16] | decode_tl_r[4]))) | dma_data_mem_v_lo) | (sbuf_v_lo &amp; sbuf_yumi_li);</pre>
+      <pre>	assign data_mem_v_li = (((yumi_o &amp; (decode[16] | decode[4])) | ((v_tl_r &amp; recover_lo) &amp; (decode_tl_r[16] | decode_tl_r[4]))) | dma_data_mem_v_lo) | (sbuf_v_lo &amp; sbuf_yumi_li);</pre>
       <pre>	assign data_mem_w_li = dma_data_mem_w_lo | (sbuf_v_lo &amp; sbuf_yumi_li);</pre>
       <pre>	assign data_mem_data_li = (dma_data_mem_w_lo ? dma_data_mem_data_lo : sbuf_data_mem_data);</pre>
-      <pre>	assign data_mem_addr_li = (recover_lo ? recover_data_mem_addr : (dma_data_mem_v_lo ? dma_data_mem_addr_lo : (((decode[16] | decode[4]) &amp; v_i) &amp; ready_o ? ld_data_mem_addr : sbuf_data_mem_addr)));</pre>
+      <pre>	assign data_mem_addr_li = (recover_lo ? recover_data_mem_addr : (dma_data_mem_v_lo ? dma_data_mem_addr_lo : ((decode[16] | decode[4]) &amp; yumi_o ? ld_data_mem_addr : sbuf_data_mem_addr)));</pre>
       <pre>	assign data_mem_w_mask_li = (dma_data_mem_w_lo ? dma_data_mem_w_mask_lo : sbuf_data_mem_w_mask);</pre>
-      <pre>	assign track_mem_v_li = ((((v_i &amp; ready_o) &amp; ((decode[16] | decode[4]) | partial_st)) | ((v_tl_r &amp; recover_lo) &amp; ((decode_tl_r[16] | decode_tl_r[4]) | partial_st_tl))) | miss_track_mem_v_lo) | (tbuf_v_lo &amp; tbuf_yumi_li);</pre>
+      <pre>	assign track_mem_v_li = (((yumi_o &amp; ((decode[16] | decode[4]) | partial_st)) | ((v_tl_r &amp; recover_lo) &amp; ((decode_tl_r[16] | decode_tl_r[4]) | partial_st_tl))) | miss_track_mem_v_lo) | (tbuf_v_lo &amp; tbuf_yumi_li);</pre>
       <pre>	assign track_mem_w_li = (miss_track_mem_v_lo ? miss_track_mem_w_lo : tbuf_v_lo &amp; tbuf_yumi_li);</pre>
       <pre>	assign track_mem_data_li = (miss_track_mem_v_lo ? miss_track_mem_data_lo : tbuf_track_mem_data);</pre>
       <pre>	assign track_mem_w_mask_li = (miss_track_mem_v_lo ? miss_track_mem_w_mask_lo : tbuf_track_mem_w_mask);</pre>
-      <pre>	assign track_mem_addr_li = (recover_lo ? addr_index_tl : (miss_track_mem_v_lo ? miss_track_mem_addr_lo : ((((decode[16] | decode[4]) | partial_st) &amp; v_i) &amp; ready_o ? addr_index : tbuf_track_mem_addr)));</pre>
+      <pre>	assign track_mem_addr_li = (recover_lo ? addr_index_tl : (miss_track_mem_v_lo ? miss_track_mem_addr_lo : (((decode[16] | decode[4]) | partial_st) &amp; yumi_o ? addr_index : tbuf_track_mem_addr)));</pre>
       <pre>	wire [ways_p - 2:0] plru_decode_data_lo;</pre>
       <pre>	wire [ways_p - 2:0] plru_decode_mask_lo;</pre>
       <pre>	bsg_lru_pseudo_tree_decode #(.ways_p(ways_p)) plru_decode(</pre>
@@ -852,13 +854,13 @@
       <pre>	wire [((addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) &gt;= (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) ? ((addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)))) + 1 : ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) - (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))))) + 1) * 1:1] sv2v_tmp_08605;</pre>
       <pre>	assign sv2v_tmp_08605 = addr_v_r;</pre>
       <pre>	always @(*) sbuf_entry_li[addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))-:((addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) &gt;= (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) ? ((addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)))) + 1 : ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) - (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))))) + 1)] = sv2v_tmp_08605;</pre>
-      <pre>	assign sbuf_yumi_li = ((sbuf_v_lo &amp; ~(((decode[16] | decode[4]) &amp; v_i) &amp; ready_o)) &amp; ~dma_data_mem_v_lo) &amp; ~(((v_tl_r &amp; (decode_tl_r[16] | decode_tl_r[4])) &amp; ~v_we) &amp; ~miss_v);</pre>
+      <pre>	assign sbuf_yumi_li = ((sbuf_v_lo &amp; ~((decode[16] | decode[4]) &amp; yumi_o)) &amp; ~dma_data_mem_v_lo) &amp; ~(((v_tl_r &amp; (decode_tl_r[16] | decode_tl_r[4])) &amp; ~v_we) &amp; ~miss_v);</pre>
       <pre>	assign sbuf_bypass_addr_li = addr_tl_r;</pre>
       <pre>	assign sbuf_bypass_v_li = ((decode_tl_r[16] | decode_tl_r[4]) &amp; v_tl_r) &amp; v_we;</pre>
       <pre>	assign tbuf_v_li = ((decode_v_r[15] &amp; ~partial_st_v) &amp; v_o) &amp; yumi_i;</pre>
       <pre>	assign tbuf_way_li = (miss_v ? chosen_way_lo : tag_hit_way_id);</pre>
       <pre>	assign tbuf_addr_li = addr_v_r;</pre>
-      <pre>	assign tbuf_yumi_li = ((tbuf_v_lo &amp; ~((((decode[16] | decode[4]) | partial_st) &amp; v_i) &amp; ready_o)) &amp; ~miss_track_mem_v_lo) &amp; ~(((v_tl_r &amp; ((decode_tl_r[16] | decode_tl_r[4]) | partial_st_tl)) &amp; ~v_we) &amp; ~miss_v);</pre>
+      <pre>	assign tbuf_yumi_li = ((tbuf_v_lo &amp; ~(((decode[16] | decode[4]) | partial_st) &amp; yumi_o)) &amp; ~miss_track_mem_v_lo) &amp; ~(((v_tl_r &amp; ((decode_tl_r[16] | decode_tl_r[4]) | partial_st_tl)) &amp; ~v_we) &amp; ~miss_v);</pre>
       <pre>	assign tbuf_bypass_addr_li = addr_tl_r;</pre>
       <pre>	assign tbuf_bypass_v_li = (((decode_tl_r[16] | decode_tl_r[4]) | partial_st_tl) &amp; v_tl_r) &amp; v_we;</pre>
       <pre>	always @(negedge clk_i)</pre>
