@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-01-25 01:39:44</dd></div>
-        <div><dt>time elapsed</dt><dd>0.059s</dd></div>
-        <div><dt>ram usage</dt><dd>78920 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-01-26 01:39:49</dd></div>
+        <div><dt>time elapsed</dt><dd>0.053s</dd></div>
+        <div><dt>ram usage</dt><dd>72356 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -58,9 +58,6 @@
       <pre>module bsg_cache_to_dram_ctrl_rx (</pre>
       <pre>	clk_i,</pre>
       <pre>	reset_i,</pre>
-      <pre>	v_i,</pre>
-      <pre>	tag_i,</pre>
-      <pre>	ready_o,</pre>
       <pre>	dma_data_o,</pre>
       <pre>	dma_data_v_o,</pre>
       <pre>	dma_data_ready_i,</pre>
@@ -68,31 +65,28 @@
       <pre>	app_rd_data_end_i,</pre>
       <pre>	app_rd_data_i</pre>
       <pre>);</pre>
-      <pre>	parameter num_cache_p = 0;</pre>
-      <pre>	parameter data_width_p = 0;</pre>
-      <pre>	parameter block_size_in_words_p = 0;</pre>
+      <pre>	parameter num_dma_p = 0;</pre>
+      <pre>	parameter dma_data_width_p = 0;</pre>
+      <pre>	parameter dma_burst_len_p = 0;</pre>
       <pre>	parameter dram_ctrl_burst_len_p = 0;</pre>
-      <pre>	localparam lg_num_cache_lp = (num_cache_p == 1 ? 1 : $clog2(num_cache_p));</pre>
+      <pre>	localparam lg_num_dma_lp = (num_dma_p == 1 ? 1 : $clog2(num_dma_p));</pre>
       <pre>	localparam lg_dram_ctrl_burst_len_lp = (dram_ctrl_burst_len_p == 1 ? 1 : $clog2(dram_ctrl_burst_len_p));</pre>
-      <pre>	localparam num_req_lp = block_size_in_words_p / dram_ctrl_burst_len_p;</pre>
+      <pre>	localparam num_req_lp = dma_burst_len_p / dram_ctrl_burst_len_p;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
-      <pre>	input v_i;</pre>
-      <pre>	input [lg_num_cache_lp - 1:0] tag_i;</pre>
-      <pre>	output wire ready_o;</pre>
-      <pre>	output wire [(num_cache_p * data_width_p) - 1:0] dma_data_o;</pre>
-      <pre>	output wire [num_cache_p - 1:0] dma_data_v_o;</pre>
-      <pre>	input [num_cache_p - 1:0] dma_data_ready_i;</pre>
+      <pre>	output wire [dma_data_width_p - 1:0] dma_data_o;</pre>
+      <pre>	output wire dma_data_v_o;</pre>
+      <pre>	input dma_data_ready_i;</pre>
       <pre>	input app_rd_data_valid_i;</pre>
       <pre>	input app_rd_data_end_i;</pre>
-      <pre>	input [data_width_p - 1:0] app_rd_data_i;</pre>
+      <pre>	input [dma_data_width_p - 1:0] app_rd_data_i;</pre>
       <pre>	wire unused = app_rd_data_end_i;</pre>
       <pre>	wire fifo_v_lo;</pre>
       <pre>	wire fifo_yumi_li;</pre>
-      <pre>	wire [data_width_p - 1:0] fifo_data_lo;</pre>
+      <pre>	wire [dma_data_width_p - 1:0] fifo_data_lo;</pre>
       <pre>	bsg_fifo_1r1w_large #(</pre>
-      <pre>		.width_p(data_width_p),</pre>
-      <pre>		.els_p(num_cache_p * dram_ctrl_burst_len_p)</pre>
+      <pre>		.width_p(dma_data_width_p),</pre>
+      <pre>		.els_p(num_dma_p * dram_ctrl_burst_len_p)</pre>
       <pre>	) fifo(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.reset_i(reset_i),</pre>
@@ -103,36 +97,9 @@
       <pre>		.data_o(fifo_data_lo),</pre>
       <pre>		.yumi_i(fifo_yumi_li)</pre>
       <pre>	);</pre>
-      <pre>	wire tag_fifo_v_lo;</pre>
-      <pre>	reg tag_fifo_yumi_li;</pre>
-      <pre>	wire [lg_num_cache_lp - 1:0] tag_fifo_data_lo;</pre>
-      <pre>	bsg_fifo_1r1w_small #(</pre>
-      <pre>		.width_p(lg_num_cache_lp),</pre>
-      <pre>		.els_p(num_cache_p)</pre>
-      <pre>	) tag_fifo(</pre>
-      <pre>		.clk_i(clk_i),</pre>
-      <pre>		.reset_i(reset_i),</pre>
-      <pre>		.v_i(v_i),</pre>
-      <pre>		.ready_o(ready_o),</pre>
-      <pre>		.data_i(tag_i),</pre>
-      <pre>		.v_o(tag_fifo_v_lo),</pre>
-      <pre>		.data_o(tag_fifo_data_lo),</pre>
-      <pre>		.yumi_i(tag_fifo_yumi_li)</pre>
-      <pre>	);</pre>
-      <pre>	assign fifo_yumi_li = (fifo_v_lo &amp; tag_fifo_v_lo) &amp; dma_data_ready_i[tag_fifo_data_lo];</pre>
-      <pre>	wire [num_cache_p - 1:0] cache_sel;</pre>
-      <pre>	bsg_decode_with_v #(.num_out_p(num_cache_p)) demux(</pre>
-      <pre>		.i(tag_fifo_data_lo),</pre>
-      <pre>		.v_i(tag_fifo_v_lo),</pre>
-      <pre>		.o(cache_sel)</pre>
-      <pre>	);</pre>
-      <pre>	genvar i;</pre>
-      <pre>	generate</pre>
-      <pre>		for (i = 0; i &lt; num_cache_p; i = i + 1) begin : genblk1</pre>
-      <pre>			assign dma_data_o[i * data_width_p+:data_width_p] = fifo_data_lo;</pre>
-      <pre>			assign dma_data_v_o[i] = cache_sel[i] &amp; fifo_v_lo;</pre>
-      <pre>		end</pre>
-      <pre>	endgenerate</pre>
+      <pre>	assign fifo_yumi_li = fifo_v_lo &amp; dma_data_ready_i;</pre>
+      <pre>	assign dma_data_o = fifo_data_lo;</pre>
+      <pre>	assign dma_data_v_o = fifo_v_lo;</pre>
       <pre>	wire [lg_dram_ctrl_burst_len_lp - 1:0] count_lo;</pre>
       <pre>	reg counter_up_li;</pre>
       <pre>	reg counter_clear_li;</pre>
@@ -150,12 +117,10 @@
       <pre>		if (count_lo == (dram_ctrl_burst_len_p - 1)) begin</pre>
       <pre>			counter_clear_li = fifo_yumi_li;</pre>
       <pre>			counter_up_li = 1&#39;b0;</pre>
-      <pre>			tag_fifo_yumi_li = fifo_yumi_li;</pre>
       <pre>		end</pre>
       <pre>		else begin</pre>
       <pre>			counter_clear_li = 1&#39;b0;</pre>
       <pre>			counter_up_li = fifo_yumi_li;</pre>
-      <pre>			tag_fifo_yumi_li = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>endmodule</pre>
       <pre>module bsg_cache_to_dram_ctrl_rx__abstract;</pre>
