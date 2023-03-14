@@ -372,7 +372,29 @@
 <span class="normal"><a href="#l-364">364</a></span>
 <span class="normal"><a href="#l-365">365</a></span>
 <span class="normal"><a href="#l-366">366</a></span>
-<span class="normal"><a href="#l-367">367</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
+<span class="normal"><a href="#l-367">367</a></span>
+<span class="normal"><a href="#l-368">368</a></span>
+<span class="normal"><a href="#l-369">369</a></span>
+<span class="normal"><a href="#l-370">370</a></span>
+<span class="normal"><a href="#l-371">371</a></span>
+<span class="normal"><a href="#l-372">372</a></span>
+<span class="normal"><a href="#l-373">373</a></span>
+<span class="normal"><a href="#l-374">374</a></span>
+<span class="normal"><a href="#l-375">375</a></span>
+<span class="normal"><a href="#l-376">376</a></span>
+<span class="normal"><a href="#l-377">377</a></span>
+<span class="normal"><a href="#l-378">378</a></span>
+<span class="normal"><a href="#l-379">379</a></span>
+<span class="normal"><a href="#l-380">380</a></span>
+<span class="normal"><a href="#l-381">381</a></span>
+<span class="normal"><a href="#l-382">382</a></span>
+<span class="normal"><a href="#l-383">383</a></span>
+<span class="normal"><a href="#l-384">384</a></span>
+<span class="normal"><a href="#l-385">385</a></span>
+<span class="normal"><a href="#l-386">386</a></span>
+<span class="normal"><a href="#l-387">387</a></span>
+<span class="normal"><a href="#l-388">388</a></span>
+<span class="normal"><a href="#l-389">389</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a>
 <a id="l-4" name="l-4"></a>
@@ -737,8 +759,30 @@
 <a id="l-363" name="l-363"></a><span class="w">            </span><span class="p">);</span>
 <a id="l-364" name="l-364"></a><span class="w">        </span><span class="k">end</span>
 <a id="l-365" name="l-365"></a><span class="w">    </span><span class="k">endgenerate</span>
-<a id="l-366" name="l-366"></a>
-<a id="l-367" name="l-367"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">CommitStage</span>
+<a id="l-366" name="l-366"></a><span class="no">`ifdef</span><span class="w"> </span><span class="n">RSD_FUNCTIONAL_SIMULATION</span>
+<a id="l-367" name="l-367"></a><span class="w">    </span><span class="k">localparam</span><span class="w"> </span><span class="n">DEADLOCK_DETECT_CYCLES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span>
+<a id="l-368" name="l-368"></a><span class="w">    </span><span class="kt">integer</span><span class="w"> </span><span class="n">cycles</span><span class="p">;</span>
+<a id="l-369" name="l-369"></a><span class="w">    </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-370" name="l-370"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">rst</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">commit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-371" name="l-371"></a><span class="w">            </span><span class="n">cycles</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="l-372" name="l-372"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-373" name="l-373"></a><span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-374" name="l-374"></a><span class="w">            </span><span class="n">cycles</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">cycles</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="l-375" name="l-375"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-376" name="l-376"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-377" name="l-377"></a>
+<a id="l-378" name="l-378"></a>
+<a id="l-379" name="l-379"></a><span class="w">    </span><span class="k">generate</span>
+<a id="l-380" name="l-380"></a><span class="w">        </span><span class="no">`RSD_ASSERT_CLK</span><span class="p">(</span>
+<a id="l-381" name="l-381"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">,</span>
+<a id="l-382" name="l-382"></a><span class="w">            </span><span class="o">!</span><span class="p">(</span><span class="n">cycles</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">DEADLOCK_DETECT_CYCLES</span><span class="p">),</span>
+<a id="l-383" name="l-383"></a><span class="w">            </span><span class="s">&quot;Deadlock detected&quot;</span>
+<a id="l-384" name="l-384"></a><span class="w">        </span><span class="p">);</span>
+<a id="l-385" name="l-385"></a><span class="w">    </span><span class="k">endgenerate</span>
+<a id="l-386" name="l-386"></a>
+<a id="l-387" name="l-387"></a><span class="no">`endif</span>
+<a id="l-388" name="l-388"></a>
+<a id="l-389" name="l-389"></a><span class="k">endmodule</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">CommitStage</span>
 </pre></div></td></tr></table></div>
 
   </body>

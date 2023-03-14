@@ -168,9 +168,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-03-13 01:41:57</dd></div>
-        <div><dt>time elapsed</dt><dd>9.490s</dd></div>
-        <div><dt>ram usage</dt><dd>504816 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-03-14 01:41:03</dd></div>
+        <div><dt>time elapsed</dt><dd>9.963s</dd></div>
+        <div><dt>ram usage</dt><dd>497744 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -1665,6 +1665,7 @@
       <pre>			localparam SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH = 6;</pre>
       <pre>			reg [5:0] flushRangeHeadPtr;</pre>
       <pre>			reg [5:0] flushRangeTailPtr;</pre>
+      <pre>			reg flushAllInsns;</pre>
       <pre>			localparam MicroArchConf_CONF_LOAD_QUEUE_ENTRY_NUM = 16;</pre>
       <pre>			localparam LoadStoreUnitTypes_LOAD_QUEUE_ENTRY_NUM = MicroArchConf_CONF_LOAD_QUEUE_ENTRY_NUM;</pre>
       <pre>			localparam LoadStoreUnitTypes_LOAD_QUEUE_ENTRY_NUM_BIT_WIDTH = 4;</pre>
@@ -4318,6 +4319,7 @@
       <pre>			reg [2:0] refetchType;</pre>
       <pre>			localparam BasicTypes_ISSUE_WIDTH_BIT_SIZE = 3;</pre>
       <pre>			reg [2:0] exceptionIndex;</pre>
+      <pre>			reg startRecoveryAtCommit;</pre>
       <pre>			reg [69:0] recoveryReg;</pre>
       <pre>			reg [69:0] nextRecoveryReg;</pre>
       <pre>			reg [SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH:0] recoveryEntryNum;</pre>
@@ -4325,7 +4327,7 @@
       <pre>			reg [5:0] flushRangeHeadPtr;</pre>
       <pre>			reg [5:0] flushRangeTailPtr;</pre>
       <pre>			always @(posedge Core.activeListIF.clk)</pre>
-      <pre>				if (Core.activeListIF.rst || (Core.recoveryManagerIF.toRecoveryPhase &amp;&amp; !exceptionDetected))</pre>
+      <pre>				if (Core.activeListIF.rst || ((Core.recoveryManagerIF.toRecoveryPhase &amp;&amp; !exceptionDetected) &amp;&amp; !startRecoveryAtCommit))</pre>
       <pre>					recoveryReg &lt;= 1&#39;sb0;</pre>
       <pre>				else</pre>
       <pre>					recoveryReg &lt;= nextRecoveryReg;</pre>
@@ -4357,6 +4359,7 @@
       <pre>				exceptionIndex = 1&#39;sb0;</pre>
       <pre>				exceptionDetected = BasicTypes_FALSE;</pre>
       <pre>				refetchType = 3&#39;b000;</pre>
+      <pre>				startRecoveryAtCommit = BasicTypes_FALSE;</pre>
       <pre>				begin : sv2v_autoblock_125</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_ISSUE_WIDTH; i = i + 1)</pre>
@@ -4374,6 +4377,8 @@
       <pre>									nextRecoveryReg[3-:4] = writeData[i][56-:4];</pre>
       <pre>									exceptionDetected = |{writeData[i][56-:4] == 4&#39;b0011, writeData[i][56-:4] == 4&#39;b0010};</pre>
       <pre>									exceptionIndex = i;</pre>
+      <pre>									if (!(|{writeData[i][56-:4] == 4&#39;b0011, writeData[i][56-:4] == 4&#39;b0010}))</pre>
+      <pre>										startRecoveryAtCommit = BasicTypes_TRUE;</pre>
       <pre>									if (writeData[i][56-:4] == 4&#39;b0011)</pre>
       <pre>										refetchType = (writeData[i][1] ? 3&#39;b011 : (writeData[i][0] ? 3&#39;b010 : 3&#39;b001));</pre>
       <pre>									else</pre>
@@ -4390,7 +4395,14 @@
       <pre>				Core.activeListIF.storeQueueRecoveryTailPtr = recoveryReg[8-:4];</pre>
       <pre>				flushRangeHeadPtr = Core.recoveryManagerIF.flushRangeHeadPtr;</pre>
       <pre>				flushRangeTailPtr = Core.recoveryManagerIF.flushRangeTailPtr;</pre>
-      <pre>				nextRecoveryEntryNum = (flushRangeTailPtr &gt;= flushRangeHeadPtr ? flushRangeTailPtr - flushRangeHeadPtr : (SchedulerTypes_ACTIVE_LIST_ENTRY_NUM + flushRangeTailPtr) - flushRangeHeadPtr);</pre>
+      <pre>				if ((flushRangeHeadPtr == flushRangeTailPtr) &amp;&amp; (count == SchedulerTypes_ACTIVE_LIST_ENTRY_NUM)) begin</pre>
+      <pre>					nextRecoveryEntryNum = SchedulerTypes_ACTIVE_LIST_ENTRY_NUM;</pre>
+      <pre>					Core.recoveryManagerIF.flushAllInsns = BasicTypes_TRUE;</pre>
+      <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					nextRecoveryEntryNum = (flushRangeTailPtr &gt;= flushRangeHeadPtr ? flushRangeTailPtr - flushRangeHeadPtr : (SchedulerTypes_ACTIVE_LIST_ENTRY_NUM + flushRangeTailPtr) - flushRangeHeadPtr);</pre>
+      <pre>					Core.recoveryManagerIF.flushAllInsns = BasicTypes_FALSE;</pre>
+      <pre>				end</pre>
       <pre>				Core.activeListIF.recoveryEntryNum = recoveryEntryNum;</pre>
       <pre>				Core.recoveryManagerIF.exceptionDetectedInRwStage = exceptionDetected &amp;&amp; !Core.recoveryManagerIF.unableToStartRecovery;</pre>
       <pre>				Core.recoveryManagerIF.refetchTypeFromRwStage = refetchType;</pre>
@@ -5170,9 +5182,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -5194,13 +5209,13 @@
       <pre>				begin : sv2v_autoblock_158</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM; i = i + 1)</pre>
-      <pre>						flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase &amp;&amp; Core.recoveryManagerIF.notIssued[i], Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, alPtrReg[i]);</pre>
+      <pre>						flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase &amp;&amp; Core.recoveryManagerIF.notIssued[i], Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, alPtrReg[i]);</pre>
       <pre>				end</pre>
       <pre>				begin : sv2v_autoblock_159</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
       <pre>						if (Core.schedulerIF.allocated[i])</pre>
-      <pre>							flush[writePtr[(1 - i) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH]] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.schedulerIF.writeAL_Ptr[i]);</pre>
+      <pre>							flush[writePtr[(1 - i) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH]] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, Core.schedulerIF.writeAL_Ptr[i]);</pre>
       <pre>				end</pre>
       <pre>				Core.recoveryManagerIF.flushIQ_Entry = flush;</pre>
       <pre>				Core.recoveryManagerIF.issueQueueReturnIndex = issueQueueReturnIndex || freeListReset;</pre>
@@ -5353,6 +5368,7 @@
       <pre>			reg [SchedulerTypes_REPLAY_QUEUE_ENTRY_NUM_BIT_WIDTH:0] canBeFlushedEntryCount;</pre>
       <pre>			reg [5:0] flushRangeHeadPtr;</pre>
       <pre>			reg [5:0] flushRangeTailPtr;</pre>
+      <pre>			reg flushAllInsns;</pre>
       <pre>			reg flushInt [0:1];</pre>
       <pre>			reg flushMem [0:1];</pre>
       <pre>			reg flushComplex [0:0];</pre>
@@ -5460,9 +5476,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -5667,7 +5686,7 @@
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushInt[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedEntryCount != 0, flushRangeHeadPtr, flushRangeTailPtr, replayEntryReg[320 + ((i * 126) + 51)-:6]);</pre>
+      <pre>							flushInt[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedEntryCount != 0, flushRangeHeadPtr, flushRangeTailPtr, flushAllInsns, replayEntryReg[320 + ((i * 126) + 51)-:6]);</pre>
       <pre>							Core.schedulerIF.intReplayEntry[i] = replayEntryReg[572 + i] &amp;&amp; !flushInt[i];</pre>
       <pre>							Core.schedulerIF.intReplayData[i] = replayEntryReg[320 + (i * 126)+:126];</pre>
       <pre>						end</pre>
@@ -5676,7 +5695,7 @@
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushComplex[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedEntryCount != 0, flushRangeHeadPtr, flushRangeTailPtr, replayEntryReg[249 + ((i * 70) + 51)-:6]);</pre>
+      <pre>							flushComplex[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedEntryCount != 0, flushRangeHeadPtr, flushRangeTailPtr, flushAllInsns, replayEntryReg[249 + ((i * 70) + 51)-:6]);</pre>
       <pre>							Core.schedulerIF.complexReplayEntry[i] = replayEntryReg[319 + i] &amp;&amp; !flushComplex[i];</pre>
       <pre>							Core.schedulerIF.complexReplayData[i] = replayEntryReg[249 + (i * 70)+:70];</pre>
       <pre>						end</pre>
@@ -5685,7 +5704,7 @@
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushMem[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedEntryCount != 0, flushRangeHeadPtr, flushRangeTailPtr, replayEntryReg[21 + ((i * 113) + 51)-:6]);</pre>
+      <pre>							flushMem[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedEntryCount != 0, flushRangeHeadPtr, flushRangeTailPtr, flushAllInsns, replayEntryReg[21 + ((i * 113) + 51)-:6]);</pre>
       <pre>							Core.schedulerIF.memReplayEntry[i] = replayEntryReg[247 + i] &amp;&amp; !flushMem[i];</pre>
       <pre>							Core.schedulerIF.memReplayData[i] = replayEntryReg[21 + (i * 113)+:113];</pre>
       <pre>						end</pre>
@@ -5716,6 +5735,7 @@
       <pre>					canBeFlushedEntryCount &lt;= count;</pre>
       <pre>					flushRangeHeadPtr &lt;= Core.recoveryManagerIF.flushRangeHeadPtr;</pre>
       <pre>					flushRangeTailPtr &lt;= Core.recoveryManagerIF.flushRangeTailPtr;</pre>
+      <pre>					flushAllInsns &lt;= Core.recoveryManagerIF.flushAllInsns;</pre>
       <pre>				end</pre>
       <pre>				else if ((canBeFlushedEntryCount &gt; 0) &amp;&amp; Core.schedulerIF.replay)</pre>
       <pre>					canBeFlushedEntryCount &lt;= canBeFlushedEntryCount - 1;</pre>
@@ -6002,14 +6022,43 @@
       <pre>							end</pre>
       <pre>					end</pre>
       <pre>				end</pre>
+      <pre>				else begin</pre>
+      <pre>					begin : sv2v_autoblock_217</pre>
+      <pre>						reg signed [31:0] i;</pre>
+      <pre>						for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
+      <pre>							begin</pre>
+      <pre>								begin : sv2v_autoblock_218</pre>
+      <pre>									reg signed [31:0] j;</pre>
+      <pre>									for (j = 1; j &lt; 4; j = j + 1)</pre>
+      <pre>										complexPipeReg[i][j - 1] &lt;= complexPipeReg[i][j];</pre>
+      <pre>								end</pre>
+      <pre>								complexPipeReg[i][3][26] &lt;= BasicTypes_FALSE;</pre>
+      <pre>							end</pre>
+      <pre>					end</pre>
+      <pre>					begin : sv2v_autoblock_219</pre>
+      <pre>						reg signed [31:0] i;</pre>
+      <pre>						for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
+      <pre>							begin</pre>
+      <pre>								begin : sv2v_autoblock_220</pre>
+      <pre>									reg signed [31:0] j;</pre>
+      <pre>									for (j = 1; j &lt; 2; j = j + 1)</pre>
+      <pre>										memPipeReg[i][j - 1] &lt;= memPipeReg[i][j];</pre>
+      <pre>								end</pre>
+      <pre>								memPipeReg[i][1][26] &lt;= BasicTypes_FALSE;</pre>
+      <pre>							end</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			localparam BasicTypes_TRUE = 1&#39;b1;</pre>
       <pre>			function automatic PipelineTypes_SelectiveFlushDetector;</pre>
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -6030,7 +6079,7 @@
       <pre>			localparam SchedulerTypes_WAKEUP_WIDTH = 4;</pre>
       <pre>			always @(*) begin</pre>
       <pre>				flushIQ_Entry = Core.recoveryManagerIF.flushIQ_Entry;</pre>
-      <pre>				begin : sv2v_autoblock_217</pre>
+      <pre>				begin : sv2v_autoblock_221</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6041,7 +6090,7 @@
       <pre>							nextIntPipeReg[i][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH] = Core.recoveryManagerIF.selectedActiveListPtr[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_218</pre>
+      <pre>				begin : sv2v_autoblock_222</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6052,7 +6101,7 @@
       <pre>							nextComplexPipeReg[i][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH] = Core.recoveryManagerIF.selectedActiveListPtr[i + BasicTypes_INT_ISSUE_WIDTH];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_219</pre>
+      <pre>				begin : sv2v_autoblock_223</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6063,37 +6112,37 @@
       <pre>							nextMemPipeReg[i][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH] = Core.recoveryManagerIF.selectedActiveListPtr[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_220</pre>
+      <pre>				begin : sv2v_autoblock_224</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushInt[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountInt != 0, flushRangeHeadPtr, flushRangeTailPtr, intPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
-      <pre>							Core.wakeupSelectIF.wakeup[i] = intPipeReg[i][0][26] &amp;&amp; !flushInt[i];</pre>
+      <pre>							flushInt[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountInt != 0, flushRangeHeadPtr, flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, intPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							Core.wakeupSelectIF.wakeup[i] = (intPipeReg[i][0][26] &amp;&amp; !flushInt[i]) &amp;&amp; !Core.wakeupSelectIF.stall;</pre>
       <pre>							Core.wakeupSelectIF.wakeupPtr[i] = intPipeReg[i][0][25-:4];</pre>
-      <pre>							Core.wakeupSelectIF.wakeupVector[i] = intPipeReg[i][0][21-:16];</pre>
+      <pre>							Core.wakeupSelectIF.wakeupVector[i] = (!Core.wakeupSelectIF.stall ? intPipeReg[i][0][21-:16] : {16 {1&#39;sb0}});</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_221</pre>
+      <pre>				begin : sv2v_autoblock_225</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushComplex[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountComplex != 0, flushRangeHeadPtr, flushRangeTailPtr, complexPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							flushComplex[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountComplex != 0, flushRangeHeadPtr, flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, complexPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
       <pre>							Core.wakeupSelectIF.wakeup[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][26] &amp;&amp; !flushComplex[i];</pre>
       <pre>							Core.wakeupSelectIF.wakeupPtr[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][25-:4];</pre>
       <pre>							Core.wakeupSelectIF.wakeupVector[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][21-:16];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_222</pre>
+      <pre>				begin : sv2v_autoblock_226</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushMem[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountMem != 0, flushRangeHeadPtr, flushRangeTailPtr, memPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							flushMem[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountMem != 0, flushRangeHeadPtr, flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, memPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
       <pre>							Core.wakeupSelectIF.wakeup[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][26] &amp;&amp; !flushMem[i];</pre>
       <pre>							Core.wakeupSelectIF.wakeupPtr[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][25-:4];</pre>
       <pre>							Core.wakeupSelectIF.wakeupVector[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][21-:16];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_223</pre>
+      <pre>				begin : sv2v_autoblock_227</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; 1; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6103,7 +6152,7 @@
       <pre>				end</pre>
       <pre>			end</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_224</pre>
+      <pre>				begin : sv2v_autoblock_228</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6111,19 +6160,19 @@
       <pre>							Core.wakeupSelectIF.releasePtr[i] = intPipeReg[i][0][25-:4];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_225</pre>
+      <pre>				begin : sv2v_autoblock_229</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							Core.wakeupSelectIF.releaseEntry[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][26] &amp;&amp; !Core.wakeupSelectIF.stall;</pre>
+      <pre>							Core.wakeupSelectIF.releaseEntry[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][26];</pre>
       <pre>							Core.wakeupSelectIF.releasePtr[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][25-:4];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_226</pre>
+      <pre>				begin : sv2v_autoblock_230</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							Core.wakeupSelectIF.releaseEntry[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][26] &amp;&amp; !Core.wakeupSelectIF.stall;</pre>
+      <pre>							Core.wakeupSelectIF.releaseEntry[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][26];</pre>
       <pre>							Core.wakeupSelectIF.releasePtr[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][25-:4];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
@@ -6198,7 +6247,7 @@
       <pre>			localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>			localparam BasicTypes_TRUE = 1&#39;b1;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_227</pre>
+      <pre>				begin : sv2v_autoblock_231</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6207,28 +6256,28 @@
       <pre>							writeData[((1 - i) * 7) + 6-:7] = Core.wakeupSelectIF.writeDstTag[i][6-:7];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_228</pre>
+      <pre>				begin : sv2v_autoblock_232</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; SchedulerTypes_WAKEUP_WIDTH; i = i + 1)</pre>
       <pre>						Core.wakeupSelectIF.wakeupDstTag[i][6-:7] = readData[((3 - i) * 7) + 6-:7];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_229</pre>
+      <pre>				begin : sv2v_autoblock_233</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						readPtr[(3 - i) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = Core.wakeupSelectIF.wakeupPtr[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_230</pre>
+      <pre>				begin : sv2v_autoblock_234</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						readPtr[(3 - (i + BasicTypes_INT_ISSUE_WIDTH)) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = Core.wakeupSelectIF.wakeupPtr[i + BasicTypes_INT_ISSUE_WIDTH];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_231</pre>
+      <pre>				begin : sv2v_autoblock_235</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						readPtr[(3 - ((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH)) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = Core.wakeupSelectIF.wakeupPtr[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH];</pre>
       <pre>				end</pre>
       <pre>				if (Core.wakeupSelectIF.rst) begin</pre>
-      <pre>					begin : sv2v_autoblock_232</pre>
+      <pre>					begin : sv2v_autoblock_236</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
       <pre>							write[i] = BasicTypes_FALSE;</pre>
@@ -6286,7 +6335,6 @@
       <pre>				.clk(Core.wakeupSelectIF.clk),</pre>
       <pre>				.rst(Core.wakeupSelectIF.rst),</pre>
       <pre>				.rstStart(Core.wakeupSelectIF.rstStart),</pre>
-      <pre>				.stall(Core.wakeupSelectIF.stall),</pre>
       <pre>				.wakeup(Core.wakeupSelectIF.wakeup),</pre>
       <pre>				.wakeupDstValid(wakeupDstRegValid),</pre>
       <pre>				.wakeupDstRegNum(wakeupDstRegNum),</pre>
@@ -6298,13 +6346,13 @@
       <pre>				.dispatchedSrcReady(dispatchedSrcRegReady)</pre>
       <pre>			);</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_233</pre>
+      <pre>				begin : sv2v_autoblock_237</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							dispatchedDstRegValid[i] = Core.wakeupSelectIF.writeDstTag[i][0];</pre>
       <pre>							dispatchedDstRegNum[(1 - i) * BasicTypes_PREG_NUM_BIT_WIDTH+:BasicTypes_PREG_NUM_BIT_WIDTH] = Core.wakeupSelectIF.writeDstTag[i][6-:6];</pre>
-      <pre>							begin : sv2v_autoblock_234</pre>
+      <pre>							begin : sv2v_autoblock_238</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 0; j &lt; SchedulerTypes_ISSUE_QUEUE_SRC_REG_NUM; j = j + 1)</pre>
       <pre>									begin</pre>
@@ -6314,7 +6362,7 @@
       <pre>							end</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_235</pre>
+      <pre>				begin : sv2v_autoblock_239</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; SchedulerTypes_WAKEUP_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6325,7 +6373,6 @@
       <pre>			end</pre>
       <pre>			ProducerMatrix producerMatrix(</pre>
       <pre>				.clk(Core.wakeupSelectIF.clk),</pre>
-      <pre>				.stall(Core.wakeupSelectIF.stall),</pre>
       <pre>				.dispatch(Core.wakeupSelectIF.write),</pre>
       <pre>				.dispatchedSrcRegReady(dispatchedSrcRegReady),</pre>
       <pre>				.dispatchedSrcRegPtr(dispatchedSrcRegPtr),</pre>
@@ -6344,15 +6391,15 @@
       <pre>				dispatchStore = Core.wakeupSelectIF.dispatchStore;</pre>
       <pre>				dispatchLoad = Core.wakeupSelectIF.dispatchLoad;</pre>
       <pre>				notIssued = Core.wakeupSelectIF.notIssued;</pre>
-      <pre>				begin : sv2v_autoblock_236</pre>
+      <pre>				begin : sv2v_autoblock_240</pre>
       <pre>					reg signed [31:0] w;</pre>
       <pre>					for (w = 0; w &lt; 5; w = w + 1)</pre>
       <pre>						wakeupDstVector[(4 - w) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM] = Core.wakeupSelectIF.wakeupVector[w];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_237</pre>
+      <pre>				begin : sv2v_autoblock_241</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
-      <pre>						begin : sv2v_autoblock_238</pre>
+      <pre>						begin : sv2v_autoblock_242</pre>
       <pre>							reg signed [31:0] j;</pre>
       <pre>							for (j = 0; j &lt; SchedulerTypes_ISSUE_QUEUE_SRC_REG_NUM; j = j + 1)</pre>
       <pre>								dispatchedSrcRegPtr[((i * 2) + j) * 4+:4] = Core.wakeupSelectIF.writeSrcTag[i][0 + ((j * 5) + 4)-:4];</pre>
@@ -6360,7 +6407,7 @@
       <pre>				end</pre>
       <pre>				storeBitVector = storeBitVectorReg &amp; notIssued;</pre>
       <pre>				memDependencyPred = Core.wakeupSelectIF.memDependencyPred;</pre>
-      <pre>				begin : sv2v_autoblock_239</pre>
+      <pre>				begin : sv2v_autoblock_243</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
       <pre>						if (dispatchStore[i]) begin</pre>
@@ -6373,7 +6420,7 @@
       <pre>							dependStoreBitVector[(1 - i) * 16+:16] = 0;</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_240</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_244</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM; i = i + 1)</pre>
       <pre>					Core.wakeupSelectIF.opReady[i] = opMatrixReady[i];</pre>
@@ -6452,7 +6499,7 @@
       <pre>				.granted(storeSelected)</pre>
       <pre>			);</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_241</pre>
+      <pre>				begin : sv2v_autoblock_245</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6462,7 +6509,7 @@
       <pre>							compRequest[i] = Core.wakeupSelectIF.opReady[i] &amp;&amp; Core.wakeupSelectIF.complexIssueReq[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_242</pre>
+      <pre>				begin : sv2v_autoblock_246</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6473,7 +6520,7 @@
       <pre>							recoverySelectedPtr[(4 - i) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = intSelectedPtr[(1 - i) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_243</pre>
+      <pre>				begin : sv2v_autoblock_247</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6484,7 +6531,7 @@
       <pre>							recoverySelectedPtr[(4 - (i + BasicTypes_INT_ISSUE_WIDTH)) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = compSelectedPtr[i * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_244</pre>
+      <pre>				begin : sv2v_autoblock_248</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6495,7 +6542,7 @@
       <pre>							recoverySelectedPtr[(4 - ((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH)) * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = loadSelectedPtr[i * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_245</pre>
+      <pre>				begin : sv2v_autoblock_249</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6522,7 +6569,7 @@
       <pre>			reg [9:0] pipeReg;</pre>
       <pre>			reg [9:0] nextPipeReg;</pre>
       <pre>			always @(posedge Core.intIsStageIF.clk)</pre>
-      <pre>				if (Core.intIsStageIF.rst) begin : sv2v_autoblock_246</pre>
+      <pre>				if (Core.intIsStageIF.rst) begin : sv2v_autoblock_250</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[(1 - i) * 5+:5] &lt;= 1&#39;sb0;</pre>
@@ -6540,9 +6587,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -6560,12 +6610,12 @@
       <pre>				else</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_247</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_251</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
       <pre>						if (Core.recoveryManagerIF.toRecoveryPhase)</pre>
-      <pre>							nextPipeReg[((1 - i) * 5) + 4] = pipeReg[((1 - i) * 5) + 4] &amp;&amp; !PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.schedulerIF.intIssuedData[i][51-:6]);</pre>
+      <pre>							nextPipeReg[((1 - i) * 5) + 4] = pipeReg[((1 - i) * 5) + 4] &amp;&amp; !PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, Core.schedulerIF.intIssuedData[i][51-:6]);</pre>
       <pre>						else</pre>
       <pre>							nextPipeReg[((1 - i) * 5) + 4] = pipeReg[((1 - i) * 5) + 4];</pre>
       <pre>						nextPipeReg[((1 - i) * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = pipeReg[((1 - i) * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
@@ -6602,7 +6652,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.isStage[1];</pre>
       <pre>				clear = Core.ctrlIF.isStage[0];</pre>
-      <pre>				begin : sv2v_autoblock_248</pre>
+      <pre>				begin : sv2v_autoblock_252</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6615,7 +6665,7 @@
       <pre>								valid[i] = !stall &amp;&amp; pipeReg[((1 - i) * 5) + 4];</pre>
       <pre>							end</pre>
       <pre>							issueQueuePtr[i] = pipeReg[((1 - i) * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, issuedData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, issuedData[i][51-:6]);</pre>
       <pre>							Core.schedulerIF.intIssue[i] = (!clear &amp;&amp; valid[i]) &amp;&amp; !flush[i];</pre>
       <pre>							Core.schedulerIF.intIssuePtr[i] = issueQueuePtr[i];</pre>
       <pre>							nextStage[((1 - i) * 139) + 126] = ((clear || Core.intIsStageIF.rst) || flush[i] ? BasicTypes_FALSE : valid[i]);</pre>
@@ -6624,7 +6674,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.intIsStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_249</pre>
+      <pre>				begin : sv2v_autoblock_253</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6665,7 +6715,7 @@
       <pre>			reg [277:0] pipeReg;</pre>
       <pre>			localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>			always @(posedge Core.intRrStageIF.clk)</pre>
-      <pre>				if (Core.intRrStageIF.rst) begin : sv2v_autoblock_250</pre>
+      <pre>				if (Core.intRrStageIF.rst) begin : sv2v_autoblock_254</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 139) + 126] &lt;= BasicTypes_FALSE;</pre>
@@ -6700,9 +6750,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -6745,7 +6798,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_251</pre>
+      <pre>				begin : sv2v_autoblock_255</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6769,7 +6822,7 @@
       <pre>							operandA[i][32] = (intSubInfo[i][55-:2] != 2&#39;b00) || Core.registerFileIF.intSrcRegDataA[i][32];</pre>
       <pre>							operandB[i][32] = (intSubInfo[i][53-:2] != 2&#39;b00) || Core.registerFileIF.intSrcRegDataB[i][32];</pre>
       <pre>							nextStage[((1 - i) * 217) + 216-:12] = pipeReg[((1 - i) * 139) + 138-:12];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							nextStage[((1 - i) * 217) + 204] = (((stall || clear) || Core.intRrStageIF.rst) || flush[i] ? BasicTypes_FALSE : pipeReg[((1 - i) * 139) + 126]);</pre>
       <pre>							nextStage[((1 - i) * 217) + 77-:33] = operandA[i];</pre>
       <pre>							nextStage[((1 - i) * 217) + 44-:33] = operandB[i];</pre>
@@ -6778,7 +6831,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.intRrStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_252</pre>
+      <pre>				begin : sv2v_autoblock_256</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6823,7 +6876,7 @@
       <pre>			reg [433:0] pipeReg;</pre>
       <pre>			localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>			always @(posedge Core.intExStageIF.clk)</pre>
-      <pre>				if (Core.intExStageIF.rst) begin : sv2v_autoblock_253</pre>
+      <pre>				if (Core.intExStageIF.rst) begin : sv2v_autoblock_257</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 217) + 204] &lt;= BasicTypes_FALSE;</pre>
@@ -6937,9 +6990,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -6960,7 +7016,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_254</pre>
+      <pre>				begin : sv2v_autoblock_258</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -6969,7 +7025,7 @@
       <pre>							intSubInfo[i] = intOpInfo[i][55-:56];</pre>
       <pre>							brSubInfo[i] = intOpInfo[i][55-:56];</pre>
       <pre>							pc[i] = MemoryMapTypes_ToAddrFromPC(iqData[i][18-:19]);</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							fuOpA[i] = (pipeReg[((1 - i) * 217) + 11] ? Core.bypassNetworkIF.intSrcRegDataOutA[i] : pipeReg[((1 - i) * 217) + 77-:33]);</pre>
       <pre>							fuOpB[i] = (pipeReg[((1 - i) * 217) + 5] ? Core.bypassNetworkIF.intSrcRegDataOutB[i] : pipeReg[((1 - i) * 217) + 44-:33]);</pre>
       <pre>							isCondEnabled[i] = IsConditionEnabledInt(iqData[i][54-:3], fuOpA[i][31-:BasicTypes_DATA_WIDTH], fuOpB[i][31-:BasicTypes_DATA_WIDTH]);</pre>
@@ -7008,7 +7064,7 @@
       <pre>			end</pre>
       <pre>			reg [455:0] nextStage;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_255</pre>
+      <pre>				begin : sv2v_autoblock_259</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7021,7 +7077,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.intExStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_256</pre>
+      <pre>				begin : sv2v_autoblock_260</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7063,7 +7119,7 @@
       <pre>			reg [455:0] pipeReg;</pre>
       <pre>			localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>			always @(posedge Core.ctrlIF.clk)</pre>
-      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_257</pre>
+      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_261</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 228) + 215] &lt;= BasicTypes_FALSE;</pre>
@@ -7089,9 +7145,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -7112,14 +7171,14 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_258</pre>
+      <pre>				begin : sv2v_autoblock_262</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							iqData[i] = pipeReg[((1 - i) * 228) + 214-:126];</pre>
       <pre>							regValid[i] = pipeReg[((1 - i) * 228) + 88];</pre>
       <pre>							valid[i] = pipeReg[((1 - i) * 228) + 215];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							update[i] = ((!stall &amp;&amp; !clear) &amp;&amp; valid[i]) &amp;&amp; !flush[i];</pre>
       <pre>							Core.registerFileIF.intDstRegWE[i] = update[i] &amp;&amp; iqData[i][25];</pre>
       <pre>							Core.registerFileIF.intDstRegNum[i] = iqData[i][24-:BasicTypes_PREG_NUM_BIT_WIDTH];</pre>
@@ -7153,7 +7212,7 @@
       <pre>							Core.schedulerIF.intRecordData[i] = pipeReg[((1 - i) * 228) + 214-:126];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_259</pre>
+      <pre>				begin : sv2v_autoblock_263</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7173,7 +7232,7 @@
       <pre>			reg [4:0] pipeReg;</pre>
       <pre>			reg [4:0] nextPipeReg;</pre>
       <pre>			always @(posedge Core.complexIsStageIF.clk)</pre>
-      <pre>				if (Core.complexIsStageIF.rst) begin : sv2v_autoblock_260</pre>
+      <pre>				if (Core.complexIsStageIF.rst) begin : sv2v_autoblock_264</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[i * 5+:5] &lt;= 1&#39;sb0;</pre>
@@ -7191,9 +7250,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -7211,12 +7273,12 @@
       <pre>				else</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_261</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_265</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
       <pre>						if (Core.recoveryManagerIF.toRecoveryPhase)</pre>
-      <pre>							nextPipeReg[(i * 5) + 4] = pipeReg[(i * 5) + 4] &amp;&amp; !PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.schedulerIF.complexIssuedData[i][51-:6]);</pre>
+      <pre>							nextPipeReg[(i * 5) + 4] = pipeReg[(i * 5) + 4] &amp;&amp; !PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, Core.schedulerIF.complexIssuedData[i][51-:6]);</pre>
       <pre>						else</pre>
       <pre>							nextPipeReg[(i * 5) + 4] = pipeReg[(i * 5) + 4];</pre>
       <pre>						nextPipeReg[(i * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = pipeReg[(i * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
@@ -7245,7 +7307,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.isStage[1];</pre>
       <pre>				clear = Core.ctrlIF.isStage[0];</pre>
-      <pre>				begin : sv2v_autoblock_262</pre>
+      <pre>				begin : sv2v_autoblock_266</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7258,7 +7320,7 @@
       <pre>								valid[i] = !stall &amp;&amp; pipeReg[(i * 5) + 4];</pre>
       <pre>							end</pre>
       <pre>							issueQueuePtr[i] = pipeReg[(i * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, issuedData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, issuedData[i][51-:6]);</pre>
       <pre>							Core.schedulerIF.complexIssue[i] = (!clear &amp;&amp; valid[i]) &amp;&amp; !flush[i];</pre>
       <pre>							Core.schedulerIF.complexIssuePtr[i] = issueQueuePtr[i];</pre>
       <pre>							Core.mulDivUnitIF.divAcquire[i] = ((!clear &amp;&amp; valid[i]) &amp;&amp; !flush[i]) &amp;&amp; (issuedData[i][54-:3] == 3&#39;b001);</pre>
@@ -7270,7 +7332,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.complexIsStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_263</pre>
+      <pre>				begin : sv2v_autoblock_267</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7302,7 +7364,7 @@
       <pre>			localparam SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH = 6;</pre>
       <pre>			reg [83:0] pipeReg;</pre>
       <pre>			always @(posedge Core.complexRrStageIF.clk)</pre>
-      <pre>				if (Core.complexRrStageIF.rst) begin : sv2v_autoblock_264</pre>
+      <pre>				if (Core.complexRrStageIF.rst) begin : sv2v_autoblock_268</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[(i * 84) + 71] &lt;= 1&#39;sb0;</pre>
@@ -7327,9 +7389,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -7350,7 +7415,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_265</pre>
+      <pre>				begin : sv2v_autoblock_269</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7367,7 +7432,7 @@
       <pre>							Core.bypassNetworkIF.complexReadRegA[i] = BasicTypes_TRUE;</pre>
       <pre>							Core.bypassNetworkIF.complexReadRegB[i] = BasicTypes_TRUE;</pre>
       <pre>							nextStage[(i * 163) + 162-:12] = pipeReg[(i * 84) + 83-:12];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							nextStage[(i * 163) + 150] = (((stall || clear) || Core.complexRrStageIF.rst) || flush[i] ? BasicTypes_FALSE : pipeReg[(i * 84) + 71]);</pre>
       <pre>							nextStage[(i * 163) + 149] = pipeReg[(i * 84) + 70];</pre>
       <pre>							if (iqData[i][54-:3] == 3&#39;b001)</pre>
@@ -7381,7 +7446,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.complexRrStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_266</pre>
+      <pre>				begin : sv2v_autoblock_270</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7420,10 +7485,10 @@
       <pre>			reg [167:0] localPipeReg;</pre>
       <pre>			reg [167:0] nextLocalPipeReg;</pre>
       <pre>			always @(posedge Core.complexExStageIF.clk)</pre>
-      <pre>				if (Core.complexExStageIF.rst || clear) begin : sv2v_autoblock_267</pre>
+      <pre>				if (Core.complexExStageIF.rst || clear) begin : sv2v_autoblock_271</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
-      <pre>						begin : sv2v_autoblock_268</pre>
+      <pre>						begin : sv2v_autoblock_272</pre>
       <pre>							reg signed [31:0] j;</pre>
       <pre>							for (j = 0; j &lt; 2; j = j + 1)</pre>
       <pre>								begin</pre>
@@ -7440,7 +7505,7 @@
       <pre>			localparam BasicTypes_MEM_ISSUE_WIDTH_BIT_SIZE = 1;</pre>
       <pre>			reg [162:0] pipeReg;</pre>
       <pre>			always @(posedge Core.complexExStageIF.clk)</pre>
-      <pre>				if (Core.complexExStageIF.rst) begin : sv2v_autoblock_269</pre>
+      <pre>				if (Core.complexExStageIF.rst) begin : sv2v_autoblock_273</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[(i * 163) + 150] &lt;= 1&#39;sb0;</pre>
@@ -7461,7 +7526,7 @@
       <pre>			reg [5:0] nextActiveListIndex;</pre>
       <pre>			reg divReset [0:0];</pre>
       <pre>			always @(posedge Core.complexExStageIF.clk)</pre>
-      <pre>				if (Core.complexExStageIF.rst) begin : sv2v_autoblock_270</pre>
+      <pre>				if (Core.complexExStageIF.rst) begin : sv2v_autoblock_274</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						regActiveListIndex[i * SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH] &lt;= 1&#39;sb0;</pre>
@@ -7475,9 +7540,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -7495,7 +7563,7 @@
       <pre>				else</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_271</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_275</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
@@ -7510,7 +7578,7 @@
       <pre>						Core.mulDivUnitIF.dataInB[i] = fuOpB[i][31-:BasicTypes_DATA_WIDTH];</pre>
       <pre>						divReset[i] = BasicTypes_FALSE;</pre>
       <pre>						if (Core.recoveryManagerIF.toRecoveryPhase)</pre>
-      <pre>							divReset[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, regActiveListIndex[i * SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							divReset[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, regActiveListIndex[i * SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH+:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
       <pre>						if (clear)</pre>
       <pre>							divReset[i] = BasicTypes_TRUE;</pre>
       <pre>						if (isDiv[i] &amp;&amp; (pipeReg[(i * 163) + 148] || (pipeReg[(i * 163) + 150] &amp;&amp; flush[i][0])))</pre>
@@ -7530,7 +7598,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_272</pre>
+      <pre>				begin : sv2v_autoblock_276</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7538,13 +7606,13 @@
       <pre>							complexOpInfo[i] = pipeReg[(i * 163) + 135-:3];</pre>
       <pre>							mulSubInfo[i] = complexOpInfo[i][2-:3];</pre>
       <pre>							divSubInfo[i] = complexOpInfo[i][2-:3];</pre>
-      <pre>							flush[i][0] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, pipeReg[(i * 163) + 129-:6]);</pre>
-      <pre>							begin : sv2v_autoblock_273</pre>
+      <pre>							flush[i][0] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, pipeReg[(i * 163) + 129-:6]);</pre>
+      <pre>							begin : sv2v_autoblock_277</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 1; j &lt; BasicTypes_COMPLEX_EXEC_STAGE_DEPTH; j = j + 1)</pre>
       <pre>									begin</pre>
       <pre>										iqData[i][j] = localPipeReg[(((i * 2) + (2 - j)) * 84) + 69-:70];</pre>
-      <pre>										flush[i][j] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, localPipeReg[(((i * 2) + (2 - j)) * 84) + 51-:6]);</pre>
+      <pre>										flush[i][j] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, localPipeReg[(((i * 2) + (2 - j)) * 84) + 51-:6]);</pre>
       <pre>									end</pre>
       <pre>							end</pre>
       <pre>							fuOpA[i] = (pipeReg[(i * 163) + 11] ? Core.bypassNetworkIF.complexSrcRegDataOutA[i] : pipeReg[(i * 163) + 77-:33]);</pre>
@@ -7564,7 +7632,7 @@
       <pre>			end</pre>
       <pre>			reg [115:0] nextStage;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_274</pre>
+      <pre>				begin : sv2v_autoblock_278</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7575,7 +7643,7 @@
       <pre>								nextLocalPipeReg[(((i * 2) + 1) * 84) + 70] = pipeReg[(i * 163) + 149] &amp;&amp; Core.mulDivUnitIF.divFinished[i];</pre>
       <pre>							else</pre>
       <pre>								nextLocalPipeReg[(((i * 2) + 1) * 84) + 70] = regValid[i];</pre>
-      <pre>							begin : sv2v_autoblock_275</pre>
+      <pre>							begin : sv2v_autoblock_279</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 1; j &lt; 2; j = j + 1)</pre>
       <pre>									begin</pre>
@@ -7587,7 +7655,7 @@
       <pre>							end</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_276</pre>
+      <pre>				begin : sv2v_autoblock_280</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7598,14 +7666,14 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.complexExStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_277</pre>
+      <pre>				begin : sv2v_autoblock_281</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							Core.debugIF.complexExReg[i][39] = pipeReg[(i * 163) + 150];</pre>
       <pre>							Core.debugIF.complexExReg[i][36] = flush[i][0];</pre>
       <pre>							Core.debugIF.complexExReg[i][0+:12] = pipeReg[(i * 163) + 162-:12];</pre>
-      <pre>							begin : sv2v_autoblock_278</pre>
+      <pre>							begin : sv2v_autoblock_282</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 1; j &lt; BasicTypes_COMPLEX_EXEC_STAGE_DEPTH; j = j + 1)</pre>
       <pre>									begin</pre>
@@ -7640,7 +7708,7 @@
       <pre>			localparam SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH = 6;</pre>
       <pre>			reg [115:0] pipeReg;</pre>
       <pre>			always @(posedge Core.ctrlIF.clk)</pre>
-      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_279</pre>
+      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_283</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[(i * 116) + 103] &lt;= 1&#39;sb0;</pre>
@@ -7670,9 +7738,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -7693,14 +7764,14 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_280</pre>
+      <pre>				begin : sv2v_autoblock_284</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							iqData[i] = pipeReg[(i * 116) + 102-:70];</pre>
       <pre>							regValid[i] = pipeReg[(i * 116) + 32];</pre>
       <pre>							valid[i] = pipeReg[(i * 116) + 103];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							update[i] = ((!stall &amp;&amp; !clear) &amp;&amp; valid[i]) &amp;&amp; !flush[i];</pre>
       <pre>							Core.registerFileIF.complexDstRegWE[i] = update[i] &amp;&amp; iqData[i][25];</pre>
       <pre>							Core.registerFileIF.complexDstRegNum[i] = iqData[i][24-:BasicTypes_PREG_NUM_BIT_WIDTH];</pre>
@@ -7721,7 +7792,7 @@
       <pre>							Core.activeListIF.complexWriteData[i] = alWriteData[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_281</pre>
+      <pre>				begin : sv2v_autoblock_285</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7767,7 +7838,7 @@
       <pre>				);</pre>
       <pre>			end</pre>
       <pre>			always @(posedge Core.mulDivUnitIF.clk)</pre>
-      <pre>				if (Core.mulDivUnitIF.rst) begin : sv2v_autoblock_282</pre>
+      <pre>				if (Core.mulDivUnitIF.rst) begin : sv2v_autoblock_286</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MULDIV_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						regPhase[i * 2+:2] &lt;= 2&#39;d0;</pre>
@@ -7778,7 +7849,7 @@
       <pre>			localparam BasicTypes_TRUE = 1&#39;b1;</pre>
       <pre>			always @(*) begin</pre>
       <pre>				nextPhase = regPhase;</pre>
-      <pre>				begin : sv2v_autoblock_283</pre>
+      <pre>				begin : sv2v_autoblock_287</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MULDIV_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7818,7 +7889,7 @@
       <pre>			reg [9:0] pipeReg;</pre>
       <pre>			reg [9:0] nextPipeReg;</pre>
       <pre>			always @(posedge Core.memIsStageIF.clk)</pre>
-      <pre>				if (Core.memIsStageIF.rst) begin : sv2v_autoblock_284</pre>
+      <pre>				if (Core.memIsStageIF.rst) begin : sv2v_autoblock_288</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[(1 - i) * 5+:5] &lt;= 1&#39;sb0;</pre>
@@ -7836,9 +7907,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -7856,12 +7930,12 @@
       <pre>				else</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_285</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_289</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
       <pre>						if (Core.recoveryManagerIF.toRecoveryPhase)</pre>
-      <pre>							nextPipeReg[((1 - i) * 5) + 4] = pipeReg[((1 - i) * 5) + 4] &amp;&amp; !PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.schedulerIF.memIssuedData[i][51-:6]);</pre>
+      <pre>							nextPipeReg[((1 - i) * 5) + 4] = pipeReg[((1 - i) * 5) + 4] &amp;&amp; !PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, Core.schedulerIF.memIssuedData[i][51-:6]);</pre>
       <pre>						else</pre>
       <pre>							nextPipeReg[((1 - i) * 5) + 4] = pipeReg[((1 - i) * 5) + 4];</pre>
       <pre>						nextPipeReg[((1 - i) * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH] = pipeReg[((1 - i) * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
@@ -7894,7 +7968,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.isStage[1];</pre>
       <pre>				clear = Core.ctrlIF.isStage[0];</pre>
-      <pre>				begin : sv2v_autoblock_286</pre>
+      <pre>				begin : sv2v_autoblock_290</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7907,7 +7981,7 @@
       <pre>								valid[i] = !stall &amp;&amp; pipeReg[((1 - i) * 5) + 4];</pre>
       <pre>							end</pre>
       <pre>							issueQueuePtr[i] = pipeReg[((1 - i) * 5) + 3-:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM_BIT_WIDTH];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, issuedData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, issuedData[i][51-:6]);</pre>
       <pre>							Core.schedulerIF.memIssue[i] = (!clear &amp;&amp; valid[i]) &amp;&amp; !flush[i];</pre>
       <pre>							Core.schedulerIF.memIssuePtr[i] = issueQueuePtr[i];</pre>
       <pre>							nextStage[(1 - i) * 131] = Core.schedulerIF.replay;</pre>
@@ -7918,7 +7992,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.memIsStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_287</pre>
+      <pre>				begin : sv2v_autoblock_291</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -7957,7 +8031,7 @@
       <pre>			localparam OpFormatTypes_CSR_IMM_WIDTH = 5;</pre>
       <pre>			reg [261:0] pipeReg;</pre>
       <pre>			always @(posedge Core.memRrStageIF.clk)</pre>
-      <pre>				if (Core.memRrStageIF.rst) begin : sv2v_autoblock_288</pre>
+      <pre>				if (Core.memRrStageIF.rst) begin : sv2v_autoblock_292</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 131) + 118] &lt;= 1&#39;sb0;</pre>
@@ -7992,9 +8066,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -8026,7 +8103,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_289</pre>
+      <pre>				begin : sv2v_autoblock_293</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8049,7 +8126,7 @@
       <pre>							operandA[i][32] = (memOpInfo[i][42-:2] != 2&#39;b00) || Core.registerFileIF.memSrcRegDataA[i][32];</pre>
       <pre>							operandB[i][32] = (memOpInfo[i][40-:2] != 2&#39;b00) || Core.registerFileIF.memSrcRegDataB[i][32];</pre>
       <pre>							nextStage[((1 - i) * 209) + 208-:12] = pipeReg[((1 - i) * 131) + 130-:12];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							nextStage[((1 - i) * 209) + 196] = (((stall || clear) || Core.memRrStageIF.rst) || flush[i] ? BasicTypes_FALSE : pipeReg[((1 - i) * 131) + 118]);</pre>
       <pre>							nextStage[((1 - i) * 209) + 195-:113] = pipeReg[((1 - i) * 131) + 117-:113];</pre>
       <pre>							nextStage[((1 - i) * 209) + 82-:33] = operandA[i];</pre>
@@ -8060,12 +8137,12 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.memRrStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_290</pre>
+      <pre>				begin : sv2v_autoblock_294</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>						Core.loadStoreUnitIF.makeMSHRCanBeInvalidByMemoryRegisterReadStage[i] = BasicTypes_FALSE;</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_291</pre>
+      <pre>				begin : sv2v_autoblock_295</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8079,7 +8156,7 @@
       <pre>								Core.loadStoreUnitIF.makeMSHRCanBeInvalidByMemoryRegisterReadStage[mshrID] = BasicTypes_TRUE;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_292</pre>
+      <pre>				begin : sv2v_autoblock_296</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8122,7 +8199,7 @@
       <pre>			localparam OpFormatTypes_CSR_IMM_WIDTH = 5;</pre>
       <pre>			reg [417:0] pipeReg;</pre>
       <pre>			always @(posedge Core.memExStageIF.clk)</pre>
-      <pre>				if (Core.memExStageIF.rst) begin : sv2v_autoblock_293</pre>
+      <pre>				if (Core.memExStageIF.rst) begin : sv2v_autoblock_297</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 209) + 196] &lt;= 1&#39;sb0;</pre>
@@ -8231,9 +8308,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -8254,17 +8334,17 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_294</pre>
+      <pre>				begin : sv2v_autoblock_298</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						makeMSHRCanBeInvalid[i] = pipeReg[((1 - i) * 209) + 136];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_295</pre>
+      <pre>				begin : sv2v_autoblock_299</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							iqData[i] = pipeReg[((1 - i) * 209) + 195-:113];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, iqData[i][51-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, iqData[i][51-:6]);</pre>
       <pre>							memOpInfo[i] = iqData[i][100-:49];</pre>
       <pre>							fuOpA[i] = (pipeReg[((1 - i) * 209) + 16] ? Core.bypassNetworkIF.memSrcRegDataOutA[i] : pipeReg[((1 - i) * 209) + 82-:33]);</pre>
       <pre>							fuOpB[i] = (pipeReg[((1 - i) * 209) + 10] ? Core.bypassNetworkIF.memSrcRegDataOutB[i] : pipeReg[((1 - i) * 209) + 49-:33]);</pre>
@@ -8276,7 +8356,7 @@
       <pre>							regValid[i] = ((memOpInfo[i][42-:2] != 2&#39;b00) || fuOpA[i][32]) &amp;&amp; ((memOpInfo[i][40-:2] != 2&#39;b00) || fuOpB[i][32]);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_296</pre>
+      <pre>				begin : sv2v_autoblock_300</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8309,7 +8389,7 @@
       <pre>			localparam MicroArchConf_CONF_STORE_ISSUE_WIDTH = 1;</pre>
       <pre>			localparam BasicTypes_STORE_ISSUE_WIDTH = MicroArchConf_CONF_STORE_ISSUE_WIDTH;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_297</pre>
+      <pre>				begin : sv2v_autoblock_301</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8324,19 +8404,19 @@
       <pre>							nextStage[((1 - i) * 216) + 215-:12] = pipeReg[((1 - i) * 209) + 208-:12];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_298</pre>
+      <pre>				begin : sv2v_autoblock_302</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						if (makeMSHRCanBeInvalid[i])</pre>
       <pre>							nextStage[((1 - i) * 216) + 143] = BasicTypes_FALSE;</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_299</pre>
+      <pre>				begin : sv2v_autoblock_303</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						nextStage[((1 - (i + BasicTypes_STORE_ISSUE_LANE_BEGIN)) * 216) + 143] = BasicTypes_FALSE;</pre>
       <pre>				end</pre>
       <pre>				Core.memExStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_300</pre>
+      <pre>				begin : sv2v_autoblock_304</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8381,7 +8461,7 @@
       <pre>			localparam BasicTypes_STORE_ISSUE_WIDTH = MicroArchConf_CONF_STORE_ISSUE_WIDTH;</pre>
       <pre>			reg [215:0] stPipeReg [0:0];</pre>
       <pre>			always @(posedge Core.mtStageIF.clk)</pre>
-      <pre>				if (Core.mtStageIF.rst) begin : sv2v_autoblock_301</pre>
+      <pre>				if (Core.mtStageIF.rst) begin : sv2v_autoblock_305</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 216) + 203] &lt;= 1&#39;sb0;</pre>
@@ -8399,7 +8479,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_302</pre>
+      <pre>				begin : sv2v_autoblock_306</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8407,7 +8487,7 @@
       <pre>							ldIqData[i] = pipeReg[((1 - i) * 216) + 202-:113];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_303</pre>
+      <pre>				begin : sv2v_autoblock_307</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8449,9 +8529,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -8470,16 +8553,16 @@
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
       <pre>			endfunction</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_304</pre>
+      <pre>				begin : sv2v_autoblock_308</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>						lsuMakeMSHRCanBeInvalidByMemoryTagAccessStage[i] = BasicTypes_FALSE;</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_305</pre>
+      <pre>				begin : sv2v_autoblock_309</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							ldFlush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, ldIqData[i][51-:6]);</pre>
+      <pre>							ldFlush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, ldIqData[i][51-:6]);</pre>
       <pre>							ldUpdate[i] = ((ldPipeReg[i][203] &amp;&amp; !stall) &amp;&amp; !clear) &amp;&amp; !ldFlush[i];</pre>
       <pre>							isLoad[i] = ldIqData[i][100-:3] == 3&#39;b000;</pre>
       <pre>							isCSR[i] = ldIqData[i][100-:3] == 3&#39;b100;</pre>
@@ -8600,12 +8683,12 @@
       <pre>							ldNextStage[i][163-:12] = ldPipeReg[i][215-:12];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_306</pre>
+      <pre>				begin : sv2v_autoblock_310</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>						Core.loadStoreUnitIF.makeMSHRCanBeInvalidByMemoryTagAccessStage[i] = BasicTypes_FALSE;</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_307</pre>
+      <pre>				begin : sv2v_autoblock_311</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8628,12 +8711,12 @@
       <pre>			reg [163:0] stNextStage [0:0];</pre>
       <pre>			reg [112:0] stRecordData [0:0];</pre>
       <pre>			reg [0:0] memAccessOrderViolation;</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_308</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_312</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
       <pre>						memAccessOrderViolation[i] = BasicTypes_FALSE;</pre>
-      <pre>						stFlush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, stIqData[i][51-:6]);</pre>
+      <pre>						stFlush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, stIqData[i][51-:6]);</pre>
       <pre>						stUpdate[i] = ((stPipeReg[i][203] &amp;&amp; !stall) &amp;&amp; !clear) &amp;&amp; !stFlush[i];</pre>
       <pre>						isStore[i] = stIqData[i][100-:3] == 3&#39;b001;</pre>
       <pre>						Core.loadStoreUnitIF.executeStore[i] = stUpdate[i] &amp;&amp; isStore[i];</pre>
@@ -8704,7 +8787,7 @@
       <pre>			endfunction</pre>
       <pre>			always @(*) begin</pre>
       <pre>				Core.loadStoreUnitIF.memAccessOrderViolation = memAccessOrderViolation;</pre>
-      <pre>				begin : sv2v_autoblock_309</pre>
+      <pre>				begin : sv2v_autoblock_313</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8716,7 +8799,7 @@
       <pre>							flush[i] = ldFlush[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_310</pre>
+      <pre>				begin : sv2v_autoblock_314</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8731,12 +8814,12 @@
       <pre>				Core.mtStageIF.nextStage = nextStage;</pre>
       <pre>			end</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_311</pre>
+      <pre>				begin : sv2v_autoblock_315</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						Core.perfCounterIF.loadMiss[i] = (ldUpdate[i] &amp;&amp; isLoad[i]) &amp;&amp; ldMSHR_Allocated[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_312</pre>
+      <pre>				begin : sv2v_autoblock_316</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8771,7 +8854,7 @@
       <pre>			localparam SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH = 6;</pre>
       <pre>			reg [327:0] pipeReg;</pre>
       <pre>			always @(posedge Core.maStageIF.clk)</pre>
-      <pre>				if (Core.maStageIF.rst) begin : sv2v_autoblock_313</pre>
+      <pre>				if (Core.maStageIF.rst) begin : sv2v_autoblock_317</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 164) + 151] &lt;= 1&#39;sb0;</pre>
@@ -8807,9 +8890,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -8830,12 +8916,12 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_314</pre>
+      <pre>				begin : sv2v_autoblock_318</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							valid[i] = pipeReg[((1 - i) * 164) + 151];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, pipeReg[((1 - i) * 164) + 138-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, pipeReg[((1 - i) * 164) + 138-:6]);</pre>
       <pre>							isStore[i] = pipeReg[((1 - i) * 164) + 150];</pre>
       <pre>							isLoad[i] = pipeReg[((1 - i) * 164) + 149];</pre>
       <pre>							isCSR[i] = pipeReg[((1 - i) * 164) + 148];</pre>
@@ -8845,7 +8931,7 @@
       <pre>							regValid[i] = pipeReg[((1 - i) * 164) + 92];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_315</pre>
+      <pre>				begin : sv2v_autoblock_319</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8864,7 +8950,7 @@
       <pre>							ldDataOut[i][32] = regValid[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_316</pre>
+      <pre>				begin : sv2v_autoblock_320</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8872,17 +8958,17 @@
       <pre>							stDataOut[i][32] = BasicTypes_FALSE;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_317</pre>
+      <pre>				begin : sv2v_autoblock_321</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						dataOut[i] = ldDataOut[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_318</pre>
+      <pre>				begin : sv2v_autoblock_322</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						dataOut[i + BasicTypes_STORE_ISSUE_LANE_BEGIN] = stDataOut[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_319</pre>
+      <pre>				begin : sv2v_autoblock_323</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8900,13 +8986,13 @@
       <pre>							nextStage[((1 - i) * 136) + 123] = (((stall || clear) || Core.maStageIF.rst) || flush[i] ? BasicTypes_FALSE : pipeReg[((1 - i) * 164) + 151]);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_320</pre>
+      <pre>				begin : sv2v_autoblock_324</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						;</pre>
       <pre>				end</pre>
       <pre>				Core.maStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_321</pre>
+      <pre>				begin : sv2v_autoblock_325</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -8967,7 +9053,7 @@
       <pre>			reg [31:0] loadAddrReg [0:0];</pre>
       <pre>			reg [2:0] loadMemAccessSizeReg [0:0];</pre>
       <pre>			localparam BasicTypes_FALSE = 1&#39;b0;</pre>
-      <pre>			always @(posedge Core.loadStoreUnitIF.clk) begin : sv2v_autoblock_322</pre>
+      <pre>			always @(posedge Core.loadStoreUnitIF.clk) begin : sv2v_autoblock_326</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					if (Core.loadStoreUnitIF.rst) begin</pre>
@@ -8991,12 +9077,12 @@
       <pre>			reg [31:0] shiftedLoadData [0:0];</pre>
       <pre>			reg [31:0] extendedLoadData;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_323</pre>
+      <pre>				begin : sv2v_autoblock_327</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						Core.loadStoreUnitIF.executedLoadVectorData[i] = 0;</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_324</pre>
+      <pre>				begin : sv2v_autoblock_328</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -9049,7 +9135,7 @@
       <pre>			localparam BasicTypes_TRUE = 1&#39;b1;</pre>
       <pre>			always @(*) begin</pre>
       <pre>				pushCount = 0;</pre>
-      <pre>				begin : sv2v_autoblock_325</pre>
+      <pre>				begin : sv2v_autoblock_329</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_RENAME_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -9081,13 +9167,13 @@
       <pre>			reg [0:0] executedLoadWordRE [0:0];</pre>
       <pre>			reg executedLoadRegValid [0:0];</pre>
       <pre>			always @(posedge Core.loadStoreUnitIF.clk)</pre>
-      <pre>				if (reset) begin : sv2v_autoblock_326</pre>
+      <pre>				if (reset) begin : sv2v_autoblock_330</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; LoadStoreUnitTypes_LOAD_QUEUE_ENTRY_NUM; i = i + 1)</pre>
       <pre>						loadQueue[i][40] &lt;= BasicTypes_FALSE;</pre>
       <pre>				end</pre>
       <pre>				else begin</pre>
-      <pre>					begin : sv2v_autoblock_327</pre>
+      <pre>					begin : sv2v_autoblock_331</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>							if (Core.loadStoreUnitIF.executeLoad[i]) begin</pre>
@@ -9098,7 +9184,7 @@
       <pre>								loadQueue[executedLoadQueuePtrByLoad[i]][18-:MemoryMapTypes_PC_WIDTH] &lt;= Core.loadStoreUnitIF.executedLoadPC[i];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_328</pre>
+      <pre>					begin : sv2v_autoblock_332</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_RENAME_WIDTH; i = i + 1)</pre>
       <pre>							if (Core.loadStoreUnitIF.allocateLoadQueue[i])</pre>
@@ -9119,7 +9205,7 @@
       <pre>				reg signed [31:0] ret;</pre>
       <pre>				begin</pre>
       <pre>					ret = 0;</pre>
-      <pre>					begin : sv2v_autoblock_329</pre>
+      <pre>					begin : sv2v_autoblock_333</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; width; i = i + 1)</pre>
       <pre>							ret[i] = data[i + offset];</pre>
@@ -9139,7 +9225,7 @@
       <pre>					LoadStoreUnitTypes_LSQ_ToBlockWordEnable = wordEnable &lt;&lt; LoadStoreUnitTypes_LSQ_SelectBits(addr, BasicTypes_DATA_BYTE_WIDTH_BIT_SIZE, 0);</pre>
       <pre>				end</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_330</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_334</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
@@ -9181,11 +9267,11 @@
       <pre>						LoadQueuePtrToAge = age;</pre>
       <pre>				end</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_331</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_335</pre>
       <pre>				reg [0:1] _sv2v_jump;</pre>
       <pre>				_sv2v_jump = 2&#39;b00;</pre>
       <pre>				reset = Core.loadStoreUnitIF.rst;</pre>
-      <pre>				begin : sv2v_autoblock_332</pre>
+      <pre>				begin : sv2v_autoblock_336</pre>
       <pre>					reg signed [31:0] si;</pre>
       <pre>					for (si = 0; si &lt; BasicTypes_STORE_ISSUE_WIDTH; si = si + 1)</pre>
       <pre>						begin</pre>
@@ -9196,16 +9282,16 @@
       <pre>							executedLoadQueuePtrByStore[si] = Core.loadStoreUnitIF.executedLoadQueuePtrByStore[si];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_333</pre>
+      <pre>				begin : sv2v_autoblock_337</pre>
       <pre>					reg signed [31:0] si;</pre>
       <pre>					for (si = 0; si &lt; BasicTypes_STORE_ISSUE_WIDTH; si = si + 1)</pre>
-      <pre>						begin : sv2v_autoblock_334</pre>
+      <pre>						begin : sv2v_autoblock_338</pre>
       <pre>							reg signed [31:0] lqe;</pre>
       <pre>							for (lqe = 0; lqe &lt; LoadStoreUnitTypes_LOAD_QUEUE_ENTRY_NUM; lqe = lqe + 1)</pre>
       <pre>								addrMatch[si][lqe] = ((loadQueue[lqe][40] &amp;&amp; loadQueue[lqe][41]) &amp;&amp; (loadQueue[lqe][39-:20] == executedStoreAddr[si])) &amp;&amp; ((loadQueue[lqe][19-:1] &amp; executedStoreWordWE[si]) != 1&#39;b0);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_335</pre>
+      <pre>				begin : sv2v_autoblock_339</pre>
       <pre>					reg signed [31:0] si;</pre>
       <pre>					for (si = 0; si &lt; BasicTypes_STORE_ISSUE_WIDTH; si = si + 1)</pre>
       <pre>						if (Core.loadStoreUnitIF.executeStore[si]) begin</pre>
@@ -9216,16 +9302,16 @@
       <pre>						else</pre>
       <pre>							violation[si] = BasicTypes_FALSE;</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_336</pre>
+      <pre>				begin : sv2v_autoblock_340</pre>
       <pre>					reg signed [31:0] si;</pre>
-      <pre>					begin : sv2v_autoblock_337</pre>
+      <pre>					begin : sv2v_autoblock_341</pre>
       <pre>						reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>						for (si = 0; si &lt; BasicTypes_STORE_ISSUE_WIDTH; si = si + 1)</pre>
       <pre>							if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
       <pre>								_sv2v_jump = 2&#39;b00;</pre>
-      <pre>								begin : sv2v_autoblock_338</pre>
+      <pre>								begin : sv2v_autoblock_342</pre>
       <pre>									reg signed [31:0] li;</pre>
-      <pre>									begin : sv2v_autoblock_339</pre>
+      <pre>									begin : sv2v_autoblock_343</pre>
       <pre>										reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>										reg [0:1] _sv2v_jump_1;</pre>
       <pre>										_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -9265,7 +9351,7 @@
       <pre>				end</pre>
       <pre>				if (_sv2v_jump == 2&#39;b00) begin</pre>
       <pre>					Core.loadStoreUnitIF.conflictLoadPC = conflictLoadPC;</pre>
-      <pre>					begin : sv2v_autoblock_340</pre>
+      <pre>					begin : sv2v_autoblock_344</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>							Core.loadStoreUnitIF.conflict[i] = violation[i];</pre>
@@ -9335,7 +9421,7 @@
       <pre>			localparam BasicTypes_TRUE = 1&#39;b1;</pre>
       <pre>			always @(*) begin</pre>
       <pre>				pushCount = 0;</pre>
-      <pre>				begin : sv2v_autoblock_341</pre>
+      <pre>				begin : sv2v_autoblock_345</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_RENAME_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -9363,7 +9449,7 @@
       <pre>			reg executedStoreRegValid [0:0];</pre>
       <pre>			reg [3:0] executedStoreQueuePtrByStore;</pre>
       <pre>			always @(posedge Core.loadStoreUnitIF.clk)</pre>
-      <pre>				if (Core.loadStoreUnitIF.rst) begin : sv2v_autoblock_342</pre>
+      <pre>				if (Core.loadStoreUnitIF.rst) begin : sv2v_autoblock_346</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; LoadStoreUnitTypes_STORE_QUEUE_ENTRY_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -9374,7 +9460,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				else begin</pre>
-      <pre>					begin : sv2v_autoblock_343</pre>
+      <pre>					begin : sv2v_autoblock_347</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>							if (executeStore[i]) begin</pre>
@@ -9385,7 +9471,7 @@
       <pre>								storeQueue[executedStoreQueuePtrByStore[i * LoadStoreUnitTypes_STORE_QUEUE_ENTRY_NUM_BIT_WIDTH+:LoadStoreUnitTypes_STORE_QUEUE_ENTRY_NUM_BIT_WIDTH]][3-:BasicTypes_DATA_BYTE_WIDTH] &lt;= executedStoreByteWE[i];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_344</pre>
+      <pre>					begin : sv2v_autoblock_348</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_RENAME_WIDTH; i = i + 1)</pre>
       <pre>							if (Core.loadStoreUnitIF.allocateStoreQueue[i])</pre>
@@ -9404,7 +9490,7 @@
       <pre>				reg signed [31:0] ret;</pre>
       <pre>				begin</pre>
       <pre>					ret = 0;</pre>
-      <pre>					begin : sv2v_autoblock_345</pre>
+      <pre>					begin : sv2v_autoblock_349</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; width; i = i + 1)</pre>
       <pre>							ret[i] = data[i + offset];</pre>
@@ -9437,7 +9523,7 @@
       <pre>					LoadStoreUnitTypes_LSQ_ToWordByteEnable = byteEnable &lt;&lt; addr[1:0];</pre>
       <pre>				end</pre>
       <pre>			endfunction</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_346</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_350</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
@@ -9469,7 +9555,7 @@
       <pre>					.picked(picked[i])</pre>
       <pre>				);</pre>
       <pre>			end</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_347</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_351</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					executedStoreQueuePtrByLoad[i] = Core.loadStoreUnitIF.executedStoreQueuePtrByLoad[i];</pre>
@@ -9492,7 +9578,7 @@
       <pre>				.ra(sqReadPtr),</pre>
       <pre>				.rv(sqReadData)</pre>
       <pre>			);</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_348</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_352</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>					begin</pre>
@@ -9518,7 +9604,7 @@
       <pre>				Core.loadStoreUnitIF.retiredStoreWordWE = headDataEntry[4-:1];</pre>
       <pre>				Core.loadStoreUnitIF.retiredStoreByteWE = headDataEntry[3-:BasicTypes_DATA_BYTE_WIDTH];</pre>
       <pre>				Core.loadStoreUnitIF.storeQueueHeadPtr = headPtr;</pre>
-      <pre>				begin : sv2v_autoblock_349</pre>
+      <pre>				begin : sv2v_autoblock_353</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -9528,16 +9614,16 @@
       <pre>							executedLoadByteRE[i] = LoadStoreUnitTypes_LSQ_ToWordByteEnable(Core.loadStoreUnitIF.executedLoadAddr[i], Core.loadStoreUnitIF.executedLoadMemAccessMode[i]);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_350</pre>
+      <pre>				begin : sv2v_autoblock_354</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
-      <pre>						begin : sv2v_autoblock_351</pre>
+      <pre>						begin : sv2v_autoblock_355</pre>
       <pre>							reg signed [31:0] j;</pre>
       <pre>							for (j = 0; j &lt; LoadStoreUnitTypes_STORE_QUEUE_ENTRY_NUM; j = j + 1)</pre>
       <pre>								addrMatch[i][j] = ((storeQueue[j][25] &amp;&amp; (storeQueue[j][24-:20] == LoadStoreUnitTypes_LSQ_ToBlockAddr(Core.loadStoreUnitIF.executedLoadAddr[i]))) &amp;&amp; ((storeQueue[j][4-:1] &amp; executedLoadWordRE[i]) != 1&#39;b0)) &amp;&amp; ((storeQueue[j][3-:BasicTypes_DATA_BYTE_WIDTH] &amp; executedLoadByteRE[i]) != {4 {1&#39;sb0}});</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_352</pre>
+      <pre>				begin : sv2v_autoblock_356</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -9590,7 +9676,7 @@
       <pre>			localparam CacheSystemTypes_MSHR_NUM_BIT_WIDTH = 1;</pre>
       <pre>			reg [0:0] portStoreMSHRID;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_353</pre>
+      <pre>				begin : sv2v_autoblock_357</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>						portMSHRPhase[i] = Core.loadStoreUnitIF.mshrPhase[i];</pre>
@@ -9643,7 +9729,7 @@
       <pre>				reg signed [31:0] ret;</pre>
       <pre>				begin</pre>
       <pre>					ret = 0;</pre>
-      <pre>					begin : sv2v_autoblock_354</pre>
+      <pre>					begin : sv2v_autoblock_358</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; width; i = i + 1)</pre>
       <pre>							ret[i] = data[i + offset];</pre>
@@ -9658,7 +9744,7 @@
       <pre>				reg [7:0] ret;</pre>
       <pre>				reg [3:0] we;</pre>
       <pre>				begin</pre>
-      <pre>					begin : sv2v_autoblock_355</pre>
+      <pre>					begin : sv2v_autoblock_359</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; LoadStoreUnitTypes_LSQ_BLOCK_WORD_WIDTH; i = i + 1)</pre>
       <pre>							if (wordWE[i])</pre>
@@ -9677,7 +9763,7 @@
       <pre>				reg [63:0] line;</pre>
       <pre>				begin</pre>
       <pre>					line = 1&#39;sb0;</pre>
-      <pre>					begin : sv2v_autoblock_356</pre>
+      <pre>					begin : sv2v_autoblock_360</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; 2; i = i + 1)</pre>
       <pre>							line[i * LoadStoreUnitTypes_LSQ_BLOCK_WIDTH+:LoadStoreUnitTypes_LSQ_BLOCK_WIDTH] = data;</pre>
@@ -9708,9 +9794,9 @@
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
       <pre>					ret = {blockAddr, {LoadStoreUnitTypes_LSQ_BLOCK_BYTE_WIDTH_BIT_SIZE {1&#39;b0}}};</pre>
-      <pre>					begin : sv2v_autoblock_357</pre>
+      <pre>					begin : sv2v_autoblock_361</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_358</pre>
+      <pre>						begin : sv2v_autoblock_362</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; LoadStoreUnitTypes_LSQ_BLOCK_WORD_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -9822,7 +9908,7 @@
       <pre>				nextDataStagePipeReg = tagStagePipeReg;</pre>
       <pre>				if (stallStoreTagStage)</pre>
       <pre>					nextDataStagePipeReg[60] = BasicTypes_FALSE;</pre>
-      <pre>				begin : sv2v_autoblock_359</pre>
+      <pre>				begin : sv2v_autoblock_363</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_STORE_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						Core.perfCounterIF.storeMiss[i] = (i == 0 ? finishWriteBack : BasicTypes_FALSE);</pre>
@@ -9841,9 +9927,9 @@
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
       <pre>					ret = data[31:0];</pre>
-      <pre>					begin : sv2v_autoblock_360</pre>
+      <pre>					begin : sv2v_autoblock_364</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_361</pre>
+      <pre>						begin : sv2v_autoblock_365</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; LoadStoreUnitTypes_LSQ_BLOCK_WORD_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -10039,13 +10125,13 @@
       <pre>					case (regPhase)</pre>
       <pre>						default: nextPhase = 2&#39;d0;</pre>
       <pre>						2&#39;d0: begin</pre>
-      <pre>							begin : sv2v_autoblock_362</pre>
+      <pre>							begin : sv2v_autoblock_366</pre>
       <pre>								reg signed [31:0] i;</pre>
       <pre>								for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>									if (Core.dCache.port.mshrPhase[i] != 5&#39;d0)</pre>
       <pre>										mshrBusy = BasicTypes_TRUE;</pre>
       <pre>							end</pre>
-      <pre>							begin : sv2v_autoblock_363</pre>
+      <pre>							begin : sv2v_autoblock_367</pre>
       <pre>								reg signed [31:0] i;</pre>
       <pre>								for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; i = i + 1)</pre>
       <pre>									if (Core.dCache.port.lsuCacheGrtReg[i] || Core.dCache.port.lsuCacheGrt[i])</pre>
@@ -10116,7 +10202,7 @@
       <pre>						rstIndex &lt;= 1&#39;sb0;</pre>
       <pre>					else</pre>
       <pre>						rstIndex &lt;= rstIndex + 1;</pre>
-      <pre>					begin : sv2v_autoblock_364</pre>
+      <pre>					begin : sv2v_autoblock_368</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							if (Core.dCache.port.rst) begin</pre>
@@ -10188,7 +10274,7 @@
       <pre>					begin</pre>
       <pre>						evicted = 0;</pre>
       <pre>						pos = 0;</pre>
-      <pre>						begin : sv2v_autoblock_365</pre>
+      <pre>						begin : sv2v_autoblock_369</pre>
       <pre>							reg signed [31:0] i;</pre>
       <pre>							for (i = 0; i &lt; CacheSystemTypes_DCACHE_WAY_BIT_NUM; i = i + 1)</pre>
       <pre>								begin</pre>
@@ -10206,11 +10292,11 @@
       <pre>					begin</pre>
       <pre>						next = 0;</pre>
       <pre>						pos = 0;</pre>
-      <pre>						begin : sv2v_autoblock_366</pre>
+      <pre>						begin : sv2v_autoblock_370</pre>
       <pre>							reg signed [31:0] i;</pre>
       <pre>							for (i = 0; i &lt; CacheSystemTypes_DCACHE_WAY_BIT_NUM; i = i + 1)</pre>
       <pre>								begin</pre>
-      <pre>									begin : sv2v_autoblock_367</pre>
+      <pre>									begin : sv2v_autoblock_371</pre>
       <pre>										reg signed [31:0] j;</pre>
       <pre>										for (j = 0; j &lt; (1 &lt;&lt; i); j = j + 1)</pre>
       <pre>											next[pos + j] = way[-i];</pre>
@@ -10231,7 +10317,7 @@
       <pre>						pos = 0;</pre>
       <pre>						c = 0;</pre>
       <pre>						we = 1&#39;sb0;</pre>
-      <pre>						begin : sv2v_autoblock_368</pre>
+      <pre>						begin : sv2v_autoblock_372</pre>
       <pre>							reg signed [31:0] i;</pre>
       <pre>							for (i = 0; i &lt; CacheSystemTypes_DCACHE_WAY_BIT_NUM; i = i + 1)</pre>
       <pre>								begin</pre>
@@ -10244,14 +10330,14 @@
       <pre>					end</pre>
       <pre>				endfunction</pre>
       <pre>				always @(*) begin</pre>
-      <pre>					begin : sv2v_autoblock_369</pre>
+      <pre>					begin : sv2v_autoblock_373</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
       <pre>								replArrayIndex[(1 - p) * CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH+:CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH] = Core.dCache.port.replArrayIndexIn[p];</pre>
       <pre>								replArrayWE_Flat[p] = TreeLRU_CalcWriteEnable(Core.dCache.port.replArrayWE[p], Core.dCache.port.replArrayDataIn[p]);</pre>
       <pre>								replArrayInFlat[p] = TreeLRU_CalcUpdatedState(Core.dCache.port.replArrayDataIn[p]);</pre>
-      <pre>								begin : sv2v_autoblock_370</pre>
+      <pre>								begin : sv2v_autoblock_374</pre>
       <pre>									reg signed [31:0] i;</pre>
       <pre>									for (i = 0; i &lt; CacheSystemTypes_DCACHE_TREE_LRU_STATE_BIT_NUM; i = i + 1)</pre>
       <pre>										begin</pre>
@@ -10264,13 +10350,13 @@
       <pre>								Core.dCache.port.replArrayDataOut[(1 - p) * 1+:1] = replArrayResult[p];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_371</pre>
+      <pre>					begin : sv2v_autoblock_375</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
       <pre>								dataArrayIndex[(1 - p) * CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH+:CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH] = Core.dCache.port.dataArrayIndexIn[p];</pre>
       <pre>								dataArrayDirtyIn[p] = Core.dCache.port.dataArrayDirtyIn[p];</pre>
-      <pre>								begin : sv2v_autoblock_372</pre>
+      <pre>								begin : sv2v_autoblock_376</pre>
       <pre>									reg signed [31:0] way;</pre>
       <pre>									for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>										dataArrayWE[way][p] = (Core.dCache.port.dataArrayWriteWay[p] == way ? Core.dCache.port.dataArrayWE[p] : BasicTypes_FALSE);</pre>
@@ -10280,24 +10366,24 @@
       <pre>					dataArrayByteWE_Tmp = Core.dCache.port.dataArrayByteWE_In;</pre>
       <pre>					dataArrayInTmp = Core.dCache.port.dataArrayDataIn;</pre>
       <pre>					tagArrayOut = tagArrayOutTmp;</pre>
-      <pre>					begin : sv2v_autoblock_373</pre>
+      <pre>					begin : sv2v_autoblock_377</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
-      <pre>							begin : sv2v_autoblock_374</pre>
+      <pre>							begin : sv2v_autoblock_378</pre>
       <pre>								reg signed [31:0] i;</pre>
       <pre>								for (i = 0; i &lt; CacheSystemTypes_DCACHE_LINE_BYTE_NUM; i = i + 1)</pre>
       <pre>									begin</pre>
-      <pre>										begin : sv2v_autoblock_375</pre>
+      <pre>										begin : sv2v_autoblock_379</pre>
       <pre>											reg signed [31:0] way;</pre>
       <pre>											for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>												dataArrayByteWE[i][way][p] = dataArrayWE[way][p] &amp;&amp; dataArrayByteWE_Tmp[((1 - p) * CacheSystemTypes_DCACHE_LINE_BYTE_NUM) + i];</pre>
       <pre>										end</pre>
-      <pre>										begin : sv2v_autoblock_376</pre>
+      <pre>										begin : sv2v_autoblock_380</pre>
       <pre>											reg signed [31:0] b;</pre>
       <pre>											for (b = 0; b &lt; 8; b = b + 1)</pre>
       <pre>												begin</pre>
       <pre>													dataArrayIn[i][((1 - p) * BasicTypes_BYTE_WIDTH) + b] = dataArrayInTmp[((1 - p) * CacheSystemTypes_DCACHE_LINE_BIT_WIDTH) + ((i * 8) + b)];</pre>
-      <pre>													begin : sv2v_autoblock_377</pre>
+      <pre>													begin : sv2v_autoblock_381</pre>
       <pre>														reg signed [31:0] way;</pre>
       <pre>														for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>															dataArrayOutTmp[way][p][(i * 8) + b] = dataArrayOut[i][way][((1 - p) * BasicTypes_BYTE_WIDTH) + b];</pre>
@@ -10307,7 +10393,7 @@
       <pre>									end</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_378</pre>
+      <pre>					begin : sv2v_autoblock_382</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
@@ -10316,14 +10402,14 @@
       <pre>								Core.dCache.port.dataArrayDirtyOut[p] = dataArrayDirtyOut[dataArrayReadWay[p]][p];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_379</pre>
+      <pre>					begin : sv2v_autoblock_383</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
       <pre>								tagArrayIndex[(1 - p) * CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH+:CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH] = Core.dCache.port.tagArrayIndexIn[p];</pre>
       <pre>								tagArrayIn[((1 - p) * 12) + 10-:CacheSystemTypes_DCACHE_TAG_BIT_WIDTH] = Core.dCache.port.tagArrayDataIn[p];</pre>
       <pre>								tagArrayIn[((1 - p) * 12) + 11] = Core.dCache.port.tagArrayValidIn[p];</pre>
-      <pre>								begin : sv2v_autoblock_380</pre>
+      <pre>								begin : sv2v_autoblock_384</pre>
       <pre>									reg signed [31:0] way;</pre>
       <pre>									for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>										begin</pre>
@@ -10335,14 +10421,14 @@
       <pre>							end</pre>
       <pre>					end</pre>
       <pre>					if (Core.dCache.port.rst) begin</pre>
-      <pre>						begin : sv2v_autoblock_381</pre>
+      <pre>						begin : sv2v_autoblock_385</pre>
       <pre>							reg signed [31:0] p;</pre>
       <pre>							for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
-      <pre>								begin : sv2v_autoblock_382</pre>
+      <pre>								begin : sv2v_autoblock_386</pre>
       <pre>									reg signed [31:0] way;</pre>
       <pre>									for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>										begin</pre>
-      <pre>											begin : sv2v_autoblock_383</pre>
+      <pre>											begin : sv2v_autoblock_387</pre>
       <pre>												reg signed [31:0] i;</pre>
       <pre>												for (i = 0; i &lt; CacheSystemTypes_DCACHE_LINE_BYTE_NUM; i = i + 1)</pre>
       <pre>													dataArrayByteWE[i][way][p] = BasicTypes_FALSE;</pre>
@@ -10351,11 +10437,11 @@
       <pre>										end</pre>
       <pre>								end</pre>
       <pre>						end</pre>
-      <pre>						begin : sv2v_autoblock_384</pre>
+      <pre>						begin : sv2v_autoblock_388</pre>
       <pre>							reg signed [31:0] i;</pre>
       <pre>							for (i = 0; i &lt; CacheSystemTypes_DCACHE_LINE_BYTE_NUM; i = i + 1)</pre>
       <pre>								begin</pre>
-      <pre>									begin : sv2v_autoblock_385</pre>
+      <pre>									begin : sv2v_autoblock_389</pre>
       <pre>										reg signed [31:0] way;</pre>
       <pre>										for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>											dataArrayByteWE[i][way][0] = BasicTypes_TRUE;</pre>
@@ -10363,7 +10449,7 @@
       <pre>									dataArrayIn[i][BasicTypes_BYTE_WIDTH+:BasicTypes_BYTE_WIDTH] = 8&#39;hcd;</pre>
       <pre>								end</pre>
       <pre>						end</pre>
-      <pre>						begin : sv2v_autoblock_386</pre>
+      <pre>						begin : sv2v_autoblock_390</pre>
       <pre>							reg signed [31:0] way;</pre>
       <pre>							for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>								dataArrayWE[way][0] = BasicTypes_TRUE;</pre>
@@ -10371,7 +10457,7 @@
       <pre>						dataArrayIndex[CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH+:CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH] = rstIndex;</pre>
       <pre>						dataArrayDirtyIn[0] = BasicTypes_FALSE;</pre>
       <pre>						tagArrayIndex[CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH+:CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH] = rstIndex;</pre>
-      <pre>						begin : sv2v_autoblock_387</pre>
+      <pre>						begin : sv2v_autoblock_391</pre>
       <pre>							reg signed [31:0] way;</pre>
       <pre>							for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>								tagArrayWE[way][0] = BasicTypes_TRUE;</pre>
@@ -10379,7 +10465,7 @@
       <pre>						tagArrayIn[22-:CacheSystemTypes_DCACHE_TAG_BIT_WIDTH] = 0;</pre>
       <pre>						tagArrayIn[23] = BasicTypes_FALSE;</pre>
       <pre>						replArrayIndex[CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH+:CacheSystemTypes_DCACHE_INDEX_BIT_WIDTH] = rstIndex;</pre>
-      <pre>						begin : sv2v_autoblock_388</pre>
+      <pre>						begin : sv2v_autoblock_392</pre>
       <pre>							reg signed [31:0] i;</pre>
       <pre>							for (i = 0; i &lt; CacheSystemTypes_DCACHE_TREE_LRU_STATE_BIT_NUM; i = i + 1)</pre>
       <pre>								begin</pre>
@@ -10409,10 +10495,10 @@
       <pre>				reg [0:1] cacheArrayInGrant;</pre>
       <pre>				localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>				localparam BasicTypes_TRUE = 1&#39;b1;</pre>
-      <pre>				always @(*) begin : sv2v_autoblock_389</pre>
+      <pre>				always @(*) begin : sv2v_autoblock_393</pre>
       <pre>					reg [0:1] _sv2v_jump;</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
-      <pre>					begin : sv2v_autoblock_390</pre>
+      <pre>					begin : sv2v_autoblock_394</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_DCACHE_MUX_PORT_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
@@ -10420,7 +10506,7 @@
       <pre>								grant[r] = BasicTypes_FALSE;</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_391</pre>
+      <pre>					begin : sv2v_autoblock_395</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; r = r + 1)</pre>
       <pre>							if (Core.dCache.port.dcFlushing)</pre>
@@ -10428,23 +10514,23 @@
       <pre>							else</pre>
       <pre>								req[r] = Core.dCache.port.lsuCacheReq[r];</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_392</pre>
+      <pre>					begin : sv2v_autoblock_396</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>							req[r + CacheSystemTypes_DCACHE_LSU_PORT_NUM] = Core.dCache.port.mshrCacheReq[r];</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_393</pre>
+      <pre>					begin : sv2v_autoblock_397</pre>
       <pre>						reg signed [31:0] p;</pre>
-      <pre>						begin : sv2v_autoblock_394</pre>
+      <pre>						begin : sv2v_autoblock_398</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
       <pre>									_sv2v_jump = 2&#39;b00;</pre>
       <pre>									cacheArrayInGrant[p] = BasicTypes_FALSE;</pre>
       <pre>									cacheArrayInSel[(1 - p) * 2+:2] = 1&#39;sb0;</pre>
-      <pre>									begin : sv2v_autoblock_395</pre>
+      <pre>									begin : sv2v_autoblock_399</pre>
       <pre>										reg signed [31:0] r;</pre>
-      <pre>										begin : sv2v_autoblock_396</pre>
+      <pre>										begin : sv2v_autoblock_400</pre>
       <pre>											reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>											reg [0:1] _sv2v_jump_1;</pre>
       <pre>											_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -10479,12 +10565,12 @@
       <pre>						Core.dCache.port.cacheArrayInSel = cacheArrayInSel;</pre>
       <pre>						Core.dCache.port.cacheArrayInGrant = cacheArrayInGrant;</pre>
       <pre>						Core.dCache.port.cacheArrayOutSel = cacheArrayOutSel;</pre>
-      <pre>						begin : sv2v_autoblock_397</pre>
+      <pre>						begin : sv2v_autoblock_401</pre>
       <pre>							reg signed [31:0] r;</pre>
       <pre>							for (r = 0; r &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; r = r + 1)</pre>
       <pre>								Core.dCache.port.lsuCacheGrt[r] = grant[r];</pre>
       <pre>						end</pre>
-      <pre>						begin : sv2v_autoblock_398</pre>
+      <pre>						begin : sv2v_autoblock_402</pre>
       <pre>							reg signed [31:0] r;</pre>
       <pre>							for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>								Core.dCache.port.mshrCacheGrt[r] = grant[r + CacheSystemTypes_DCACHE_LSU_PORT_NUM];</pre>
@@ -10543,7 +10629,7 @@
       <pre>				reg isReplSameIndex [0:1];</pre>
       <pre>				localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>				always @(posedge Core.dCache.port.clk) begin</pre>
-      <pre>					begin : sv2v_autoblock_399</pre>
+      <pre>					begin : sv2v_autoblock_403</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; i = i + 1)</pre>
       <pre>							if (Core.dCache.port.rst) begin</pre>
@@ -10557,7 +10643,7 @@
       <pre>								portInRegGrantTagStg[i] &lt;= Core.dCache.port.cacheArrayInGrant[i];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_400</pre>
+      <pre>					begin : sv2v_autoblock_404</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_MUX_PORT_NUM; i = i + 1)</pre>
       <pre>							if (Core.dCache.port.rst) begin</pre>
@@ -10581,17 +10667,17 @@
       <pre>					ToTagPartFromFullAddr = addr[21:11];</pre>
       <pre>				endfunction</pre>
       <pre>				always @(*) begin</pre>
-      <pre>					begin : sv2v_autoblock_401</pre>
+      <pre>					begin : sv2v_autoblock_405</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; r = r + 1)</pre>
       <pre>							muxIn[r] = Core.dCache.port.lsuMuxIn[r];</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_402</pre>
+      <pre>					begin : sv2v_autoblock_406</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>							muxIn[r + CacheSystemTypes_DCACHE_LSU_PORT_NUM] = Core.dCache.port.mshrCacheMuxIn[r];</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_403</pre>
+      <pre>					begin : sv2v_autoblock_407</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
@@ -10599,7 +10685,7 @@
       <pre>								portMSHRData[r] = Core.dCache.port.mshrData[r];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_404</pre>
+      <pre>					begin : sv2v_autoblock_408</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
@@ -10613,7 +10699,7 @@
       <pre>					end</pre>
       <pre>					tagArrayDataOutTmp = Core.dCache.port.tagArrayDataOut;</pre>
       <pre>					tagArrayValidOutTmp = Core.dCache.port.tagArrayValidOut;</pre>
-      <pre>					begin : sv2v_autoblock_405</pre>
+      <pre>					begin : sv2v_autoblock_409</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
@@ -10622,7 +10708,7 @@
       <pre>								mshrAddrHit[p] = BasicTypes_FALSE;</pre>
       <pre>								mshrAddrHitMSHRID[p] = 1&#39;sb0;</pre>
       <pre>								mshrReadData[p] = 1&#39;sb0;</pre>
-      <pre>								begin : sv2v_autoblock_406</pre>
+      <pre>								begin : sv2v_autoblock_410</pre>
       <pre>									reg signed [31:0] m;</pre>
       <pre>									for (m = 0; m &lt; CacheSystemTypes_MSHR_NUM; m = m + 1)</pre>
       <pre>										if (Core.dCache.port.mshrValid[m] &amp;&amp; (muxInReg[p][99-:8] == ToIndexPartFromFullAddr(Core.dCache.port.mshrAddr[m]))) begin</pre>
@@ -10641,7 +10727,7 @@
       <pre>								end</pre>
       <pre>								repHitWay[p] = 1&#39;sb0;</pre>
       <pre>								repIsHit[p] = BasicTypes_FALSE;</pre>
-      <pre>								begin : sv2v_autoblock_407</pre>
+      <pre>								begin : sv2v_autoblock_411</pre>
       <pre>									reg signed [31:0] way;</pre>
       <pre>									for (way = 0; way &lt; CacheSystemTypes_DCACHE_WAY_NUM; way = way + 1)</pre>
       <pre>										begin</pre>
@@ -10654,11 +10740,11 @@
       <pre>								end</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_408</pre>
+      <pre>					begin : sv2v_autoblock_412</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_DCACHE_MUX_PORT_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
-      <pre>								begin : sv2v_autoblock_409</pre>
+      <pre>								begin : sv2v_autoblock_413</pre>
       <pre>									reg signed [31:0] w;</pre>
       <pre>									for (w = 0; w &lt; CacheSystemTypes_DCACHE_WAY_NUM; w = w + 1)</pre>
       <pre>										begin</pre>
@@ -10674,12 +10760,12 @@
       <pre>								muxTagOut[r][63-:CacheSystemTypes_DCACHE_LINE_BIT_WIDTH] = mshrReadData[portOutRegTagStg[r]];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_410</pre>
+      <pre>					begin : sv2v_autoblock_414</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>							Core.dCache.port.mshrCanBeInvalid[r] = portMSHRCanBeInvalid[r];</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_411</pre>
+      <pre>					begin : sv2v_autoblock_415</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
@@ -10693,12 +10779,12 @@
       <pre>								Core.dCache.port.dataArrayIndexIn[p] = muxInReg[p][99-:8];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_412</pre>
+      <pre>					begin : sv2v_autoblock_416</pre>
       <pre>						reg signed [31:0] p;</pre>
       <pre>						for (p = 0; p &lt; CacheSystemTypes_DCACHE_ARRAY_PORT_NUM; p = p + 1)</pre>
       <pre>							begin</pre>
       <pre>								isReplSameIndex[p] = BasicTypes_FALSE;</pre>
-      <pre>								begin : sv2v_autoblock_413</pre>
+      <pre>								begin : sv2v_autoblock_417</pre>
       <pre>									reg signed [31:0] i;</pre>
       <pre>									for (i = 0; i &lt; p; i = i + 1)</pre>
       <pre>										if (muxInReg[i][99-:8] == muxInReg[p][99-:8])</pre>
@@ -10723,7 +10809,7 @@
       <pre>					dataArrayDataOutTmp = Core.dCache.port.dataArrayDataOut;</pre>
       <pre>					dataArrayDirtyOutTmp = Core.dCache.port.dataArrayDirtyOut;</pre>
       <pre>					replArrayDataOutTmp = Core.dCache.port.replArrayDataOut;</pre>
-      <pre>					begin : sv2v_autoblock_414</pre>
+      <pre>					begin : sv2v_autoblock_418</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_DCACHE_MUX_PORT_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
@@ -10734,7 +10820,7 @@
       <pre>					end</pre>
       <pre>				end</pre>
       <pre>				always @(*) begin</pre>
-      <pre>					begin : sv2v_autoblock_415</pre>
+      <pre>					begin : sv2v_autoblock_419</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
@@ -10742,7 +10828,7 @@
       <pre>								Core.dCache.port.lsuMuxDataOut[r] = muxDataOut[r];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_416</pre>
+      <pre>					begin : sv2v_autoblock_420</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
@@ -10762,10 +10848,10 @@
       <pre>				reg memValid;</pre>
       <pre>				localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>				localparam BasicTypes_TRUE = 1&#39;b1;</pre>
-      <pre>				always @(*) begin : sv2v_autoblock_417</pre>
+      <pre>				always @(*) begin : sv2v_autoblock_421</pre>
       <pre>					reg [0:1] _sv2v_jump;</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
-      <pre>					begin : sv2v_autoblock_418</pre>
+      <pre>					begin : sv2v_autoblock_422</pre>
       <pre>						reg signed [31:0] r;</pre>
       <pre>						for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>							begin</pre>
@@ -10775,9 +10861,9 @@
       <pre>					end</pre>
       <pre>					memInSel = 1&#39;sb0;</pre>
       <pre>					memValid = BasicTypes_FALSE;</pre>
-      <pre>					begin : sv2v_autoblock_419</pre>
+      <pre>					begin : sv2v_autoblock_423</pre>
       <pre>						reg signed [31:0] r;</pre>
-      <pre>						begin : sv2v_autoblock_420</pre>
+      <pre>						begin : sv2v_autoblock_424</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -10799,7 +10885,7 @@
       <pre>					if (_sv2v_jump == 2&#39;b00) begin</pre>
       <pre>						Core.dCache.port.memInSel = memInSel;</pre>
       <pre>						Core.dCache.port.memValid = memValid;</pre>
-      <pre>						begin : sv2v_autoblock_421</pre>
+      <pre>						begin : sv2v_autoblock_425</pre>
       <pre>							reg signed [31:0] r;</pre>
       <pre>							for (r = 0; r &lt; CacheSystemTypes_MSHR_NUM; r = r + 1)</pre>
       <pre>								Core.dCache.port.mshrMemGrt[r] = grant[r];</pre>
@@ -10817,7 +10903,7 @@
       <pre>					Core.dCache.port.memAddr = Core.dCache.port.mshrMemMuxIn[portIn][86-:22];</pre>
       <pre>					Core.dCache.port.memData = Core.dCache.port.mshrMemMuxIn[portIn][64-:64];</pre>
       <pre>					Core.dCache.port.memWE = Core.dCache.port.mshrMemMuxIn[portIn][0];</pre>
-      <pre>					begin : sv2v_autoblock_422</pre>
+      <pre>					begin : sv2v_autoblock_426</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -10852,7 +10938,7 @@
       <pre>				reg mshrFlushComplete [0:1];</pre>
       <pre>				localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>				always @(posedge Core.dCache.port.clk)</pre>
-      <pre>					if (Core.dCache.port.rst) begin : sv2v_autoblock_423</pre>
+      <pre>					if (Core.dCache.port.rst) begin : sv2v_autoblock_427</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -10870,7 +10956,7 @@
       <pre>					ToIndexSubsetPartFromFullAddr = addr[10:CacheSystemTypes_DCACHE_LINE_BYTE_NUM_BIT_WIDTH];</pre>
       <pre>				endfunction</pre>
       <pre>				always @(*) begin</pre>
-      <pre>					begin : sv2v_autoblock_424</pre>
+      <pre>					begin : sv2v_autoblock_428</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -10900,10 +10986,10 @@
       <pre>					input reg [63:0] fetchedLine;</pre>
       <pre>					input reg [63:0] storedLine;</pre>
       <pre>					input reg [7:0] storedDirty;</pre>
-      <pre>					begin : sv2v_autoblock_425</pre>
+      <pre>					begin : sv2v_autoblock_429</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LINE_BYTE_NUM; i = i + 1)</pre>
-      <pre>							begin : sv2v_autoblock_426</pre>
+      <pre>							begin : sv2v_autoblock_430</pre>
       <pre>								reg signed [31:0] b;</pre>
       <pre>								for (b = 0; b &lt; 8; b = b + 1)</pre>
       <pre>									dstLine[(i * 8) + b] = (storedDirty[i] ? storedLine[(i * 8) + b] : fetchedLine[(i * 8) + b]);</pre>
@@ -10923,12 +11009,12 @@
       <pre>					ToTagPartFromFullAddr = addr[21:11];</pre>
       <pre>				endfunction</pre>
       <pre>				always @(*) begin</pre>
-      <pre>					begin : sv2v_autoblock_427</pre>
+      <pre>					begin : sv2v_autoblock_431</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>							portIsAllocatedByStore[i] = Core.dCache.port.isAllocatedByStore[i];</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_428</pre>
+      <pre>					begin : sv2v_autoblock_432</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -11218,12 +11304,12 @@
       <pre>			localparam BasicTypes_FALSE = 1&#39;b0;</pre>
       <pre>			always @(posedge port.clk)</pre>
       <pre>				if (port.rst) begin</pre>
-      <pre>					begin : sv2v_autoblock_429</pre>
+      <pre>					begin : sv2v_autoblock_433</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>							dcReadReqReg[i] &lt;= BasicTypes_FALSE;</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_430</pre>
+      <pre>					begin : sv2v_autoblock_434</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; i = i + 1)</pre>
       <pre>							lsuCacheGrtReg[i] &lt;= BasicTypes_FALSE;</pre>
@@ -11232,7 +11318,7 @@
       <pre>				end</pre>
       <pre>				else begin</pre>
       <pre>					lsuCacheGrtReg &lt;= port.lsuCacheGrt;</pre>
-      <pre>					begin : sv2v_autoblock_431</pre>
+      <pre>					begin : sv2v_autoblock_435</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -11264,12 +11350,12 @@
       <pre>				ToTagPartFromFullAddr = addr[21:11];</pre>
       <pre>			endfunction</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_432</pre>
+      <pre>				begin : sv2v_autoblock_436</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						lsuMakeMSHRCanBeInvalid[i] = Core.loadStoreUnitIF.makeMSHRCanBeInvalid[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_433</pre>
+      <pre>				begin : sv2v_autoblock_437</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11289,7 +11375,7 @@
       <pre>							port.lsuMuxIn[i + CacheSystemTypes_DCACHE_LSU_READ_PORT_BEGIN][0] = BasicTypes_FALSE;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_434</pre>
+      <pre>				begin : sv2v_autoblock_438</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11298,7 +11384,7 @@
       <pre>								hit[i] = BasicTypes_TRUE;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_435</pre>
+      <pre>				begin : sv2v_autoblock_439</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11306,7 +11392,7 @@
       <pre>							Core.loadStoreUnitIF.dcReadHit[i] = hit[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_436</pre>
+      <pre>				begin : sv2v_autoblock_440</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_WRITE_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11329,7 +11415,7 @@
       <pre>							Core.loadStoreUnitIF.dcWriteReqAck = port.lsuCacheGrt[i + CacheSystemTypes_DCACHE_LSU_WRITE_PORT_BEGIN];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_437</pre>
+      <pre>				begin : sv2v_autoblock_441</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_WRITE_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11345,7 +11431,7 @@
       <pre>				port.storedLineByteWE = storedLineByteWE;</pre>
       <pre>			end</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_438</pre>
+      <pre>				begin : sv2v_autoblock_442</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11354,7 +11440,7 @@
       <pre>							missIsUncachable[i] = dcReadUncachableReg[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_439</pre>
+      <pre>				begin : sv2v_autoblock_443</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = CacheSystemTypes_DCACHE_LSU_WRITE_PORT_BEGIN; i &lt; 2; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11369,10 +11455,10 @@
       <pre>			reg [21:0] portInitMSHR_Addr [0:1];</pre>
       <pre>			reg portIsAllocatedByStore [0:1];</pre>
       <pre>			reg portIsUncachable [0:1];</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_440</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_444</pre>
       <pre>				reg [0:1] _sv2v_jump;</pre>
       <pre>				_sv2v_jump = 2&#39;b00;</pre>
-      <pre>				begin : sv2v_autoblock_441</pre>
+      <pre>				begin : sv2v_autoblock_445</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11380,7 +11466,7 @@
       <pre>							lsuLoadMSHRID[i] = 1&#39;sb0;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_442</pre>
+      <pre>				begin : sv2v_autoblock_446</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_WRITE_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11388,7 +11474,7 @@
       <pre>							lsuStoreMSHRID[i] = 1&#39;sb0;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_443</pre>
+      <pre>				begin : sv2v_autoblock_447</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11398,22 +11484,22 @@
       <pre>							lsuMSHRReadData[i] = port.lsuMuxTagOut[i][63-:64];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_444</pre>
+      <pre>				begin : sv2v_autoblock_448</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; i = i + 1)</pre>
       <pre>						mshrConflict[i] = port.lsuMuxTagOut[i][67];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_445</pre>
+      <pre>				begin : sv2v_autoblock_449</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; i = i + 1)</pre>
-      <pre>						begin : sv2v_autoblock_446</pre>
+      <pre>						begin : sv2v_autoblock_450</pre>
       <pre>							reg signed [31:0] m;</pre>
       <pre>							for (m = 0; m &lt; i; m = m + 1)</pre>
       <pre>								if (missReq[m] &amp;&amp; (ToIndexPartFromFullAddr(missAddr[i]) == ToIndexPartFromFullAddr(missAddr[m])))</pre>
       <pre>									mshrConflict[i] = BasicTypes_TRUE;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_447</pre>
+      <pre>				begin : sv2v_autoblock_451</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11423,18 +11509,18 @@
       <pre>							portIsUncachable[i] = BasicTypes_FALSE;</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_448</pre>
+      <pre>				begin : sv2v_autoblock_452</pre>
       <pre>					reg signed [31:0] i;</pre>
-      <pre>					begin : sv2v_autoblock_449</pre>
+      <pre>					begin : sv2v_autoblock_453</pre>
       <pre>						reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_PORT_NUM; i = i + 1)</pre>
       <pre>							if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
       <pre>								_sv2v_jump = 2&#39;b00;</pre>
       <pre>								if (!missReq[i] || mshrConflict[i])</pre>
       <pre>									_sv2v_jump = 2&#39;b01;</pre>
-      <pre>								if (_sv2v_jump == 2&#39;b00) begin : sv2v_autoblock_450</pre>
+      <pre>								if (_sv2v_jump == 2&#39;b00) begin : sv2v_autoblock_454</pre>
       <pre>									reg signed [31:0] m;</pre>
-      <pre>									begin : sv2v_autoblock_451</pre>
+      <pre>									begin : sv2v_autoblock_455</pre>
       <pre>										reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>										reg [0:1] _sv2v_jump_1;</pre>
       <pre>										_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -11473,7 +11559,7 @@
       <pre>					end</pre>
       <pre>				end</pre>
       <pre>				if (_sv2v_jump == 2&#39;b00) begin</pre>
-      <pre>					begin : sv2v_autoblock_452</pre>
+      <pre>					begin : sv2v_autoblock_456</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -11484,13 +11570,13 @@
       <pre>							end</pre>
       <pre>					end</pre>
       <pre>					port.lsuCacheGrtReg = lsuCacheGrtReg;</pre>
-      <pre>					begin : sv2v_autoblock_453</pre>
+      <pre>					begin : sv2v_autoblock_457</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>							Core.loadStoreUnitIF.dcReadBusy[i] = mshrConflict[i];</pre>
       <pre>					end</pre>
       <pre>					Core.loadStoreUnitIF.dcWriteBusy = mshrConflict[CacheSystemTypes_DCACHE_LSU_WRITE_PORT_BEGIN];</pre>
-      <pre>					begin : sv2v_autoblock_454</pre>
+      <pre>					begin : sv2v_autoblock_458</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -11500,7 +11586,7 @@
       <pre>								Core.loadStoreUnitIF.mshrReadData[i] = lsuMSHRReadData[i];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_455</pre>
+      <pre>					begin : sv2v_autoblock_459</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_READ_PORT_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -11508,7 +11594,7 @@
       <pre>								Core.loadStoreUnitIF.loadMSHRID[i] = lsuLoadMSHRID[i];</pre>
       <pre>							end</pre>
       <pre>					end</pre>
-      <pre>					begin : sv2v_autoblock_456</pre>
+      <pre>					begin : sv2v_autoblock_460</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; CacheSystemTypes_DCACHE_LSU_WRITE_PORT_NUM; i = i + 1)</pre>
       <pre>							begin</pre>
@@ -11518,7 +11604,7 @@
       <pre>					end</pre>
       <pre>				end</pre>
       <pre>			end</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_457</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_461</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>					begin</pre>
@@ -11527,7 +11613,7 @@
       <pre>						lsuMakeMSHRCanBeInvalidByReplayQueue[i] = Core.loadStoreUnitIF.makeMSHRCanBeInvalidByReplayQueue[i];</pre>
       <pre>					end</pre>
       <pre>			end</pre>
-      <pre>			always @(*) begin : sv2v_autoblock_458</pre>
+      <pre>			always @(*) begin : sv2v_autoblock_462</pre>
       <pre>				reg signed [31:0] i;</pre>
       <pre>				for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>					begin</pre>
@@ -11541,7 +11627,7 @@
       <pre>				Core.cacheSystemIF.dcMemAccessReq[86] = port.memWE;</pre>
       <pre>				Core.cacheSystemIF.dcMemAccessReq[85-:22] = port.memAddr;</pre>
       <pre>				Core.cacheSystemIF.dcMemAccessReq[63-:64] = port.memData;</pre>
-      <pre>				begin : sv2v_autoblock_459</pre>
+      <pre>				begin : sv2v_autoblock_463</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; CacheSystemTypes_MSHR_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11585,7 +11671,7 @@
       <pre>			localparam SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH = 6;</pre>
       <pre>			reg [271:0] pipeReg;</pre>
       <pre>			always @(posedge Core.ctrlIF.clk)</pre>
-      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_460</pre>
+      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_464</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[((1 - i) * 136) + 123] &lt;= 1&#39;sb0;</pre>
@@ -11608,9 +11694,12 @@
       <pre>				input reg detectRange;</pre>
       <pre>				input reg [5:0] headPtr;</pre>
       <pre>				input reg [5:0] tailPtr;</pre>
+      <pre>				input reg flushAllInsns;</pre>
       <pre>				input reg [5:0] opPtr;</pre>
       <pre>				if (!detectRange)</pre>
       <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_FALSE;</pre>
+      <pre>				else if (flushAllInsns)</pre>
+      <pre>					PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
       <pre>				else if (detectRange &amp;&amp; (tailPtr &gt;= headPtr)) begin</pre>
       <pre>					if ((opPtr &gt;= headPtr) &amp;&amp; (opPtr &lt; tailPtr))</pre>
       <pre>						PipelineTypes_SelectiveFlushDetector = BasicTypes_TRUE;</pre>
@@ -11631,12 +11720,12 @@
       <pre>			always @(*) begin</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_461</pre>
+      <pre>				begin : sv2v_autoblock_465</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							valid[i] = pipeReg[((1 - i) * 136) + 123];</pre>
-      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, pipeReg[((1 - i) * 136) + 122-:6]);</pre>
+      <pre>							flush[i] = PipelineTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, pipeReg[((1 - i) * 136) + 122-:6]);</pre>
       <pre>							update[i] = ((!stall &amp;&amp; !clear) &amp;&amp; valid[i]) &amp;&amp; !flush[i];</pre>
       <pre>							alWriteData[i][70-:6] = pipeReg[((1 - i) * 136) + 122-:6];</pre>
       <pre>							alWriteData[i][64-:4] = pipeReg[((1 - i) * 136) + 116-:4];</pre>
@@ -11654,7 +11743,7 @@
       <pre>							Core.activeListIF.memWriteData[i] = alWriteData[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_462</pre>
+      <pre>				begin : sv2v_autoblock_466</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11663,7 +11752,7 @@
       <pre>							Core.registerFileIF.memDstRegData[i] = pipeReg[((1 - i) * 136) + 32-:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_463</pre>
+      <pre>				begin : sv2v_autoblock_467</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11718,7 +11807,7 @@
       <pre>					regRstIndex &lt;= regRstIndex + REG_WRITE_NUM;</pre>
       <pre>			localparam BasicTypes_TRUE = 1&#39;b1;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_464</pre>
+      <pre>				begin : sv2v_autoblock_468</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11731,7 +11820,7 @@
       <pre>							Core.registerFileIF.intSrcRegDataB[i] = srcRegData[(9 - ((i * 2) + 1)) * 33+:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_465</pre>
+      <pre>				begin : sv2v_autoblock_469</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11744,7 +11833,7 @@
       <pre>							Core.registerFileIF.complexSrcRegDataB[i] = srcRegData[(9 - (((i + BasicTypes_INT_ISSUE_WIDTH) * 2) + 1)) * 33+:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_466</pre>
+      <pre>				begin : sv2v_autoblock_470</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11754,7 +11843,7 @@
       <pre>							Core.registerFileIF.memSrcRegDataB[i] = srcRegData[(9 - ((((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH) * 2) + 1)) * 33+:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_467</pre>
+      <pre>				begin : sv2v_autoblock_471</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11763,7 +11852,7 @@
       <pre>							dstRegData[(3 - ((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH)) * 33+:33] = Core.registerFileIF.memDstRegData[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				if (Core.registerFileIF.rst) begin : sv2v_autoblock_468</pre>
+      <pre>				if (Core.registerFileIF.rst) begin : sv2v_autoblock_472</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; REG_WRITE_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11805,9 +11894,9 @@
       <pre>					ret[2-:1] = 0;</pre>
       <pre>					ret[0-:BasicTypes_MEM_ISSUE_WIDTH_BIT_SIZE] = 0;</pre>
       <pre>					ret[1-:1] = 0;</pre>
-      <pre>					begin : sv2v_autoblock_469</pre>
+      <pre>					begin : sv2v_autoblock_473</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_470</pre>
+      <pre>						begin : sv2v_autoblock_474</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -11834,9 +11923,9 @@
       <pre>						end</pre>
       <pre>					end</pre>
       <pre>					if (_sv2v_jump == 2&#39;b00) begin</pre>
-      <pre>						begin : sv2v_autoblock_471</pre>
+      <pre>						begin : sv2v_autoblock_475</pre>
       <pre>							reg signed [31:0] i;</pre>
-      <pre>							begin : sv2v_autoblock_472</pre>
+      <pre>							begin : sv2v_autoblock_476</pre>
       <pre>								reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>								for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>									if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -11936,7 +12025,7 @@
       <pre>			localparam BasicTypes_MEM_ISSUE_WIDTH = MicroArchConf_CONF_MEM_ISSUE_WIDTH;</pre>
       <pre>			reg [23:0] memBypassCtrl;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_473</pre>
+      <pre>				begin : sv2v_autoblock_477</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11947,7 +12036,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.bypassNetworkIF.intCtrlOut = intBypassCtrl;</pre>
-      <pre>				begin : sv2v_autoblock_474</pre>
+      <pre>				begin : sv2v_autoblock_478</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11956,7 +12045,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.bypassNetworkIF.complexCtrlOut = complexBypassCtrl;</pre>
-      <pre>				begin : sv2v_autoblock_475</pre>
+      <pre>				begin : sv2v_autoblock_479</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -11964,7 +12053,7 @@
       <pre>							memRR[i][0] = Core.bypassNetworkIF.memWriteReg[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_476</pre>
+      <pre>				begin : sv2v_autoblock_480</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -12045,7 +12134,7 @@
       <pre>			localparam MicroArchConf_CONF_MEM_ISSUE_WIDTH = 2;</pre>
       <pre>			localparam BasicTypes_MEM_ISSUE_WIDTH = MicroArchConf_CONF_MEM_ISSUE_WIDTH;</pre>
       <pre>			always @(*) begin</pre>
-      <pre>				begin : sv2v_autoblock_477</pre>
+      <pre>				begin : sv2v_autoblock_481</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -12054,7 +12143,7 @@
       <pre>							Core.bypassNetworkIF.intSrcRegDataOutB[i] = SelectData(Core.bypassNetworkIF.intCtrlIn[i][5-:6], intEX, intWB, memMA, memWB);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_478</pre>
+      <pre>				begin : sv2v_autoblock_482</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -12062,12 +12151,12 @@
       <pre>							Core.bypassNetworkIF.complexSrcRegDataOutB[i] = SelectData(Core.bypassNetworkIF.complexCtrlIn[i][5-:6], intEX, intWB, memMA, memWB);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_479</pre>
+      <pre>				begin : sv2v_autoblock_483</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						memDst[i][32-:33] = Core.bypassNetworkIF.memDstRegDataOut[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_480</pre>
+      <pre>				begin : sv2v_autoblock_484</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -12121,9 +12210,9 @@
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
       <pre>					finishedInsnRange = 0;</pre>
-      <pre>					begin : sv2v_autoblock_481</pre>
+      <pre>					begin : sv2v_autoblock_485</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_482</pre>
+      <pre>						begin : sv2v_autoblock_486</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 1; i &gt;= 0; i = i - 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -12153,9 +12242,9 @@
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
       <pre>					finishedOpNum = 0;</pre>
-      <pre>					begin : sv2v_autoblock_483</pre>
+      <pre>					begin : sv2v_autoblock_487</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_484</pre>
+      <pre>						begin : sv2v_autoblock_488</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -12181,17 +12270,17 @@
       <pre>				reg [0:1] _sv2v_jump;</pre>
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
-      <pre>					begin : sv2v_autoblock_485</pre>
+      <pre>					begin : sv2v_autoblock_489</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_486</pre>
+      <pre>						begin : sv2v_autoblock_490</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
       <pre>									_sv2v_jump = 2&#39;b00;</pre>
       <pre>									headOfThisInsn[(1 - i) * BasicTypes_COMMIT_WIDTH_BIT_SIZE+:BasicTypes_COMMIT_WIDTH_BIT_SIZE] = 0;</pre>
-      <pre>									begin : sv2v_autoblock_487</pre>
+      <pre>									begin : sv2v_autoblock_491</pre>
       <pre>										reg signed [31:0] j;</pre>
-      <pre>										begin : sv2v_autoblock_488</pre>
+      <pre>										begin : sv2v_autoblock_492</pre>
       <pre>											reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>											reg [0:1] _sv2v_jump_1;</pre>
       <pre>											_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -12212,9 +12301,9 @@
       <pre>									end</pre>
       <pre>									if (_sv2v_jump == 2&#39;b00) begin</pre>
       <pre>										tailOfThisInsn[(1 - i) * BasicTypes_COMMIT_WIDTH_BIT_SIZE+:BasicTypes_COMMIT_WIDTH_BIT_SIZE] = 1;</pre>
-      <pre>										begin : sv2v_autoblock_489</pre>
+      <pre>										begin : sv2v_autoblock_493</pre>
       <pre>											reg signed [31:0] j;</pre>
-      <pre>											begin : sv2v_autoblock_490</pre>
+      <pre>											begin : sv2v_autoblock_494</pre>
       <pre>												reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>												reg [0:1] _sv2v_jump_1;</pre>
       <pre>												_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -12270,7 +12359,7 @@
       <pre>					GetInsnPtr(headOfThisInsn, tailOfThisInsn, last);</pre>
       <pre>					GetFinishedOpNum(finishedOpNum, activeListCount, execState);</pre>
       <pre>					GetFinishedInsnRange(finishedInsnRange, finishedOpNum, execState, last);</pre>
-      <pre>					begin : sv2v_autoblock_491</pre>
+      <pre>					begin : sv2v_autoblock_495</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>							if (execState[(1 - i) * 4+:4] == 4&#39;b0011) begin</pre>
@@ -12304,7 +12393,7 @@
       <pre>					recoveryStart = BasicTypes_COMMIT_WIDTH;</pre>
       <pre>					refetchType = 3&#39;b000;</pre>
       <pre>					recoveryCause = 4&#39;b0001;</pre>
-      <pre>					begin : sv2v_autoblock_492</pre>
+      <pre>					begin : sv2v_autoblock_496</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>							if (i &lt; finishedInsnRange)</pre>
@@ -12317,7 +12406,7 @@
       <pre>								end</pre>
       <pre>					end</pre>
       <pre>					toRecoveryPhase = ((startCommit &amp;&amp; recoveryTrigger) &amp;&amp; !unableToStartRecovery ? BasicTypes_TRUE : BasicTypes_FALSE);</pre>
-      <pre>					begin : sv2v_autoblock_493</pre>
+      <pre>					begin : sv2v_autoblock_497</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>							if (startCommit) begin</pre>
@@ -12341,7 +12430,7 @@
       <pre>				alReadData = Core.activeListIF.readData;</pre>
       <pre>				execState = Core.activeListIF.headExecState;</pre>
       <pre>				phase = Core.recoveryManagerIF.phase;</pre>
-      <pre>				begin : sv2v_autoblock_494</pre>
+      <pre>				begin : sv2v_autoblock_498</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -12354,7 +12443,7 @@
       <pre>				commitNum = 0;</pre>
       <pre>				commitLoadNum = 0;</pre>
       <pre>				commitStoreNum = 0;</pre>
-      <pre>				begin : sv2v_autoblock_495</pre>
+      <pre>				begin : sv2v_autoblock_499</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i]) begin</pre>
@@ -12367,7 +12456,7 @@
       <pre>				end</pre>
       <pre>				Core.renameLogicIF.commit = commit[0];</pre>
       <pre>				Core.renameLogicIF.commitNum = commitNum;</pre>
-      <pre>				begin : sv2v_autoblock_496</pre>
+      <pre>				begin : sv2v_autoblock_500</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i]) begin</pre>
@@ -12390,14 +12479,14 @@
       <pre>				Core.recoveryManagerIF.recoveryOpIndex = recoveryOpIndex;</pre>
       <pre>				Core.recoveryManagerIF.recoveryCauseFromCommitStage = recoveryCause;</pre>
       <pre>				lastCommittedPC = prevLastCommittedPC;</pre>
-      <pre>				begin : sv2v_autoblock_497</pre>
+      <pre>				begin : sv2v_autoblock_501</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i])</pre>
       <pre>							lastCommittedPC = alReadData[((1 - i) * 59) + 46-:19];</pre>
       <pre>				end</pre>
       <pre>				Core.csrUnitIF.commitNum = commitNum;</pre>
-      <pre>				begin : sv2v_autoblock_498</pre>
+      <pre>				begin : sv2v_autoblock_502</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -12736,7 +12825,7 @@
       <pre>				reqExternalInterrupt = csrReg[235] &amp;&amp; csrReg[267];</pre>
       <pre>				reqInterrupt = csrReg[291] &amp;&amp; (reqTimerInterrupt || reqExternalInterrupt);</pre>
       <pre>				interruptCodeConv[4-:BasicTypes_RSD_EXTERNAL_INTERRUPT_CODE_WIDTH] = Core.csrUnitIF.externalInterruptCodeInCSR;</pre>
-      <pre>				if (reqTimerInterrupt) begin : sv2v_autoblock_499</pre>
+      <pre>				if (reqTimerInterrupt) begin : sv2v_autoblock_503</pre>
       <pre>					reg [4:0] sv2v_tmp_cast;</pre>
       <pre>					sv2v_tmp_cast = 7;</pre>
       <pre>					interruptCode = sv2v_tmp_cast;</pre>
@@ -15078,7 +15167,6 @@
       <pre>	clk,</pre>
       <pre>	rst,</pre>
       <pre>	rstStart,</pre>
-      <pre>	stall,</pre>
       <pre>	wakeup,</pre>
       <pre>	wakeupDstValid,</pre>
       <pre>	wakeupDstRegNum,</pre>
@@ -15095,7 +15183,6 @@
       <pre>	input wire clk;</pre>
       <pre>	input wire rst;</pre>
       <pre>	input wire rstStart;</pre>
-      <pre>	input wire stall;</pre>
       <pre>	localparam MicroArchConf_CONF_COMPLEX_ISSUE_WIDTH = 1;</pre>
       <pre>	localparam BasicTypes_COMPLEX_ISSUE_WIDTH = MicroArchConf_CONF_COMPLEX_ISSUE_WIDTH;</pre>
       <pre>	localparam MicroArchConf_CONF_INT_ISSUE_WIDTH = 2;</pre>
@@ -15150,7 +15237,7 @@
       <pre>				begin</pre>
       <pre>					readyWA[(5 - i) * REG_NUM_BIT_WIDTH+:REG_NUM_BIT_WIDTH] = wakeupDstRegNum[(3 - i) * REG_NUM_BIT_WIDTH+:REG_NUM_BIT_WIDTH];</pre>
       <pre>					readyWV[i] = BasicTypes_TRUE;</pre>
-      <pre>					readyWE[i] = !stall &amp;&amp; (wakeup[i] &amp;&amp; wakeupDstValid[i]);</pre>
+      <pre>					readyWE[i] = wakeup[i] &amp;&amp; wakeupDstValid[i];</pre>
       <pre>				end</pre>
       <pre>		end</pre>
       <pre>		begin : sv2v_autoblock_2</pre>
@@ -15205,7 +15292,6 @@
       <pre>module SourceCAM (</pre>
       <pre>	clk,</pre>
       <pre>	rst,</pre>
-      <pre>	stall,</pre>
       <pre>	dispatch,</pre>
       <pre>	dispatchPtr,</pre>
       <pre>	dispatchedSrcRegNum,</pre>
@@ -15219,7 +15305,6 @@
       <pre>	parameter REG_NUM_BIT_WIDTH = 1;</pre>
       <pre>	input wire clk;</pre>
       <pre>	input wire rst;</pre>
-      <pre>	input wire stall;</pre>
       <pre>	localparam MicroArchConf_CONF_FETCH_WIDTH = 2;</pre>
       <pre>	localparam BasicTypes_FETCH_WIDTH = MicroArchConf_CONF_FETCH_WIDTH;</pre>
       <pre>	localparam BasicTypes_DISPATCH_WIDTH = BasicTypes_FETCH_WIDTH;</pre>
@@ -15312,10 +15397,7 @@
       <pre>				begin : sv2v_autoblock_13</pre>
       <pre>					reg signed [31:0] j;</pre>
       <pre>					for (j = 0; j &lt; SRC_OP_NUM; j = j + 1)</pre>
-      <pre>						if (stall)</pre>
-      <pre>							nextSrcReady[i][j] = srcReady[i][j];</pre>
-      <pre>						else</pre>
-      <pre>							nextSrcReady[i][j] = srcReady[i][j] || match[i][j];</pre>
+      <pre>						nextSrcReady[i][j] = srcReady[i][j] || match[i][j];</pre>
       <pre>				end</pre>
       <pre>		end</pre>
       <pre>		begin : sv2v_autoblock_14</pre>
@@ -15332,7 +15414,6 @@
       <pre>endmodule</pre>
       <pre>module ProducerMatrix (</pre>
       <pre>	clk,</pre>
-      <pre>	stall,</pre>
       <pre>	dispatch,</pre>
       <pre>	dispatchedSrcRegReady,</pre>
       <pre>	dispatchedSrcRegPtr,</pre>
@@ -15342,7 +15423,6 @@
       <pre>	opReady</pre>
       <pre>);</pre>
       <pre>	input wire clk;</pre>
-      <pre>	input wire stall;</pre>
       <pre>	localparam MicroArchConf_CONF_FETCH_WIDTH = 2;</pre>
       <pre>	localparam BasicTypes_FETCH_WIDTH = MicroArchConf_CONF_FETCH_WIDTH;</pre>
       <pre>	localparam BasicTypes_DISPATCH_WIDTH = BasicTypes_FETCH_WIDTH;</pre>
@@ -15396,8 +15476,6 @@
       <pre>			for (i = 0; i &lt; SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM; i = i + 1)</pre>
       <pre>				opReady[i] = !(|nextMatrix[i * SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM+:SchedulerTypes_ISSUE_QUEUE_ENTRY_NUM]);</pre>
       <pre>		end</pre>
-      <pre>		if (stall)</pre>
-      <pre>			nextMatrix = matrix;</pre>
       <pre>		begin : sv2v_autoblock_5</pre>
       <pre>			reg signed [31:0] i;</pre>
       <pre>			for (i = 0; i &lt; BasicTypes_DISPATCH_WIDTH; i = i + 1)</pre>
