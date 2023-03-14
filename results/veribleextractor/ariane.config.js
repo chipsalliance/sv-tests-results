@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/ariane'] = [["cores","ariane",1,"logs/VeribleExtractor/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/corev_apu/register_interface/src/reg_intf.sv.html"]]
+config_loader_data['veribleextractor/ariane'] = [["cores","ariane",1,"logs/VeribleExtractor/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/common/local/util/instr_tracer.sv.html"]]

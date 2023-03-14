@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/ariane'] = [["cores","ariane",1,"logs/sv_parser/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/corev_apu/register_interface/src/reg_intf.sv.html"]]
+config_loader_data['sv_parser/ariane'] = [["cores","ariane",1,"logs/sv_parser/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/common/local/util/instr_tracer.sv.html"]]

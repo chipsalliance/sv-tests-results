@@ -1,1 +1,1 @@
-config_loader_data['sv2v_zachjs/ariane'] = [["cores","ariane",0,"logs/Sv2v_zachjs/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/corev_apu/register_interface/src/reg_intf.sv.html"]]
+config_loader_data['sv2v_zachjs/ariane'] = [["cores","ariane",0,"logs/Sv2v_zachjs/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/common/local/util/instr_tracer.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['uhdmyosys/ariane'] = [["cores","ariane",0,"logs/UhdmYosys/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/corev_apu/register_interface/src/reg_intf.sv.html"]]
+config_loader_data['uhdmyosys/ariane'] = [["cores","ariane",0,"logs/UhdmYosys/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/common/local/util/instr_tracer.sv.html"]]
