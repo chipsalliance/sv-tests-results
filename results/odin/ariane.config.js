@@ -1,1 +1,1 @@
-config_loader_data['odin/ariane'] = [["cores","ariane",0,"logs/Odin/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/common/local/util/instr_tracer.sv.html"]]
+config_loader_data['odin/ariane'] = [["cores","ariane",0,"logs/Odin/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]
