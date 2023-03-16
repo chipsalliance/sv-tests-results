@@ -168,9 +168,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-03-15 14:28:47</dd></div>
-        <div><dt>time elapsed</dt><dd>7.968s</dd></div>
-        <div><dt>ram usage</dt><dd>491672 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-03-16 01:42:08</dd></div>
+        <div><dt>time elapsed</dt><dd>10.623s</dd></div>
+        <div><dt>ram usage</dt><dd>499876 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -5946,6 +5946,7 @@
       <pre>			reg [2:0] canBeFlushedRegCountMem;</pre>
       <pre>			reg [5:0] flushRangeHeadPtr;</pre>
       <pre>			reg [5:0] flushRangeTailPtr;</pre>
+      <pre>			reg flushAllInsns;</pre>
       <pre>			reg flushInt [0:1];</pre>
       <pre>			localparam MicroArchConf_CONF_LOAD_ISSUE_WIDTH = 1;</pre>
       <pre>			localparam BasicTypes_LOAD_ISSUE_WIDTH = MicroArchConf_CONF_LOAD_ISSUE_WIDTH;</pre>
@@ -6033,6 +6034,7 @@
       <pre>										complexPipeReg[i][j - 1] &lt;= complexPipeReg[i][j];</pre>
       <pre>								end</pre>
       <pre>								complexPipeReg[i][3][26] &lt;= BasicTypes_FALSE;</pre>
+      <pre>								complexPipeReg[i][3][21-:16] &lt;= 1&#39;sb0;</pre>
       <pre>							end</pre>
       <pre>					end</pre>
       <pre>					begin : sv2v_autoblock_219</pre>
@@ -6045,6 +6047,7 @@
       <pre>										memPipeReg[i][j - 1] &lt;= memPipeReg[i][j];</pre>
       <pre>								end</pre>
       <pre>								memPipeReg[i][1][26] &lt;= BasicTypes_FALSE;</pre>
+      <pre>								memPipeReg[i][1][21-:16] &lt;= 1&#39;sb0;</pre>
       <pre>							end</pre>
       <pre>					end</pre>
       <pre>				end</pre>
@@ -6116,7 +6119,7 @@
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushInt[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountInt != 0, flushRangeHeadPtr, flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, intPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							flushInt[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountInt != 0, flushRangeHeadPtr, flushRangeTailPtr, flushAllInsns, intPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
       <pre>							Core.wakeupSelectIF.wakeup[i] = (intPipeReg[i][0][26] &amp;&amp; !flushInt[i]) &amp;&amp; !Core.wakeupSelectIF.stall;</pre>
       <pre>							Core.wakeupSelectIF.wakeupPtr[i] = intPipeReg[i][0][25-:4];</pre>
       <pre>							Core.wakeupSelectIF.wakeupVector[i] = (!Core.wakeupSelectIF.stall ? intPipeReg[i][0][21-:16] : {16 {1&#39;sb0}});</pre>
@@ -6126,7 +6129,7 @@
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushComplex[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountComplex != 0, flushRangeHeadPtr, flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, complexPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							flushComplex[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountComplex != 0, flushRangeHeadPtr, flushRangeTailPtr, flushAllInsns, complexPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
       <pre>							Core.wakeupSelectIF.wakeup[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][26] &amp;&amp; !flushComplex[i];</pre>
       <pre>							Core.wakeupSelectIF.wakeupPtr[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][25-:4];</pre>
       <pre>							Core.wakeupSelectIF.wakeupVector[i + BasicTypes_INT_ISSUE_WIDTH] = complexPipeReg[i][0][21-:16];</pre>
@@ -6136,7 +6139,7 @@
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
-      <pre>							flushMem[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountMem != 0, flushRangeHeadPtr, flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, memPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
+      <pre>							flushMem[i] = PipelineTypes_SelectiveFlushDetector(canBeFlushedRegCountMem != 0, flushRangeHeadPtr, flushRangeTailPtr, flushAllInsns, memPipeReg[i][0][5-:SchedulerTypes_ACTIVE_LIST_ENTRY_NUM_BIT_WIDTH]);</pre>
       <pre>							Core.wakeupSelectIF.wakeup[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][26] &amp;&amp; !flushMem[i];</pre>
       <pre>							Core.wakeupSelectIF.wakeupPtr[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][25-:4];</pre>
       <pre>							Core.wakeupSelectIF.wakeupVector[(i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH] = memPipeReg[i][0][21-:16];</pre>
@@ -6184,6 +6187,7 @@
       <pre>					canBeFlushedRegCountMem &lt;= 0;</pre>
       <pre>					flushRangeHeadPtr &lt;= 0;</pre>
       <pre>					flushRangeTailPtr &lt;= 0;</pre>
+      <pre>					flushAllInsns &lt;= BasicTypes_FALSE;</pre>
       <pre>				end</pre>
       <pre>				else if (Core.recoveryManagerIF.toRecoveryPhase &amp;&amp; Core.recoveryManagerIF.recoveryFromRwStage) begin</pre>
       <pre>					canBeFlushedRegCountInt &lt;= SchedulerTypes_ISSUE_QUEUE_INT_LATENCY;</pre>
@@ -6191,13 +6195,26 @@
       <pre>					canBeFlushedRegCountMem &lt;= SchedulerTypes_ISSUE_QUEUE_MEM_LATENCY;</pre>
       <pre>					flushRangeHeadPtr &lt;= Core.recoveryManagerIF.flushRangeHeadPtr;</pre>
       <pre>					flushRangeTailPtr &lt;= Core.recoveryManagerIF.flushRangeTailPtr;</pre>
+      <pre>					flushAllInsns &lt;= Core.recoveryManagerIF.flushAllInsns;</pre>
       <pre>				end</pre>
       <pre>				else begin</pre>
-      <pre>					if ((canBeFlushedRegCountInt &gt; 0) &amp;&amp; !Core.wakeupSelectIF.stall)</pre>
+      <pre>					if (canBeFlushedRegCountInt == SchedulerTypes_ISSUE_QUEUE_INT_LATENCY) begin</pre>
+      <pre>						if (!Core.wakeupSelectIF.stall)</pre>
+      <pre>							canBeFlushedRegCountInt &lt;= canBeFlushedRegCountInt - 1;</pre>
+      <pre>					end</pre>
+      <pre>					else if (canBeFlushedRegCountInt &gt; 0)</pre>
       <pre>						canBeFlushedRegCountInt &lt;= canBeFlushedRegCountInt - 1;</pre>
-      <pre>					if ((canBeFlushedRegCountComplex &gt; 0) &amp;&amp; !Core.wakeupSelectIF.stall)</pre>
+      <pre>					if (canBeFlushedRegCountComplex == SchedulerTypes_ISSUE_QUEUE_COMPLEX_LATENCY) begin</pre>
+      <pre>						if (!Core.wakeupSelectIF.stall)</pre>
+      <pre>							canBeFlushedRegCountComplex &lt;= canBeFlushedRegCountComplex - 1;</pre>
+      <pre>					end</pre>
+      <pre>					else if (canBeFlushedRegCountComplex &gt; 0)</pre>
       <pre>						canBeFlushedRegCountComplex &lt;= canBeFlushedRegCountComplex - 1;</pre>
-      <pre>					if ((canBeFlushedRegCountMem &gt; 0) &amp;&amp; !Core.wakeupSelectIF.stall)</pre>
+      <pre>					if (canBeFlushedRegCountMem == SchedulerTypes_ISSUE_QUEUE_MEM_LATENCY) begin</pre>
+      <pre>						if (!Core.wakeupSelectIF.stall)</pre>
+      <pre>							canBeFlushedRegCountMem &lt;= canBeFlushedRegCountMem - 1;</pre>
+      <pre>					end</pre>
+      <pre>					else if (canBeFlushedRegCountMem &gt; 0)</pre>
       <pre>						canBeFlushedRegCountMem &lt;= canBeFlushedRegCountMem - 1;</pre>
       <pre>				end</pre>
       <pre>			always @(*) Core.recoveryManagerIF.wakeupPipelineRegFlushedOpExist = ((canBeFlushedRegCountInt != 0) || (canBeFlushedRegCountComplex != 0)) || (canBeFlushedRegCountMem != 0);</pre>
