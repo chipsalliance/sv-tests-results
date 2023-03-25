@@ -1,19 +1,19 @@
 # Compared test results
 |       tool        |new_failures|new_passes|added|removed|not_affected|
 |-------------------|-----------:|---------:|----:|------:|-----------:|
-|Surelog            |           0|         0|    0|      0|        4670|
 |Icarus             |           0|         0|    0|      0|        4685|
-|Sv2v_zachjs        |           0|         0|    0|      0|        4670|
-|Yosys              |           0|         0|    0|      0|        4670|
-|Verible            |           0|         0|    0|      0|        4517|
-|tree_sitter_verilog|           0|         0|    0|      0|        4517|
 |Slang_parse        |           0|         0|    0|      0|        4608|
-|UhdmVerilator      |           1|         0|    0|      0|        4684|
+|tree_sitter_verilog|           0|         0|    0|      0|        4517|
+|UhdmVerilator      |           0|         0|    0|      0|        4685|
 |moore              |           0|         0|    0|      0|        4608|
-|UhdmYosys          |           1|         0|    0|      0|        4669|
-|sv_parser          |           0|         0|    0|      0|        4608|
-|VeribleExtractor   |           0|         0|    0|      0|        4517|
-|moore_parse        |           0|         0|    0|      0|        4517|
-|Verilator          |           0|         0|    0|      0|        4685|
-|Odin               |           0|         0|    0|      0|        4608|
+|Surelog            |           0|         0|    0|      0|        4670|
 |Slang              |           0|         0|    0|      0|        4670|
+|UhdmYosys          |           0|         2|    0|      0|        4668|
+|sv_parser          |           0|         0|    0|      0|        4608|
+|Verible            |           0|         0|    0|      0|        4517|
+|Odin               |           0|         0|    0|      0|        4608|
+|VeribleExtractor   |           0|         0|    0|      0|        4517|
+|Yosys              |           0|         0|    0|      0|        4670|
+|Verilator          |           0|         0|    0|      0|        4685|
+|moore_parse        |           0|         0|    0|      0|        4517|
+|Sv2v_zachjs        |           0|         0|    0|      0|        4670|
