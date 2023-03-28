@@ -157,7 +157,11 @@
 <span class="normal"><a href="#l-149">149</a></span>
 <span class="normal"><a href="#l-150">150</a></span>
 <span class="normal"><a href="#l-151">151</a></span>
-<span class="normal"><a href="#l-152">152</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
+<span class="normal"><a href="#l-152">152</a></span>
+<span class="normal"><a href="#l-153">153</a></span>
+<span class="normal"><a href="#l-154">154</a></span>
+<span class="normal"><a href="#l-155">155</a></span>
+<span class="normal"><a href="#l-156">156</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2019- RSD contributors.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Licensed under the Apache License, Version 2.0, see LICENSE for details.</span>
 <a id="l-3" name="l-3"></a>
 <a id="l-4" name="l-4"></a>
@@ -171,144 +175,148 @@
 <a id="l-12" name="l-12"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;BasicMacros.sv&quot;</span>
 <a id="l-13" name="l-13"></a><span class="kn">import</span><span class="w"> </span><span class="nn">BasicTypes::*</span><span class="p">;</span>
 <a id="l-14" name="l-14"></a><span class="kn">import</span><span class="w"> </span><span class="nn">OpFormatTypes::*</span><span class="p">;</span>
-<a id="l-15" name="l-15"></a>
-<a id="l-16" name="l-16"></a><span class="k">module</span><span class="w"> </span><span class="n">MulDivUnit</span><span class="p">(</span><span class="n">MulDivUnitIF</span><span class="p">.</span><span class="n">MulDivUnit</span><span class="w"> </span><span class="n">port</span><span class="p">);</span>
-<a id="l-17" name="l-17"></a>
-<a id="l-18" name="l-18"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">genvar</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">BlockMulUnit</span>
-<a id="l-19" name="l-19"></a><span class="w">        </span><span class="c1">// MultiplierUnit</span>
-<a id="l-20" name="l-20"></a><span class="w">        </span><span class="n">PipelinedMultiplierUnit</span><span class="w"> </span><span class="p">#(</span>
-<a id="l-21" name="l-21"></a><span class="w">            </span><span class="p">.</span><span class="n">BIT_WIDTH</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="p">),</span>
-<a id="l-22" name="l-22"></a><span class="w">            </span><span class="p">.</span><span class="n">PIPELINE_DEPTH</span><span class="p">(</span><span class="n">MULDIV_STAGE_DEPTH</span><span class="p">)</span>
-<a id="l-23" name="l-23"></a><span class="w">        </span><span class="p">)</span><span class="w"> </span><span class="n">mulUnit</span><span class="w"> </span><span class="p">(</span>
-<a id="l-24" name="l-24"></a><span class="w">            </span><span class="p">.</span><span class="n">clk</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">),</span>
-<a id="l-25" name="l-25"></a><span class="w">            </span><span class="p">.</span><span class="n">stall</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">stall</span><span class="p">),</span>
-<a id="l-26" name="l-26"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpA_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInA</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-27" name="l-27"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpB_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInB</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-28" name="l-28"></a><span class="w">            </span><span class="p">.</span><span class="n">getUpper</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">mulGetUpper</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-29" name="l-29"></a><span class="w">            </span><span class="p">.</span><span class="n">mulCode</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">mulCode</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-30" name="l-30"></a><span class="w">            </span><span class="p">.</span><span class="n">dataOut</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">mulDataOut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a id="l-31" name="l-31"></a><span class="w">        </span><span class="p">);</span>
-<a id="l-32" name="l-32"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-33" name="l-33"></a>
+<a id="l-15" name="l-15"></a><span class="kn">import</span><span class="w"> </span><span class="nn">ActiveListIndexTypes::*</span><span class="p">;</span>
+<a id="l-16" name="l-16"></a>
+<a id="l-17" name="l-17"></a><span class="k">module</span><span class="w"> </span><span class="n">MulDivUnit</span><span class="p">(</span><span class="n">MulDivUnitIF</span><span class="p">.</span><span class="n">MulDivUnit</span><span class="w"> </span><span class="n">port</span><span class="p">,</span><span class="w"> </span><span class="n">RecoveryManagerIF</span><span class="p">.</span><span class="n">MulDivUnit</span><span class="w"> </span><span class="n">recovery</span><span class="p">);</span>
+<a id="l-18" name="l-18"></a>
+<a id="l-19" name="l-19"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">genvar</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">BlockMulUnit</span>
+<a id="l-20" name="l-20"></a><span class="w">        </span><span class="c1">// MultiplierUnit</span>
+<a id="l-21" name="l-21"></a><span class="w">        </span><span class="n">PipelinedMultiplierUnit</span><span class="w"> </span><span class="p">#(</span>
+<a id="l-22" name="l-22"></a><span class="w">            </span><span class="p">.</span><span class="n">BIT_WIDTH</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="p">),</span>
+<a id="l-23" name="l-23"></a><span class="w">            </span><span class="p">.</span><span class="n">PIPELINE_DEPTH</span><span class="p">(</span><span class="n">MULDIV_STAGE_DEPTH</span><span class="p">)</span>
+<a id="l-24" name="l-24"></a><span class="w">        </span><span class="p">)</span><span class="w"> </span><span class="n">mulUnit</span><span class="w"> </span><span class="p">(</span>
+<a id="l-25" name="l-25"></a><span class="w">            </span><span class="p">.</span><span class="n">clk</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">),</span>
+<a id="l-26" name="l-26"></a><span class="w">            </span><span class="p">.</span><span class="n">stall</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">stall</span><span class="p">),</span>
+<a id="l-27" name="l-27"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpA_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInA</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-28" name="l-28"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpB_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInB</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-29" name="l-29"></a><span class="w">            </span><span class="p">.</span><span class="n">getUpper</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">mulGetUpper</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-30" name="l-30"></a><span class="w">            </span><span class="p">.</span><span class="n">mulCode</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">mulCode</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-31" name="l-31"></a><span class="w">            </span><span class="p">.</span><span class="n">dataOut</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">mulDataOut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a id="l-32" name="l-32"></a><span class="w">        </span><span class="p">);</span>
+<a id="l-33" name="l-33"></a><span class="w">    </span><span class="k">end</span>
 <a id="l-34" name="l-34"></a>
-<a id="l-35" name="l-35"></a><span class="w">    </span><span class="c1">//</span>
-<a id="l-36" name="l-36"></a><span class="w">    </span><span class="c1">// DividerUnit</span>
-<a id="l-37" name="l-37"></a><span class="w">    </span><span class="c1">//</span>
-<a id="l-38" name="l-38"></a>
-<a id="l-39" name="l-39"></a><span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="kt">logic</span><span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>
-<a id="l-40" name="l-40"></a><span class="w">    </span><span class="p">{</span>
-<a id="l-41" name="l-41"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_FREE</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="c1">// Divider is free</span>
-<a id="l-42" name="l-42"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_RESERVED</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="c1">// Divider is not processing but reserved</span>
-<a id="l-43" name="l-43"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_PROCESSING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">  </span><span class="c1">// In processing</span>
-<a id="l-44" name="l-44"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_WAITING</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="w">   </span><span class="c1">// Wait for issuing div from replayqueue</span>
-<a id="l-45" name="l-45"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">DividerPhase</span><span class="p">;</span>
-<a id="l-46" name="l-46"></a><span class="w">    </span><span class="n">DividerPhase</span><span class="w"> </span><span class="n">regPhase</span><span class="w">  </span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
-<a id="l-47" name="l-47"></a><span class="w">    </span><span class="n">DividerPhase</span><span class="w"> </span><span class="n">nextPhase</span><span class="w"> </span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
-<a id="l-48" name="l-48"></a><span class="w">    </span><span class="kt">logic</span><span class="w"> </span><span class="n">finished</span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
-<a id="l-49" name="l-49"></a>
-<a id="l-50" name="l-50"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">genvar</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">BlockDivUnit</span>
-<a id="l-51" name="l-51"></a><span class="w">        </span><span class="n">DividerUnit</span><span class="w"> </span><span class="n">divUnit</span><span class="p">(</span>
-<a id="l-52" name="l-52"></a><span class="w">            </span><span class="p">.</span><span class="n">clk</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">),</span>
-<a id="l-53" name="l-53"></a><span class="w">            </span><span class="p">.</span><span class="n">rst</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">rst</span><span class="p">),</span>
-<a id="l-54" name="l-54"></a><span class="w">            </span><span class="p">.</span><span class="n">req</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divReq</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-55" name="l-55"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpA_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInA</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-56" name="l-56"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpB_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInB</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-57" name="l-57"></a><span class="w">            </span><span class="p">.</span><span class="n">divCode</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divCode</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-58" name="l-58"></a><span class="w">            </span><span class="p">.</span><span class="n">finished</span><span class="p">(</span><span class="n">finished</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
-<a id="l-59" name="l-59"></a><span class="w">            </span><span class="p">.</span><span class="n">dataOut</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divDataOut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a id="l-60" name="l-60"></a><span class="w">        </span><span class="p">);</span>
-<a id="l-61" name="l-61"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-62" name="l-62"></a>
-<a id="l-63" name="l-63"></a><span class="w">    </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-64" name="l-64"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">rst</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-65" name="l-65"></a><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-66" name="l-66"></a><span class="w">                </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
-<a id="l-67" name="l-67"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-68" name="l-68"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-69" name="l-69"></a><span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-70" name="l-70"></a><span class="w">            </span><span class="n">regPhase</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">nextPhase</span><span class="p">;</span>
-<a id="l-71" name="l-71"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-72" name="l-72"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-73" name="l-73"></a>
-<a id="l-74" name="l-74"></a><span class="w">    </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-75" name="l-75"></a><span class="w">        </span><span class="n">nextPhase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">;</span>
-<a id="l-76" name="l-76"></a>
-<a id="l-77" name="l-77"></a>
-<a id="l-78" name="l-78"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-79" name="l-79"></a>
-<a id="l-80" name="l-80"></a><span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-<a id="l-81" name="l-81"></a><span class="w">            </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-82" name="l-82"></a><span class="w">                </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
-<a id="l-83" name="l-83"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-35" name="l-35"></a>
+<a id="l-36" name="l-36"></a><span class="w">    </span><span class="c1">//</span>
+<a id="l-37" name="l-37"></a><span class="w">    </span><span class="c1">// DividerUnit</span>
+<a id="l-38" name="l-38"></a><span class="w">    </span><span class="c1">//</span>
+<a id="l-39" name="l-39"></a>
+<a id="l-40" name="l-40"></a><span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="kt">logic</span><span class="p">[</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span>
+<a id="l-41" name="l-41"></a><span class="w">    </span><span class="p">{</span>
+<a id="l-42" name="l-42"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_FREE</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="c1">// Divider is free</span>
+<a id="l-43" name="l-43"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_RESERVED</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="c1">// Divider is not processing but reserved</span>
+<a id="l-44" name="l-44"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_PROCESSING</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">  </span><span class="c1">// In processing</span>
+<a id="l-45" name="l-45"></a><span class="w">        </span><span class="n">DIVIDER_PHASE_WAITING</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="w">   </span><span class="c1">// Wait for issuing div from the replay queue</span>
+<a id="l-46" name="l-46"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="n">DividerPhase</span><span class="p">;</span>
+<a id="l-47" name="l-47"></a><span class="w">    </span><span class="n">DividerPhase</span><span class="w"> </span><span class="n">regPhase</span><span class="w">  </span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
+<a id="l-48" name="l-48"></a><span class="w">    </span><span class="n">DividerPhase</span><span class="w"> </span><span class="n">nextPhase</span><span class="w"> </span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
+<a id="l-49" name="l-49"></a><span class="w">    </span><span class="kt">logic</span><span class="w"> </span><span class="n">finished</span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
+<a id="l-50" name="l-50"></a>
+<a id="l-51" name="l-51"></a><span class="w">    </span><span class="kt">logic</span><span class="w"> </span><span class="n">flush</span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
+<a id="l-52" name="l-52"></a><span class="w">    </span><span class="n">ActiveListIndexPath</span><span class="w"> </span><span class="n">regActiveListPtr</span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
+<a id="l-53" name="l-53"></a><span class="w">    </span><span class="n">ActiveListIndexPath</span><span class="w"> </span><span class="n">nextActiveListPtr</span><span class="p">[</span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">];</span>
+<a id="l-54" name="l-54"></a>
+<a id="l-55" name="l-55"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">genvar</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">BlockDivUnit</span>
+<a id="l-56" name="l-56"></a><span class="w">        </span><span class="n">DividerUnit</span><span class="w"> </span><span class="n">divUnit</span><span class="p">(</span>
+<a id="l-57" name="l-57"></a><span class="w">            </span><span class="p">.</span><span class="n">clk</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">),</span>
+<a id="l-58" name="l-58"></a><span class="w">            </span><span class="p">.</span><span class="n">rst</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">rst</span><span class="p">),</span>
+<a id="l-59" name="l-59"></a><span class="w">            </span><span class="p">.</span><span class="n">req</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divReq</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-60" name="l-60"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpA_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInA</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-61" name="l-61"></a><span class="w">            </span><span class="p">.</span><span class="n">fuOpB_In</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">dataInB</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-62" name="l-62"></a><span class="w">            </span><span class="p">.</span><span class="n">divCode</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divCode</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-63" name="l-63"></a><span class="w">            </span><span class="p">.</span><span class="n">finished</span><span class="p">(</span><span class="n">finished</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+<a id="l-64" name="l-64"></a><span class="w">            </span><span class="p">.</span><span class="n">dataOut</span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divDataOut</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a id="l-65" name="l-65"></a><span class="w">        </span><span class="p">);</span>
+<a id="l-66" name="l-66"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-67" name="l-67"></a>
+<a id="l-68" name="l-68"></a><span class="w">    </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">port</span><span class="p">.</span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-69" name="l-69"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">rst</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-70" name="l-70"></a><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-71" name="l-71"></a><span class="w">                </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
+<a id="l-72" name="l-72"></a><span class="w">                </span><span class="n">regActiveListPtr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<a id="l-73" name="l-73"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-74" name="l-74"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-75" name="l-75"></a><span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-76" name="l-76"></a><span class="w">            </span><span class="n">regPhase</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">nextPhase</span><span class="p">;</span>
+<a id="l-77" name="l-77"></a><span class="w">            </span><span class="n">regActiveListPtr</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">nextActiveListPtr</span><span class="p">;</span>
+<a id="l-78" name="l-78"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-79" name="l-79"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-80" name="l-80"></a>
+<a id="l-81" name="l-81"></a><span class="w">    </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-82" name="l-82"></a><span class="w">        </span><span class="n">nextPhase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">;</span>
+<a id="l-83" name="l-83"></a><span class="w">        </span><span class="n">nextActiveListPtr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regActiveListPtr</span><span class="p">;</span>
 <a id="l-84" name="l-84"></a>
-<a id="l-85" name="l-85"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_FREE:</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-86" name="l-86"></a><span class="w">                </span><span class="c1">// Reserve divider and do not issue divs after that.</span>
-<a id="l-87" name="l-87"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divAcquire</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-88" name="l-88"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_RESERVED</span><span class="p">;</span>
-<a id="l-89" name="l-89"></a><span class="w">                </span><span class="k">end</span>
+<a id="l-85" name="l-85"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">MULDIV_ISSUE_WIDTH</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-86" name="l-86"></a>
+<a id="l-87" name="l-87"></a><span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<a id="l-88" name="l-88"></a><span class="w">            </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-89" name="l-89"></a><span class="w">                </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
 <a id="l-90" name="l-90"></a><span class="w">            </span><span class="k">end</span>
 <a id="l-91" name="l-91"></a>
-<a id="l-92" name="l-92"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_RESERVED:</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-93" name="l-93"></a><span class="w">                </span><span class="c1">// Request to the divider</span>
-<a id="l-94" name="l-94"></a><span class="w">                </span><span class="c1">// NOT make a request when below situation</span>
-<a id="l-95" name="l-95"></a><span class="w">                </span><span class="c1">// 1) When any operands of inst. are invalid</span>
-<a id="l-96" name="l-96"></a><span class="w">                </span><span class="c1">// 2) When the divider is waiting for the instruction</span>
-<a id="l-97" name="l-97"></a><span class="w">                </span><span class="c1">//    to receive the result of the divider</span>
-<a id="l-98" name="l-98"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divReq</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-99" name="l-99"></a><span class="w">                    </span><span class="c1">// Receive the request of div, </span>
-<a id="l-100" name="l-100"></a><span class="w">                    </span><span class="c1">// so move to processing phase</span>
-<a id="l-101" name="l-101"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_PROCESSING</span><span class="p">;</span>
-<a id="l-102" name="l-102"></a><span class="w">                </span><span class="k">end</span>
-<a id="l-103" name="l-103"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-104" name="l-104"></a>
-<a id="l-105" name="l-105"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_PROCESSING:</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-106" name="l-106"></a><span class="w">                </span><span class="c1">// Div operation has finished, so we can get result from divider</span>
-<a id="l-107" name="l-107"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">finished</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-108" name="l-108"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_WAITING</span><span class="p">;</span>
-<a id="l-109" name="l-109"></a><span class="w">                </span><span class="k">end</span>
-<a id="l-110" name="l-110"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-111" name="l-111"></a>
-<a id="l-112" name="l-112"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_WAITING:</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-113" name="l-113"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divRelease</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span>
-<a id="l-114" name="l-114"></a><span class="w">                    </span><span class="c1">// Divが除算器から結果を取得できたので，</span>
-<a id="l-115" name="l-115"></a><span class="w">                    </span><span class="c1">// IQからのdivの発行を許可する </span>
-<a id="l-116" name="l-116"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
+<a id="l-92" name="l-92"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_FREE:</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-93" name="l-93"></a><span class="w">                </span><span class="c1">// Reserve divider and do not issue any div after that.</span>
+<a id="l-94" name="l-94"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divAcquire</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-95" name="l-95"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_RESERVED</span><span class="p">;</span>
+<a id="l-96" name="l-96"></a><span class="w">                    </span><span class="n">nextActiveListPtr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">port</span><span class="p">.</span><span class="n">acquireActiveListPtr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<a id="l-97" name="l-97"></a><span class="w">                </span><span class="k">end</span>
+<a id="l-98" name="l-98"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-99" name="l-99"></a>
+<a id="l-100" name="l-100"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_RESERVED:</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-101" name="l-101"></a><span class="w">                </span><span class="c1">// Request to the divider</span>
+<a id="l-102" name="l-102"></a><span class="w">                </span><span class="c1">// NOT make a request when below situation</span>
+<a id="l-103" name="l-103"></a><span class="w">                </span><span class="c1">// 1) When any operands of inst. are invalid</span>
+<a id="l-104" name="l-104"></a><span class="w">                </span><span class="c1">// 2) When the divider is waiting for the instruction</span>
+<a id="l-105" name="l-105"></a><span class="w">                </span><span class="c1">//    to receive the result of the divider</span>
+<a id="l-106" name="l-106"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divReq</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-107" name="l-107"></a><span class="w">                    </span><span class="c1">// Receive the request of div, </span>
+<a id="l-108" name="l-108"></a><span class="w">                    </span><span class="c1">// so move to processing phase</span>
+<a id="l-109" name="l-109"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_PROCESSING</span><span class="p">;</span>
+<a id="l-110" name="l-110"></a><span class="w">                </span><span class="k">end</span>
+<a id="l-111" name="l-111"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-112" name="l-112"></a>
+<a id="l-113" name="l-113"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_PROCESSING:</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-114" name="l-114"></a><span class="w">                </span><span class="c1">// Div operation has finished, so we can get result from divider</span>
+<a id="l-115" name="l-115"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">finished</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-116" name="l-116"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_WAITING</span><span class="p">;</span>
 <a id="l-117" name="l-117"></a><span class="w">                </span><span class="k">end</span>
 <a id="l-118" name="l-118"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-119" name="l-119"></a><span class="w">            </span><span class="k">endcase</span><span class="w"> </span><span class="c1">// regPhase[i]</span>
-<a id="l-120" name="l-120"></a>
-<a id="l-121" name="l-121"></a>
-<a id="l-122" name="l-122"></a><span class="w">            </span><span class="c1">// 除算器に要求をしたdivがフラッシュされたので，除算器を解放する</span>
-<a id="l-123" name="l-123"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divReset</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-124" name="l-124"></a><span class="w">                </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
-<a id="l-125" name="l-125"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-126" name="l-126"></a>
-<a id="l-127" name="l-127"></a><span class="w">            </span><span class="no">`ifdef</span><span class="w"> </span><span class="n">RSD_MARCH_UNIFIED_MULDIV_MEM_PIPE</span>
-<a id="l-128" name="l-128"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divResetFromMI_Stage</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>
-<a id="l-129" name="l-129"></a><span class="w">                    </span><span class="n">port</span><span class="p">.</span><span class="n">divResetFromMR_Stage</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>
-<a id="l-130" name="l-130"></a><span class="w">                    </span><span class="n">port</span><span class="p">.</span><span class="n">divResetFromMT_Stage</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-<a id="l-131" name="l-131"></a><span class="w">                </span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-132" name="l-132"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
-<a id="l-133" name="l-133"></a><span class="w">                </span><span class="k">end</span>
-<a id="l-134" name="l-134"></a><span class="w">            </span><span class="no">`else</span>
-<a id="l-135" name="l-135"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divResetFromCI_Stage</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-136" name="l-136"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
-<a id="l-137" name="l-137"></a><span class="w">                </span><span class="k">end</span>
-<a id="l-138" name="l-138"></a><span class="w">            </span><span class="no">`endif</span>
-<a id="l-139" name="l-139"></a>
-<a id="l-140" name="l-140"></a><span class="w">            </span><span class="c1">// 現状 acquire が issue ステージからくるので，次のサイクルの状態でフリーか</span>
-<a id="l-141" name="l-141"></a><span class="w">            </span><span class="c1">// どうかを判定する必要がある</span>
-<a id="l-142" name="l-142"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divFree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w">   </span>
-<a id="l-143" name="l-143"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divFinished</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_WAITING</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
-<a id="l-144" name="l-144"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divBusy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_PROCESSING</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
-<a id="l-145" name="l-145"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divReserved</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_RESERVED</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
-<a id="l-146" name="l-146"></a>
-<a id="l-147" name="l-147"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="c1">// for (int i = 0; i &lt; MULDIV_ISSUE_WIDTH; i++) begin</span>
-<a id="l-148" name="l-148"></a>
-<a id="l-149" name="l-149"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="c1">// always_comb begin</span>
+<a id="l-119" name="l-119"></a>
+<a id="l-120" name="l-120"></a><span class="w">            </span><span class="nl">DIVIDER_PHASE_WAITING:</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-121" name="l-121"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="p">.</span><span class="n">divRelease</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span>
+<a id="l-122" name="l-122"></a><span class="w">                    </span><span class="c1">// Divが除算器から結果を取得できたので，</span>
+<a id="l-123" name="l-123"></a><span class="w">                    </span><span class="c1">// IQからのdivの発行を許可する </span>
+<a id="l-124" name="l-124"></a><span class="w">                    </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
+<a id="l-125" name="l-125"></a><span class="w">                </span><span class="k">end</span>
+<a id="l-126" name="l-126"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-127" name="l-127"></a><span class="w">            </span><span class="k">endcase</span><span class="w"> </span><span class="c1">// regPhase[i]</span>
+<a id="l-128" name="l-128"></a>
+<a id="l-129" name="l-129"></a>
+<a id="l-130" name="l-130"></a><span class="w">            </span><span class="c1">// Cancel divider allocation on pipeline flush</span>
+<a id="l-131" name="l-131"></a><span class="w">            </span><span class="n">flush</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SelectiveFlushDetector</span><span class="p">(</span>
+<a id="l-132" name="l-132"></a><span class="w">                </span><span class="n">recovery</span><span class="p">.</span><span class="n">toRecoveryPhase</span><span class="p">,</span>
+<a id="l-133" name="l-133"></a><span class="w">                </span><span class="n">recovery</span><span class="p">.</span><span class="n">flushRangeHeadPtr</span><span class="p">,</span>
+<a id="l-134" name="l-134"></a><span class="w">                </span><span class="n">recovery</span><span class="p">.</span><span class="n">flushRangeTailPtr</span><span class="p">,</span>
+<a id="l-135" name="l-135"></a><span class="w">                </span><span class="n">recovery</span><span class="p">.</span><span class="n">flushAllInsns</span><span class="p">,</span>
+<a id="l-136" name="l-136"></a><span class="w">                </span><span class="n">regActiveListPtr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<a id="l-137" name="l-137"></a><span class="w">            </span><span class="p">);</span>
+<a id="l-138" name="l-138"></a>
+<a id="l-139" name="l-139"></a><span class="w">            </span><span class="c1">// 除算器に要求をしたdivがフラッシュされたので，除算器を解放する</span>
+<a id="l-140" name="l-140"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">flush</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-141" name="l-141"></a><span class="w">                </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="p">;</span>
+<a id="l-142" name="l-142"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-143" name="l-143"></a>
+<a id="l-144" name="l-144"></a><span class="w">            </span><span class="c1">// 現状 acquire が issue ステージからくるので，次のサイクルの状態でフリーか</span>
+<a id="l-145" name="l-145"></a><span class="w">            </span><span class="c1">// どうかを判定する必要がある</span>
+<a id="l-146" name="l-146"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divFree</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">nextPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_FREE</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w">   </span>
+<a id="l-147" name="l-147"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divFinished</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_WAITING</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
+<a id="l-148" name="l-148"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divBusy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_PROCESSING</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
+<a id="l-149" name="l-149"></a><span class="w">            </span><span class="n">port</span><span class="p">.</span><span class="n">divReserved</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">regPhase</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">DIVIDER_PHASE_RESERVED</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span>
 <a id="l-150" name="l-150"></a>
-<a id="l-151" name="l-151"></a>
-<a id="l-152" name="l-152"></a><span class="k">endmodule</span>
+<a id="l-151" name="l-151"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="c1">// for (int i = 0; i &lt; MULDIV_ISSUE_WIDTH; i++) begin</span>
+<a id="l-152" name="l-152"></a>
+<a id="l-153" name="l-153"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="c1">// always_comb begin</span>
+<a id="l-154" name="l-154"></a>
+<a id="l-155" name="l-155"></a>
+<a id="l-156" name="l-156"></a><span class="k">endmodule</span>
 </pre></div></td></tr></table></div>
 
   </body>
