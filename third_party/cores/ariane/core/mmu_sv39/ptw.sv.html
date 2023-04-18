@@ -412,7 +412,8 @@
 <span class="normal"><a href="#l-404">404</a></span>
 <span class="normal"><a href="#l-405">405</a></span>
 <span class="normal"><a href="#l-406">406</a></span>
-<span class="normal"><a href="#l-407">407</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2018 ETH Zurich and University of Bologna.</span>
+<span class="normal"><a href="#l-407">407</a></span>
+<span class="normal"><a href="#l-408">408</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2018 ETH Zurich and University of Bologna.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Copyright and related rights are licensed under the Solderpad Hardware</span>
 <a id="l-3" name="l-3"></a><span class="c1">// License, Version 0.51 (the &quot;License&quot;); you may not use this file except in</span>
 <a id="l-4" name="l-4"></a><span class="c1">// compliance with the License.  You may obtain a copy of the License at</span>
@@ -783,42 +784,43 @@
 <a id="l-369" name="l-369"></a><span class="w">            </span><span class="c1">// 1. in the PTE Lookup check whether we still need to wait for an rvalid</span>
 <a id="l-370" name="l-370"></a><span class="w">            </span><span class="c1">// 2. waiting for a grant, if so: wait for it</span>
 <a id="l-371" name="l-371"></a><span class="w">            </span><span class="c1">// if not, go back to idle</span>
-<a id="l-372" name="l-372"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PTE_LOOKUP</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">data_rvalid_q</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">((</span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">WAIT_GRANT</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_gnt</span><span class="p">))</span>
-<a id="l-373" name="l-373"></a><span class="w">                </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WAIT_RVALID</span><span class="p">;</span>
-<a id="l-374" name="l-374"></a><span class="w">            </span><span class="k">else</span>
-<a id="l-375" name="l-375"></a><span class="w">                </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
-<a id="l-376" name="l-376"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-377" name="l-377"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-378" name="l-378"></a>
-<a id="l-379" name="l-379"></a><span class="w">    </span><span class="c1">// sequential process</span>
-<a id="l-380" name="l-380"></a><span class="w">    </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-381" name="l-381"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-382" name="l-382"></a><span class="w">            </span><span class="n">state_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
-<a id="l-383" name="l-383"></a><span class="w">            </span><span class="n">is_instr_ptw_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-384" name="l-384"></a><span class="w">            </span><span class="n">ptw_lvl_q</span><span class="w">          </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">LVL1</span><span class="p">;</span>
-<a id="l-385" name="l-385"></a><span class="w">            </span><span class="n">tag_valid_q</span><span class="w">        </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-386" name="l-386"></a><span class="w">            </span><span class="n">tlb_update_asid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-387" name="l-387"></a><span class="w">            </span><span class="n">vaddr_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-388" name="l-388"></a><span class="w">            </span><span class="n">ptw_pptr_q</span><span class="w">         </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-389" name="l-389"></a><span class="w">            </span><span class="n">global_mapping_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-390" name="l-390"></a><span class="w">            </span><span class="n">data_rdata_q</span><span class="w">       </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-391" name="l-391"></a><span class="w">            </span><span class="n">data_rvalid_q</span><span class="w">      </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
-<a id="l-392" name="l-392"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-393" name="l-393"></a><span class="w">            </span><span class="n">state_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_d</span><span class="p">;</span>
-<a id="l-394" name="l-394"></a><span class="w">            </span><span class="n">ptw_pptr_q</span><span class="w">         </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ptw_pptr_n</span><span class="p">;</span>
-<a id="l-395" name="l-395"></a><span class="w">            </span><span class="n">is_instr_ptw_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">is_instr_ptw_n</span><span class="p">;</span>
-<a id="l-396" name="l-396"></a><span class="w">            </span><span class="n">ptw_lvl_q</span><span class="w">          </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ptw_lvl_n</span><span class="p">;</span>
-<a id="l-397" name="l-397"></a><span class="w">            </span><span class="n">tag_valid_q</span><span class="w">        </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">tag_valid_n</span><span class="p">;</span>
-<a id="l-398" name="l-398"></a><span class="w">            </span><span class="n">tlb_update_asid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">tlb_update_asid_n</span><span class="p">;</span>
-<a id="l-399" name="l-399"></a><span class="w">            </span><span class="n">vaddr_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">vaddr_n</span><span class="p">;</span>
-<a id="l-400" name="l-400"></a><span class="w">            </span><span class="n">global_mapping_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">global_mapping_n</span><span class="p">;</span>
-<a id="l-401" name="l-401"></a><span class="w">            </span><span class="n">data_rdata_q</span><span class="w">       </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rdata</span><span class="p">;</span>
-<a id="l-402" name="l-402"></a><span class="w">            </span><span class="n">data_rvalid_q</span><span class="w">      </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rvalid</span><span class="p">;</span>
-<a id="l-403" name="l-403"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-404" name="l-404"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-405" name="l-405"></a>
-<a id="l-406" name="l-406"></a><span class="k">endmodule</span>
-<a id="l-407" name="l-407"></a><span class="cm">/* verilator lint_on WIDTH */</span>
+<a id="l-372" name="l-372"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(((</span><span class="n">state_q</span><span class="w"> </span><span class="ow">inside</span><span class="w"> </span><span class="p">{</span><span class="n">PTE_LOOKUP</span><span class="p">,</span><span class="w"> </span><span class="n">WAIT_RVALID</span><span class="p">})</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">data_rvalid_q</span><span class="p">)</span><span class="w"> </span><span class="o">||</span>
+<a id="l-373" name="l-373"></a><span class="w">                </span><span class="p">((</span><span class="n">state_q</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">WAIT_GRANT</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_gnt</span><span class="p">))</span>
+<a id="l-374" name="l-374"></a><span class="w">                </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WAIT_RVALID</span><span class="p">;</span>
+<a id="l-375" name="l-375"></a><span class="w">            </span><span class="k">else</span>
+<a id="l-376" name="l-376"></a><span class="w">                </span><span class="n">state_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<a id="l-377" name="l-377"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-378" name="l-378"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-379" name="l-379"></a>
+<a id="l-380" name="l-380"></a><span class="w">    </span><span class="c1">// sequential process</span>
+<a id="l-381" name="l-381"></a><span class="w">    </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-382" name="l-382"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">rst_ni</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-383" name="l-383"></a><span class="w">            </span><span class="n">state_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">IDLE</span><span class="p">;</span>
+<a id="l-384" name="l-384"></a><span class="w">            </span><span class="n">is_instr_ptw_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-385" name="l-385"></a><span class="w">            </span><span class="n">ptw_lvl_q</span><span class="w">          </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">LVL1</span><span class="p">;</span>
+<a id="l-386" name="l-386"></a><span class="w">            </span><span class="n">tag_valid_q</span><span class="w">        </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-387" name="l-387"></a><span class="w">            </span><span class="n">tlb_update_asid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-388" name="l-388"></a><span class="w">            </span><span class="n">vaddr_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-389" name="l-389"></a><span class="w">            </span><span class="n">ptw_pptr_q</span><span class="w">         </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-390" name="l-390"></a><span class="w">            </span><span class="n">global_mapping_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-391" name="l-391"></a><span class="w">            </span><span class="n">data_rdata_q</span><span class="w">       </span><span class="o">&lt;=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-392" name="l-392"></a><span class="w">            </span><span class="n">data_rvalid_q</span><span class="w">      </span><span class="o">&lt;=</span><span class="w"> </span><span class="mb">1&#39;b0</span><span class="p">;</span>
+<a id="l-393" name="l-393"></a><span class="w">        </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-394" name="l-394"></a><span class="w">            </span><span class="n">state_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_d</span><span class="p">;</span>
+<a id="l-395" name="l-395"></a><span class="w">            </span><span class="n">ptw_pptr_q</span><span class="w">         </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ptw_pptr_n</span><span class="p">;</span>
+<a id="l-396" name="l-396"></a><span class="w">            </span><span class="n">is_instr_ptw_q</span><span class="w">     </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">is_instr_ptw_n</span><span class="p">;</span>
+<a id="l-397" name="l-397"></a><span class="w">            </span><span class="n">ptw_lvl_q</span><span class="w">          </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ptw_lvl_n</span><span class="p">;</span>
+<a id="l-398" name="l-398"></a><span class="w">            </span><span class="n">tag_valid_q</span><span class="w">        </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">tag_valid_n</span><span class="p">;</span>
+<a id="l-399" name="l-399"></a><span class="w">            </span><span class="n">tlb_update_asid_q</span><span class="w">  </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">tlb_update_asid_n</span><span class="p">;</span>
+<a id="l-400" name="l-400"></a><span class="w">            </span><span class="n">vaddr_q</span><span class="w">            </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">vaddr_n</span><span class="p">;</span>
+<a id="l-401" name="l-401"></a><span class="w">            </span><span class="n">global_mapping_q</span><span class="w">   </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">global_mapping_n</span><span class="p">;</span>
+<a id="l-402" name="l-402"></a><span class="w">            </span><span class="n">data_rdata_q</span><span class="w">       </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rdata</span><span class="p">;</span>
+<a id="l-403" name="l-403"></a><span class="w">            </span><span class="n">data_rvalid_q</span><span class="w">      </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">req_port_i</span><span class="p">.</span><span class="n">data_rvalid</span><span class="p">;</span>
+<a id="l-404" name="l-404"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-405" name="l-405"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-406" name="l-406"></a>
+<a id="l-407" name="l-407"></a><span class="k">endmodule</span>
+<a id="l-408" name="l-408"></a><span class="cm">/* verilator lint_on WIDTH */</span>
 </pre></div></td></tr></table></div>
 
   </body>
