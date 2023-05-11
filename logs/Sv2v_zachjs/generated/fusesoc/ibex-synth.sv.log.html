@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-05-10 15:55:46</dd></div>
-        <div><dt>time elapsed</dt><dd>4.724s</dd></div>
-        <div><dt>ram usage</dt><dd>713944 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-05-11 01:44:23</dd></div>
+        <div><dt>time elapsed</dt><dd>6.056s</dd></div>
+        <div><dt>ram usage</dt><dd>714468 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -2176,6 +2176,8 @@
       <pre>				assign tag_rdata_padded_ic1 = {tag_rdata_ic1[((1 - way) * TagSizeECC) + (TagSizeECC - 1)-:6], {22 - ibex_pkg_IC_TAG_SIZE {1&#39;b0}}, tag_rdata_ic1[((1 - way) * TagSizeECC) + (ibex_pkg_IC_TAG_SIZE - 1)-:ibex_pkg_IC_TAG_SIZE]};</pre>
       <pre>				prim_secded_inv_28_22_dec data_ecc_dec(</pre>
       <pre>					.data_i(tag_rdata_padded_ic1),</pre>
+      <pre>					.data_o(),</pre>
+      <pre>					.syndrome_o(),</pre>
       <pre>					.err_o(tag_err_bank_ic1)</pre>
       <pre>				);</pre>
       <pre>				assign tag_err_ic1[way] = |tag_err_bank_ic1;</pre>
@@ -2184,6 +2186,8 @@
       <pre>			for (bank = 0; bank &lt; ibex_pkg_IC_LINE_BEATS; bank = bank + 1) begin : gen_ecc_banks</pre>
       <pre>				prim_secded_inv_39_32_dec data_ecc_dec(</pre>
       <pre>					.data_i(hit_data_ecc_ic1[bank * BusSizeECC+:BusSizeECC]),</pre>
+      <pre>					.data_o(),</pre>
+      <pre>					.syndrome_o(),</pre>
       <pre>					.err_o(data_err_ic1[bank * 2+:2])</pre>
       <pre>				);</pre>
       <pre>				assign hit_data_ic1[bank * ibex_pkg_BUS_SIZE+:ibex_pkg_BUS_SIZE] = hit_data_ecc_ic1[bank * BusSizeECC+:ibex_pkg_BUS_SIZE];</pre>
@@ -3766,7 +3770,7 @@
       <pre>	output wire [Width - 1:0] out_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_buf #(.Width(Width)) u_impl_xilinx(</pre>
       <pre>				.in_i(in_i),</pre>
       <pre>				.out_o(out_o)</pre>
@@ -3794,7 +3798,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_gating #(</pre>
       <pre>				.FpgaBufGlobal(FpgaBufGlobal),</pre>
       <pre>				.NoFpgaGate(NoFpgaGate)</pre>
@@ -3831,7 +3835,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_mux2 #(.NoFpgaBufG(NoFpgaBufG)) u_impl_xilinx(</pre>
       <pre>				.clk0_i(clk0_i),</pre>
       <pre>				.clk1_i(clk1_i),</pre>
@@ -3863,7 +3867,7 @@
       <pre>	output wire [Width - 1:0] q_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
       <pre>				.ResetValue(ResetValue),</pre>
       <pre>				.Width(Width)</pre>
@@ -4141,7 +4145,7 @@
       <pre>	input wire [9:0] cfg_i;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
@@ -6518,7 +6522,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(mepc_d),</pre>
       <pre>		.wr_en_i(mepc_en),</pre>
-      <pre>		.rd_data_o(mepc_q)</pre>
+      <pre>		.rd_data_o(mepc_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	assign mie_d[17] = csr_wdata_int[ibex_pkg_CSR_MSIX_BIT];</pre>
       <pre>	assign mie_d[16] = csr_wdata_int[ibex_pkg_CSR_MTIX_BIT];</pre>
@@ -6533,7 +6538,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i({mie_d}),</pre>
       <pre>		.wr_en_i(mie_en),</pre>
-      <pre>		.rd_data_o(mie_q)</pre>
+      <pre>		.rd_data_o(mie_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6544,7 +6550,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(csr_wdata_int),</pre>
       <pre>		.wr_en_i(mscratch_en),</pre>
-      <pre>		.rd_data_o(mscratch_q)</pre>
+      <pre>		.rd_data_o(mscratch_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(7),</pre>
@@ -6555,7 +6562,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i({mcause_d}),</pre>
       <pre>		.wr_en_i(mcause_en),</pre>
-      <pre>		.rd_data_o(mcause_q)</pre>
+      <pre>		.rd_data_o(mcause_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6566,7 +6574,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(mtval_d),</pre>
       <pre>		.wr_en_i(mtval_en),</pre>
-      <pre>		.rd_data_o(mtval_q)</pre>
+      <pre>		.rd_data_o(mtval_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6590,7 +6599,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i({dcsr_d}),</pre>
       <pre>		.wr_en_i(dcsr_en),</pre>
-      <pre>		.rd_data_o(dcsr_q)</pre>
+      <pre>		.rd_data_o(dcsr_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6601,7 +6611,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(depc_d),</pre>
       <pre>		.wr_en_i(depc_en),</pre>
-      <pre>		.rd_data_o(depc_q)</pre>
+      <pre>		.rd_data_o(depc_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6612,7 +6623,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(csr_wdata_int),</pre>
       <pre>		.wr_en_i(dscratch0_en),</pre>
-      <pre>		.rd_data_o(dscratch0_q)</pre>
+      <pre>		.rd_data_o(dscratch0_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6623,7 +6635,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(csr_wdata_int),</pre>
       <pre>		.wr_en_i(dscratch1_en),</pre>
-      <pre>		.rd_data_o(dscratch1_q)</pre>
+      <pre>		.rd_data_o(dscratch1_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	localparam [2:0] MSTACK_RESET_VAL = 3&#39;b100;</pre>
       <pre>	ibex_csr #(</pre>
@@ -6635,7 +6648,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i({mstack_d}),</pre>
       <pre>		.wr_en_i(mstack_en),</pre>
-      <pre>		.rd_data_o(mstack_q)</pre>
+      <pre>		.rd_data_o(mstack_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(32),</pre>
@@ -6646,7 +6660,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(mstack_epc_d),</pre>
       <pre>		.wr_en_i(mstack_en),</pre>
-      <pre>		.rd_data_o(mstack_epc_q)</pre>
+      <pre>		.rd_data_o(mstack_epc_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_csr #(</pre>
       <pre>		.Width(7),</pre>
@@ -6657,7 +6672,8 @@
       <pre>		.rst_ni(rst_ni),</pre>
       <pre>		.wr_data_i(mstack_cause_d),</pre>
       <pre>		.wr_en_i(mstack_en),</pre>
-      <pre>		.rd_data_o(mstack_cause_q)</pre>
+      <pre>		.rd_data_o(mstack_cause_q),</pre>
+      <pre>		.rd_error_o()</pre>
       <pre>	);</pre>
       <pre>	localparam [11:0] ibex_pkg_CSR_OFF_PMP_ADDR = 12&#39;h3b0;</pre>
       <pre>	localparam [11:0] ibex_pkg_CSR_OFF_PMP_CFG = 12&#39;h3a0;</pre>
@@ -6862,7 +6878,8 @@
       <pre>		.counterh_we_i(mhpmcounterh_we[0]),</pre>
       <pre>		.counter_we_i(mhpmcounter_we[0]),</pre>
       <pre>		.counter_val_i(csr_wdata_int),</pre>
-      <pre>		.counter_val_o(mhpmcounter[0])</pre>
+      <pre>		.counter_val_o(mhpmcounter[0]),</pre>
+      <pre>		.counter_val_upd_o()</pre>
       <pre>	);</pre>
       <pre>	ibex_counter #(</pre>
       <pre>		.CounterWidth(64),</pre>
@@ -6971,7 +6988,8 @@
       <pre>				.rst_ni(rst_ni),</pre>
       <pre>				.wr_data_i(tselect_d),</pre>
       <pre>				.wr_en_i(tselect_we),</pre>
-      <pre>				.rd_data_o(tselect_q)</pre>
+      <pre>				.rd_data_o(tselect_q),</pre>
+      <pre>				.rd_error_o()</pre>
       <pre>			);</pre>
       <pre>			for (i = 0; i &lt; DbgHwBreakNum; i = i + 1) begin : g_dbg_tmatch_reg</pre>
       <pre>				ibex_csr #(</pre>
@@ -6983,7 +7001,8 @@
       <pre>					.rst_ni(rst_ni),</pre>
       <pre>					.wr_data_i(tmatch_control_d),</pre>
       <pre>					.wr_en_i(tmatch_control_we[i]),</pre>
-      <pre>					.rd_data_o(tmatch_control_q[i])</pre>
+      <pre>					.rd_data_o(tmatch_control_q[i]),</pre>
+      <pre>					.rd_error_o()</pre>
       <pre>				);</pre>
       <pre>				ibex_csr #(</pre>
       <pre>					.Width(32),</pre>
@@ -6994,7 +7013,8 @@
       <pre>					.rst_ni(rst_ni),</pre>
       <pre>					.wr_data_i(tmatch_value_d),</pre>
       <pre>					.wr_en_i(tmatch_value_we[i]),</pre>
-      <pre>					.rd_data_o(tmatch_value_q[i])</pre>
+      <pre>					.rd_data_o(tmatch_value_q[i]),</pre>
+      <pre>					.rd_error_o()</pre>
       <pre>				);</pre>
       <pre>			end</pre>
       <pre>			localparam [31:0] TSelectRdataPadlen = (DbgHwNumLen &gt;= 32 ? 0 : 32 - DbgHwNumLen);</pre>
@@ -9427,6 +9447,8 @@
       <pre>			);</pre>
       <pre>			prim_secded_inv_39_32_dec u_instr_intg_dec(</pre>
       <pre>				.data_i(instr_rdata_buf),</pre>
+      <pre>				.data_o(),</pre>
+      <pre>				.syndrome_o(),</pre>
       <pre>				.err_o(ecc_err)</pre>
       <pre>			);</pre>
       <pre>			assign instr_intg_err = |ecc_err;</pre>
@@ -10063,6 +10085,8 @@
       <pre>			);</pre>
       <pre>			prim_secded_inv_39_32_dec u_data_intg_dec(</pre>
       <pre>				.data_i(data_rdata_buf),</pre>
+      <pre>				.data_o(),</pre>
+      <pre>				.syndrome_o(),</pre>
       <pre>				.err_o(ecc_err)</pre>
       <pre>			);</pre>
       <pre>			assign data_intg_err = |ecc_err;</pre>
@@ -12195,10 +12219,14 @@
       <pre>			);</pre>
       <pre>			prim_secded_inv_39_32_dec regfile_ecc_dec_a(</pre>
       <pre>				.data_i(rf_rdata_a_ecc_i),</pre>
+      <pre>				.data_o(),</pre>
+      <pre>				.syndrome_o(),</pre>
       <pre>				.err_o(rf_ecc_err_a)</pre>
       <pre>			);</pre>
       <pre>			prim_secded_inv_39_32_dec regfile_ecc_dec_b(</pre>
       <pre>				.data_i(rf_rdata_b_ecc_i),</pre>
+      <pre>				.data_o(),</pre>
+      <pre>				.syndrome_o(),</pre>
       <pre>				.err_o(rf_ecc_err_b)</pre>
       <pre>			);</pre>
       <pre>			assign rf_rdata_a = rf_rdata_a_ecc_i[31:0];</pre>
@@ -12589,6 +12617,7 @@
       <pre>					prim_secded_inv_hamming_22_16_dec u_dec(</pre>
       <pre>						.data_i(rdata_sram),</pre>
       <pre>						.data_o(sv2v_tmp_u_dec_data_o),</pre>
+      <pre>						.syndrome_o(),</pre>
       <pre>						.err_o(sv2v_tmp_u_dec_err_o)</pre>
       <pre>					);</pre>
       <pre>				end</pre>
@@ -12606,6 +12635,7 @@
       <pre>					prim_secded_inv_22_16_dec u_dec(</pre>
       <pre>						.data_i(rdata_sram),</pre>
       <pre>						.data_o(sv2v_tmp_u_dec_data_o),</pre>
+      <pre>						.syndrome_o(),</pre>
       <pre>						.err_o(sv2v_tmp_u_dec_err_o)</pre>
       <pre>					);</pre>
       <pre>				end</pre>
@@ -12625,6 +12655,7 @@
       <pre>					prim_secded_inv_hamming_39_32_dec u_dec(</pre>
       <pre>						.data_i(rdata_sram),</pre>
       <pre>						.data_o(sv2v_tmp_u_dec_data_o),</pre>
+      <pre>						.syndrome_o(),</pre>
       <pre>						.err_o(sv2v_tmp_u_dec_err_o)</pre>
       <pre>					);</pre>
       <pre>				end</pre>
@@ -12642,6 +12673,7 @@
       <pre>					prim_secded_inv_39_32_dec u_dec(</pre>
       <pre>						.data_i(rdata_sram),</pre>
       <pre>						.data_o(sv2v_tmp_u_dec_data_o),</pre>
+      <pre>						.syndrome_o(),</pre>
       <pre>						.err_o(sv2v_tmp_u_dec_err_o)</pre>
       <pre>					);</pre>
       <pre>				end</pre>
@@ -12881,7 +12913,8 @@
       <pre>				.data_i({data_scr_nonce[k * DataNonceWidth+:DataNonceWidth], addr_i}),</pre>
       <pre>				.key_i(key_i),</pre>
       <pre>				.dec_i(1&#39;b0),</pre>
-      <pre>				.data_o(keystream[k * 64+:64])</pre>
+      <pre>				.data_o(keystream[k * 64+:64]),</pre>
+      <pre>				.valid_o()</pre>
       <pre>			);</pre>
       <pre>			if ((k == (NumParKeystr - 1)) &amp;&amp; ((Width % 64) &gt; 0)) begin : gen_unread_last</pre>
       <pre>				localparam signed [31:0] UnusedWidth = 64 - (Width % 64);</pre>
@@ -13009,6 +13042,7 @@
       <pre>		.wdata_i(wdata_scr),</pre>
       <pre>		.wmask_i(wmask_q),</pre>
       <pre>		.rdata_o(rdata_scr),</pre>
+      <pre>		.rvalid_o(),</pre>
       <pre>		.rerror_o(rerror_o),</pre>
       <pre>		.cfg_i(cfg_i)</pre>
       <pre>	);</pre>
@@ -14241,12 +14275,16 @@
       <pre>						.key_i(scramble_key_q),</pre>
       <pre>						.nonce_i(scramble_nonce_q),</pre>
       <pre>						.req_i(ic_tag_req[way]),</pre>
+      <pre>						.gnt_o(),</pre>
       <pre>						.write_i(ic_tag_write),</pre>
       <pre>						.addr_i(ic_tag_addr),</pre>
       <pre>						.wdata_i(ic_tag_wdata),</pre>
       <pre>						.wmask_i({TagSizeECC {1&#39;b1}}),</pre>
       <pre>						.intg_error_i(1&#39;b0),</pre>
       <pre>						.rdata_o(ic_tag_rdata[(1 - way) * TagSizeECC+:TagSizeECC]),</pre>
+      <pre>						.rvalid_o(),</pre>
+      <pre>						.raddr_o(),</pre>
+      <pre>						.rerror_o(),</pre>
       <pre>						.cfg_i(ram_cfg_i)</pre>
       <pre>					);</pre>
       <pre>					prim_ram_1p_scr #(</pre>
@@ -14265,12 +14303,16 @@
       <pre>						.key_i(scramble_key_q),</pre>
       <pre>						.nonce_i(scramble_nonce_q),</pre>
       <pre>						.req_i(ic_data_req[way]),</pre>
+      <pre>						.gnt_o(),</pre>
       <pre>						.write_i(ic_data_write),</pre>
       <pre>						.addr_i(ic_data_addr),</pre>
       <pre>						.wdata_i(ic_data_wdata),</pre>
       <pre>						.wmask_i({LineSizeECC {1&#39;b1}}),</pre>
       <pre>						.intg_error_i(1&#39;b0),</pre>
       <pre>						.rdata_o(ic_data_rdata[(1 - way) * LineSizeECC+:LineSizeECC]),</pre>
+      <pre>						.rvalid_o(),</pre>
+      <pre>						.raddr_o(),</pre>
+      <pre>						.rerror_o(),</pre>
       <pre>						.cfg_i(ram_cfg_i)</pre>
       <pre>					);</pre>
       <pre>					reg [127:0] sampled_scramble_key;</pre>
@@ -14613,6 +14655,7 @@
       <pre>		.data_be_o(data_be),</pre>
       <pre>		.data_addr_o(data_addr),</pre>
       <pre>		.data_wdata_o(data_wdata),</pre>
+      <pre>		.data_wdata_intg_o(),</pre>
       <pre>		.data_rdata_i(data_rdata),</pre>
       <pre>		.data_rdata_intg_i(sv2v_uu_u_top_ext_data_rdata_intg_i_0),</pre>
       <pre>		.data_err_i(&#39;b0),</pre>
@@ -14622,7 +14665,12 @@
       <pre>		.irq_fast_i(15&#39;b000000000000000),</pre>
       <pre>		.irq_nm_i(1&#39;b0),</pre>
       <pre>		.debug_req_i(&#39;b0),</pre>
-      <pre>		.fetch_enable_i(&#39;b1)</pre>
+      <pre>		.crash_dump_o(),</pre>
+      <pre>		.fetch_enable_i(&#39;b1),</pre>
+      <pre>		.alert_minor_o(),</pre>
+      <pre>		.alert_major_internal_o(),</pre>
+      <pre>		.alert_major_bus_o(),</pre>
+      <pre>		.core_sleep_o()</pre>
       <pre>	);</pre>
       <pre>	ram_2p #(</pre>
       <pre>		.Depth(MEM_SIZE / 4),</pre>
