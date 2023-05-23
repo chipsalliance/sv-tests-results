@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" type="text/css" href="../../../../../../code.css">
+    <link rel="stylesheet" type="text/css" href="../../../../../../../code.css">
   </head>
   <body>  
-    <header id="header_code"><h2>third_party/cores/black-parrot/bp_common/src/v/bsg_wormhole_stream_control.v</h2></header>  
+    <header id="header_code"><h2>third_party/cores/black-parrot/bp_me/src/v/network/bp_me_wormhole_stream_control.sv</h2></header>  
     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"><a href="#l-1">  1</a></span>
 <span class="normal"><a href="#l-2">  2</a></span>
 <span class="normal"><a href="#l-3">  3</a></span>
@@ -181,7 +181,7 @@
 <a id="l-26" name="l-26"></a>
 <a id="l-27" name="l-27"></a><span class="no">`include</span><span class="w"> </span><span class="s">&quot;bsg_defines.v&quot;</span>
 <a id="l-28" name="l-28"></a>
-<a id="l-29" name="l-29"></a><span class="k">module</span><span class="w"> </span><span class="n">bsg_wormhole_stream_control</span>
+<a id="l-29" name="l-29"></a><span class="k">module</span><span class="w"> </span><span class="n">bp_me_wormhole_stream_control</span>
 <a id="l-30" name="l-30"></a><span class="w"> </span><span class="p">#(</span><span class="k">parameter</span><span class="w"> </span><span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">len_width_p</span><span class="p">)</span>
 <a id="l-31" name="l-31"></a><span class="w">   </span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="p">[</span><span class="n">len_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="no">`BSG_INV_PARAM</span><span class="p">(</span><span class="n">hdr_len_p</span><span class="p">)</span>
 <a id="l-32" name="l-32"></a><span class="w">   </span><span class="p">)</span>
@@ -210,8 +210,8 @@
 <a id="l-55" name="l-55"></a><span class="w">  </span><span class="c1">// count from num_flits to zero, count_r_o==1 means last flit</span>
 <a id="l-56" name="l-56"></a><span class="w">  </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">len_width_p</span><span class="o">-</span><span class="mi">1</span><span class="o">:</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">hdr_flit_cnt</span><span class="p">,</span><span class="w"> </span><span class="n">data_flit_cnt</span><span class="p">;</span>
 <a id="l-57" name="l-57"></a>
-<a id="l-58" name="l-58"></a><span class="w">  </span><span class="c1">// Sending last hdr flit</span>
-<a id="l-59" name="l-59"></a><span class="w">  </span><span class="kt">wire</span><span class="w"> </span><span class="n">hdr_flit_last</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">hdr_flit_cnt</span><span class="w">  </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">len_width_p</span><span class="p">)&#39;(</span><span class="mi">1</span><span class="p">));</span>
+<a id="l-58" name="l-58"></a><span class="w">  </span><span class="c1">// Sending last hdr flit (single header packets are always good to go)</span>
+<a id="l-59" name="l-59"></a><span class="w">  </span><span class="kt">wire</span><span class="w"> </span><span class="n">hdr_flit_last</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">hdr_flit_cnt</span><span class="w">  </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">len_width_p</span><span class="p">)&#39;(</span><span class="mi">1</span><span class="p">))</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">hdr_len_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 <a id="l-60" name="l-60"></a><span class="w">  </span><span class="c1">// Sending last data flit</span>
 <a id="l-61" name="l-61"></a><span class="w">  </span><span class="kt">wire</span><span class="w"> </span><span class="n">data_flit_last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">data_flit_cnt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">len_width_p</span><span class="p">)&#39;(</span><span class="mi">1</span><span class="p">));</span>
 <a id="l-62" name="l-62"></a><span class="w">  </span><span class="c1">// All hdr flits are sent</span>
@@ -267,7 +267,7 @@
 <a id="l-112" name="l-112"></a><span class="w">    </span><span class="c1">// (data_flit_done signal takes one cycle to be registered, not useful</span>
 <a id="l-113" name="l-113"></a><span class="w">    </span><span class="c1">// in this case, extract data_len_li signal directly from hdr)</span>
 <a id="l-114" name="l-114"></a><span class="w">    </span><span class="k">assign</span><span class="w"> </span><span class="n">e_hdr_to_e_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">link_accept_i</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">is_hdr</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">data_len_li</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">);</span>
-<a id="l-115" name="l-115"></a><span class="w">    </span><span class="k">assign</span><span class="w"> </span><span class="n">has_data_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">is_hdr</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">data_len_li</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">);</span>
+<a id="l-115" name="l-115"></a><span class="w">    </span><span class="k">assign</span><span class="w"> </span><span class="n">has_data_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">data_len_li</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">);</span>
 <a id="l-116" name="l-116"></a><span class="w">  </span><span class="c1">// Multiple hdr flits</span>
 <a id="l-117" name="l-117"></a><span class="w">  </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
 <a id="l-118" name="l-118"></a><span class="w">    </span><span class="c1">// When wormhole link accept flit</span>
@@ -277,7 +277,7 @@
 <a id="l-122" name="l-122"></a><span class="w">    </span><span class="c1">// (data_len_li signal only meaningful in first hdr flit, not useful</span>
 <a id="l-123" name="l-123"></a><span class="w">    </span><span class="c1">// in this case, use registered data_flit_done signal from data_flit_counter)</span>
 <a id="l-124" name="l-124"></a><span class="w">    </span><span class="k">assign</span><span class="w"> </span><span class="n">e_hdr_to_e_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">link_accept_i</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">hdr_flit_last</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">data_flit_done</span><span class="p">);</span>
-<a id="l-125" name="l-125"></a><span class="w">    </span><span class="k">assign</span><span class="w"> </span><span class="n">has_data_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">is_hdr</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">data_flit_done</span><span class="p">;</span>
+<a id="l-125" name="l-125"></a><span class="w">    </span><span class="k">assign</span><span class="w"> </span><span class="n">has_data_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">data_flit_done</span><span class="p">;</span>
 <a id="l-126" name="l-126"></a><span class="w">  </span><span class="k">end</span>
 <a id="l-127" name="l-127"></a>
 <a id="l-128" name="l-128"></a><span class="w">  </span><span class="c1">// When wormhole link accept flit and sending last data flit</span>
@@ -300,7 +300,7 @@
 <a id="l-145" name="l-145"></a>
 <a id="l-146" name="l-146"></a><span class="k">endmodule</span>
 <a id="l-147" name="l-147"></a>
-<a id="l-148" name="l-148"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bsg_wormhole_stream_control</span><span class="p">)</span>
+<a id="l-148" name="l-148"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bp_me_wormhole_stream_control</span><span class="p">)</span>
 </pre></div></td></tr></table></div>
 
   </body>
