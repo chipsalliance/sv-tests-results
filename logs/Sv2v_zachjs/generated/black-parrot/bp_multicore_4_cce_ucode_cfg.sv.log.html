@@ -322,9 +322,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-06-06 01:40:46</dd></div>
-        <div><dt>time elapsed</dt><dd>130.142s</dd></div>
-        <div><dt>ram usage</dt><dd>3705720 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-06-07 01:43:48</dd></div>
+        <div><dt>time elapsed</dt><dd>126.040s</dd></div>
+        <div><dt>ram usage</dt><dd>3704532 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -2899,9 +2899,10 @@
       <pre>	assign tbuf_bypass_addr_li = addr_tl_r;</pre>
       <pre>	assign tbuf_bypass_v_li = (((decode_tl_r[16] | decode_tl_r[4]) | partial_st_tl) &amp; v_tl_r) &amp; v_we;</pre>
       <pre>	always @(negedge clk_i)</pre>
-      <pre>		if (~reset_i)</pre>
+      <pre>		if (~reset_i) begin</pre>
       <pre>			if (v_v_r)</pre>
       <pre>				;</pre>
+      <pre>		end</pre>
       <pre>	generate</pre>
       <pre>		if (debug_p) begin : genblk14</pre>
       <pre>			always @(posedge clk_i) begin</pre>
@@ -3213,9 +3214,10 @@
       <pre>				track_mem_data_r &lt;= track_mem_data_i;</pre>
       <pre>		end</pre>
       <pre>	always @(posedge clk_i)</pre>
-      <pre>		if (debug_p)</pre>
+      <pre>		if (debug_p) begin</pre>
       <pre>			if (dma_pkt_v_o &amp; dma_pkt_yumi_i)</pre>
       <pre>				$display(&#34;&lt;VCACHE&gt; DMA_PKT we:%0d addr:%8h // %8t&#34;, dma_pkt[1 + (addr_width_p + (block_size_in_words_p - 1))], dma_pkt[addr_width_p + (block_size_in_words_p - 1)-:((addr_width_p + (block_size_in_words_p - 1)) &gt;= (block_size_in_words_p + 0) ? ((addr_width_p + (block_size_in_words_p - 1)) - (block_size_in_words_p + 0)) + 1 : ((block_size_in_words_p + 0) - (addr_width_p + (block_size_in_words_p - 1))) + 1)], $time);</pre>
+      <pre>		end</pre>
       <pre>endmodule</pre>
       <pre>module bsg_cache_dma__abstract;</pre>
       <pre>	</pre>
@@ -5294,12 +5296,14 @@
       <pre>	always @(posedge clk_i)</pre>
       <pre>		;</pre>
       <pre>	always @(posedge clk_i)</pre>
-      <pre>		if (verbose_p)</pre>
-      <pre>			if (v_i)</pre>
+      <pre>		if (verbose_p) begin</pre>
+      <pre>			if (v_i) begin</pre>
       <pre>				if (enq_not_deq_i)</pre>
       <pre>					$display(&#34;### %m enq %x onto fifo (r=%x w=%x)&#34;, data_i, rd_ptr, wr_ptr);</pre>
       <pre>				else</pre>
       <pre>					$display(&#34;### %m deq fifo (r=%x w=%x)&#34;, rd_ptr, wr_ptr);</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
       <pre>	wire [31:0] num_elements_debug = (fifo_empty ? 0 : (fifo_full ? els_p : (wr_ptr &gt; rd_ptr ? wr_ptr - rd_ptr : els_p - (rd_ptr - wr_ptr))));</pre>
       <pre>	bsg_circular_ptr #(</pre>
       <pre>		.slots_p(els_p),</pre>
@@ -6421,9 +6425,10 @@
       <pre>				full_r &lt;= ((~empty_r &amp; enq_i) &amp; ~deq_i) | (full_r &amp; ~deq_i);</pre>
       <pre>		end</pre>
       <pre>	always @(posedge clk_i)</pre>
-      <pre>		if (~reset_i)</pre>
+      <pre>		if (~reset_i) begin</pre>
       <pre>			if (allow_enq_deq_on_full_p)</pre>
       <pre>				;</pre>
+      <pre>		end</pre>
       <pre>	always @(posedge clk_i)</pre>
       <pre>		if (verbose_p) begin</pre>
       <pre>			if (enq_i)</pre>
@@ -9024,9 +9029,10 @@
       <pre>			else</pre>
       <pre>				result_r &lt;= adder_result[width_p - 1:0];</pre>
       <pre>		end</pre>
-      <pre>		else if ((curr_state_r == 3&#39;d3) &amp;&amp; !opB_r[0])</pre>
+      <pre>		else if ((curr_state_r == 3&#39;d3) &amp;&amp; !opB_r[0]) begin</pre>
       <pre>			if (gets_high_part_r)</pre>
       <pre>				result_r &lt;= result_r &gt;&gt; 1;</pre>
+      <pre>		end</pre>
       <pre>	assign ready_o = curr_state_r == 3&#39;d0;</pre>
       <pre>	assign result_o = result_r;</pre>
       <pre>	assign v_o = curr_state_r == 3&#39;d5;</pre>
@@ -17553,11 +17559,12 @@
       <pre>						$display(&#34;%m in  ch%2d: nacking   packet %h&#34;, i, link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]);</pre>
       <pre>					else if (((reset_i === 1&#39;b0) &amp;&amp; link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]) &amp;&amp; link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 0)])</pre>
       <pre>						$display(&#34;%m in  ch%2d: accepting packet %h&#34;, i, link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]);</pre>
-      <pre>					if ((reset_i === 1&#39;b0) &amp;&amp; any_yumi)</pre>
+      <pre>					if ((reset_i === 1&#39;b0) &amp;&amp; any_yumi) begin</pre>
       <pre>						if (reqs_lo)</pre>
       <pre>							$display(&#34;%m in  ch%2d: dequeing  header %h (outch=%b,len=%b,dest=%b)&#34;, i, fifo_data_lo[i * flit_width_p+:flit_width_p], reqs_lo, hdr[len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)-:((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) &gt;= (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] + 0) ? ((len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1)) - (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] + 0)) + 1 : ((cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] + 0) - (len_width_p + (cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1))) + 1)], hdr[cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32] - 1-:cord_markers_pos_p[(cord_dims_p &gt;= 0 ? dims_p : cord_dims_p - dims_p) * 32+:32]]);</pre>
       <pre>						else</pre>
       <pre>							$display(&#34;%m in  ch%2d: dequeing  packet %h&#34;, i, fifo_data_lo[i * flit_width_p+:flit_width_p]);</pre>
+      <pre>					end</pre>
       <pre>				end</pre>
       <pre>			end</pre>
       <pre>			bsg_wormhole_router_decoder_dor #(</pre>
@@ -17648,10 +17655,12 @@
       <pre>				.data_sel_o(data_sel_lo)</pre>
       <pre>			);</pre>
       <pre>			always @(negedge clk_i)</pre>
-      <pre>				if (debug_lp)</pre>
-      <pre>					if ((reset_i === 1&#39;b0) &amp;&amp; link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)])</pre>
+      <pre>				if (debug_lp) begin</pre>
+      <pre>					if ((reset_i === 1&#39;b0) &amp;&amp; link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p + 1)]) begin</pre>
       <pre>						if (link_i_cast[(i * (2 + flit_width_p)) + (flit_width_p + 0)])</pre>
       <pre>							$display(&#34;%m out ch%2d: sending   packet %h&#34;, i, link_o_cast[(i * (2 + flit_width_p)) + (flit_width_p - 1)-:flit_width_p]);</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			bsg_mux_one_hot #(</pre>
       <pre>				.width_p(flit_width_p),</pre>
       <pre>				.els_p(input_dirs_sparse_lp)</pre>
@@ -23077,7 +23086,7 @@
       <pre>		csr_illegal_instr_o = 1&#39;sb0;</pre>
       <pre>		csr_csrw_o = 1&#39;sb0;</pre>
       <pre>		csr_data_lo = 1&#39;sb0;</pre>
-      <pre>		if (csr_cmd_v_i)</pre>
+      <pre>		if (csr_cmd_v_i) begin</pre>
       <pre>			if ((is_s_mode &amp; mstatus_lo[20]) &amp; (csr_cmd_cast_i[75-:12] == 12&#39;h180))</pre>
       <pre>				csr_illegal_instr_o = 1&#39;b1;</pre>
       <pre>			else if ((is_s_mode &amp; (csr_cmd_cast_i[75-:12] == 12&#39;hc00)) &amp; ~mcounteren_lo[0])</pre>
@@ -23191,6 +23200,7 @@
       <pre>					default: csr_illegal_instr_o = 1&#39;b1;</pre>
       <pre>				endcase</pre>
       <pre>			end</pre>
+      <pre>		end</pre>
       <pre>		if (retire_pkt_cast_i[11]) begin</pre>
       <pre>			if (m_interrupt_icode_v_li &amp; mgie) begin</pre>
       <pre>				priv_mode_n = 2&#39;b11;</pre>
@@ -23215,7 +23225,7 @@
       <pre>				interrupt_v_lo = 1&#39;b1;</pre>
       <pre>			end</pre>
       <pre>		end</pre>
-      <pre>		else if (exception_ecode_v_li)</pre>
+      <pre>		else if (exception_ecode_v_li) begin</pre>
       <pre>			if (is_debug_mode)</pre>
       <pre>				exception_v_lo = 1&#39;b1;</pre>
       <pre>			else if (medeleg_lo[exception_ecode_li] &amp; ~is_m_mode) begin</pre>
@@ -23240,6 +23250,7 @@
       <pre>				mcause_li[62-:63] = exception_ecode_li;</pre>
       <pre>				exception_v_lo = 1&#39;b1;</pre>
       <pre>			end</pre>
+      <pre>		end</pre>
       <pre>		if (is_debug_mode)</pre>
       <pre>			enter_debug = retire_pkt_cast_i[5];</pre>
       <pre>		else if ((retire_pkt_cast_i[11] &amp; d_interrupt_icode_v_li) &amp; dgie) begin</pre>
@@ -43360,8 +43371,8 @@
       <pre>		cnt_inc = 1&#39;sb0;</pre>
       <pre>		cnt_dec = 1&#39;sb0;</pre>
       <pre>		cnt_rst = 1&#39;sb0;</pre>
-      <pre>		if (auto_fwd_msg_i | ~cce_normal_mode_r)</pre>
-      <pre>			if (mem_rev_v_i)</pre>
+      <pre>		if (auto_fwd_msg_i | ~cce_normal_mode_r) begin</pre>
+      <pre>			if (mem_rev_v_i) begin</pre>
       <pre>				if (mem_rev_header_cast_i[(((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2) &gt;= 0 ? ((((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2) &gt;= 0 ? (((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 3 : 1 - ((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2)) + (3 + (paddr_width_p + 7))) - ((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2) : (3 + (paddr_width_p + 8)) + 0)]) begin</pre>
       <pre>					spec_r_v_o = 1&#39;b1;</pre>
       <pre>					spec_r_addr_o = mem_rev_header_cast_i[paddr_width_p + 7-:((paddr_width_p + 7) &gt;= 8 ? paddr_width_p + 0 : 9 - (paddr_width_p + 7))];</pre>
@@ -43456,6 +43467,8 @@
       <pre>					pending_w_addr_o = mem_rev_header_cast_i[paddr_width_p + 7-:((paddr_width_p + 7) &gt;= 8 ? paddr_width_p + 0 : 9 - (paddr_width_p + 7))];</pre>
       <pre>					pending_o = 1&#39;b0;</pre>
       <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
       <pre>		if ((lce_resp_v_i &amp; (lce_resp_header_cast_i[3-:4] == 4&#39;b0010)) &amp; ~pending_w_v_o) begin</pre>
       <pre>			lce_resp_yumi_o = lce_resp_v_i;</pre>
       <pre>			lce_resp_busy_o = 1&#39;b1;</pre>
@@ -43560,7 +43573,7 @@
       <pre>						endcase</pre>
       <pre>					end</pre>
       <pre>				end</pre>
-      <pre>				else if (decoded_inst_i[49])</pre>
+      <pre>				else if (decoded_inst_i[49]) begin</pre>
       <pre>					if (~lce_cmd_busy_o) begin</pre>
       <pre>						lce_cmd_v_o = 1&#39;b1;</pre>
       <pre>						lce_cmd_header_cast_o[(((((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + 3) + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + cce_id_width_p) + lce_id_width_p) + (3 + (paddr_width_p + 7))) - ((((((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + 3) + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + cce_id_width_p) + lce_id_width_p) - 1) - (lce_id_width_p - 1))-:lce_id_width_p] = lce_i;</pre>
@@ -43582,6 +43595,7 @@
       <pre>							end</pre>
       <pre>						end</pre>
       <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			4&#39;d3: begin</pre>
       <pre>				busy_o = 1&#39;b1;</pre>
       <pre>				if (~lce_cmd_busy_o) begin</pre>
@@ -43728,13 +43742,14 @@
       <pre>			pending_bits_r &lt;= pending_bits_n;</pre>
       <pre>	always @(*) begin</pre>
       <pre>		pending_bits_n = pending_bits_r;</pre>
-      <pre>		if (w_v_i)</pre>
+      <pre>		if (w_v_i) begin</pre>
       <pre>			if (clear_i)</pre>
       <pre>				pending_bits_n[w_wg * width_p+:width_p] = 1&#39;sb0;</pre>
       <pre>			else if (pending_i)</pre>
       <pre>				pending_bits_n[w_wg * width_p+:width_p] = pending_bits_r[w_wg * width_p+:width_p] + &#39;d1;</pre>
       <pre>			else</pre>
       <pre>				pending_bits_n[w_wg * width_p+:width_p] = pending_bits_r[w_wg * width_p+:width_p] - &#39;d1;</pre>
+      <pre>		end</pre>
       <pre>	end</pre>
       <pre>	assign pending_o = ((r_v_i &amp; w_v_i) &amp; (w_wg == r_wg) ? ~(pending_bits_n[r_wg * width_p+:width_p] == 0) : ~(pending_bits_r[r_wg * width_p+:width_p] == 0));</pre>
       <pre>endmodule</pre>
@@ -45969,7 +45984,7 @@
       <pre>		state_v_li = 1&#39;sb0;</pre>
       <pre>		pending_busy = 1&#39;sb0;</pre>
       <pre>		lce_cmd_busy = 1&#39;sb0;</pre>
-      <pre>		if (fsm_rev_v_li)</pre>
+      <pre>		if (fsm_rev_v_li) begin</pre>
       <pre>			if (fsm_rev_header_li[(((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2) &gt;= 0 ? ((((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2) &gt;= 0 ? (((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 3 : 1 - ((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2)) + (3 + (paddr_width_p + 7))) - ((((3 + (lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p))) + lce_id_width_p) + did_width_p) + 2) : (3 + (paddr_width_p + 8)) + 0)]) begin</pre>
       <pre>				if (spec_bits_lo[5])</pre>
       <pre>					;</pre>
@@ -46062,6 +46077,7 @@
       <pre>				pending_w_addr = fsm_rev_header_li[paddr_width_p + 7-:((paddr_width_p + 7) &gt;= 8 ? paddr_width_p + 0 : 9 - (paddr_width_p + 7))];</pre>
       <pre>				pending_li = 1&#39;b0;</pre>
       <pre>			end</pre>
+      <pre>		end</pre>
       <pre>		if ((fsm_resp_v_li &amp; (fsm_resp_header_li[3-:4] == 4&#39;b0010)) &amp; ~pending_busy) begin</pre>
       <pre>			fsm_resp_yumi_lo = fsm_resp_v_li;</pre>
       <pre>			pending_busy = fsm_resp_yumi_lo &amp; fsm_resp_last_li;</pre>
@@ -46304,7 +46320,7 @@
       <pre>					state_n = (fsm_cmd_yumi_li ? 6&#39;d17 : 6&#39;d16);</pre>
       <pre>				end</pre>
       <pre>			6&#39;d17:</pre>
-      <pre>				if (fsm_resp_v_li)</pre>
+      <pre>				if (fsm_resp_v_li) begin</pre>
       <pre>					if (fsm_resp_header_li[3-:4] == 4&#39;b0100) begin</pre>
       <pre>						fsm_resp_yumi_lo = fsm_resp_v_li;</pre>
       <pre>						state_n = (invalidate_flag ? 6&#39;d14 : (mshr_r[(19 + (paddr_width_p + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + (paddr_width_p + (3 + (lce_id_width_p + 10))))))) - 2] | mshr_r[(19 + (paddr_width_p + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + (paddr_width_p + (3 + (lce_id_width_p + 10))))))) - 14] ? 6&#39;d18 : (transfer_flag ? 6&#39;d22 : 6&#39;d27)));</pre>
@@ -46335,8 +46351,9 @@
       <pre>						end</pre>
       <pre>						state_n = (fsm_fwd_yumi_li &amp; fsm_fwd_last_lo ? (invalidate_flag ? 6&#39;d14 : (transfer_flag ? 6&#39;d22 : 6&#39;d27)) : 6&#39;d17);</pre>
       <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			6&#39;d14: begin</pre>
-      <pre>				if (pe_v)</pre>
+      <pre>				if (pe_v) begin</pre>
       <pre>					if (~lce_cmd_busy) begin</pre>
       <pre>						fsm_cmd_v_lo = 1&#39;b1;</pre>
       <pre>						fsm_cmd_header_lo[3-:4] = 4&#39;b0010;</pre>
@@ -46357,6 +46374,7 @@
       <pre>					end</pre>
       <pre>					else</pre>
       <pre>						pe_sharers_n = pe_sharers_r;</pre>
+      <pre>				end</pre>
       <pre>				if (fsm_resp_v_li &amp; (fsm_resp_header_li[3-:4] == 4&#39;b0001)) begin</pre>
       <pre>					fsm_resp_yumi_lo = fsm_resp_v_li;</pre>
       <pre>					cnt_dec = fsm_resp_yumi_lo;</pre>
@@ -46392,7 +46410,7 @@
       <pre>				else</pre>
       <pre>					state_n = 6&#39;d20;</pre>
       <pre>			6&#39;d19:</pre>
-      <pre>				if (fsm_resp_v_li)</pre>
+      <pre>				if (fsm_resp_v_li) begin</pre>
       <pre>					if (((fsm_resp_header_li[3-:4] == 4&#39;b0011) &amp; ~pending_busy) &amp; ~mem_credits_empty) begin</pre>
       <pre>						if (~pending_busy) begin</pre>
       <pre>							fsm_fwd_v_lo = fsm_resp_v_li;</pre>
@@ -46416,6 +46434,7 @@
       <pre>						fsm_resp_yumi_lo = fsm_resp_v_li;</pre>
       <pre>						state_n = 6&#39;d20;</pre>
       <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			6&#39;d20:</pre>
       <pre>				if (~pending_busy &amp; ~mem_credits_empty) begin</pre>
       <pre>					fsm_fwd_v_lo = fsm_req_v_li;</pre>
@@ -46457,7 +46476,7 @@
       <pre>					state_n = (fsm_cmd_yumi_li ? (mshr_r[(19 + (paddr_width_p + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + (paddr_width_p + (3 + (lce_id_width_p + 10))))))) - 8] &amp; ~mshr_r[(19 + (paddr_width_p + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + ((lce_assoc_p == 1 ? 1 : $clog2(lce_assoc_p)) + (paddr_width_p + (3 + (lce_id_width_p + 10))))))) - 15] ? 6&#39;d26 : 6&#39;d27) : state_r);</pre>
       <pre>				end</pre>
       <pre>			6&#39;d26:</pre>
-      <pre>				if (fsm_resp_v_li)</pre>
+      <pre>				if (fsm_resp_v_li) begin</pre>
       <pre>					if (fsm_resp_header_li[3-:4] == 4&#39;b0100) begin</pre>
       <pre>						fsm_resp_yumi_lo = fsm_resp_v_li;</pre>
       <pre>						state_n = 6&#39;d27;</pre>
@@ -46476,6 +46495,7 @@
       <pre>						pending_w_addr = fsm_resp_header_li[paddr_width_p + 7-:((paddr_width_p + 7) &gt;= 8 ? paddr_width_p + 0 : 9 - (paddr_width_p + 7))];</pre>
       <pre>						state_n = (fsm_resp_yumi_lo &amp; fsm_resp_last_li ? 6&#39;d27 : 6&#39;d26);</pre>
       <pre>					end</pre>
+      <pre>				end</pre>
       <pre>			6&#39;d21:</pre>
       <pre>				if (~lce_cmd_busy) begin</pre>
       <pre>					fsm_cmd_v_lo = 1&#39;b1;</pre>
