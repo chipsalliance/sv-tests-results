@@ -1,1 +1,1 @@
-config_loader_data['surelog/rsd'] = [["cores","rsd",0,"logs/Surelog/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
+config_loader_data['surelog/rsd'] = [["cores","rsd",1,"logs/Surelog/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]
