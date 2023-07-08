@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-07 01:40:09</dd></div>
-        <div><dt>time elapsed</dt><dd>0.170s</dd></div>
-        <div><dt>ram usage</dt><dd>136416 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-08 01:39:37</dd></div>
+        <div><dt>time elapsed</dt><dd>0.177s</dd></div>
+        <div><dt>ram usage</dt><dd>139224 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -65,8 +65,8 @@
       <pre>);</pre>
       <pre>	parameter ways_p = 0;</pre>
       <pre>	parameter sets_p = 0;</pre>
-      <pre>	parameter lg_sets_lp = (sets_p == 1 ? 1 : $clog2(sets_p));</pre>
-      <pre>	parameter stat_mem_pkt_width_lp = (3 + (ways_p == 1 ? 1 : $clog2(ways_p))) + (sets_p == 1 ? 1 : $clog2(sets_p));</pre>
+      <pre>	parameter lg_sets_lp = ((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p));</pre>
+      <pre>	parameter stat_mem_pkt_width_lp = (3 + ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p))) + ((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p));</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
       <pre>	input v_i;</pre>
@@ -74,7 +74,7 @@
       <pre>	output wire [ways_p - 1:0] dirty_o;</pre>
       <pre>	output wire [ways_p - 2:0] lru_bits_o;</pre>
       <pre>	localparam stat_info_width_lp = (ways_p + ways_p) - 1;</pre>
-      <pre>	wire [((3 + (ways_p == 1 ? 1 : $clog2(ways_p))) + (sets_p == 1 ? 1 : $clog2(sets_p))) - 1:0] stat_mem_pkt;</pre>
+      <pre>	wire [((3 + ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p))) + ((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p))) - 1:0] stat_mem_pkt;</pre>
       <pre>	assign stat_mem_pkt = stat_mem_pkt_i;</pre>
       <pre>	reg [(ways_p + ((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p)) - 1:0] data_li;</pre>
       <pre>	wire [(ways_p + ((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p)) - 1:0] data_lo;</pre>
@@ -89,20 +89,20 @@
       <pre>		.reset_i(reset_i),</pre>
       <pre>		.v_i(v_i),</pre>
       <pre>		.w_i(w_li),</pre>
-      <pre>		.addr_i(stat_mem_pkt[(sets_p == 1 ? 1 : $clog2(sets_p)) - 1-:(sets_p == 1 ? 1 : $clog2(sets_p))]),</pre>
+      <pre>		.addr_i(stat_mem_pkt[((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1-:((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p))]),</pre>
       <pre>		.w_mask_i(mask_li),</pre>
       <pre>		.data_i(data_li),</pre>
       <pre>		.data_o(data_lo)</pre>
       <pre>	);</pre>
       <pre>	wire [ways_p - 1:0] way_decode_lo;</pre>
       <pre>	bsg_decode #(.num_out_p(ways_p)) way_demux(</pre>
-      <pre>		.i(stat_mem_pkt[(ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)-:(((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)) &gt;= ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0) ? (((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)) - ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0)) + 1 : (((sets_p == 1 ? 1 : $clog2(sets_p)) + 0) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1))) + 1)]),</pre>
+      <pre>		.i(stat_mem_pkt[((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)-:((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)) &gt;= (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0) ? ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)) - (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0)) + 1 : ((((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1))) + 1)]),</pre>
       <pre>		.o(way_decode_lo)</pre>
       <pre>	);</pre>
       <pre>	wire [ways_p - 2:0] lru_decode_data_lo;</pre>
       <pre>	wire [ways_p - 2:0] lru_decode_mask_lo;</pre>
       <pre>	bsg_lru_pseudo_tree_decode #(.ways_p(ways_p)) lru_decode(</pre>
-      <pre>		.way_id_i(stat_mem_pkt[(ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)-:(((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)) &gt;= ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0) ? (((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)) - ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0)) + 1 : (((sets_p == 1 ? 1 : $clog2(sets_p)) + 0) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1))) + 1)]),</pre>
+      <pre>		.way_id_i(stat_mem_pkt[((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)-:((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)) &gt;= (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0) ? ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)) - (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0)) + 1 : ((((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1))) + 1)]),</pre>
       <pre>		.data_o(lru_decode_data_lo),</pre>
       <pre>		.mask_o(lru_decode_mask_lo)</pre>
       <pre>	);</pre>
@@ -112,7 +112,7 @@
       <pre>		mask_li[((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1-:((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p)] = 1&#39;sb0;</pre>
       <pre>		data_li[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = 1&#39;sb0;</pre>
       <pre>		mask_li[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = 1&#39;sb0;</pre>
-      <pre>		case (stat_mem_pkt[3 + ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1))-:((3 + ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1))) &gt;= ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0)) ? ((3 + ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1))) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0))) + 1 : (((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) + 0)) - (3 + ((ways_p == 1 ? 1 : $clog2(ways_p)) + ((sets_p == 1 ? 1 : $clog2(sets_p)) - 1)))) + 1)])</pre>
+      <pre>		case (stat_mem_pkt[3 + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1))-:((3 + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1))) &gt;= (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0)) ? ((3 + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1))) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0))) + 1 : ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) + 0)) - (3 + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + (((sets_p == 1) || (sets_p == 0) ? 1 : $clog2(sets_p)) - 1)))) + 1)])</pre>
       <pre>			3&#39;d0: begin</pre>
       <pre>				w_li = 1&#39;b0;</pre>
       <pre>				data_li[((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1-:((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p)] = 1&#39;sb0;</pre>

@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-07 01:40:08</dd></div>
-        <div><dt>time elapsed</dt><dd>0.101s</dd></div>
-        <div><dt>ram usage</dt><dd>81960 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-08 01:39:36</dd></div>
+        <div><dt>time elapsed</dt><dd>0.106s</dd></div>
+        <div><dt>ram usage</dt><dd>87372 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -67,7 +67,7 @@
       <pre>	parameter width_p = 0;</pre>
       <pre>	parameter els_p = 0;</pre>
       <pre>	parameter latch_last_read_p = 0;</pre>
-      <pre>	parameter addr_width_lp = (els_p == 1 ? 1 : $clog2(els_p));</pre>
+      <pre>	parameter addr_width_lp = ((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p));</pre>
       <pre>	parameter verbose_p = 1;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input v_i;</pre>
@@ -78,7 +78,7 @@
       <pre>	output wire [(width_p &lt; 1 ? 0 : width_p - 1):0] data_o;</pre>
       <pre>	wire unused = reset_i;</pre>
       <pre>	generate</pre>
-      <pre>		if (width_p == 0) begin : z</pre>
+      <pre>		if ((width_p == 0) || (els_p == 0)) begin : z</pre>
       <pre>			wire unused0 = &amp;{clk_i, v_i, data_i, addr_i, w_i};</pre>
       <pre>			assign data_o = 1&#39;sb0;</pre>
       <pre>		end</pre>
@@ -87,11 +87,12 @@
       <pre>			reg [width_p - 1:0] mem [els_p - 1:0];</pre>
       <pre>			wire read_en;</pre>
       <pre>			wire [width_p - 1:0] data_out;</pre>
+      <pre>			wire [addr_width_lp - 1:0] addr_li = (els_p &gt; 0 ? addr_i : {addr_width_lp {1&#39;sb0}});</pre>
       <pre>			assign read_en = v_i &amp; ~w_i;</pre>
       <pre>			assign data_out = mem[addr_r];</pre>
       <pre>			always @(posedge clk_i)</pre>
       <pre>				if (read_en)</pre>
-      <pre>					addr_r &lt;= addr_i;</pre>
+      <pre>					addr_r &lt;= addr_li;</pre>
       <pre>				else</pre>
       <pre>					addr_r &lt;= 1&#39;sbx;</pre>
       <pre>			if (latch_last_read_p) begin : llr</pre>
@@ -113,7 +114,7 @@
       <pre>			end</pre>
       <pre>			always @(posedge clk_i)</pre>
       <pre>				if (v_i &amp; w_i)</pre>
-      <pre>					mem[addr_i] &lt;= data_i;</pre>
+      <pre>					mem[addr_li] &lt;= data_i;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	initial if (verbose_p)</pre>

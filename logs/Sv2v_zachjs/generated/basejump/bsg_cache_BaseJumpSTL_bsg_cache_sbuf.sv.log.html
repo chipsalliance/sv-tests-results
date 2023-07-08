@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-07 01:40:04</dd></div>
-        <div><dt>time elapsed</dt><dd>0.130s</dd></div>
-        <div><dt>ram usage</dt><dd>111132 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-08 01:39:33</dd></div>
+        <div><dt>time elapsed</dt><dd>0.147s</dd></div>
+        <div><dt>ram usage</dt><dd>115088 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -74,7 +74,7 @@
       <pre>	parameter addr_width_p = 0;</pre>
       <pre>	parameter ways_p = 0;</pre>
       <pre>	localparam data_mask_width_lp = data_width_p &gt;&gt; 3;</pre>
-      <pre>	localparam sbuf_entry_width_lp = ((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p));</pre>
+      <pre>	localparam sbuf_entry_width_lp = ((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p));</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
       <pre>	input [sbuf_entry_width_lp - 1:0] sbuf_entry_i;</pre>
@@ -88,12 +88,12 @@
       <pre>	input bypass_v_i;</pre>
       <pre>	output reg [data_width_p - 1:0] bypass_data_o;</pre>
       <pre>	output reg [data_mask_width_lp - 1:0] bypass_mask_o;</pre>
-      <pre>	localparam lg_data_mask_width_lp = ((data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
-      <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p))) - 1:0] el0;</pre>
-      <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p))) - 1:0] el1;</pre>
+      <pre>	localparam lg_data_mask_width_lp = (((data_width_p &gt;&gt; 3) == 1) || ((data_width_p &gt;&gt; 3) == 0) ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
+      <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p))) - 1:0] el0;</pre>
+      <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p))) - 1:0] el1;</pre>
       <pre>	wire el0_valid;</pre>
       <pre>	wire el1_valid;</pre>
-      <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + (ways_p == 1 ? 1 : $clog2(ways_p))) - 1:0] sbuf_entry_in;</pre>
+      <pre>	wire [(((addr_width_p + data_width_p) + (data_width_p &gt;&gt; 3)) + ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p))) - 1:0] sbuf_entry_in;</pre>
       <pre>	assign sbuf_entry_in = sbuf_entry_i;</pre>
       <pre>	bsg_cache_buffer_queue #(.width_p(sbuf_entry_width_lp)) q0(</pre>
       <pre>		.clk_i(clk_i),</pre>
@@ -118,9 +118,9 @@
       <pre>	wire tag_hit2_n;</pre>
       <pre>	wire [(addr_width_p - lg_data_mask_width_lp) - 1:0] bypass_word_addr;</pre>
       <pre>	assign bypass_word_addr = bypass_addr_i[addr_width_p - 1:lg_data_mask_width_lp];</pre>
-      <pre>	assign tag_hit0_n = bypass_word_addr == el0[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (addr_width_p - 1)):(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)];</pre>
-      <pre>	assign tag_hit1_n = bypass_word_addr == el1[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (addr_width_p - 1)):(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)];</pre>
-      <pre>	assign tag_hit2_n = bypass_word_addr == sbuf_entry_in[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (addr_width_p - 1)):(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)];</pre>
+      <pre>	assign tag_hit0_n = bypass_word_addr == el0[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (addr_width_p - 1)):(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)];</pre>
+      <pre>	assign tag_hit1_n = bypass_word_addr == el1[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (addr_width_p - 1)):(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)];</pre>
+      <pre>	assign tag_hit2_n = bypass_word_addr == sbuf_entry_in[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (addr_width_p - 1)):(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)];</pre>
       <pre>	assign tag_hit0 = tag_hit0_n &amp; el0_valid;</pre>
       <pre>	assign tag_hit1 = tag_hit1_n &amp; el1_valid;</pre>
       <pre>	assign tag_hit2 = tag_hit2_n &amp; v_i;</pre>
@@ -133,14 +133,14 @@
       <pre>	wire [data_width_p - 1:0] el0or1_data;</pre>
       <pre>	wire [data_width_p - 1:0] bypass_data_n;</pre>
       <pre>	wire [(data_width_p &gt;&gt; 3) - 1:0] bypass_mask_n;</pre>
-      <pre>	assign bypass_mask_n = ((tag_hit0x4 &amp; el0[(data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) &gt;= ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) + 1 : (((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) + 1)]) | (tag_hit1x4 &amp; el1[(data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) &gt;= ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) + 1 : (((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) + 1)])) | (tag_hit2x4 &amp; sbuf_entry_in[(data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) &gt;= ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) + 1 : (((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) + 1)]);</pre>
+      <pre>	assign bypass_mask_n = ((tag_hit0x4 &amp; el0[(data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) &gt;= (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) + 1 : ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) + 1)]) | (tag_hit1x4 &amp; el1[(data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) &gt;= (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) + 1 : ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) + 1)])) | (tag_hit2x4 &amp; sbuf_entry_in[(data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) &gt;= (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) + 1 : ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) + 1)]);</pre>
       <pre>	bsg_mux_segmented #(</pre>
       <pre>		.segments_p(data_width_p &gt;&gt; 3),</pre>
       <pre>		.segment_width_p(8)</pre>
       <pre>	) mux_segmented_merge0(</pre>
-      <pre>		.data0_i(el1[data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) + 1 : (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) + 1)]),</pre>
-      <pre>		.data1_i(el0[data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) + 1 : (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) + 1)]),</pre>
-      <pre>		.sel_i(tag_hit0x4 &amp; el0[(data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) &gt;= ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) + 1 : (((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) + 1)]),</pre>
+      <pre>		.data0_i(el1[data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0))) + 1 : (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) - (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) + 1)]),</pre>
+      <pre>		.data1_i(el0[data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0))) + 1 : (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) - (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) + 1)]),</pre>
+      <pre>		.sel_i(tag_hit0x4 &amp; el0[(data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) &gt;= (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) + 1 : ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) + 1)]),</pre>
       <pre>		.data_o(el0or1_data)</pre>
       <pre>	);</pre>
       <pre>	bsg_mux_segmented #(</pre>
@@ -148,8 +148,8 @@
       <pre>		.segment_width_p(8)</pre>
       <pre>	) mux_segmented_merge1(</pre>
       <pre>		.data0_i(el0or1_data),</pre>
-      <pre>		.data1_i(sbuf_entry_in[data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0))) + 1 : (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) - (data_width_p + ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)))) + 1)]),</pre>
-      <pre>		.sel_i(tag_hit2x4 &amp; sbuf_entry_in[(data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) &gt;= ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1)) - ((ways_p == 1 ? 1 : $clog2(ways_p)) + 0)) + 1 : (((ways_p == 1 ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + ((ways_p == 1 ? 1 : $clog2(ways_p)) - 1))) + 1)]),</pre>
+      <pre>		.data1_i(sbuf_entry_in[data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))-:((data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) &gt;= ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) ? ((data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0))) + 1 : (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) - (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) + 1)]),</pre>
+      <pre>		.sel_i(tag_hit2x4 &amp; sbuf_entry_in[(data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)-:(((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) &gt;= (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) ? (((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)) - (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0)) + 1 : ((((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) + 0) - ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1))) + 1)]),</pre>
       <pre>		.data_o(bypass_data_n)</pre>
       <pre>	);</pre>
       <pre>	always @(posedge clk_i)</pre>

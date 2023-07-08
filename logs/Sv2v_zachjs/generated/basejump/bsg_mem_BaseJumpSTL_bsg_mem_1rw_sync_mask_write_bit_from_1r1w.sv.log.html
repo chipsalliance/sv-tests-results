@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-07 01:40:05</dd></div>
-        <div><dt>time elapsed</dt><dd>0.102s</dd></div>
-        <div><dt>ram usage</dt><dd>85324 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-08 01:39:34</dd></div>
+        <div><dt>time elapsed</dt><dd>0.116s</dd></div>
+        <div><dt>ram usage</dt><dd>92608 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -70,7 +70,7 @@
       <pre>	parameter latch_last_read_p = 0;</pre>
       <pre>	parameter enable_clock_gating_p = 0;</pre>
       <pre>	parameter verbose_p = 0;</pre>
-      <pre>	localparam addr_width_lp = (els_p == 1 ? 1 : $clog2(els_p));</pre>
+      <pre>	localparam addr_width_lp = ((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p));</pre>
       <pre>	localparam width_m1_lp = (width_p &lt; 1 ? 0 : width_p - 1);</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
@@ -90,13 +90,14 @@
       <pre>		.data_o(v_and_w_r)</pre>
       <pre>	);</pre>
       <pre>	wire [addr_width_lp - 1:0] w_addr_r;</pre>
-      <pre>	wire addr_match = w_addr_r == addr_i;</pre>
+      <pre>	wire [addr_width_lp - 1:0] addr_li = (els_p &gt; 1 ? addr_i : {addr_width_lp {1&#39;sb0}});</pre>
+      <pre>	wire addr_match = w_addr_r == addr_li;</pre>
       <pre>	wire bypass_n = v_and_w_r &amp; addr_match;</pre>
       <pre>	wire bypass_r;</pre>
       <pre>	bsg_dff_en #(.width_p(addr_width_lp + 1)) common_regs(</pre>
       <pre>		.clk_i(clk_i),</pre>
       <pre>		.en_i(v_i),</pre>
-      <pre>		.data_i({addr_i, bypass_n}),</pre>
+      <pre>		.data_i({addr_li, bypass_n}),</pre>
       <pre>		.data_o({w_addr_r, bypass_r})</pre>
       <pre>	);</pre>
       <pre>	wire [width_m1_lp:0] w_mask_r;</pre>
@@ -109,7 +110,16 @@
       <pre>	wire [width_m1_lp:0] mem_data_lo;</pre>
       <pre>	reg [width_m1_lp:0] bypass_data_r;</pre>
       <pre>	wire [width_m1_lp:0] w_data_li = (bypass_r ? bypass_data_r : (mem_data_lo &amp; ~w_mask_r) | (bypass_data_r &amp; w_mask_r));</pre>
-      <pre>	always @(posedge clk_i) bypass_data_r &lt;= (bypass_n ? (w_i ? (w_data_li &amp; ~w_mask_i) | (data_i &amp; w_mask_i) : w_data_li) : data_i);</pre>
+      <pre>	generate</pre>
+      <pre>		if (els_p &gt; 0) begin : genblk1</pre>
+      <pre>			always @(posedge clk_i) bypass_data_r &lt;= (bypass_n ? (w_i ? (w_data_li &amp; ~w_mask_i) | (data_i &amp; w_mask_i) : w_data_li) : data_i);</pre>
+      <pre>		end</pre>
+      <pre>		else begin : genblk1</pre>
+      <pre>			wire [(width_m1_lp &gt;= 0 ? width_m1_lp + 1 : 1 - width_m1_lp):1] sv2v_tmp_F8693;</pre>
+      <pre>			assign sv2v_tmp_F8693 = 1&#39;sb0;</pre>
+      <pre>			always @(*) bypass_data_r = sv2v_tmp_F8693;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	wire r_en_li = v_i &amp; ~bypass_n;</pre>
       <pre>	wire w_en_li = v_and_w_r &amp; ~(v_and_w_n &amp; addr_match);</pre>
       <pre>	bsg_mem_1r1w_sync #(</pre>
@@ -122,7 +132,7 @@
       <pre>		.w_addr_i(w_addr_r),</pre>
       <pre>		.w_data_i(w_data_li),</pre>
       <pre>		.r_v_i(r_en_li),</pre>
-      <pre>		.r_addr_i(addr_i),</pre>
+      <pre>		.r_addr_i(addr_li),</pre>
       <pre>		.r_data_o(mem_data_lo)</pre>
       <pre>	);</pre>
       <pre>	wire [width_m1_lp:0] data_o_latchable = (bypass_r ? bypass_data_r : mem_data_lo);</pre>

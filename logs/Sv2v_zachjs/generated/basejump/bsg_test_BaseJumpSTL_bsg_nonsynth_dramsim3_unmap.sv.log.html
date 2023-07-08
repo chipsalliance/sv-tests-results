@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-07 01:40:05</dd></div>
+        <div><dt>completed</dt><dd>2023-07-08 01:39:33</dd></div>
         <div><dt>time elapsed</dt><dd>0.105s</dd></div>
-        <div><dt>ram usage</dt><dd>88812 KB</dd></div>
+        <div><dt>ram usage</dt><dd>89784 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -77,20 +77,24 @@
       <pre>	parameter lg_num_bg_lp = $clog2(num_bg_p);</pre>
       <pre>	parameter lg_num_ranks_lp = $clog2(num_ranks_p);</pre>
       <pre>	parameter data_mask_width_lp = data_width_p &gt;&gt; 3;</pre>
-      <pre>	parameter byte_offset_width_lp = ((data_width_p &gt;&gt; 3) == 1 ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
+      <pre>	parameter byte_offset_width_lp = (((data_width_p &gt;&gt; 3) == 1) || ((data_width_p &gt;&gt; 3) == 0) ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
       <pre>	parameter addr_width_lp = lg_num_channels_lp + channel_addr_width_p;</pre>
       <pre>	input wire [addr_width_lp - 1:0] mem_addr_i;</pre>
       <pre>	output wire [channel_addr_width_p - 1:0] ch_addr_o;</pre>
       <pre>	localparam signed [31:0] bsg_dramsim3_pkg_max_cfgs = 128;</pre>
-      <pre>	localparam signed [31:0] bsg_dramsim3_pkg_lg_max_cfgs = 7;</pre>
+      <pre>	localparam signed [31:0] bsg_dramsim3_pkg_lg_max_cfgs = (1&#39;d0 || 1&#39;d0 ? 1 : 7);</pre>
+      <pre>	function automatic [bsg_dramsim3_pkg_lg_max_cfgs - 1:0] sv2v_cast_EF085;</pre>
+      <pre>		input reg [bsg_dramsim3_pkg_lg_max_cfgs - 1:0] inp;</pre>
+      <pre>		sv2v_cast_EF085 = inp;</pre>
+      <pre>	endfunction</pre>
       <pre>	generate</pre>
-      <pre>		if (address_mapping_p == 7&#39;d1) begin : genblk1</pre>
+      <pre>		if (address_mapping_p == sv2v_cast_EF085(1)) begin : genblk1</pre>
       <pre>			assign ch_addr_o = {mem_addr_i[addr_width_lp - 1:byte_offset_width_lp + lg_num_channels_lp], {byte_offset_width_lp {1&#39;b0}}};</pre>
       <pre>		end</pre>
-      <pre>		else if (address_mapping_p == 7&#39;d0) begin : genblk1</pre>
+      <pre>		else if (address_mapping_p == sv2v_cast_EF085(0)) begin : genblk1</pre>
       <pre>			assign ch_addr_o = {mem_addr_i[addr_width_lp - 1:(lg_num_channels_lp + lg_num_columns_lp) + byte_offset_width_lp], mem_addr_i[(lg_num_columns_lp + byte_offset_width_lp) - 1:byte_offset_width_lp], {byte_offset_width_lp {1&#39;b0}}};</pre>
       <pre>		end</pre>
-      <pre>		else if (address_mapping_p == 7&#39;d2) begin : genblk1</pre>
+      <pre>		else if (address_mapping_p == sv2v_cast_EF085(2)) begin : genblk1</pre>
       <pre>			localparam mem_co_pos_lp = byte_offset_width_lp;</pre>
       <pre>			localparam mem_bg_pos_lp = mem_co_pos_lp + lg_num_columns_lp;</pre>
       <pre>			localparam mem_ba_pos_lp = mem_bg_pos_lp + lg_num_bg_lp;</pre>

@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-07 01:40:05</dd></div>
-        <div><dt>time elapsed</dt><dd>0.097s</dd></div>
-        <div><dt>ram usage</dt><dd>78392 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-08 01:39:33</dd></div>
+        <div><dt>time elapsed</dt><dd>0.095s</dd></div>
+        <div><dt>ram usage</dt><dd>84072 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -71,7 +71,7 @@
       <pre>	parameter width_p = 0;</pre>
       <pre>	parameter els_p = 0;</pre>
       <pre>	parameter read_write_same_addr_p = 0;</pre>
-      <pre>	parameter addr_width_lp = (els_p == 1 ? 1 : $clog2(els_p));</pre>
+      <pre>	parameter addr_width_lp = ((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p));</pre>
       <pre>	input w_clk_i;</pre>
       <pre>	input w_reset_i;</pre>
       <pre>	input w_v_i;</pre>
@@ -85,18 +85,21 @@
       <pre>	output wire [(width_p &lt; 1 ? 0 : width_p - 1):0] r1_data_o;</pre>
       <pre>	wire unused = w_reset_i;</pre>
       <pre>	generate</pre>
-      <pre>		if (width_p == 0) begin : z</pre>
+      <pre>		if ((width_p == 0) || (els_p == 0)) begin : z</pre>
       <pre>			wire unused0 = &amp;{w_clk_i, w_v_i, w_addr_i, w_data_i, r0_v_i, r0_addr_i, r1_v_i, r1_addr_i};</pre>
       <pre>			assign r0_data_o = 1&#39;sb0;</pre>
       <pre>			assign r1_data_o = 1&#39;sb0;</pre>
       <pre>		end</pre>
       <pre>		else begin : nz</pre>
       <pre>			reg [width_p - 1:0] mem [els_p - 1:0];</pre>
-      <pre>			assign r1_data_o = mem[r1_addr_i];</pre>
-      <pre>			assign r0_data_o = mem[r0_addr_i];</pre>
+      <pre>			wire [addr_width_lp - 1:0] r0_addr_li = (els_p &gt; 1 ? r0_addr_i : {addr_width_lp {1&#39;sb0}});</pre>
+      <pre>			wire [addr_width_lp - 1:0] r1_addr_li = (els_p &gt; 1 ? r1_addr_i : {addr_width_lp {1&#39;sb0}});</pre>
+      <pre>			assign r1_data_o = mem[r1_addr_li];</pre>
+      <pre>			assign r0_data_o = mem[r0_addr_li];</pre>
+      <pre>			wire [addr_width_lp - 1:0] w_addr_li = (els_p &gt; 1 ? w_addr_i : {addr_width_lp {1&#39;sb0}});</pre>
       <pre>			always @(posedge w_clk_i)</pre>
       <pre>				if (w_v_i)</pre>
-      <pre>					mem[w_addr_i] &lt;= w_data_i;</pre>
+      <pre>					mem[w_addr_li] &lt;= w_data_i;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>endmodule</pre>
