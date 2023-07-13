@@ -1,0 +1,1 @@
+config_loader_data['veribleextractor/rggen'] = [["","RgGen",0,"logs/VeribleExtractor/generated/rggen/rggen.sv.log.html","third_party/cores/rggen-sv-rtl/rggen_rtl_pkg.sv.html"]]
