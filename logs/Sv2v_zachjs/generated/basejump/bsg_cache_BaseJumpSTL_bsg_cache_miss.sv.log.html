@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-24 10:23:11</dd></div>
-        <div><dt>time elapsed</dt><dd>0.250s</dd></div>
-        <div><dt>ram usage</dt><dd>196368 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-25 01:38:37</dd></div>
+        <div><dt>time elapsed</dt><dd>0.205s</dd></div>
+        <div><dt>ram usage</dt><dd>196924 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -109,7 +109,8 @@
       <pre>	parameter data_mask_width_lp = data_width_p &gt;&gt; 3;</pre>
       <pre>	parameter lg_data_mask_width_lp = (((data_width_p &gt;&gt; 3) == 1) || ((data_width_p &gt;&gt; 3) == 0) ? 1 : $clog2(data_width_p &gt;&gt; 3));</pre>
       <pre>	parameter block_offset_width_lp = (block_size_in_words_p &gt; 1 ? lg_data_mask_width_lp + lg_block_size_in_words_lp : lg_data_mask_width_lp);</pre>
-      <pre>	parameter tag_width_lp = (addr_width_p - lg_sets_lp) - block_offset_width_lp;</pre>
+      <pre>	parameter tag_offset_lp = (sets_p == 1 ? block_offset_width_lp : block_offset_width_lp + lg_sets_lp);</pre>
+      <pre>	parameter tag_width_lp = addr_width_p - tag_offset_lp;</pre>
       <pre>	parameter tag_info_width_lp = tag_width_lp + 2;</pre>
       <pre>	parameter lg_ways_lp = ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p));</pre>
       <pre>	parameter stat_info_width_lp = (ways_p + ways_p) - 1;</pre>
@@ -191,8 +192,8 @@
       <pre>	wire [lg_ways_lp - 1:0] addr_way_v;</pre>
       <pre>	wire [lg_block_size_in_words_lp - 1:0] addr_block_offset_v;</pre>
       <pre>	assign addr_index_v = addr_v_i[block_offset_width_lp+:lg_sets_lp];</pre>
-      <pre>	assign addr_tag_v = addr_v_i[block_offset_width_lp + lg_sets_lp+:tag_width_lp];</pre>
-      <pre>	assign addr_way_v = addr_v_i[block_offset_width_lp + lg_sets_lp+:lg_ways_lp];</pre>
+      <pre>	assign addr_tag_v = addr_v_i[tag_offset_lp+:tag_width_lp];</pre>
+      <pre>	assign addr_way_v = addr_v_i[tag_offset_lp+:lg_ways_lp];</pre>
       <pre>	assign addr_block_offset_v = addr_v_i[lg_data_mask_width_lp+:lg_block_size_in_words_lp];</pre>
       <pre>	assign stat_mem_addr_o = addr_index_v;</pre>
       <pre>	assign tag_mem_addr_o = addr_index_v;</pre>
@@ -267,7 +268,7 @@
       <pre>			4&#39;d4: begin</pre>
       <pre>				chosen_way_n = (track_miss_i ? tag_hit_way_id_i : (invalid_exist ? invalid_way_id : lru_way_id));</pre>
       <pre>				dma_cmd_o = 4&#39;b0001;</pre>
-      <pre>				dma_addr_o = {addr_tag_v, addr_index_v, {block_offset_width_lp {1&#39;b0}}};</pre>
+      <pre>				dma_addr_o = {addr_tag_v, {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>				miss_state_n = (dma_done_i ? ((~track_miss_i &amp; stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - chosen_way_n)]) &amp; valid_v_i[chosen_way_n] ? 4&#39;d3 : 4&#39;d6) : 4&#39;d4);</pre>
       <pre>			end</pre>
       <pre>			4&#39;d1: begin</pre>
@@ -313,12 +314,12 @@
       <pre>			end</pre>
       <pre>			4&#39;d3: begin</pre>
       <pre>				dma_cmd_o = 4&#39;b0010;</pre>
-      <pre>				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], addr_index_v, {block_offset_width_lp {1&#39;b0}}};</pre>
+      <pre>				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>				miss_state_n = (dma_done_i ? 4&#39;d5 : 4&#39;d3);</pre>
       <pre>			end</pre>
       <pre>			4&#39;d5: begin</pre>
       <pre>				dma_cmd_o = 4&#39;b1000;</pre>
-      <pre>				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], addr_index_v, {block_offset_width_lp {1&#39;b0}}};</pre>
+      <pre>				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>				stat_mem_v_o = dma_done_i &amp; st_tag_miss_op;</pre>
       <pre>				stat_mem_w_o = 1&#39;b1;</pre>
       <pre>				stat_mem_data_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = {ways_p {1&#39;b1}};</pre>
@@ -353,7 +354,7 @@
       <pre>			end</pre>
       <pre>			4&#39;d6: begin</pre>
       <pre>				dma_cmd_o = 4&#39;b0100;</pre>
-      <pre>				dma_addr_o = {addr_tag_v, addr_index_v, {block_size_in_words_p &gt; 1 {addr_block_offset_v}}, {lg_data_mask_width_lp {1&#39;b0}}};</pre>
+      <pre>				dma_addr_o = {addr_tag_v, {sets_p &gt; 1 {addr_index_v}}, {block_size_in_words_p &gt; 1 {addr_block_offset_v}}, {lg_data_mask_width_lp {1&#39;b0}}};</pre>
       <pre>				stat_mem_v_o = dma_done_i;</pre>
       <pre>				stat_mem_w_o = 1&#39;b1;</pre>
       <pre>				stat_mem_data_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = {ways_p {decode_v_i[15] | decode_v_i[4]}};</pre>

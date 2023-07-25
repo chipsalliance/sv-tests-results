@@ -44,9 +44,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2023-07-24 10:23:11</dd></div>
-        <div><dt>time elapsed</dt><dd>0.500s</dd></div>
-        <div><dt>ram usage</dt><dd>348632 KB</dd></div>
+        <div><dt>completed</dt><dd>2023-07-25 01:38:34</dd></div>
+        <div><dt>time elapsed</dt><dd>0.449s</dd></div>
+        <div><dt>ram usage</dt><dd>350588 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -110,7 +110,8 @@
       <pre>	localparam lg_data_mask_width_lp = ((data_mask_width_lp == 1) || (data_mask_width_lp == 0) ? 1 : $clog2(data_mask_width_lp));</pre>
       <pre>	localparam lg_block_size_in_words_lp = ((block_size_in_words_p == 1) || (block_size_in_words_p == 0) ? 1 : $clog2(block_size_in_words_p));</pre>
       <pre>	localparam block_offset_width_lp = (block_size_in_words_p &gt; 1 ? lg_data_mask_width_lp + lg_block_size_in_words_lp : lg_data_mask_width_lp);</pre>
-      <pre>	localparam tag_width_lp = (addr_width_p - lg_sets_lp) - block_offset_width_lp;</pre>
+      <pre>	localparam way_offset_width_lp = (sets_p == 1 ? block_offset_width_lp : block_offset_width_lp + lg_sets_lp);</pre>
+      <pre>	localparam tag_width_lp = (sets_p == 1 ? addr_width_p - block_offset_width_lp : (addr_width_p - lg_sets_lp) - block_offset_width_lp);</pre>
       <pre>	localparam tag_info_width_lp = tag_width_lp + 2;</pre>
       <pre>	localparam lg_ways_lp = ((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p));</pre>
       <pre>	localparam stat_info_width_lp = (ways_p + ways_p) - 1;</pre>
@@ -122,6 +123,7 @@
       <pre>	localparam dma_data_mask_width_lp = dma_data_width_p &gt;&gt; 3;</pre>
       <pre>	localparam data_mem_els_lp = sets_p * burst_len_lp;</pre>
       <pre>	localparam lg_data_mem_els_lp = ((data_mem_els_lp == 1) || (data_mem_els_lp == 0) ? 1 : $clog2(data_mem_els_lp));</pre>
+      <pre>	localparam sbuf_data_mem_addr_offset_lp = (burst_len_lp == block_size_in_words_p ? lg_block_size_in_words_lp + $clog2(sets_p) : lg_burst_len_lp + $clog2(sets_p));</pre>
       <pre>	wire [lg_ways_lp - 1:0] addr_way;</pre>
       <pre>	wire [lg_sets_lp - 1:0] addr_index;</pre>
       <pre>	wire [(((6 + addr_width_p) + data_width_p) + (data_width_p &gt;&gt; 3)) - 1:0] cache_pkt;</pre>
@@ -131,7 +133,7 @@
       <pre>		.opcode_i(cache_pkt[6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1)))-:((6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1)))) &gt;= (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + 0))) ? ((6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1)))) - (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + 0)))) + 1 : ((addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + 0))) - (6 + (addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))))) + 1)]),</pre>
       <pre>		.decode_o(decode)</pre>
       <pre>	);</pre>
-      <pre>	assign addr_way = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (block_offset_width_lp + lg_sets_lp))+:lg_ways_lp];</pre>
+      <pre>	assign addr_way = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - way_offset_width_lp)+:lg_ways_lp];</pre>
       <pre>	assign addr_index = cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - block_offset_width_lp)+:lg_sets_lp];</pre>
       <pre>	wire [lg_data_mem_els_lp - 1:0] ld_data_mem_addr;</pre>
       <pre>	generate</pre>
@@ -139,7 +141,7 @@
       <pre>			assign ld_data_mem_addr = addr_index;</pre>
       <pre>		end</pre>
       <pre>		else if (burst_len_lp == block_size_in_words_p) begin : genblk1</pre>
-      <pre>			assign ld_data_mem_addr = {addr_index, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp]};</pre>
+      <pre>			assign ld_data_mem_addr = {{sets_p &gt; 1 {addr_index}}, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp]};</pre>
       <pre>		end</pre>
       <pre>		else begin : genblk1</pre>
       <pre>			assign ld_data_mem_addr = {addr_index, cache_pkt[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) - 1))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp]};</pre>
@@ -176,7 +178,7 @@
       <pre>			assign recover_data_mem_addr = addr_index_tl;</pre>
       <pre>		end</pre>
       <pre>		else if (burst_len_lp == block_size_in_words_p) begin : genblk2</pre>
-      <pre>			assign recover_data_mem_addr = {addr_index_tl, addr_tl_r[lg_data_mask_width_lp+:lg_block_size_in_words_lp]};</pre>
+      <pre>			assign recover_data_mem_addr = {{sets_p &gt; 1 {addr_index_tl}}, addr_tl_r[lg_data_mask_width_lp+:lg_block_size_in_words_lp]};</pre>
       <pre>		end</pre>
       <pre>		else begin : genblk2</pre>
       <pre>			assign recover_data_mem_addr = {addr_index_tl, addr_tl_r[lg_data_mask_width_lp + lg_burst_size_in_words_lp+:lg_burst_len_lp]};</pre>
@@ -300,9 +302,9 @@
       <pre>	wire [lg_ways_lp - 1:0] addr_way_v;</pre>
       <pre>	wire [lg_block_size_in_words_lp - 1:0] addr_block_offset_v;</pre>
       <pre>	wire [ways_p - 1:0] tag_hit_v;</pre>
-      <pre>	assign addr_tag_v = addr_v_r[block_offset_width_lp + lg_sets_lp+:tag_width_lp];</pre>
+      <pre>	assign addr_tag_v = addr_v_r[way_offset_width_lp+:tag_width_lp];</pre>
       <pre>	assign addr_index_v = addr_v_r[block_offset_width_lp+:lg_sets_lp];</pre>
-      <pre>	assign addr_way_v = addr_v_r[block_offset_width_lp + lg_sets_lp+:lg_ways_lp];</pre>
+      <pre>	assign addr_way_v = addr_v_r[way_offset_width_lp+:lg_ways_lp];</pre>
       <pre>	assign addr_block_offset_v = (block_size_in_words_p &gt; 1 ? addr_v_r[lg_data_mask_width_lp+:lg_block_size_in_words_lp] : 1&#39;b0);</pre>
       <pre>	generate</pre>
       <pre>		for (i = 0; i &lt; ways_p; i = i + 1) begin : genblk5</pre>
@@ -530,10 +532,10 @@
       <pre>			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - block_offset_width_lp)+:lg_sets_lp];</pre>
       <pre>		end</pre>
       <pre>		else if (burst_len_lp == block_size_in_words_p) begin : genblk7</pre>
-      <pre>			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:lg_block_size_in_words_lp + lg_sets_lp];</pre>
+      <pre>			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - lg_data_mask_width_lp)+:sbuf_data_mem_addr_offset_lp];</pre>
       <pre>		end</pre>
       <pre>		else begin : genblk7</pre>
-      <pre>			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:lg_burst_len_lp + lg_sets_lp];</pre>
+      <pre>			assign sbuf_data_mem_addr = sbuf_entry_lo[(addr_width_p + (data_width_p + ((data_width_p &gt;&gt; 3) + (((ways_p == 1) || (ways_p == 0) ? 1 : $clog2(ways_p)) - 1)))) - ((addr_width_p - 1) - (lg_data_mask_width_lp + lg_burst_size_in_words_lp))+:sbuf_data_mem_addr_offset_lp];</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	wire [(data_sel_mux_els_lp * data_width_p) - 1:0] sbuf_data_in_mux_li;</pre>
@@ -759,7 +761,7 @@
       <pre>			if (decode_v_r[12])</pre>
       <pre>				data_o = {{data_width_p - 2 {1&#39;b0}}, lock_v_r[addr_way_v], valid_v_r[addr_way_v]};</pre>
       <pre>			else if (decode_v_r[11])</pre>
-      <pre>				data_o = {tag_v_r[addr_way_v * tag_width_lp+:tag_width_lp], addr_index_v, {block_offset_width_lp {1&#39;b0}}};</pre>
+      <pre>				data_o = {tag_v_r[addr_way_v * tag_width_lp+:tag_width_lp], {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>			else if (decode_v_r[17])</pre>
       <pre>				data_o = ld_data_masked;</pre>
       <pre>			else</pre>
