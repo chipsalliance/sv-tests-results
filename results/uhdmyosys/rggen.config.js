@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/rggen'] = [["","RgGen",0,"logs/UhdmYosys/generated/rggen/rggen.sv.log.html","third_party/cores/rggen-sv-rtl/rggen_rtl_pkg.sv.html"]]

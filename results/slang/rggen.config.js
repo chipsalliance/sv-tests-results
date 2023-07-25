@@ -1,1 +1,0 @@
-config_loader_data['slang/rggen'] = [["","RgGen",0,"logs/Slang/generated/rggen/rggen.sv.log.html","third_party/cores/rggen-sv-rtl/rggen_rtl_pkg.sv.html"]]
