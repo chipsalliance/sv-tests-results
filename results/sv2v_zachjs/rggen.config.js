@@ -1,0 +1,1 @@
+config_loader_data['sv2v_zachjs/rggen'] = [["","RgGen",1,"logs/Sv2v_zachjs/generated/rggen/rggen.sv.log.html","third_party/cores/rggen-sv-rtl/rggen_rtl_pkg.sv.html"]]
