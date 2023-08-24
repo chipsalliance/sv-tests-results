@@ -1,1 +1,1 @@
-config_loader_data['sv_parser/ariane'] = [["cores","ariane",0,"logs/sv_parser/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]
+config_loader_data['sv_parser/ariane'] = [["cores","ariane",1,"logs/sv_parser/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]
