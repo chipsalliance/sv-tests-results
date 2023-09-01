@@ -1,1 +1,0 @@
-config_loader_data['sv_parser/swerv'] = [["cores","swerv",1,"logs/sv_parser/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]

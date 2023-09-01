@@ -1,0 +1,1 @@
+config_loader_data['odin/veer-el2'] = [["cores","veer-el2",0,"logs/Odin/generated/veer-config/veer-el2_synth/veer-el2_synth.sv.log.html","third_party/cores/veer-el2/design/include/el2_def.sv.html"]]

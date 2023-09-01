@@ -1,0 +1,1 @@
+config_loader_data['slang/veer-eh1'] = [["cores","veer-eh1",1,"logs/Slang/generated/fusesoc/veer-eh1-sim.sv.log.html","build/veer-eh1_sim/sim-verilator/config/common_defines.vh.html"]]

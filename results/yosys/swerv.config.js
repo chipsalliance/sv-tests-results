@@ -1,1 +1,0 @@
-config_loader_data['yosys/swerv'] = [["cores","swerv",0,"logs/Yosys/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['sv2v_zachjs/swerv'] = [["cores","swerv",1,"logs/Sv2v_zachjs/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]

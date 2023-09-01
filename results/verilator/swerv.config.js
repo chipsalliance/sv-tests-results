@@ -1,1 +1,0 @@
-config_loader_data['verilator/swerv'] = [["cores","swerv",1,"logs/Verilator/generated/fusesoc/swerv-sim.sv.log.html","build/swerv_sim/sim-verilator/config/common_defines.vh.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/swerv'] = [["cores","swerv",0,"logs/tree_sitter_verilog/generated/fusesoc/swerv-synth.sv.log.html","build/swerv_synth/synth-vivado/config/common_defines.vh.html"]]
