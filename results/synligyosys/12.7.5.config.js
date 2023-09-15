@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/12.7.5'] = [["","dowhile_loop",0,"logs/SynligYosys/chapter-12/12.7.5--dowhile.sv.log.html","tests/chapter-12/12.7.5--dowhile.sv.html"]]

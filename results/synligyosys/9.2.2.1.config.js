@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/9.2.2.1'] = [["","always",1,"logs/SynligYosys/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]

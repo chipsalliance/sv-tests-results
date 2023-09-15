@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/6.19.5.5'] = [["","enum_num",1,"logs/SynligYosys/chapter-6/6.19.5.5--enum_num.sv.log.html","tests/chapter-6/6.19.5.5--enum_num.sv.html"]]

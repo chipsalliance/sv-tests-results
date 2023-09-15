@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/rsd'] = [["cores","rsd",0,"logs/SynligYosys/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

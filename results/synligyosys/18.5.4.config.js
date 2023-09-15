@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/18.5.4'] = [["","distribution_0",1,"logs/SynligYosys/chapter-18/18.5.4--distribution_0.sv.log.html","tests/chapter-18/18.5.4--distribution_0.sv.html"],["","distribution_2",0,"logs/SynligYosys/chapter-18/18.5.4--distribution_2.sv.log.html","tests/chapter-18/18.5.4--distribution_2.sv.html"]]

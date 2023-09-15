@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/12.7.6'] = [["","forever_loop",0,"logs/UhdmYosys/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/18.5.5'] = [["","uniqueness_constraints_0",1,"logs/SynligYosys/chapter-18/18.5.5--uniqueness-constraints_0.sv.log.html","tests/chapter-18/18.5.5--uniqueness-constraints_0.sv.html"]]

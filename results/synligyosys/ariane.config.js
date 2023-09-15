@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/ariane'] = [["cores","ariane",0,"logs/SynligYosys/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]

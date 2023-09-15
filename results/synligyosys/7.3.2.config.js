@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/7.3.2'] = [["","basic-tagged-packed-union",0,"logs/SynligYosys/chapter-7/unions/tagged/packed.sv.log.html","tests/chapter-7/unions/tagged/packed.sv.html"],["","basic-tagged-union",0,"logs/SynligYosys/chapter-7/unions/tagged/basic.sv.log.html","tests/chapter-7/unions/tagged/basic.sv.html"]]

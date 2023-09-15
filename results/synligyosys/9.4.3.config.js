@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/9.4.3'] = [["","event_sequence_controls",1,"logs/SynligYosys/chapter-9/9.4.3--event_sequence_controls.sv.log.html","tests/chapter-9/9.4.3--event_sequence_controls.sv.html"]]

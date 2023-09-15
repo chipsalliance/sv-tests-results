@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/8.13'] = [["","inheritance",1,"logs/SynligYosys/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]

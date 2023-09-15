@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/6.16.10'] = [["","string_atoreal",1,"logs/UhdmYosys/chapter-6/6.16.10--string_atoreal.sv.log.html","tests/chapter-6/6.16.10--string_atoreal.sv.html"]]

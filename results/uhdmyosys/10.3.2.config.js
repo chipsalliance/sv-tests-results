@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/10.3.2'] = [["","cont_assignment",1,"logs/UhdmYosys/chapter-10/10.3.2--cont-assignment.sv.log.html","tests/chapter-10/10.3.2--cont-assignment.sv.html"]]

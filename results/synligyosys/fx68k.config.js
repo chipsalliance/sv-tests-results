@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/fx68k'] = [["cores","fx68k",0,"logs/SynligYosys/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

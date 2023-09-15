@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/6.16.6'] = [["","string_compare_fn",1,"logs/SynligYosys/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]

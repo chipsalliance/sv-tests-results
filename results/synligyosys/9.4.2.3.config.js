@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/9.4.2.3'] = [["","event_conditional",0,"logs/SynligYosys/chapter-9/9.4.2.3--event_conditional.sv.log.html","tests/chapter-9/9.4.2.3--event_conditional.sv.html"]]

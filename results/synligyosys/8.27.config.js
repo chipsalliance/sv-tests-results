@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/8.27'] = [["","forward_declaration",1,"logs/SynligYosys/chapter-8/8.27--forward_declaration.sv.log.html","tests/chapter-8/8.27--forward_declaration.sv.html"]]

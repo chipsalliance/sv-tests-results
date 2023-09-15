@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/23.2'] = [["","macromodule_definition",1,"logs/SynligYosys/chapter-23/23.2--macromodule-definition.sv.log.html","tests/chapter-23/23.2--macromodule-definition.sv.html"],["","module_definition",1,"logs/SynligYosys/chapter-23/23.2--module-definition.sv.log.html","tests/chapter-23/23.2--module-definition.sv.html"]]

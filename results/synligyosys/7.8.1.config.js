@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/7.8.1'] = [["","associative-arrays-other-types",1,"logs/SynligYosys/chapter-7/arrays/associative/other.sv.log.html","tests/chapter-7/arrays/associative/other.sv.html"],["","associative-arrays-wildcard",1,"logs/SynligYosys/chapter-7/arrays/associative/wildcard.sv.log.html","tests/chapter-7/arrays/associative/wildcard.sv.html"]]

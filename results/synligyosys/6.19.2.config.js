@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/6.19.2'] = [["","enum_sequence",1,"logs/SynligYosys/chapter-6/6.19.2--enum_sequence.sv.log.html","tests/chapter-6/6.19.2--enum_sequence.sv.html"],["","enum_sequence_range",1,"logs/SynligYosys/chapter-6/6.19.2--enum_sequence_range.sv.log.html","tests/chapter-6/6.19.2--enum_sequence_range.sv.html"]]

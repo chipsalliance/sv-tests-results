@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/7.9.9'] = [["","associative-arrays-assignment",0,"logs/UhdmYosys/chapter-7/arrays/associative/assignment.sv.log.html","tests/chapter-7/arrays/associative/assignment.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/12.6.3'] = [["","conditional_pattern",0,"logs/SynligYosys/chapter-12/12.6.3--conditional_pattern.sv.log.html","tests/chapter-12/12.6.3--conditional_pattern.sv.html"]]

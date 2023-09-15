@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/8.9'] = [["","static_properties",0,"logs/UhdmYosys/chapter-8/8.9--static_properties.sv.log.html","tests/chapter-8/8.9--static_properties.sv.html"]]

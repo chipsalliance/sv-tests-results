@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/22.8'] = [["","22.8--default_nettype",1,"logs/SynligYosys/chapter-22/22.8--default_nettype.sv.log.html","tests/chapter-22/22.8--default_nettype.sv.html"],["","22.8--default_nettype-redefinition",1,"logs/SynligYosys/chapter-22/22.8--default_nettype-redefinition.sv.log.html","tests/chapter-22/22.8--default_nettype-redefinition.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/9.4.2.1'] = [["","event_comma_op",1,"logs/SynligYosys/chapter-9/9.4.2.1--event_comma_op.sv.log.html","tests/chapter-9/9.4.2.1--event_comma_op.sv.html"],["","event_or_op",1,"logs/SynligYosys/chapter-9/9.4.2.1--event_or_op.sv.log.html","tests/chapter-9/9.4.2.1--event_or_op.sv.html"]]

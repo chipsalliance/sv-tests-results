@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/7.3'] = [["","basic-union",0,"logs/SynligYosys/chapter-7/unions/unpacked/basic.sv.log.html","tests/chapter-7/unions/unpacked/basic.sv.html"],["","union_test_0",1,"logs/SynligYosys/generic/union/union_test_0.sv.log.html","tests/generic/union/union_test_0.sv.html"]]

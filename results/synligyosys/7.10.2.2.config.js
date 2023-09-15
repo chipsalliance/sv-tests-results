@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/7.10.2.2'] = [["","insert",0,"logs/SynligYosys/chapter-7/queues/insert.sv.log.html","tests/chapter-7/queues/insert.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/18.4.1'] = [["","rand_modifier",1,"logs/SynligYosys/chapter-18/18.4.1--rand-modifier.sv.log.html","tests/chapter-18/18.4.1--rand-modifier.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/7.4'] = [["","basic-packed",1,"logs/SynligYosys/chapter-7/arrays/packed/basic.sv.log.html","tests/chapter-7/arrays/packed/basic.sv.html"],["","basic-unpacked",0,"logs/SynligYosys/chapter-7/arrays/unpacked/basic.sv.log.html","tests/chapter-7/arrays/unpacked/basic.sv.html"]]

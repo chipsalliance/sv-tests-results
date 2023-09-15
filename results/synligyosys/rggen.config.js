@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/rggen'] = [["cores","RgGen",0,"logs/SynligYosys/generated/rggen/rggen.sv.log.html","third_party/cores/rggen-sv-rtl/rggen_rtl_pkg.sv.html"]]

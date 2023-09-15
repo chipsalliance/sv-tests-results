@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/sanity'] = [["","sanity",1,"logs/UhdmYosys/sanity.sv.log.html","tests/sanity.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/18.5.9'] = [["","global_constraints_0",1,"logs/UhdmYosys/chapter-18/18.5.9--global-constraints_0.sv.log.html","tests/chapter-18/18.5.9--global-constraints_0.sv.html"]]

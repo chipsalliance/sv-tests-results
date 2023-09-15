@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/22.5.2'] = [["","22.5.2--undef-basic",1,"logs/SynligYosys/chapter-22/22.5.2--undef-basic.sv.log.html","tests/chapter-22/22.5.2--undef-basic.sv.html"],["","22.5.2--undef-nonexisting",1,"logs/SynligYosys/chapter-22/22.5.2--undef-nonexisting.sv.log.html","tests/chapter-22/22.5.2--undef-nonexisting.sv.html"]]

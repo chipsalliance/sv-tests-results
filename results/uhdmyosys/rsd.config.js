@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/rsd'] = [["cores","rsd",0,"logs/UhdmYosys/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

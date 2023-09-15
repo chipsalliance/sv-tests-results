@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/26.3'] = [["","package_ref",1,"logs/UhdmYosys/chapter-26/26.3--package-ref.sv.log.html","tests/chapter-26/26.3--package-ref.sv.html"]]

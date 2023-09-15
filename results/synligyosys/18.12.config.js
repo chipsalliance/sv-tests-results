@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/18.12'] = [["","randomization_of_scope_variables_0",1,"logs/SynligYosys/chapter-18/18.12--randomization-of-scope-variables_0.sv.log.html","tests/chapter-18/18.12--randomization-of-scope-variables_0.sv.html"]]

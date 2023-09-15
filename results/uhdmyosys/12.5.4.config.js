@@ -1,1 +1,0 @@
-config_loader_data['uhdmyosys/12.5.4'] = [["","case_set",1,"logs/UhdmYosys/chapter-12/12.5.4--case_set.sv.log.html","tests/chapter-12/12.5.4--case_set.sv.html"]]

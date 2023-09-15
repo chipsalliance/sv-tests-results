@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/6.6.4'] = [["","net_trireg",1,"logs/SynligYosys/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]

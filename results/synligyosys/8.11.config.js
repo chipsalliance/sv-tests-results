@@ -1,0 +1,1 @@
+config_loader_data['synligyosys/8.11'] = [["","this",1,"logs/SynligYosys/chapter-8/8.11--this.sv.log.html","tests/chapter-8/8.11--this.sv.html"]]
