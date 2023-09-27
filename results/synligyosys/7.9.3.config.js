@@ -1,1 +1,1 @@
-config_loader_data['synligyosys/7.9.3'] = [["","associative-arrays-exists",0,"logs/SynligYosys/chapter-7/arrays/associative/methods/exists.sv.log.html","tests/chapter-7/arrays/associative/methods/exists.sv.html"]]
+config_loader_data['synligyosys/7.9.3'] = [["","associative-arrays-exists",1,"logs/SynligYosys/chapter-7/arrays/associative/methods/exists.sv.log.html","tests/chapter-7/arrays/associative/methods/exists.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['synligyosys/7.8.7'] = [["","associative-arrays-allocating-elements",0,"logs/SynligYosys/chapter-7/arrays/associative/alloc.sv.log.html","tests/chapter-7/arrays/associative/alloc.sv.html"]]
+config_loader_data['synligyosys/7.8.7'] = [["","associative-arrays-allocating-elements",1,"logs/SynligYosys/chapter-7/arrays/associative/alloc.sv.log.html","tests/chapter-7/arrays/associative/alloc.sv.html"]]
