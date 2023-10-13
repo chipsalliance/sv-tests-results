@@ -1,1 +1,1 @@
-config_loader_data['synligyosys/9.3.4'] = [["","block_names_par",1,"logs/SynligYosys/chapter-9/9.3.4--block_names_par.sv.log.html","tests/chapter-9/9.3.4--block_names_par.sv.html"],["","block_names_seq",1,"logs/SynligYosys/chapter-9/9.3.4--block_names_seq.sv.log.html","tests/chapter-9/9.3.4--block_names_seq.sv.html"]]
+config_loader_data['synligyosys/9.3.4'] = [["","block_names_seq",1,"logs/SynligYosys/chapter-9/9.3.4--block_names_seq.sv.log.html","tests/chapter-9/9.3.4--block_names_seq.sv.html"]]

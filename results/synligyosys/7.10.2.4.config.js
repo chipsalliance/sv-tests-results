@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/7.10.2.4'] = [["","pop_front",0,"logs/SynligYosys/chapter-7/queues/pop_front.sv.log.html","tests/chapter-7/queues/pop_front.sv.html"]]

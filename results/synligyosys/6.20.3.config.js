@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/6.20.3'] = [["","parameter_type",1,"logs/SynligYosys/chapter-6/6.20.3--parameter_type.sv.log.html","tests/chapter-6/6.20.3--parameter_type.sv.html"]]

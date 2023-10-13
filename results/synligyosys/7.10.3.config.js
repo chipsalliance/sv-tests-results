@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/7.10.3'] = [["","queues-elements-persistence",0,"logs/SynligYosys/chapter-7/queues/persistence.sv.log.html","tests/chapter-7/queues/persistence.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/9.6.3'] = [["","disable_fork",1,"logs/SynligYosys/chapter-9/9.6.3--disable_fork.sv.log.html","tests/chapter-9/9.6.3--disable_fork.sv.html"]]

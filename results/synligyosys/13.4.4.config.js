@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/13.4.4'] = [["","function_fork_invalid",0,"logs/SynligYosys/chapter-13/13.4.4--fork-invalid.sv.log.html","tests/chapter-13/13.4.4--fork-invalid.sv.html"],["","function_fork_valid",1,"logs/SynligYosys/chapter-13/13.4.4--fork-valid.sv.log.html","tests/chapter-13/13.4.4--fork-valid.sv.html"]]

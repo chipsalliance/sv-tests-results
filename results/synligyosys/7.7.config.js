@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/7.7'] = [["","unpacked-arrays-as-arguments-to-subroutines",0,"logs/SynligYosys/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]

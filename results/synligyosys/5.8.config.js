@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/5.8'] = [["","time-literals",1,"logs/SynligYosys/chapter-5/5.8-time-literals.sv.log.html","tests/chapter-5/5.8-time-literals.sv.html"]]

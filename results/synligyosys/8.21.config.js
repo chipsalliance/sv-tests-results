@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/8.21'] = [["","abstract_class",1,"logs/SynligYosys/chapter-8/8.21--abstract_class.sv.log.html","tests/chapter-8/8.21--abstract_class.sv.html"],["","abstract_class_inst",0,"logs/SynligYosys/chapter-8/8.21--abstract_class_inst.sv.log.html","tests/chapter-8/8.21--abstract_class_inst.sv.html"]]

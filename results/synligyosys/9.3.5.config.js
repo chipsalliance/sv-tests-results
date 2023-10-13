@@ -1,1 +1,1 @@
-config_loader_data['synligyosys/9.3.5'] = [["","statement_labels_par",1,"logs/SynligYosys/chapter-9/9.3.5--statement_labels_par.sv.log.html","tests/chapter-9/9.3.5--statement_labels_par.sv.html"],["","statement_labels_seq",1,"logs/SynligYosys/chapter-9/9.3.5--statement_labels_seq.sv.log.html","tests/chapter-9/9.3.5--statement_labels_seq.sv.html"]]
+config_loader_data['synligyosys/9.3.5'] = [["","statement_labels_seq",1,"logs/SynligYosys/chapter-9/9.3.5--statement_labels_seq.sv.log.html","tests/chapter-9/9.3.5--statement_labels_seq.sv.html"]]

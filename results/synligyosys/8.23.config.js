@@ -1,1 +1,0 @@
-config_loader_data['synligyosys/8.23'] = [["","scope_resolution",1,"logs/SynligYosys/chapter-8/8.23--scope_resolution.sv.log.html","tests/chapter-8/8.23--scope_resolution.sv.html"]]

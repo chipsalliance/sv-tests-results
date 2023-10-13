@@ -1,1 +1,0 @@
-config_loader_data['yosys/8.4'] = [["","instantiation",0,"logs/Yosys/chapter-8/8.4--instantiation.sv.log.html","tests/chapter-8/8.4--instantiation.sv.html"]]

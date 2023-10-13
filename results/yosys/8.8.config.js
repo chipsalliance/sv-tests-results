@@ -1,1 +1,0 @@
-config_loader_data['yosys/8.8'] = [["","typed_constructor",0,"logs/Yosys/chapter-8/8.8--typed_constructor.sv.log.html","tests/chapter-8/8.8--typed_constructor.sv.html"],["","typed_constructor_param",0,"logs/Yosys/chapter-8/8.8--typed_constructor_param.sv.log.html","tests/chapter-8/8.8--typed_constructor_param.sv.html"]]

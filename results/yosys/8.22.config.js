@@ -1,1 +1,0 @@
-config_loader_data['yosys/8.22'] = [["","dynamic_method_lookup",0,"logs/Yosys/chapter-8/8.22--dynamic_method_lookup.sv.log.html","tests/chapter-8/8.22--dynamic_method_lookup.sv.html"]]
