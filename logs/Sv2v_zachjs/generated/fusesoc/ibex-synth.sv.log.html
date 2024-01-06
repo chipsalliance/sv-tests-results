@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/zachjs/sv2v/tree/f9917d94da51a09812cb1356ab2cd4971b86b88a" target="_blank"><h1>zachjs-sv2v</h1></a>
+        <a href="https://github.com/zachjs/sv2v/tree/9825bb9bcbabde39e3cb5e6f3ac041fa2a081266" target="_blank"><h1>zachjs-sv2v</h1></a>
         <h2>ibex</h2>
     </header>
     <section class="property-list">
@@ -130,9 +130,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2024-01-05 01:42:32</dd></div>
-        <div><dt>time elapsed</dt><dd>5.027s</dd></div>
-        <div><dt>ram usage</dt><dd>711852 KB</dd></div>
+        <div><dt>completed</dt><dd>2024-01-06 01:43:24</dd></div>
+        <div><dt>time elapsed</dt><dd>5.987s</dd></div>
+        <div><dt>ram usage</dt><dd>711896 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -2350,7 +2350,7 @@
       <pre>				);</pre>
       <pre>				assign hit_data_ic1[bank * ibex_pkg_BUS_SIZE+:ibex_pkg_BUS_SIZE] = hit_data_ecc_ic1[bank * BusSizeECC+:ibex_pkg_BUS_SIZE];</pre>
       <pre>			end</pre>
-      <pre>			assign ecc_err_ic1 = lookup_valid_ic1 &amp; ((|data_err_ic1 &amp; tag_hit_ic1) | |tag_err_ic1);</pre>
+      <pre>			assign ecc_err_ic1 = lookup_valid_ic1 &amp; ((|data_err_ic1 &amp; tag_hit_ic1) | (|tag_err_ic1));</pre>
       <pre>			assign ecc_correction_ways_d = {ibex_pkg_IC_NUM_WAYS {|tag_err_ic1}} | (tag_match_ic1 &amp; {ibex_pkg_IC_NUM_WAYS {|data_err_ic1}});</pre>
       <pre>			assign ecc_correction_write_d = ecc_err_ic1;</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni)</pre>
@@ -2414,7 +2414,7 @@
       <pre>					cache_cnt_q &lt;= 1&#39;sb0;</pre>
       <pre>				else</pre>
       <pre>					cache_cnt_q &lt;= cache_cnt_d;</pre>
-      <pre>			assign fill_cache_new = ((branch_i | |cache_cnt_q) &amp; icache_enable_i) &amp; ~inval_block_cache;</pre>
+      <pre>			assign fill_cache_new = ((branch_i | (|cache_cnt_q)) &amp; icache_enable_i) &amp; ~inval_block_cache;</pre>
       <pre>		end</pre>
       <pre>		else begin : gen_cache_all</pre>
       <pre>			assign fill_cache_new = icache_enable_i &amp; ~inval_block_cache;</pre>
@@ -2443,12 +2443,12 @@
       <pre>				assign fill_alloc_sel[fb] = ~fill_busy_q[fb];</pre>
       <pre>			end</pre>
       <pre>			else begin : gen_fb_rest</pre>
-      <pre>				assign fill_alloc_sel[fb] = ~fill_busy_q[fb] &amp; &amp;fill_busy_q[fb - 1:0];</pre>
+      <pre>				assign fill_alloc_sel[fb] = ~fill_busy_q[fb] &amp; (&amp;fill_busy_q[fb - 1:0]);</pre>
       <pre>			end</pre>
       <pre>			assign fill_alloc[fb] = fill_alloc_sel[fb] &amp; fill_new_alloc;</pre>
       <pre>			assign fill_busy_d[fb] = fill_alloc[fb] | (fill_busy_q[fb] &amp; ~fill_done[fb]);</pre>
       <pre>			assign fill_older_d[fb * NUM_FB+:NUM_FB] = (fill_alloc[fb] ? fill_busy_q : fill_older_q[fb * NUM_FB+:NUM_FB]) &amp; ~fill_done;</pre>
-      <pre>			assign fill_done[fb] = ((((fill_ram_done_q[fb] | fill_hit_q[fb]) | ~fill_cache_q[fb]) | |fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS]) &amp; ((fill_out_done[fb] | fill_stale_q[fb]) | branch_i)) &amp; fill_rvd_done[fb];</pre>
+      <pre>			assign fill_done[fb] = ((((fill_ram_done_q[fb] | fill_hit_q[fb]) | ~fill_cache_q[fb]) | (|fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS])) &amp; ((fill_out_done[fb] | fill_stale_q[fb]) | branch_i)) &amp; fill_rvd_done[fb];</pre>
       <pre>			assign fill_stale_d[fb] = fill_busy_q[fb] &amp; (branch_i | fill_stale_q[fb]);</pre>
       <pre>			assign fill_cache_d[fb] = (fill_alloc[fb] &amp; fill_cache_new) | (((fill_cache_q[fb] &amp; fill_busy_q[fb]) &amp; icache_enable_i) &amp; ~icache_inval_i);</pre>
       <pre>			assign fill_hit_ic1[fb] = ((lookup_valid_ic1 &amp; fill_in_ic1[fb]) &amp; tag_hit_ic1) &amp; ~ecc_err_ic1;</pre>
@@ -2475,7 +2475,7 @@
       <pre>			assign fill_data_sel[fb] = ~|(((fill_busy_q &amp; ~fill_out_done) &amp; ~fill_stale_q) &amp; fill_older_q[fb * NUM_FB+:NUM_FB]);</pre>
       <pre>			assign fill_out_arb[fb] = fill_out_req[fb] &amp; fill_data_sel[fb];</pre>
       <pre>			assign fill_rvd_arb[fb] = (instr_rvalid_i &amp; fill_rvd_exp[fb]) &amp; ~|(fill_rvd_exp &amp; fill_older_q[fb * NUM_FB+:NUM_FB]);</pre>
-      <pre>			assign fill_data_reg[fb] = (((fill_busy_q[fb] &amp; ~fill_stale_q[fb]) &amp; ~fill_out_done[fb]) &amp; fill_data_sel[fb]) &amp; (((fill_rvd_beat[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] &gt; fill_out_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)]) | fill_hit_q[fb]) | |fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS]);</pre>
+      <pre>			assign fill_data_reg[fb] = (((fill_busy_q[fb] &amp; ~fill_stale_q[fb]) &amp; ~fill_out_done[fb]) &amp; fill_data_sel[fb]) &amp; (((fill_rvd_beat[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] &gt; fill_out_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)]) | fill_hit_q[fb]) | (|fill_err_q[fb * ibex_pkg_IC_LINE_BEATS+:ibex_pkg_IC_LINE_BEATS]));</pre>
       <pre>			assign fill_data_hit[fb] = (fill_busy_q[fb] &amp; fill_hit_ic1[fb]) &amp; fill_data_sel[fb];</pre>
       <pre>			assign fill_data_rvd[fb] = ((((((fill_busy_q[fb] &amp; fill_rvd_arb[fb]) &amp; ~fill_hit_q[fb]) &amp; ~fill_hit_ic1[fb]) &amp; ~fill_stale_q[fb]) &amp; ~fill_out_done[fb]) &amp; (fill_rvd_beat[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)] == fill_out_cnt_q[(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? 0 : ibex_pkg_IC_LINE_BEATS_W) + (fb * (ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W))+:(ibex_pkg_IC_LINE_BEATS_W &gt;= 0 ? ibex_pkg_IC_LINE_BEATS_W + 1 : 1 - ibex_pkg_IC_LINE_BEATS_W)])) &amp; fill_data_sel[fb];</pre>
       <pre>			assign fill_entry_en[fb] = fill_alloc[fb] | fill_busy_q[fb];</pre>
@@ -2592,7 +2592,7 @@
       <pre>				end</pre>
       <pre>		end</pre>
       <pre>	end</pre>
-      <pre>	assign instr_req = ((~icache_enable_i | branch_i) &amp; lookup_grant_ic0) | |fill_ext_req;</pre>
+      <pre>	assign instr_req = ((~icache_enable_i | branch_i) &amp; lookup_grant_ic0) | (|fill_ext_req);</pre>
       <pre>	assign instr_addr = (|fill_ext_req ? fill_ext_req_addr : lookup_addr_ic0[31:ibex_pkg_BUS_W]);</pre>
       <pre>	assign instr_req_o = instr_req;</pre>
       <pre>	assign instr_addr_o = {instr_addr[31:ibex_pkg_BUS_W], {ibex_pkg_BUS_W {1&#39;b0}}};</pre>
@@ -2759,7 +2759,7 @@
       <pre>					inval_index_q &lt;= inval_index_d;</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	assign busy_o = inval_active | |(fill_busy_q &amp; ~fill_rvd_done);</pre>
+      <pre>	assign busy_o = inval_active | (|(fill_busy_q &amp; ~fill_rvd_done));</pre>
       <pre>	initial begin : size_param_legal</pre>
       <pre>		</pre>
       <pre>	end</pre>
@@ -3972,7 +3972,7 @@
       <pre>			wire [LfsrDw - 1:0] cmp_val;</pre>
       <pre>			assign cmp_val = {{LfsrDw - 1 {1&#39;b1}}, 1&#39;b0};</pre>
       <pre>			assign cnt_d = (lfsr_en_i &amp;&amp; lockup ? {LfsrDw {1&#39;sb0}} : (lfsr_en_i &amp;&amp; (cnt_q == cmp_val) ? {LfsrDw {1&#39;sb0}} : (lfsr_en_i ? cnt_q + 1&#39;b1 : cnt_q)));</pre>
-      <pre>			assign perturbed_d = (perturbed_q | |entropy_i) | seed_en_i;</pre>
+      <pre>			assign perturbed_d = (perturbed_q | (|entropy_i)) | seed_en_i;</pre>
       <pre>			always @(posedge clk_i or negedge rst_ni) begin : p_max_len</pre>
       <pre>				if (!rst_ni) begin</pre>
       <pre>					cnt_q &lt;= 1&#39;sb0;</pre>
@@ -3996,7 +3996,7 @@
       <pre>	output wire [Width - 1:0] out_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_buf #(.Width(Width)) u_impl_xilinx(</pre>
       <pre>				.in_i(in_i),</pre>
       <pre>				.out_o(out_o)</pre>
@@ -4024,7 +4024,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_gating #(</pre>
       <pre>				.FpgaBufGlobal(FpgaBufGlobal),</pre>
       <pre>				.NoFpgaGate(NoFpgaGate)</pre>
@@ -4061,7 +4061,7 @@
       <pre>	output wire clk_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_clock_mux2 #(.NoFpgaBufG(NoFpgaBufG)) u_impl_xilinx(</pre>
       <pre>				.clk0_i(clk0_i),</pre>
       <pre>				.clk1_i(clk1_i),</pre>
@@ -4093,7 +4093,7 @@
       <pre>	output wire [Width - 1:0] q_o;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd1) begin : gen_xilinx</pre>
+      <pre>		if (Impl == 32&#39;sd2) begin : gen_xilinx</pre>
       <pre>			prim_xilinx_flop #(</pre>
       <pre>				.ResetValue(ResetValue),</pre>
       <pre>				.Width(Width)</pre>
@@ -4373,7 +4373,7 @@
       <pre>	input wire [9:0] cfg_i;</pre>
       <pre>	parameter integer Impl = 32&#39;sd0;</pre>
       <pre>	generate</pre>
-      <pre>		if (Impl == 32&#39;sd2) begin : gen_badbit</pre>
+      <pre>		if (Impl == 32&#39;sd1) begin : gen_badbit</pre>
       <pre>			prim_badbit_ram_1p #(</pre>
       <pre>				.DataBitsPerMask(DataBitsPerMask),</pre>
       <pre>				.Depth(Depth),</pre>
@@ -7189,7 +7189,7 @@
       <pre>				.rd_data_o(pmp_mseccfg_q),</pre>
       <pre>				.rd_error_o(pmp_mseccfg_err)</pre>
       <pre>			);</pre>
-      <pre>			assign pmp_csr_err = (|pmp_cfg_err | |pmp_addr_err) | pmp_mseccfg_err;</pre>
+      <pre>			assign pmp_csr_err = (|pmp_cfg_err | (|pmp_addr_err)) | pmp_mseccfg_err;</pre>
       <pre>			assign pmp_mseccfg = pmp_mseccfg_q;</pre>
       <pre>		end</pre>
       <pre>		else begin : g_no_pmp_tieoffs</pre>

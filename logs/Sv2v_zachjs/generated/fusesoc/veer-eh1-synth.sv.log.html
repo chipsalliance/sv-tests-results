@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/zachjs/sv2v/tree/f9917d94da51a09812cb1356ab2cd4971b86b88a" target="_blank"><h1>zachjs-sv2v</h1></a>
+        <a href="https://github.com/zachjs/sv2v/tree/9825bb9bcbabde39e3cb5e6f3ac041fa2a081266" target="_blank"><h1>zachjs-sv2v</h1></a>
         <h2>veer-eh1</h2>
     </header>
     <section class="property-list">
@@ -75,9 +75,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2024-01-05 01:42:29</dd></div>
-        <div><dt>time elapsed</dt><dd>6.780s</dd></div>
-        <div><dt>ram usage</dt><dd>889552 KB</dd></div>
+        <div><dt>completed</dt><dd>2024-01-06 01:43:21</dd></div>
+        <div><dt>time elapsed</dt><dd>7.587s</dd></div>
+        <div><dt>ram usage</dt><dd>889628 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -1514,7 +1514,7 @@
       <pre>			assign fifo_data_bus_en[i] = (fifo_data_en[i] | fifo_data_valid[i]) &amp; dma_bus_clk_en;</pre>
       <pre>			assign fifo_pend_en[i] = ((dma_dccm_req | dma_iccm_req) &amp; ~dma_mem_write) &amp; (i == RdPtr[1:0]);</pre>
       <pre>			assign fifo_error_en[i] = fifo_cmd_en[i] | (((dccm_dma_rvalid &amp; dccm_dma_ecc_error) &amp; (i == RdPtr_Q3[1:0])) | ((iccm_dma_rvalid &amp; iccm_dma_ecc_error) &amp; (i == RdPtr_Q2[1:0])));</pre>
-      <pre>			assign fifo_error_bus_en[i] = ((|fifo_error_in[(i * 2) + 1-:2] &amp; fifo_error_en[i]) | |fifo_error[i * 2+:2]) &amp; dma_bus_clk_en;</pre>
+      <pre>			assign fifo_error_bus_en[i] = ((|fifo_error_in[(i * 2) + 1-:2] &amp; fifo_error_en[i]) | (|fifo_error[i * 2+:2])) &amp; dma_bus_clk_en;</pre>
       <pre>			assign fifo_done_en[i] = ((|fifo_error[i * 2+:2] | ((dma_dccm_req | dma_iccm_req) &amp; dma_mem_write)) &amp; (i == RdPtr[1:0])) | ((dccm_dma_rvalid &amp; (i == RdPtr_Q3[1:0])) | (iccm_dma_rvalid &amp; (i == RdPtr_Q2[1:0])));</pre>
       <pre>			assign fifo_done_bus_en[i] = (fifo_done_en[i] | fifo_done[i]) &amp; dma_bus_clk_en;</pre>
       <pre>			assign fifo_reset[i] = ((axi_slv_sent &amp; dma_bus_clk_en) | dma_dbg_cmd_done) &amp; (i == RspPtr[1:0]);</pre>
@@ -1712,7 +1712,7 @@
       <pre>	assign dma_address_error = axi_mstr_valid &amp; ~(dma_addr_in_dccm | dma_addr_in_iccm);</pre>
       <pre>	assign dma_alignment_error = (axi_mstr_valid &amp; ~dma_address_error) &amp; ((((((((axi_mstr_size[2:0] == 3&#39;h1) &amp; axi_mstr_addr[0]) | ((axi_mstr_size[2:0] == 3&#39;h2) &amp; |axi_mstr_addr[1:0])) | ((axi_mstr_size[2:0] == 3&#39;h3) &amp; |axi_mstr_addr[2:0])) | (dma_addr_in_iccm &amp; ~((axi_mstr_size[1:0] == 2&#39;b10) | (axi_mstr_size[1:0] == 2&#39;b11)))) | ((dma_addr_in_dccm &amp; axi_mstr_write) &amp; ~((axi_mstr_size[1:0] == 2&#39;b10) | (axi_mstr_size[1:0] == 2&#39;b11)))) | ((axi_mstr_write &amp; (axi_mstr_size[2:0] == 3&#39;h2)) &amp; (axi_mstr_wstrb[axi_mstr_addr[2:0]+:4] != 4&#39;hf))) | ((axi_mstr_write &amp; (axi_mstr_size[2:0] == 3&#39;h3)) &amp; ~(((axi_mstr_wstrb[7:0] == 8&#39;h0f) | (axi_mstr_wstrb[7:0] == 8&#39;hf0)) | (axi_mstr_wstrb[7:0] == 8&#39;hff))));</pre>
       <pre>	assign dma_dbg_ready = fifo_empty &amp; dbg_dma_bubble;</pre>
-      <pre>	assign dma_dbg_cmd_done = (fifo_valid[RspPtr] &amp; fifo_dbg[RspPtr]) &amp; ((fifo_write[RspPtr] | fifo_data_valid[RspPtr]) | |fifo_error[RspPtr * 2+:2]);</pre>
+      <pre>	assign dma_dbg_cmd_done = (fifo_valid[RspPtr] &amp; fifo_dbg[RspPtr]) &amp; ((fifo_write[RspPtr] | fifo_data_valid[RspPtr]) | (|fifo_error[RspPtr * 2+:2]));</pre>
       <pre>	assign dma_dbg_cmd_fail = |fifo_error[RspPtr * 2+:2];</pre>
       <pre>	assign dma_dbg_sz[1:0] = fifo_sz[(RspPtr * 3) + 1-:2];</pre>
       <pre>	assign dma_dbg_addr[1:0] = fifo_addr[(RspPtr * 32) + 1-:2];</pre>
@@ -1771,7 +1771,7 @@
       <pre>		.rst_l(rst_l)</pre>
       <pre>	);</pre>
       <pre>	assign dma_buffer_c1_clken = (((axi_mstr_valid &amp; dma_bus_clk_en) | dbg_cmd_valid) | dec_tlu_stall_dma) | clk_override;</pre>
-      <pre>	assign dma_free_clken = ((((((((((axi_mstr_valid | axi_mstr_valid_q) | axi_slv_valid) | axi_slv_sent_q) | dbg_cmd_valid) | dma_dbg_cmd_done) | dma_dbg_cmd_done_q) | |fifo_valid[3:0]) | wrbuf_vld) | rdbuf_vld) | dec_tlu_stall_dma) | clk_override;</pre>
+      <pre>	assign dma_free_clken = ((((((((((axi_mstr_valid | axi_mstr_valid_q) | axi_slv_valid) | axi_slv_sent_q) | dbg_cmd_valid) | dma_dbg_cmd_done) | dma_dbg_cmd_done_q) | (|fifo_valid[3:0])) | wrbuf_vld) | rdbuf_vld) | dec_tlu_stall_dma) | clk_override;</pre>
       <pre>	rvoclkhdr dma_buffer_c1cgc(</pre>
       <pre>		.en(dma_buffer_c1_clken),</pre>
       <pre>		.l1clk(dma_buffer_c1_clk),</pre>
@@ -4977,10 +4977,10 @@
       <pre>	assign ifu_ic_req_addr_f2[31:3] = {imb_ff[31:6], ic_req_addr_bits_5_3[5:3]};</pre>
       <pre>	assign ifu_ic_mb_empty = ((miss_state == 3&#39;b010) &amp; ~(ifu_wr_en_new &amp; last_beat)) | ~miss_pending;</pre>
       <pre>	assign ifu_miss_state_idle = miss_state == 3&#39;b000;</pre>
-      <pre>	assign replace_way_mb_any[3] = ((way_status_mb_ff[2] &amp; way_status_mb_ff[0]) &amp; &amp;tagv_mb_ff[3:0]) | (((~tagv_mb_ff[3] &amp; tagv_mb_ff[2]) &amp; tagv_mb_ff[1]) &amp; tagv_mb_ff[0]);</pre>
-      <pre>	assign replace_way_mb_any[2] = ((~way_status_mb_ff[2] &amp; way_status_mb_ff[0]) &amp; &amp;tagv_mb_ff[3:0]) | ((~tagv_mb_ff[2] &amp; tagv_mb_ff[1]) &amp; tagv_mb_ff[0]);</pre>
-      <pre>	assign replace_way_mb_any[1] = ((way_status_mb_ff[1] &amp; ~way_status_mb_ff[0]) &amp; &amp;tagv_mb_ff[3:0]) | (~tagv_mb_ff[1] &amp; tagv_mb_ff[0]);</pre>
-      <pre>	assign replace_way_mb_any[0] = ((~way_status_mb_ff[1] &amp; ~way_status_mb_ff[0]) &amp; &amp;tagv_mb_ff[3:0]) | ~tagv_mb_ff[0];</pre>
+      <pre>	assign replace_way_mb_any[3] = ((way_status_mb_ff[2] &amp; way_status_mb_ff[0]) &amp; (&amp;tagv_mb_ff[3:0])) | (((~tagv_mb_ff[3] &amp; tagv_mb_ff[2]) &amp; tagv_mb_ff[1]) &amp; tagv_mb_ff[0]);</pre>
+      <pre>	assign replace_way_mb_any[2] = ((~way_status_mb_ff[2] &amp; way_status_mb_ff[0]) &amp; (&amp;tagv_mb_ff[3:0])) | ((~tagv_mb_ff[2] &amp; tagv_mb_ff[1]) &amp; tagv_mb_ff[0]);</pre>
+      <pre>	assign replace_way_mb_any[1] = ((way_status_mb_ff[1] &amp; ~way_status_mb_ff[0]) &amp; (&amp;tagv_mb_ff[3:0])) | (~tagv_mb_ff[1] &amp; tagv_mb_ff[0]);</pre>
+      <pre>	assign replace_way_mb_any[0] = ((~way_status_mb_ff[1] &amp; ~way_status_mb_ff[0]) &amp; (&amp;tagv_mb_ff[3:0])) | ~tagv_mb_ff[0];</pre>
       <pre>	assign way_status_hit_new[2:0] = ((({3 {ic_rd_hit[0]}} &amp; {way_status[2], 2&#39;b11}) | ({3 {ic_rd_hit[1]}} &amp; {way_status[2], 2&#39;b01})) | ({3 {ic_rd_hit[2]}} &amp; {1&#39;b1, way_status[1], 1&#39;b0})) | ({3 {ic_rd_hit[3]}} &amp; {1&#39;b0, way_status[1], 1&#39;b0});</pre>
       <pre>	assign way_status_rep_new[2:0] = ((({3 {replace_way_mb_any[0]}} &amp; {way_status_mb_ff[2], 2&#39;b11}) | ({3 {replace_way_mb_any[1]}} &amp; {way_status_mb_ff[2], 2&#39;b01})) | ({3 {replace_way_mb_any[2]}} &amp; {1&#39;b1, way_status_mb_ff[1], 1&#39;b0})) | ({3 {replace_way_mb_any[3]}} &amp; {1&#39;b0, way_status_mb_ff[1], 1&#39;b0});</pre>
       <pre>	assign way_status_new[2:0] = (ifu_wr_en_new_q ? way_status_rep_new[2:0] : way_status_hit_new[2:0]);</pre>
@@ -11070,7 +11070,7 @@
       <pre>		.dout(mhpmc6h[31:0])</pre>
       <pre>	);</pre>
       <pre>	wire [5:0] event_saturate_wb;</pre>
-      <pre>	assign event_saturate_wb[5:0] = ((dec_csr_wrdata_wb[5:0] &gt; 6&#39;d50) | |dec_csr_wrdata_wb[31:6] ? 6&#39;d50 : dec_csr_wrdata_wb[5:0]);</pre>
+      <pre>	assign event_saturate_wb[5:0] = ((dec_csr_wrdata_wb[5:0] &gt; 6&#39;d50) | (|dec_csr_wrdata_wb[31:6]) ? 6&#39;d50 : dec_csr_wrdata_wb[5:0]);</pre>
       <pre>	assign wr_mhpme3_wb = dec_csr_wen_wb_mod &amp; (dec_csr_wraddr_wb[11:0] == 12&#39;h323);</pre>
       <pre>	rvdffs #(.WIDTH(6)) mhpme3_ff(</pre>
       <pre>		.rst_l(rst_l),</pre>
@@ -18645,7 +18645,7 @@
       <pre>				end</pre>
       <pre>		end</pre>
       <pre>	end</pre>
-      <pre>	assign ld_hit_dc2 = |ld_byte_hit_lo[3:0] | |ld_byte_hit_hi[3:0];</pre>
+      <pre>	assign ld_hit_dc2 = |ld_byte_hit_lo[3:0] | (|ld_byte_hit_hi[3:0]);</pre>
       <pre>	assign ld_full_hit_dc2 = (((ld_full_hit_lo_dc2 &amp; ld_full_hit_hi_dc2) &amp; lsu_busreq_dc2) &amp; lsu_pkt_dc2[14]) &amp; ~is_sideeffects_dc2;</pre>
       <pre>	assign {ld_fwddata_dc2_nc[63:32], ld_fwddata_dc2[31:0]} = {ld_fwddata_hi[31:0], ld_fwddata_lo[31:0]} &gt;&gt; (8 * lsu_addr_dc2[1:0]);</pre>
       <pre>	assign bus_read_data_dc3[31:0] = (ld_full_hit_dc3 ? ld_fwddata_dc3[31:0] : ld_bus_data_dc3[31:0]);</pre>
@@ -19943,7 +19943,7 @@
       <pre>			end</pre>
       <pre>			4&#39;h3: begin</pre>
       <pre>				dbg_nxtstate = (dmcontrol_reg[1] ? 4&#39;h0 : (|abstractcs_reg[10:8] | ((command_reg[31:24] == 8&#39;h00) &amp; ~command_reg[17]) ? 4&#39;h8 : 4&#39;h4));</pre>
-      <pre>				dbg_state_en = ((dbg_cmd_valid | |abstractcs_reg[10:8]) | ((command_reg[31:24] == 8&#39;h00) &amp; ~command_reg[17])) | dmcontrol_reg[1];</pre>
+      <pre>				dbg_state_en = ((dbg_cmd_valid | (|abstractcs_reg[10:8])) | ((command_reg[31:24] == 8&#39;h00) &amp; ~command_reg[17])) | dmcontrol_reg[1];</pre>
       <pre>			end</pre>
       <pre>			4&#39;h4: begin</pre>
       <pre>				dbg_nxtstate = (dmcontrol_reg[1] ? 4&#39;h0 : 4&#39;h8);</pre>
@@ -19951,7 +19951,7 @@
       <pre>			end</pre>
       <pre>			4&#39;h5: begin</pre>
       <pre>				dbg_nxtstate = (dmcontrol_reg[1] ? 4&#39;h0 : (|abstractcs_reg[10:8] ? 4&#39;h8 : 4&#39;h6));</pre>
-      <pre>				dbg_state_en = ((dbg_bus_clk_en &amp; ~sb_cmd_pending) | |abstractcs_reg[10:8]) | dmcontrol_reg[1];</pre>
+      <pre>				dbg_state_en = ((dbg_bus_clk_en &amp; ~sb_cmd_pending) | (|abstractcs_reg[10:8])) | dmcontrol_reg[1];</pre>
       <pre>			end</pre>
       <pre>			4&#39;h6: begin</pre>
       <pre>				sb_abmem_cmd_done_in = 1&#39;b1;</pre>
