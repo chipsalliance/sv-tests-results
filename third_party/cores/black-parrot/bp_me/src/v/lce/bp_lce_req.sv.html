@@ -328,7 +328,9 @@
 <span class="normal"><a href="#l-320">320</a></span>
 <span class="normal"><a href="#l-321">321</a></span>
 <span class="normal"><a href="#l-322">322</a></span>
-<span class="normal"><a href="#l-323">323</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/**</span>
+<span class="normal"><a href="#l-323">323</a></span>
+<span class="normal"><a href="#l-324">324</a></span>
+<span class="normal"><a href="#l-325">325</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/**</span>
 <a id="l-2" name="l-2"></a><span class="cm"> *  Name:</span>
 <a id="l-3" name="l-3"></a><span class="cm"> *    bp_lce_req.sv</span>
 <a id="l-4" name="l-4"></a><span class="cm"> *</span>
@@ -633,24 +635,26 @@
 <a id="l-303" name="l-303"></a><span class="w">      </span><span class="k">endcase</span>
 <a id="l-304" name="l-304"></a>
 <a id="l-305" name="l-305"></a><span class="w">      </span><span class="c1">// Fire off a non-blocking request opportunistically if we have one</span>
-<a id="l-306" name="l-306"></a><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">nonblocking_v_r</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">fsm_req_v_lo</span><span class="p">)</span>
-<a id="l-307" name="l-307"></a><span class="w">        </span><span class="k">begin</span>
-<a id="l-308" name="l-308"></a><span class="w">          </span><span class="n">fsm_req_v_lo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fsm_req_ready_then_li</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">cache_req_credits_full_o</span><span class="p">;</span>
-<a id="l-309" name="l-309"></a>
-<a id="l-310" name="l-310"></a><span class="w">          </span><span class="n">cache_req_done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fsm_req_v_lo</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">fsm_req_last_lo</span><span class="p">;</span>
-<a id="l-311" name="l-311"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-312" name="l-312"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-313" name="l-313"></a>
-<a id="l-314" name="l-314"></a><span class="w">  </span><span class="c1">// synopsys sync_set_reset &quot;reset_i&quot;</span>
-<a id="l-315" name="l-315"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@</span><span class="w"> </span><span class="p">(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="p">)</span>
-<a id="l-316" name="l-316"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
-<a id="l-317" name="l-317"></a><span class="w">      </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">e_reset</span><span class="p">;</span>
-<a id="l-318" name="l-318"></a><span class="w">    </span><span class="k">else</span>
-<a id="l-319" name="l-319"></a><span class="w">      </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_n</span><span class="p">;</span>
-<a id="l-320" name="l-320"></a>
-<a id="l-321" name="l-321"></a><span class="k">endmodule</span>
+<a id="l-306" name="l-306"></a><span class="w">      </span><span class="c1">// Could eke out some performance by changing ~fsm_req_v_lo to blocking_req_v_lo</span>
+<a id="l-307" name="l-307"></a><span class="w">      </span><span class="c1">//if (nonblocking_v_r &amp; ~fsm_req_v_lo)</span>
+<a id="l-308" name="l-308"></a><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">is_ready</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">nonblocking_v_r</span><span class="p">)</span>
+<a id="l-309" name="l-309"></a><span class="w">        </span><span class="k">begin</span>
+<a id="l-310" name="l-310"></a><span class="w">          </span><span class="n">fsm_req_v_lo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fsm_req_ready_then_li</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">cache_req_credits_full_o</span><span class="p">;</span>
+<a id="l-311" name="l-311"></a>
+<a id="l-312" name="l-312"></a><span class="w">          </span><span class="n">cache_req_done</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fsm_req_v_lo</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">fsm_req_last_lo</span><span class="p">;</span>
+<a id="l-313" name="l-313"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-314" name="l-314"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-315" name="l-315"></a>
+<a id="l-316" name="l-316"></a><span class="w">  </span><span class="c1">// synopsys sync_set_reset &quot;reset_i&quot;</span>
+<a id="l-317" name="l-317"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@</span><span class="w"> </span><span class="p">(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_i</span><span class="p">)</span>
+<a id="l-318" name="l-318"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reset_i</span><span class="p">)</span>
+<a id="l-319" name="l-319"></a><span class="w">      </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">e_reset</span><span class="p">;</span>
+<a id="l-320" name="l-320"></a><span class="w">    </span><span class="k">else</span>
+<a id="l-321" name="l-321"></a><span class="w">      </span><span class="n">state_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">state_n</span><span class="p">;</span>
 <a id="l-322" name="l-322"></a>
-<a id="l-323" name="l-323"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bp_lce_req</span><span class="p">)</span>
+<a id="l-323" name="l-323"></a><span class="k">endmodule</span>
+<a id="l-324" name="l-324"></a>
+<a id="l-325" name="l-325"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bp_lce_req</span><span class="p">)</span>
 </pre></div></td></tr></table></div>
 
   </body>
