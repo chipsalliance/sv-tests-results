@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/5.6.1'] = [["","escaped-identifiers",1,"logs/yosys_slang/chapter-5/5.6.1--escaped-identifiers.sv.log.html","tests/chapter-5/5.6.1--escaped-identifiers.sv.html"],["","nonescaped-access",1,"logs/yosys_slang/chapter-5/5.6.1--nonescaped-access.sv.log.html","tests/chapter-5/5.6.1--nonescaped-access.sv.html"]]

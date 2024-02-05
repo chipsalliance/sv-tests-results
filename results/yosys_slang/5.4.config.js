@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/5.4'] = [["","comments",1,"logs/yosys_slang/chapter-5/5.4--coments.sv.log.html","tests/chapter-5/5.4--coments.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/5.9.1'] = [["","string-special-chars",1,"logs/yosys_slang/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]

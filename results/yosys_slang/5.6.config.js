@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/5.6'] = [["","identifiers",1,"logs/yosys_slang/chapter-5/5.6--identifiers.sv.log.html","tests/chapter-5/5.6--identifiers.sv.html"],["","wrong-identifiers",1,"logs/yosys_slang/chapter-5/5.6--wrong-identifiers.sv.log.html","tests/chapter-5/5.6--wrong-identifiers.sv.html"]]

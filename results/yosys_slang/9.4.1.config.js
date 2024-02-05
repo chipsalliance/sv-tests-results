@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/9.4.1'] = [["","always",0,"logs/yosys_slang/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]

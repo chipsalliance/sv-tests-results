@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/18.12.1'] = [["","adding_constraints_to_scope_variables_0",1,"logs/yosys_slang/chapter-18/18.12.1--adding-constraints-to-scope-variables_0.sv.log.html","tests/chapter-18/18.12.1--adding-constraints-to-scope-variables_0.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/12.5.1'] = [["","casex",0,"logs/yosys_slang/chapter-12/12.5.1--casex.sv.log.html","tests/chapter-12/12.5.1--casex.sv.html"],["","casez",0,"logs/yosys_slang/chapter-12/12.5.1--casez.sv.log.html","tests/chapter-12/12.5.1--casez.sv.html"]]

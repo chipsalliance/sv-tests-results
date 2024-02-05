@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/21.6'] = [["","test_plusargs",1,"logs/yosys_slang/chapter-21/21.6--test.sv.log.html","tests/chapter-21/21.6--test.sv.html"],["","value_plusargs",1,"logs/yosys_slang/chapter-21/21.6--value.sv.log.html","tests/chapter-21/21.6--value.sv.html"]]

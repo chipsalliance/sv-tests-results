@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/18.13.2'] = [["","urandom_range_0",1,"logs/yosys_slang/chapter-18/18.13.2--urandom_range_0.sv.log.html","tests/chapter-18/18.13.2--urandom_range_0.sv.html"]]

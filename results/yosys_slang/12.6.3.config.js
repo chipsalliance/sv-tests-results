@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/12.6.3'] = [["","conditional_pattern",0,"logs/yosys_slang/chapter-12/12.6.3--conditional_pattern.sv.log.html","tests/chapter-12/12.6.3--conditional_pattern.sv.html"]]

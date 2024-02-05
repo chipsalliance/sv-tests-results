@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/6.9.1'] = [["","logic_vector",1,"logs/yosys_slang/chapter-6/6.9.1--logic_vector.sv.log.html","tests/chapter-6/6.9.1--logic_vector.sv.html"]]

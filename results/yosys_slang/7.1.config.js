@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/7.1'] = [["","basic-packed-structures",1,"logs/yosys_slang/chapter-7/structures/packed/basic.sv.log.html","tests/chapter-7/structures/packed/basic.sv.html"],["","basic-unpacked-structures",0,"logs/yosys_slang/chapter-7/structures/unpacked/basic.sv.log.html","tests/chapter-7/structures/unpacked/basic.sv.html"]]

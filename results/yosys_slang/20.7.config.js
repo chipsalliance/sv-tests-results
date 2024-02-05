@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/20.7'] = [["","array_queries",1,"logs/yosys_slang/chapter-20/20.7--array-queries.sv.log.html","tests/chapter-20/20.7--array-queries.sv.html"],["","array_queries_multi_dim",0,"logs/yosys_slang/chapter-20/20.7--array-queries-multi-dim.sv.log.html","tests/chapter-20/20.7--array-queries-multi-dim.sv.html"]]

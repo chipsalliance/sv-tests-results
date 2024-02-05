@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/9.2.2.3'] = [["","always_latch_expr",0,"logs/yosys_slang/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]

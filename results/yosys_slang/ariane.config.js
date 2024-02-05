@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/ariane'] = [["cores","ariane",0,"logs/yosys_slang/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]

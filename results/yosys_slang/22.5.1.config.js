@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/22.5.1'] = [["","22.5.1--define_and_resetall",1,"logs/yosys_slang/chapter-22/22.5.1--define_and_resetall.sv.log.html","tests/chapter-22/22.5.1--define_and_resetall.sv.html"]]

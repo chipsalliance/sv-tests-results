@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/6.6.1'] = [["","net_tri",1,"logs/yosys_slang/generated/nets/6.6.1--net_tri.sv.log.html","tests/generated/nets/6.6.1--net_tri.sv.html"],["","net_wire",1,"logs/yosys_slang/generated/nets/6.6.1--net_wire.sv.log.html","tests/generated/nets/6.6.1--net_wire.sv.html"]]

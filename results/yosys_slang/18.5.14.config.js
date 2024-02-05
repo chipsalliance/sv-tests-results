@@ -1,0 +1,1 @@
+config_loader_data['yosys_slang/18.5.14'] = [["","soft_constraints_0",1,"logs/yosys_slang/chapter-18/18.5.14--soft-constraints_0.sv.log.html","tests/chapter-18/18.5.14--soft-constraints_0.sv.html"],["","soft_constraints_2",1,"logs/yosys_slang/chapter-18/18.5.14--soft-constraints_2.sv.log.html","tests/chapter-18/18.5.14--soft-constraints_2.sv.html"]]
