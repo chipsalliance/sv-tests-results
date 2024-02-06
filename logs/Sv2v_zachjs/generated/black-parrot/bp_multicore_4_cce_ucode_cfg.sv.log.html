@@ -330,9 +330,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2024-02-05 08:37:59</dd></div>
-        <div><dt>time elapsed</dt><dd>170.823s</dd></div>
-        <div><dt>ram usage</dt><dd>3715076 KB</dd></div>
+        <div><dt>completed</dt><dd>2024-02-06 01:38:46</dd></div>
+        <div><dt>time elapsed</dt><dd>150.829s</dd></div>
+        <div><dt>ram usage</dt><dd>3745964 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -25279,7 +25279,7 @@
       <pre>		.in(reg_cast_i[64-:65]),</pre>
       <pre>		.out(dp_raw_lo)</pre>
       <pre>	);</pre>
-      <pre>	wire invbox = (tag_i == 1&#39;b1) &amp; (reg_cast_i[65] == 1&#39;b0);</pre>
+      <pre>	wire invbox = tag_i &gt; reg_cast_i[65];</pre>
       <pre>	wire [64:0] rec;</pre>
       <pre>	localparam [65:0] bp_be_pkg_sp_canonical_reg = 66&#39;h2e008000000000000;</pre>
       <pre>	assign rec = (invbox ? bp_be_pkg_sp_canonical_reg : dp_rec);</pre>
@@ -25494,18 +25494,23 @@
       <pre>		if (_sv2v_0)</pre>
       <pre>			;</pre>
       <pre>		case (reg_cast_i[65-:2])</pre>
-      <pre>			2&#39;b11: raw = {{56 {reg_cast_i[63]}}, val[0+:8]};</pre>
-      <pre>			2&#39;b10: raw = {{48 {reg_cast_i[63]}}, val[0+:16]};</pre>
-      <pre>			2&#39;b01: raw = {{32 {reg_cast_i[63]}}, val[0+:32]};</pre>
+      <pre>			2&#39;b11: raw = {{56 {val[63]}}, val[0+:8]};</pre>
+      <pre>			2&#39;b10: raw = {{48 {val[63]}}, val[0+:16]};</pre>
+      <pre>			2&#39;b01: raw = {{32 {val[63]}}, val[0+:32]};</pre>
       <pre>			default: raw = val;</pre>
       <pre>		endcase</pre>
       <pre>	end</pre>
-      <pre>	wire sig = ~unsigned_i &amp; raw[63];</pre>
+      <pre>	wire invbox = tag_i &gt; reg_cast_i[65-:2];</pre>
       <pre>	always @(*) begin</pre>
       <pre>		if (_sv2v_0)</pre>
       <pre>			;</pre>
-      <pre>		case (tag_i)</pre>
-      <pre>			2&#39;b01: val_o = {{32 {sig}}, raw[0+:32]};</pre>
+      <pre>		casez ({unsigned_i, invbox, tag_i})</pre>
+      <pre>			4&#39;b1z11: val_o = {{56 {1&#39;b0}}, raw[0+:8]};</pre>
+      <pre>			4&#39;b0111: val_o = {{56 {raw[7]}}, raw[0+:8]};</pre>
+      <pre>			4&#39;b1z10: val_o = {{48 {1&#39;b0}}, raw[0+:16]};</pre>
+      <pre>			4&#39;b0110: val_o = {{48 {raw[15]}}, raw[0+:16]};</pre>
+      <pre>			4&#39;b1z01: val_o = {{32 {1&#39;b0}}, raw[0+:32]};</pre>
+      <pre>			4&#39;b0101: val_o = {{32 {raw[31]}}, raw[0+:32]};</pre>
       <pre>			default: val_o = raw;</pre>
       <pre>		endcase</pre>
       <pre>	end</pre>
