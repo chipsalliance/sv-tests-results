@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/7.5.2'] = [["","dynamic-arrays-op-size",0,"logs/yosys_slang/chapter-7/arrays/dynamic/op-size.sv.log.html","tests/chapter-7/arrays/dynamic/op-size.sv.html"]]
+config_loader_data['yosys_slang/7.5.2'] = [["","dynamic-arrays-op-size",1,"logs/yosys_slang/chapter-7/arrays/dynamic/op-size.sv.log.html","tests/chapter-7/arrays/dynamic/op-size.sv.html"]]

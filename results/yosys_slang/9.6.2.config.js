@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/9.6.2'] = [["","disable",0,"logs/yosys_slang/chapter-9/9.6.2--disable.sv.log.html","tests/chapter-9/9.6.2--disable.sv.html"]]
+config_loader_data['yosys_slang/9.6.2'] = [["","disable",1,"logs/yosys_slang/chapter-9/9.6.2--disable.sv.log.html","tests/chapter-9/9.6.2--disable.sv.html"]]

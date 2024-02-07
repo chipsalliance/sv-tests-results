@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/7.6'] = [["","array-unpacked-assignments",0,"logs/yosys_slang/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]
+config_loader_data['yosys_slang/7.6'] = [["","array-unpacked-assignments",1,"logs/yosys_slang/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]

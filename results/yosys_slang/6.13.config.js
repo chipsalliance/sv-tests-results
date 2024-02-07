@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.13'] = [["","void",0,"logs/yosys_slang/chapter-6/6.13--void.sv.log.html","tests/chapter-6/6.13--void.sv.html"]]
+config_loader_data['yosys_slang/6.13'] = [["","void",1,"logs/yosys_slang/chapter-6/6.13--void.sv.log.html","tests/chapter-6/6.13--void.sv.html"]]

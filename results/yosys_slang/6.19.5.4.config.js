@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.19.5.4'] = [["","enum_prev",0,"logs/yosys_slang/chapter-6/6.19.5.4--enum_prev.sv.log.html","tests/chapter-6/6.19.5.4--enum_prev.sv.html"]]
+config_loader_data['yosys_slang/6.19.5.4'] = [["","enum_prev",1,"logs/yosys_slang/chapter-6/6.19.5.4--enum_prev.sv.log.html","tests/chapter-6/6.19.5.4--enum_prev.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/11.3.5'] = [["","expr_short_circuit",0,"logs/yosys_slang/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]
+config_loader_data['yosys_slang/11.3.5'] = [["","expr_short_circuit",1,"logs/yosys_slang/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]

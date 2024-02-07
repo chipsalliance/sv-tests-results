@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/21.2'] = [["","display_boh",0,"logs/yosys_slang/chapter-21/21.2--display-boh.sv.log.html","tests/chapter-21/21.2--display-boh.sv.html"],["","write_boh",0,"logs/yosys_slang/chapter-21/21.2--write-boh.sv.log.html","tests/chapter-21/21.2--write-boh.sv.html"]]
+config_loader_data['yosys_slang/21.2'] = [["","display_boh",1,"logs/yosys_slang/chapter-21/21.2--display-boh.sv.log.html","tests/chapter-21/21.2--display-boh.sv.html"],["","write_boh",1,"logs/yosys_slang/chapter-21/21.2--write-boh.sv.log.html","tests/chapter-21/21.2--write-boh.sv.html"]]
