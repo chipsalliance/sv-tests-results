@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/12.7.5'] = [["","dowhile_loop",1,"logs/yosys_slang/chapter-12/12.7.5--dowhile.sv.log.html","tests/chapter-12/12.7.5--dowhile.sv.html"]]
+config_loader_data['yosys_slang/12.7.5'] = [["","dowhile_loop",0,"logs/yosys_slang/chapter-12/12.7.5--dowhile.sv.log.html","tests/chapter-12/12.7.5--dowhile.sv.html"]]

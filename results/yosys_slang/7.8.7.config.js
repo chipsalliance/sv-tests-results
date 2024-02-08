@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/7.8.7'] = [["","associative-arrays-allocating-elements",0,"logs/yosys_slang/chapter-7/arrays/associative/alloc.sv.log.html","tests/chapter-7/arrays/associative/alloc.sv.html"]]
+config_loader_data['yosys_slang/7.8.7'] = [["","associative-arrays-allocating-elements",1,"logs/yosys_slang/chapter-7/arrays/associative/alloc.sv.log.html","tests/chapter-7/arrays/associative/alloc.sv.html"]]

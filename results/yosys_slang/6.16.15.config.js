@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.16.15'] = [["","string_realtoa",1,"logs/yosys_slang/chapter-6/6.16.15--string_realtoa.sv.log.html","tests/chapter-6/6.16.15--string_realtoa.sv.html"]]
+config_loader_data['yosys_slang/6.16.15'] = [["","string_realtoa",0,"logs/yosys_slang/chapter-6/6.16.15--string_realtoa.sv.log.html","tests/chapter-6/6.16.15--string_realtoa.sv.html"]]

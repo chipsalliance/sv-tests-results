@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/11.11'] = [["","min_max_avg_delay",1,"logs/yosys_slang/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]
+config_loader_data['yosys_slang/11.11'] = [["","min_max_avg_delay",0,"logs/yosys_slang/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]

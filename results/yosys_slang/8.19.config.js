@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/8.19'] = [["","global_constant",0,"logs/yosys_slang/chapter-8/8.19--global_constant.sv.log.html","tests/chapter-8/8.19--global_constant.sv.html"]]
+config_loader_data['yosys_slang/8.19'] = [["","global_constant",1,"logs/yosys_slang/chapter-8/8.19--global_constant.sv.log.html","tests/chapter-8/8.19--global_constant.sv.html"]]

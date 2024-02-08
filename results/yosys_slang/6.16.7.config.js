@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.16.7'] = [["","string_icompare",0,"logs/yosys_slang/chapter-6/6.16.7--string_icompare.sv.log.html","tests/chapter-6/6.16.7--string_icompare.sv.html"]]
+config_loader_data['yosys_slang/6.16.7'] = [["","string_icompare",1,"logs/yosys_slang/chapter-6/6.16.7--string_icompare.sv.log.html","tests/chapter-6/6.16.7--string_icompare.sv.html"]]

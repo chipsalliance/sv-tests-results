@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/8.26.3'] = [["","type_access_extends",0,"logs/yosys_slang/chapter-8/8.26.3--type_access_extends.sv.log.html","tests/chapter-8/8.26.3--type_access_extends.sv.html"]]
+config_loader_data['yosys_slang/8.26.3'] = [["","type_access_extends",1,"logs/yosys_slang/chapter-8/8.26.3--type_access_extends.sv.log.html","tests/chapter-8/8.26.3--type_access_extends.sv.html"]]

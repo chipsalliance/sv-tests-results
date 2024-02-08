@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.16.12'] = [["","string_hextoa",1,"logs/yosys_slang/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]
+config_loader_data['yosys_slang/6.16.12'] = [["","string_hextoa",0,"logs/yosys_slang/chapter-6/6.16.12--string_hextoa.sv.log.html","tests/chapter-6/6.16.12--string_hextoa.sv.html"]]

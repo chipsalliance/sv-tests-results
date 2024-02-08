@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.6.7'] = [["","nettype",0,"logs/yosys_slang/chapter-6/6.6.7--nettype.sv.log.html","tests/chapter-6/6.6.7--nettype.sv.html"]]
+config_loader_data['yosys_slang/6.6.7'] = [["","nettype",1,"logs/yosys_slang/chapter-6/6.6.7--nettype.sv.log.html","tests/chapter-6/6.6.7--nettype.sv.html"]]

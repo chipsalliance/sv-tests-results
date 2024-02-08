@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/6.16.4'] = [["","string_toupper",0,"logs/yosys_slang/chapter-6/6.16.4--string_toupper.sv.log.html","tests/chapter-6/6.16.4--string_toupper.sv.html"]]
+config_loader_data['yosys_slang/6.16.4'] = [["","string_toupper",1,"logs/yosys_slang/chapter-6/6.16.4--string_toupper.sv.log.html","tests/chapter-6/6.16.4--string_toupper.sv.html"]]

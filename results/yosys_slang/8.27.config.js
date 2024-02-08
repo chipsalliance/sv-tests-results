@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/8.27'] = [["","forward_declaration",0,"logs/yosys_slang/chapter-8/8.27--forward_declaration.sv.log.html","tests/chapter-8/8.27--forward_declaration.sv.html"]]
+config_loader_data['yosys_slang/8.27'] = [["","forward_declaration",1,"logs/yosys_slang/chapter-8/8.27--forward_declaration.sv.log.html","tests/chapter-8/8.27--forward_declaration.sv.html"]]
