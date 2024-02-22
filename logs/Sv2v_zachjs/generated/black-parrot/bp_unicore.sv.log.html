@@ -330,9 +330,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2024-02-21 01:38:13</dd></div>
-        <div><dt>time elapsed</dt><dd>155.260s</dd></div>
-        <div><dt>ram usage</dt><dd>3748120 KB</dd></div>
+        <div><dt>completed</dt><dd>2024-02-22 01:37:38</dd></div>
+        <div><dt>time elapsed</dt><dd>142.974s</dd></div>
+        <div><dt>ram usage</dt><dd>3711992 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -52459,7 +52459,6 @@
       <pre>	reg msg_yumi_lo;</pre>
       <pre>	bp_me_stream_gearbox #(</pre>
       <pre>		.bp_params_p(bp_params_p),</pre>
-      <pre>		.buffered_p(1),</pre>
       <pre>		.in_data_width_p(bedrock_fill_width_p),</pre>
       <pre>		.out_data_width_p(data_width_p),</pre>
       <pre>		.payload_width_p(payload_width_p),</pre>
@@ -52759,7 +52758,6 @@
       <pre>	wire msg_ready_and_li;</pre>
       <pre>	bp_me_stream_gearbox #(</pre>
       <pre>		.bp_params_p(bp_params_p),</pre>
-      <pre>		.buffered_p(0),</pre>
       <pre>		.in_data_width_p(data_width_p),</pre>
       <pre>		.out_data_width_p(bedrock_fill_width_p),</pre>
       <pre>		.payload_width_p(payload_width_p),</pre>
@@ -54537,7 +54535,6 @@
       <pre>	localparam icache_tag_width_p = caddr_width_p - ((((icache_sets_p * icache_block_width_p) / 8) == 1) || (((icache_sets_p * icache_block_width_p) / 8) == 0) ? 1 : $clog2((icache_sets_p * icache_block_width_p) / 8));</pre>
       <pre>	localparam dcache_tag_width_p = caddr_width_p - ((((dcache_sets_p * dcache_block_width_p) / 8) == 1) || (((dcache_sets_p * dcache_block_width_p) / 8) == 0) ? 1 : $clog2((dcache_sets_p * dcache_block_width_p) / 8));</pre>
       <pre>	localparam acache_tag_width_p = caddr_width_p - ((((acache_sets_p * acache_block_width_p) / 8) == 1) || (((acache_sets_p * acache_block_width_p) / 8) == 0) ? 1 : $clog2((acache_sets_p * acache_block_width_p) / 8));</pre>
-      <pre>	parameter buffered_p = 0;</pre>
       <pre>	parameter in_data_width_p = 0;</pre>
       <pre>	parameter out_data_width_p = 0;</pre>
       <pre>	parameter payload_width_p = 0;</pre>
@@ -54562,26 +54559,16 @@
       <pre>	wire [in_data_width_p - 1:0] msg_data_li;</pre>
       <pre>	wire msg_v_li;</pre>
       <pre>	wire msg_ready_and_lo;</pre>
-      <pre>	generate</pre>
-      <pre>		if (buffered_p) begin : buffer</pre>
-      <pre>			bsg_two_fifo #(.width_p((1 * ((((0 + payload_width_p) + 3) + paddr_width_p) + 8)) + in_data_width_p)) fifo(</pre>
-      <pre>				.clk_i(clk_i),</pre>
-      <pre>				.reset_i(reset_i),</pre>
-      <pre>				.data_i({msg_header_cast_i, msg_data_i}),</pre>
-      <pre>				.v_i(msg_v_i),</pre>
-      <pre>				.ready_param_o(msg_ready_and_o),</pre>
-      <pre>				.data_o({msg_header_li, msg_data_li}),</pre>
-      <pre>				.v_o(msg_v_li),</pre>
-      <pre>				.yumi_i(msg_ready_and_lo &amp; msg_v_li)</pre>
-      <pre>			);</pre>
-      <pre>		end</pre>
-      <pre>		else begin : no_buffer</pre>
-      <pre>			assign msg_header_li = msg_header_cast_i;</pre>
-      <pre>			assign msg_data_li = msg_data_i;</pre>
-      <pre>			assign msg_v_li = msg_v_i;</pre>
-      <pre>			assign msg_ready_and_o = msg_ready_and_lo;</pre>
-      <pre>		end</pre>
-      <pre>	endgenerate</pre>
+      <pre>	bsg_two_fifo #(.width_p((1 * ((((0 + payload_width_p) + 3) + paddr_width_p) + 8)) + in_data_width_p)) fifo(</pre>
+      <pre>		.clk_i(clk_i),</pre>
+      <pre>		.reset_i(reset_i),</pre>
+      <pre>		.data_i({msg_header_cast_i, msg_data_i}),</pre>
+      <pre>		.v_i(msg_v_i),</pre>
+      <pre>		.ready_param_o(msg_ready_and_o),</pre>
+      <pre>		.data_o({msg_header_li, msg_data_li}),</pre>
+      <pre>		.v_o(msg_v_li),</pre>
+      <pre>		.yumi_i(msg_ready_and_lo &amp; msg_v_li)</pre>
+      <pre>	);</pre>
       <pre>	assign msg_header_cast_o = msg_header_li;</pre>
       <pre>	generate</pre>
       <pre>		if (in_data_width_p &lt; out_data_width_p) begin : widen</pre>
@@ -54642,7 +54629,7 @@
       <pre>				.ready_and_i(msg_ready_param_i)</pre>
       <pre>			);</pre>
       <pre>		end</pre>
-      <pre>		else begin : genblk2</pre>
+      <pre>		else begin : genblk1</pre>
       <pre>			assign msg_data_o = msg_data_li;</pre>
       <pre>			assign msg_v_o = msg_v_li;</pre>
       <pre>			assign msg_ready_and_lo = msg_ready_param_i;</pre>

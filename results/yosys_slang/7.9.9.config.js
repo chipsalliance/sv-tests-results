@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/7.9.9'] = [["","associative-arrays-assignment",0,"logs/yosys_slang/chapter-7/arrays/associative/assignment.sv.log.html","tests/chapter-7/arrays/associative/assignment.sv.html"]]
+config_loader_data['yosys_slang/7.9.9'] = [["","associative-arrays-assignment",1,"logs/yosys_slang/chapter-7/arrays/associative/assignment.sv.log.html","tests/chapter-7/arrays/associative/assignment.sv.html"]]
