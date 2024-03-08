@@ -182,9 +182,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2024-03-07 01:25:21</dd></div>
-        <div><dt>time elapsed</dt><dd>9.666s</dd></div>
-        <div><dt>ram usage</dt><dd>905292 KB</dd></div>
+        <div><dt>completed</dt><dd>2024-03-08 01:33:35</dd></div>
+        <div><dt>time elapsed</dt><dd>9.657s</dd></div>
+        <div><dt>ram usage</dt><dd>904176 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -13244,10 +13244,11 @@
       <pre>			reg regValid [0:0];</pre>
       <pre>			reg [32:0] dataOut [0:0];</pre>
       <pre>			reg [4:0] fflagsOut [0:0];</pre>
-      <pre>			wire [31:0] addDataOut [0:0];</pre>
-      <pre>			wire [31:0] mulDataOut [0:0];</pre>
       <pre>			wire [31:0] fmaDataOut [0:0];</pre>
       <pre>			wire [31:0] otherDataOut [0:0];</pre>
+      <pre>			reg [31:0] fmaMulLHS [0:0];</pre>
+      <pre>			reg [31:0] fmaMulRHS [0:0];</pre>
+      <pre>			reg [31:0] fmaAddend [0:0];</pre>
       <pre>			wire [4:0] addFFlagsOut [0:0];</pre>
       <pre>			wire [4:0] mulFFlagsOut [0:0];</pre>
       <pre>			wire [4:0] fmaFFlagsOut [0:0];</pre>
@@ -13256,23 +13257,11 @@
       <pre>			genvar _gv_i_9;</pre>
       <pre>			for (_gv_i_9 = 0; _gv_i_9 &lt; BasicTypes_FP_ISSUE_WIDTH; _gv_i_9 = _gv_i_9 + 1) begin : genblk2</pre>
       <pre>				localparam i = _gv_i_9;</pre>
-      <pre>				FP32PipelinedAdder #(.PIPELINE_DEPTH(BasicTypes_FP_EXEC_STAGE_DEPTH)) fpAdder(</pre>
-      <pre>					.clk(Core.fpExStageIF.clk),</pre>
-      <pre>					.lhs(fuOpA[i][31-:BasicTypes_DATA_WIDTH]),</pre>
-      <pre>					.rhs((fpuCode[i] == 5&#39;b00001 ? {~fuOpB[i][31], fuOpB[i][30:0]} : fuOpB[i][31-:BasicTypes_DATA_WIDTH])),</pre>
-      <pre>					.result(addDataOut[i])</pre>
-      <pre>				);</pre>
-      <pre>				FP32PipelinedMultiplier #(.PIPELINE_DEPTH(BasicTypes_FP_EXEC_STAGE_DEPTH)) fpMultiplier(</pre>
-      <pre>					.clk(Core.fpExStageIF.clk),</pre>
-      <pre>					.lhs(fuOpA[i][31-:BasicTypes_DATA_WIDTH]),</pre>
-      <pre>					.rhs(fuOpB[i][31-:BasicTypes_DATA_WIDTH]),</pre>
-      <pre>					.result(mulDataOut[i])</pre>
-      <pre>				);</pre>
       <pre>				FP32PipelinedFMA fpFMA(</pre>
       <pre>					.clk(Core.fpExStageIF.clk),</pre>
-      <pre>					.mullhs((|{fpuCode[i] == 5&#39;b10110, fpuCode[i] == 5&#39;b10111} ? {~fuOpA[i][31], fuOpA[i][30:0]} : fuOpA[i][31-:BasicTypes_DATA_WIDTH])),</pre>
-      <pre>					.mulrhs(fuOpB[i][31-:BasicTypes_DATA_WIDTH]),</pre>
-      <pre>					.addend((|{fpuCode[i] == 5&#39;b10101, fpuCode[i] == 5&#39;b10111} ? {~fuOpC[i][31], fuOpC[i][30:0]} : fuOpC[i][31-:BasicTypes_DATA_WIDTH])),</pre>
+      <pre>					.mullhs(fmaMulLHS[i]),</pre>
+      <pre>					.mulrhs(fmaMulRHS[i]),</pre>
+      <pre>					.addend(fmaAddend[i]),</pre>
       <pre>					.result(fmaDataOut[i])</pre>
       <pre>				);</pre>
       <pre>				FP32PipelinedOther #(.PIPELINE_DEPTH(BasicTypes_FP_EXEC_STAGE_DEPTH)) fpOther(</pre>
@@ -13291,6 +13280,22 @@
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
       <pre>				begin : sv2v_autoblock_492</pre>
+      <pre>					reg signed [31:0] i;</pre>
+      <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
+      <pre>						begin</pre>
+      <pre>							fmaMulLHS[i] = (|{fpuCode[i] == 5&#39;b10110, fpuCode[i] == 5&#39;b10111} ? {~fuOpA[i][31], fuOpA[i][30:0]} : fuOpA[i][31-:BasicTypes_DATA_WIDTH]);</pre>
+      <pre>							fmaMulRHS[i] = (|{fpuCode[i] == 5&#39;b00000, fpuCode[i] == 5&#39;b00001} ? 32&#39;h3f800000 : fuOpB[i][31-:BasicTypes_DATA_WIDTH]);</pre>
+      <pre>							if (fpuCode[i] == 5&#39;b00010)</pre>
+      <pre>								fmaAddend[i] = 32&#39;h00000000;</pre>
+      <pre>							else if (fpuCode[i] == 5&#39;b00000)</pre>
+      <pre>								fmaAddend[i] = fuOpB[i][31-:BasicTypes_DATA_WIDTH];</pre>
+      <pre>							else if (fpuCode[i] == 5&#39;b00001)</pre>
+      <pre>								fmaAddend[i] = {~fuOpB[i][31], fuOpB[i][30:0]};</pre>
+      <pre>							else</pre>
+      <pre>								fmaAddend[i] = (|{fpuCode[i] == 5&#39;b10101, fpuCode[i] == 5&#39;b10111} ? {~fuOpC[i][31], fuOpC[i][30:0]} : fuOpC[i][31-:BasicTypes_DATA_WIDTH]);</pre>
+      <pre>						end</pre>
+      <pre>				end</pre>
+      <pre>				begin : sv2v_autoblock_493</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13339,7 +13344,7 @@
       <pre>					;</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_493</pre>
+      <pre>				begin : sv2v_autoblock_494</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13354,7 +13359,7 @@
       <pre>							else</pre>
       <pre>								rm[i] = stRM[i];</pre>
       <pre>							flush[i][0] = ActiveListIndexTypes_SelectiveFlushDetector(Core.recoveryManagerIF.toRecoveryPhase, Core.recoveryManagerIF.flushRangeHeadPtr, Core.recoveryManagerIF.flushRangeTailPtr, Core.recoveryManagerIF.flushAllInsns, pipeReg[(i * 226) + 181-:6]);</pre>
-      <pre>							begin : sv2v_autoblock_494</pre>
+      <pre>							begin : sv2v_autoblock_495</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 1; j &lt; BasicTypes_FP_EXEC_STAGE_DEPTH; j = j + 1)</pre>
       <pre>									begin</pre>
@@ -13368,20 +13373,12 @@
       <pre>							regValid[i] = (((fpOpInfo[i][5-:2] != 2&#39;b00) || fuOpA[i][32]) &amp;&amp; ((fpOpInfo[i][3-:2] != 2&#39;b00) || fuOpB[i][32])) &amp;&amp; ((fpOpInfo[i][1-:2] != 2&#39;b00) || fuOpC[i][32]);</pre>
       <pre>							dataOut[i][32] = localPipeReg[((i * 4) * 105) + 91];</pre>
       <pre>							case (localPipeReg[((i * 4) * 105) + 78-:3])</pre>
-      <pre>								3&#39;b000: begin</pre>
-      <pre>									dataOut[i][31-:BasicTypes_DATA_WIDTH] = addDataOut[i];</pre>
-      <pre>									fflagsOut[i] = 1&#39;sb0;</pre>
-      <pre>								end</pre>
-      <pre>								3&#39;b001: begin</pre>
-      <pre>									dataOut[i][31-:BasicTypes_DATA_WIDTH] = mulDataOut[i];</pre>
+      <pre>								3&#39;b000, 3&#39;b001, 3&#39;b100: begin</pre>
+      <pre>									dataOut[i][31-:BasicTypes_DATA_WIDTH] = fmaDataOut[i];</pre>
       <pre>									fflagsOut[i] = 1&#39;sb0;</pre>
       <pre>								end</pre>
       <pre>								3&#39;b010, 3&#39;b011: begin</pre>
       <pre>									dataOut[i][31-:BasicTypes_DATA_WIDTH] = Core.fpDivSqrtUnitIF.DataOut[i];</pre>
-      <pre>									fflagsOut[i] = 1&#39;sb0;</pre>
-      <pre>								end</pre>
-      <pre>								3&#39;b100: begin</pre>
-      <pre>									dataOut[i][31-:BasicTypes_DATA_WIDTH] = fmaDataOut[i];</pre>
       <pre>									fflagsOut[i] = 1&#39;sb0;</pre>
       <pre>								end</pre>
       <pre>								default: begin</pre>
@@ -13400,7 +13397,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
-      <pre>				begin : sv2v_autoblock_495</pre>
+      <pre>				begin : sv2v_autoblock_496</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13411,7 +13408,7 @@
       <pre>								nextLocalPipeReg[(((i * 4) + 3) * 105) + 91] = pipeReg[(i * 226) + 212] &amp;&amp; Core.fpDivSqrtUnitIF.Finished[i];</pre>
       <pre>							else</pre>
       <pre>								nextLocalPipeReg[(((i * 4) + 3) * 105) + 91] = regValid[i];</pre>
-      <pre>							begin : sv2v_autoblock_496</pre>
+      <pre>							begin : sv2v_autoblock_497</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 1; j &lt; 4; j = j + 1)</pre>
       <pre>									begin</pre>
@@ -13423,7 +13420,7 @@
       <pre>							end</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_497</pre>
+      <pre>				begin : sv2v_autoblock_498</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13435,14 +13432,14 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.fpExStageIF.nextStage = nextStage;</pre>
-      <pre>				begin : sv2v_autoblock_498</pre>
+      <pre>				begin : sv2v_autoblock_499</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							Core.debugIF.fpExReg[i][65] = pipeReg[(i * 226) + 213];</pre>
       <pre>							Core.debugIF.fpExReg[i][60] = flush[i][0];</pre>
       <pre>							Core.debugIF.fpExReg[i][0+:12] = pipeReg[(i * 226) + 225-:12];</pre>
-      <pre>							begin : sv2v_autoblock_499</pre>
+      <pre>							begin : sv2v_autoblock_500</pre>
       <pre>								reg signed [31:0] j;</pre>
       <pre>								for (j = 1; j &lt; BasicTypes_FP_EXEC_STAGE_DEPTH; j = j + 1)</pre>
       <pre>									begin</pre>
@@ -13481,7 +13478,7 @@
       <pre>			localparam MemoryMapTypes_PC_WIDTH = 19;</pre>
       <pre>			reg [141:0] pipeReg;</pre>
       <pre>			always @(posedge Core.ctrlIF.clk)</pre>
-      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_500</pre>
+      <pre>				if (Core.ctrlIF.rst) begin : sv2v_autoblock_501</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						pipeReg[(i * 142) + 129] &lt;= 1&#39;sb0;</pre>
@@ -13531,7 +13528,7 @@
       <pre>					;</pre>
       <pre>				stall = Core.ctrlIF.backEnd[1];</pre>
       <pre>				clear = Core.ctrlIF.backEnd[0];</pre>
-      <pre>				begin : sv2v_autoblock_501</pre>
+      <pre>				begin : sv2v_autoblock_502</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13559,7 +13556,7 @@
       <pre>							Core.activeListIF.fpFFlagsData[i] = pipeReg[(i * 142) + 4-:5];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_502</pre>
+      <pre>				begin : sv2v_autoblock_503</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13598,7 +13595,7 @@
       <pre>				);</pre>
       <pre>			end</pre>
       <pre>			always @(posedge Core.fpDivSqrtUnitIF.clk)</pre>
-      <pre>				if (Core.fpDivSqrtUnitIF.rst) begin : sv2v_autoblock_503</pre>
+      <pre>				if (Core.fpDivSqrtUnitIF.rst) begin : sv2v_autoblock_504</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_DIVSQRT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13644,7 +13641,7 @@
       <pre>					;</pre>
       <pre>				nextPhase = regPhase;</pre>
       <pre>				nextActiveListPtr = regActiveListPtr;</pre>
-      <pre>				begin : sv2v_autoblock_504</pre>
+      <pre>				begin : sv2v_autoblock_505</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_DIVSQRT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13735,7 +13732,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
-      <pre>				begin : sv2v_autoblock_505</pre>
+      <pre>				begin : sv2v_autoblock_506</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13748,7 +13745,7 @@
       <pre>							Core.registerFileIF.intSrcRegDataB[i] = srcRegData[(10 - ((i * 2) + 1)) * 33+:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_506</pre>
+      <pre>				begin : sv2v_autoblock_507</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13761,7 +13758,7 @@
       <pre>							Core.registerFileIF.complexSrcRegDataB[i] = srcRegData[(10 - (((i + BasicTypes_INT_ISSUE_WIDTH) * 2) + 1)) * 33+:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_507</pre>
+      <pre>				begin : sv2v_autoblock_508</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13771,7 +13768,7 @@
       <pre>							Core.registerFileIF.memSrcRegDataB[i] = (Core.registerFileIF.memSrcRegNumB[i][6] ? srcFPRegData[(4 - (i + 3)) * 33+:33] : srcRegData[(10 - ((((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH) * 2) + 1)) * 33+:33]);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_508</pre>
+      <pre>				begin : sv2v_autoblock_509</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13780,7 +13777,7 @@
       <pre>							dstRegData[(4 - ((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH)) * 33+:33] = Core.registerFileIF.memDstRegData[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_509</pre>
+      <pre>				begin : sv2v_autoblock_510</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13790,7 +13787,7 @@
       <pre>							dstRegData[(4 - (((i + BasicTypes_INT_ISSUE_WIDTH) + BasicTypes_COMPLEX_ISSUE_WIDTH) + BasicTypes_LOAD_ISSUE_WIDTH)) * 33+:33] = Core.registerFileIF.fpDstRegData[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				if (Core.registerFileIF.rst) begin : sv2v_autoblock_510</pre>
+      <pre>				if (Core.registerFileIF.rst) begin : sv2v_autoblock_511</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; REG_WRITE_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13823,7 +13820,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
-      <pre>				begin : sv2v_autoblock_511</pre>
+      <pre>				begin : sv2v_autoblock_512</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13838,12 +13835,12 @@
       <pre>							Core.registerFileIF.fpSrcRegDataC[i] = srcFPRegData[(4 - ((i * 3) + 2)) * 33+:33];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_512</pre>
+      <pre>				begin : sv2v_autoblock_513</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						srcFPRegNum[(4 - (i + 3)) * BasicTypes_PSCALAR_FP_NUM_BIT_WIDTH+:BasicTypes_PSCALAR_FP_NUM_BIT_WIDTH] = Core.registerFileIF.memSrcRegNumB[i][5-:6];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_513</pre>
+      <pre>				begin : sv2v_autoblock_514</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13852,7 +13849,7 @@
       <pre>							dstFPRegData[(1 - (i + BasicTypes_FP_ISSUE_WIDTH)) * 33+:33] = Core.registerFileIF.memDstRegData[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				if (Core.registerFileIF.rst) begin : sv2v_autoblock_514</pre>
+      <pre>				if (Core.registerFileIF.rst) begin : sv2v_autoblock_515</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; FP_WRITE_NUM; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -13902,9 +13899,9 @@
       <pre>					ret[1-:1] = 0;</pre>
       <pre>					ret[2-:1] = 0;</pre>
       <pre>					ret[0-:BasicTypes_FP_ISSUE_WIDTH_BIT_SIZE] = 0;</pre>
-      <pre>					begin : sv2v_autoblock_515</pre>
+      <pre>					begin : sv2v_autoblock_516</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_516</pre>
+      <pre>						begin : sv2v_autoblock_517</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -13932,9 +13929,9 @@
       <pre>						end</pre>
       <pre>					end</pre>
       <pre>					if (_sv2v_jump == 2&#39;b00) begin</pre>
-      <pre>						begin : sv2v_autoblock_517</pre>
+      <pre>						begin : sv2v_autoblock_518</pre>
       <pre>							reg signed [31:0] i;</pre>
-      <pre>							begin : sv2v_autoblock_518</pre>
+      <pre>							begin : sv2v_autoblock_519</pre>
       <pre>								reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>								for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>									if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -14041,7 +14038,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
-      <pre>				begin : sv2v_autoblock_519</pre>
+      <pre>				begin : sv2v_autoblock_520</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14052,7 +14049,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.bypassNetworkIF.intCtrlOut = intBypassCtrl;</pre>
-      <pre>				begin : sv2v_autoblock_520</pre>
+      <pre>				begin : sv2v_autoblock_521</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14061,7 +14058,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.bypassNetworkIF.complexCtrlOut = complexBypassCtrl;</pre>
-      <pre>				begin : sv2v_autoblock_521</pre>
+      <pre>				begin : sv2v_autoblock_522</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14069,7 +14066,7 @@
       <pre>							memRR[i][0] = Core.bypassNetworkIF.memWriteReg[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_522</pre>
+      <pre>				begin : sv2v_autoblock_523</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14078,7 +14075,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				Core.bypassNetworkIF.memCtrlOut = memBypassCtrl;</pre>
-      <pre>				begin : sv2v_autoblock_523</pre>
+      <pre>				begin : sv2v_autoblock_524</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14170,7 +14167,7 @@
       <pre>			always @(*) begin</pre>
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
-      <pre>				begin : sv2v_autoblock_524</pre>
+      <pre>				begin : sv2v_autoblock_525</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_INT_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14179,7 +14176,7 @@
       <pre>							Core.bypassNetworkIF.intSrcRegDataOutB[i] = SelectData(Core.bypassNetworkIF.intCtrlIn[i][13-:7], intEX, intWB, memMA, memWB);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_525</pre>
+      <pre>				begin : sv2v_autoblock_526</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMPLEX_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14187,12 +14184,12 @@
       <pre>							Core.bypassNetworkIF.complexSrcRegDataOutB[i] = SelectData(Core.bypassNetworkIF.complexCtrlIn[i][13-:7], intEX, intWB, memMA, memWB);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_526</pre>
+      <pre>				begin : sv2v_autoblock_527</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_LOAD_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						memDst[i][32-:33] = Core.bypassNetworkIF.memDstRegDataOut[i];</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_527</pre>
+      <pre>				begin : sv2v_autoblock_528</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_MEM_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14200,7 +14197,7 @@
       <pre>							Core.bypassNetworkIF.memSrcRegDataOutB[i] = SelectData(Core.bypassNetworkIF.memCtrlIn[i][13-:7], intEX, intWB, memMA, memWB);</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				begin : sv2v_autoblock_528</pre>
+      <pre>				begin : sv2v_autoblock_529</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_FP_ISSUE_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14266,9 +14263,9 @@
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
       <pre>					finishedInsnRange = 0;</pre>
-      <pre>					begin : sv2v_autoblock_529</pre>
+      <pre>					begin : sv2v_autoblock_530</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_530</pre>
+      <pre>						begin : sv2v_autoblock_531</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 1; i &gt;= 0; i = i - 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -14295,9 +14292,9 @@
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
       <pre>					finishedOpNum = 0;</pre>
-      <pre>					begin : sv2v_autoblock_531</pre>
+      <pre>					begin : sv2v_autoblock_532</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_532</pre>
+      <pre>						begin : sv2v_autoblock_533</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
@@ -14323,17 +14320,17 @@
       <pre>				reg [0:1] _sv2v_jump;</pre>
       <pre>				begin</pre>
       <pre>					_sv2v_jump = 2&#39;b00;</pre>
-      <pre>					begin : sv2v_autoblock_533</pre>
+      <pre>					begin : sv2v_autoblock_534</pre>
       <pre>						reg signed [31:0] i;</pre>
-      <pre>						begin : sv2v_autoblock_534</pre>
+      <pre>						begin : sv2v_autoblock_535</pre>
       <pre>							reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>							for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>								if (_sv2v_jump &lt; 2&#39;b10) begin</pre>
       <pre>									_sv2v_jump = 2&#39;b00;</pre>
       <pre>									headOfThisInsn[(1 - i) * BasicTypes_COMMIT_WIDTH_BIT_SIZE+:BasicTypes_COMMIT_WIDTH_BIT_SIZE] = 0;</pre>
-      <pre>									begin : sv2v_autoblock_535</pre>
+      <pre>									begin : sv2v_autoblock_536</pre>
       <pre>										reg signed [31:0] j;</pre>
-      <pre>										begin : sv2v_autoblock_536</pre>
+      <pre>										begin : sv2v_autoblock_537</pre>
       <pre>											reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>											reg [0:1] _sv2v_jump_1;</pre>
       <pre>											_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -14354,9 +14351,9 @@
       <pre>									end</pre>
       <pre>									if (_sv2v_jump == 2&#39;b00) begin</pre>
       <pre>										tailOfThisInsn[(1 - i) * BasicTypes_COMMIT_WIDTH_BIT_SIZE+:BasicTypes_COMMIT_WIDTH_BIT_SIZE] = 1;</pre>
-      <pre>										begin : sv2v_autoblock_537</pre>
+      <pre>										begin : sv2v_autoblock_538</pre>
       <pre>											reg signed [31:0] j;</pre>
-      <pre>											begin : sv2v_autoblock_538</pre>
+      <pre>											begin : sv2v_autoblock_539</pre>
       <pre>												reg signed [31:0] _sv2v_value_on_break;</pre>
       <pre>												reg [0:1] _sv2v_jump_1;</pre>
       <pre>												_sv2v_jump_1 = _sv2v_jump;</pre>
@@ -14412,7 +14409,7 @@
       <pre>					GetInsnPtr(headOfThisInsn, tailOfThisInsn, last);</pre>
       <pre>					GetFinishedOpNum(finishedOpNum, activeListCount, execState);</pre>
       <pre>					GetFinishedInsnRange(finishedInsnRange, finishedOpNum, execState, last);</pre>
-      <pre>					begin : sv2v_autoblock_539</pre>
+      <pre>					begin : sv2v_autoblock_540</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>							if (execState[(1 - i) * 4+:4] == 4&#39;b0011) begin</pre>
@@ -14446,7 +14443,7 @@
       <pre>					recoveryStart = BasicTypes_COMMIT_WIDTH;</pre>
       <pre>					refetchType = 3&#39;b000;</pre>
       <pre>					recoveryCause = 4&#39;b0001;</pre>
-      <pre>					begin : sv2v_autoblock_540</pre>
+      <pre>					begin : sv2v_autoblock_541</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>							if (i &lt; finishedInsnRange) begin</pre>
@@ -14460,7 +14457,7 @@
       <pre>							end</pre>
       <pre>					end</pre>
       <pre>					toRecoveryPhase = ((startCommit &amp;&amp; recoveryTrigger) &amp;&amp; !unableToStartRecovery ? BasicTypes_TRUE : BasicTypes_FALSE);</pre>
-      <pre>					begin : sv2v_autoblock_541</pre>
+      <pre>					begin : sv2v_autoblock_542</pre>
       <pre>						reg signed [31:0] i;</pre>
       <pre>						for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>							if (startCommit) begin</pre>
@@ -14486,7 +14483,7 @@
       <pre>				alReadData = Core.activeListIF.readData;</pre>
       <pre>				execState = Core.activeListIF.headExecState;</pre>
       <pre>				phase = Core.recoveryManagerIF.phase;</pre>
-      <pre>				begin : sv2v_autoblock_542</pre>
+      <pre>				begin : sv2v_autoblock_543</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14499,7 +14496,7 @@
       <pre>				commitNum = 0;</pre>
       <pre>				commitLoadNum = 0;</pre>
       <pre>				commitStoreNum = 0;</pre>
-      <pre>				begin : sv2v_autoblock_543</pre>
+      <pre>				begin : sv2v_autoblock_544</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i]) begin</pre>
@@ -14512,7 +14509,7 @@
       <pre>				end</pre>
       <pre>				Core.renameLogicIF.commit = commit[0];</pre>
       <pre>				Core.renameLogicIF.commitNum = commitNum;</pre>
-      <pre>				begin : sv2v_autoblock_544</pre>
+      <pre>				begin : sv2v_autoblock_545</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i]) begin</pre>
@@ -14535,7 +14532,7 @@
       <pre>				Core.recoveryManagerIF.recoveryOpIndex = recoveryOpIndex;</pre>
       <pre>				Core.recoveryManagerIF.recoveryCauseFromCommitStage = recoveryCause;</pre>
       <pre>				lastCommittedPC = prevLastCommittedPC;</pre>
-      <pre>				begin : sv2v_autoblock_545</pre>
+      <pre>				begin : sv2v_autoblock_546</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i])</pre>
@@ -14544,7 +14541,7 @@
       <pre>				Core.csrUnitIF.commitNum = commitNum;</pre>
       <pre>				fflagsWE = BasicTypes_FALSE;</pre>
       <pre>				fflagsData = 1&#39;sb0;</pre>
-      <pre>				begin : sv2v_autoblock_546</pre>
+      <pre>				begin : sv2v_autoblock_547</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						if (commit[i]) begin</pre>
@@ -14554,7 +14551,7 @@
       <pre>				end</pre>
       <pre>				Core.csrUnitIF.fflagsWE = fflagsWE;</pre>
       <pre>				Core.csrUnitIF.fflagsData = fflagsData;</pre>
-      <pre>				begin : sv2v_autoblock_547</pre>
+      <pre>				begin : sv2v_autoblock_548</pre>
       <pre>					reg signed [31:0] i;</pre>
       <pre>					for (i = 0; i &lt; BasicTypes_COMMIT_WIDTH; i = i + 1)</pre>
       <pre>						begin</pre>
@@ -14931,7 +14928,7 @@
       <pre>				reqExternalInterrupt = csrReg[267] &amp;&amp; csrReg[299];</pre>
       <pre>				reqInterrupt = csrReg[323] &amp;&amp; (reqTimerInterrupt || reqExternalInterrupt);</pre>
       <pre>				interruptCodeConv[4-:BasicTypes_RSD_EXTERNAL_INTERRUPT_CODE_WIDTH] = Core.csrUnitIF.externalInterruptCodeInCSR;</pre>
-      <pre>				if (reqTimerInterrupt) begin : sv2v_autoblock_548</pre>
+      <pre>				if (reqTimerInterrupt) begin : sv2v_autoblock_549</pre>
       <pre>					reg [4:0] sv2v_tmp_cast;</pre>
       <pre>					sv2v_tmp_cast = 7;</pre>
       <pre>					interruptCode = sv2v_tmp_cast;</pre>
