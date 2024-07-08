@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/ariane'] = [["cores","ariane",0,"logs/VeribleExtractor/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]
+config_loader_data['veribleextractor/ariane'] = [["cores","ariane",1,"logs/VeribleExtractor/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]
