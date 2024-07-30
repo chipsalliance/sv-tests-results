@@ -1,1 +1,1 @@
-config_loader_data['veribleextractor/6.6.8'] = [["","interconnect",0,"logs/VeribleExtractor/chapter-6/6.6.8--interconnect.sv.log.html","tests/chapter-6/6.6.8--interconnect.sv.html"]]
+config_loader_data['veribleextractor/6.6.8'] = [["","interconnect",1,"logs/VeribleExtractor/chapter-6/6.6.8--interconnect.sv.log.html","tests/chapter-6/6.6.8--interconnect.sv.html"]]
