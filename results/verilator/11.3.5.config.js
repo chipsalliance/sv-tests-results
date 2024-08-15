@@ -1,1 +1,1 @@
-config_loader_data['verilator/11.3.5'] = [["","expr_short_circuit",0,"logs/Verilator/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]
+config_loader_data['verilator/11.3.5'] = [["","expr_short_circuit",1,"logs/Verilator/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]
