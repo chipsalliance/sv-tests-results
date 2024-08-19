@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/8.12'] = [["","assignment",0,"logs/circt_verilog/chapter-8/8.12--assignment.sv.log.html","tests/chapter-8/8.12--assignment.sv.html"],["","shallow_copy",0,"logs/circt_verilog/chapter-8/8.12--shallow_copy.sv.log.html","tests/chapter-8/8.12--shallow_copy.sv.html"]]

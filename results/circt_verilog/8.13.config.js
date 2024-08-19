@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/8.13'] = [["","inheritance",0,"logs/circt_verilog/chapter-8/8.13--inheritance.sv.log.html","tests/chapter-8/8.13--inheritance.sv.html"]]

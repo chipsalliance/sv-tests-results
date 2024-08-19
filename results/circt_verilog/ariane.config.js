@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/ariane'] = [["cores","ariane",0,"logs/circt_verilog/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]

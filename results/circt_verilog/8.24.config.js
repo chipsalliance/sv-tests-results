@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/8.24'] = [["","out_of_block_methods",0,"logs/circt_verilog/chapter-8/8.24--out_of_block_methods.sv.log.html","tests/chapter-8/8.24--out_of_block_methods.sv.html"]]

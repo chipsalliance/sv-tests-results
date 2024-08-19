@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/7.4'] = [["","basic-packed",1,"logs/circt_verilog/chapter-7/arrays/packed/basic.sv.log.html","tests/chapter-7/arrays/packed/basic.sv.html"],["","basic-unpacked",1,"logs/circt_verilog/chapter-7/arrays/unpacked/basic.sv.log.html","tests/chapter-7/arrays/unpacked/basic.sv.html"]]

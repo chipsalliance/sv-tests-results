@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/6.6.6'] = [["","net_supply0",1,"logs/circt_verilog/generated/nets/6.6.6--net_supply0.sv.log.html","tests/generated/nets/6.6.6--net_supply0.sv.html"],["","net_supply1",1,"logs/circt_verilog/generated/nets/6.6.6--net_supply1.sv.log.html","tests/generated/nets/6.6.6--net_supply1.sv.html"]]

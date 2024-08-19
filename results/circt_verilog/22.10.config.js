@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/22.10'] = [["","22.10--celldefine-basic-1",1,"logs/circt_verilog/chapter-22/22.10--celldefine-basic-1.sv.log.html","tests/chapter-22/22.10--celldefine-basic-1.sv.html"],["","22.10--celldefine-basic-2",1,"logs/circt_verilog/chapter-22/22.10--celldefine-basic-2.sv.log.html","tests/chapter-22/22.10--celldefine-basic-2.sv.html"]]

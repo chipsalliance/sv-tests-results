@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/7.8.3'] = [["","associative-arrays-class",0,"logs/circt_verilog/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]

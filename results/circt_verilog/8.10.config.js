@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/8.10'] = [["","static_methods",0,"logs/circt_verilog/chapter-8/8.10--static_methods.sv.log.html","tests/chapter-8/8.10--static_methods.sv.html"]]

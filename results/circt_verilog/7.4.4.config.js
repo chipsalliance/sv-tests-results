@@ -1,0 +1,1 @@
+config_loader_data['circt_verilog/7.4.4'] = [["","memories-basic",1,"logs/circt_verilog/chapter-7/memories/basic.sv.log.html","tests/chapter-7/memories/basic.sv.html"],["","memories-read-write",0,"logs/circt_verilog/chapter-7/memories/read-write.sv.log.html","tests/chapter-7/memories/read-write.sv.html"]]
