@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.5.3'] = [["","dynamic-arrays-op-delete",1,"logs/tree_sitter_systemverilog/chapter-7/arrays/dynamic/op-delete.sv.log.html","tests/chapter-7/arrays/dynamic/op-delete.sv.html"]]

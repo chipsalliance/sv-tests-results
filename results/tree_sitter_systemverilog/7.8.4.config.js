@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.8.4'] = [["","associative-arrays-integral",1,"logs/tree_sitter_systemverilog/chapter-7/arrays/associative/integral.sv.log.html","tests/chapter-7/arrays/associative/integral.sv.html"]]

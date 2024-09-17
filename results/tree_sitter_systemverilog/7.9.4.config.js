@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.9.4'] = [["","associative-arrays-first",1,"logs/tree_sitter_systemverilog/chapter-7/arrays/associative/methods/first.sv.log.html","tests/chapter-7/arrays/associative/methods/first.sv.html"]]

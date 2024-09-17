@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/6.19.5.4'] = [["","enum_prev",1,"logs/tree_sitter_systemverilog/chapter-6/6.19.5.4--enum_prev.sv.log.html","tests/chapter-6/6.19.5.4--enum_prev.sv.html"]]

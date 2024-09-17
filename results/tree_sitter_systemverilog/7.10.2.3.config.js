@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.10.2.3'] = [["","delete",1,"logs/tree_sitter_systemverilog/chapter-7/queues/delete.sv.log.html","tests/chapter-7/queues/delete.sv.html"]]

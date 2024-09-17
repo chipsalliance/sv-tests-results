@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/8.8'] = [["","typed_constructor",1,"logs/tree_sitter_systemverilog/chapter-8/8.8--typed_constructor.sv.log.html","tests/chapter-8/8.8--typed_constructor.sv.html"],["","typed_constructor_param",1,"logs/tree_sitter_systemverilog/chapter-8/8.8--typed_constructor_param.sv.log.html","tests/chapter-8/8.8--typed_constructor_param.sv.html"]]

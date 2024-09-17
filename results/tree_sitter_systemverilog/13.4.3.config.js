@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/13.4.3'] = [["","const_function",1,"logs/tree_sitter_systemverilog/chapter-13/13.4.3--const-function.sv.log.html","tests/chapter-13/13.4.3--const-function.sv.html"]]

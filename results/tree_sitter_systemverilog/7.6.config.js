@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.6'] = [["","array-unpacked-assignments",1,"logs/tree_sitter_systemverilog/chapter-7/arrays/unpacked/assignments.sv.log.html","tests/chapter-7/arrays/unpacked/assignments.sv.html"]]

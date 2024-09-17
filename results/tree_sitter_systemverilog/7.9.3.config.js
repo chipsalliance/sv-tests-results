@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.9.3'] = [["","associative-arrays-exists",1,"logs/tree_sitter_systemverilog/chapter-7/arrays/associative/methods/exists.sv.log.html","tests/chapter-7/arrays/associative/methods/exists.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/8.15'] = [["","super",1,"logs/tree_sitter_systemverilog/chapter-8/8.15--super.sv.log.html","tests/chapter-8/8.15--super.sv.html"],["","super-def-new",1,"logs/tree_sitter_systemverilog/chapter-8/8.15--super-default-new.sv.log.html","tests/chapter-8/8.15--super-default-new.sv.html"]]

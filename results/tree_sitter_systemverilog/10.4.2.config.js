@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/10.4.2'] = [["","non_blocking_assignment",1,"logs/tree_sitter_systemverilog/chapter-10/10.4.2--non-blocking-assignment.sv.log.html","tests/chapter-10/10.4.2--non-blocking-assignment.sv.html"]]

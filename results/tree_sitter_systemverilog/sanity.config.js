@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/sanity'] = [["","sanity",1,"logs/tree_sitter_systemverilog/sanity.sv.log.html","tests/sanity.sv.html"]]

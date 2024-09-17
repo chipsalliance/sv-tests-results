@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/8.22'] = [["","dynamic_method_lookup",1,"logs/tree_sitter_systemverilog/chapter-8/8.22--dynamic_method_lookup.sv.log.html","tests/chapter-8/8.22--dynamic_method_lookup.sv.html"]]

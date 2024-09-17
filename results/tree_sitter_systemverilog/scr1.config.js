@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/scr1'] = [["cores","scr1",0,"logs/tree_sitter_systemverilog/generated/scr1/scr1.sv.log.html","third_party/cores/scr1/src/core/pipeline/scr1_pipe_hdu.sv.html"]]

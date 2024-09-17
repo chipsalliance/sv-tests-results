@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/rsd'] = [["cores","rsd",0,"logs/tree_sitter_systemverilog/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

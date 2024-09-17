@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/6.9.1'] = [["","logic_vector",1,"logs/tree_sitter_systemverilog/chapter-6/6.9.1--logic_vector.sv.log.html","tests/chapter-6/6.9.1--logic_vector.sv.html"]]

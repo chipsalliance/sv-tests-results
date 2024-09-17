@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/8.23'] = [["","scope_resolution",1,"logs/tree_sitter_systemverilog/chapter-8/8.23--scope_resolution.sv.log.html","tests/chapter-8/8.23--scope_resolution.sv.html"]]

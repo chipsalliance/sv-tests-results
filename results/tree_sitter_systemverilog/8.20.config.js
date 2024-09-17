@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/8.20'] = [["","virtual_method",1,"logs/tree_sitter_systemverilog/chapter-8/8.20--virtual_method.sv.log.html","tests/chapter-8/8.20--virtual_method.sv.html"]]

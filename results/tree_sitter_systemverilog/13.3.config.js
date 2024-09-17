@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/13.3'] = [["","task",1,"logs/tree_sitter_systemverilog/chapter-13/13.3--task.sv.log.html","tests/chapter-13/13.3--task.sv.html"]]

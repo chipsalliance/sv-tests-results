@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/7.10.1'] = [["","max-size",1,"logs/tree_sitter_systemverilog/chapter-7/queues/max-size.sv.log.html","tests/chapter-7/queues/max-size.sv.html"],["","slice",1,"logs/tree_sitter_systemverilog/chapter-7/queues/slice.sv.log.html","tests/chapter-7/queues/slice.sv.html"]]

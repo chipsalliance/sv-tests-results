@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/8.12'] = [["","assignment",1,"logs/tree_sitter_systemverilog/chapter-8/8.12--assignment.sv.log.html","tests/chapter-8/8.12--assignment.sv.html"],["","shallow_copy",1,"logs/tree_sitter_systemverilog/chapter-8/8.12--shallow_copy.sv.log.html","tests/chapter-8/8.12--shallow_copy.sv.html"]]

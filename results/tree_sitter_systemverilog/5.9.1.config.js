@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/5.9.1'] = [["","string-special-chars",1,"logs/tree_sitter_systemverilog/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]

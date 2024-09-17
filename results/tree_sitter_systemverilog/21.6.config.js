@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/21.6'] = [["","test_plusargs",1,"logs/tree_sitter_systemverilog/chapter-21/21.6--test.sv.log.html","tests/chapter-21/21.6--test.sv.html"],["","value_plusargs",1,"logs/tree_sitter_systemverilog/chapter-21/21.6--value.sv.log.html","tests/chapter-21/21.6--value.sv.html"]]

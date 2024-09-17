@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/6.24.3'] = [["","bitstream_cast",1,"logs/tree_sitter_systemverilog/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]

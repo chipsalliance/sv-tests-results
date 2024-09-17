@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/tnoc'] = [["cores","TNoC",1,"logs/tree_sitter_systemverilog/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]

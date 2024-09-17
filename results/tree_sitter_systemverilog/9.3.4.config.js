@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/9.3.4'] = [["","block_names_par",1,"logs/tree_sitter_systemverilog/chapter-9/9.3.4--block_names_par.sv.log.html","tests/chapter-9/9.3.4--block_names_par.sv.html"],["","block_names_seq",1,"logs/tree_sitter_systemverilog/chapter-9/9.3.4--block_names_seq.sv.log.html","tests/chapter-9/9.3.4--block_names_seq.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/9.3.1'] = [["","sequential_block",1,"logs/tree_sitter_systemverilog/chapter-9/9.3.1--sequential_block.sv.log.html","tests/chapter-9/9.3.1--sequential_block.sv.html"]]

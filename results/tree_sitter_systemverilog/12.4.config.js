@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_systemverilog/12.4'] = [["","if",1,"logs/tree_sitter_systemverilog/chapter-12/12.4--if.sv.log.html","tests/chapter-12/12.4--if.sv.html"],["","if_else",1,"logs/tree_sitter_systemverilog/chapter-12/12.4--if_else.sv.log.html","tests/chapter-12/12.4--if_else.sv.html"]]
