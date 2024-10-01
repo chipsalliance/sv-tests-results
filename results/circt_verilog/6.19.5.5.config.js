@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/6.19.5.5'] = [["","enum_num",0,"logs/circt_verilog/chapter-6/6.19.5.5--enum_num.sv.log.html","tests/chapter-6/6.19.5.5--enum_num.sv.html"]]
+config_loader_data['circt_verilog/6.19.5.5'] = [["","enum_num",1,"logs/circt_verilog/chapter-6/6.19.5.5--enum_num.sv.log.html","tests/chapter-6/6.19.5.5--enum_num.sv.html"]]
