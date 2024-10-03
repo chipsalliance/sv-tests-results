@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/9.4.2.2'] = [["","event_implicit",0,"logs/circt_verilog/chapter-9/9.4.2.2--event_implicit.sv.log.html","tests/chapter-9/9.4.2.2--event_implicit.sv.html"]]
+config_loader_data['circt_verilog/9.4.2.2'] = [["","event_implicit",1,"logs/circt_verilog/chapter-9/9.4.2.2--event_implicit.sv.log.html","tests/chapter-9/9.4.2.2--event_implicit.sv.html"]]

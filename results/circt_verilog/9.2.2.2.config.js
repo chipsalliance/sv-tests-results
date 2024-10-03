@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/9.2.2.2'] = [["","always_comb",0,"logs/circt_verilog/chapter-9/9.2.2.2--always_comb.sv.log.html","tests/chapter-9/9.2.2.2--always_comb.sv.html"]]
+config_loader_data['circt_verilog/9.2.2.2'] = [["","always_comb",1,"logs/circt_verilog/chapter-9/9.2.2.2--always_comb.sv.log.html","tests/chapter-9/9.2.2.2--always_comb.sv.html"]]
