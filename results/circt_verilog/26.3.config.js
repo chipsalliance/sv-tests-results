@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/26.3'] = [["","package_ref",0,"logs/circt_verilog/chapter-26/26.3--package-ref.sv.log.html","tests/chapter-26/26.3--package-ref.sv.html"]]
+config_loader_data['circt_verilog/26.3'] = [["","package_ref",1,"logs/circt_verilog/chapter-26/26.3--package-ref.sv.log.html","tests/chapter-26/26.3--package-ref.sv.html"]]

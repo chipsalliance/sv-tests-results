@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/5.9.1'] = [["","string-special-chars",0,"logs/circt_verilog/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]
+config_loader_data['circt_verilog/5.9.1'] = [["","string-special-chars",1,"logs/circt_verilog/chapter-5/5.9.1-string-special-chars.sv.log.html","tests/chapter-5/5.9.1-string-special-chars.sv.html"]]
