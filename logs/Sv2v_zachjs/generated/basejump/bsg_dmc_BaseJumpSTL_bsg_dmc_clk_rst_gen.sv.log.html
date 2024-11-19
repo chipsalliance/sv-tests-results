@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2024-11-18 01:39:43</dd></div>
-        <div><dt>time elapsed</dt><dd>0.065s</dd></div>
-        <div><dt>ram usage</dt><dd>86220 KB</dd></div>
+        <div><dt>completed</dt><dd>2024-11-19 01:39:25</dd></div>
+        <div><dt>time elapsed</dt><dd>0.091s</dd></div>
+        <div><dt>ram usage</dt><dd>95164 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -57,64 +57,89 @@
       <pre>	</pre>
       <pre>endmodule</pre>
       <pre>module bsg_dmc_clk_rst_gen (</pre>
-      <pre>	async_reset_tag_i,</pre>
-      <pre>	bsg_dly_tag_i,</pre>
-      <pre>	bsg_dly_trigger_tag_i,</pre>
-      <pre>	bsg_ds_tag_i,</pre>
-      <pre>	async_reset_o,</pre>
-      <pre>	clk_i,</pre>
-      <pre>	clk_o,</pre>
-      <pre>	clk_2x_i,</pre>
-      <pre>	clk_1x_o</pre>
+      <pre>	dly_tag_lines_i,</pre>
+      <pre>	osc_tag_lines_i,</pre>
+      <pre>	dqs_clk_i,</pre>
+      <pre>	dqs_clk_o,</pre>
+      <pre>	ext_dfi_clk_2x_i,</pre>
+      <pre>	ui_clk_i,</pre>
+      <pre>	async_reset_i,</pre>
+      <pre>	ui_reset_o,</pre>
+      <pre>	dfi_reset_o,</pre>
+      <pre>	dfi_clk_2x_o,</pre>
+      <pre>	dfi_clk_1x_o</pre>
       <pre>);</pre>
-      <pre>	parameter num_adgs_p = 2;</pre>
-      <pre>	parameter num_lines_p = 0;</pre>
-      <pre>	input wire [3:0] async_reset_tag_i;</pre>
-      <pre>	input wire [(num_lines_p * 4) - 1:0] bsg_dly_tag_i;</pre>
-      <pre>	input wire [(num_lines_p * 4) - 1:0] bsg_dly_trigger_tag_i;</pre>
-      <pre>	input wire [3:0] bsg_ds_tag_i;</pre>
-      <pre>	output wire async_reset_o;</pre>
-      <pre>	input [num_lines_p - 1:0] clk_i;</pre>
-      <pre>	output wire [num_lines_p - 1:0] clk_o;</pre>
-      <pre>	input clk_2x_i;</pre>
-      <pre>	output wire clk_1x_o;</pre>
+      <pre>	parameter num_taps_p = 4;</pre>
+      <pre>	parameter ds_width_p = 2;</pre>
+      <pre>	parameter dq_groups_p = 0;</pre>
+      <pre>	input wire [39:0] dly_tag_lines_i;</pre>
+      <pre>	input wire [19:0] osc_tag_lines_i;</pre>
+      <pre>	input [dq_groups_p - 1:0] dqs_clk_i;</pre>
+      <pre>	output wire [dq_groups_p - 1:0] dqs_clk_o;</pre>
+      <pre>	input ext_dfi_clk_2x_i;</pre>
+      <pre>	input ui_clk_i;</pre>
+      <pre>	input async_reset_i;</pre>
+      <pre>	output wire ui_reset_o;</pre>
+      <pre>	output wire dfi_reset_o;</pre>
+      <pre>	output wire dfi_clk_2x_o;</pre>
+      <pre>	output wire dfi_clk_1x_o;</pre>
       <pre>	localparam debug_level_lp = 0;</pre>
       <pre>	genvar _gv_i_1;</pre>
+      <pre>	wire dly_async_reset_r;</pre>
       <pre>	bsg_tag_client_unsync #(.width_p(1)) btc_async_reset(</pre>
-      <pre>		.bsg_tag_i(async_reset_tag_i),</pre>
-      <pre>		.data_async_r_o(async_reset_o)</pre>
+      <pre>		.bsg_tag_i(dly_tag_lines_i[3-:4]),</pre>
+      <pre>		.data_async_r_o(dly_async_reset_r)</pre>
       <pre>	);</pre>
       <pre>	generate</pre>
-      <pre>		for (_gv_i_1 = 0; _gv_i_1 &lt; num_lines_p; _gv_i_1 = _gv_i_1 + 1) begin : dly_lines</pre>
+      <pre>		for (_gv_i_1 = 0; _gv_i_1 &lt; dq_groups_p; _gv_i_1 = _gv_i_1 + 1) begin : dly_lines</pre>
       <pre>			localparam i = _gv_i_1;</pre>
-      <pre>			bsg_dly_line #(.num_adgs_p(num_adgs_p)) dly_line_inst(</pre>
-      <pre>				.bsg_tag_i(bsg_dly_tag_i[i * 4+:4]),</pre>
-      <pre>				.bsg_tag_trigger_i(bsg_dly_trigger_tag_i[i * 4+:4]),</pre>
-      <pre>				.async_reset_i(async_reset_o),</pre>
-      <pre>				.clk_i(clk_i[i]),</pre>
-      <pre>				.clk_o(clk_o[i])</pre>
+      <pre>			bsg_dmc_dly_line_v3 #(.num_taps_p(num_taps_p)) dly_line_inst(</pre>
+      <pre>				.clk_i(dqs_clk_i[i]),</pre>
+      <pre>				.async_reset_i(dly_async_reset_r),</pre>
+      <pre>				.clk_o(dqs_clk_o[i])</pre>
       <pre>			);</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
-      <pre>	wire [2:0] ds_tag_payload_r;</pre>
+      <pre>	wire [ds_width_p + 0:0] ds_tag_payload_r;</pre>
       <pre>	wire ds_tag_payload_new_r;</pre>
       <pre>	bsg_tag_client #(</pre>
-      <pre>		.width_p(3),</pre>
+      <pre>		.width_p(((ds_width_p + 0) &gt;= 0 ? ds_width_p + 1 : 1 - (ds_width_p + 0))),</pre>
       <pre>		.harden_p(1)</pre>
       <pre>	) btc_ds(</pre>
-      <pre>		.bsg_tag_i(bsg_ds_tag_i),</pre>
-      <pre>		.recv_clk_i(clk_2x_i),</pre>
+      <pre>		.bsg_tag_i(dly_tag_lines_i[39-:4]),</pre>
+      <pre>		.recv_clk_i(dfi_clk_2x_o),</pre>
       <pre>		.recv_new_r_o(ds_tag_payload_new_r),</pre>
       <pre>		.recv_data_r_o(ds_tag_payload_r)</pre>
       <pre>	);</pre>
       <pre>	bsg_counter_clock_downsample #(</pre>
-      <pre>		.width_p(2),</pre>
+      <pre>		.width_p(ds_width_p),</pre>
       <pre>		.harden_p(1)</pre>
       <pre>	) clk_gen_ds_inst(</pre>
-      <pre>		.clk_i(clk_2x_i),</pre>
+      <pre>		.clk_i(dfi_clk_2x_o),</pre>
       <pre>		.reset_i(ds_tag_payload_r[0]),</pre>
-      <pre>		.val_i(2&#39;d0),</pre>
-      <pre>		.clk_r_o(clk_1x_o)</pre>
+      <pre>		.val_i(ds_tag_payload_r[ds_width_p + 0-:((ds_width_p + 0) &gt;= 1 ? ds_width_p + 0 : 2 - (ds_width_p + 0))]),</pre>
+      <pre>		.clk_r_o(dfi_clk_1x_o)</pre>
+      <pre>	);</pre>
+      <pre>	wire osc_async_reset_r;</pre>
+      <pre>	bsg_tag_client_unsync #(.width_p(1)) osc_async_reset(</pre>
+      <pre>		.bsg_tag_i(osc_tag_lines_i[3-:4]),</pre>
+      <pre>		.data_async_r_o(osc_async_reset_r)</pre>
+      <pre>	);</pre>
+      <pre>	wire [1:0] sel_tag_payload_r;</pre>
+      <pre>	bsg_tag_client_unsync #(.width_p(2)) osc_sel(</pre>
+      <pre>		.bsg_tag_i(osc_tag_lines_i[19-:4]),</pre>
+      <pre>		.data_async_r_o(sel_tag_payload_r)</pre>
+      <pre>	);</pre>
+      <pre>	assign dfi_clk_2x_o = ext_dfi_clk_2x_i;</pre>
+      <pre>	bsg_sync_sync #(.width_p(1)) ui_reset_inst(</pre>
+      <pre>		.oclk_i(ui_clk_i),</pre>
+      <pre>		.iclk_data_i(async_reset_i),</pre>
+      <pre>		.oclk_data_o(ui_reset_o)</pre>
+      <pre>	);</pre>
+      <pre>	bsg_sync_sync #(.width_p(1)) dfi_reset_inst(</pre>
+      <pre>		.oclk_i(dfi_clk_1x_o),</pre>
+      <pre>		.iclk_data_i(async_reset_i),</pre>
+      <pre>		.oclk_data_o(dfi_reset_o)</pre>
       <pre>	);</pre>
       <pre>endmodule</pre>
       <pre>module bsg_dmc_clk_rst_gen__abstract;</pre>
