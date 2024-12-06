@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/12.5'] = [["","case",0,"logs/circt_verilog/chapter-12/12.5--case.sv.log.html","tests/chapter-12/12.5--case.sv.html"]]
+config_loader_data['circt_verilog/12.5'] = [["","case",1,"logs/circt_verilog/chapter-12/12.5--case.sv.log.html","tests/chapter-12/12.5--case.sv.html"]]
