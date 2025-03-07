@@ -1,1 +1,1 @@
-config_loader_data['tree_sitter_systemverilog/6.19.3'] = [["","enum_type_checking",1,"logs/tree_sitter_systemverilog/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"]]
+config_loader_data['tree_sitter_systemverilog/6.19.3'] = [["","enum_type_checking",0,"logs/tree_sitter_systemverilog/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"]]
