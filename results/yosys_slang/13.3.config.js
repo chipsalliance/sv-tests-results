@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/13.3'] = [["","task",0,"logs/yosys_slang/chapter-13/13.3--task.sv.log.html","tests/chapter-13/13.3--task.sv.html"],["","task-label",0,"logs/yosys_slang/chapter-13/13.3--task-label.sv.log.html","tests/chapter-13/13.3--task-label.sv.html"]]
+config_loader_data['yosys_slang/13.3'] = [["","task",1,"logs/yosys_slang/chapter-13/13.3--task.sv.log.html","tests/chapter-13/13.3--task.sv.html"],["","task-label",1,"logs/yosys_slang/chapter-13/13.3--task-label.sv.log.html","tests/chapter-13/13.3--task-label.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/7.9.8'] = [["","associative-arrays-arg-traversal",0,"logs/yosys_slang/chapter-7/arrays/associative/methods/traversal.sv.log.html","tests/chapter-7/arrays/associative/methods/traversal.sv.html"]]
+config_loader_data['yosys_slang/7.9.8'] = [["","associative-arrays-arg-traversal",1,"logs/yosys_slang/chapter-7/arrays/associative/methods/traversal.sv.log.html","tests/chapter-7/arrays/associative/methods/traversal.sv.html"]]

@@ -1,1 +1,1 @@
-config_loader_data['yosys_slang/7.9.6'] = [["","associative-arrays-next",0,"logs/yosys_slang/chapter-7/arrays/associative/methods/next.sv.log.html","tests/chapter-7/arrays/associative/methods/next.sv.html"]]
+config_loader_data['yosys_slang/7.9.6'] = [["","associative-arrays-next",1,"logs/yosys_slang/chapter-7/arrays/associative/methods/next.sv.log.html","tests/chapter-7/arrays/associative/methods/next.sv.html"]]
