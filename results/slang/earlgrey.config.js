@@ -1,1 +1,0 @@
-config_loader_data['slang/earlgrey'] = [["cores","earlgrey",0,"logs/Slang/generated/fusesoc/earlgrey-sim.sv.log.html","build/lowrisc_dv_chip_verilator_sim_0.1/src/lowrisc_constants_jtag_id_pkg_0/rtl/jtag_id_pkg.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['veribleextractor/earlgrey'] = [["cores","earlgrey",1,"logs/VeribleExtractor/generated/fusesoc/earlgrey-synth.sv.log.html","build/lowrisc_systems_chip_earlgrey_nexysvideo_0.1/src/lowrisc_constants_jtag_id_pkg_0/rtl/jtag_id_pkg.sv.html"]]

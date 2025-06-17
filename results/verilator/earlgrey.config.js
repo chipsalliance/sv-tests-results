@@ -1,1 +1,0 @@
-config_loader_data['verilator/earlgrey'] = [["cores","earlgrey",0,"logs/Verilator/generated/fusesoc/earlgrey-sim.sv.log.html","build/lowrisc_dv_chip_verilator_sim_0.1/src/lowrisc_lint_comportable_0.1/tools/verilator/comportable.vlt.html"]]
