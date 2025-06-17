@@ -1,1 +1,1 @@
-config_loader_data['yosys/6.23'] = [["","type_op_compare",0,"logs/Yosys/chapter-6/6.23--type_op_compare.sv.log.html","tests/chapter-6/6.23--type_op_compare.sv.html"]]
+config_loader_data['yosys/6.23'] = [["","localparam_type_decl",0,"logs/Yosys/chapter-6/6.23--localparam_type_decl.sv.log.html","tests/chapter-6/6.23--localparam_type_decl.sv.html"],["","type_op_compare",0,"logs/Yosys/chapter-6/6.23--type_op_compare.sv.log.html","tests/chapter-6/6.23--type_op_compare.sv.html"]]
