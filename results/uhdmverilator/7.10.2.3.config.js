@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/7.10.2.3'] = [["","delete",0,"logs/UhdmVerilator/chapter-7/queues/delete.sv.log.html","tests/chapter-7/queues/delete.sv.html"]]

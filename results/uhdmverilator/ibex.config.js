@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/ibex'] = [["cores","ibex",0,"logs/UhdmVerilator/generated/fusesoc/ibex-sim.sv.log.html","build/lowrisc_ibex_ibex_simple_system_0/src/lowrisc_lint_common_0.1/tools/verilator/common.vlt.html"]]

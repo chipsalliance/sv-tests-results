@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/6.19.5.2'] = [["","enum_last",1,"logs/UhdmVerilator/chapter-6/6.19.5.2--enum_last.sv.log.html","tests/chapter-6/6.19.5.2--enum_last.sv.html"]]

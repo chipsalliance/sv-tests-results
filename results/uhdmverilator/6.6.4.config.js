@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/6.6.4'] = [["","net_trireg",0,"logs/UhdmVerilator/generated/nets/6.6.4--net_trireg.sv.log.html","tests/generated/nets/6.6.4--net_trireg.sv.html"]]

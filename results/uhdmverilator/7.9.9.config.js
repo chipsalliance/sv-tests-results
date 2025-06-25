@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/7.9.9'] = [["","associative-arrays-assignment",0,"logs/UhdmVerilator/chapter-7/arrays/associative/assignment.sv.log.html","tests/chapter-7/arrays/associative/assignment.sv.html"]]

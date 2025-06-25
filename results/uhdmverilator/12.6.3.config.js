@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/12.6.3'] = [["","conditional_pattern",0,"logs/UhdmVerilator/chapter-12/12.6.3--conditional_pattern.sv.log.html","tests/chapter-12/12.6.3--conditional_pattern.sv.html"]]

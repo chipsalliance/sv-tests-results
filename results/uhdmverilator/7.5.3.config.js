@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/7.5.3'] = [["","dynamic-arrays-op-delete",0,"logs/UhdmVerilator/chapter-7/arrays/dynamic/op-delete.sv.log.html","tests/chapter-7/arrays/dynamic/op-delete.sv.html"]]

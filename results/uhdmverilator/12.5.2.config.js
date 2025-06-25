@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/12.5.2'] = [["","case_constant",1,"logs/UhdmVerilator/chapter-12/12.5.2--case_const.sv.log.html","tests/chapter-12/12.5.2--case_const.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/10.3.1'] = [["","net_decl_assignment",1,"logs/UhdmVerilator/chapter-10/10.3.1--net-decl-assignment.sv.log.html","tests/chapter-10/10.3.1--net-decl-assignment.sv.html"],["","one_net_assign",1,"logs/UhdmVerilator/chapter-10/10.3.1--one-net.sv.log.html","tests/chapter-10/10.3.1--one-net.sv.html"]]

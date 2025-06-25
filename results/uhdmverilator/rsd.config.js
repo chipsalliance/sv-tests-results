@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/rsd'] = [["cores","rsd",0,"logs/UhdmVerilator/generated/rsd/rsd.sv.log.html","tests/generated/rsd/rsd.sv.html"]]

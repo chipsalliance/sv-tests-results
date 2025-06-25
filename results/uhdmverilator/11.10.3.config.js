@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/11.10.3'] = [["","empty_string",1,"logs/UhdmVerilator/chapter-11/11.10.3--empty_string.sv.log.html","tests/chapter-11/11.10.3--empty_string.sv.html"],["","empty_string_sim",1,"logs/UhdmVerilator/chapter-11/11.10.3--empty_string-sim.sv.log.html","tests/chapter-11/11.10.3--empty_string-sim.sv.html"]]

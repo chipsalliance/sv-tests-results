@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/11.11'] = [["","min_max_avg_delay",0,"logs/UhdmVerilator/chapter-11/11.11--min_max_avg_delay.sv.log.html","tests/chapter-11/11.11--min_max_avg_delay.sv.html"]]

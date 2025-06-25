@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/veer-eh1'] = [["cores","veer-eh1",0,"logs/UhdmVerilator/generated/fusesoc/veer-eh1-sim.sv.log.html","build/veer-eh1_sim/sim-verilator/config/common_defines.vh.html"]]

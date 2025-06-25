@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/13.3'] = [["","task",0,"logs/UhdmVerilator/chapter-13/13.3--task.sv.log.html","tests/chapter-13/13.3--task.sv.html"],["","task-label",0,"logs/UhdmVerilator/chapter-13/13.3--task-label.sv.log.html","tests/chapter-13/13.3--task-label.sv.html"]]

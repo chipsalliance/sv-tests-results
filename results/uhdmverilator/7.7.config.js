@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/7.7'] = [["","unpacked-arrays-as-arguments-to-subroutines",1,"logs/UhdmVerilator/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]

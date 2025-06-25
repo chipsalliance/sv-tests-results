@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/10.3.3'] = [["","cont_assignment_delay",1,"logs/UhdmVerilator/chapter-10/10.3.3--cont-assignment-delay.sv.log.html","tests/chapter-10/10.3.3--cont-assignment-delay.sv.html"],["","cont_assignment_net_delay",1,"logs/UhdmVerilator/chapter-10/10.3.3--cont-assignment-net-delay.sv.log.html","tests/chapter-10/10.3.3--cont-assignment-net-delay.sv.html"]]

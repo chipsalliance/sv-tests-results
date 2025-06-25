@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/8.19'] = [["","global_constant",1,"logs/UhdmVerilator/chapter-8/8.19--global_constant.sv.log.html","tests/chapter-8/8.19--global_constant.sv.html"],["","instance_constant",1,"logs/UhdmVerilator/chapter-8/8.19--instance_constant.sv.log.html","tests/chapter-8/8.19--instance_constant.sv.html"]]

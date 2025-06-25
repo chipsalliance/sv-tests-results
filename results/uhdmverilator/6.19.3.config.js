@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/6.19.3'] = [["","enum_type_checking",1,"logs/UhdmVerilator/chapter-6/6.19.3--enum_type_checking.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking.sv.html"],["","enum_type_checking_inv",0,"logs/UhdmVerilator/chapter-6/6.19.3--enum_type_checking_inv.sv.log.html","tests/chapter-6/6.19.3--enum_type_checking_inv.sv.html"]]

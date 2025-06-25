@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/6.24.3'] = [["","bitstream_cast",1,"logs/UhdmVerilator/chapter-6/6.24.3--bitstream_cast.sv.log.html","tests/chapter-6/6.24.3--bitstream_cast.sv.html"]]

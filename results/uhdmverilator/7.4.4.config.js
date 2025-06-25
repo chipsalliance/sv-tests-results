@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/7.4.4'] = [["","memories-basic",1,"logs/UhdmVerilator/chapter-7/memories/basic.sv.log.html","tests/chapter-7/memories/basic.sv.html"],["","memories-read-write",1,"logs/UhdmVerilator/chapter-7/memories/read-write.sv.log.html","tests/chapter-7/memories/read-write.sv.html"]]

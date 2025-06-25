@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/8.24'] = [["","out_of_block_methods",0,"logs/UhdmVerilator/chapter-8/8.24--out_of_block_methods.sv.log.html","tests/chapter-8/8.24--out_of_block_methods.sv.html"]]

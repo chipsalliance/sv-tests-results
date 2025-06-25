@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/8.15'] = [["","super",0,"logs/UhdmVerilator/chapter-8/8.15--super.sv.log.html","tests/chapter-8/8.15--super.sv.html"],["","super-def-new",0,"logs/UhdmVerilator/chapter-8/8.15--super-default-new.sv.log.html","tests/chapter-8/8.15--super-default-new.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/21.6'] = [["","test_plusargs",0,"logs/UhdmVerilator/chapter-21/21.6--test.sv.log.html","tests/chapter-21/21.6--test.sv.html"],["","value_plusargs",1,"logs/UhdmVerilator/chapter-21/21.6--value.sv.log.html","tests/chapter-21/21.6--value.sv.html"]]

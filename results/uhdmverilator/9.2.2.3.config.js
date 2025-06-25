@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/9.2.2.3'] = [["","always_latch_expr",1,"logs/UhdmVerilator/chapter-9/9.2.2.3--always_latch.sv.log.html","tests/chapter-9/9.2.2.3--always_latch.sv.html"]]

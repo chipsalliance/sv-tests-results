@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/13.4.3'] = [["","const_function",1,"logs/UhdmVerilator/chapter-13/13.4.3--const-function.sv.log.html","tests/chapter-13/13.4.3--const-function.sv.html"]]

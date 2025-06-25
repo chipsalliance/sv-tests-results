@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/9.2.2.4'] = [["","always_ff",1,"logs/UhdmVerilator/chapter-9/9.2.2.4--always_ff.sv.log.html","tests/chapter-9/9.2.2.4--always_ff.sv.html"]]

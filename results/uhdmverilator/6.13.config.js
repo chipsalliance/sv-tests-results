@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/6.13'] = [["","void",0,"logs/UhdmVerilator/chapter-6/6.13--void.sv.log.html","tests/chapter-6/6.13--void.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['uhdmverilator/fx68k'] = [["cores","fx68k",0,"logs/UhdmVerilator/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
