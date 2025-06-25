@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/8.26.6.3'] = [["","diamond_relationship",1,"logs/tree_sitter_verilog/chapter-8/8.26.6.3--diamond_relationship.sv.log.html","tests/chapter-8/8.26.6.3--diamond_relationship.sv.html"]]

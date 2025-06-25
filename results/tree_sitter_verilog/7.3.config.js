@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/7.3'] = [["","basic-union",0,"logs/tree_sitter_verilog/chapter-7/unions/unpacked/basic.sv.log.html","tests/chapter-7/unions/unpacked/basic.sv.html"],["","union_test_0",1,"logs/tree_sitter_verilog/generic/union/union_test_0.sv.log.html","tests/generic/union/union_test_0.sv.html"]]

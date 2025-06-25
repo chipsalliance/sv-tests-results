@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/9.2.2.4'] = [["","always_ff",1,"logs/tree_sitter_verilog/chapter-9/9.2.2.4--always_ff.sv.log.html","tests/chapter-9/9.2.2.4--always_ff.sv.html"]]

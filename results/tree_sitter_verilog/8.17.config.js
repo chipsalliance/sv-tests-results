@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/8.17'] = [["","constructor_const_arg",1,"logs/tree_sitter_verilog/chapter-8/8.17--constructor_const_arg.sv.log.html","tests/chapter-8/8.17--constructor_const_arg.sv.html"],["","constructor_super",1,"logs/tree_sitter_verilog/chapter-8/8.7--constructor_super.sv.log.html","tests/chapter-8/8.7--constructor_super.sv.html"]]

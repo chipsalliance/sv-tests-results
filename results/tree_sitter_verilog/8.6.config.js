@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/8.6'] = [["","methods",0,"logs/tree_sitter_verilog/chapter-8/8.6--methods.sv.log.html","tests/chapter-8/8.6--methods.sv.html"]]

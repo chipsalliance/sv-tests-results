@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/18.4.1'] = [["","rand_modifier",1,"logs/tree_sitter_verilog/chapter-18/18.4.1--rand-modifier.sv.log.html","tests/chapter-18/18.4.1--rand-modifier.sv.html"]]

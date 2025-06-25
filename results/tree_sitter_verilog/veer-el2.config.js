@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/veer-el2'] = [["cores","veer-el2",0,"logs/tree_sitter_verilog/generated/veer-config/veer-el2_synth/veer-el2_synth.sv.log.html","third_party/cores/veer-el2/design/include/el2_def.sv.html"]]

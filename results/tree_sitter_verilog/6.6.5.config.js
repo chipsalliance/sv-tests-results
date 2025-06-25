@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/6.6.5'] = [["","net_tri0",1,"logs/tree_sitter_verilog/generated/nets/6.6.5--net_tri0.sv.log.html","tests/generated/nets/6.6.5--net_tri0.sv.html"],["","net_tri1",1,"logs/tree_sitter_verilog/generated/nets/6.6.5--net_tri1.sv.log.html","tests/generated/nets/6.6.5--net_tri1.sv.html"]]

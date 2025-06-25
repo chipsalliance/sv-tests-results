@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/9.4.2.1'] = [["","event_comma_op",1,"logs/tree_sitter_verilog/chapter-9/9.4.2.1--event_comma_op.sv.log.html","tests/chapter-9/9.4.2.1--event_comma_op.sv.html"],["","event_or_op",1,"logs/tree_sitter_verilog/chapter-9/9.4.2.1--event_or_op.sv.log.html","tests/chapter-9/9.4.2.1--event_or_op.sv.html"]]

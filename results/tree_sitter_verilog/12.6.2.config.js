@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/12.6.2'] = [["","if_pattern",1,"logs/tree_sitter_verilog/chapter-12/12.6.2--if_pattern.sv.log.html","tests/chapter-12/12.6.2--if_pattern.sv.html"]]

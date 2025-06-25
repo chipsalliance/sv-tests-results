@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/9.4.2.2'] = [["","event_implicit",1,"logs/tree_sitter_verilog/chapter-9/9.4.2.2--event_implicit.sv.log.html","tests/chapter-9/9.4.2.2--event_implicit.sv.html"]]

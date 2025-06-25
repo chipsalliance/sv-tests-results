@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/5.13'] = [["","builtin-methods-string",1,"logs/tree_sitter_verilog/chapter-5/5.13-builtin-methods-strings.sv.log.html","tests/chapter-5/5.13-builtin-methods-strings.sv.html"]]

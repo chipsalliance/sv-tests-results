@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/7.10.2.1'] = [["","bounded-queues",0,"logs/tree_sitter_verilog/chapter-7/queues/bounded.sv.log.html","tests/chapter-7/queues/bounded.sv.html"],["","size",1,"logs/tree_sitter_verilog/chapter-7/queues/size.sv.log.html","tests/chapter-7/queues/size.sv.html"]]

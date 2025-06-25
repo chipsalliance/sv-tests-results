@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/11.4.12.2'] = [["","string_concat_op",1,"logs/tree_sitter_verilog/chapter-11/11.4.12.2--string_concat_op.sv.log.html","tests/chapter-11/11.4.12.2--string_concat_op.sv.html"],["","string_repl_op",1,"logs/tree_sitter_verilog/chapter-11/11.4.12.2--string_repl_op.sv.log.html","tests/chapter-11/11.4.12.2--string_repl_op.sv.html"]]

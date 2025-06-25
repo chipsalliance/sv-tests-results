@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/9.3.3'] = [["","block_start_finish",1,"logs/tree_sitter_verilog/chapter-9/9.3.3--block_start_finish.sv.log.html","tests/chapter-9/9.3.3--block_start_finish.sv.html"],["","event_order",1,"logs/tree_sitter_verilog/chapter-9/9.3.3--event.sv.log.html","tests/chapter-9/9.3.3--event.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/6.16.6'] = [["","string_compare_fn",1,"logs/tree_sitter_verilog/chapter-6/6.16.6--string_compare.sv.log.html","tests/chapter-6/6.16.6--string_compare.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/18.5.11'] = [["","static_constraint_blocks_0",1,"logs/tree_sitter_verilog/chapter-18/18.5.11--static-constraint-blocks_0.sv.log.html","tests/chapter-18/18.5.11--static-constraint-blocks_0.sv.html"]]

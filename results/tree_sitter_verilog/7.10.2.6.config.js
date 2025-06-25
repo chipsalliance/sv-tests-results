@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/7.10.2.6'] = [["","push_front",0,"logs/tree_sitter_verilog/chapter-7/queues/push_front.sv.log.html","tests/chapter-7/queues/push_front.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/10.3.2'] = [["","cont_assignment",1,"logs/tree_sitter_verilog/chapter-10/10.3.2--cont-assignment.sv.log.html","tests/chapter-10/10.3.2--cont-assignment.sv.html"]]

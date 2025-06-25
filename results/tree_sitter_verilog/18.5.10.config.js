@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/18.5.10'] = [["","variable_ordering_0",1,"logs/tree_sitter_verilog/chapter-18/18.5.10--variable-ordering_0.sv.log.html","tests/chapter-18/18.5.10--variable-ordering_0.sv.html"]]

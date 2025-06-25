@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/fx68k'] = [["cores","fx68k",0,"logs/tree_sitter_verilog/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]

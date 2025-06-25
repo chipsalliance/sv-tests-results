@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/7.8.3'] = [["","associative-arrays-class",1,"logs/tree_sitter_verilog/chapter-7/arrays/associative/class.sv.log.html","tests/chapter-7/arrays/associative/class.sv.html"]]

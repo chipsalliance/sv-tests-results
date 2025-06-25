@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/18.7.1'] = [["","local_scope_resolution_0",0,"logs/tree_sitter_verilog/chapter-18/18.7.1--local-scope-resolution_0.sv.log.html","tests/chapter-18/18.7.1--local-scope-resolution_0.sv.html"]]

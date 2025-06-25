@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/ariane'] = [["cores","ariane",0,"logs/tree_sitter_verilog/generated/ariane/ariane.sv.log.html","third_party/cores/ariane/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv.html"]]

@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/7.5.1'] = [["","dynamic-arrays-op-new",0,"logs/tree_sitter_verilog/chapter-7/arrays/dynamic/op-new.sv.log.html","tests/chapter-7/arrays/dynamic/op-new.sv.html"]]

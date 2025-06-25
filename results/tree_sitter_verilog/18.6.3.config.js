@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/18.6.3'] = [["","behavior_of_randomization_methods_0",1,"logs/tree_sitter_verilog/chapter-18/18.6.3--behavior-of-randomization-methods_0.sv.log.html","tests/chapter-18/18.6.3--behavior-of-randomization-methods_0.sv.html"]]

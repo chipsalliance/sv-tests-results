@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/6.16.3'] = [["","string_getc",1,"logs/tree_sitter_verilog/chapter-6/6.16.3--string_getc.sv.log.html","tests/chapter-6/6.16.3--string_getc.sv.html"]]
