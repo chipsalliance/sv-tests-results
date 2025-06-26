@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/dd4b9c0dba6a1ed62e724646c2381b0e913aca42" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/ea23107b45020cbda2e510bc054374c025103d7d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_br_gh129_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-06-25 12:28:52</dd></div>
-        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
-        <div><dt>ram usage</dt><dd>14924 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-06-26 02:09:48</dd></div>
+        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
+        <div><dt>ram usage</dt><dd>15392 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -42,42 +42,45 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tests/ivtest -I /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=test <a href="../../../../third_party/tests/ivtest/ivltests/br_gh129.v.html" target="file-frame">third_party/tests/ivtest/ivltests/br_gh129.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @test() {</pre>
-      <pre>    %0 = sim.fmt.lit &#34;FAILED\0A&#34;</pre>
-      <pre>    %1 = sim.fmt.lit &#34;PASSED\0A&#34;</pre>
-      <pre>    %2 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %1 = sim.fmt.lit &#34;FAILED\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.lit &#34;PASSED\0A&#34;</pre>
       <pre>    %c100_i32 = hw.constant 100 : i32</pre>
       <pre>    %c1_i32 = hw.constant 1 : i32</pre>
       <pre>    %c10_i32 = hw.constant 10 : i32</pre>
       <pre>    %c0_i32 = hw.constant 0 : i32</pre>
       <pre>    %count = llhd.sig %c0_i32 : i32</pre>
-      <pre>    llhd.process {</pre>
-      <pre>      cf.br ^bb1(%c0_i32 : i32)</pre>
-      <pre>    ^bb1(%3: i32):  // 2 preds: ^bb0, ^bb2</pre>
-      <pre>      %4 = comb.icmp slt %3, %c10_i32 : i32</pre>
-      <pre>      %5 = llhd.prb %count : !hw.inout&lt;i32&gt;</pre>
-      <pre>      %6 = comb.icmp ceq %5, %c100_i32 : i32</pre>
-      <pre>      %7 = comb.add %3, %c1_i32 : i32</pre>
-      <pre>      cf.cond_br %4, ^bb2(%c0_i32 : i32), ^bb4</pre>
-      <pre>    ^bb2(%8: i32):  // 2 preds: ^bb1, ^bb3</pre>
-      <pre>      %9 = comb.icmp slt %8, %c10_i32 : i32</pre>
-      <pre>      %10 = llhd.prb %count : !hw.inout&lt;i32&gt;</pre>
-      <pre>      %11 = comb.add %10, %c1_i32 : i32</pre>
-      <pre>      %12 = comb.add %8, %c1_i32 : i32</pre>
-      <pre>      cf.cond_br %9, ^bb3, ^bb1(%7 : i32)</pre>
+      <pre>    %3 = llhd.prb %count : !hw.inout&lt;i32&gt;</pre>
+      <pre>    %4:2 = llhd.process -&gt; i32, i1 {</pre>
+      <pre>      cf.br ^bb1(%c0_i32, %3, %false : i32, i32, i1)</pre>
+      <pre>    ^bb1(%5: i32, %6: i32, %7: i1):  // 2 preds: ^bb0, ^bb4</pre>
+      <pre>      %8 = comb.icmp slt %5, %c10_i32 : i32</pre>
+      <pre>      cf.cond_br %8, ^bb2(%c0_i32, %6, %7 : i32, i32, i1), ^bb5</pre>
+      <pre>    ^bb2(%9: i32, %10: i32, %11: i1):  // 2 preds: ^bb1, ^bb3</pre>
+      <pre>      %12 = comb.icmp slt %9, %c10_i32 : i32</pre>
+      <pre>      cf.cond_br %12, ^bb3, ^bb4</pre>
       <pre>    ^bb3:  // pred: ^bb2</pre>
-      <pre>      llhd.drv %count, %11 after %2 : !hw.inout&lt;i32&gt;</pre>
-      <pre>      cf.br ^bb2(%12 : i32)</pre>
-      <pre>    ^bb4:  // pred: ^bb1</pre>
-      <pre>      cf.cond_br %6, ^bb5, ^bb6</pre>
-      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      %13 = comb.add %10, %c1_i32 : i32</pre>
+      <pre>      %14 = comb.add %9, %c1_i32 : i32</pre>
+      <pre>      cf.br ^bb2(%14, %13, %true : i32, i32, i1)</pre>
+      <pre>    ^bb4:  // pred: ^bb2</pre>
+      <pre>      %15 = comb.add %5, %c1_i32 : i32</pre>
+      <pre>      cf.br ^bb1(%15, %10, %11 : i32, i32, i1)</pre>
+      <pre>    ^bb5:  // pred: ^bb1</pre>
+      <pre>      %16 = comb.icmp ceq %6, %c100_i32 : i32</pre>
+      <pre>      cf.cond_br %16, ^bb6, ^bb7</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      cf.br ^bb8</pre>
+      <pre>    ^bb7:  // pred: ^bb5</pre>
       <pre>      sim.proc.print %1</pre>
-      <pre>      cf.br ^bb7</pre>
-      <pre>    ^bb6:  // pred: ^bb4</pre>
-      <pre>      sim.proc.print %0</pre>
-      <pre>      cf.br ^bb7</pre>
-      <pre>    ^bb7:  // 2 preds: ^bb5, ^bb6</pre>
-      <pre>      llhd.halt</pre>
+      <pre>      cf.br ^bb8</pre>
+      <pre>    ^bb8:  // 2 preds: ^bb6, ^bb7</pre>
+      <pre>      llhd.halt %6, %7 : i32, i1</pre>
       <pre>    }</pre>
+      <pre>    llhd.drv %count, %4#0 after %0 if %4#1 : !hw.inout&lt;i32&gt;</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>

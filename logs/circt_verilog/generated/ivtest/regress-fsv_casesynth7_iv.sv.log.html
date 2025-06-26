@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/dd4b9c0dba6a1ed62e724646c2381b0e913aca42" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/ea23107b45020cbda2e510bc054374c025103d7d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-fsv_casesynth7_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-06-25 12:28:50</dd></div>
-        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
-        <div><dt>ram usage</dt><dd>14900 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-06-26 02:09:53</dd></div>
+        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
+        <div><dt>ram usage</dt><dd>15552 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -42,6 +42,7 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tests/ivtest -I /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=mux <a href="../../../../third_party/tests/ivtest/ivltests/casesynth7.v.html" target="file-frame">third_party/tests/ivtest/ivltests/casesynth7.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @mux(in %sel : i3, in %i1 : i3, in %i2 : i3, in %i3 : i3, in %i4 : i3, out o : i3) {</pre>
+      <pre>    %false = hw.constant false</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %0 = sim.fmt.lit &#34;PASSED\0A&#34;</pre>
       <pre>    %1 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
@@ -53,34 +54,35 @@
       <pre>    %c0_i32 = hw.constant 0 : i32</pre>
       <pre>    %c0_i3 = hw.constant 0 : i3</pre>
       <pre>    %o = llhd.sig %c0_i3 : i3</pre>
-      <pre>    %2 = comb.concat %c0_i29, %sel : i29, i3</pre>
-      <pre>    %3 = comb.icmp ceq %2, %c0_i32 : i32</pre>
-      <pre>    %4 = comb.icmp ceq %2, %c1_i32 : i32</pre>
-      <pre>    %5 = comb.icmp ceq %2, %c2_i32 : i32</pre>
-      <pre>    %6 = comb.icmp ceq %2, %c3_i32 : i32</pre>
-      <pre>    %7 = comb.icmp ceq %2, %c4_i32 : i32</pre>
-      <pre>    %8 = comb.xor %3, %true : i1</pre>
-      <pre>    %9 = comb.and %8, %4 : i1</pre>
-      <pre>    %10 = comb.mux %9, %i1, %c0_i3 : i3</pre>
-      <pre>    %11 = comb.xor %4, %true : i1</pre>
-      <pre>    %12 = comb.and %8, %11 : i1</pre>
-      <pre>    %13 = comb.and %12, %5 : i1</pre>
-      <pre>    %14 = comb.mux %13, %i2, %10 : i3</pre>
-      <pre>    %15 = comb.xor %5, %true : i1</pre>
-      <pre>    %16 = comb.and %12, %15 : i1</pre>
-      <pre>    %17 = comb.and %16, %6 : i1</pre>
-      <pre>    %18 = comb.mux %17, %i3, %14 : i3</pre>
-      <pre>    %19 = comb.xor %6, %true : i1</pre>
-      <pre>    %20 = comb.and %16, %19, %7 : i1</pre>
-      <pre>    %21 = comb.mux %20, %i4, %18 : i3</pre>
-      <pre>    %22 = comb.or %20, %17, %13, %9, %3 : i1</pre>
-      <pre>    llhd.drv %o, %21 after %1 if %22 : !hw.inout&lt;i3&gt;</pre>
+      <pre>    %2 = llhd.prb %o : !hw.inout&lt;i3&gt;</pre>
+      <pre>    %3:2 = llhd.combinational -&gt; i3, i1 {</pre>
+      <pre>      %4 = comb.concat %c0_i29, %sel : i29, i3</pre>
+      <pre>      %5 = comb.icmp ceq %4, %c0_i32 : i32</pre>
+      <pre>      cf.cond_br %5, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %6 = comb.extract %c0_i32 from 0 : (i32) -&gt; i3</pre>
+      <pre>      cf.br ^bb6(%6, %true : i3, i1)</pre>
+      <pre>    ^bb2:  // pred: ^bb0</pre>
+      <pre>      %7 = comb.icmp ceq %4, %c1_i32 : i32</pre>
+      <pre>      cf.cond_br %7, ^bb6(%i1, %true : i3, i1), ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %8 = comb.icmp ceq %4, %c2_i32 : i32</pre>
+      <pre>      cf.cond_br %8, ^bb6(%i2, %true : i3, i1), ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %9 = comb.icmp ceq %4, %c3_i32 : i32</pre>
+      <pre>      cf.cond_br %9, ^bb6(%i3, %true : i3, i1), ^bb5</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      %10 = comb.icmp ceq %4, %c4_i32 : i32</pre>
+      <pre>      cf.cond_br %10, ^bb6(%i4, %true : i3, i1), ^bb6(%c0_i3, %false : i3, i1)</pre>
+      <pre>    ^bb6(%11: i3, %12: i1):  // 6 preds: ^bb1, ^bb2, ^bb3, ^bb4, ^bb5, ^bb5</pre>
+      <pre>      llhd.yield %11, %12 : i3, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %o, %3#0 after %1 if %3#1 : !hw.inout&lt;i3&gt;</pre>
       <pre>    llhd.process {</pre>
       <pre>      sim.proc.print %0</pre>
       <pre>      llhd.halt</pre>
       <pre>    }</pre>
-      <pre>    %23 = llhd.prb %o : !hw.inout&lt;i3&gt;</pre>
-      <pre>    hw.output %23 : i3</pre>
+      <pre>    hw.output %2 : i3</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

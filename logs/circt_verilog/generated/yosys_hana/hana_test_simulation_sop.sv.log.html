@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/dd4b9c0dba6a1ed62e724646c2381b0e913aca42" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/ea23107b45020cbda2e510bc054374c025103d7d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>hana_test_simulation_sop</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-06-25 12:29:36</dd></div>
-        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
-        <div><dt>ram usage</dt><dd>16196 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-06-26 02:10:32</dd></div>
+        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
+        <div><dt>ram usage</dt><dd>16700 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -48,39 +48,28 @@
       <pre>    %false = hw.constant false</pre>
       <pre>    %c1_i32 = hw.constant 1 : i32</pre>
       <pre>    %c0_i32 = hw.constant 0 : i32</pre>
-      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
-      <pre>    %in_0 = llhd.sig name &#34;in&#34; %c0_i2 : i2</pre>
-      <pre>    %1 = llhd.prb %in_0 : !hw.inout&lt;i2&gt;</pre>
-      <pre>    %select_1 = llhd.sig name &#34;select&#34; %false : i1</pre>
-      <pre>    %2 = llhd.prb %select_1 : !hw.inout&lt;i1&gt;</pre>
       <pre>    %out = llhd.sig %false : i1</pre>
-      <pre>    llhd.process {</pre>
-      <pre>      cf.br ^bb1</pre>
-      <pre>    ^bb1:  // 2 preds: ^bb0, ^bb2</pre>
-      <pre>      llhd.wait (%1, %2 : i2, i1), ^bb2</pre>
+      <pre>    %1:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb1(%3: i1, %4: i1):  // 4 preds: ^bb0, ^bb3, ^bb4, ^bb5</pre>
+      <pre>      llhd.wait yield (%3, %4 : i1, i1), (%in, %select : i2, i1), ^bb2</pre>
       <pre>    ^bb2:  // pred: ^bb1</pre>
-      <pre>      %4 = llhd.prb %select_1 : !hw.inout&lt;i1&gt;</pre>
-      <pre>      %5 = comb.concat %c0_i31, %4 : i31, i1</pre>
+      <pre>      %5 = comb.concat %c0_i31, %select : i31, i1</pre>
       <pre>      %6 = comb.icmp ceq %5, %c0_i32 : i32</pre>
-      <pre>      %7 = llhd.prb %in_0 : !hw.inout&lt;i2&gt;</pre>
-      <pre>      %8 = comb.extract %7 from 0 : (i2) -&gt; i1</pre>
-      <pre>      %9 = comb.icmp ceq %5, %c1_i32 : i32</pre>
-      <pre>      %10 = comb.extract %7 from 1 : (i2) -&gt; i1</pre>
-      <pre>      %11 = comb.and %6, %true : i1</pre>
-      <pre>      %12 = comb.xor %6, %true : i1</pre>
-      <pre>      %13 = comb.and %12, %true : i1</pre>
-      <pre>      %14 = comb.or %13, %false : i1</pre>
-      <pre>      %15 = comb.and %14, %9 : i1</pre>
-      <pre>      %16 = comb.or %15, %false : i1</pre>
-      <pre>      %17 = comb.mux %16, %10, %8 : i1</pre>
-      <pre>      %18 = comb.or %15, %11, %false : i1</pre>
-      <pre>      llhd.drv %out, %17 after %0 if %18 : !hw.inout&lt;i1&gt;</pre>
-      <pre>      cf.br ^bb1</pre>
+      <pre>      cf.cond_br %6, ^bb3, ^bb4</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %7 = comb.extract %in from 0 : (i2) -&gt; i1</pre>
+      <pre>      cf.br ^bb1(%7, %true : i1, i1)</pre>
+      <pre>    ^bb4:  // pred: ^bb2</pre>
+      <pre>      %8 = comb.icmp ceq %5, %c1_i32 : i32</pre>
+      <pre>      cf.cond_br %8, ^bb5, ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      %9 = comb.extract %in from 1 : (i2) -&gt; i1</pre>
+      <pre>      cf.br ^bb1(%9, %true : i1, i1)</pre>
       <pre>    }</pre>
-      <pre>    llhd.drv %in_0, %in after %0 : !hw.inout&lt;i2&gt;</pre>
-      <pre>    llhd.drv %select_1, %select after %0 : !hw.inout&lt;i1&gt;</pre>
-      <pre>    %3 = llhd.prb %out : !hw.inout&lt;i1&gt;</pre>
-      <pre>    hw.output %3 : i1</pre>
+      <pre>    llhd.drv %out, %1#0 after %0 if %1#1 : !hw.inout&lt;i1&gt;</pre>
+      <pre>    %2 = llhd.prb %out : !hw.inout&lt;i1&gt;</pre>
+      <pre>    hw.output %2 : i1</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

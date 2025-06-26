@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/dd4b9c0dba6a1ed62e724646c2381b0e913aca42" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/ea23107b45020cbda2e510bc054374c025103d7d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr1087_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-06-25 12:28:45</dd></div>
-        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
-        <div><dt>ram usage</dt><dd>15064 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-06-26 02:09:51</dd></div>
+        <div><dt>time elapsed</dt><dd>0.009s</dd></div>
+        <div><dt>ram usage</dt><dd>15432 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -42,10 +42,39 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tests/ivtest -I /root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=COUNTER <a href="../../../../third_party/tests/ivtest/ivltests/pr1087.v.html" target="file-frame">third_party/tests/ivtest/ivltests/pr1087.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @COUNTER(in %CLOCK_I : i1, in %nARST_I : i1, out COUNT_O : i3) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 1d, 0e&gt;</pre>
+      <pre>    %c0_i29 = hw.constant 0 : i29</pre>
+      <pre>    %true = hw.constant true</pre>
       <pre>    %c0_i3 = hw.constant 0 : i3</pre>
-      <pre>    %0 = seq.to_clock %nARST_I</pre>
-      <pre>    %1 = seq.clock_inv %0</pre>
-      <pre>    %2 = seq.compreg %c0_i3, %1 reset %CLOCK_I, %c0_i3 : i3  </pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %COUNT_O = llhd.sig %c0_i3 : i3</pre>
+      <pre>    %1:2 = llhd.process -&gt; i3, i1 {</pre>
+      <pre>      cf.br ^bb1(%CLOCK_I, %nARST_I, %c0_i3, %false : i1, i1, i3, i1)</pre>
+      <pre>    ^bb1(%3: i1, %4: i1, %5: i3, %6: i1):  // 4 preds: ^bb0, ^bb2, ^bb4, ^bb5</pre>
+      <pre>      llhd.wait yield (%5, %6 : i3, i1), (%CLOCK_I, %nARST_I : i1, i1), ^bb2(%3, %4 : i1, i1)</pre>
+      <pre>    ^bb2(%7: i1, %8: i1):  // pred: ^bb1</pre>
+      <pre>      %9 = comb.xor bin %7, %true : i1</pre>
+      <pre>      %10 = comb.and bin %9, %CLOCK_I : i1</pre>
+      <pre>      %11 = comb.xor bin %nARST_I, %true : i1</pre>
+      <pre>      %12 = comb.and bin %8, %11 : i1</pre>
+      <pre>      %13 = comb.or bin %10, %12 : i1</pre>
+      <pre>      cf.cond_br %13, ^bb3, ^bb1(%CLOCK_I, %nARST_I, %2, %false : i1, i1, i3, i1)</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %14 = comb.icmp eq %nARST_I, %false : i1</pre>
+      <pre>      cf.cond_br %14, ^bb4, ^bb5</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %15 = comb.concat %false : i1</pre>
+      <pre>      %16 = comb.replicate %15 : (i1) -&gt; i3</pre>
+      <pre>      cf.br ^bb1(%CLOCK_I, %nARST_I, %16, %true : i1, i1, i3, i1)</pre>
+      <pre>    ^bb5:  // pred: ^bb3</pre>
+      <pre>      %17 = comb.concat %c0_i29, %2 : i29, i3</pre>
+      <pre>      %18 = comb.add %17, %c1_i32 : i32</pre>
+      <pre>      %19 = comb.extract %18 from 0 : (i32) -&gt; i3</pre>
+      <pre>      cf.br ^bb1(%CLOCK_I, %nARST_I, %19, %true : i1, i1, i3, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %COUNT_O, %1#0 after %0 if %1#1 : !hw.inout&lt;i3&gt;</pre>
+      <pre>    %2 = llhd.prb %COUNT_O : !hw.inout&lt;i3&gt;</pre>
       <pre>    hw.output %2 : i3</pre>
       <pre>  }</pre>
       <pre>}</pre>

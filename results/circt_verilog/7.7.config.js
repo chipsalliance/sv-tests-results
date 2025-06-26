@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/7.7'] = [["","unpacked-arrays-as-arguments-to-subroutines",1,"logs/circt_verilog/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]
+config_loader_data['circt_verilog/7.7'] = [["","unpacked-arrays-as-arguments-to-subroutines",0,"logs/circt_verilog/chapter-7/arrays/unpacked/subroutines.sv.log.html","tests/chapter-7/arrays/unpacked/subroutines.sv.html"]]
