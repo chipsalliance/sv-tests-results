@@ -1,20 +1,20 @@
 # Changes In Tests
 |          Tool           |New Failures|New Passes|Added|Removed|Not Affected|
 |-------------------------|-----------:|---------:|----:|------:|-----------:|
-|Verilator                |           0|         0|    0|      0|        4670|
-|Yosys                    |           0|         1|    0|      0|        4313|
-|Slang                    |           0|         0|    0|      0|        4655|
-|yosys_slang              |           0|         0|    0|      0|        3847|
-|Icarus                   |           0|         0|    0|      0|        4670|
-|circt_verilog            |           0|         0|    0|      0|        4652|
-|Surelog                  |           0|         0|    0|      0|        4655|
-|Verible                  |           0|         0|    0|      0|        4501|
-|VeribleExtractor         |           0|         0|    0|      0|        4501|
-|tree_sitter_systemverilog|           0|         0|    0|      0|        4498|
-|Sv2v_zachjs              |           0|         0|    0|      0|        4655|
-|moore_parse              |           0|         0|    0|      0|        4501|
-|SynligYosys              |           1|         1|    0|      0|        4311|
+|Yosys                    |           0|         0|    0|      0|        4314|
 |Odin                     |           0|         0|    0|      0|        4592|
+|VeribleExtractor         |           0|         0|    0|      0|        4501|
 |moore                    |           0|         0|    0|      0|        4592|
 |Slang_parse              |           0|         0|    0|      0|        4592|
+|tree_sitter_systemverilog|           0|         0|    0|      0|        4498|
+|Slang                    |           0|         0|    0|      0|        4655|
+|Icarus                   |           0|         0|    0|      0|        4670|
+|Sv2v_zachjs              |           0|         0|    0|      0|        4655|
+|Verilator                |           0|         0|    0|      0|        4670|
+|circt_verilog            |           0|         0|    0|      0|        4652|
+|moore_parse              |           0|         0|    0|      0|        4501|
+|Verible                  |           0|         0|    0|      0|        4501|
+|yosys_slang              |           0|         0|    0|      0|        3847|
 |sv_parser                |           0|         0|    0|      0|        4592|
+|Surelog                  |           0|         0|    0|      0|        4655|
+|SynligYosys              |           1|         0|    0|      0|        4312|
