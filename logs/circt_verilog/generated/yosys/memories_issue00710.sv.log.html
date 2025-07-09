@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/8c1865c5a989e48b6c3ccbf52e66a11187d57abf" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/ce0ad8a2ad17c415cc692d42a8c3d8ccdd71af69" target="_blank"><h1>circt-verilog</h1></a>
         <h2>memories_issue00710</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-07-08 19:58:45</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>15880 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-07-09 09:54:21</dd></div>
+        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
+        <div><dt>ram usage</dt><dd>15808 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -46,8 +46,8 @@
       <pre>    %c0_i8 = hw.constant 0 : i8</pre>
       <pre>    %c-1_i8 = hw.constant -1 : i8</pre>
       <pre>    %0 = comb.sub %c-1_i8, %addr : i8</pre>
-      <pre>    %1 = hw.array_get %20[%0] : !hw.array&lt;256xi8&gt;, i8</pre>
-      <pre>    %2 = hw.array_inject %20[%addr], %wdata : !hw.array&lt;256xi8&gt;, i8</pre>
+      <pre>    %1 = hw.array_get %bram[%0] : !hw.array&lt;256xi8&gt;, i8</pre>
+      <pre>    %2 = hw.array_inject %bram[%0], %wdata : !hw.array&lt;256xi8&gt;, i8</pre>
       <pre>    %3 = comb.xor %reset, %true : i1</pre>
       <pre>    %4 = comb.and %re, %3 : i1</pre>
       <pre>    %5 = comb.xor %4, %true : i1</pre>
@@ -58,16 +58,22 @@
       <pre>    %10 = comb.xor %we, %true : i1</pre>
       <pre>    %11 = comb.and %7, %10 : i1</pre>
       <pre>    %12 = comb.xor %11, %true : i1</pre>
-      <pre>    %13 = comb.or %11, %9 : i1</pre>
-      <pre>    %14 = comb.mux %13, %20, %2 : !hw.array&lt;256xi8&gt;</pre>
-      <pre>    %15 = comb.and %12, %8 : i1</pre>
-      <pre>    %16 = comb.or %11, %8, %5 : i1</pre>
-      <pre>    %17 = comb.mux %16, %c0_i8, %1 : i8</pre>
-      <pre>    %18 = comb.and %12, %9, %4 : i1</pre>
-      <pre>    %19 = seq.to_clock %clk</pre>
-      <pre>    %20 = seq.compreg.ce %14, %19, %15 : !hw.array&lt;256xi8&gt;  </pre>
-      <pre>    %21 = seq.compreg.ce %17, %19, %18 : i8  </pre>
-      <pre>    hw.output %21 : i8</pre>
+      <pre>    %13 = comb.and %12, %9, %5 : i1</pre>
+      <pre>    %14 = comb.and %12, %8 : i1</pre>
+      <pre>    %15 = comb.or %11, %8, %5 : i1</pre>
+      <pre>    %16 = comb.mux %15, %c0_i8, %1 : i8</pre>
+      <pre>    %17 = comb.and %12, %9, %4 : i1</pre>
+      <pre>    %18 = seq.to_clock %clk</pre>
+      <pre>    %19 = comb.xor %13, %true : i1</pre>
+      <pre>    %20 = comb.and %19, %dummy : i1</pre>
+      <pre>    %dummy = seq.firreg %20 clock %18 : i1</pre>
+      <pre>    %21 = comb.xor %14, %true : i1</pre>
+      <pre>    %22 = comb.or %21, %11, %9 : i1</pre>
+      <pre>    %23 = comb.mux %22, %bram, %2 : !hw.array&lt;256xi8&gt;</pre>
+      <pre>    %bram = seq.firreg %23 clock %18 : !hw.array&lt;256xi8&gt;</pre>
+      <pre>    %24 = comb.mux %17, %16, %rdata : i8</pre>
+      <pre>    %rdata = seq.firreg %24 clock %18 : i8</pre>
+      <pre>    hw.output %rdata : i8</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>
