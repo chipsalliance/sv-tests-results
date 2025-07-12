@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-07-11 15:04:04</dd></div>
-        <div><dt>time elapsed</dt><dd>0.074s</dd></div>
-        <div><dt>ram usage</dt><dd>84040 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-07-12 01:40:25</dd></div>
+        <div><dt>time elapsed</dt><dd>0.071s</dd></div>
+        <div><dt>ram usage</dt><dd>85676 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -64,7 +64,8 @@
       <pre>	alloc_v_o,</pre>
       <pre>	alloc_yumi_i,</pre>
       <pre>	dealloc_v_i,</pre>
-      <pre>	dealloc_id_i</pre>
+      <pre>	dealloc_id_i,</pre>
+      <pre>	empty_o</pre>
       <pre>);</pre>
       <pre>	parameter els_p = 0;</pre>
       <pre>	parameter id_width_lp = ((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p));</pre>
@@ -76,15 +77,17 @@
       <pre>	input alloc_yumi_i;</pre>
       <pre>	input dealloc_v_i;</pre>
       <pre>	input [id_width_lp - 1:0] dealloc_id_i;</pre>
+      <pre>	output wire empty_o;</pre>
       <pre>	wire [els_p - 1:0] allocated_r;</pre>
-      <pre>	wire [els_p - 1:0] allocated_or_reserved_li;</pre>
-      <pre>	assign allocated_or_reserved_li = allocated_r | reserved_i;</pre>
+      <pre>	assign empty_o = ~(|allocated_r);</pre>
       <pre>	wire [els_p - 1:0] dealloc_decode;</pre>
       <pre>	bsg_decode_with_v #(.num_out_p(els_p)) d1(</pre>
       <pre>		.i(dealloc_id_i),</pre>
       <pre>		.v_i(dealloc_v_i),</pre>
       <pre>		.o(dealloc_decode)</pre>
       <pre>	);</pre>
+      <pre>	wire [els_p - 1:0] allocated_or_reserved_li;</pre>
+      <pre>	assign allocated_or_reserved_li = (allocated_r &amp; ~dealloc_decode) | reserve_i;</pre>
       <pre>	wire [id_width_lp - 1:0] alloc_id_lo;</pre>
       <pre>	wire alloc_v_lo;</pre>
       <pre>	wire [els_p - 1:0] one_hot_out;</pre>
@@ -92,7 +95,7 @@
       <pre>		.width_p(els_p),</pre>
       <pre>		.lo_to_hi_p(1)</pre>
       <pre>	) pe0(</pre>
-      <pre>		.i(~allocated_or_reserved_li | dealloc_decode),</pre>
+      <pre>		.i(~allocated_or_reserved_li),</pre>
       <pre>		.o(one_hot_out),</pre>
       <pre>		.v_o(alloc_v_lo)</pre>
       <pre>	);</pre>
@@ -114,7 +117,7 @@
       <pre>		.clear_i(dealloc_decode),</pre>
       <pre>		.data_o(allocated_r)</pre>
       <pre>	);</pre>
-      <pre>	always @(negedge clk_i)</pre>
+      <pre>	always @(posedge clk_i)</pre>
       <pre>		if (~reset_i) begin</pre>
       <pre>			if (dealloc_v_i)</pre>
       <pre>				;</pre>

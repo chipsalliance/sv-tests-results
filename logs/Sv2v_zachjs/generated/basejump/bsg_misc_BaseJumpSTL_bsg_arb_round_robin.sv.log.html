@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-07-11 15:04:01</dd></div>
-        <div><dt>time elapsed</dt><dd>0.071s</dd></div>
-        <div><dt>ram usage</dt><dd>83932 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-07-12 01:40:23</dd></div>
+        <div><dt>time elapsed</dt><dd>0.101s</dd></div>
+        <div><dt>ram usage</dt><dd>101564 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -56,33 +56,32 @@
       <pre>module top;</pre>
       <pre>	</pre>
       <pre>endmodule</pre>
-      <pre>module bsg_arb_round_robin (</pre>
+      <pre>module bsg_arb_round_robin_composable (</pre>
       <pre>	clk_i,</pre>
       <pre>	reset_i,</pre>
       <pre>	reqs_i,</pre>
       <pre>	grants_o,</pre>
-      <pre>	yumi_i</pre>
+      <pre>	thermocode_r_i,</pre>
+      <pre>	thermocode_n_o</pre>
       <pre>);</pre>
       <pre>	reg _sv2v_0;</pre>
       <pre>	parameter width_p = 0;</pre>
+      <pre>	localparam thermo_width_m1_lp = (width_p &lt; 2 ? 0 : width_p - 2);</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
       <pre>	input [width_p - 1:0] reqs_i;</pre>
       <pre>	output wire [width_p - 1:0] grants_o;</pre>
-      <pre>	input yumi_i;</pre>
+      <pre>	input [thermo_width_m1_lp:0] thermocode_r_i;</pre>
+      <pre>	output reg [thermo_width_m1_lp:0] thermocode_n_o;</pre>
       <pre>	generate</pre>
       <pre>		if (width_p == 1) begin : fi</pre>
       <pre>			assign grants_o = reqs_i;</pre>
+      <pre>			wire [(thermo_width_m1_lp &gt;= 0 ? thermo_width_m1_lp + 1 : 1 - thermo_width_m1_lp):1] sv2v_tmp_99BDC;</pre>
+      <pre>			assign sv2v_tmp_99BDC = 1&#39;b0;</pre>
+      <pre>			always @(*) thermocode_n_o = sv2v_tmp_99BDC;</pre>
       <pre>		end</pre>
       <pre>		else begin : fi2</pre>
-      <pre>			reg [width_p - 2:0] thermocode_r;</pre>
-      <pre>			reg [width_p - 2:0] thermocode_n;</pre>
-      <pre>			always @(posedge clk_i)</pre>
-      <pre>				if (reset_i)</pre>
-      <pre>					thermocode_r &lt;= 1&#39;sb0;</pre>
-      <pre>				else if (yumi_i)</pre>
-      <pre>					thermocode_r &lt;= thermocode_n;</pre>
-      <pre>			wire [(width_p * 2) - 1:0] scan_li = {1&#39;b0, thermocode_r &amp; reqs_i[width_p - 2:0], reqs_i};</pre>
+      <pre>			wire [(width_p * 2) - 1:0] scan_li = {1&#39;b0, thermocode_r_i &amp; reqs_i[width_p - 2:0], reqs_i};</pre>
       <pre>			wire [(width_p * 2) - 1:0] scan_lo;</pre>
       <pre>			bsg_scan #(</pre>
       <pre>				.width_p(width_p * 2),</pre>
@@ -97,13 +96,91 @@
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
       <pre>				if (|scan_li[(width_p * 2) - 1-:width_p])</pre>
-      <pre>					thermocode_n = scan_lo[(width_p * 2) - 1-:width_p - 1];</pre>
+      <pre>					thermocode_n_o = scan_lo[(width_p * 2) - 1-:width_p - 1];</pre>
       <pre>				else</pre>
-      <pre>					thermocode_n = scan_lo[width_p - 1:1];</pre>
+      <pre>					thermocode_n_o = scan_lo[width_p - 1:1];</pre>
       <pre>			end</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	initial _sv2v_0 = 0;</pre>
+      <pre>endmodule</pre>
+      <pre>module bsg_arb_round_robin_composable__abstract;</pre>
+      <pre>	</pre>
+      <pre>endmodule</pre>
+      <pre>module bsg_arb_round_robin (</pre>
+      <pre>	clk_i,</pre>
+      <pre>	reset_i,</pre>
+      <pre>	reqs_i,</pre>
+      <pre>	grants_o,</pre>
+      <pre>	yumi_i</pre>
+      <pre>);</pre>
+      <pre>	parameter width_p = 0;</pre>
+      <pre>	input clk_i;</pre>
+      <pre>	input reset_i;</pre>
+      <pre>	input [width_p - 1:0] reqs_i;</pre>
+      <pre>	output wire [width_p - 1:0] grants_o;</pre>
+      <pre>	input yumi_i;</pre>
+      <pre>	generate</pre>
+      <pre>		if (width_p == 1) begin : fi</pre>
+      <pre>			assign grants_o = reqs_i;</pre>
+      <pre>		end</pre>
+      <pre>		else begin : fi2</pre>
+      <pre>			reg [width_p - 2:0] thermocode_r;</pre>
+      <pre>			wire [width_p - 2:0] thermocode_n;</pre>
+      <pre>			always @(posedge clk_i)</pre>
+      <pre>				if (reset_i)</pre>
+      <pre>					thermocode_r &lt;= 1&#39;sb0;</pre>
+      <pre>				else if (yumi_i)</pre>
+      <pre>					thermocode_r &lt;= thermocode_n;</pre>
+      <pre>			bsg_arb_round_robin_composable #(.width_p(width_p)) barrc(</pre>
+      <pre>				.clk_i(clk_i),</pre>
+      <pre>				.reset_i(reset_i),</pre>
+      <pre>				.reqs_i(reqs_i),</pre>
+      <pre>				.grants_o(grants_o),</pre>
+      <pre>				.thermocode_r_i(thermocode_r),</pre>
+      <pre>				.thermocode_n_o(thermocode_n)</pre>
+      <pre>			);</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
+      <pre>endmodule</pre>
+      <pre>module bsg_arb_round_robin_two_level (</pre>
+      <pre>	clk_i,</pre>
+      <pre>	reset_i,</pre>
+      <pre>	reqs_i,</pre>
+      <pre>	grants_o,</pre>
+      <pre>	granted_high_o,</pre>
+      <pre>	yumi_i</pre>
+      <pre>);</pre>
+      <pre>	parameter width_p = 0;</pre>
+      <pre>	input clk_i;</pre>
+      <pre>	input reset_i;</pre>
+      <pre>	input [(2 * width_p) - 1:0] reqs_i;</pre>
+      <pre>	output wire [width_p - 1:0] grants_o;</pre>
+      <pre>	output wire granted_high_o;</pre>
+      <pre>	input yumi_i;</pre>
+      <pre>	wire [width_p - 1:0] grants_low_lo;</pre>
+      <pre>	wire [width_p - 1:0] grants_high_lo;</pre>
+      <pre>	wire granted_low_lo;</pre>
+      <pre>	bsg_arb_round_robin #(.width_p(width_p)) low(</pre>
+      <pre>		.clk_i(clk_i),</pre>
+      <pre>		.reset_i(reset_i),</pre>
+      <pre>		.reqs_i(reqs_i[width_p+:width_p]),</pre>
+      <pre>		.grants_o(grants_low_lo),</pre>
+      <pre>		.yumi_i(granted_low_lo &amp; yumi_i)</pre>
+      <pre>	);</pre>
+      <pre>	bsg_arb_round_robin #(.width_p(width_p)) hi(</pre>
+      <pre>		.clk_i(clk_i),</pre>
+      <pre>		.reset_i(reset_i),</pre>
+      <pre>		.reqs_i(reqs_i[0+:width_p]),</pre>
+      <pre>		.grants_o(grants_high_lo),</pre>
+      <pre>		.yumi_i(granted_high_o &amp; yumi_i)</pre>
+      <pre>	);</pre>
+      <pre>	assign granted_high_o = |reqs_i[0+:width_p];</pre>
+      <pre>	assign granted_low_lo = |reqs_i[width_p+:width_p] &amp; ~granted_high_o;</pre>
+      <pre>	assign grants_o = (granted_high_o ? grants_high_lo : grants_low_lo);</pre>
+      <pre>endmodule</pre>
+      <pre>module bsg_arb_round_robin_priority__abstract;</pre>
+      <pre>	</pre>
       <pre>endmodule</pre>
       <pre>module bsg_arb_round_robin__abstract;</pre>
       <pre>	</pre>
