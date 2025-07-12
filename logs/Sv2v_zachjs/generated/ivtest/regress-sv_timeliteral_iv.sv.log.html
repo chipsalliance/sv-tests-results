@@ -17,8 +17,8 @@
         <div>
           <dt>incdirs</dt>
           <dd><ul>
-            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
-            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+            <li>/root/sv-tests/sv-tests/third_party/tools/icarus/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests<li>
           </ul></dd>
         </div>
         <div><dt>top module</dt><dd></dd></div>
@@ -28,19 +28,20 @@
         <div>
           <dt>files</dt>
           <dd><ul>
-            <li><a href="../../../../third_party/tests/ivtest/ivltests/timeliteral.v.html" target="file-frame">third_party/tests/ivtest/ivltests/timeliteral.v</a><li>
+            <li><a href="../../../../third_party/tools/icarus/ivtest/ivltests/timeliteral.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/timeliteral.v</a><li>
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-07-12 06:51:53</dd></div>
-        <div><dt>time elapsed</dt><dd>0.029s</dd></div>
-        <div><dt>ram usage</dt><dd>32600 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-07-12 20:12:21</dd></div>
+        <div><dt>time elapsed</dt><dd>0.039s</dd></div>
+        <div><dt>ram usage</dt><dd>38752 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/timeliteral.v.html" target="file-frame">third_party/tests/ivtest/ivltests/timeliteral.v</a></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I/root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests/timeliteral.v</pre>
       <pre>module same;</pre>
+      <pre>	reg passed;</pre>
       <pre>	function check_time;</pre>
       <pre>		input reg _sv2v_unused;</pre>
       <pre>		realtime result;</pre>
@@ -68,8 +69,24 @@
       <pre>			end</pre>
       <pre>		end</pre>
       <pre>	endfunction</pre>
+      <pre>	initial begin</pre>
+      <pre>		passed = 1&#39;b1;</pre>
+      <pre>		#(0.499ps)</pre>
+      <pre>			;</pre>
+      <pre>		if ($realtime() != 0.0) begin</pre>
+      <pre>			$display(&#34;Failed: Expected a 0.499ps delay to scale to 0ps of delay, got %f&#34;, $realtime());</pre>
+      <pre>			passed = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		#(0.5ps)</pre>
+      <pre>			;</pre>
+      <pre>		if ($realtime() != 1.0) begin</pre>
+      <pre>			$display(&#34;Failed: Expected a 0.5ps delay to scale to 1ps of delay, got %f&#34;, $realtime());</pre>
+      <pre>			passed = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
       <pre>endmodule</pre>
       <pre>module max;</pre>
+      <pre>	reg passed;</pre>
       <pre>	function check_time;</pre>
       <pre>		input reg _sv2v_unused;</pre>
       <pre>		realtime result;</pre>
@@ -92,6 +109,21 @@
       <pre>			end</pre>
       <pre>		end</pre>
       <pre>	endfunction</pre>
+      <pre>	initial begin</pre>
+      <pre>		passed = 1&#39;b1;</pre>
+      <pre>		#(0.499fs)</pre>
+      <pre>			;</pre>
+      <pre>		if ($realtime() != 0.0) begin</pre>
+      <pre>			$display(&#34;Failed: Expected a 0.499fs delay to scale to 0s of delay, got %f&#34;, $realtime());</pre>
+      <pre>			passed = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		#(0.5fs)</pre>
+      <pre>			;</pre>
+      <pre>		if ($realtime() != 1e-17) begin</pre>
+      <pre>			$display(&#34;Failed: Expected a 0.5fs delay to scale to 1e-17s of delay, got %f&#34;, $realtime());</pre>
+      <pre>			passed = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
       <pre>endmodule</pre>
       <pre>module top;</pre>
       <pre>	realtime result;</pre>
@@ -125,7 +157,21 @@
       <pre>		end</pre>
       <pre>		passed = passed &amp; same.check_time();</pre>
       <pre>		passed = passed &amp; max.check_time();</pre>
-      <pre>		if (passed)</pre>
+      <pre>		#(0.499ps)</pre>
+      <pre>			;</pre>
+      <pre>		if ($realtime() != 0.0) begin</pre>
+      <pre>			$display(&#34;Failed: Expected a 0.499fs delay to scale to 0ns of delay, got %f&#34;, $realtime());</pre>
+      <pre>			passed = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		#(0.5ps)</pre>
+      <pre>			;</pre>
+      <pre>		if ($realtime() != 0.001) begin</pre>
+      <pre>			$display(&#34;Failed: Expected a 0.5fs delay to scale to 0.001ns of delay, got %f&#34;, $realtime());</pre>
+      <pre>			passed = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>		#(1)</pre>
+      <pre>			;</pre>
+      <pre>		if ((passed &amp;&amp; max.passed) &amp;&amp; same.passed)</pre>
       <pre>			$display(&#34;PASSED&#34;);</pre>
       <pre>	end</pre>
       <pre>endmodule</pre>
