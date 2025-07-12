@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header class="test-passed">
+        <a href="https://github.com/zachjs/sv2v/tree/e5effb5e1ea4e0cf9b4af2c769d364e0ed4b6d84" target="_blank"><h1>zachjs-sv2v</h1></a>
+        <h2>regress-vlg_sqrt32_iv</h2>
+    </header>
+    <section class="property-list">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation elaboration parsing</dd></div>
+        <div><dt>results group</dt><dd>imported</dd></div>
+        <div><dt>mode</dt><dd>elaboration</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/ivltests/sqrt32.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sqrt32.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2025-07-12 06:51:48</dd></div>
+        <div><dt>time elapsed</dt><dd>0.035s</dd></div>
+        <div><dt>ram usage</dt><dd>42384 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/ivltests/sqrt32.v.html" target="file-frame">third_party/tests/ivtest/ivltests/sqrt32.v</a></pre>
+      <pre>module sqrt (</pre>
+      <pre>	clk,</pre>
+      <pre>	rdy,</pre>
+      <pre>	reset,</pre>
+      <pre>	x,</pre>
+      <pre>	acc</pre>
+      <pre>);</pre>
+      <pre>	input clk;</pre>
+      <pre>	output wire rdy;</pre>
+      <pre>	input reset;</pre>
+      <pre>	input [31:0] x;</pre>
+      <pre>	output reg [15:0] acc;</pre>
+      <pre>	parameter ss = 5;</pre>
+      <pre>	localparam w = 1 &lt;&lt; ss;</pre>
+      <pre>	reg [w - 1:0] acc2;</pre>
+      <pre>	reg [ss - 1:0] bitl;</pre>
+      <pre>	wire [(w / 2) - 1:0] _bit = 1 &lt;&lt; bitl;</pre>
+      <pre>	wire [w - 1:0] bit2 = 1 &lt;&lt; (bitl &lt;&lt; 1);</pre>
+      <pre>	assign rdy = bitl[ss - 1];</pre>
+      <pre>	wire [(w / 2) - 1:0] guess = acc | _bit;</pre>
+      <pre>	wire [w - 1:0] guess2 = (acc2 + bit2) + ((acc &lt;&lt; bitl) &lt;&lt; 1);</pre>
+      <pre>	(* ivl_synthesis_on *) always @(posedge clk or posedge reset)</pre>
+      <pre>		if (reset) begin</pre>
+      <pre>			acc = 0;</pre>
+      <pre>			acc2 = 0;</pre>
+      <pre>			bitl = (w / 2) - 1;</pre>
+      <pre>		end</pre>
+      <pre>		else begin</pre>
+      <pre>			if (guess2 &lt;= x) begin</pre>
+      <pre>				acc &lt;= guess;</pre>
+      <pre>				acc2 &lt;= guess2;</pre>
+      <pre>			end</pre>
+      <pre>			bitl &lt;= bitl - 1;</pre>
+      <pre>		end</pre>
+      <pre>endmodule</pre>
+      <pre>module testBench;</pre>
+      <pre>	parameter ss = 5;</pre>
+      <pre>	parameter w = 1 &lt;&lt; ss;</pre>
+      <pre>	parameter Amax = 10001;</pre>
+      <pre>	reg [w - 1:0] A;</pre>
+      <pre>	reg clk;</pre>
+      <pre>	reg reset;</pre>
+      <pre>	wire [(w / 2) - 1:0] Z;</pre>
+      <pre>	wire done;</pre>
+      <pre>	sqrt dut(</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.rdy(done),</pre>
+      <pre>		.reset(reset),</pre>
+      <pre>		.x(A),</pre>
+      <pre>		.acc(Z)</pre>
+      <pre>	);</pre>
+      <pre>	(* ivl_synthesis_off *) always #(5) clk = !clk;</pre>
+      <pre>	task reset_dut;</pre>
+      <pre>		begin</pre>
+      <pre>			reset = 1;</pre>
+      <pre>			@(posedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			#(1) reset = 0;</pre>
+      <pre>			@(negedge clk)</pre>
+      <pre>				;</pre>
+      <pre>		end</pre>
+      <pre>	endtask</pre>
+      <pre>	task run_dut;</pre>
+      <pre>		while (done == 0) @(posedge clk)</pre>
+      <pre>			;</pre>
+      <pre>	endtask</pre>
+      <pre>	integer idx;</pre>
+      <pre>	integer a;</pre>
+      <pre>	integer z;</pre>
+      <pre>	integer errCnt;</pre>
+      <pre>	(* ivl_synthesis_off *) initial begin</pre>
+      <pre>		reset = 0;</pre>
+      <pre>		clk = 0;</pre>
+      <pre>		$display(&#34;ss=%d, width=%d, Amax=%d&#34;, ss, w, Amax);</pre>
+      <pre>		errCnt = 0;</pre>
+      <pre>		A = 4;</pre>
+      <pre>		reset_dut;</pre>
+      <pre>		run_dut;</pre>
+      <pre>		$display(&#34;test=0 x=%d, y=%d&#34;, A, Z);</pre>
+      <pre>		A = Amax / 10;</pre>
+      <pre>		reset_dut;</pre>
+      <pre>		run_dut;</pre>
+      <pre>		$display(&#34;test=0 x=%d, y=%d&#34;, A, Z);</pre>
+      <pre>		A = Amax - 1;</pre>
+      <pre>		reset_dut;</pre>
+      <pre>		run_dut;</pre>
+      <pre>		$display(&#34;test=0 x=%d, y=%d&#34;, A, Z);</pre>
+      <pre>		for (idx = 1; idx &lt; Amax; idx = 2 * idx)</pre>
+      <pre>			begin</pre>
+      <pre>				A = idx;</pre>
+      <pre>				reset_dut;</pre>
+      <pre>				run_dut;</pre>
+      <pre>				$display(&#34;%d: x=%d, y=%d&#34;, idx, A, Z);</pre>
+      <pre>				a = A;</pre>
+      <pre>				z = Z;</pre>
+      <pre>				if (a &lt; (z * z)) begin</pre>
+      <pre>					$display(&#34;test=%d x=%d, y=%d ERROR:y is too big&#34;, idx, A, Z);</pre>
+      <pre>					$display(&#34;FAILED&#34;);</pre>
+      <pre>					$finish;</pre>
+      <pre>				end</pre>
+      <pre>				if (z &lt; 65535) begin</pre>
+      <pre>					if (a &gt;= ((z + 1) * (z + 1))) begin</pre>
+      <pre>						$display(&#34;test=%d x=%d, y=%d ERROR: y is too small&#34;, idx, A, Z);</pre>
+      <pre>						$display(&#34;FAILED&#34;);</pre>
+      <pre>						$finish;</pre>
+      <pre>					end</pre>
+      <pre>				end</pre>
+      <pre>				else</pre>
+      <pre>					$display(&#34;Could not verify above number&#34;);</pre>
+      <pre>			end</pre>
+      <pre>		$display(&#34;Running  tests Amax=%d random input numbers&#34;, Amax);</pre>
+      <pre>		for (idx = 0; idx &lt; Amax; idx = 1 + idx)</pre>
+      <pre>			begin</pre>
+      <pre>				A = $random;</pre>
+      <pre>				if (A &lt; (1 &lt;&lt; (w - 1))) begin</pre>
+      <pre>					reset_dut;</pre>
+      <pre>					run_dut;</pre>
+      <pre>					a = A;</pre>
+      <pre>					z = Z;</pre>
+      <pre>					if (a &lt; (z * z)) begin</pre>
+      <pre>						$display(&#34;test=%d x=%d, y=%d ERROR:y is too big&#34;, idx, A, Z);</pre>
+      <pre>						$display(&#34;FAILED&#34;);</pre>
+      <pre>						$finish;</pre>
+      <pre>					end</pre>
+      <pre>					if (z &lt; 65535) begin</pre>
+      <pre>						if (a &gt;= ((z + 1) * (z + 1))) begin</pre>
+      <pre>							$display(&#34;test=%d x=%d, y=%d ERROR: y is too small&#34;, idx, A, Z);</pre>
+      <pre>							$display(&#34;FAILED&#34;);</pre>
+      <pre>							$finish;</pre>
+      <pre>						end</pre>
+      <pre>					end</pre>
+      <pre>					else</pre>
+      <pre>						$display(&#34;Could not verify above number&#34;);</pre>
+      <pre>					if ((idx % 1000) == 0)</pre>
+      <pre>						$display(&#34;Finished %d tests&#34;, idx);</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>		$display(&#34;PASSED&#34;);</pre>
+      <pre>		$finish;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
+</html>

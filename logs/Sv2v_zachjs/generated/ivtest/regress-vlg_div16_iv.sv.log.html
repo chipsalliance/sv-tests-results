@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="../../../../log.css">
+  </head>
+  <body>
+    <header class="test-passed">
+        <a href="https://github.com/zachjs/sv2v/tree/e5effb5e1ea4e0cf9b4af2c769d364e0ed4b6d84" target="_blank"><h1>zachjs-sv2v</h1></a>
+        <h2>regress-vlg_div16_iv</h2>
+    </header>
+    <section class="property-list">
+      <dl>
+        <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
+        <div><dt>tags</dt><dd>ivtest</dd></div>
+        <div>
+          <dt>incdirs</dt>
+          <dd><ul>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest<li>
+            <li>/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests<li>
+          </ul></dd>
+        </div>
+        <div><dt>top module</dt><dd></dd></div>
+        <div><dt>type</dt><dd>simulation elaboration parsing</dd></div>
+        <div><dt>results group</dt><dd>imported</dd></div>
+        <div><dt>mode</dt><dd>elaboration</dd></div>
+        <div>
+          <dt>files</dt>
+          <dd><ul>
+            <li><a href="../../../../third_party/tests/ivtest/contrib/div16.v.html" target="file-frame">third_party/tests/ivtest/contrib/div16.v</a><li>
+          </ul></dd>
+        </div>
+        <div><dt>defines</dt><dd><code></code></dd></div>
+        <div><dt>completed</dt><dd>2025-07-12 06:51:45</dd></div>
+        <div><dt>time elapsed</dt><dd>0.037s</dd></div>
+        <div><dt>ram usage</dt><dd>41220 KB</dd></div>
+      </dl>
+    </section>
+    <section class="log">
+      <pre></pre>
+      <pre>zachjs-sv2v -I/root/sv-tests/sv-tests/third_party/tests/ivtest -I/root/sv-tests/sv-tests/third_party/tests/ivtest/ivltests <a href="../../../../third_party/tests/ivtest/contrib/div16.v.html" target="file-frame">third_party/tests/ivtest/contrib/div16.v</a></pre>
+      <pre>module div16 (</pre>
+      <pre>	clk,</pre>
+      <pre>	resetb,</pre>
+      <pre>	start,</pre>
+      <pre>	a,</pre>
+      <pre>	b,</pre>
+      <pre>	q,</pre>
+      <pre>	r,</pre>
+      <pre>	done</pre>
+      <pre>);</pre>
+      <pre>	parameter N = 16;</pre>
+      <pre>	input clk;</pre>
+      <pre>	input resetb;</pre>
+      <pre>	input start;</pre>
+      <pre>	input [N - 1:0] a;</pre>
+      <pre>	input [N - 1:0] b;</pre>
+      <pre>	output reg [N - 1:0] q;</pre>
+      <pre>	output wire [N - 1:0] r;</pre>
+      <pre>	output reg done;</pre>
+      <pre>	reg [N - 1:0] power;</pre>
+      <pre>	reg [N - 1:0] accum;</pre>
+      <pre>	reg [(2 * N) - 1:0] bpower;</pre>
+      <pre>	assign r = accum;</pre>
+      <pre>	wire [(2 * N) - 1:0] accum_minus_bpower = accum - bpower;</pre>
+      <pre>	always @(posedge clk or negedge resetb)</pre>
+      <pre>		if (~resetb) begin</pre>
+      <pre>			q &lt;= 0;</pre>
+      <pre>			accum &lt;= 0;</pre>
+      <pre>			power &lt;= 0;</pre>
+      <pre>			bpower &lt;= 0;</pre>
+      <pre>			done &lt;= 0;</pre>
+      <pre>		end</pre>
+      <pre>		else if (start) begin</pre>
+      <pre>			q &lt;= 0;</pre>
+      <pre>			accum &lt;= a;</pre>
+      <pre>			power[N - 1] &lt;= 1&#39;b1;</pre>
+      <pre>			bpower &lt;= b &lt;&lt; (N - 1);</pre>
+      <pre>			done &lt;= 0;</pre>
+      <pre>		end</pre>
+      <pre>		else if (power != 0) begin</pre>
+      <pre>			if (~accum_minus_bpower[(2 * N) - 1]) begin</pre>
+      <pre>				q &lt;= q | power;</pre>
+      <pre>				accum &lt;= accum_minus_bpower;</pre>
+      <pre>			end</pre>
+      <pre>			power &lt;= power &gt;&gt; 1;</pre>
+      <pre>			bpower &lt;= bpower &gt;&gt; 1;</pre>
+      <pre>		end</pre>
+      <pre>		else</pre>
+      <pre>			done &lt;= 1;</pre>
+      <pre>endmodule</pre>
+      <pre>module test_div16;</pre>
+      <pre>	reg clk;</pre>
+      <pre>	reg resetb;</pre>
+      <pre>	reg start;</pre>
+      <pre>	reg [15:0] a;</pre>
+      <pre>	reg [15:0] b;</pre>
+      <pre>	wire [15:0] q;</pre>
+      <pre>	wire [15:0] r;</pre>
+      <pre>	wire done;</pre>
+      <pre>	integer num_errors;</pre>
+      <pre>	div16 div16(</pre>
+      <pre>		.clk(clk),</pre>
+      <pre>		.resetb(resetb),</pre>
+      <pre>		.start(start),</pre>
+      <pre>		.a(a),</pre>
+      <pre>		.b(b),</pre>
+      <pre>		.q(q),</pre>
+      <pre>		.r(r),</pre>
+      <pre>		.done(done)</pre>
+      <pre>	);</pre>
+      <pre>	task do_divide;</pre>
+      <pre>		input [15:0] arga;</pre>
+      <pre>		input [15:0] argb;</pre>
+      <pre>		begin</pre>
+      <pre>			a = arga;</pre>
+      <pre>			b = argb;</pre>
+      <pre>			@(posedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			#(1) start = 1;</pre>
+      <pre>			@(posedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			#(1) start = 0;</pre>
+      <pre>			while (~done) @(posedge clk)</pre>
+      <pre>				;</pre>
+      <pre>			#(1)</pre>
+      <pre>				;</pre>
+      <pre>			$display(&#34;Circuit: %0d / %0d = %0d, rem = %0d\t\t......... Reality: %0d, rem = %0d&#34;, arga, argb, q, r, a / b, a % b);</pre>
+      <pre>			if (b !== 0) begin</pre>
+      <pre>				if (q !== (a / b)) begin</pre>
+      <pre>					$display(&#34;   Error!  Unexpected Quotient\n\n&#34;);</pre>
+      <pre>					num_errors = num_errors + 1;</pre>
+      <pre>				end</pre>
+      <pre>				if (r !== (a % b)) begin</pre>
+      <pre>					$display(&#34;   Error!  Unexpected Remainder\n\n&#34;);</pre>
+      <pre>					num_errors = num_errors + 1;</pre>
+      <pre>				end</pre>
+      <pre>			end</pre>
+      <pre>		end</pre>
+      <pre>	endtask</pre>
+      <pre>	initial begin</pre>
+      <pre>		num_errors = 0;</pre>
+      <pre>		start = 0;</pre>
+      <pre>		#(200)</pre>
+      <pre>			;</pre>
+      <pre>		$display(&#34;16-bit Dividend, 8-bit divisor&#34;);</pre>
+      <pre>		repeat (25) do_divide($random, $random &amp; 255);</pre>
+      <pre>		$display(&#34;\n16-bit Dividend, 12-bit divisor&#34;);</pre>
+      <pre>		repeat (25) do_divide($random, $random &amp; 4095);</pre>
+      <pre>		$display(&#34;\n16-bit Dividend, 16-bit divisor&#34;);</pre>
+      <pre>		repeat (25) do_divide($random, $random);</pre>
+      <pre>		$display(&#34;\nSpecial Cases:&#34;);</pre>
+      <pre>		do_divide(16&#39;hffff, 16&#39;hffff);</pre>
+      <pre>		do_divide(312, 1);</pre>
+      <pre>		do_divide(0, 42);</pre>
+      <pre>		do_divide(312, 0);</pre>
+      <pre>		if (num_errors === 0)</pre>
+      <pre>			$display(&#34;\n\nPASSED&#34;);</pre>
+      <pre>		else</pre>
+      <pre>			$display(&#34;\n\nFAILED - There were %0d Errors.&#34;, num_errors);</pre>
+      <pre>		$finish;</pre>
+      <pre>	end</pre>
+      <pre>	initial begin</pre>
+      <pre>		clk = 0;</pre>
+      <pre>		forever begin</pre>
+      <pre>			#(10) clk = 1;</pre>
+      <pre>			#(10) clk = 0;</pre>
+      <pre>		end</pre>
+      <pre>	end</pre>
+      <pre>	initial begin</pre>
+      <pre>		resetb = 0;</pre>
+      <pre>		#(133) resetb = 1;</pre>
+      <pre>	end</pre>
+      <pre>endmodule</pre>
+      <pre></pre>
+    </section>
+  </body>
+</html>
