@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/11.3.5'] = [["","expr_short_circuit",1,"logs/tree_sitter_verilog/chapter-11/11.3.5--expr_short_circuit.sv.log.html","tests/chapter-11/11.3.5--expr_short_circuit.sv.html"]]

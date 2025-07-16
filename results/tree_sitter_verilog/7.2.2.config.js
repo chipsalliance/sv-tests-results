@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/7.2.2'] = [["","unpacked-structures-members-default-value",0,"logs/tree_sitter_verilog/chapter-7/structures/unpacked/default-value.sv.log.html","tests/chapter-7/structures/unpacked/default-value.sv.html"]]

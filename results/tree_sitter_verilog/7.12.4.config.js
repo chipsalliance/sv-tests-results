@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/7.12.4'] = [["","unpacked-array-iterator-index-querying",1,"logs/tree_sitter_verilog/chapter-7/arrays/unpacked/index.sv.log.html","tests/chapter-7/arrays/unpacked/index.sv.html"]]

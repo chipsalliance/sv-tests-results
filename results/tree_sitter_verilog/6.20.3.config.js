@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/6.20.3'] = [["","parameter_type",1,"logs/tree_sitter_verilog/chapter-6/6.20.3--parameter_type.sv.log.html","tests/chapter-6/6.20.3--parameter_type.sv.html"]]

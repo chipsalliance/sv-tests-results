@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/12.7.6'] = [["","forever_loop",1,"logs/tree_sitter_verilog/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/8.26.6.1'] = [["","name_conflict_resolved",0,"logs/tree_sitter_verilog/chapter-8/8.26.6.1--name_conflict_resolved.sv.log.html","tests/chapter-8/8.26.6.1--name_conflict_resolved.sv.html"]]

@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/9.4.3'] = [["","event_sequence_controls",1,"logs/tree_sitter_verilog/chapter-9/9.4.3--event_sequence_controls.sv.log.html","tests/chapter-9/9.4.3--event_sequence_controls.sv.html"]]

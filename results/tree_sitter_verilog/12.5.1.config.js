@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/12.5.1'] = [["","casex",1,"logs/tree_sitter_verilog/chapter-12/12.5.1--casex.sv.log.html","tests/chapter-12/12.5.1--casex.sv.html"],["","casez",1,"logs/tree_sitter_verilog/chapter-12/12.5.1--casez.sv.log.html","tests/chapter-12/12.5.1--casez.sv.html"]]

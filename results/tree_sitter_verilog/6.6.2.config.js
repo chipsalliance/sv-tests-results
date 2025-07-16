@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/6.6.2'] = [["","net_uwire",1,"logs/tree_sitter_verilog/generated/nets/6.6.2--net_uwire.sv.log.html","tests/generated/nets/6.6.2--net_uwire.sv.html"]]

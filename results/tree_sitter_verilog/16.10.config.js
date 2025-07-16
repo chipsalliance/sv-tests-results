@@ -1,0 +1,1 @@
+config_loader_data['tree_sitter_verilog/16.10'] = [["","property_local_var_test",0,"logs/tree_sitter_verilog/chapter-16/16.10--property-local-var.sv.log.html","tests/chapter-16/16.10--property-local-var.sv.html"],["","sequence_local_var_test",1,"logs/tree_sitter_verilog/chapter-16/16.10--sequence-local-var.sv.log.html","tests/chapter-16/16.10--sequence-local-var.sv.html"]]
