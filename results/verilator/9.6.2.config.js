@@ -1,1 +1,1 @@
-config_loader_data['verilator/9.6.2'] = [["","disable",1,"logs/Verilator/chapter-9/9.6.2--disable.sv.log.html","tests/chapter-9/9.6.2--disable.sv.html"],["","disable_other",0,"logs/Verilator/chapter-9/9.6.2--disable_other.sv.log.html","tests/chapter-9/9.6.2--disable_other.sv.html"]]
+config_loader_data['verilator/9.6.2'] = [["","disable",1,"logs/Verilator/chapter-9/9.6.2--disable.sv.log.html","tests/chapter-9/9.6.2--disable.sv.html"],["","disable_other",1,"logs/Verilator/chapter-9/9.6.2--disable_other.sv.log.html","tests/chapter-9/9.6.2--disable_other.sv.html"]]
