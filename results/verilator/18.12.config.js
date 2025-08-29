@@ -1,1 +1,1 @@
-config_loader_data['verilator/18.12'] = [["","randomization_of_scope_variables_0",0,"logs/Verilator/chapter-18/18.12--randomization-of-scope-variables_0.sv.log.html","tests/chapter-18/18.12--randomization-of-scope-variables_0.sv.html"]]
+config_loader_data['verilator/18.12'] = [["","randomization_of_scope_variables_0",1,"logs/Verilator/chapter-18/18.12--randomization-of-scope-variables_0.sv.log.html","tests/chapter-18/18.12--randomization-of-scope-variables_0.sv.html"]]
