@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/9.2.2.1'] = [["","always",0,"logs/circt_verilog/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]
+config_loader_data['circt_verilog/9.2.2.1'] = [["","always",1,"logs/circt_verilog/chapter-9/9.2.2.1--always.sv.log.html","tests/chapter-9/9.2.2.1--always.sv.html"]]

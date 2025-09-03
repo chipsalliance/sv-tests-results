@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/dda02357885621749352dafe93a35f3ceca4fae7" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/f4b660f282b0d8f2772786cfc4d22a9171fbe92d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr1866215b_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,18 +32,52 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-09-02 01:47:05</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>17288 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-09-03 01:47:05</dd></div>
+        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
+        <div><dt>ram usage</dt><dd>17676 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=A <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr1866215b.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr1866215b.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1866215b.v:37:13: error: &#39;hw.bitcast&#39; op result #0 must be Type wherein the bitwidth in hardware is known, but got &#39;!llhd.time&#39;</pre>
-      <pre>   initial #1 $display(&#34;CH=%h, CL=%h, SH=%h, SL=%h&#34;, CH, CL, SH, SL);</pre>
-      <pre>            ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1866215b.v:37:13: note: see current operation: %13 = &#34;hw.bitcast&#34;(%0) : (i64) -&gt; !llhd.time</pre>
+      <pre>module {</pre>
+      <pre>  hw.module @A(out CH : i16, out CL : i32, out SH : i16, out SL : i32) {</pre>
+      <pre>    %c1431655765_i32 = hw.constant 1431655765 : i32</pre>
+      <pre>    %c-1431655766_i32 = hw.constant -1431655766 : i32</pre>
+      <pre>    %c255_i16 = hw.constant 255 : i16</pre>
+      <pre>    %c-1_i6 = hw.constant -1 : i6</pre>
+      <pre>    %c-1_i7 = hw.constant -1 : i7</pre>
+      <pre>    hw.instance &#34;B0&#34; @B(CH: %c-1_i6: i6, CL: %c1431655765_i32: i32, SH: %c-1_i7: i7, SL: %c-1431655766_i32: i32) -&gt; ()</pre>
+      <pre>    hw.output %c255_i16, %c1431655765_i32, %c255_i16, %c-1431655766_i32 : i16, i32, i16, i32</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @B(in %CH : i6, in %CL : i32, in %SH : i7, in %SL : i32) {</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %0 = comb.concat %false, %CH : i1, i6</pre>
+      <pre>    %1 = comb.concat %false, %SH : i1, i7</pre>
+      <pre>    hw.instance &#34;C0&#34; @C(CH: %0: i7, CL: %CL: i32, SH: %1: i8, SL: %SL: i32) -&gt; ()</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @C(in %CH : i7, in %CL : i32, in %SH : i8, in %SL : i32) {</pre>
+      <pre>    %0 = sim.fmt.lit &#34;\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.lit &#34;, SL=&#34;</pre>
+      <pre>    %2 = sim.fmt.lit &#34;, SH=&#34;</pre>
+      <pre>    %3 = sim.fmt.lit &#34;, CL=&#34;</pre>
+      <pre>    %4 = sim.fmt.lit &#34;CH=&#34;</pre>
+      <pre>    %5 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait delay %5, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %6 = sim.fmt.hex %CH : i7</pre>
+      <pre>      %7 = sim.fmt.hex %CL : i32</pre>
+      <pre>      %8 = sim.fmt.hex %SH : i8</pre>
+      <pre>      %9 = sim.fmt.hex %SL : i32</pre>
+      <pre>      %10 = sim.fmt.concat (%4, %6, %3, %7, %2, %8, %1, %9, %0)</pre>
+      <pre>      sim.proc.print %10</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>

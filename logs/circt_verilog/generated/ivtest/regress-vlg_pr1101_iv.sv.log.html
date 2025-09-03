@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/dda02357885621749352dafe93a35f3ceca4fae7" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/f4b660f282b0d8f2772786cfc4d22a9171fbe92d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr1101_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,18 +32,47 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-09-02 01:47:15</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>16932 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-09-03 01:47:05</dd></div>
+        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
+        <div><dt>ram usage</dt><dd>17420 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=Test <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr1101.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr1101.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1101.v:17:8: error: &#39;hw.bitcast&#39; op result #0 must be Type wherein the bitwidth in hardware is known, but got &#39;!llhd.time&#39;</pre>
-      <pre>      #10 $display(&#34;ww=%b, w1=%b, w2=%b&#34;, ww, w1, w2);</pre>
-      <pre>       ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1101.v:17:8: note: see current operation: %37 = &#34;hw.bitcast&#34;(%0) : (i64) -&gt; !llhd.time</pre>
+      <pre>module {</pre>
+      <pre>  hw.module @Test() {</pre>
+      <pre>    %0 = sim.fmt.lit &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.lit &#34;\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.lit &#34;, w2=&#34;</pre>
+      <pre>    %3 = sim.fmt.lit &#34;, w1=&#34;</pre>
+      <pre>    %4 = sim.fmt.lit &#34;ww=&#34;</pre>
+      <pre>    %c-1_i2 = hw.constant -1 : i2</pre>
+      <pre>    %5 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
+      <pre>    %c0_i4 = hw.constant 0 : i4</pre>
+      <pre>    %6 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %7 = hw.bitcast %c0_i4 : (i4) -&gt; !hw.array&lt;4xi1&gt;</pre>
+      <pre>    %array_of_reg = llhd.sig %7 : !hw.array&lt;4xi1&gt;</pre>
+      <pre>    %8 = llhd.prb %array_of_reg : !hw.inout&lt;array&lt;4xi1&gt;&gt;</pre>
+      <pre>    %9 = hw.array_get %8[%c0_i2] : !hw.array&lt;4xi1&gt;, i2</pre>
+      <pre>    %10:2 = llhd.process -&gt; !hw.array&lt;4xi1&gt;, i1 {</pre>
+      <pre>      %11 = hw.array_inject %8[%c0_i2], %false : !hw.array&lt;4xi1&gt;, i2</pre>
+      <pre>      %12 = hw.array_inject %11[%c-1_i2], %true : !hw.array&lt;4xi1&gt;, i2</pre>
+      <pre>      llhd.wait yield (%12, %true : !hw.array&lt;4xi1&gt;, i1), delay %6, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %13 = sim.fmt.bin %9 : i1</pre>
+      <pre>      %14 = sim.fmt.concat (%4, %13, %3, %13, %2, %13, %1)</pre>
+      <pre>      sim.proc.print %14</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt %7, %false : !hw.array&lt;4xi1&gt;, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %array_of_reg, %10#0 after %5 if %10#1 : !hw.inout&lt;array&lt;4xi1&gt;&gt;</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>

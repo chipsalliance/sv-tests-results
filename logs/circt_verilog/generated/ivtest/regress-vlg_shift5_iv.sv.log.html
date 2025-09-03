@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/dda02357885621749352dafe93a35f3ceca4fae7" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/f4b660f282b0d8f2772786cfc4d22a9171fbe92d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_shift5_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,18 +32,59 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-09-02 01:47:13</dd></div>
-        <div><dt>time elapsed</dt><dd>0.008s</dd></div>
-        <div><dt>ram usage</dt><dd>16844 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-09-03 01:46:53</dd></div>
+        <div><dt>time elapsed</dt><dd>0.013s</dd></div>
+        <div><dt>ram usage</dt><dd>17420 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=ArithmeticShiftTest <a href="../../../../third_party/tools/icarus/ivtest/ivltests/shift5.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/shift5.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/shift5.v:20:6: error: &#39;hw.bitcast&#39; op result #0 must be Type wherein the bitwidth in hardware is known, but got &#39;!llhd.time&#39;</pre>
-      <pre>    #1; //allow time for inputs to propagate</pre>
-      <pre>     ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/shift5.v:20:6: note: see current operation: %16 = &#34;hw.bitcast&#34;(%0) : (i64) -&gt; !llhd.time</pre>
+      <pre>module {</pre>
+      <pre>  hw.module @ArithmeticShiftTest() {</pre>
+      <pre>    %c-32_i6 = hw.constant -32 : i6</pre>
+      <pre>    %c-2147483648_i32 = hw.constant -2147483648 : i32</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %1 = sim.fmt.lit &#34;.\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.lit &#34;FAIL: 32&#39;sh80000000 &gt;&gt;&gt; 6&#39;d32 != 0xffffffff, actual = 0x&#34;</pre>
+      <pre>    %c-1_i32 = hw.constant -1 : i32</pre>
+      <pre>    %3 = sim.fmt.lit &#34;\0A&#34;</pre>
+      <pre>    %4 = sim.fmt.lit &#34;PASS: 32&#39;sh80000000 &gt;&gt;&gt; 6&#39;d32 = 0x&#34;</pre>
+      <pre>    %c0_i26 = hw.constant 0 : i26</pre>
+      <pre>    %c0_i6 = hw.constant 0 : i6</pre>
+      <pre>    %5 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %in = llhd.sig %c0_i32 : i32</pre>
+      <pre>    %shift = llhd.sig %c0_i6 : i6</pre>
+      <pre>    %6 = llhd.prb %in : !hw.inout&lt;i32&gt;</pre>
+      <pre>    %7 = llhd.prb %shift : !hw.inout&lt;i6&gt;</pre>
+      <pre>    %8 = comb.concat %c0_i26, %7 : i26, i6</pre>
+      <pre>    %9 = comb.shrs %6, %8 : i32</pre>
+      <pre>    %10:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      llhd.wait yield (%true, %true : i1, i1), delay %5, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %11 = comb.icmp ceq %9, %c-1_i32 : i32</pre>
+      <pre>      cf.cond_br %11, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %12 = sim.fmt.hex %9 : i32</pre>
+      <pre>      %13 = sim.fmt.concat (%4, %12, %3)</pre>
+      <pre>      sim.proc.print %13</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      %14 = sim.fmt.hex %9 : i32</pre>
+      <pre>      %15 = sim.fmt.concat (%2, %14, %1)</pre>
+      <pre>      sim.proc.print %15</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb4:  // 2 preds: ^bb2, ^bb3</pre>
+      <pre>      llhd.halt %false, %false : i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %in, %c-2147483648_i32 after %0 if %10#0 : !hw.inout&lt;i32&gt;</pre>
+      <pre>    llhd.drv %shift, %c-32_i6 after %0 if %10#1 : !hw.inout&lt;i6&gt;</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>
