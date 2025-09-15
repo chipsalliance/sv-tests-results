@@ -1,1 +1,1 @@
-config_loader_data['yosys/13.4'] = [["","function",0,"logs/Yosys/chapter-13/13.4--function.sv.log.html","tests/chapter-13/13.4--function.sv.html"],["","function",0,"logs/Yosys/chapter-13/13.4--function-label.sv.log.html","tests/chapter-13/13.4--function-label.sv.html"]]
+config_loader_data['yosys/13.4'] = [["","function",0,"logs/Yosys/chapter-13/13.4--function-label.sv.log.html","tests/chapter-13/13.4--function-label.sv.html"],["","function",0,"logs/Yosys/chapter-13/13.4--function.sv.log.html","tests/chapter-13/13.4--function.sv.html"]]
