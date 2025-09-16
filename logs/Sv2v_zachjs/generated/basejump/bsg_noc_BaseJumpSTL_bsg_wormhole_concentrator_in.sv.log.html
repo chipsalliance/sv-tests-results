@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-09-15 01:40:13</dd></div>
-        <div><dt>time elapsed</dt><dd>0.082s</dd></div>
-        <div><dt>ram usage</dt><dd>94912 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-09-16 01:40:05</dd></div>
+        <div><dt>time elapsed</dt><dd>0.091s</dd></div>
+        <div><dt>ram usage</dt><dd>97828 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -62,6 +62,7 @@
       <pre>	links_v_i,</pre>
       <pre>	links_data_i,</pre>
       <pre>	links_ready_and_rev_o,</pre>
+      <pre>	links_credit_late_o,</pre>
       <pre>	concentrated_link_ready_and_rev_i,</pre>
       <pre>	concentrated_link_v_o,</pre>
       <pre>	concentrated_link_data_o</pre>
@@ -72,16 +73,26 @@
       <pre>	parameter num_in_p = 1;</pre>
       <pre>	parameter debug_lp = 0;</pre>
       <pre>	parameter hold_on_valid_p = 0;</pre>
+      <pre>	parameter els_p = 2;</pre>
+      <pre>	parameter harden_p = 0;</pre>
+      <pre>	parameter assert_valid_credit_p = 0;</pre>
       <pre>	input clk_i;</pre>
       <pre>	input reset_i;</pre>
       <pre>	input [num_in_p - 1:0] links_v_i;</pre>
       <pre>	input [(num_in_p * flit_width_p) - 1:0] links_data_i;</pre>
       <pre>	output wire [num_in_p - 1:0] links_ready_and_rev_o;</pre>
+      <pre>	output wire [num_in_p - 1:0] links_credit_late_o;</pre>
       <pre>	input concentrated_link_ready_and_rev_i;</pre>
       <pre>	output wire concentrated_link_v_o;</pre>
       <pre>	output wire [flit_width_p - 1:0] concentrated_link_data_o;</pre>
       <pre>	genvar _gv_i_1;</pre>
       <pre>	genvar _gv_j_1;</pre>
+      <pre>	generate</pre>
+      <pre>		if (assert_valid_credit_p) begin : genblk1</pre>
+      <pre>			always @(posedge clk_i)</pre>
+      <pre>				;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	wire [(num_in_p * flit_width_p) - 1:0] fifo_data_lo;</pre>
       <pre>	wire [num_in_p - 1:0] fifo_valid_lo;</pre>
       <pre>	wire [num_in_p - 1:0] releases;</pre>
@@ -90,7 +101,11 @@
       <pre>	generate</pre>
       <pre>		for (_gv_i_1 = 0; _gv_i_1 &lt; num_in_p; _gv_i_1 = _gv_i_1 + 1) begin : in_ch</pre>
       <pre>			localparam i = _gv_i_1;</pre>
-      <pre>			bsg_two_fifo #(.width_p(flit_width_p)) twofer(</pre>
+      <pre>			bsg_fifo_1r1w_small #(</pre>
+      <pre>				.width_p(flit_width_p),</pre>
+      <pre>				.els_p(els_p),</pre>
+      <pre>				.harden_p(1)</pre>
+      <pre>			) twofer(</pre>
       <pre>				.clk_i(clk_i),</pre>
       <pre>				.reset_i(reset_i),</pre>
       <pre>				.v_i(links_v_i[i]),</pre>
@@ -100,6 +115,7 @@
       <pre>				.data_o(fifo_data_lo[i * flit_width_p+:flit_width_p]),</pre>
       <pre>				.yumi_i(yumis[i])</pre>
       <pre>			);</pre>
+      <pre>			assign links_credit_late_o[i] = yumis[i];</pre>
       <pre>			wire [(len_width_p + cord_width_p) - 1:0] concentrated_hdr;</pre>
       <pre>			assign concentrated_hdr = fifo_data_lo[(i * flit_width_p) + ((len_width_p + cord_width_p) - 1)-:len_width_p + cord_width_p];</pre>
       <pre>			bsg_wormhole_router_input_control #(</pre>
