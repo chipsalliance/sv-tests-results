@@ -1,1 +1,1 @@
-config_loader_data['slang/tnoc'] = [["cores","TNoC",1,"logs/Slang/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
+config_loader_data['slang/tnoc'] = [["cores","TNoC",0,"logs/Slang/generated/tnoc/tnoc.sv.log.html","third_party/cores/tnoc/rtl/bcm/tbcm_counter.sv.html"]]
