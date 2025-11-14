@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-11-13 15:14:53</dd></div>
+        <div><dt>completed</dt><dd>2025-11-14 01:41:06</dd></div>
         <div><dt>time elapsed</dt><dd>0.091s</dd></div>
-        <div><dt>ram usage</dt><dd>95604 KB</dd></div>
+        <div><dt>ram usage</dt><dd>95576 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -64,7 +64,7 @@
       <pre>);</pre>
       <pre>	parameter width_p = 0;</pre>
       <pre>	parameter harden_p = 1;</pre>
-      <pre>	input wire [3:0] bsg_tag_i;</pre>
+      <pre>	input wire [2:0] bsg_tag_i;</pre>
       <pre>	input recv_clk_i;</pre>
       <pre>	output wire recv_new_r_o;</pre>
       <pre>	output wire [width_p - 1:0] recv_data_r_o;</pre>
@@ -72,9 +72,9 @@
       <pre>	reg op_r;</pre>
       <pre>	reg op_r_r;</pre>
       <pre>	reg param_r;</pre>
-      <pre>	always @(posedge bsg_tag_i[3]) begin</pre>
-      <pre>		op_r &lt;= bsg_tag_i[2];</pre>
-      <pre>		param_r &lt;= bsg_tag_i[1];</pre>
+      <pre>	always @(posedge bsg_tag_i[2]) begin</pre>
+      <pre>		op_r &lt;= bsg_tag_i[1];</pre>
+      <pre>		param_r &lt;= bsg_tag_i[0];</pre>
       <pre>		op_r_r &lt;= op_r;</pre>
       <pre>	end</pre>
       <pre>	wire reset_op = ~op_r &amp; param_r;</pre>
@@ -107,21 +107,21 @@
       <pre>		.width_p(width_p),</pre>
       <pre>		.harden_p(harden_p)</pre>
       <pre>	) tag_data_reg(</pre>
-      <pre>		.clk_i(bsg_tag_i[3]),</pre>
+      <pre>		.clk_i(bsg_tag_i[2]),</pre>
       <pre>		.data_i(tag_data_n),</pre>
       <pre>		.data_o(tag_data_r)</pre>
       <pre>	);</pre>
       <pre>	reg recv_toggle_r;</pre>
       <pre>	wire recv_toggle_n;</pre>
       <pre>	bsg_launch_sync_sync #(.width_p(1)) blss(</pre>
-      <pre>		.iclk_i(bsg_tag_i[3]),</pre>
+      <pre>		.iclk_i(bsg_tag_i[2]),</pre>
       <pre>		.iclk_reset_i(reset_op),</pre>
       <pre>		.iclk_data_i(tag_toggle_r ^ send_now),</pre>
       <pre>		.iclk_data_o(tag_toggle_r),</pre>
       <pre>		.oclk_i(recv_clk_i),</pre>
       <pre>		.oclk_data_o(recv_toggle_n)</pre>
       <pre>	);</pre>
-      <pre>	wire recv_new = (recv_toggle_r ^ recv_toggle_n) &amp; bsg_tag_i[0];</pre>
+      <pre>	wire recv_new = recv_toggle_r ^ recv_toggle_n;</pre>
       <pre>	reg recv_new_r;</pre>
       <pre>	reg recv_new_r_r;</pre>
       <pre>	always @(posedge recv_clk_i) begin</pre>
@@ -138,7 +138,7 @@
       <pre>		.data_i(tag_data_r),</pre>
       <pre>		.data_o(recv_data_r)</pre>
       <pre>	);</pre>
-      <pre>	assign recv_new_r_o = recv_new_r_r &amp; bsg_tag_i[0];</pre>
+      <pre>	assign recv_new_r_o = recv_new_r_r;</pre>
       <pre>	assign recv_data_r_o = recv_data_r;</pre>
       <pre>endmodule</pre>
       <pre>module bsg_tag_client__abstract;</pre>

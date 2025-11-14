@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-11-13 15:14:54</dd></div>
-        <div><dt>time elapsed</dt><dd>0.117s</dd></div>
-        <div><dt>ram usage</dt><dd>127884 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-11-14 01:41:06</dd></div>
+        <div><dt>time elapsed</dt><dd>0.124s</dd></div>
+        <div><dt>ram usage</dt><dd>127328 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -72,7 +72,7 @@
       <pre>	input clk_i;</pre>
       <pre>	input data_i;</pre>
       <pre>	input [lg_els_lp - 1:0] node_id_offset_i;</pre>
-      <pre>	output wire [(local_els_p * 4) - 1:0] clients_o;</pre>
+      <pre>	output wire [(local_els_p * 3) - 1:0] clients_o;</pre>
       <pre>	localparam max_packet_len_lp = ((1 &lt;&lt; lg_width_p) - 1) + ((((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p)) + 1) + lg_width_p);</pre>
       <pre>	localparam reset_len_lp = (1 &lt;&lt; ((((((1 &lt;&lt; lg_width_p) - 1) + ((((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p)) + 1) + lg_width_p)) + 1) == 1) || (((((1 &lt;&lt; lg_width_p) - 1) + ((((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p)) + 1) + lg_width_p)) + 1) == 0) ? 1 : $clog2((((1 &lt;&lt; lg_width_p) - 1) + ((((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p)) + 1) + lg_width_p)) + 1))) + 1;</pre>
       <pre>	localparam lg_max_packet_len_lp = (((max_packet_len_lp + 1) == 1) || ((max_packet_len_lp + 1) == 0) ? 1 : $clog2(max_packet_len_lp + 1));</pre>
@@ -103,7 +103,7 @@
       <pre>	reg [((((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1:0] hdr_r;</pre>
       <pre>	reg [((((els_p == 1) || (els_p == 0) ? 1 : $clog2(els_p)) + 1) + lg_width_p) - 1:0] hdr_n;</pre>
       <pre>	reg v_n;</pre>
-      <pre>	reg [3:0] bsg_tag_n;</pre>
+      <pre>	reg [2:0] bsg_tag_n;</pre>
       <pre>	reg [1:0] state_r;</pre>
       <pre>	reg [1:0] state_n;</pre>
       <pre>	always @(posedge clk_i)</pre>
@@ -138,8 +138,8 @@
       <pre>		hdr_ptr_n = hdr_ptr_r;</pre>
       <pre>		hdr_n = hdr_r;</pre>
       <pre>		v_n = 1&#39;b0;</pre>
-      <pre>		bsg_tag_n[2] = 1&#39;b0;</pre>
       <pre>		bsg_tag_n[1] = 1&#39;b0;</pre>
+      <pre>		bsg_tag_n[0] = 1&#39;b0;</pre>
       <pre>		case (state_r)</pre>
       <pre>			2&#39;d0: begin</pre>
       <pre>				if (data_i_r)</pre>
@@ -166,10 +166,10 @@
       <pre>			end</pre>
       <pre>			2&#39;d2: begin</pre>
       <pre>				v_n = 1&#39;b1;</pre>
-      <pre>				bsg_tag_n[2] = hdr_r[lg_width_p + 0];</pre>
-      <pre>				bsg_tag_n[1] = data_i_r;</pre>
+      <pre>				bsg_tag_n[1] = hdr_r[lg_width_p + 0];</pre>
+      <pre>				bsg_tag_n[0] = data_i_r;</pre>
       <pre>				if (debug_level_lp &gt; 2)</pre>
-      <pre>					$display(&#34;## bsg_tag_master PACKET TRANSFER op,param=&lt;%b,%b&gt; (%m)&#34;, bsg_tag_n[2], bsg_tag_n[1]);</pre>
+      <pre>					$display(&#34;## bsg_tag_master PACKET TRANSFER op,param=&lt;%b,%b&gt; (%m)&#34;, bsg_tag_n[1], bsg_tag_n[0]);</pre>
       <pre>				if (hdr_r[lg_width_p - 1-:lg_width_p] == sv2v_cast_4D2A2_signed(1)) begin</pre>
       <pre>					state_n = 2&#39;d0;</pre>
       <pre>					if (debug_level_lp &gt; 1)</pre>
@@ -193,10 +193,9 @@
       <pre>	generate</pre>
       <pre>		for (_gv_i_1 = 0; _gv_i_1 &lt; local_els_p; _gv_i_1 = _gv_i_1 + 1) begin : rof</pre>
       <pre>			localparam i = _gv_i_1;</pre>
-      <pre>			assign clients_o[(i * 4) + 3] = clk_i;</pre>
-      <pre>			assign clients_o[(i * 4) + 2] = (node_id_match &amp; clients_decode[i]) &amp; bsg_tag_n[2];</pre>
-      <pre>			assign clients_o[(i * 4) + 1] = (node_id_match &amp; clients_decode[i]) &amp; bsg_tag_n[1];</pre>
-      <pre>			assign clients_o[i * 4] = 1&#39;b1;</pre>
+      <pre>			assign clients_o[(i * 3) + 2] = clk_i;</pre>
+      <pre>			assign clients_o[(i * 3) + 1] = (node_id_match &amp; clients_decode[i]) &amp; bsg_tag_n[1];</pre>
+      <pre>			assign clients_o[i * 3] = (node_id_match &amp; clients_decode[i]) &amp; bsg_tag_n[0];</pre>
       <pre>		end</pre>
       <pre>	endgenerate</pre>
       <pre>	initial _sv2v_0 = 0;</pre>
