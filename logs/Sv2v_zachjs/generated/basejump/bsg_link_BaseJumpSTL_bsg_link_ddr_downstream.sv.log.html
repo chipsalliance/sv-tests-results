@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2025-12-18 01:40:27</dd></div>
-        <div><dt>time elapsed</dt><dd>0.095s</dd></div>
-        <div><dt>ram usage</dt><dd>107048 KB</dd></div>
+        <div><dt>completed</dt><dd>2025-12-19 01:40:35</dd></div>
+        <div><dt>time elapsed</dt><dd>0.110s</dd></div>
+        <div><dt>ram usage</dt><dd>108640 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -102,20 +102,22 @@
       <pre>			wire io_iddr_valid_lo;</pre>
       <pre>			wire io_iddr_data_v;</pre>
       <pre>			wire [phy_width_lp - 1:0] io_iddr_data_top;</pre>
-      <pre>			wire [(2 * (channel_width_p / 2)) - 1:0] io_iddr_data_bottom;</pre>
+      <pre>			wire [channel_width_p - 1:0] io_iddr_data_bottom_whole;</pre>
       <pre>			wire core_ss_valid_lo;</pre>
       <pre>			wire core_ss_yumi_li;</pre>
       <pre>			wire core_ss_data_nonzero;</pre>
       <pre>			wire [phy_width_lp - 1:0] core_ss_data_top;</pre>
-      <pre>			wire [(2 * (channel_width_p / 2)) - 1:0] core_ss_data_bottom;</pre>
+      <pre>			wire [channel_width_p - 1:0] core_ss_data_bottom_whole;</pre>
       <pre>			assign core_ss_yumi_li = core_sipo_yumi_lo;</pre>
       <pre>			assign core_sipo_valid_li[i] = core_ss_valid_lo;</pre>
       <pre>			assign core_sipo_data_li[(i * ddr_width_lp) + ((ddr_width_lp - 1) &gt;= channel_width_p ? ddr_width_lp - 1 : ((ddr_width_lp - 1) + ((ddr_width_lp - 1) &gt;= channel_width_p ? ((ddr_width_lp - 1) - channel_width_p) + 1 : (channel_width_p - (ddr_width_lp - 1)) + 1)) - 1)-:((ddr_width_lp - 1) &gt;= channel_width_p ? ((ddr_width_lp - 1) - channel_width_p) + 1 : (channel_width_p - (ddr_width_lp - 1)) + 1)] = core_ss_data_top;</pre>
       <pre>			if (use_encode_p == 0) begin : genblk1</pre>
-      <pre>				assign core_sipo_data_li[(i * ddr_width_lp) + (channel_width_p - 1)-:channel_width_p] = core_ss_data_bottom;</pre>
+      <pre>				assign core_sipo_data_li[(i * ddr_width_lp) + (channel_width_p - 1)-:channel_width_p] = core_ss_data_bottom_whole;</pre>
       <pre>				assign io_iddr_valid_lo = io_iddr_data_v;</pre>
       <pre>			end</pre>
       <pre>			else begin : genblk1</pre>
+      <pre>				wire [(2 * (channel_width_p / 2)) - 1:0] io_iddr_data_bottom = io_iddr_data_bottom_whole;</pre>
+      <pre>				wire [(2 * (channel_width_p / 2)) - 1:0] core_ss_data_bottom = core_ss_data_bottom_whole;</pre>
       <pre>				assign core_sipo_data_li[(i * ddr_width_lp) + ((channel_width_p - 1) &gt;= (channel_width_p / 2) ? channel_width_p - 1 : ((channel_width_p - 1) + ((channel_width_p - 1) &gt;= (channel_width_p / 2) ? ((channel_width_p - 1) - (channel_width_p / 2)) + 1 : ((channel_width_p / 2) - (channel_width_p - 1)) + 1)) - 1)-:((channel_width_p - 1) &gt;= (channel_width_p / 2) ? ((channel_width_p - 1) - (channel_width_p / 2)) + 1 : ((channel_width_p / 2) - (channel_width_p - 1)) + 1)] = (core_ss_data_nonzero ? {core_ss_data_bottom[channel_width_p / 2+:channel_width_p / 2]} : {core_ss_data_bottom[(channel_width_p / 2) - 1], core_ss_data_bottom[(channel_width_p / 2) + (((channel_width_p / 2) - 2) &gt;= 0 ? (channel_width_p / 2) - 2 : (((channel_width_p / 2) - 2) + (((channel_width_p / 2) - 2) &gt;= 0 ? (channel_width_p / 2) - 1 : 3 - (channel_width_p / 2))) - 1)-:(((channel_width_p / 2) - 2) &gt;= 0 ? (channel_width_p / 2) - 1 : 3 - (channel_width_p / 2))]});</pre>
       <pre>				assign core_sipo_data_li[(i * ddr_width_lp) + ((channel_width_p / 2) - 1)-:channel_width_p / 2] = (core_ss_data_nonzero ? {core_ss_data_bottom[0+:channel_width_p / 2]} : 1&#39;b0);</pre>
       <pre>				assign io_iddr_valid_lo = io_iddr_data_v | io_iddr_data_bottom[(channel_width_p / 2) + ((channel_width_p / 2) - 1)];</pre>
@@ -123,7 +125,7 @@
       <pre>			bsg_link_iddr_phy #(.width_p(phy_width_lp)) iddr_phy(</pre>
       <pre>				.clk_i(io_clk_i[i]),</pre>
       <pre>				.data_i({io_valid_i[i], io_data_i[i * channel_width_p+:channel_width_p]}),</pre>
-      <pre>				.data_r_o({io_iddr_data_top, io_iddr_data_v, io_iddr_data_bottom})</pre>
+      <pre>				.data_r_o({io_iddr_data_top, io_iddr_data_v, io_iddr_data_bottom_whole})</pre>
       <pre>			);</pre>
       <pre>			bsg_link_source_sync_downstream #(</pre>
       <pre>				.channel_width_p(2 * phy_width_lp),</pre>
@@ -136,10 +138,10 @@
       <pre>				.core_link_reset_i(core_link_reset_i),</pre>
       <pre>				.io_link_reset_i(io_link_reset_i[i]),</pre>
       <pre>				.io_clk_i(io_clk_i[i]),</pre>
-      <pre>				.io_data_i({io_iddr_data_top, io_iddr_data_v, io_iddr_data_bottom}),</pre>
+      <pre>				.io_data_i({io_iddr_data_top, io_iddr_data_v, io_iddr_data_bottom_whole}),</pre>
       <pre>				.io_valid_i(io_iddr_valid_lo),</pre>
       <pre>				.core_token_r_o(core_token_r_o[i]),</pre>
-      <pre>				.core_data_o({core_ss_data_top, core_ss_data_nonzero, core_ss_data_bottom}),</pre>
+      <pre>				.core_data_o({core_ss_data_top, core_ss_data_nonzero, core_ss_data_bottom_whole}),</pre>
       <pre>				.core_valid_o(core_ss_valid_lo),</pre>
       <pre>				.core_yumi_i(core_ss_yumi_li)</pre>
       <pre>			);</pre>
