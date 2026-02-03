@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/8.23'] = [["","scope_resolution",0,"logs/circt_verilog/chapter-8/8.23--scope_resolution.sv.log.html","tests/chapter-8/8.23--scope_resolution.sv.html"]]
+config_loader_data['circt_verilog/8.23'] = [["","scope_resolution",1,"logs/circt_verilog/chapter-8/8.23--scope_resolution.sv.log.html","tests/chapter-8/8.23--scope_resolution.sv.html"]]

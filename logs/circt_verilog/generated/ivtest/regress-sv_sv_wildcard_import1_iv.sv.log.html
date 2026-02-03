@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/384e69b9790fcc58bbf3ca5f676328c7ea0ad720" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/fcf8a1dcb7125b2c085f4141fdb82963bd33b59b" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_sv_wildcard_import1_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,20 +32,73 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-02-03 01:50:30</dd></div>
-        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
-        <div><dt>ram usage</dt><dd>19360 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-02-03 15:51:28</dd></div>
+        <div><dt>time elapsed</dt><dd>0.016s</dd></div>
+        <div><dt>ram usage</dt><dd>20316 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=test <a href="../../../../third_party/tools/icarus/ivtest/ivltests/sv_wildcard_import1.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/sv_wildcard_import1.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/sv_wildcard_import1.v:12:4: error: failed to legalize operation &#39;moore.global_variable&#39;</pre>
-      <pre>st s;</pre>
-      <pre>   ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/sv_wildcard_import1.v:12:4: note: see current operation: </pre>
-      <pre>&#34;moore.global_variable&#34;() &lt;{sym_name = &#34;my_package::s&#34;, type = !moore.struct&lt;{v: l16}&gt;}&gt; ({</pre>
-      <pre>}) : () -&gt; ()</pre>
+      <pre>module {</pre>
+      <pre>  llhd.global_signal @&#34;my_package::s&#34; : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>  llhd.global_signal @&#34;my_package::e&#34; : i1</pre>
+      <pre>  hw.module @test() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %c1_i16 = hw.constant 1 : i16</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %3 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c3_i32 = hw.constant 3 : i32</pre>
+      <pre>    %c2_i16 = hw.constant 2 : i16</pre>
+      <pre>    %4 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c0_i16 = hw.constant 0 : i16</pre>
+      <pre>    %my_v = llhd.sig %c0_i16 : i16</pre>
+      <pre>    %5 = llhd.prb %my_v : i16</pre>
+      <pre>    %6 = llhd.process -&gt; i1 {</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %4, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %7 = llhd.get_global_signal @&#34;my_package::e&#34; : &lt;i1&gt;</pre>
+      <pre>      %8 = llhd.prb %7 : i1</pre>
+      <pre>      %9 = comb.xor %8, %true : i1</pre>
+      <pre>      llhd.drv %7, %9 after %3 : i1</pre>
+      <pre>      llhd.halt %false : i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %my_v, %c1_i16 after %3 if %6 : i16</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %7 = llhd.get_global_signal @&#34;my_package::s&#34; : &lt;!hw.struct&lt;v: i16&gt;&gt;</pre>
+      <pre>      %8 = llhd.sig.struct_extract %7[&#34;v&#34;] : &lt;!hw.struct&lt;v: i16&gt;&gt;</pre>
+      <pre>      llhd.drv %8, %5 after %3 : i16</pre>
+      <pre>      %9 = llhd.prb %7 : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>      %v = hw.struct_extract %9[&#34;v&#34;] : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>      %10 = comb.add %v, %c2_i16 : i16</pre>
+      <pre>      llhd.drv %8, %10 after %3 : i16</pre>
+      <pre>      %11 = llhd.prb %7 : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>      %v_0 = hw.struct_extract %11[&#34;v&#34;] : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>      %12 = sim.fmt.dec %v_0 : i16</pre>
+      <pre>      %13 = sim.fmt.concat (%12, %0)</pre>
+      <pre>      sim.proc.print %13</pre>
+      <pre>      %14 = llhd.prb %7 : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>      %v_1 = hw.struct_extract %14[&#34;v&#34;] : !hw.struct&lt;v: i16&gt;</pre>
+      <pre>      %15 = comb.concat %c0_i16, %v_1 : i16, i16</pre>
+      <pre>      %16 = comb.icmp ceq %15, %c3_i32 : i32</pre>
+      <pre>      cf.cond_br %16, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb4:  // 2 preds: ^bb2, ^bb3</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>

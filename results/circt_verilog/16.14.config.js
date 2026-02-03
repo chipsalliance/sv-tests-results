@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/16.14'] = [["","assume_property_test",0,"logs/circt_verilog/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]
+config_loader_data['circt_verilog/16.14'] = [["","assume_property_test",1,"logs/circt_verilog/chapter-16/16.14--assume-property.sv.log.html","tests/chapter-16/16.14--assume-property.sv.html"]]
