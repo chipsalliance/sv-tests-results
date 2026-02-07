@@ -1100,8 +1100,7 @@
 <span class="normal"><a href="#l-1092">1092</a></span>
 <span class="normal"><a href="#l-1093">1093</a></span>
 <span class="normal"><a href="#l-1094">1094</a></span>
-<span class="normal"><a href="#l-1095">1095</a></span>
-<span class="normal"><a href="#l-1096">1096</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2025 ETH Zurich and University of Bologna.</span>
+<span class="normal"><a href="#l-1095">1095</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="c1">// Copyright 2025 ETH Zurich and University of Bologna.</span>
 <a id="l-2" name="l-2"></a><span class="c1">// Copyright and related rights are licensed under the Solderpad Hardware</span>
 <a id="l-3" name="l-3"></a><span class="c1">// License, Version 0.51 (the &quot;License&quot;); you may not use this file except in</span>
 <a id="l-4" name="l-4"></a><span class="c1">// compliance with the License.  You may obtain a copy of the License at</span>
@@ -2134,69 +2133,68 @@
 <a id="l-1031" name="l-1031"></a><span class="w">                </span><span class="cm">/* requires non mandatory support for jtc and branch prediction</span>
 <a id="l-1032" name="l-1032"></a><span class="cm">                case(packet_f_opt_ext_subformat_i)</span>
 <a id="l-1033" name="l-1033"></a><span class="cm">                SF_PBC: begin // subformat 0</span>
-<a id="l-1034" name="l-1034"></a><span class="cm">                /*  There can be two type of payloads for this subformat:</span>
-<a id="l-1035" name="l-1035"></a><span class="cm">                    1. no address, branch count</span>
-<a id="l-1036" name="l-1036"></a><span class="cm">                    2. address, branch count</span>
-<a id="l-1037" name="l-1037"></a><span class="cm">                * /    </span>
-<a id="l-1038" name="l-1038"></a><span class="cm">                </span>
-<a id="l-1039" name="l-1039"></a><span class="cm">                    // only for F0SF0 payload w/address</span>
-<a id="l-1040" name="l-1040"></a><span class="cm">                    // updating latest address sent in a packet</span>
-<a id="l-1041" name="l-1041"></a>
-<a id="l-1042" name="l-1042"></a><span class="cm">                    packet_payload_o = {F_OPT_EXT, SF_PBC, etc..};</span>
-<a id="l-1043" name="l-1043"></a><span class="cm">                    packet_valid_o = &#39;1;</span>
-<a id="l-1044" name="l-1044"></a><span class="cm">                end</span>
-<a id="l-1045" name="l-1045"></a>
-<a id="l-1046" name="l-1046"></a><span class="cm">                SF_JTC: begin // subformat 1</span>
-<a id="l-1047" name="l-1047"></a><span class="cm">                    packet_payload_o = {F_OPT_EXT, SF_JTC, etc..};</span>
-<a id="l-1048" name="l-1048"></a><span class="cm">                    packet_valid_o = &#39;1;</span>
-<a id="l-1049" name="l-1049"></a><span class="cm">                end</span>
-<a id="l-1050" name="l-1050"></a><span class="cm">                endcase</span>
-<a id="l-1051" name="l-1051"></a><span class="cm">                */</span>
-<a id="l-1052" name="l-1052"></a><span class="w">            </span><span class="c1">//end</span>
-<a id="l-1053" name="l-1053"></a><span class="w">            </span><span class="k">endcase</span>
-<a id="l-1054" name="l-1054"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-1055" name="l-1055"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-1056" name="l-1056"></a>
-<a id="l-1057" name="l-1057"></a><span class="w">    </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">address_to_compress</span>
-<a id="l-1058" name="l-1058"></a><span class="w">        </span><span class="n">diff_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-1059" name="l-1059"></a><span class="w">        </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
-<a id="l-1060" name="l-1060"></a><span class="w">        </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">latest_addr_q</span><span class="p">;</span>
-<a id="l-1061" name="l-1061"></a>
-<a id="l-1062" name="l-1062"></a><span class="w">        </span><span class="c1">// determines differential address for F1, F2</span>
-<a id="l-1063" name="l-1063"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_valid_o</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">packet_format_i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F_DIFF_DELTA</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>
-<a id="l-1064" name="l-1064"></a><span class="w">            </span><span class="n">packet_format_i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F_ADDR_ONLY</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-1065" name="l-1065"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ioptions_i</span><span class="p">.</span><span class="n">delta_address_en</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-1066" name="l-1066"></a><span class="w">                </span><span class="n">diff_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">latest_addr_q</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span><span class="w"> </span><span class="c1">// mostly &gt;0 exept for jump , remove signed </span>
-<a id="l-1067" name="l-1067"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diff_addr</span><span class="p">;</span>
-<a id="l-1068" name="l-1068"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ioptions_i</span><span class="p">.</span><span class="n">full_address_en</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-1069" name="l-1069"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1070" name="l-1070"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-1071" name="l-1071"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-1072" name="l-1072"></a>
-<a id="l-1073" name="l-1073"></a><span class="w">        </span><span class="c1">// determines latest address</span>
-<a id="l-1074" name="l-1074"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_valid_o</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">update_latest_addr</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-1075" name="l-1075"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>
-<a id="l-1076" name="l-1076"></a><span class="w">                </span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F2</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// F1, F2</span>
-<a id="l-1077" name="l-1077"></a><span class="w">                </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1078" name="l-1078"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1079" name="l-1079"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-1080" name="l-1080"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F3SF0</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// F3SF0</span>
-<a id="l-1081" name="l-1081"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">resync_q</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w">  </span><span class="c1">//FIXME WHY ?</span>
-<a id="l-1082" name="l-1082"></a><span class="w">                    </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1083" name="l-1083"></a><span class="w">                    </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1084" name="l-1084"></a><span class="w">                </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
-<a id="l-1085" name="l-1085"></a><span class="w">                    </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1086" name="l-1086"></a><span class="w">                    </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
-<a id="l-1087" name="l-1087"></a><span class="w">                </span><span class="k">end</span>
-<a id="l-1088" name="l-1088"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-1089" name="l-1089"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F3SF1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// F3SF1</span>
-<a id="l-1090" name="l-1090"></a><span class="w">                </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
-<a id="l-1091" name="l-1091"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
-<a id="l-1092" name="l-1092"></a><span class="w">            </span><span class="k">end</span>
-<a id="l-1093" name="l-1093"></a><span class="w">        </span><span class="k">end</span>
-<a id="l-1094" name="l-1094"></a><span class="w">    </span><span class="k">end</span>
-<a id="l-1095" name="l-1095"></a>
-<a id="l-1096" name="l-1096"></a><span class="k">endmodule</span>
+<a id="l-1034" name="l-1034"></a><span class="cm">                    // There can be two type of payloads for this subformat:</span>
+<a id="l-1035" name="l-1035"></a><span class="cm">                    // 1. no address, branch count</span>
+<a id="l-1036" name="l-1036"></a><span class="cm">                    // 2. address, branch count</span>
+<a id="l-1037" name="l-1037"></a><span class="cm">                </span>
+<a id="l-1038" name="l-1038"></a><span class="cm">                    // only for F0SF0 payload w/address</span>
+<a id="l-1039" name="l-1039"></a><span class="cm">                    // updating latest address sent in a packet</span>
+<a id="l-1040" name="l-1040"></a>
+<a id="l-1041" name="l-1041"></a><span class="cm">                    packet_payload_o = {F_OPT_EXT, SF_PBC, etc..};</span>
+<a id="l-1042" name="l-1042"></a><span class="cm">                    packet_valid_o = &#39;1;</span>
+<a id="l-1043" name="l-1043"></a><span class="cm">                end</span>
+<a id="l-1044" name="l-1044"></a>
+<a id="l-1045" name="l-1045"></a><span class="cm">                SF_JTC: begin // subformat 1</span>
+<a id="l-1046" name="l-1046"></a><span class="cm">                    packet_payload_o = {F_OPT_EXT, SF_JTC, etc..};</span>
+<a id="l-1047" name="l-1047"></a><span class="cm">                    packet_valid_o = &#39;1;</span>
+<a id="l-1048" name="l-1048"></a><span class="cm">                end</span>
+<a id="l-1049" name="l-1049"></a><span class="cm">                endcase</span>
+<a id="l-1050" name="l-1050"></a><span class="cm">                */</span>
+<a id="l-1051" name="l-1051"></a><span class="w">            </span><span class="c1">//end</span>
+<a id="l-1052" name="l-1052"></a><span class="w">            </span><span class="k">endcase</span>
+<a id="l-1053" name="l-1053"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-1054" name="l-1054"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-1055" name="l-1055"></a>
+<a id="l-1056" name="l-1056"></a><span class="w">    </span><span class="k">always_comb</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">address_to_compress</span>
+<a id="l-1057" name="l-1057"></a><span class="w">        </span><span class="n">diff_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-1058" name="l-1058"></a><span class="w">        </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">&#39;0</span><span class="p">;</span>
+<a id="l-1059" name="l-1059"></a><span class="w">        </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">latest_addr_q</span><span class="p">;</span>
+<a id="l-1060" name="l-1060"></a>
+<a id="l-1061" name="l-1061"></a><span class="w">        </span><span class="c1">// determines differential address for F1, F2</span>
+<a id="l-1062" name="l-1062"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_valid_o</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">packet_format_i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F_DIFF_DELTA</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>
+<a id="l-1063" name="l-1063"></a><span class="w">            </span><span class="n">packet_format_i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F_ADDR_ONLY</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-1064" name="l-1064"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ioptions_i</span><span class="p">.</span><span class="n">delta_address_en</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-1065" name="l-1065"></a><span class="w">                </span><span class="n">diff_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">latest_addr_q</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span><span class="w"> </span><span class="c1">// mostly &gt;0 exept for jump , remove signed </span>
+<a id="l-1066" name="l-1066"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">diff_addr</span><span class="p">;</span>
+<a id="l-1067" name="l-1067"></a><span class="w">            </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ioptions_i</span><span class="p">.</span><span class="n">full_address_en</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-1068" name="l-1068"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1069" name="l-1069"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-1070" name="l-1070"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-1071" name="l-1071"></a>
+<a id="l-1072" name="l-1072"></a><span class="w">        </span><span class="c1">// determines latest address</span>
+<a id="l-1073" name="l-1073"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_valid_o</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">update_latest_addr</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-1074" name="l-1074"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>
+<a id="l-1075" name="l-1075"></a><span class="w">                </span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F2</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// F1, F2</span>
+<a id="l-1076" name="l-1076"></a><span class="w">                </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1077" name="l-1077"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1078" name="l-1078"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-1079" name="l-1079"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F3SF0</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// F3SF0</span>
+<a id="l-1080" name="l-1080"></a><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">resync_q</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w">  </span><span class="c1">//FIXME WHY ?</span>
+<a id="l-1081" name="l-1081"></a><span class="w">                    </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1082" name="l-1082"></a><span class="w">                    </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1083" name="l-1083"></a><span class="w">                </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-1084" name="l-1084"></a><span class="w">                    </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1085" name="l-1085"></a><span class="w">                    </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tc_address_i</span><span class="p">;</span>
+<a id="l-1086" name="l-1086"></a><span class="w">                </span><span class="k">end</span>
+<a id="l-1087" name="l-1087"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-1088" name="l-1088"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">packet_type_o</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">te_pkg</span><span class="o">::</span><span class="n">F3SF1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// F3SF1</span>
+<a id="l-1089" name="l-1089"></a><span class="w">                </span><span class="n">latest_addr_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
+<a id="l-1090" name="l-1090"></a><span class="w">                </span><span class="n">addr_to_compress_o</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address</span><span class="p">;</span>
+<a id="l-1091" name="l-1091"></a><span class="w">            </span><span class="k">end</span>
+<a id="l-1092" name="l-1092"></a><span class="w">        </span><span class="k">end</span>
+<a id="l-1093" name="l-1093"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-1094" name="l-1094"></a>
+<a id="l-1095" name="l-1095"></a><span class="k">endmodule</span>
 </pre></div></td></tr></table></div>
 
   </body>
