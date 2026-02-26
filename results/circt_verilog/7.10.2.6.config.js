@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/7.10.2.6'] = [["","push_front",0,"logs/circt_verilog/chapter-7/queues/push_front.sv.log.html","tests/chapter-7/queues/push_front.sv.html"]]
+config_loader_data['circt_verilog/7.10.2.6'] = [["","push_front",1,"logs/circt_verilog/chapter-7/queues/push_front.sv.log.html","tests/chapter-7/queues/push_front.sv.html"]]
