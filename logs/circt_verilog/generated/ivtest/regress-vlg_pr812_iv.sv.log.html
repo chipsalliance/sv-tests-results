@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/f847e156617d3bed7dc04ce98e75f8553badbae3" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr812_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,18 +32,77 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-27 22:15:41</dd></div>
-        <div><dt>time elapsed</dt><dd>0.509s</dd></div>
-        <div><dt>ram usage</dt><dd>413716 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-28 01:52:10</dd></div>
+        <div><dt>time elapsed</dt><dd>0.037s</dd></div>
+        <div><dt>ram usage</dt><dd>21796 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=top <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr812.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr812.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr812.v:39:2: error: &#39;hw.bitcast&#39; op result #0 must be Type wherein the bitwidth in hardware is known, but got &#39;f64&#39;</pre>
-      <pre>        initial begin</pre>
-      <pre>        ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr812.v:39:2: note: see current operation: %15 = &#34;hw.bitcast&#34;(%14) : (i1073741823) -&gt; f64</pre>
+      <pre>module {</pre>
+      <pre>  hw.module @top() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34; in top\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;tp = &#34;</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %b1.a = hw.instance &#34;b1&#34; @bot(b: %false: i1) -&gt; (a: i1) {sv.namehint = &#34;b&#34;}</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      %2 = sim.fmt.dec %c1_i32 : i32</pre>
+      <pre>      %3 = sim.fmt.concat (%1, %2, %0)</pre>
+      <pre>      sim.proc.print %3</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @bot(out a : i1, in %b : i1) {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;tp == 10, (expected)\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;)\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;tp != 10.0.  (tp = &#34;</pre>
+      <pre>    %cst = arith.constant 1.000000e+01 : f64</pre>
+      <pre>    %3 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34;, tp2 = &#34;</pre>
+      <pre>    %5 = sim.fmt.literal &#34;tp = &#34;</pre>
+      <pre>    %6 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %7 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %cst_0 = arith.constant 0.000000e+00 : f64</pre>
+      <pre>    %tp = llhd.sig %cst_0 : f64</pre>
+      <pre>    %8 = llhd.prb %tp : f64</pre>
+      <pre>    %tp2 = llhd.sig %cst_0 : f64</pre>
+      <pre>    %9 = llhd.prb %tp2 : f64</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.drv %tp, %cst after %6 : f64</pre>
+      <pre>      llhd.drv %tp2, %cst after %6 : f64</pre>
+      <pre>      %10 = llhd.prb %tp : f64</pre>
+      <pre>      %11 = sim.fmt.flt %10 : f64</pre>
+      <pre>      %12 = llhd.prb %tp2 : f64</pre>
+      <pre>      %13 = sim.fmt.flt %12 : f64</pre>
+      <pre>      %14 = sim.fmt.concat (%5, %11, %4, %13, %3)</pre>
+      <pre>      sim.proc.print %14</pre>
+      <pre>      %15 = llhd.prb %tp : f64</pre>
+      <pre>      %16 = arith.cmpf one, %15, %cst : f64</pre>
+      <pre>      cf.cond_br %16, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %17 = llhd.prb %tp : f64</pre>
+      <pre>      %18 = sim.fmt.flt %17 : f64</pre>
+      <pre>      %19 = sim.fmt.concat (%2, %18, %1)</pre>
+      <pre>      sim.proc.print %19</pre>
+      <pre>      cf.br ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb0</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb3</pre>
+      <pre>    ^bb3:  // 2 preds: ^bb1, ^bb2</pre>
+      <pre>      llhd.wait delay %7, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %20 = sim.fmt.flt %8 : f64</pre>
+      <pre>      %21 = sim.fmt.flt %9 : f64</pre>
+      <pre>      %22 = sim.fmt.concat (%5, %20, %4, %21, %3)</pre>
+      <pre>      sim.proc.print %22</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output %b : i1</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>

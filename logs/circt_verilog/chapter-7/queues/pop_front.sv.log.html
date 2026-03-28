@@ -6,14 +6,14 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/f847e156617d3bed7dc04ce98e75f8553badbae3" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
         <h2>pop_front</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test queues pop_front function support</dd></div>
         <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
-        <div><dt>tags</dt><dd>7.10.2 7.10.2.4</dd></div>
+        <div><dt>tags</dt><dd>7.10.2.4 7.10.2</dd></div>
         <div>
           <dt>incdirs</dt>
           <dd><ul>
@@ -31,9 +31,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-27 22:15:15</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>20436 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-28 01:51:52</dd></div>
+        <div><dt>time elapsed</dt><dd>0.041s</dd></div>
+        <div><dt>ram usage</dt><dd>20968 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -41,31 +41,38 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/tests/chapter-7/queues --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=top <a href="../../../../tests/chapter-7/queues/pop_front.sv.html" target="file-frame">tests/chapter-7/queues/pop_front.sv</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @top() {</pre>
-      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
-      <pre>    %1 = sim.fmt.literal &#34; == 2)\0A&#34;</pre>
-      <pre>    %2 = sim.fmt.literal &#34;:assert: (&#34;</pre>
+      <pre>    %0 = sim.fmt.literal &#34; == 2)\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;:assert: (&#34;</pre>
+      <pre>    %2 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
       <pre>    %c4_i32 = hw.constant 4 : i32</pre>
       <pre>    %c3_i32 = hw.constant 3 : i32</pre>
       <pre>    %c2_i32 = hw.constant 2 : i32</pre>
       <pre>    %3 = sim.queue.empty : &lt;i32, 0&gt;</pre>
       <pre>    %q = llhd.sig %3 : !sim.queue&lt;i32, 0&gt;</pre>
       <pre>    %4 = llhd.prb %q : !sim.queue&lt;i32, 0&gt;</pre>
-      <pre>    %5:2 = llhd.process -&gt; !sim.queue&lt;i32, 0&gt;, i32 {</pre>
+      <pre>    %5 = llhd.process -&gt; i32 {</pre>
       <pre>      %6 = sim.queue.push_back %c2_i32 into %4 : &lt;i32, 0&gt;</pre>
-      <pre>      %7 = sim.queue.push_back %c3_i32 into %6 : &lt;i32, 0&gt;</pre>
-      <pre>      %8 = sim.queue.push_back %c4_i32 into %7 : &lt;i32, 0&gt;</pre>
-      <pre>      %outQueue, %popped = sim.queue.pop_front from %8 : &lt;i32, 0&gt;</pre>
-      <pre>      %9 = sim.queue.size %outQueue : &lt;i32, 0&gt;</pre>
-      <pre>      %10 = builtin.unrealized_conversion_cast %9 : i64 to i32</pre>
-      <pre>      %11 = sim.fmt.dec %10 signed : i32</pre>
-      <pre>      %12 = sim.fmt.concat (%2, %11, %1)</pre>
-      <pre>      sim.proc.print %12</pre>
-      <pre>      %13 = sim.fmt.dec %popped signed : i32</pre>
-      <pre>      %14 = sim.fmt.concat (%2, %13, %1)</pre>
-      <pre>      sim.proc.print %14</pre>
-      <pre>      llhd.halt %outQueue, %popped : !sim.queue&lt;i32, 0&gt;, i32</pre>
+      <pre>      llhd.drv %q, %6 after %2 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %7 = llhd.prb %q : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %8 = sim.queue.push_back %c3_i32 into %7 : &lt;i32, 0&gt;</pre>
+      <pre>      llhd.drv %q, %8 after %2 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %9 = llhd.prb %q : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %10 = sim.queue.push_back %c4_i32 into %9 : &lt;i32, 0&gt;</pre>
+      <pre>      llhd.drv %q, %10 after %2 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %11 = llhd.prb %q : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %outQueue, %popped = sim.queue.pop_front from %11 : &lt;i32, 0&gt;</pre>
+      <pre>      llhd.drv %q, %outQueue after %2 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %12 = llhd.prb %q : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %13 = sim.queue.size %12 : &lt;i32, 0&gt;</pre>
+      <pre>      %14 = builtin.unrealized_conversion_cast %13 : i64 to i32</pre>
+      <pre>      %15 = sim.fmt.dec %14 signed : i32</pre>
+      <pre>      %16 = sim.fmt.concat (%1, %15, %0)</pre>
+      <pre>      sim.proc.print %16</pre>
+      <pre>      %17 = sim.fmt.dec %popped signed : i32</pre>
+      <pre>      %18 = sim.fmt.concat (%1, %17, %0)</pre>
+      <pre>      sim.proc.print %18</pre>
+      <pre>      llhd.halt %popped : i32</pre>
       <pre>    }</pre>
-      <pre>    llhd.drv %q, %5#0 after %0 : !sim.queue&lt;i32, 0&gt;</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>

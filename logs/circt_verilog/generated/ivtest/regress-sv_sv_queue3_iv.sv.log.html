@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/f847e156617d3bed7dc04ce98e75f8553badbae3" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_sv_queue3_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-27 22:15:34</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>20544 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-28 01:52:07</dd></div>
+        <div><dt>time elapsed</dt><dd>0.017s</dd></div>
+        <div><dt>ram usage</dt><dd>21072 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -42,46 +42,62 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=main <a href="../../../../third_party/tools/icarus/ivtest/ivltests/sv_queue3.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/sv_queue3.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @main() {</pre>
-      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
-      <pre>    %1 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
-      <pre>    %2 = sim.fmt.literal &#34; after clear\0A&#34;</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34; after clear\0A&#34;</pre>
+      <pre>    %2 = sim.string.literal &#34;Hello, World!&#34;</pre>
       <pre>    %3 = sim.fmt.literal &#34;FAILED -- nums.size=&#34;</pre>
       <pre>    %4 = sim.fmt.literal &#34;FAILED -- words.size=&#34;</pre>
+      <pre>    %5 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
       <pre>    %c0_i32 = hw.constant 0 : i32</pre>
       <pre>    %c42_i32 = hw.constant 42 : i32</pre>
-      <pre>    %5 = sim.queue.empty : &lt;i32, 0&gt;</pre>
-      <pre>    %nums = llhd.sig %5 : !sim.queue&lt;i32, 0&gt;</pre>
-      <pre>    %6 = llhd.prb %nums : !sim.queue&lt;i32, 0&gt;</pre>
-      <pre>    %7:2 = llhd.process -&gt; !sim.queue&lt;!sim.dstring, 0&gt;, !sim.queue&lt;i32, 0&gt; {</pre>
-      <pre>      %8 = sim.queue.push_back %c42_i32 into %6 : &lt;i32, 0&gt;</pre>
-      <pre>      %9 = sim.queue.concat () : () &lt;!sim.dstring, 0&gt;</pre>
-      <pre>      %10 = sim.queue.size %9 : &lt;!sim.dstring, 0&gt;</pre>
-      <pre>      %11 = builtin.unrealized_conversion_cast %10 : i64 to i32</pre>
-      <pre>      %12 = comb.icmp ne %11, %c0_i32 : i32</pre>
-      <pre>      cf.cond_br %12, ^bb1, ^bb2</pre>
+      <pre>    %6 = sim.queue.empty : &lt;!sim.dstring, 0&gt;</pre>
+      <pre>    %words = llhd.sig %6 : !sim.queue&lt;!sim.dstring, 0&gt;</pre>
+      <pre>    %7 = llhd.prb %words : !sim.queue&lt;!sim.dstring, 0&gt;</pre>
+      <pre>    %8 = sim.queue.empty : &lt;i32, 0&gt;</pre>
+      <pre>    %nums = llhd.sig %8 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      %9 = sim.queue.push_back %2 into %7 : &lt;!sim.dstring, 0&gt;</pre>
+      <pre>      llhd.drv %words, %9 after %5 : !sim.queue&lt;!sim.dstring, 0&gt;</pre>
+      <pre>      %10 = llhd.prb %nums : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %11 = sim.queue.push_back %c42_i32 into %10 : &lt;i32, 0&gt;</pre>
+      <pre>      llhd.drv %nums, %11 after %5 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %12 = sim.queue.concat () : () &lt;!sim.dstring, 0&gt;</pre>
+      <pre>      llhd.drv %words, %12 after %5 : !sim.queue&lt;!sim.dstring, 0&gt;</pre>
+      <pre>      %13 = llhd.prb %words : !sim.queue&lt;!sim.dstring, 0&gt;</pre>
+      <pre>      %14 = sim.queue.size %13 : &lt;!sim.dstring, 0&gt;</pre>
+      <pre>      %15 = builtin.unrealized_conversion_cast %14 : i64 to i32</pre>
+      <pre>      %16 = comb.icmp ne %15, %c0_i32 : i32</pre>
+      <pre>      cf.cond_br %16, ^bb1, ^bb2</pre>
       <pre>    ^bb1:  // pred: ^bb0</pre>
-      <pre>      %13 = sim.fmt.dec %11 specifierWidth 0 signed : i32</pre>
-      <pre>      %14 = sim.fmt.concat (%4, %13, %2)</pre>
-      <pre>      sim.proc.print %14</pre>
+      <pre>      %17 = llhd.prb %words : !sim.queue&lt;!sim.dstring, 0&gt;</pre>
+      <pre>      %18 = sim.queue.size %17 : &lt;!sim.dstring, 0&gt;</pre>
+      <pre>      %19 = builtin.unrealized_conversion_cast %18 : i64 to i32</pre>
+      <pre>      %20 = sim.fmt.dec %19 specifierWidth 0 signed : i32</pre>
+      <pre>      %21 = sim.fmt.concat (%4, %20, %1)</pre>
+      <pre>      sim.proc.print %21</pre>
       <pre>      sim.terminate success, quiet</pre>
-      <pre>      llhd.halt %9, %8 : !sim.queue&lt;!sim.dstring, 0&gt;, !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      llhd.halt</pre>
       <pre>    ^bb2:  // pred: ^bb0</pre>
-      <pre>      %15 = sim.queue.concat () : () &lt;i32, 0&gt;</pre>
-      <pre>      %16 = sim.queue.size %15 : &lt;i32, 0&gt;</pre>
-      <pre>      %17 = builtin.unrealized_conversion_cast %16 : i64 to i32</pre>
-      <pre>      %18 = comb.icmp ne %17, %c0_i32 : i32</pre>
-      <pre>      cf.cond_br %18, ^bb3, ^bb4</pre>
+      <pre>      %22 = sim.queue.concat () : () &lt;i32, 0&gt;</pre>
+      <pre>      llhd.drv %nums, %22 after %5 : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %23 = llhd.prb %nums : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %24 = sim.queue.size %23 : &lt;i32, 0&gt;</pre>
+      <pre>      %25 = builtin.unrealized_conversion_cast %24 : i64 to i32</pre>
+      <pre>      %26 = comb.icmp ne %25, %c0_i32 : i32</pre>
+      <pre>      cf.cond_br %26, ^bb3, ^bb4</pre>
       <pre>    ^bb3:  // pred: ^bb2</pre>
-      <pre>      %19 = sim.fmt.dec %17 specifierWidth 0 signed : i32</pre>
-      <pre>      %20 = sim.fmt.concat (%3, %19, %2)</pre>
-      <pre>      sim.proc.print %20</pre>
+      <pre>      %27 = llhd.prb %nums : !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      %28 = sim.queue.size %27 : &lt;i32, 0&gt;</pre>
+      <pre>      %29 = builtin.unrealized_conversion_cast %28 : i64 to i32</pre>
+      <pre>      %30 = sim.fmt.dec %29 specifierWidth 0 signed : i32</pre>
+      <pre>      %31 = sim.fmt.concat (%3, %30, %1)</pre>
+      <pre>      sim.proc.print %31</pre>
       <pre>      sim.terminate success, quiet</pre>
-      <pre>      llhd.halt %9, %15 : !sim.queue&lt;!sim.dstring, 0&gt;, !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      llhd.halt</pre>
       <pre>    ^bb4:  // pred: ^bb2</pre>
-      <pre>      sim.proc.print %1</pre>
-      <pre>      llhd.halt %9, %15 : !sim.queue&lt;!sim.dstring, 0&gt;, !sim.queue&lt;i32, 0&gt;</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt</pre>
       <pre>    }</pre>
-      <pre>    llhd.drv %nums, %7#1 after %0 : !sim.queue&lt;i32, 0&gt;</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>

@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/f847e156617d3bed7dc04ce98e75f8553badbae3" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_br_gh194_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-27 22:15:28</dd></div>
-        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
-        <div><dt>ram usage</dt><dd>20552 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-28 01:52:01</dd></div>
+        <div><dt>time elapsed</dt><dd>0.020s</dd></div>
+        <div><dt>ram usage</dt><dd>21300 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -42,12 +42,48 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=string_example <a href="../../../../third_party/tools/icarus/ivtest/ivltests/br_gh194.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/br_gh194.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @string_example() {</pre>
+      <pre>    %c0_i31 = hw.constant 0 : i31</pre>
+      <pre>    %c101_i8 = hw.constant 101 : i8</pre>
       <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
-      <pre>    %1 = sim.string.literal &#34;Hello, World&#34;</pre>
-      <pre>    %2 = llhd.process -&gt; !sim.dstring {</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED -- example(test_string) returned error.\0A&#34;</pre>
+      <pre>    %2 = sim.string.literal &#34;Hello, World&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34;FAILED -- test+string[0] = &#34;</pre>
+      <pre>    %5 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %c72_i8 = hw.constant 72 : i8</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %6 = sim.string.literal &#34;&#34;</pre>
+      <pre>    %test_string = llhd.sig %6 : !sim.dstring</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.drv %test_string, %2 after %5 : !sim.dstring</pre>
+      <pre>      %7 = llhd.prb %test_string : !sim.dstring</pre>
+      <pre>      %8 = sim.string.get %7[%c0_i32]</pre>
+      <pre>      %9 = comb.icmp cne %8, %c72_i8 : i8</pre>
+      <pre>      cf.cond_br %9, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %10 = llhd.prb %test_string : !sim.dstring</pre>
+      <pre>      %11 = sim.string.get %10[%c0_i32]</pre>
+      <pre>      %12 = sim.fmt.hex %11, isUpper false : i8</pre>
+      <pre>      %13 = sim.fmt.concat (%4, %12, %3)</pre>
+      <pre>      sim.proc.print %13</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb2:  // pred: ^bb0</pre>
+      <pre>      %14 = llhd.prb %test_string : !sim.dstring</pre>
+      <pre>      %15 = sim.string.get %14[%c1_i32]</pre>
+      <pre>      %16 = comb.icmp ne %15, %c101_i8 : i8</pre>
+      <pre>      %17 = comb.concat %c0_i31, %16 : i31, i1</pre>
+      <pre>      %18 = comb.icmp ceq %17, %c1_i32 : i32</pre>
+      <pre>      cf.cond_br %18, ^bb3, ^bb4</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb4:  // pred: ^bb2</pre>
       <pre>      sim.proc.print %0</pre>
       <pre>      sim.terminate success, quiet</pre>
-      <pre>      llhd.halt %1 : !sim.dstring</pre>
+      <pre>      llhd.halt</pre>
       <pre>    }</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>

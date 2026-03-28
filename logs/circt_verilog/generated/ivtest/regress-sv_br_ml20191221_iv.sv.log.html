@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/f847e156617d3bed7dc04ce98e75f8553badbae3" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_br_ml20191221_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-27 22:15:31</dd></div>
-        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
-        <div><dt>ram usage</dt><dd>21376 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-28 01:52:08</dd></div>
+        <div><dt>time elapsed</dt><dd>0.031s</dd></div>
+        <div><dt>ram usage</dt><dd>22572 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -46,26 +46,32 @@
       <pre>module {</pre>
       <pre>  llvm.func @malloc(i64) -&gt; !llvm.ptr</pre>
       <pre>  hw.module @test() {</pre>
-      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
-      <pre>    %1 = sim.fmt.literal &#34;FAILED\0A&#34;</pre>
-      <pre>    %2 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
-      <pre>    %3 = llvm.mlir.constant(4 : i64) : i64</pre>
+      <pre>    %0 = sim.fmt.literal &#34;FAILED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %2 = llvm.mlir.constant(4 : i64) : i64</pre>
+      <pre>    %3 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %4 = llvm.mlir.zero : !llvm.ptr</pre>
       <pre>    %c1_i32 = hw.constant 1 : i32</pre>
-      <pre>    %4 = llhd.process -&gt; !llvm.ptr {</pre>
-      <pre>      %5 = llvm.call @malloc(%3) : (i64) -&gt; !llvm.ptr</pre>
-      <pre>      %6 = builtin.unrealized_conversion_cast %5 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %6, %c1_i32 after %0 : i32</pre>
-      <pre>      %7 = llhd.prb %6 : i32</pre>
-      <pre>      %8 = comb.icmp ceq %7, %c1_i32 : i32</pre>
-      <pre>      cf.cond_br %8, ^bb1, ^bb2</pre>
+      <pre>    %c = llhd.sig %4 : !llvm.ptr</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      %5 = llvm.call @malloc(%2) : (i64) -&gt; !llvm.ptr</pre>
+      <pre>      llhd.drv %c, %5 after %3 : !llvm.ptr</pre>
+      <pre>      %6 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %7 = builtin.unrealized_conversion_cast %6 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      llhd.drv %7, %c1_i32 after %3 : i32</pre>
+      <pre>      %8 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %9 = builtin.unrealized_conversion_cast %8 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %10 = llhd.prb %9 : i32</pre>
+      <pre>      %11 = comb.icmp ceq %10, %c1_i32 : i32</pre>
+      <pre>      cf.cond_br %11, ^bb1, ^bb2</pre>
       <pre>    ^bb1:  // pred: ^bb0</pre>
-      <pre>      sim.proc.print %2</pre>
-      <pre>      cf.br ^bb3</pre>
-      <pre>    ^bb2:  // pred: ^bb0</pre>
       <pre>      sim.proc.print %1</pre>
       <pre>      cf.br ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb0</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb3</pre>
       <pre>    ^bb3:  // 2 preds: ^bb1, ^bb2</pre>
-      <pre>      llhd.halt %5 : !llvm.ptr</pre>
+      <pre>      llhd.halt</pre>
       <pre>    }</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
