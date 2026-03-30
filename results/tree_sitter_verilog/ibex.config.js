@@ -1,1 +1,0 @@
-config_loader_data['tree_sitter_verilog/ibex'] = [["cores","ibex",0,"logs/tree_sitter_verilog/generated/fusesoc/ibex-synth.sv.log.html","build/lowrisc_ibex_top_artya7_0.1/src/lowrisc_ibex_ibex_pkg_0.1/rtl/ibex_pkg.sv.html"]]
