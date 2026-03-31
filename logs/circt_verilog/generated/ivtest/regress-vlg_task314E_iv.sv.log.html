@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/4df5007fbcf22e2ccc099948098ab48f552f8e92" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_task314E_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-30 07:46:50</dd></div>
-        <div><dt>time elapsed</dt><dd>0.013s</dd></div>
-        <div><dt>ram usage</dt><dd>21512 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-31 01:52:20</dd></div>
+        <div><dt>time elapsed</dt><dd>0.035s</dd></div>
+        <div><dt>ram usage</dt><dd>21276 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -43,13 +43,71 @@
       <pre>module {</pre>
       <pre>  hw.module @main() {</pre>
       <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED - task 3.14E task calling a function(3)\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;FAILED - task 3.14E task calling a function(2)\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;FAILED - task 3.14E task calling a function (1)\0A&#34;</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %false = hw.constant false</pre>
-      <pre>    %1:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>    %var1 = llhd.sig %false : i1</pre>
+      <pre>    %var2 = llhd.sig %false : i1</pre>
+      <pre>    %4 = llhd.process -&gt; i1 {</pre>
+      <pre>      llhd.call_coroutine @my_task(%true, %false, %var1, %var2) : (i1, i1, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>      %5 = llhd.prb %var1 : i1</pre>
+      <pre>      %6 = comb.xor %5, %true : i1</pre>
+      <pre>      %7 = llhd.prb %var2 : i1</pre>
+      <pre>      %8 = comb.xor %7, %true : i1</pre>
+      <pre>      %9 = comb.and %6, %8 : i1</pre>
+      <pre>      %10 = comb.xor %9, %true : i1</pre>
+      <pre>      cf.cond_br %10, ^bb1, ^bb2(%false : i1)</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      sim.proc.print %3</pre>
+      <pre>      cf.br ^bb2(%true : i1)</pre>
+      <pre>    ^bb2(%11: i1):  // 2 preds: ^bb0, ^bb1</pre>
+      <pre>      llhd.call_coroutine @my_task(%true, %true, %var1, %var2) : (i1, i1, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>      %12 = llhd.prb %var1 : i1</pre>
+      <pre>      %13 = comb.xor %12, %true : i1</pre>
+      <pre>      %14 = llhd.prb %var2 : i1</pre>
+      <pre>      %15 = comb.and %13, %14 : i1</pre>
+      <pre>      %16 = comb.xor %15, %true : i1</pre>
+      <pre>      cf.cond_br %16, ^bb3, ^bb4(%11 : i1)</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      cf.br ^bb4(%true : i1)</pre>
+      <pre>    ^bb4(%17: i1):  // 2 preds: ^bb2, ^bb3</pre>
+      <pre>      llhd.call_coroutine @my_task(%false, %false, %var1, %var2) : (i1, i1, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>      %18 = llhd.prb %var1 : i1</pre>
+      <pre>      %19 = llhd.prb %var2 : i1</pre>
+      <pre>      %20 = comb.xor %19, %true : i1</pre>
+      <pre>      %21 = comb.and %18, %20 : i1</pre>
+      <pre>      %22 = comb.xor %21, %true : i1</pre>
+      <pre>      cf.cond_br %22, ^bb5, ^bb6(%17 : i1)</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      cf.br ^bb6(%true : i1)</pre>
+      <pre>    ^bb6(%23: i1):  // 2 preds: ^bb4, ^bb5</pre>
+      <pre>      %24 = comb.xor %23, %true : i1</pre>
+      <pre>      cf.cond_br %24, ^bb7, ^bb8</pre>
+      <pre>    ^bb7:  // pred: ^bb6</pre>
       <pre>      sim.proc.print %0</pre>
-      <pre>      llhd.halt %false, %true : i1, i1</pre>
+      <pre>      cf.br ^bb8</pre>
+      <pre>    ^bb8:  // 2 preds: ^bb6, ^bb7</pre>
+      <pre>      llhd.halt %23 : i1</pre>
       <pre>    }</pre>
       <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  func.func private @foo(%arg0: i1) -&gt; i1 {</pre>
+      <pre>    return %arg0 : i1</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @my_task(%arg0: i1, %arg1: i1, %arg2: !llhd.ref&lt;i1&gt;, %arg3: !llhd.ref&lt;i1&gt;) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %1 = func.call @foo(%arg0) : (i1) -&gt; i1</pre>
+      <pre>    %2 = comb.xor %1, %true : i1</pre>
+      <pre>    %3 = func.call @foo(%2) : (i1) -&gt; i1</pre>
+      <pre>    llhd.drv %arg2, %3 after %0 : i1</pre>
+      <pre>    %4 = func.call @foo(%arg1) : (i1) -&gt; i1</pre>
+      <pre>    llhd.drv %arg3, %4 after %0 : i1</pre>
+      <pre>    llhd.return</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

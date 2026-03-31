@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/4df5007fbcf22e2ccc099948098ab48f552f8e92" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_sv_class_method_default2_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-30 07:46:45</dd></div>
-        <div><dt>time elapsed</dt><dd>0.026s</dd></div>
-        <div><dt>ram usage</dt><dd>22784 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-31 01:52:20</dd></div>
+        <div><dt>time elapsed</dt><dd>0.023s</dd></div>
+        <div><dt>ram usage</dt><dd>22236 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -44,7 +44,14 @@
       <pre>class C;</pre>
       <pre>      ^</pre>
       <pre>module {</pre>
-      <pre>  llvm.func @malloc(i64) -&gt; !llvm.ptr</pre>
+      <pre>  func.func private @malloc(i64) -&gt; !llvm.ptr</pre>
+      <pre>  llhd.coroutine private @&#34;C::t&#34;(%arg0: !llvm.ptr, %arg1: i32, %arg2: i32, %arg3: i32) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %1 = builtin.unrealized_conversion_cast %arg0 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>    %2 = comb.add %arg1, %arg2, %arg3 : i32</pre>
+      <pre>    llhd.drv %1, %2 after %0 : i32</pre>
+      <pre>    llhd.return</pre>
+      <pre>  }</pre>
       <pre>  hw.module @test() {</pre>
       <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
       <pre>    %true = hw.constant true</pre>
@@ -57,239 +64,235 @@
       <pre>    %c10_i32 = hw.constant 10 : i32</pre>
       <pre>    %c18_i32 = hw.constant 18 : i32</pre>
       <pre>    %c14_i32 = hw.constant 14 : i32</pre>
+      <pre>    %c8_i32 = hw.constant 8 : i32</pre>
       <pre>    %c13_i32 = hw.constant 13 : i32</pre>
       <pre>    %c9_i32 = hw.constant 9 : i32</pre>
+      <pre>    %c4_i32 = hw.constant 4 : i32</pre>
       <pre>    %c6_i32 = hw.constant 6 : i32</pre>
+      <pre>    %c3_i32 = hw.constant 3 : i32</pre>
+      <pre>    %c2_i32 = hw.constant 2 : i32</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
       <pre>    %false = hw.constant false</pre>
       <pre>    %5 = llvm.mlir.constant(4 : i64) : i64</pre>
-      <pre>    %6 = llvm.call @malloc(%5) : (i64) -&gt; !llvm.ptr</pre>
+      <pre>    %6 = llhd.combinational -&gt; !llvm.ptr {</pre>
+      <pre>      %10 = func.call @malloc(%5) : (i64) -&gt; !llvm.ptr</pre>
+      <pre>      llhd.yield %10 : !llvm.ptr</pre>
+      <pre>    }</pre>
       <pre>    %c = llhd.sig %6 : !llvm.ptr</pre>
       <pre>    %7 = llhd.prb %c : !llvm.ptr</pre>
       <pre>    %failed = llhd.sig %false : i1</pre>
       <pre>    %8 = llhd.prb %failed : i1</pre>
       <pre>    %9:2 = llhd.process -&gt; i1, i1 {</pre>
-      <pre>      %10 = builtin.unrealized_conversion_cast %7 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %10, %c6_i32 after %0 : i32</pre>
-      <pre>      %11 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %12 = builtin.unrealized_conversion_cast %11 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %13 = llhd.prb %12 : i32</pre>
-      <pre>      %14 = comb.icmp cne %13, %c6_i32 : i32</pre>
-      <pre>      cf.cond_br %14, ^bb1, ^bb2(%8, %false : i1, i1)</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%7, %c1_i32, %c2_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %10 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %11 = builtin.unrealized_conversion_cast %10 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %12 = llhd.prb %11 : i32</pre>
+      <pre>      %13 = comb.icmp cne %12, %c6_i32 : i32</pre>
+      <pre>      cf.cond_br %13, ^bb1, ^bb2(%8, %false : i1, i1)</pre>
       <pre>    ^bb1:  // pred: ^bb0</pre>
-      <pre>      %15 = sim.fmt.dec %c6_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %16 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %17 = builtin.unrealized_conversion_cast %16 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %18 = llhd.prb %17 : i32</pre>
-      <pre>      %19 = sim.fmt.dec %18 specifierWidth 0 signed : i32</pre>
-      <pre>      %20 = sim.fmt.concat (%2, %15, %4, %19, %3)</pre>
-      <pre>      sim.proc.print %20</pre>
+      <pre>      %14 = sim.fmt.dec %c6_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %15 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %16 = builtin.unrealized_conversion_cast %15 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %17 = llhd.prb %16 : i32</pre>
+      <pre>      %18 = sim.fmt.dec %17 specifierWidth 0 signed : i32</pre>
+      <pre>      %19 = sim.fmt.concat (%2, %14, %4, %18, %3)</pre>
+      <pre>      sim.proc.print %19</pre>
       <pre>      cf.br ^bb2(%true, %true : i1, i1)</pre>
-      <pre>    ^bb2(%21: i1, %22: i1):  // 2 preds: ^bb0, ^bb1</pre>
+      <pre>    ^bb2(%20: i1, %21: i1):  // 2 preds: ^bb0, ^bb1</pre>
+      <pre>      %22 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%22, %c4_i32, %c2_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
       <pre>      %23 = llhd.prb %c : !llvm.ptr</pre>
       <pre>      %24 = builtin.unrealized_conversion_cast %23 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %24, %c9_i32 after %0 : i32</pre>
-      <pre>      %25 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %26 = builtin.unrealized_conversion_cast %25 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %27 = llhd.prb %26 : i32</pre>
-      <pre>      %28 = comb.icmp cne %27, %c9_i32 : i32</pre>
-      <pre>      cf.cond_br %28, ^bb3, ^bb4(%21, %22 : i1, i1)</pre>
+      <pre>      %25 = llhd.prb %24 : i32</pre>
+      <pre>      %26 = comb.icmp cne %25, %c9_i32 : i32</pre>
+      <pre>      cf.cond_br %26, ^bb3, ^bb4(%20, %21 : i1, i1)</pre>
       <pre>    ^bb3:  // pred: ^bb2</pre>
-      <pre>      %29 = sim.fmt.dec %c9_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %30 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %31 = builtin.unrealized_conversion_cast %30 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %32 = llhd.prb %31 : i32</pre>
-      <pre>      %33 = sim.fmt.dec %32 specifierWidth 0 signed : i32</pre>
-      <pre>      %34 = sim.fmt.concat (%2, %29, %4, %33, %3)</pre>
-      <pre>      sim.proc.print %34</pre>
+      <pre>      %27 = sim.fmt.dec %c9_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %28 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %29 = builtin.unrealized_conversion_cast %28 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %30 = llhd.prb %29 : i32</pre>
+      <pre>      %31 = sim.fmt.dec %30 specifierWidth 0 signed : i32</pre>
+      <pre>      %32 = sim.fmt.concat (%2, %27, %4, %31, %3)</pre>
+      <pre>      sim.proc.print %32</pre>
       <pre>      cf.br ^bb4(%true, %true : i1, i1)</pre>
-      <pre>    ^bb4(%35: i1, %36: i1):  // 2 preds: ^bb2, ^bb3</pre>
-      <pre>      %37 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %38 = builtin.unrealized_conversion_cast %37 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %38, %c9_i32 after %0 : i32</pre>
-      <pre>      %39 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %40 = builtin.unrealized_conversion_cast %39 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %41 = llhd.prb %40 : i32</pre>
-      <pre>      %42 = comb.icmp cne %41, %c9_i32 : i32</pre>
-      <pre>      cf.cond_br %42, ^bb5, ^bb6(%35, %36 : i1, i1)</pre>
+      <pre>    ^bb4(%33: i1, %34: i1):  // 2 preds: ^bb2, ^bb3</pre>
+      <pre>      %35 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%35, %c4_i32, %c2_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %36 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %37 = builtin.unrealized_conversion_cast %36 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %38 = llhd.prb %37 : i32</pre>
+      <pre>      %39 = comb.icmp cne %38, %c9_i32 : i32</pre>
+      <pre>      cf.cond_br %39, ^bb5, ^bb6(%33, %34 : i1, i1)</pre>
       <pre>    ^bb5:  // pred: ^bb4</pre>
-      <pre>      %43 = sim.fmt.dec %c9_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %44 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %45 = builtin.unrealized_conversion_cast %44 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %46 = llhd.prb %45 : i32</pre>
-      <pre>      %47 = sim.fmt.dec %46 specifierWidth 0 signed : i32</pre>
-      <pre>      %48 = sim.fmt.concat (%2, %43, %4, %47, %3)</pre>
-      <pre>      sim.proc.print %48</pre>
+      <pre>      %40 = sim.fmt.dec %c9_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %41 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %42 = builtin.unrealized_conversion_cast %41 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %43 = llhd.prb %42 : i32</pre>
+      <pre>      %44 = sim.fmt.dec %43 specifierWidth 0 signed : i32</pre>
+      <pre>      %45 = sim.fmt.concat (%2, %40, %4, %44, %3)</pre>
+      <pre>      sim.proc.print %45</pre>
       <pre>      cf.br ^bb6(%true, %true : i1, i1)</pre>
-      <pre>    ^bb6(%49: i1, %50: i1):  // 2 preds: ^bb4, ^bb5</pre>
-      <pre>      %51 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %52 = builtin.unrealized_conversion_cast %51 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %52, %c9_i32 after %0 : i32</pre>
-      <pre>      %53 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %54 = builtin.unrealized_conversion_cast %53 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %55 = llhd.prb %54 : i32</pre>
-      <pre>      %56 = comb.icmp cne %55, %c9_i32 : i32</pre>
-      <pre>      cf.cond_br %56, ^bb7, ^bb8(%49, %50 : i1, i1)</pre>
+      <pre>    ^bb6(%46: i1, %47: i1):  // 2 preds: ^bb4, ^bb5</pre>
+      <pre>      %48 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%48, %c4_i32, %c2_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %49 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %50 = builtin.unrealized_conversion_cast %49 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %51 = llhd.prb %50 : i32</pre>
+      <pre>      %52 = comb.icmp cne %51, %c9_i32 : i32</pre>
+      <pre>      cf.cond_br %52, ^bb7, ^bb8(%46, %47 : i1, i1)</pre>
       <pre>    ^bb7:  // pred: ^bb6</pre>
-      <pre>      %57 = sim.fmt.dec %c9_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %58 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %59 = builtin.unrealized_conversion_cast %58 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %60 = llhd.prb %59 : i32</pre>
-      <pre>      %61 = sim.fmt.dec %60 specifierWidth 0 signed : i32</pre>
-      <pre>      %62 = sim.fmt.concat (%2, %57, %4, %61, %3)</pre>
-      <pre>      sim.proc.print %62</pre>
+      <pre>      %53 = sim.fmt.dec %c9_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %54 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %55 = builtin.unrealized_conversion_cast %54 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %56 = llhd.prb %55 : i32</pre>
+      <pre>      %57 = sim.fmt.dec %56 specifierWidth 0 signed : i32</pre>
+      <pre>      %58 = sim.fmt.concat (%2, %53, %4, %57, %3)</pre>
+      <pre>      sim.proc.print %58</pre>
       <pre>      cf.br ^bb8(%true, %true : i1, i1)</pre>
-      <pre>    ^bb8(%63: i1, %64: i1):  // 2 preds: ^bb6, ^bb7</pre>
-      <pre>      %65 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %66 = builtin.unrealized_conversion_cast %65 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %66, %c13_i32 after %0 : i32</pre>
+      <pre>    ^bb8(%59: i1, %60: i1):  // 2 preds: ^bb6, ^bb7</pre>
+      <pre>      %61 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%61, %c4_i32, %c6_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %62 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %63 = builtin.unrealized_conversion_cast %62 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %64 = llhd.prb %63 : i32</pre>
+      <pre>      %65 = comb.icmp cne %64, %c13_i32 : i32</pre>
+      <pre>      cf.cond_br %65, ^bb9, ^bb10(%59, %60 : i1, i1)</pre>
+      <pre>    ^bb9:  // pred: ^bb8</pre>
+      <pre>      %66 = sim.fmt.dec %c13_i32 specifierWidth 0 signed : i32</pre>
       <pre>      %67 = llhd.prb %c : !llvm.ptr</pre>
       <pre>      %68 = builtin.unrealized_conversion_cast %67 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
       <pre>      %69 = llhd.prb %68 : i32</pre>
-      <pre>      %70 = comb.icmp cne %69, %c13_i32 : i32</pre>
-      <pre>      cf.cond_br %70, ^bb9, ^bb10(%63, %64 : i1, i1)</pre>
-      <pre>    ^bb9:  // pred: ^bb8</pre>
-      <pre>      %71 = sim.fmt.dec %c13_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %72 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %73 = builtin.unrealized_conversion_cast %72 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %74 = llhd.prb %73 : i32</pre>
-      <pre>      %75 = sim.fmt.dec %74 specifierWidth 0 signed : i32</pre>
-      <pre>      %76 = sim.fmt.concat (%2, %71, %4, %75, %3)</pre>
-      <pre>      sim.proc.print %76</pre>
+      <pre>      %70 = sim.fmt.dec %69 specifierWidth 0 signed : i32</pre>
+      <pre>      %71 = sim.fmt.concat (%2, %66, %4, %70, %3)</pre>
+      <pre>      sim.proc.print %71</pre>
       <pre>      cf.br ^bb10(%true, %true : i1, i1)</pre>
-      <pre>    ^bb10(%77: i1, %78: i1):  // 2 preds: ^bb8, ^bb9</pre>
-      <pre>      %79 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %80 = builtin.unrealized_conversion_cast %79 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %80, %c13_i32 after %0 : i32</pre>
-      <pre>      %81 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %82 = builtin.unrealized_conversion_cast %81 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %83 = llhd.prb %82 : i32</pre>
-      <pre>      %84 = comb.icmp cne %83, %c13_i32 : i32</pre>
-      <pre>      cf.cond_br %84, ^bb11, ^bb12(%77, %78 : i1, i1)</pre>
+      <pre>    ^bb10(%72: i1, %73: i1):  // 2 preds: ^bb8, ^bb9</pre>
+      <pre>      %74 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%74, %c4_i32, %c6_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %75 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %76 = builtin.unrealized_conversion_cast %75 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %77 = llhd.prb %76 : i32</pre>
+      <pre>      %78 = comb.icmp cne %77, %c13_i32 : i32</pre>
+      <pre>      cf.cond_br %78, ^bb11, ^bb12(%72, %73 : i1, i1)</pre>
       <pre>    ^bb11:  // pred: ^bb10</pre>
-      <pre>      %85 = sim.fmt.dec %c13_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %86 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %87 = builtin.unrealized_conversion_cast %86 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %88 = llhd.prb %87 : i32</pre>
-      <pre>      %89 = sim.fmt.dec %88 specifierWidth 0 signed : i32</pre>
-      <pre>      %90 = sim.fmt.concat (%2, %85, %4, %89, %3)</pre>
-      <pre>      sim.proc.print %90</pre>
+      <pre>      %79 = sim.fmt.dec %c13_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %80 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %81 = builtin.unrealized_conversion_cast %80 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %82 = llhd.prb %81 : i32</pre>
+      <pre>      %83 = sim.fmt.dec %82 specifierWidth 0 signed : i32</pre>
+      <pre>      %84 = sim.fmt.concat (%2, %79, %4, %83, %3)</pre>
+      <pre>      sim.proc.print %84</pre>
       <pre>      cf.br ^bb12(%true, %true : i1, i1)</pre>
-      <pre>    ^bb12(%91: i1, %92: i1):  // 2 preds: ^bb10, ^bb11</pre>
+      <pre>    ^bb12(%85: i1, %86: i1):  // 2 preds: ^bb10, ^bb11</pre>
+      <pre>      %87 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%87, %c4_i32, %c2_i32, %c8_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %88 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %89 = builtin.unrealized_conversion_cast %88 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %90 = llhd.prb %89 : i32</pre>
+      <pre>      %91 = comb.icmp cne %90, %c14_i32 : i32</pre>
+      <pre>      cf.cond_br %91, ^bb13, ^bb14(%85, %86 : i1, i1)</pre>
+      <pre>    ^bb13:  // pred: ^bb12</pre>
+      <pre>      %92 = sim.fmt.dec %c14_i32 specifierWidth 0 signed : i32</pre>
       <pre>      %93 = llhd.prb %c : !llvm.ptr</pre>
       <pre>      %94 = builtin.unrealized_conversion_cast %93 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %94, %c14_i32 after %0 : i32</pre>
-      <pre>      %95 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %96 = builtin.unrealized_conversion_cast %95 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %97 = llhd.prb %96 : i32</pre>
-      <pre>      %98 = comb.icmp cne %97, %c14_i32 : i32</pre>
-      <pre>      cf.cond_br %98, ^bb13, ^bb14(%91, %92 : i1, i1)</pre>
-      <pre>    ^bb13:  // pred: ^bb12</pre>
-      <pre>      %99 = sim.fmt.dec %c14_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %100 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %101 = builtin.unrealized_conversion_cast %100 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %102 = llhd.prb %101 : i32</pre>
-      <pre>      %103 = sim.fmt.dec %102 specifierWidth 0 signed : i32</pre>
-      <pre>      %104 = sim.fmt.concat (%2, %99, %4, %103, %3)</pre>
-      <pre>      sim.proc.print %104</pre>
+      <pre>      %95 = llhd.prb %94 : i32</pre>
+      <pre>      %96 = sim.fmt.dec %95 specifierWidth 0 signed : i32</pre>
+      <pre>      %97 = sim.fmt.concat (%2, %92, %4, %96, %3)</pre>
+      <pre>      sim.proc.print %97</pre>
       <pre>      cf.br ^bb14(%true, %true : i1, i1)</pre>
-      <pre>    ^bb14(%105: i1, %106: i1):  // 2 preds: ^bb12, ^bb13</pre>
-      <pre>      %107 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %108 = builtin.unrealized_conversion_cast %107 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %108, %c18_i32 after %0 : i32</pre>
-      <pre>      %109 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %110 = builtin.unrealized_conversion_cast %109 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %111 = llhd.prb %110 : i32</pre>
-      <pre>      %112 = comb.icmp cne %111, %c18_i32 : i32</pre>
-      <pre>      cf.cond_br %112, ^bb15, ^bb16(%105, %106 : i1, i1)</pre>
+      <pre>    ^bb14(%98: i1, %99: i1):  // 2 preds: ^bb12, ^bb13</pre>
+      <pre>      %100 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%100, %c4_i32, %c6_i32, %c8_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %101 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %102 = builtin.unrealized_conversion_cast %101 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %103 = llhd.prb %102 : i32</pre>
+      <pre>      %104 = comb.icmp cne %103, %c18_i32 : i32</pre>
+      <pre>      cf.cond_br %104, ^bb15, ^bb16(%98, %99 : i1, i1)</pre>
       <pre>    ^bb15:  // pred: ^bb14</pre>
-      <pre>      %113 = sim.fmt.dec %c18_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %105 = sim.fmt.dec %c18_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %106 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %107 = builtin.unrealized_conversion_cast %106 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %108 = llhd.prb %107 : i32</pre>
+      <pre>      %109 = sim.fmt.dec %108 specifierWidth 0 signed : i32</pre>
+      <pre>      %110 = sim.fmt.concat (%2, %105, %4, %109, %3)</pre>
+      <pre>      sim.proc.print %110</pre>
+      <pre>      cf.br ^bb16(%true, %true : i1, i1)</pre>
+      <pre>    ^bb16(%111: i1, %112: i1):  // 2 preds: ^bb14, ^bb15</pre>
+      <pre>      %113 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%113, %c1_i32, %c6_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
       <pre>      %114 = llhd.prb %c : !llvm.ptr</pre>
       <pre>      %115 = builtin.unrealized_conversion_cast %114 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
       <pre>      %116 = llhd.prb %115 : i32</pre>
-      <pre>      %117 = sim.fmt.dec %116 specifierWidth 0 signed : i32</pre>
-      <pre>      %118 = sim.fmt.concat (%2, %113, %4, %117, %3)</pre>
-      <pre>      sim.proc.print %118</pre>
-      <pre>      cf.br ^bb16(%true, %true : i1, i1)</pre>
-      <pre>    ^bb16(%119: i1, %120: i1):  // 2 preds: ^bb14, ^bb15</pre>
-      <pre>      %121 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %122 = builtin.unrealized_conversion_cast %121 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %122, %c10_i32 after %0 : i32</pre>
-      <pre>      %123 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %124 = builtin.unrealized_conversion_cast %123 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %125 = llhd.prb %124 : i32</pre>
-      <pre>      %126 = comb.icmp cne %125, %c10_i32 : i32</pre>
-      <pre>      cf.cond_br %126, ^bb17, ^bb18(%119, %120 : i1, i1)</pre>
+      <pre>      %117 = comb.icmp cne %116, %c10_i32 : i32</pre>
+      <pre>      cf.cond_br %117, ^bb17, ^bb18(%111, %112 : i1, i1)</pre>
       <pre>    ^bb17:  // pred: ^bb16</pre>
-      <pre>      %127 = sim.fmt.dec %c10_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %128 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %129 = builtin.unrealized_conversion_cast %128 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %130 = llhd.prb %129 : i32</pre>
-      <pre>      %131 = sim.fmt.dec %130 specifierWidth 0 signed : i32</pre>
-      <pre>      %132 = sim.fmt.concat (%2, %127, %4, %131, %3)</pre>
-      <pre>      sim.proc.print %132</pre>
+      <pre>      %118 = sim.fmt.dec %c10_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %119 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %120 = builtin.unrealized_conversion_cast %119 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %121 = llhd.prb %120 : i32</pre>
+      <pre>      %122 = sim.fmt.dec %121 specifierWidth 0 signed : i32</pre>
+      <pre>      %123 = sim.fmt.concat (%2, %118, %4, %122, %3)</pre>
+      <pre>      sim.proc.print %123</pre>
       <pre>      cf.br ^bb18(%true, %true : i1, i1)</pre>
-      <pre>    ^bb18(%133: i1, %134: i1):  // 2 preds: ^bb16, ^bb17</pre>
-      <pre>      %135 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %136 = builtin.unrealized_conversion_cast %135 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %136, %c10_i32 after %0 : i32</pre>
-      <pre>      %137 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %138 = builtin.unrealized_conversion_cast %137 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %139 = llhd.prb %138 : i32</pre>
-      <pre>      %140 = comb.icmp cne %139, %c10_i32 : i32</pre>
-      <pre>      cf.cond_br %140, ^bb19, ^bb20(%133, %134 : i1, i1)</pre>
+      <pre>    ^bb18(%124: i1, %125: i1):  // 2 preds: ^bb16, ^bb17</pre>
+      <pre>      %126 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%126, %c1_i32, %c6_i32, %c3_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %127 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %128 = builtin.unrealized_conversion_cast %127 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %129 = llhd.prb %128 : i32</pre>
+      <pre>      %130 = comb.icmp cne %129, %c10_i32 : i32</pre>
+      <pre>      cf.cond_br %130, ^bb19, ^bb20(%124, %125 : i1, i1)</pre>
       <pre>    ^bb19:  // pred: ^bb18</pre>
-      <pre>      %141 = sim.fmt.dec %c10_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %142 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %143 = builtin.unrealized_conversion_cast %142 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %144 = llhd.prb %143 : i32</pre>
-      <pre>      %145 = sim.fmt.dec %144 specifierWidth 0 signed : i32</pre>
-      <pre>      %146 = sim.fmt.concat (%2, %141, %4, %145, %3)</pre>
-      <pre>      sim.proc.print %146</pre>
+      <pre>      %131 = sim.fmt.dec %c10_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %132 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %133 = builtin.unrealized_conversion_cast %132 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %134 = llhd.prb %133 : i32</pre>
+      <pre>      %135 = sim.fmt.dec %134 specifierWidth 0 signed : i32</pre>
+      <pre>      %136 = sim.fmt.concat (%2, %131, %4, %135, %3)</pre>
+      <pre>      sim.proc.print %136</pre>
       <pre>      cf.br ^bb20(%true, %true : i1, i1)</pre>
-      <pre>    ^bb20(%147: i1, %148: i1):  // 2 preds: ^bb18, ^bb19</pre>
-      <pre>      %149 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %150 = builtin.unrealized_conversion_cast %149 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %150, %c15_i32 after %0 : i32</pre>
-      <pre>      %151 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %152 = builtin.unrealized_conversion_cast %151 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %153 = llhd.prb %152 : i32</pre>
-      <pre>      %154 = comb.icmp cne %153, %c15_i32 : i32</pre>
-      <pre>      cf.cond_br %154, ^bb21, ^bb22(%147, %148 : i1, i1)</pre>
+      <pre>    ^bb20(%137: i1, %138: i1):  // 2 preds: ^bb18, ^bb19</pre>
+      <pre>      %139 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%139, %c1_i32, %c6_i32, %c8_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %140 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %141 = builtin.unrealized_conversion_cast %140 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %142 = llhd.prb %141 : i32</pre>
+      <pre>      %143 = comb.icmp cne %142, %c15_i32 : i32</pre>
+      <pre>      cf.cond_br %143, ^bb21, ^bb22(%137, %138 : i1, i1)</pre>
       <pre>    ^bb21:  // pred: ^bb20</pre>
-      <pre>      %155 = sim.fmt.dec %c15_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %156 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %157 = builtin.unrealized_conversion_cast %156 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %158 = llhd.prb %157 : i32</pre>
-      <pre>      %159 = sim.fmt.dec %158 specifierWidth 0 signed : i32</pre>
-      <pre>      %160 = sim.fmt.concat (%2, %155, %4, %159, %3)</pre>
-      <pre>      sim.proc.print %160</pre>
+      <pre>      %144 = sim.fmt.dec %c15_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %145 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %146 = builtin.unrealized_conversion_cast %145 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %147 = llhd.prb %146 : i32</pre>
+      <pre>      %148 = sim.fmt.dec %147 specifierWidth 0 signed : i32</pre>
+      <pre>      %149 = sim.fmt.concat (%2, %144, %4, %148, %3)</pre>
+      <pre>      sim.proc.print %149</pre>
       <pre>      cf.br ^bb22(%true, %true : i1, i1)</pre>
-      <pre>    ^bb22(%161: i1, %162: i1):  // 2 preds: ^bb20, ^bb21</pre>
-      <pre>      %163 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %164 = builtin.unrealized_conversion_cast %163 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %164, %c11_i32 after %0 : i32</pre>
-      <pre>      %165 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %166 = builtin.unrealized_conversion_cast %165 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %167 = llhd.prb %166 : i32</pre>
-      <pre>      %168 = comb.icmp cne %167, %c11_i32 : i32</pre>
-      <pre>      cf.cond_br %168, ^bb23, ^bb24(%161, %162 : i1, i1)</pre>
+      <pre>    ^bb22(%150: i1, %151: i1):  // 2 preds: ^bb20, ^bb21</pre>
+      <pre>      %152 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      llhd.call_coroutine @&#34;C::t&#34;(%152, %c1_i32, %c2_i32, %c8_i32) : (!llvm.ptr, i32, i32, i32) -&gt; ()</pre>
+      <pre>      %153 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %154 = builtin.unrealized_conversion_cast %153 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %155 = llhd.prb %154 : i32</pre>
+      <pre>      %156 = comb.icmp cne %155, %c11_i32 : i32</pre>
+      <pre>      cf.cond_br %156, ^bb23, ^bb24(%150, %151 : i1, i1)</pre>
       <pre>    ^bb23:  // pred: ^bb22</pre>
-      <pre>      %169 = sim.fmt.dec %c11_i32 specifierWidth 0 signed : i32</pre>
-      <pre>      %170 = llhd.prb %c : !llvm.ptr</pre>
-      <pre>      %171 = builtin.unrealized_conversion_cast %170 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %172 = llhd.prb %171 : i32</pre>
-      <pre>      %173 = sim.fmt.dec %172 specifierWidth 0 signed : i32</pre>
-      <pre>      %174 = sim.fmt.concat (%2, %169, %4, %173, %3)</pre>
-      <pre>      sim.proc.print %174</pre>
+      <pre>      %157 = sim.fmt.dec %c11_i32 specifierWidth 0 signed : i32</pre>
+      <pre>      %158 = llhd.prb %c : !llvm.ptr</pre>
+      <pre>      %159 = builtin.unrealized_conversion_cast %158 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %160 = llhd.prb %159 : i32</pre>
+      <pre>      %161 = sim.fmt.dec %160 specifierWidth 0 signed : i32</pre>
+      <pre>      %162 = sim.fmt.concat (%2, %157, %4, %161, %3)</pre>
+      <pre>      sim.proc.print %162</pre>
       <pre>      cf.br ^bb24(%true, %true : i1, i1)</pre>
-      <pre>    ^bb24(%175: i1, %176: i1):  // 2 preds: ^bb22, ^bb23</pre>
-      <pre>      %177 = comb.xor %175, %true : i1</pre>
-      <pre>      cf.cond_br %177, ^bb25, ^bb26</pre>
+      <pre>    ^bb24(%163: i1, %164: i1):  // 2 preds: ^bb22, ^bb23</pre>
+      <pre>      %165 = comb.xor %163, %true : i1</pre>
+      <pre>      cf.cond_br %165, ^bb25, ^bb26</pre>
       <pre>    ^bb25:  // pred: ^bb24</pre>
       <pre>      sim.proc.print %1</pre>
       <pre>      cf.br ^bb26</pre>
       <pre>    ^bb26:  // 2 preds: ^bb24, ^bb25</pre>
-      <pre>      llhd.halt %175, %176 : i1, i1</pre>
+      <pre>      llhd.halt %163, %164 : i1, i1</pre>
       <pre>    }</pre>
       <pre>    llhd.drv %failed, %9#0 after %0 if %9#1 : i1</pre>
       <pre>    hw.output</pre>

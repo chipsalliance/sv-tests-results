@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/4df5007fbcf22e2ccc099948098ab48f552f8e92" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_sdw_task2_iv</h2>
     </header>
     <section class="property-list">
@@ -32,8 +32,8 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-30 07:46:55</dd></div>
-        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
+        <div><dt>completed</dt><dd>2026-03-31 01:52:22</dd></div>
+        <div><dt>time elapsed</dt><dd>0.019s</dd></div>
         <div><dt>ram usage</dt><dd>21472 KB</dd></div>
       </dl>
     </section>
@@ -42,14 +42,36 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=main <a href="../../../../third_party/tools/icarus/ivtest/ivltests/sdw_task2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/sdw_task2.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @main() {</pre>
-      <pre>    %c4_i4 = hw.constant 4 : i4</pre>
       <pre>    %0 = sim.fmt.literal &#34;PASSED\0A\0A&#34;</pre>
-      <pre>    %1 = llhd.process -&gt; i4 {</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED - task didn&#39;t modify global_reg\0A\0A&#34;</pre>
+      <pre>    %c4_i4 = hw.constant 4 : i4</pre>
+      <pre>    %2 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c2_i4 = hw.constant 2 : i4</pre>
+      <pre>    %c0_i4 = hw.constant 0 : i4</pre>
+      <pre>    %global_reg = llhd.sig %c0_i4 : i4</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.drv %global_reg, %c2_i4 after %2 : i4</pre>
+      <pre>      %3 = llhd.prb %global_reg : i4</pre>
+      <pre>      llhd.call_coroutine @inc_glob(%3, %3, %global_reg) : (i4, i4, !llhd.ref&lt;i4&gt;) -&gt; ()</pre>
+      <pre>      %4 = llhd.prb %global_reg : i4</pre>
+      <pre>      %5 = comb.icmp ne %4, %c4_i4 : i4</pre>
+      <pre>      cf.cond_br %5, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb2:  // pred: ^bb0</pre>
       <pre>      sim.proc.print %0</pre>
       <pre>      sim.terminate success, quiet</pre>
-      <pre>      llhd.halt %c4_i4 : i4</pre>
+      <pre>      llhd.halt</pre>
       <pre>    }</pre>
       <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @inc_glob(%arg0: i4, %arg1: i4, %arg2: !llhd.ref&lt;i4&gt;) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %1 = comb.add %arg0, %arg1 : i4</pre>
+      <pre>    llhd.drv %arg2, %1 after %0 : i4</pre>
+      <pre>    llhd.return</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

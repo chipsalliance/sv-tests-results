@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/838a8bb2910695c4b8b42eb0a20406c5fb6cf532" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/4df5007fbcf22e2ccc099948098ab48f552f8e92" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_idiv2_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-03-30 07:46:49</dd></div>
-        <div><dt>time elapsed</dt><dd>0.042s</dd></div>
-        <div><dt>ram usage</dt><dd>21364 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-03-31 01:52:21</dd></div>
+        <div><dt>time elapsed</dt><dd>0.031s</dd></div>
+        <div><dt>ram usage</dt><dd>21132 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -42,18 +42,46 @@
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=test <a href="../../../../third_party/tools/icarus/ivtest/ivltests/idiv2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/idiv2.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @test() {</pre>
-      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %c3_i16 = hw.constant 3 : i16</pre>
       <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
-      <pre>    %1 = sim.fmt.literal &#34;\0A&#34;</pre>
-      <pre>    %2 = sim.fmt.literal &#34;13 % 3 = &#34;</pre>
-      <pre>    %3 = llhd.process -&gt; i32 {</pre>
-      <pre>      %4 = sim.fmt.dec %c1_i32 : i32</pre>
-      <pre>      %5 = sim.fmt.concat (%2, %4, %1)</pre>
-      <pre>      sim.proc.print %5</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED -- result is &#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;13 % 3 = &#34;</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %c13_i32 = hw.constant 13 : i32</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %result = llhd.sig %c0_i32 : i32</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.call_coroutine @mod(%c13_i32, %c3_i16, %result) : (i32, i16, !llhd.ref&lt;i32&gt;) -&gt; ()</pre>
+      <pre>      %4 = llhd.prb %result : i32</pre>
+      <pre>      %5 = sim.fmt.dec %4 : i32</pre>
+      <pre>      %6 = sim.fmt.concat (%3, %5, %2)</pre>
+      <pre>      sim.proc.print %6</pre>
+      <pre>      %7 = llhd.prb %result : i32</pre>
+      <pre>      %8 = comb.icmp cne %7, %c1_i32 : i32</pre>
+      <pre>      cf.cond_br %8, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %9 = llhd.prb %result : i32</pre>
+      <pre>      %10 = sim.fmt.bin %9 : i32</pre>
+      <pre>      %11 = sim.fmt.concat (%1, %10, %2)</pre>
+      <pre>      sim.proc.print %11</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb2:  // pred: ^bb0</pre>
       <pre>      sim.proc.print %0</pre>
-      <pre>      llhd.halt %c1_i32 : i32</pre>
+      <pre>      llhd.halt</pre>
       <pre>    }</pre>
       <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @mod(%arg0: i32, %arg1: i16, %arg2: !llhd.ref&lt;i32&gt;) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c0_i16 = hw.constant 0 : i16</pre>
+      <pre>    %1 = comb.concat %c0_i16, %arg1 : i16, i16</pre>
+      <pre>    %2 = comb.divu %arg0, %1 : i32</pre>
+      <pre>    %3 = comb.mul %2, %1 : i32</pre>
+      <pre>    %4 = comb.sub %arg0, %3 : i32</pre>
+      <pre>    llhd.drv %arg2, %4 after %0 : i32</pre>
+      <pre>    llhd.return</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>
