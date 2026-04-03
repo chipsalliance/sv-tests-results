@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/5dc62fe46c9dbf8936f4f706083301e7503715eb" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/e6a98e6d877bd16dfc97a5dac38954b87fb625f4" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr572_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,20 +32,75 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-02 01:49:36</dd></div>
-        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
-        <div><dt>ram usage</dt><dd>15448 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-03 01:52:07</dd></div>
+        <div><dt>time elapsed</dt><dd>0.020s</dd></div>
+        <div><dt>ram usage</dt><dd>21144 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-index-oob -Wno-range-oob -Wno-range-width-oob --top=top <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr572.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr572.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr572.v:33:3: error: unknown hierarchical name `toplevel_event`</pre>
-      <pre>        @top.toplevel_event</pre>
-      <pre>         ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr572.v:18:10: note: no rvalue generated for Variable</pre>
-      <pre>   event toplevel_event;</pre>
-      <pre>         ^</pre>
+      <pre>module {</pre>
+      <pre>  hw.module @top() {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %1 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %toplevel_event = llhd.sig %false : i1</pre>
+      <pre>    %2 = llhd.prb %toplevel_event : i1</pre>
+      <pre>    hw.instance &#34;sub&#34; @submodule(top.toplevel_event: %toplevel_event: !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    %3:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      llhd.wait yield (%false, %false : i1, i1), delay %1, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %4 = comb.xor %2, %true : i1</pre>
+      <pre>      llhd.halt %4, %true : i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %toplevel_event, %3#0 after %0 if %3#1 : i1</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @submodule(in %top.toplevel_event : !llhd.ref&lt;i1&gt;) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;: local event triggered\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;: toplevel event triggered\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;at &#34;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %4 = llhd.constant_time &lt;25000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c1000000_i64 = hw.constant 1000000 : i64</pre>
+      <pre>    %5 = llhd.prb %top.toplevel_event : i1</pre>
+      <pre>    %local_event = llhd.sig %false : i1</pre>
+      <pre>    %6 = llhd.prb %local_event : i1</pre>
+      <pre>    %7:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      llhd.wait yield (%false, %false : i1, i1), delay %4, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %8 = comb.xor %6, %true : i1</pre>
+      <pre>      llhd.halt %8, %true : i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %local_event, %7#0 after %0 if %7#1 : i1</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb1:  // 2 preds: ^bb0, ^bb3</pre>
+      <pre>      llhd.wait (%5 : i1), ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %8 = llhd.current_time</pre>
+      <pre>      %9 = llhd.time_to_int %8</pre>
+      <pre>      %10 = comb.divu %9, %c1000000_i64 : i64</pre>
+      <pre>      %11 = sim.fmt.dec %10 specifierWidth 0 : i64</pre>
+      <pre>      %12 = sim.fmt.concat (%3, %11, %2)</pre>
+      <pre>      sim.proc.print %12</pre>
+      <pre>      llhd.wait (%6 : i1), ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %13 = llhd.current_time</pre>
+      <pre>      %14 = llhd.time_to_int %13</pre>
+      <pre>      %15 = comb.divu %14, %c1000000_i64 : i64</pre>
+      <pre>      %16 = sim.fmt.dec %15 specifierWidth 0 : i64</pre>
+      <pre>      %17 = sim.fmt.concat (%3, %16, %1)</pre>
+      <pre>      sim.proc.print %17</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>
