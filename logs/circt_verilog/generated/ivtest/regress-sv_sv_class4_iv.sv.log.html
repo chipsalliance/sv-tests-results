@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/f5d48db42f101d9d11dec0b2667b0dcc9a7f494e" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/8ed791a45b392f4d535ea04ef6f1aad0c09e140d" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_sv_class4_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-09 14:16:56</dd></div>
-        <div><dt>time elapsed</dt><dd>0.015s</dd></div>
-        <div><dt>ram usage</dt><dd>22460 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-10 01:51:37</dd></div>
+        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
+        <div><dt>ram usage</dt><dd>22588 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -45,6 +45,12 @@
       <pre>         ^</pre>
       <pre>module {</pre>
       <pre>  func.func private @malloc(i64) -&gt; !llvm.ptr</pre>
+      <pre>  llvm.mlir.global internal constant @&#34;main::foo_t::typeinfo&#34;() {addr_space = 0 : i32} : !llvm.struct&lt;(ptr)&gt; {</pre>
+      <pre>    %0 = llvm.mlir.undef : !llvm.struct&lt;(ptr)&gt;</pre>
+      <pre>    %1 = llvm.mlir.zero : !llvm.ptr</pre>
+      <pre>    %2 = llvm.insertvalue %1, %0[0] : !llvm.struct&lt;(ptr)&gt; </pre>
+      <pre>    llvm.return %2 : !llvm.struct&lt;(ptr)&gt;</pre>
+      <pre>  }</pre>
       <pre>  hw.module @main() {</pre>
       <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
       <pre>    %1 = sim.fmt.literal &#34;FAILED -- increment properties: obj.a=&#34;</pre>
@@ -52,78 +58,87 @@
       <pre>    %3 = sim.fmt.literal &#34;, obj.b=&#34;</pre>
       <pre>    %4 = sim.fmt.literal &#34;FAILED -- assign to object: obj.a=&#34;</pre>
       <pre>    %5 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
-      <pre>    %6 = llvm.mlir.constant(8 : i64) : i64</pre>
+      <pre>    %6 = llvm.mlir.addressof @&#34;main::foo_t::typeinfo&#34; : !llvm.ptr</pre>
+      <pre>    %7 = llvm.mlir.constant(24 : i64) : i64</pre>
       <pre>    %c0_i32 = hw.constant 0 : i32</pre>
       <pre>    %c1_i32 = hw.constant 1 : i32</pre>
       <pre>    %c-1_i32 = hw.constant -1 : i32</pre>
-      <pre>    %7 = llvm.mlir.zero : !llvm.ptr</pre>
-      <pre>    %obj = llhd.sig %7 : !llvm.ptr</pre>
+      <pre>    %8 = llvm.mlir.zero : !llvm.ptr</pre>
+      <pre>    %obj = llhd.sig %8 : !llvm.ptr</pre>
       <pre>    llhd.process {</pre>
-      <pre>      %8 = func.call @malloc(%6) : (i64) -&gt; !llvm.ptr</pre>
-      <pre>      llhd.drv %obj, %8 after %5 : !llvm.ptr</pre>
-      <pre>      %9 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %10 = builtin.unrealized_conversion_cast %9 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      llhd.drv %10, %c-1_i32 after %5 : i32</pre>
+      <pre>      %9 = func.call @malloc(%7) : (i64) -&gt; !llvm.ptr</pre>
+      <pre>      %10 = llvm.getelementptr %9[0, 0] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      llvm.store %6, %10 : !llvm.ptr, !llvm.ptr</pre>
+      <pre>      llhd.drv %obj, %9 after %5 : !llvm.ptr</pre>
       <pre>      %11 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %12 = llvm.getelementptr %11[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (i32, i32)&gt;</pre>
+      <pre>      %12 = llvm.getelementptr %11[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
       <pre>      %13 = builtin.unrealized_conversion_cast %12 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
       <pre>      llhd.drv %13, %c-1_i32 after %5 : i32</pre>
       <pre>      %14 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %15 = builtin.unrealized_conversion_cast %14 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %16 = llhd.prb %15 : i32</pre>
-      <pre>      %17 = comb.icmp ne %16, %c-1_i32 : i32</pre>
-      <pre>      %18 = llvm.getelementptr %14[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (i32, i32)&gt;</pre>
+      <pre>      %15 = llvm.getelementptr %14[2] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %16 = builtin.unrealized_conversion_cast %15 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      llhd.drv %16, %c-1_i32 after %5 : i32</pre>
+      <pre>      %17 = llhd.prb %obj : !llvm.ptr</pre>
+      <pre>      %18 = llvm.getelementptr %17[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
       <pre>      %19 = builtin.unrealized_conversion_cast %18 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
       <pre>      %20 = llhd.prb %19 : i32</pre>
       <pre>      %21 = comb.icmp ne %20, %c-1_i32 : i32</pre>
-      <pre>      %22 = comb.or %17, %21 : i1</pre>
-      <pre>      cf.cond_br %22, ^bb1, ^bb2</pre>
+      <pre>      %22 = llvm.getelementptr %17[2] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %23 = builtin.unrealized_conversion_cast %22 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %24 = llhd.prb %23 : i32</pre>
+      <pre>      %25 = comb.icmp ne %24, %c-1_i32 : i32</pre>
+      <pre>      %26 = comb.or %21, %25 : i1</pre>
+      <pre>      cf.cond_br %26, ^bb1, ^bb2</pre>
       <pre>    ^bb1:  // pred: ^bb0</pre>
-      <pre>      %23 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %24 = builtin.unrealized_conversion_cast %23 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %25 = llhd.prb %24 : i32</pre>
-      <pre>      %26 = sim.fmt.dec %25 specifierWidth 0 signed : i32</pre>
-      <pre>      %27 = llvm.getelementptr %23[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (i32, i32)&gt;</pre>
-      <pre>      %28 = builtin.unrealized_conversion_cast %27 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %29 = llhd.prb %28 : i32</pre>
-      <pre>      %30 = sim.fmt.dec %29 specifierWidth 0 : i32</pre>
-      <pre>      %31 = sim.fmt.concat (%4, %26, %3, %30, %2)</pre>
-      <pre>      sim.proc.print %31</pre>
+      <pre>      %27 = llhd.prb %obj : !llvm.ptr</pre>
+      <pre>      %28 = llvm.getelementptr %27[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %29 = builtin.unrealized_conversion_cast %28 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %30 = llhd.prb %29 : i32</pre>
+      <pre>      %31 = sim.fmt.dec %30 specifierWidth 0 signed : i32</pre>
+      <pre>      %32 = llvm.getelementptr %27[2] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %33 = builtin.unrealized_conversion_cast %32 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %34 = llhd.prb %33 : i32</pre>
+      <pre>      %35 = sim.fmt.dec %34 specifierWidth 0 : i32</pre>
+      <pre>      %36 = sim.fmt.concat (%4, %31, %3, %35, %2)</pre>
+      <pre>      sim.proc.print %36</pre>
       <pre>      sim.terminate success, quiet</pre>
       <pre>      llhd.halt</pre>
       <pre>    ^bb2:  // pred: ^bb0</pre>
-      <pre>      %32 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %33 = builtin.unrealized_conversion_cast %32 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %34 = llhd.prb %33 : i32</pre>
-      <pre>      %35 = comb.add %34, %c1_i32 : i32</pre>
-      <pre>      llhd.drv %33, %35 after %5 : i32</pre>
-      <pre>      %36 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %37 = llvm.getelementptr %36[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (i32, i32)&gt;</pre>
-      <pre>      %38 = builtin.unrealized_conversion_cast %37 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %39 = llhd.prb %38 : i32</pre>
-      <pre>      %40 = comb.add %39, %c1_i32 : i32</pre>
-      <pre>      llhd.drv %38, %40 after %5 : i32</pre>
-      <pre>      %41 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %42 = builtin.unrealized_conversion_cast %41 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %43 = llhd.prb %42 : i32</pre>
-      <pre>      %44 = comb.icmp ne %43, %c0_i32 : i32</pre>
-      <pre>      %45 = llvm.getelementptr %41[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (i32, i32)&gt;</pre>
-      <pre>      %46 = builtin.unrealized_conversion_cast %45 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %47 = llhd.prb %46 : i32</pre>
-      <pre>      %48 = comb.icmp ne %47, %c0_i32 : i32</pre>
-      <pre>      %49 = comb.or %44, %48 : i1</pre>
-      <pre>      cf.cond_br %49, ^bb3, ^bb4</pre>
+      <pre>      %37 = llhd.prb %obj : !llvm.ptr</pre>
+      <pre>      %38 = llvm.getelementptr %37[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %39 = builtin.unrealized_conversion_cast %38 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %40 = llhd.prb %39 : i32</pre>
+      <pre>      %41 = comb.add %40, %c1_i32 : i32</pre>
+      <pre>      llhd.drv %39, %41 after %5 : i32</pre>
+      <pre>      %42 = llhd.prb %obj : !llvm.ptr</pre>
+      <pre>      %43 = llvm.getelementptr %42[2] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %44 = builtin.unrealized_conversion_cast %43 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %45 = llhd.prb %44 : i32</pre>
+      <pre>      %46 = comb.add %45, %c1_i32 : i32</pre>
+      <pre>      llhd.drv %44, %46 after %5 : i32</pre>
+      <pre>      %47 = llhd.prb %obj : !llvm.ptr</pre>
+      <pre>      %48 = llvm.getelementptr %47[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %49 = builtin.unrealized_conversion_cast %48 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %50 = llhd.prb %49 : i32</pre>
+      <pre>      %51 = comb.icmp ne %50, %c0_i32 : i32</pre>
+      <pre>      %52 = llvm.getelementptr %47[2] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %53 = builtin.unrealized_conversion_cast %52 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %54 = llhd.prb %53 : i32</pre>
+      <pre>      %55 = comb.icmp ne %54, %c0_i32 : i32</pre>
+      <pre>      %56 = comb.or %51, %55 : i1</pre>
+      <pre>      cf.cond_br %56, ^bb3, ^bb4</pre>
       <pre>    ^bb3:  // pred: ^bb2</pre>
-      <pre>      %50 = llhd.prb %obj : !llvm.ptr</pre>
-      <pre>      %51 = builtin.unrealized_conversion_cast %50 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %52 = llhd.prb %51 : i32</pre>
-      <pre>      %53 = sim.fmt.dec %52 specifierWidth 0 signed : i32</pre>
-      <pre>      %54 = llvm.getelementptr %50[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (i32, i32)&gt;</pre>
-      <pre>      %55 = builtin.unrealized_conversion_cast %54 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
-      <pre>      %56 = llhd.prb %55 : i32</pre>
-      <pre>      %57 = sim.fmt.dec %56 specifierWidth 0 : i32</pre>
-      <pre>      %58 = sim.fmt.concat (%1, %53, %3, %57, %2)</pre>
-      <pre>      sim.proc.print %58</pre>
+      <pre>      %57 = llhd.prb %obj : !llvm.ptr</pre>
+      <pre>      %58 = llvm.getelementptr %57[1] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %59 = builtin.unrealized_conversion_cast %58 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %60 = llhd.prb %59 : i32</pre>
+      <pre>      %61 = sim.fmt.dec %60 specifierWidth 0 signed : i32</pre>
+      <pre>      %62 = llvm.getelementptr %57[2] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;main::foo_t&#34;, (struct&lt;(ptr, ptr)&gt;, i32, i32)&gt;</pre>
+      <pre>      %63 = builtin.unrealized_conversion_cast %62 : !llvm.ptr to !llhd.ref&lt;i32&gt;</pre>
+      <pre>      %64 = llhd.prb %63 : i32</pre>
+      <pre>      %65 = sim.fmt.dec %64 specifierWidth 0 : i32</pre>
+      <pre>      %66 = sim.fmt.concat (%1, %61, %3, %65, %2)</pre>
+      <pre>      sim.proc.print %66</pre>
       <pre>      sim.terminate success, quiet</pre>
       <pre>      llhd.halt</pre>
       <pre>    ^bb4:  // pred: ^bb2</pre>
