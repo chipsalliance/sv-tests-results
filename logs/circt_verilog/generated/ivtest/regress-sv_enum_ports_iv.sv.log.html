@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:32</dd></div>
-        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
-        <div><dt>ram usage</dt><dd>21296 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:01</dd></div>
+        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
+        <div><dt>ram usage</dt><dd>21524 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=enum_ports <a href="../../../../third_party/tools/icarus/ivtest/ivltests/enum_ports.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/enum_ports.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/enum_ports.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/enum_ports.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @enum_ports(in %var_i : i32, out var_o : i32, out is_var_rst : i1) {</pre>
+      <pre>  hw.module private @enum_ports(in %var_i : i32, out var_o : i32, out is_var_rst : i1) {</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
       <pre>    %false = hw.constant false</pre>
@@ -59,6 +59,55 @@
       <pre>    llhd.drv %is_var_rst, %1#0 after %0 if %1#1 : i1</pre>
       <pre>    %2 = llhd.prb %is_var_rst : i1</pre>
       <pre>    hw.output %c0_i32, %2 : i32, i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test_unit() {</pre>
+      <pre>    %c5_i32 = hw.constant 5 : i32</pre>
+      <pre>    %c2_i32 = hw.constant 2 : i32</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED 3\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;FAILED 2\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;FAILED 1\0A&#34;</pre>
+      <pre>    %4 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %5 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %var_in = llhd.sig %c0_i32 : i32</pre>
+      <pre>    %6 = llhd.prb %var_in : i32</pre>
+      <pre>    %dut.var_o, %dut.is_var_rst = hw.instance &#34;dut&#34; @enum_ports(var_i: %6: i32) -&gt; (var_o: i32, is_var_rst: i1)</pre>
+      <pre>    %7:2 = llhd.process -&gt; i32, i1 {</pre>
+      <pre>      llhd.wait yield (%c0_i32, %false : i32, i1), delay %5, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %8 = comb.icmp cne %dut.var_o, %c0_i32 : i32</pre>
+      <pre>      cf.cond_br %8, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %3</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %c0_i32, %false : i32, i1</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%c2_i32, %true : i32, i1), delay %5, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %9 = comb.icmp cne %dut.is_var_rst, %false : i1</pre>
+      <pre>      cf.cond_br %9, ^bb5, ^bb6</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %c0_i32, %false : i32, i1</pre>
+      <pre>    ^bb6:  // pred: ^bb4</pre>
+      <pre>      llhd.wait yield (%c5_i32, %true : i32, i1), delay %5, ^bb7</pre>
+      <pre>    ^bb7:  // pred: ^bb6</pre>
+      <pre>      %10 = comb.icmp cne %dut.is_var_rst, %true : i1</pre>
+      <pre>      cf.cond_br %10, ^bb8, ^bb9</pre>
+      <pre>    ^bb8:  // pred: ^bb7</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %c0_i32, %false : i32, i1</pre>
+      <pre>    ^bb9:  // pred: ^bb7</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt %c0_i32, %false : i32, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %var_in, %7#0 after %4 if %7#1 : i32</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

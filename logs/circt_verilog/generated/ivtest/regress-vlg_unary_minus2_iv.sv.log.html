@@ -32,18 +32,58 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:33</dd></div>
-        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
-        <div><dt>ram usage</dt><dd>21144 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:03</dd></div>
+        <div><dt>time elapsed</dt><dd>0.025s</dd></div>
+        <div><dt>ram usage</dt><dd>21540 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=U1 <a href="../../../../third_party/tools/icarus/ivtest/ivltests/unary_minus2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/unary_minus2.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/unary_minus2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/unary_minus2.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @U1(out OUT : i10) {</pre>
+      <pre>  hw.module private @U1(out OUT : i10) {</pre>
       <pre>    %c-384_i10 = hw.constant -384 : i10</pre>
       <pre>    hw.output %c-384_i10 : i10</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @U2(out OUT : i10) {</pre>
+      <pre>    %c96_i10 = hw.constant 96 : i10</pre>
+      <pre>    hw.output %c96_i10 : i10</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @main() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED -- out2 = &#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;FAILED -- out1 = &#34;</pre>
+      <pre>    %c96_i10 = hw.constant 96 : i10</pre>
+      <pre>    %c-384_i10 = hw.constant -384 : i10</pre>
+      <pre>    %4 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %u1.OUT = hw.instance &#34;u1&#34; @U1() -&gt; (OUT: i10)</pre>
+      <pre>    %u2.OUT = hw.instance &#34;u2&#34; @U2() -&gt; (OUT: i10)</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait delay %4, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %5 = comb.icmp cne %u1.OUT, %c-384_i10 : i10</pre>
+      <pre>      cf.cond_br %5, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %6 = sim.fmt.bin %u1.OUT : i10</pre>
+      <pre>      %7 = sim.fmt.concat (%3, %6, %2)</pre>
+      <pre>      sim.proc.print %7</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      %8 = comb.icmp cne %u2.OUT, %c96_i10 : i10</pre>
+      <pre>      cf.cond_br %8, ^bb4, ^bb5</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %9 = sim.fmt.bin %u2.OUT : i10</pre>
+      <pre>      %10 = sim.fmt.concat (%1, %9, %2)</pre>
+      <pre>      sim.proc.print %10</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb5:  // pred: ^bb3</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

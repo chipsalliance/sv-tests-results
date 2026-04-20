@@ -32,22 +32,120 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:40</dd></div>
-        <div><dt>time elapsed</dt><dd>0.023s</dd></div>
-        <div><dt>ram usage</dt><dd>21520 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:16</dd></div>
+        <div><dt>time elapsed</dt><dd>0.035s</dd></div>
+        <div><dt>ram usage</dt><dd>22056 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=test <a href="../../../../third_party/tools/icarus/ivtest/ivltests/ff_dual_enable.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/ff_dual_enable.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/ff_dual_enable.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/ff_dual_enable.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @test(in %clk : i1, out foo : i1, out bar : i1, in %foo_valid : i1, in %foo_in : i1, in %bar_valid : i1, in %bar_in : i1) {</pre>
+      <pre>  hw.module private @test(in %clk : i1, out foo : i1, out bar : i1, in %foo_valid : i1, in %foo_in : i1, in %bar_valid : i1, in %bar_in : i1) {</pre>
       <pre>    %0 = seq.to_clock %clk</pre>
       <pre>    %1 = comb.mux bin %foo_valid, %foo_in, %foo : i1</pre>
       <pre>    %foo = seq.firreg %1 clock %0 : i1</pre>
       <pre>    %2 = comb.mux bin %bar_valid, %bar_in, %bar : i1</pre>
       <pre>    %bar = seq.firreg %2 clock %0 : i1</pre>
       <pre>    hw.output %foo, %bar : i1, i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @main() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %c0_i31 = hw.constant 0 : i31</pre>
+      <pre>    %1 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %2 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %foo = llhd.sig %false : i1</pre>
+      <pre>    %3 = llhd.prb %foo : i1</pre>
+      <pre>    %bar = llhd.sig %false : i1</pre>
+      <pre>    %4 = llhd.prb %bar : i1</pre>
+      <pre>    %foo_valid = llhd.sig %false : i1</pre>
+      <pre>    %foo_in = llhd.sig %false : i1</pre>
+      <pre>    %bar_valid = llhd.sig %false : i1</pre>
+      <pre>    %bar_in = llhd.sig %false : i1</pre>
+      <pre>    %5 = llhd.prb %foo_valid : i1</pre>
+      <pre>    %6 = llhd.prb %foo_in : i1</pre>
+      <pre>    %7 = llhd.prb %bar_valid : i1</pre>
+      <pre>    %8 = llhd.prb %bar_in : i1</pre>
+      <pre>    %dut.foo, %dut.bar = hw.instance &#34;dut&#34; @test(clk: %9: i1, foo_valid: %5: i1, foo_in: %6: i1, bar_valid: %7: i1, bar_in: %8: i1) -&gt; (foo: i1, bar: i1)</pre>
+      <pre>    llhd.drv %foo, %dut.foo after %1 : i1</pre>
+      <pre>    llhd.drv %bar, %dut.bar after %1 : i1</pre>
+      <pre>    %9 = llhd.process -&gt; i1 {</pre>
+      <pre>      llhd.drv %foo_valid, %true after %1 : i1</pre>
+      <pre>      llhd.drv %bar_valid, %true after %1 : i1</pre>
+      <pre>      llhd.drv %foo_in, %false after %1 : i1</pre>
+      <pre>      llhd.drv %bar_in, %false after %1 : i1</pre>
+      <pre>      llhd.wait yield (%false : i1), delay %2, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %2, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %10 = comb.concat %c0_i31, %3 : i31, i1</pre>
+      <pre>      %11 = comb.icmp cne %10, %c0_i32 : i32</pre>
+      <pre>      %12 = comb.concat %c0_i31, %4 : i31, i1</pre>
+      <pre>      %13 = comb.icmp cne %12, %c0_i32 : i32</pre>
+      <pre>      %14 = comb.or %11, %13 : i1</pre>
+      <pre>      cf.cond_br %14, ^bb3, ^bb4</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      llhd.call_coroutine @fail(%foo, %bar, %foo_valid, %bar_valid, %foo_in, %bar_in) : (!llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb4:  // 2 preds: ^bb2, ^bb3</pre>
+      <pre>      llhd.drv %bar_in, %true after %1 : i1</pre>
+      <pre>      llhd.wait yield (%false : i1), delay %2, ^bb5</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %2, ^bb6</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      %15 = comb.icmp cne %12, %c1_i32 : i32</pre>
+      <pre>      %16 = comb.or %11, %15 : i1</pre>
+      <pre>      cf.cond_br %16, ^bb7, ^bb8</pre>
+      <pre>    ^bb7:  // pred: ^bb6</pre>
+      <pre>      llhd.call_coroutine @fail(%foo, %bar, %foo_valid, %bar_valid, %foo_in, %bar_in) : (!llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>      cf.br ^bb8</pre>
+      <pre>    ^bb8:  // 2 preds: ^bb6, ^bb7</pre>
+      <pre>      llhd.drv %foo_in, %true after %1 : i1</pre>
+      <pre>      llhd.drv %bar_in, %false after %1 : i1</pre>
+      <pre>      llhd.drv %foo_valid, %true after %1 : i1</pre>
+      <pre>      llhd.drv %bar_valid, %false after %1 : i1</pre>
+      <pre>      llhd.wait yield (%false : i1), delay %2, ^bb9</pre>
+      <pre>    ^bb9:  // pred: ^bb8</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %2, ^bb10</pre>
+      <pre>    ^bb10:  // pred: ^bb9</pre>
+      <pre>      %17 = comb.icmp cne %10, %c1_i32 : i32</pre>
+      <pre>      %18 = comb.or %17, %15 : i1</pre>
+      <pre>      cf.cond_br %18, ^bb11, ^bb12</pre>
+      <pre>    ^bb11:  // pred: ^bb10</pre>
+      <pre>      llhd.call_coroutine @fail(%foo, %bar, %foo_valid, %bar_valid, %foo_in, %bar_in) : (!llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>      cf.br ^bb12</pre>
+      <pre>    ^bb12:  // 2 preds: ^bb10, ^bb11</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt %false : i1</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @fail(%arg0: !llhd.ref&lt;i1&gt;, %arg1: !llhd.ref&lt;i1&gt;, %arg2: !llhd.ref&lt;i1&gt;, %arg3: !llhd.ref&lt;i1&gt;, %arg4: !llhd.ref&lt;i1&gt;, %arg5: !llhd.ref&lt;i1&gt;) {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;, foo/bar_in=&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;, foo/bar_valid=&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;/&#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34;FAILED -- foo/bar=&#34;</pre>
+      <pre>    %5 = llhd.prb %arg0 : i1</pre>
+      <pre>    %6 = sim.fmt.bin %5 : i1</pre>
+      <pre>    %7 = llhd.prb %arg1 : i1</pre>
+      <pre>    %8 = sim.fmt.bin %7 : i1</pre>
+      <pre>    %9 = llhd.prb %arg2 : i1</pre>
+      <pre>    %10 = sim.fmt.bin %9 : i1</pre>
+      <pre>    %11 = llhd.prb %arg3 : i1</pre>
+      <pre>    %12 = sim.fmt.bin %11 : i1</pre>
+      <pre>    %13 = llhd.prb %arg4 : i1</pre>
+      <pre>    %14 = sim.fmt.bin %13 : i1</pre>
+      <pre>    %15 = llhd.prb %arg5 : i1</pre>
+      <pre>    %16 = sim.fmt.bin %15 : i1</pre>
+      <pre>    %17 = sim.fmt.concat (%4, %6, %3, %8, %2, %10, %3, %12, %1, %14, %3, %16, %0)</pre>
+      <pre>    sim.proc.print %17</pre>
+      <pre>    sim.terminate success, quiet</pre>
+      <pre>    llhd.halt</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

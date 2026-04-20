@@ -32,14 +32,14 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:51:25</dd></div>
-        <div><dt>time elapsed</dt><dd>0.021s</dd></div>
-        <div><dt>ram usage</dt><dd>21140 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:50</dd></div>
+        <div><dt>time elapsed</dt><dd>0.015s</dd></div>
+        <div><dt>ram usage</dt><dd>21452 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=wandwor_test0 <a href="../../../../tests/generated/yosys/simple_wandwor.sv.html" target="file-frame">tests/generated/yosys/simple_wandwor.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/wandwor.v.html" target="file-frame">third_party/tools/yosys/tests/simple/wandwor.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../tests/generated/yosys/simple_wandwor.sv.html" target="file-frame">tests/generated/yosys/simple_wandwor.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/wandwor.v.html" target="file-frame">third_party/tools/yosys/tests/simple/wandwor.v</a></pre>
       <pre>../../../third_party/tools/yosys/tests/simple/wandwor.v:8:27: warning: output net port &#39;X&#39; coerced to &#39;inout&#39; [-Wport-coercion]</pre>
       <pre>        wandwor_foo foo_0 (C, D, X);</pre>
       <pre>                                 ^</pre>
@@ -52,6 +52,18 @@
       <pre>../../../third_party/tools/yosys/tests/simple/wandwor.v:7:30: remark: driven here</pre>
       <pre>        assign X = A, X = B, Y = C, Y = D;</pre>
       <pre>                                    ^</pre>
+      <pre>../../../third_party/tools/yosys/tests/simple/wandwor.v:22:7: warning: output net port &#39;X&#39; coerced to &#39;inout&#39; [-Wport-coercion]</pre>
+      <pre>                .O({X, Y})</pre>
+      <pre>                    ^</pre>
+      <pre>../../../third_party/tools/yosys/tests/simple/wandwor.v:25:9: remark: driven here</pre>
+      <pre>        assign X = C, X = D;</pre>
+      <pre>               ^</pre>
+      <pre>../../../third_party/tools/yosys/tests/simple/wandwor.v:22:10: warning: output net port &#39;Y&#39; coerced to &#39;inout&#39; [-Wport-coercion]</pre>
+      <pre>                .O({X, Y})</pre>
+      <pre>                       ^</pre>
+      <pre>../../../third_party/tools/yosys/tests/simple/wandwor.v:26:9: remark: driven here</pre>
+      <pre>        assign Y = C, Y = D;</pre>
+      <pre>               ^</pre>
       <pre>module {</pre>
       <pre>  hw.module @wandwor_test0(in %A : i1, in %B : i1, in %C : i1, in %D : i1, out X : i1, out Y : i1, out Z : i1) {</pre>
       <pre>    %foo_0.O = hw.instance &#34;foo_0&#34; @wandwor_foo(I0: %C: i1, I1: %D: i1) -&gt; (O: i1)</pre>
@@ -59,9 +71,35 @@
       <pre>    %foo_2.O = hw.instance &#34;foo_2&#34; @wandwor_foo(I0: %foo_0.O: i1, I1: %foo_1.O: i1) -&gt; (O: i1)</pre>
       <pre>    hw.output %foo_0.O, %foo_1.O, %foo_2.O : i1, i1, i1</pre>
       <pre>  }</pre>
+      <pre>  hw.module @wandwor_test1(in %A : i4, in %B : i4, in %C : i4, in %D : i4, out X : i4, out Y : i4, out Z : i1) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c0_i4 = hw.constant 0 : i4</pre>
+      <pre>    %X = llhd.sig %c0_i4 : i4</pre>
+      <pre>    %Y = llhd.sig %c0_i4 : i4</pre>
+      <pre>    %1 = comb.concat %A, %B : i4, i4</pre>
+      <pre>    %2 = comb.concat %B, %A : i4, i4</pre>
+      <pre>    %bar_inst.O = hw.instance &#34;bar_inst&#34; @wandwor_bar(I0: %1: i8, I1: %2: i8) -&gt; (O: i8)</pre>
+      <pre>    %3 = comb.extract %bar_inst.O from 4 : (i8) -&gt; i4</pre>
+      <pre>    llhd.drv %X, %3 after %0 : i4</pre>
+      <pre>    %4 = comb.extract %bar_inst.O from 0 : (i8) -&gt; i4</pre>
+      <pre>    llhd.drv %Y, %4 after %0 : i4</pre>
+      <pre>    llhd.drv %X, %C after %0 : i4</pre>
+      <pre>    llhd.drv %X, %D after %0 : i4</pre>
+      <pre>    llhd.drv %Y, %C after %0 : i4</pre>
+      <pre>    llhd.drv %Y, %D after %0 : i4</pre>
+      <pre>    %5 = llhd.prb %X : i4</pre>
+      <pre>    %6 = llhd.prb %Y : i4</pre>
+      <pre>    %7 = comb.concat %5, %6 : i4, i4</pre>
+      <pre>    %8 = comb.parity %7 : i8</pre>
+      <pre>    hw.output %5, %6, %8 : i4, i4, i1</pre>
+      <pre>  }</pre>
       <pre>  hw.module private @wandwor_foo(in %I0 : i1, in %I1 : i1, out O : i1) {</pre>
       <pre>    %0 = comb.xor %I0, %I1 : i1</pre>
       <pre>    hw.output %0 : i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @wandwor_bar(in %I0 : i8, in %I1 : i8, out O : i8) {</pre>
+      <pre>    %0 = comb.add %I0, %I1 : i8</pre>
+      <pre>    hw.output %0 : i8</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

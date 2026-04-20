@@ -32,18 +32,24 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:45</dd></div>
-        <div><dt>time elapsed</dt><dd>0.016s</dd></div>
-        <div><dt>ram usage</dt><dd>22584 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:13</dd></div>
+        <div><dt>time elapsed</dt><dd>0.024s</dd></div>
+        <div><dt>ram usage</dt><dd>22900 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=M <a href="../../../../third_party/tools/icarus/ivtest/ivltests/sv_class_in_module_decl.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/sv_class_in_module_decl.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/sv_class_in_module_decl.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/sv_class_in_module_decl.v</a></pre>
       <pre>../../../third_party/tools/icarus/ivtest/ivltests/sv_class_in_module_decl.v:9:9: remark: Class builtin functions (needed for randomization, constraints, and covergroups) are not yet supported and will be dropped during lowering.</pre>
       <pre>  class C;</pre>
       <pre>        ^</pre>
       <pre>module {</pre>
+      <pre>  llvm.mlir.global internal constant @&#34;M::C_0::typeinfo&#34;() {addr_space = 0 : i32} : !llvm.struct&lt;(ptr)&gt; {</pre>
+      <pre>    %0 = llvm.mlir.undef : !llvm.struct&lt;(ptr)&gt;</pre>
+      <pre>    %1 = llvm.mlir.zero : !llvm.ptr</pre>
+      <pre>    %2 = llvm.insertvalue %1, %0[0] : !llvm.struct&lt;(ptr)&gt; </pre>
+      <pre>    llvm.return %2 : !llvm.struct&lt;(ptr)&gt;</pre>
+      <pre>  }</pre>
       <pre>  func.func private @malloc(i64) -&gt; !llvm.ptr</pre>
       <pre>  llvm.mlir.global internal constant @&#34;M::C::typeinfo&#34;() {addr_space = 0 : i32} : !llvm.struct&lt;(ptr)&gt; {</pre>
       <pre>    %0 = llvm.mlir.undef : !llvm.struct&lt;(ptr)&gt;</pre>
@@ -51,7 +57,7 @@
       <pre>    %2 = llvm.insertvalue %1, %0[0] : !llvm.struct&lt;(ptr)&gt; </pre>
       <pre>    llvm.return %2 : !llvm.struct&lt;(ptr)&gt;</pre>
       <pre>  }</pre>
-      <pre>  hw.module @M() {</pre>
+      <pre>  hw.module private @M(out c : !llhd.ref&lt;!llvm.ptr&gt;) {</pre>
       <pre>    %0 = llvm.mlir.addressof @&#34;M::C::typeinfo&#34; : !llvm.ptr</pre>
       <pre>    %1 = llvm.mlir.constant(16 : i64) : i64</pre>
       <pre>    %2 = llhd.combinational -&gt; !llvm.ptr {</pre>
@@ -60,6 +66,29 @@
       <pre>    }</pre>
       <pre>    %3 = llvm.getelementptr %2[0, 0] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;M::C&#34;, (struct&lt;(ptr, ptr)&gt;)&gt;</pre>
       <pre>    llvm.store %0, %3 : !llvm.ptr, !llvm.ptr</pre>
+      <pre>    %c = llhd.sig %2 : !llvm.ptr</pre>
+      <pre>    hw.output %c : !llhd.ref&lt;!llvm.ptr&gt;</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @M_1(out c : !llhd.ref&lt;!llvm.ptr&gt;) {</pre>
+      <pre>    %0 = llvm.mlir.addressof @&#34;M::C_0::typeinfo&#34; : !llvm.ptr</pre>
+      <pre>    %1 = llvm.mlir.constant(16 : i64) : i64</pre>
+      <pre>    %2 = llhd.combinational -&gt; !llvm.ptr {</pre>
+      <pre>      %4 = func.call @malloc(%1) : (i64) -&gt; !llvm.ptr</pre>
+      <pre>      llhd.yield %4 : !llvm.ptr</pre>
+      <pre>    }</pre>
+      <pre>    %3 = llvm.getelementptr %2[0, 0] : (!llvm.ptr) -&gt; !llvm.ptr, !llvm.struct&lt;&#34;M::C_0&#34;, (struct&lt;(ptr, ptr)&gt;)&gt;</pre>
+      <pre>    llvm.store %0, %3 : !llvm.ptr, !llvm.ptr</pre>
+      <pre>    %c = llhd.sig %2 : !llvm.ptr</pre>
+      <pre>    hw.output %c : !llhd.ref&lt;!llvm.ptr&gt;</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %m1.c = hw.instance &#34;m1&#34; @M() -&gt; (c: !llhd.ref&lt;!llvm.ptr&gt;)</pre>
+      <pre>    %m2.c = hw.instance &#34;m2&#34; @M_1() -&gt; (c: !llhd.ref&lt;!llvm.ptr&gt;)</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>

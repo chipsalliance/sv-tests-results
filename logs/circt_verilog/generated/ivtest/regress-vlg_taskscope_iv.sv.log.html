@@ -32,18 +32,78 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:40</dd></div>
-        <div><dt>time elapsed</dt><dd>0.027s</dd></div>
-        <div><dt>ram usage</dt><dd>21020 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:12</dd></div>
+        <div><dt>time elapsed</dt><dd>0.021s</dd></div>
+        <div><dt>ram usage</dt><dd>21732 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=nest <a href="../../../../third_party/tools/icarus/ivtest/ivltests/task-scope.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/task-scope.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/task-scope.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/task-scope.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @nest(out r : i8) {</pre>
+      <pre>  hw.module private @nest(out r : i8, out r : !llhd.ref&lt;i8&gt;) {</pre>
       <pre>    %c0_i8 = hw.constant 0 : i8</pre>
-      <pre>    hw.output %c0_i8 : i8</pre>
+      <pre>    %r = llhd.sig %c0_i8 : i8</pre>
+      <pre>    %0 = llhd.prb %r : i8</pre>
+      <pre>    hw.output %0, %r : i8, !llhd.ref&lt;i8&gt;</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @incr(%arg0: i8, %arg1: !llhd.ref&lt;i8&gt;) {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;R=&#34;</pre>
+      <pre>    %2 = llhd.constant_time &lt;0ns, 1d, 0e&gt;</pre>
+      <pre>    %3 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %4 = llhd.prb %arg1 : i8</pre>
+      <pre>    %5 = comb.add %4, %arg0 : i8</pre>
+      <pre>    llhd.drv %arg1, %5 after %2 : i8</pre>
+      <pre>    llhd.wait delay %3, ^bb1</pre>
+      <pre>  ^bb1:  // pred: ^bb0</pre>
+      <pre>    %6 = llhd.prb %arg1 : i8</pre>
+      <pre>    %7 = sim.fmt.bin %6 : i8</pre>
+      <pre>    %8 = sim.fmt.concat (%1, %7, %0)</pre>
+      <pre>    sim.proc.print %8</pre>
+      <pre>    llhd.return</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;FAILED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %c3_i8 = hw.constant 3 : i8</pre>
+      <pre>    %2 = llhd.constant_time &lt;0ns, 1d, 0e&gt;</pre>
+      <pre>    %3 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c0_i8 = hw.constant 0 : i8</pre>
+      <pre>    %n.r, %n.r_0 = hw.instance &#34;n&#34; @nest() -&gt; (r: i8, r: !llhd.ref&lt;i8&gt;)</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.drv %n.r_0, %c0_i8 after %2 : i8</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait delay %3, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.call_coroutine @increment(%n.r_0) : (!llhd.ref&lt;i8&gt;) -&gt; ()</pre>
+      <pre>      llhd.wait delay %3, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.call_coroutine @increment(%n.r_0) : (!llhd.ref&lt;i8&gt;) -&gt; ()</pre>
+      <pre>      llhd.wait delay %3, ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      llhd.call_coroutine @increment(%n.r_0) : (!llhd.ref&lt;i8&gt;) -&gt; ()</pre>
+      <pre>      llhd.wait delay %3, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %4 = comb.icmp eq %n.r, %c3_i8 : i8</pre>
+      <pre>      cf.cond_br %4, ^bb5, ^bb6</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      cf.br ^bb7</pre>
+      <pre>    ^bb6:  // pred: ^bb4</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb7</pre>
+      <pre>    ^bb7:  // 2 preds: ^bb5, ^bb6</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @increment(%arg0: !llhd.ref&lt;i8&gt;) {</pre>
+      <pre>    %c1_i8 = hw.constant 1 : i8</pre>
+      <pre>    llhd.call_coroutine @incr(%c1_i8, %arg0) : (i8, !llhd.ref&lt;i8&gt;) -&gt; ()</pre>
+      <pre>    llhd.return</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

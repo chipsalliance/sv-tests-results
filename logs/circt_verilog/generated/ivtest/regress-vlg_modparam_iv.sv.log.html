@@ -32,20 +32,153 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:40</dd></div>
-        <div><dt>time elapsed</dt><dd>0.009s</dd></div>
-        <div><dt>ram usage</dt><dd>21752 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:14</dd></div>
+        <div><dt>time elapsed</dt><dd>0.033s</dd></div>
+        <div><dt>ram usage</dt><dd>22152 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=reg32 <a href="../../../../third_party/tools/icarus/ivtest/ivltests/modparam.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/modparam.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=top <a href="../../../../third_party/tools/icarus/ivtest/ivltests/modparam.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/modparam.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @reg32(in %clk : i1, in %we : i1, in %din : i32, out dout : i32) {</pre>
+      <pre>  hw.module private @reg32(in %clk : i1, in %we : i1, in %din : i8, out dout : i8) {</pre>
       <pre>    %0 = seq.to_clock %clk</pre>
-      <pre>    %1 = comb.mux bin %we, %din, %store : i32</pre>
-      <pre>    %store = seq.firreg %1 clock %0 : i32</pre>
-      <pre>    hw.output %store : i32</pre>
+      <pre>    %1 = comb.mux bin %we, %din, %store : i8</pre>
+      <pre>    %store = seq.firreg %1 clock %0 : i8</pre>
+      <pre>    hw.output %store : i8</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @memory(in %clk : i1, in %we : i1, in %addr : i2, in %din : i8, out dout : i8) {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c0_i8 = hw.constant 0 : i8</pre>
+      <pre>    %c-2_i2 = hw.constant -2 : i2</pre>
+      <pre>    %c1_i2 = hw.constant 1 : i2</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
+      <pre>    %dout = llhd.sig %c0_i8 : i8</pre>
+      <pre>    %we0 = llhd.sig %false : i1</pre>
+      <pre>    %we1 = llhd.sig %false : i1</pre>
+      <pre>    %we2 = llhd.sig %false : i1</pre>
+      <pre>    %we3 = llhd.sig %false : i1</pre>
+      <pre>    %1 = llhd.prb %we0 : i1</pre>
+      <pre>    %reg0.dout = hw.instance &#34;reg0&#34; @reg32(clk: %clk: i1, we: %1: i1, din: %din: i8) -&gt; (dout: i8)</pre>
+      <pre>    %2 = llhd.prb %we1 : i1</pre>
+      <pre>    %reg1.dout = hw.instance &#34;reg1&#34; @reg32(clk: %clk: i1, we: %2: i1, din: %din: i8) -&gt; (dout: i8)</pre>
+      <pre>    %3 = llhd.prb %we2 : i1</pre>
+      <pre>    %reg2.dout = hw.instance &#34;reg2&#34; @reg32(clk: %clk: i1, we: %3: i1, din: %din: i8) -&gt; (dout: i8)</pre>
+      <pre>    %4 = llhd.prb %we3 : i1</pre>
+      <pre>    %reg3.dout = hw.instance &#34;reg3&#34; @reg32(clk: %clk: i1, we: %4: i1, din: %din: i8) -&gt; (dout: i8)</pre>
+      <pre>    %5:8 = llhd.process -&gt; i1, i1, i1, i1, i1, i1, i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false, %false, %false, %false, %false, %false, %false : i1, i1, i1, i1, i1, i1, i1, i1)</pre>
+      <pre>    ^bb1(%8: i1, %9: i1, %10: i1, %11: i1, %12: i1, %13: i1, %14: i1, %15: i1):  // 5 preds: ^bb0, ^bb2, ^bb3, ^bb4, ^bb4</pre>
+      <pre>      llhd.wait yield (%8, %9, %10, %11, %12, %13, %14, %15 : i1, i1, i1, i1, i1, i1, i1, i1), (%addr, %we : i2, i1), ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %16 = comb.icmp ceq %addr, %c0_i2 : i2</pre>
+      <pre>      cf.cond_br %16, ^bb1(%we, %true, %false, %true, %false, %true, %false, %true : i1, i1, i1, i1, i1, i1, i1, i1), ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %17 = comb.icmp ceq %addr, %c1_i2 : i2</pre>
+      <pre>      cf.cond_br %17, ^bb1(%false, %true, %we, %true, %false, %true, %false, %true : i1, i1, i1, i1, i1, i1, i1, i1), ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %18 = comb.icmp ceq %addr, %c-2_i2 : i2</pre>
+      <pre>      cf.cond_br %18, ^bb1(%false, %true, %false, %true, %we, %true, %false, %true : i1, i1, i1, i1, i1, i1, i1, i1), ^bb1(%false, %true, %false, %true, %false, %true, %we, %true : i1, i1, i1, i1, i1, i1, i1, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %we0, %5#0 after %0 if %5#1 : i1</pre>
+      <pre>    llhd.drv %we1, %5#2 after %0 if %5#3 : i1</pre>
+      <pre>    llhd.drv %we2, %5#4 after %0 if %5#5 : i1</pre>
+      <pre>    llhd.drv %we3, %5#6 after %0 if %5#7 : i1</pre>
+      <pre>    %6:2 = llhd.process -&gt; i8, i1 {</pre>
+      <pre>      cf.br ^bb1(%c0_i8, %false : i8, i1)</pre>
+      <pre>    ^bb1(%8: i8, %9: i1):  // 5 preds: ^bb0, ^bb2, ^bb3, ^bb4, ^bb4</pre>
+      <pre>      llhd.wait yield (%8, %9 : i8, i1), (%addr, %reg0.dout, %reg1.dout, %reg2.dout, %reg3.dout : i2, i8, i8, i8, i8), ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %10 = comb.icmp ceq %addr, %c0_i2 : i2</pre>
+      <pre>      cf.cond_br %10, ^bb1(%reg0.dout, %true : i8, i1), ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %11 = comb.icmp ceq %addr, %c1_i2 : i2</pre>
+      <pre>      cf.cond_br %11, ^bb1(%reg1.dout, %true : i8, i1), ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %12 = comb.icmp ceq %addr, %c-2_i2 : i2</pre>
+      <pre>      cf.cond_br %12, ^bb1(%reg2.dout, %true : i8, i1), ^bb1(%reg3.dout, %true : i8, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %dout, %6#0 after %0 if %6#1 : i8</pre>
+      <pre>    %7 = llhd.prb %dout : i8</pre>
+      <pre>    hw.output %7 : i8</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @top() {</pre>
+      <pre>    %c3_i8 = hw.constant 3 : i8</pre>
+      <pre>    %c-1_i2 = hw.constant -1 : i2</pre>
+      <pre>    %c2_i8 = hw.constant 2 : i8</pre>
+      <pre>    %c-2_i2 = hw.constant -2 : i2</pre>
+      <pre>    %c1_i8 = hw.constant 1 : i8</pre>
+      <pre>    %c1_i2 = hw.constant 1 : i2</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;FAILED - Ram[0] not 0, is &#34;</pre>
+      <pre>    %3 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %4 = llhd.constant_time &lt;5000000fs, 0d, 0e&gt;</pre>
+      <pre>    %5 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %6 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c0_i8 = hw.constant 0 : i8</pre>
+      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
+      <pre>    %7 = llhd.constant_time &lt;3000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %clk = llhd.sig %false : i1</pre>
+      <pre>    %we = llhd.sig %false : i1</pre>
+      <pre>    %addr = llhd.sig %c0_i2 : i2</pre>
+      <pre>    %din = llhd.sig %c0_i8 : i8</pre>
+      <pre>    %error = llhd.sig %false : i1</pre>
+      <pre>    %8 = llhd.prb %error : i1</pre>
+      <pre>    %9 = llhd.prb %clk : i1</pre>
+      <pre>    %10 = llhd.prb %we : i1</pre>
+      <pre>    %11 = llhd.prb %addr : i2</pre>
+      <pre>    %12 = llhd.prb %din : i8</pre>
+      <pre>    %mem.dout = hw.instance &#34;mem&#34; @memory(clk: %9: i1, we: %10: i1, addr: %11: i2, din: %12: i8) -&gt; (dout: i8)</pre>
+      <pre>    %13:9 = llhd.process -&gt; i1, i1, i1, i1, i1, i2, i1, i8, i1 {</pre>
+      <pre>      llhd.wait yield (%true, %false, %true, %false, %false, %c0_i2, %false, %c0_i8, %false : i1, i1, i1, i1, i1, i2, i1, i8, i1), delay %7, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %true, %true, %c0_i2, %true, %c0_i8, %true : i1, i1, i1, i1, i1, i2, i1, i8, i1), delay %6, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false, %false, %c1_i2, %true, %c1_i8, %true : i1, i1, i1, i1, i1, i2, i1, i8, i1), delay %6, ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false, %false, %c-2_i2, %true, %c2_i8, %true : i1, i1, i1, i1, i1, i2, i1, i8, i1), delay %6, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false, %false, %c-1_i2, %true, %c3_i8, %true : i1, i1, i1, i1, i1, i2, i1, i8, i1), delay %6, ^bb5</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false, %true, %c0_i2, %true, %c0_i8, %false : i1, i1, i1, i1, i1, i2, i1, i8, i1), delay %5, ^bb6</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      %15 = comb.icmp cne %mem.dout, %c0_i8 : i8</pre>
+      <pre>      cf.cond_br %15, ^bb7, ^bb8(%8, %false : i1, i1)</pre>
+      <pre>    ^bb7:  // pred: ^bb6</pre>
+      <pre>      %16 = sim.fmt.hex %mem.dout, isUpper false : i8</pre>
+      <pre>      %17 = sim.fmt.concat (%2, %16, %1)</pre>
+      <pre>      sim.proc.print %17</pre>
+      <pre>      cf.br ^bb8(%true, %true : i1, i1)</pre>
+      <pre>    ^bb8(%18: i1, %19: i1):  // 2 preds: ^bb6, ^bb7</pre>
+      <pre>      %20 = comb.xor %18, %true : i1</pre>
+      <pre>      cf.cond_br %20, ^bb9, ^bb10</pre>
+      <pre>    ^bb9:  // pred: ^bb8</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb10</pre>
+      <pre>    ^bb10:  // 2 preds: ^bb8, ^bb9</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %18, %19, %false, %false, %c0_i2, %false, %c0_i8, %false : i1, i1, i1, i1, i1, i2, i1, i8, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %false after %3 if %13#0 : i1</pre>
+      <pre>    llhd.drv %error, %13#1 after %3 if %13#2 : i1</pre>
+      <pre>    llhd.drv %we, %13#3 after %3 if %13#4 : i1</pre>
+      <pre>    llhd.drv %addr, %13#5 after %3 if %13#6 : i2</pre>
+      <pre>    llhd.drv %din, %13#7 after %3 if %13#8 : i8</pre>
+      <pre>    %14:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb1(%15: i1, %16: i1):  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>      llhd.wait yield (%15, %16 : i1, i1), delay %4, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %17 = comb.xor %9, %true : i1</pre>
+      <pre>      cf.br ^bb1(%17, %true : i1, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %14#0 after %3 if %14#1 : i1</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

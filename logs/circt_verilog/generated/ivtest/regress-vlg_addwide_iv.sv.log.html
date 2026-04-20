@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:40</dd></div>
-        <div><dt>time elapsed</dt><dd>0.020s</dd></div>
-        <div><dt>ram usage</dt><dd>21632 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:15</dd></div>
+        <div><dt>time elapsed</dt><dd>0.016s</dd></div>
+        <div><dt>ram usage</dt><dd>21584 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=source <a href="../../../../third_party/tools/icarus/ivtest/ivltests/addwide.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/addwide.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/addwide.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/addwide.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @source(out C : i1, out h : i12) {</pre>
+      <pre>  hw.module private @source(out C : i1, out h : i12) {</pre>
       <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
       <pre>    %1 = llhd.constant_time &lt;0ns, 1d, 0e&gt;</pre>
       <pre>    %c3_i12 = hw.constant 3 : i12</pre>
@@ -92,6 +92,35 @@
       <pre>    llhd.drv %h, %h_1 after %0 : i12</pre>
       <pre>    %17 = llhd.prb %h : i12</pre>
       <pre>    hw.output %4, %17 : i1, i12</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @bench() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34; = FAIL\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %c13_i12 = hw.constant 13 : i12</pre>
+      <pre>    %2 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %3 = llhd.constant_time &lt;85000000fs, 0d, 0e&gt;</pre>
+      <pre>    %dut.C, %dut.h = hw.instance &#34;dut&#34; @source() -&gt; (C: i1, h: i12) {sv.namehint = &#34;clock&#34;}</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait delay %3, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %4 = comb.icmp eq %dut.h, %c13_i12 : i12</pre>
+      <pre>      cf.cond_br %4, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %5 = sim.fmt.dec %dut.h specifierWidth 7 : i12</pre>
+      <pre>      %6 = sim.fmt.concat (%5, %2)</pre>
+      <pre>      sim.proc.print %6</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      %7 = sim.fmt.dec %dut.h specifierWidth 7 : i12</pre>
+      <pre>      %8 = sim.fmt.concat (%7, %0)</pre>
+      <pre>      sim.proc.print %8</pre>
+      <pre>      cf.br ^bb4</pre>
+      <pre>    ^bb4:  // 2 preds: ^bb2, ^bb3</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

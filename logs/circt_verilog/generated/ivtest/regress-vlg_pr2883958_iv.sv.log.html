@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:41</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>21340 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:02</dd></div>
+        <div><dt>time elapsed</dt><dd>0.016s</dd></div>
+        <div><dt>ram usage</dt><dd>21788 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=test <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr2883958.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr2883958.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=top <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr2883958.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr2883958.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @test(out outp : i1, out outm : i1, out outl : i1, in %in : i1) {</pre>
+      <pre>  hw.module private @test(out outp : i1, out outm : i1, out outl : i1, in %in : i1) {</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %0 = llhd.delay %4 by &lt;1000000000000000fs, 0d, 0e&gt; : i1</pre>
       <pre>    %1 = llhd.delay %in by &lt;1000000000000000fs, 0d, 0e&gt; : i1</pre>
@@ -49,6 +49,114 @@
       <pre>    %3 = comb.xor %in, %true : i1</pre>
       <pre>    %4 = comb.icmp ceq %in, %true : i1</pre>
       <pre>    hw.output %2, %1, %0 : i1, i1, i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @top() {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;.\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;Failed in=1 LPM check, expected 1&#39;b1, got &#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;Failed in=1 mux. check, expected 1&#39;b1, got &#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34;Failed in=1 prim. check, expected 1&#39;b0, got &#34;</pre>
+      <pre>    %5 = sim.fmt.literal &#34;Failed in=0 LPM check, expected 1&#39;b0, got &#34;</pre>
+      <pre>    %6 = sim.fmt.literal &#34;Failed in=0 mux. check, expected 1&#39;b0, got &#34;</pre>
+      <pre>    %7 = sim.fmt.literal &#34;Failed in=0 prim. check, expected 1&#39;b1, got &#34;</pre>
+      <pre>    %8 = sim.fmt.literal &#34;Failed initial LPM check, expected 1&#39;b0, got &#34;</pre>
+      <pre>    %9 = sim.fmt.literal &#34;Failed initial mux. check, expected 1&#39;bx, got &#34;</pre>
+      <pre>    %10 = sim.fmt.literal &#34;Failed initial prim. check, expected 1&#39;bx, got &#34;</pre>
+      <pre>    %11 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %12 = llhd.constant_time &lt;1100000000000000fs, 0d, 0e&gt;</pre>
+      <pre>    %in = llhd.sig %false : i1</pre>
+      <pre>    %passed = llhd.sig %false : i1</pre>
+      <pre>    %13 = llhd.prb %passed : i1</pre>
+      <pre>    %14 = llhd.prb %in : i1</pre>
+      <pre>    %dut.outp, %dut.outm, %dut.outl = hw.instance &#34;dut&#34; @test(in: %14: i1) -&gt; (outp: i1, outm: i1, outl: i1)</pre>
+      <pre>    %15:4 = llhd.process -&gt; i1, i1, i1, i1 {</pre>
+      <pre>      llhd.wait yield (%true, %true, %false, %false : i1, i1, i1, i1), delay %12, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %16 = comb.icmp cne %dut.outp, %false : i1</pre>
+      <pre>      cf.cond_br %16, ^bb2, ^bb3(%false : i1)</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %17 = sim.fmt.bin %dut.outp : i1</pre>
+      <pre>      %18 = sim.fmt.concat (%10, %17, %1)</pre>
+      <pre>      sim.proc.print %18</pre>
+      <pre>      cf.br ^bb3(%true : i1)</pre>
+      <pre>    ^bb3(%19: i1):  // 2 preds: ^bb1, ^bb2</pre>
+      <pre>      %20 = comb.icmp cne %dut.outm, %false : i1</pre>
+      <pre>      cf.cond_br %20, ^bb4, ^bb5(%19 : i1)</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %21 = sim.fmt.bin %dut.outm : i1</pre>
+      <pre>      %22 = sim.fmt.concat (%9, %21, %1)</pre>
+      <pre>      sim.proc.print %22</pre>
+      <pre>      cf.br ^bb5(%true : i1)</pre>
+      <pre>    ^bb5(%23: i1):  // 2 preds: ^bb3, ^bb4</pre>
+      <pre>      %24 = comb.icmp cne %dut.outl, %false : i1</pre>
+      <pre>      cf.cond_br %24, ^bb6, ^bb7(%23 : i1)</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      %25 = sim.fmt.bin %dut.outl : i1</pre>
+      <pre>      %26 = sim.fmt.concat (%8, %25, %1)</pre>
+      <pre>      sim.proc.print %26</pre>
+      <pre>      cf.br ^bb7(%true : i1)</pre>
+      <pre>    ^bb7(%27: i1):  // 2 preds: ^bb5, ^bb6</pre>
+      <pre>      llhd.wait yield (%false, %27, %false, %true : i1, i1, i1, i1), delay %12, ^bb8</pre>
+      <pre>    ^bb8:  // pred: ^bb7</pre>
+      <pre>      %28 = comb.icmp cne %dut.outp, %true : i1</pre>
+      <pre>      cf.cond_br %28, ^bb9, ^bb10(%false : i1)</pre>
+      <pre>    ^bb9:  // pred: ^bb8</pre>
+      <pre>      %29 = sim.fmt.bin %dut.outp : i1</pre>
+      <pre>      %30 = sim.fmt.concat (%7, %29, %1)</pre>
+      <pre>      sim.proc.print %30</pre>
+      <pre>      cf.br ^bb10(%true : i1)</pre>
+      <pre>    ^bb10(%31: i1):  // 2 preds: ^bb8, ^bb9</pre>
+      <pre>      cf.cond_br %20, ^bb11, ^bb12(%31 : i1)</pre>
+      <pre>    ^bb11:  // pred: ^bb10</pre>
+      <pre>      %32 = sim.fmt.bin %dut.outm : i1</pre>
+      <pre>      %33 = sim.fmt.concat (%6, %32, %1)</pre>
+      <pre>      sim.proc.print %33</pre>
+      <pre>      cf.br ^bb12(%true : i1)</pre>
+      <pre>    ^bb12(%34: i1):  // 2 preds: ^bb10, ^bb11</pre>
+      <pre>      cf.cond_br %24, ^bb13, ^bb14(%34 : i1)</pre>
+      <pre>    ^bb13:  // pred: ^bb12</pre>
+      <pre>      %35 = sim.fmt.bin %dut.outl : i1</pre>
+      <pre>      %36 = sim.fmt.concat (%5, %35, %1)</pre>
+      <pre>      sim.proc.print %36</pre>
+      <pre>      cf.br ^bb14(%true : i1)</pre>
+      <pre>    ^bb14(%37: i1):  // 2 preds: ^bb12, ^bb13</pre>
+      <pre>      llhd.wait yield (%false, %37, %true, %true : i1, i1, i1, i1), delay %12, ^bb15</pre>
+      <pre>    ^bb15:  // pred: ^bb14</pre>
+      <pre>      cf.cond_br %16, ^bb16, ^bb17(%13, %false : i1, i1)</pre>
+      <pre>    ^bb16:  // pred: ^bb15</pre>
+      <pre>      %38 = sim.fmt.bin %dut.outp : i1</pre>
+      <pre>      %39 = sim.fmt.concat (%4, %38, %1)</pre>
+      <pre>      sim.proc.print %39</pre>
+      <pre>      cf.br ^bb17(%false, %true : i1, i1)</pre>
+      <pre>    ^bb17(%40: i1, %41: i1):  // 2 preds: ^bb15, ^bb16</pre>
+      <pre>      %42 = comb.icmp cne %dut.outm, %true : i1</pre>
+      <pre>      cf.cond_br %42, ^bb18, ^bb19(%40, %41 : i1, i1)</pre>
+      <pre>    ^bb18:  // pred: ^bb17</pre>
+      <pre>      %43 = sim.fmt.bin %dut.outm : i1</pre>
+      <pre>      %44 = sim.fmt.concat (%3, %43, %1)</pre>
+      <pre>      sim.proc.print %44</pre>
+      <pre>      cf.br ^bb19(%false, %true : i1, i1)</pre>
+      <pre>    ^bb19(%45: i1, %46: i1):  // 2 preds: ^bb17, ^bb18</pre>
+      <pre>      %47 = comb.icmp cne %dut.outl, %true : i1</pre>
+      <pre>      cf.cond_br %47, ^bb20, ^bb21(%45, %46 : i1, i1)</pre>
+      <pre>    ^bb20:  // pred: ^bb19</pre>
+      <pre>      %48 = sim.fmt.bin %dut.outl : i1</pre>
+      <pre>      %49 = sim.fmt.concat (%2, %48, %1)</pre>
+      <pre>      sim.proc.print %49</pre>
+      <pre>      cf.br ^bb21(%false, %true : i1, i1)</pre>
+      <pre>    ^bb21(%50: i1, %51: i1):  // 2 preds: ^bb19, ^bb20</pre>
+      <pre>      cf.cond_br %50, ^bb22, ^bb23</pre>
+      <pre>    ^bb22:  // pred: ^bb21</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb23</pre>
+      <pre>    ^bb23:  // 2 preds: ^bb21, ^bb22</pre>
+      <pre>      llhd.halt %50, %51, %false, %false : i1, i1, i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %passed, %15#0 after %11 if %15#1 : i1</pre>
+      <pre>    llhd.drv %in, %15#2 after %11 if %15#3 : i1</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

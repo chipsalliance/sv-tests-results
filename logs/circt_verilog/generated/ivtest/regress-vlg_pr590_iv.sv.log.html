@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:34</dd></div>
-        <div><dt>time elapsed</dt><dd>0.011s</dd></div>
-        <div><dt>ram usage</dt><dd>21276 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:11</dd></div>
+        <div><dt>time elapsed</dt><dd>0.015s</dd></div>
+        <div><dt>ram usage</dt><dd>21648 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=ex1 <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr590.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr590.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr590.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr590.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @ex1(in %clk : i1, in %reset : i1, in %insig : i4, out outsig : i4) {</pre>
+      <pre>  hw.module private @ex1(in %clk : i1, in %reset : i1, in %insig : i4, out outsig : i4) {</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %false = hw.constant false</pre>
       <pre>    %0 = sim.fmt.literal &#34;\0A&#34;</pre>
@@ -67,6 +67,65 @@
       <pre>    llhd.drv %outsig, %4#0 after %3 if %4#1 : i4</pre>
       <pre>    %5 = llhd.prb %outsig : i4</pre>
       <pre>    hw.output %5 : i4</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @main() {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c2_i4 = hw.constant 2 : i4</pre>
+      <pre>    %1 = sim.fmt.literal &#34;..................clock tickling\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;\0A starting the testbench\0A\0A&#34;</pre>
+      <pre>    %c1000000_i64 = hw.constant 1000000 : i64</pre>
+      <pre>    %3 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %4 = llhd.constant_time &lt;71000000fs, 0d, 0e&gt;</pre>
+      <pre>    %5 = llhd.constant_time &lt;20000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c0_i4 = hw.constant 0 : i4</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %clk = llhd.sig %false : i1</pre>
+      <pre>    %6 = llhd.prb %clk : i1</pre>
+      <pre>    %reset = llhd.sig %false : i1</pre>
+      <pre>    %7 = llhd.prb %reset : i1</pre>
+      <pre>    %ex1.outsig = hw.instance &#34;ex1&#34; @ex1(clk: %6: i1, reset: %7: i1, insig: %8#2: i4) -&gt; (outsig: i4) {sv.namehint = &#34;outsig&#34;}</pre>
+      <pre>    %8:3 = llhd.process -&gt; i1, i1, i4 {</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      llhd.wait yield (%true, %true, %c0_i4 : i1, i1, i4), delay %5, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.halt %false, %false, %c2_i4 : i1, i1, i4</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %false after %0 if %8#0 : i1</pre>
+      <pre>    llhd.drv %reset, %true after %0 if %8#1 : i1</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait delay %4, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    %9:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb1(%10: i1, %11: i1):  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>      llhd.wait yield (%10, %11 : i1, i1), delay %3, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %12 = comb.xor %6, %true : i1</pre>
+      <pre>      cf.br ^bb1(%12, %true : i1, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %9#0 after %0 if %9#1 : i1</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb1:  // 3 preds: ^bb0, ^bb2, ^bb3</pre>
+      <pre>      llhd.wait (%6 : i1), ^bb2(%6 : i1)</pre>
+      <pre>    ^bb2(%10: i1):  // pred: ^bb1</pre>
+      <pre>      %11 = comb.xor bin %10, %true : i1</pre>
+      <pre>      %12 = comb.and bin %11, %6 : i1</pre>
+      <pre>      cf.cond_br %12, ^bb3, ^bb1</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %13 = llhd.current_time</pre>
+      <pre>      %14 = llhd.time_to_int %13</pre>
+      <pre>      %15 = comb.divu %14, %c1000000_i64 : i64</pre>
+      <pre>      %16 = sim.fmt.dec %15 : i64</pre>
+      <pre>      %17 = sim.fmt.concat (%16, %1)</pre>
+      <pre>      sim.proc.print %17</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

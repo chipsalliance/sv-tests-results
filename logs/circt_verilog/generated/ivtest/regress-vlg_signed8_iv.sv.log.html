@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:43</dd></div>
-        <div><dt>time elapsed</dt><dd>0.006s</dd></div>
-        <div><dt>ram usage</dt><dd>21348 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:01</dd></div>
+        <div><dt>time elapsed</dt><dd>0.017s</dd></div>
+        <div><dt>ram usage</dt><dd>21704 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=mult58s <a href="../../../../third_party/tools/icarus/ivtest/ivltests/signed8.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/signed8.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/signed8.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/signed8.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @mult58s(in %a : i5, in %b : i8, out p : i16) {</pre>
+      <pre>  hw.module private @mult58s(in %a : i5, in %b : i8, out p : i16) {</pre>
       <pre>    %c0_i8 = hw.constant 0 : i8</pre>
       <pre>    %0 = comb.extract %b from 7 : (i8) -&gt; i1</pre>
       <pre>    %1 = comb.replicate %0 : (i1) -&gt; i5</pre>
@@ -52,6 +52,72 @@
       <pre>    %6 = comb.replicate %5 : (i1) -&gt; i3</pre>
       <pre>    %7 = comb.concat %6, %4 : i3, i13</pre>
       <pre>    hw.output %7 : i16</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test_mult() {</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %c-127_i32 = hw.constant -127 : i32</pre>
+      <pre>    %c32_i32 = hw.constant 32 : i32</pre>
+      <pre>    %1 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;) acutal = &#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34; (&#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34; expect = &#34;</pre>
+      <pre>    %5 = sim.fmt.literal &#34;, b=&#34;</pre>
+      <pre>    %6 = sim.fmt.literal &#34;Error Miscompare with a=&#34;</pre>
+      <pre>    %7 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %8 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c128_i32 = hw.constant 128 : i32</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %a = llhd.sig %c0_i32 : i32</pre>
+      <pre>    %b = llhd.sig %c0_i32 : i32</pre>
+      <pre>    %prod = llhd.sig %c0_i32 : i32</pre>
+      <pre>    %9 = llhd.prb %prod : i32</pre>
+      <pre>    %10 = llhd.prb %a : i32</pre>
+      <pre>    %11 = comb.extract %10 from 0 : (i32) -&gt; i5</pre>
+      <pre>    %12 = llhd.prb %b : i32</pre>
+      <pre>    %13 = comb.extract %12 from 0 : (i32) -&gt; i8</pre>
+      <pre>    %dut.p = hw.instance &#34;dut&#34; @mult58s(a: %11: i5, b: %13: i8) -&gt; (p: i16)</pre>
+      <pre>    %14:6 = llhd.process -&gt; i32, i1, i32, i1, i32, i1 {</pre>
+      <pre>      cf.br ^bb1(%c0_i32, %c0_i32, %false : i32, i32, i1)</pre>
+      <pre>    ^bb1(%15: i32, %16: i32, %17: i1):  // 2 preds: ^bb0, ^bb7</pre>
+      <pre>      %18 = comb.icmp slt %15, %c32_i32 : i32</pre>
+      <pre>      cf.cond_br %18, ^bb2(%15, %true, %c-127_i32 : i32, i1, i32), ^bb8</pre>
+      <pre>    ^bb2(%19: i32, %20: i1, %21: i32):  // 2 preds: ^bb1, ^bb6</pre>
+      <pre>      %22 = comb.icmp slt %21, %c128_i32 : i32</pre>
+      <pre>      cf.cond_br %22, ^bb3, ^bb7</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %23 = comb.mul %19, %21 : i32</pre>
+      <pre>      llhd.wait yield (%19, %20, %21, %true, %23, %true : i32, i1, i32, i1, i32, i1), delay %8, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %24 = comb.extract %9 from 0 : (i32) -&gt; i16</pre>
+      <pre>      %25 = comb.icmp cne %dut.p, %24 : i16</pre>
+      <pre>      cf.cond_br %25, ^bb5, ^bb6</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      %26 = sim.fmt.hex %11, isUpper false : i5</pre>
+      <pre>      %27 = sim.fmt.hex %13, isUpper false : i8</pre>
+      <pre>      %28 = sim.fmt.dec %9 specifierWidth 0 signed : i32</pre>
+      <pre>      %29 = sim.fmt.hex %24, isUpper false : i16</pre>
+      <pre>      %30 = sim.fmt.hex %dut.p, isUpper false : i16</pre>
+      <pre>      %31 = sim.fmt.concat (%6, %26, %5, %27, %4, %28, %3, %29, %2, %30, %1)</pre>
+      <pre>      sim.proc.print %31</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %c0_i32, %false, %c0_i32, %false, %c0_i32, %false : i32, i1, i32, i1, i32, i1</pre>
+      <pre>    ^bb6:  // pred: ^bb4</pre>
+      <pre>      %32 = comb.add %12, %c1_i32 : i32</pre>
+      <pre>      cf.br ^bb2(%10, %false, %32 : i32, i1, i32)</pre>
+      <pre>    ^bb7:  // pred: ^bb2</pre>
+      <pre>      %33 = comb.add %19, %c1_i32 : i32</pre>
+      <pre>      cf.br ^bb1(%33, %21, %true : i32, i32, i1)</pre>
+      <pre>    ^bb8:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt %15, %true, %16, %17, %c0_i32, %false : i32, i1, i32, i1, i32, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %a, %14#0 after %7 if %14#1 : i32</pre>
+      <pre>    llhd.drv %b, %14#2 after %7 if %14#3 : i32</pre>
+      <pre>    llhd.drv %prod, %14#4 after %7 if %14#5 : i32</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

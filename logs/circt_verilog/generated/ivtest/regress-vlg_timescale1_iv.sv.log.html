@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:34</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>21148 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:40:59</dd></div>
+        <div><dt>time elapsed</dt><dd>0.019s</dd></div>
+        <div><dt>ram usage</dt><dd>21760 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=slow <a href="../../../../third_party/tools/icarus/ivtest/ivltests/timescale1.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/timescale1.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/timescale1.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/timescale1.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @slow(out out : i1) {</pre>
+      <pre>  hw.module private @slow(out out : i1) {</pre>
       <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %1 = llhd.constant_time &lt;100000000000fs, 0d, 0e&gt;</pre>
@@ -58,6 +58,100 @@
       <pre>    llhd.drv %out, %3#0 after %0 if %3#1 : i1</pre>
       <pre>    %4 = llhd.prb %out : i1</pre>
       <pre>    hw.output %4 : i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @fast(out out : i1) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %1 = llhd.constant_time &lt;10000000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %2 = llhd.constant_time &lt;0fs, 0d, 0e&gt;</pre>
+      <pre>    %out = llhd.sig %false : i1</pre>
+      <pre>    %3:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      llhd.wait yield (%false, %false : i1, i1), delay %2, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.wait yield (%false, %true : i1, i1), delay %1, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.halt %true, %true : i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %out, %3#0 after %0 if %3#1 : i1</pre>
+      <pre>    %4 = llhd.prb %out : i1</pre>
+      <pre>    hw.output %4 : i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @main() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED\0A&#34;</pre>
+      <pre>    %2 = llhd.constant_time &lt;80000000000fs, 0d, 0e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %3 = llhd.constant_time &lt;10000000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %4 = llhd.constant_time &lt;5000000000fs, 0d, 0e&gt;</pre>
+      <pre>    %m1.out = hw.instance &#34;m1&#34; @slow() -&gt; (out: i1)</pre>
+      <pre>    %m2.out = hw.instance &#34;m2&#34; @fast() -&gt; (out: i1)</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.wait delay %4, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %5 = comb.icmp cne %m1.out, %false : i1</pre>
+      <pre>      cf.cond_br %5, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      %6 = comb.icmp cne %m2.out, %false : i1</pre>
+      <pre>      cf.cond_br %6, ^bb4, ^bb5</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb5:  // pred: ^bb3</pre>
+      <pre>      llhd.wait delay %3, ^bb6</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      cf.cond_br %5, ^bb7, ^bb8</pre>
+      <pre>    ^bb7:  // pred: ^bb6</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb8:  // pred: ^bb6</pre>
+      <pre>      %7 = comb.icmp cne %m2.out, %true : i1</pre>
+      <pre>      cf.cond_br %7, ^bb9, ^bb10</pre>
+      <pre>    ^bb9:  // pred: ^bb8</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb10:  // pred: ^bb8</pre>
+      <pre>      llhd.wait delay %2, ^bb11</pre>
+      <pre>    ^bb11:  // pred: ^bb10</pre>
+      <pre>      cf.cond_br %5, ^bb12, ^bb13</pre>
+      <pre>    ^bb12:  // pred: ^bb11</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb13:  // pred: ^bb11</pre>
+      <pre>      cf.cond_br %7, ^bb14, ^bb15</pre>
+      <pre>    ^bb14:  // pred: ^bb13</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb15:  // pred: ^bb13</pre>
+      <pre>      llhd.wait delay %3, ^bb16</pre>
+      <pre>    ^bb16:  // pred: ^bb15</pre>
+      <pre>      %8 = comb.icmp cne %m1.out, %true : i1</pre>
+      <pre>      cf.cond_br %8, ^bb17, ^bb18</pre>
+      <pre>    ^bb17:  // pred: ^bb16</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb18:  // pred: ^bb16</pre>
+      <pre>      cf.cond_br %7, ^bb19, ^bb20</pre>
+      <pre>    ^bb19:  // pred: ^bb18</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    ^bb20:  // pred: ^bb18</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

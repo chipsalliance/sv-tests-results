@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:38</dd></div>
-        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
-        <div><dt>ram usage</dt><dd>21240 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:08</dd></div>
+        <div><dt>time elapsed</dt><dd>0.017s</dd></div>
+        <div><dt>ram usage</dt><dd>21824 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=ram <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr1662508.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr1662508.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr1662508.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr1662508.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @ram(in %clk : i1, in %we : i1, in %addr : i10, in %data : i16, out read_bus : i16) {</pre>
+      <pre>  hw.module private @ram(in %clk : i1, in %we : i1, in %addr : i10, in %data : i16, out read_bus : i16) {</pre>
       <pre>    %false = hw.constant false</pre>
       <pre>    %0 = comb.extract %addr from 0 : (i10) -&gt; i4</pre>
       <pre>    %1 = comb.concat %false, %0 : i1, i4</pre>
@@ -50,6 +50,85 @@
       <pre>    %3 = seq.firmem.read_port %mem[%1], clock %2 : &lt;32 x 16, mask 1&gt;</pre>
       <pre>    seq.firmem.write_port %mem[%1] = %data, clock %2 enable %we : &lt;32 x 16, mask 1&gt;</pre>
       <pre>    hw.output %3 : i16</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @ram_test() {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAIL\0A&#34;</pre>
+      <pre>    %c0_i12 = hw.constant 0 : i12</pre>
+      <pre>    %2 = sim.fmt.literal &#34; &#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %4 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c16_i32 = hw.constant 16 : i32</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %5 = llhd.constant_time &lt;5000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c33_i32 = hw.constant 33 : i32</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %clk = llhd.sig %false : i1</pre>
+      <pre>    %6 = llhd.prb %clk : i1</pre>
+      <pre>    %fail = llhd.sig %false : i1</pre>
+      <pre>    %7 = llhd.prb %fail : i1</pre>
+      <pre>    %cc = llhd.sig %c0_i32 : i32</pre>
+      <pre>    %8 = llhd.prb %cc : i32</pre>
+      <pre>    %9:4 = llhd.process -&gt; i32, i1, i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%c0_i32 : i32)</pre>
+      <pre>    ^bb1(%16: i32):  // 2 preds: ^bb0, ^bb4</pre>
+      <pre>      %17 = comb.icmp slt %16, %c33_i32 : i32</pre>
+      <pre>      cf.cond_br %17, ^bb2, ^bb5</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%16, %true, %false, %true : i32, i1, i1, i1), delay %5, ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      llhd.wait yield (%c0_i32, %false, %true, %true : i32, i1, i1, i1), delay %5, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %18 = comb.add %8, %c1_i32 : i32</pre>
+      <pre>      cf.br ^bb1(%18 : i32)</pre>
+      <pre>    ^bb5:  // pred: ^bb1</pre>
+      <pre>      cf.cond_br %7, ^bb6, ^bb7</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      cf.br ^bb8</pre>
+      <pre>    ^bb7:  // pred: ^bb5</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb8</pre>
+      <pre>    ^bb8:  // 2 preds: ^bb6, ^bb7</pre>
+      <pre>      llhd.halt %16, %true, %false, %false : i32, i1, i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %cc, %9#0 after %4 if %9#1 : i32</pre>
+      <pre>    llhd.drv %clk, %9#2 after %4 if %9#3 : i1</pre>
+      <pre>    %10 = comb.extract %8 from 0 : (i32) -&gt; i10</pre>
+      <pre>    %11 = comb.extract %8 from 0 : (i32) -&gt; i16</pre>
+      <pre>    %12 = comb.mul %11, %11 : i16</pre>
+      <pre>    %13 = comb.icmp slt %8, %c16_i32 : i32</pre>
+      <pre>    %14 = seq.to_clock %6</pre>
+      <pre>    %addr = seq.firreg %10 clock %14 : i10</pre>
+      <pre>    %data = seq.firreg %12 clock %14 : i16</pre>
+      <pre>    %we = seq.firreg %13 clock %14 : i1</pre>
+      <pre>    %ram.read_bus = hw.instance &#34;ram&#34; @ram(clk: %6: i1, we: %we: i1, addr: %addr: i10, data: %data: i16) -&gt; (read_bus: i16)</pre>
+      <pre>    %15:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb1(%16: i1, %17: i1):  // 5 preds: ^bb0, ^bb2, ^bb3, ^bb4, ^bb4</pre>
+      <pre>      llhd.wait yield (%16, %17 : i1, i1), (%6 : i1), ^bb2(%6 : i1)</pre>
+      <pre>    ^bb2(%18: i1):  // pred: ^bb1</pre>
+      <pre>      %19 = comb.xor bin %6, %true : i1</pre>
+      <pre>      %20 = comb.and bin %18, %19 : i1</pre>
+      <pre>      cf.cond_br %20, ^bb3, ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %21 = comb.xor %we, %true : i1</pre>
+      <pre>      cf.cond_br %21, ^bb4, ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %22 = sim.fmt.dec %addr : i10</pre>
+      <pre>      %23 = sim.fmt.dec %ram.read_bus : i16</pre>
+      <pre>      %24 = sim.fmt.concat (%22, %2, %23, %3)</pre>
+      <pre>      sim.proc.print %24</pre>
+      <pre>      %25 = comb.extract %addr from 0 : (i10) -&gt; i4</pre>
+      <pre>      %26 = comb.concat %c0_i12, %25 : i12, i4</pre>
+      <pre>      %27 = comb.mul %26, %26 : i16</pre>
+      <pre>      %28 = comb.icmp cne %ram.read_bus, %27 : i16</pre>
+      <pre>      cf.cond_br %28, ^bb1(%true, %true : i1, i1), ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %fail, %15#0 after %4 if %15#1 : i1</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

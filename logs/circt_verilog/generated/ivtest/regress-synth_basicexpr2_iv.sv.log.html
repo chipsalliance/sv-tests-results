@@ -32,21 +32,61 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:39</dd></div>
-        <div><dt>time elapsed</dt><dd>0.010s</dd></div>
-        <div><dt>ram usage</dt><dd>21124 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:03</dd></div>
+        <div><dt>time elapsed</dt><dd>0.009s</dd></div>
+        <div><dt>ram usage</dt><dd>21672 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=adder <a href="../../../../third_party/tools/icarus/ivtest/ivltests/basicexpr2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/basicexpr2.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/basicexpr2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/basicexpr2.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @adder(out q : i2, in %a : i1, in %b : i1) {</pre>
+      <pre>  hw.module private @adder(out q : i2, in %a : i1, in %b : i1) {</pre>
       <pre>    %false = hw.constant false</pre>
       <pre>    %0 = comb.concat %false, %a : i1, i1</pre>
       <pre>    %1 = comb.concat %false, %b : i1, i1</pre>
       <pre>    %2 = comb.add %0, %1 : i2</pre>
       <pre>    hw.output %2 : i2</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test() {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED - Q isn&#39;t 2 \0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;FAILED - Q isn&#39;t 0 \0A&#34;</pre>
+      <pre>    %3 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c-2_i2 = hw.constant -2 : i2</pre>
+      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
+      <pre>    %4 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %d = llhd.sig %false : i1</pre>
+      <pre>    %5 = llhd.prb %d : i1</pre>
+      <pre>    %u_add.q = hw.instance &#34;u_add&#34; @adder(a: %5: i1, b: %5: i1) -&gt; (q: i2)</pre>
+      <pre>    %6:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      llhd.wait yield (%false, %true : i1, i1), delay %4, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %7 = comb.icmp cne %u_add.q, %c0_i2 : i2</pre>
+      <pre>      cf.cond_br %7, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false : i1, i1</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%false, %false : i1, i1), delay %4, ^bb4</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      llhd.wait yield (%true, %true : i1, i1), delay %4, ^bb5</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      %8 = comb.icmp cne %u_add.q, %c-2_i2 : i2</pre>
+      <pre>      cf.cond_br %8, ^bb6, ^bb7</pre>
+      <pre>    ^bb6:  // pred: ^bb5</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false : i1, i1</pre>
+      <pre>    ^bb7:  // pred: ^bb5</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt %false, %false : i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %d, %6#0 after %3 if %6#1 : i1</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

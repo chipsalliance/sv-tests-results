@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:32</dd></div>
-        <div><dt>time elapsed</dt><dd>0.020s</dd></div>
-        <div><dt>ram usage</dt><dd>21680 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:03</dd></div>
+        <div><dt>time elapsed</dt><dd>0.031s</dd></div>
+        <div><dt>ram usage</dt><dd>22424 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=fifo <a href="../../../../third_party/tools/icarus/ivtest/contrib/fifo.v.html" target="file-frame">third_party/tools/icarus/ivtest/contrib/fifo.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/contrib/fifo.v.html" target="file-frame">third_party/tools/icarus/ivtest/contrib/fifo.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @fifo(in %clk : i1, in %rstp : i1, in %din : i16, in %writep : i1, in %readp : i1, out dout : i16, out emptyp : i1, out fullp : i1) {</pre>
+      <pre>  hw.module private @fifo(in %clk : i1, in %rstp : i1, in %din : i16, in %writep : i1, in %readp : i1, out dout : i16, out emptyp : i1, out fullp : i1) {</pre>
       <pre>    %0 = llhd.constant_time &lt;0ns, 1d, 0e&gt;</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %c1_i3 = hw.constant 1 : i3</pre>
@@ -131,6 +131,185 @@
       <pre>    %53 = llhd.prb %emptyp : i1</pre>
       <pre>    %54 = llhd.prb %fullp : i1</pre>
       <pre>    hw.output %dout, %53, %54 : i16, i1, i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test_fifo() {</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c0_i16 = hw.constant 0 : i16</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %2 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %clk = llhd.sig %false : i1</pre>
+      <pre>    %rstp = llhd.sig %false : i1</pre>
+      <pre>    %din = llhd.sig %c0_i16 : i16</pre>
+      <pre>    %readp = llhd.sig %false : i1</pre>
+      <pre>    %writep = llhd.sig %false : i1</pre>
+      <pre>    %dout = llhd.sig %c0_i16 : i16</pre>
+      <pre>    %error = llhd.sig %false : i1</pre>
+      <pre>    %3 = llhd.prb %clk : i1</pre>
+      <pre>    %4 = llhd.prb %rstp : i1</pre>
+      <pre>    %5 = llhd.prb %din : i16</pre>
+      <pre>    %6 = llhd.prb %writep : i1</pre>
+      <pre>    %7 = llhd.prb %readp : i1</pre>
+      <pre>    %U1.dout, %U1.emptyp, %U1.fullp = hw.instance &#34;U1&#34; @fifo(clk: %3: i1, rstp: %4: i1, din: %5: i16, writep: %6: i1, readp: %7: i1) -&gt; (dout: i16, emptyp: i1, fullp: i1) {sv.namehint = &#34;fullp&#34;}</pre>
+      <pre>    llhd.drv %dout, %U1.dout after %1 : i16</pre>
+      <pre>    %8 = llhd.process -&gt; i1 {</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb1:  // 2 preds: ^bb0, ^bb3</pre>
+      <pre>      llhd.wait yield (%false : i1), delay %2, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %2, ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %8 after %1 : i1</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      llhd.drv %error, %false after %1 : i1</pre>
+      <pre>      llhd.call_coroutine @test1(%din, %writep, %readp, %rstp, %clk, %error, %dout) : (!llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;) -&gt; ()</pre>
+      <pre>      %9 = llhd.prb %error : i1</pre>
+      <pre>      %10 = comb.xor %9, %true : i1</pre>
+      <pre>      cf.cond_br %10, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      cf.br ^bb2</pre>
+      <pre>    ^bb2:  // 2 preds: ^bb0, ^bb1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @read_word(%arg0: i16, %arg1: !llhd.ref&lt;i1&gt;, %arg2: !llhd.ref&lt;i1&gt;, %arg3: !llhd.ref&lt;i16&gt;, %arg4: !llhd.ref&lt;i1&gt;) {</pre>
+      <pre>    %0 = sim.fmt.literal &#34; from FIFO\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;, Read &#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;FAILED - Expect &#34;</pre>
+      <pre>    %3 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %4 = llhd.constant_time &lt;5000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %5 = llhd.prb %arg1 : i1</pre>
+      <pre>    cf.br ^bb1</pre>
+      <pre>  ^bb1:  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>    %6 = llhd.prb %arg1 : i1</pre>
+      <pre>    llhd.wait (%5 : i1), ^bb2</pre>
+      <pre>  ^bb2:  // pred: ^bb1</pre>
+      <pre>    %7 = llhd.prb %arg1 : i1</pre>
+      <pre>    %8 = comb.xor bin %7, %true : i1</pre>
+      <pre>    %9 = comb.and bin %6, %8 : i1</pre>
+      <pre>    cf.cond_br %9, ^bb3, ^bb1</pre>
+      <pre>  ^bb3:  // pred: ^bb2</pre>
+      <pre>    llhd.drv %arg2, %true after %3 : i1</pre>
+      <pre>    cf.br ^bb4</pre>
+      <pre>  ^bb4:  // 2 preds: ^bb3, ^bb5</pre>
+      <pre>    %10 = llhd.prb %arg1 : i1</pre>
+      <pre>    llhd.wait (%5 : i1), ^bb5</pre>
+      <pre>  ^bb5:  // pred: ^bb4</pre>
+      <pre>    %11 = llhd.prb %arg1 : i1</pre>
+      <pre>    %12 = comb.xor bin %10, %true : i1</pre>
+      <pre>    %13 = comb.and bin %12, %11 : i1</pre>
+      <pre>    cf.cond_br %13, ^bb6, ^bb4</pre>
+      <pre>  ^bb6:  // pred: ^bb5</pre>
+      <pre>    llhd.wait delay %4, ^bb7</pre>
+      <pre>  ^bb7:  // pred: ^bb6</pre>
+      <pre>    %14 = llhd.prb %arg3 : i16</pre>
+      <pre>    %15 = comb.icmp cne %arg0, %14 : i16</pre>
+      <pre>    cf.cond_br %15, ^bb8, ^bb9</pre>
+      <pre>  ^bb8:  // pred: ^bb7</pre>
+      <pre>    %16 = sim.fmt.hex %arg0, isUpper false specifierWidth 0 : i16</pre>
+      <pre>    %17 = llhd.prb %arg3 : i16</pre>
+      <pre>    %18 = sim.fmt.hex %17, isUpper false specifierWidth 0 : i16</pre>
+      <pre>    %19 = sim.fmt.concat (%2, %16, %1, %18, %0)</pre>
+      <pre>    sim.proc.print %19</pre>
+      <pre>    llhd.drv %arg4, %true after %3 : i1</pre>
+      <pre>    cf.br ^bb9</pre>
+      <pre>  ^bb9:  // 2 preds: ^bb7, ^bb8</pre>
+      <pre>    llhd.drv %arg2, %false after %3 : i1</pre>
+      <pre>    llhd.return</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @write_word(%arg0: i16, %arg1: !llhd.ref&lt;i1&gt;, %arg2: !llhd.ref&lt;i16&gt;, %arg3: !llhd.ref&lt;i1&gt;) {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %1 = llhd.constant_time &lt;5000000fs, 0d, 0e&gt;</pre>
+      <pre>    %c0_i16 = hw.constant 0 : i16</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %2 = llhd.prb %arg1 : i1</pre>
+      <pre>    cf.br ^bb1</pre>
+      <pre>  ^bb1:  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>    %3 = llhd.prb %arg1 : i1</pre>
+      <pre>    llhd.wait (%2 : i1), ^bb2</pre>
+      <pre>  ^bb2:  // pred: ^bb1</pre>
+      <pre>    %4 = llhd.prb %arg1 : i1</pre>
+      <pre>    %5 = comb.xor bin %4, %true : i1</pre>
+      <pre>    %6 = comb.and bin %3, %5 : i1</pre>
+      <pre>    cf.cond_br %6, ^bb3, ^bb1</pre>
+      <pre>  ^bb3:  // pred: ^bb2</pre>
+      <pre>    llhd.drv %arg2, %arg0 after %0 : i16</pre>
+      <pre>    llhd.drv %arg3, %true after %0 : i1</pre>
+      <pre>    cf.br ^bb4</pre>
+      <pre>  ^bb4:  // 2 preds: ^bb3, ^bb5</pre>
+      <pre>    %7 = llhd.prb %arg1 : i1</pre>
+      <pre>    llhd.wait (%2 : i1), ^bb5</pre>
+      <pre>  ^bb5:  // pred: ^bb4</pre>
+      <pre>    %8 = llhd.prb %arg1 : i1</pre>
+      <pre>    %9 = comb.xor bin %7, %true : i1</pre>
+      <pre>    %10 = comb.and bin %9, %8 : i1</pre>
+      <pre>    cf.cond_br %10, ^bb6, ^bb4</pre>
+      <pre>  ^bb6:  // pred: ^bb5</pre>
+      <pre>    llhd.wait delay %1, ^bb7</pre>
+      <pre>  ^bb7:  // pred: ^bb6</pre>
+      <pre>    llhd.drv %arg2, %c0_i16 after %0 : i16</pre>
+      <pre>    llhd.drv %arg3, %false after %0 : i1</pre>
+      <pre>    llhd.return</pre>
+      <pre>  }</pre>
+      <pre>  llhd.coroutine private @test1(%arg0: !llhd.ref&lt;i16&gt;, %arg1: !llhd.ref&lt;i1&gt;, %arg2: !llhd.ref&lt;i1&gt;, %arg3: !llhd.ref&lt;i1&gt;, %arg4: !llhd.ref&lt;i1&gt;, %arg5: !llhd.ref&lt;i1&gt;, %arg6: !llhd.ref&lt;i16&gt;) {</pre>
+      <pre>    %c8_i16 = hw.constant 8 : i16</pre>
+      <pre>    %c7_i16 = hw.constant 7 : i16</pre>
+      <pre>    %c6_i16 = hw.constant 6 : i16</pre>
+      <pre>    %c5_i16 = hw.constant 5 : i16</pre>
+      <pre>    %c4_i16 = hw.constant 4 : i16</pre>
+      <pre>    %c3_i16 = hw.constant 3 : i16</pre>
+      <pre>    %c2_i16 = hw.constant 2 : i16</pre>
+      <pre>    %c1_i16 = hw.constant 1 : i16</pre>
+      <pre>    %c17476_i16 = hw.constant 17476 : i16</pre>
+      <pre>    %c13107_i16 = hw.constant 13107 : i16</pre>
+      <pre>    %c8738_i16 = hw.constant 8738 : i16</pre>
+      <pre>    %c4369_i16 = hw.constant 4369 : i16</pre>
+      <pre>    %0 = llhd.constant_time &lt;50000000fs, 0d, 0e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %c0_i16 = hw.constant 0 : i16</pre>
+      <pre>    %1 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    llhd.drv %arg0, %c0_i16 after %1 : i16</pre>
+      <pre>    llhd.drv %arg1, %false after %1 : i1</pre>
+      <pre>    llhd.drv %arg2, %false after %1 : i1</pre>
+      <pre>    llhd.drv %arg3, %true after %1 : i1</pre>
+      <pre>    llhd.wait delay %0, ^bb1</pre>
+      <pre>  ^bb1:  // pred: ^bb0</pre>
+      <pre>    llhd.drv %arg3, %false after %1 : i1</pre>
+      <pre>    llhd.wait delay %0, ^bb2</pre>
+      <pre>  ^bb2:  // pred: ^bb1</pre>
+      <pre>    llhd.call_coroutine @write_word(%c4369_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c8738_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c13107_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c4369_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c8738_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c17476_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c13107_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c1_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c2_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c3_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c4_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c5_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c6_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c7_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @write_word(%c8_i16, %arg4, %arg0, %arg1) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c17476_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c1_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c2_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c3_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c4_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c5_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.call_coroutine @read_word(%c6_i16, %arg4, %arg2, %arg6, %arg5) : (i16, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i1&gt;, !llhd.ref&lt;i16&gt;, !llhd.ref&lt;i1&gt;) -&gt; ()</pre>
+      <pre>    llhd.return</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

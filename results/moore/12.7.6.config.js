@@ -1,1 +1,1 @@
-config_loader_data['moore/12.7.6'] = [["","forever_loop",0,"logs/moore/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]
+config_loader_data['moore/12.7.6'] = [["","forever_loop",1,"logs/moore/chapter-12/12.7.6--forever.sv.log.html","tests/chapter-12/12.7.6--forever.sv.html"]]

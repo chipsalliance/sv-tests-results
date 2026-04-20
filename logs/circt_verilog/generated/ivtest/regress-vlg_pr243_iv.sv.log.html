@@ -32,16 +32,24 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:41</dd></div>
-        <div><dt>time elapsed</dt><dd>0.012s</dd></div>
-        <div><dt>ram usage</dt><dd>21220 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:09</dd></div>
+        <div><dt>time elapsed</dt><dd>0.036s</dd></div>
+        <div><dt>ram usage</dt><dd>21812 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=mymod <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr243.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr243.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr243.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr243.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @mymod(out out1 : i1, out out2 : i1, in %state : i9, in %reset : i1) {</pre>
+      <pre>  llhd.global_signal @__monitor_active_id : i32 init {</pre>
+      <pre>    %c0_i32 = hw.constant 0 : i32</pre>
+      <pre>    llhd.yield %c0_i32 : i32</pre>
+      <pre>  }</pre>
+      <pre>  llhd.global_signal @__monitor_enabled : i1 init {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    llhd.yield %true : i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @mymod(out out1 : i1, out out2 : i1, in %state : i9, in %reset : i1) {</pre>
       <pre>    %c390_i32 = hw.constant 390 : i32</pre>
       <pre>    %c5_i32 = hw.constant 5 : i32</pre>
       <pre>    %c0_i23 = hw.constant 0 : i23</pre>
@@ -50,6 +58,75 @@
       <pre>    %2 = comb.icmp ugt %0, %c390_i32 : i32</pre>
       <pre>    %3 = comb.or %2, %reset : i1</pre>
       <pre>    hw.output %1, %3 : i1, i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @t() {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %c1_i9 = hw.constant 1 : i9</pre>
+      <pre>    %0 = sim.fmt.literal &#34;   TIME:state:out1:out2\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;:&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %3 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c1_i32 = hw.constant 1 : i32</pre>
+      <pre>    %c1000000_i64 = hw.constant 1000000 : i64</pre>
+      <pre>    %4 = llhd.constant_time &lt;5110000000fs, 0d, 0e&gt;</pre>
+      <pre>    %5 = llhd.constant_time &lt;20000000fs, 0d, 0e&gt;</pre>
+      <pre>    %6 = llhd.constant_time &lt;10000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %c0_i9 = hw.constant 0 : i9</pre>
+      <pre>    %state = llhd.sig %c0_i9 : i9</pre>
+      <pre>    %reset = llhd.sig %false : i1</pre>
+      <pre>    %7 = llhd.prb %state : i9</pre>
+      <pre>    %8 = llhd.prb %reset : i1</pre>
+      <pre>    %m1.out1, %m1.out2 = hw.instance &#34;m1&#34; @mymod(state: %7: i9, reset: %8: i1) -&gt; (out1: i1, out2: i1)</pre>
+      <pre>    %9:3 = llhd.process -&gt; i1, i1, i1 {</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      %11 = llhd.get_global_signal @__monitor_active_id : &lt;i32&gt;</pre>
+      <pre>      llhd.drv %11, %c1_i32 after %3 : i32</pre>
+      <pre>      llhd.wait yield (%true, %false, %true : i1, i1, i1), delay %6, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.wait yield (%false, %true, %true : i1, i1, i1), delay %5, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%false, %false, %true : i1, i1, i1), delay %4, ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false : i1, i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %state, %c0_i9 after %3 if %9#0 : i9</pre>
+      <pre>    llhd.drv %reset, %9#1 after %3 if %9#2 : i1</pre>
+      <pre>    llhd.combinational {</pre>
+      <pre>      %11 = llhd.current_time</pre>
+      <pre>      %12 = llhd.time_to_int %11</pre>
+      <pre>      %13 = comb.divu %12, %c1000000_i64 : i64</pre>
+      <pre>      %14 = sim.fmt.dec %13 specifierWidth 7 : i64</pre>
+      <pre>      %15 = sim.fmt.dec %7 specifierWidth 5 : i9</pre>
+      <pre>      %16 = sim.fmt.dec %m1.out1 specifierWidth 3 : i1</pre>
+      <pre>      %17 = sim.fmt.dec %m1.out2 specifierWidth 3 : i1</pre>
+      <pre>      %18 = sim.fmt.concat (%14, %1, %15, %1, %16, %1, %17, %2)</pre>
+      <pre>      %19 = llhd.get_global_signal @__monitor_active_id : &lt;i32&gt;</pre>
+      <pre>      %20 = llhd.prb %19 : i32</pre>
+      <pre>      %21 = comb.icmp eq %20, %c1_i32 : i32</pre>
+      <pre>      %22 = llhd.get_global_signal @__monitor_enabled : &lt;i1&gt;</pre>
+      <pre>      %23 = llhd.prb %22 : i1</pre>
+      <pre>      %24 = comb.and %21, %23 : i1</pre>
+      <pre>      cf.cond_br %24, ^bb1, ^bb2</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      sim.proc.print %18</pre>
+      <pre>      cf.br ^bb2</pre>
+      <pre>    ^bb2:  // 2 preds: ^bb0, ^bb1</pre>
+      <pre>      llhd.yield</pre>
+      <pre>    }</pre>
+      <pre>    %10:2 = llhd.process -&gt; i9, i1 {</pre>
+      <pre>      cf.br ^bb1(%c0_i9, %false : i9, i1)</pre>
+      <pre>    ^bb1(%11: i9, %12: i1):  // 3 preds: ^bb0, ^bb2, ^bb3</pre>
+      <pre>      llhd.wait yield (%11, %12 : i9, i1), delay %6, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      cf.cond_br %8, ^bb1(%c0_i9, %true : i9, i1), ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %13 = comb.add %7, %c1_i9 : i9</pre>
+      <pre>      cf.br ^bb1(%13, %true : i9, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %state, %10#0 after %3 if %10#1 : i9</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

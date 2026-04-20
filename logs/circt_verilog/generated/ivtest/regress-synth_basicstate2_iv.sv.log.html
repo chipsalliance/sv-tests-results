@@ -32,16 +32,16 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:50:41</dd></div>
-        <div><dt>time elapsed</dt><dd>0.013s</dd></div>
-        <div><dt>ram usage</dt><dd>21636 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:07</dd></div>
+        <div><dt>time elapsed</dt><dd>0.021s</dd></div>
+        <div><dt>ram usage</dt><dd>22000 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=sm <a href="../../../../third_party/tools/icarus/ivtest/ivltests/basicstate2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/basicstate2.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/basicstate2.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/basicstate2.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module @sm(in %clk : i1, in %rst : i1, out st : i2) {</pre>
+      <pre>  hw.module private @sm(in %clk : i1, in %rst : i1, out st : i2) {</pre>
       <pre>    %0 = llhd.constant_time &lt;0ns, 1d, 0e&gt;</pre>
       <pre>    %true = hw.constant true</pre>
       <pre>    %c-2_i2 = hw.constant -2 : i2</pre>
@@ -69,6 +69,121 @@
       <pre>    }</pre>
       <pre>    llhd.drv %next_st, %3#0 after %0 if %3#1 : i2</pre>
       <pre>    hw.output %st : i2</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @test() {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED - SM didn&#39;t xsn to 00\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;FAILED - SM didn&#39;t xsn to 10\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;FAILED - SM didn&#39;t xsn to 11\0A&#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34;FAILED - SM didn&#39;t xsn to 01\0A&#34;</pre>
+      <pre>    %5 = sim.fmt.literal &#34;FAILED - SM didn&#39;t initialize\0A&#34;</pre>
+      <pre>    %6 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c-2_i2 = hw.constant -2 : i2</pre>
+      <pre>    %c-1_i2 = hw.constant -1 : i2</pre>
+      <pre>    %c1_i2 = hw.constant 1 : i2</pre>
+      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
+      <pre>    %7 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %8 = llhd.constant_time &lt;5000000fs, 0d, 0e&gt;</pre>
+      <pre>    %clk = llhd.sig %false : i1</pre>
+      <pre>    %9 = llhd.prb %clk : i1</pre>
+      <pre>    %rst = llhd.sig %false : i1</pre>
+      <pre>    %10 = llhd.prb %rst : i1</pre>
+      <pre>    %u_sm.st = hw.instance &#34;u_sm&#34; @sm(clk: %9: i1, rst: %10: i1) -&gt; (st: i2)</pre>
+      <pre>    %11:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb1(%13: i1, %14: i1):  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>      llhd.wait yield (%13, %14 : i1, i1), delay %8, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %15 = comb.xor %9, %true : i1</pre>
+      <pre>      cf.br ^bb1(%15, %true : i1, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %11#0 after %6 if %11#1 : i1</pre>
+      <pre>    %12:4 = llhd.process -&gt; i1, i1, i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %true, %true, %true : i1, i1, i1, i1)</pre>
+      <pre>    ^bb1(%13: i1, %14: i1, %15: i1, %16: i1):  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>      llhd.wait yield (%13, %14, %15, %16 : i1, i1, i1, i1), (%9 : i1), ^bb2(%13 : i1)</pre>
+      <pre>    ^bb2(%17: i1):  // pred: ^bb1</pre>
+      <pre>      %18 = comb.xor bin %17, %true : i1</pre>
+      <pre>      %19 = comb.and bin %18, %9 : i1</pre>
+      <pre>      cf.cond_br %19, ^bb3, ^bb1(%9, %false, %false, %false : i1, i1, i1, i1)</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), delay %7, ^bb4(%17 : i1)</pre>
+      <pre>    ^bb4(%20: i1):  // pred: ^bb3</pre>
+      <pre>      %21 = comb.icmp cne %u_sm.st, %c0_i2 : i2</pre>
+      <pre>      cf.cond_br %21, ^bb5, ^bb6(%true : i1)</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      sim.proc.print %5</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false, %true : i1, i1, i1, i1</pre>
+      <pre>    ^bb6(%22: i1):  // 2 preds: ^bb4, ^bb7</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %22 : i1, i1, i1, i1), (%9 : i1), ^bb7(%20, %9 : i1, i1)</pre>
+      <pre>    ^bb7(%23: i1, %24: i1):  // pred: ^bb6</pre>
+      <pre>      %25 = comb.xor bin %24, %true : i1</pre>
+      <pre>      %26 = comb.and bin %25, %9 : i1</pre>
+      <pre>      cf.cond_br %26, ^bb8, ^bb6(%false : i1)</pre>
+      <pre>    ^bb8:  // pred: ^bb7</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), delay %7, ^bb9(%23, %24 : i1, i1)</pre>
+      <pre>    ^bb9(%27: i1, %28: i1):  // pred: ^bb8</pre>
+      <pre>      %29 = comb.icmp cne %u_sm.st, %c1_i2 : i2</pre>
+      <pre>      cf.cond_br %29, ^bb10, ^bb11</pre>
+      <pre>    ^bb10:  // pred: ^bb9</pre>
+      <pre>      sim.proc.print %4</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false, %false : i1, i1, i1, i1</pre>
+      <pre>    ^bb11:  // 2 preds: ^bb9, ^bb12</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), (%9 : i1), ^bb12(%27, %28, %9 : i1, i1, i1)</pre>
+      <pre>    ^bb12(%30: i1, %31: i1, %32: i1):  // pred: ^bb11</pre>
+      <pre>      %33 = comb.xor bin %32, %true : i1</pre>
+      <pre>      %34 = comb.and bin %33, %9 : i1</pre>
+      <pre>      cf.cond_br %34, ^bb13, ^bb11</pre>
+      <pre>    ^bb13:  // pred: ^bb12</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), delay %7, ^bb14(%30, %31, %32 : i1, i1, i1)</pre>
+      <pre>    ^bb14(%35: i1, %36: i1, %37: i1):  // pred: ^bb13</pre>
+      <pre>      %38 = comb.icmp cne %u_sm.st, %c-1_i2 : i2</pre>
+      <pre>      cf.cond_br %38, ^bb15, ^bb16</pre>
+      <pre>    ^bb15:  // pred: ^bb14</pre>
+      <pre>      sim.proc.print %3</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false, %false : i1, i1, i1, i1</pre>
+      <pre>    ^bb16:  // 2 preds: ^bb14, ^bb17</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), (%9 : i1), ^bb17(%35, %36, %37, %9 : i1, i1, i1, i1)</pre>
+      <pre>    ^bb17(%39: i1, %40: i1, %41: i1, %42: i1):  // pred: ^bb16</pre>
+      <pre>      %43 = comb.xor bin %42, %true : i1</pre>
+      <pre>      %44 = comb.and bin %43, %9 : i1</pre>
+      <pre>      cf.cond_br %44, ^bb18, ^bb16</pre>
+      <pre>    ^bb18:  // pred: ^bb17</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), delay %7, ^bb19(%39, %40, %41, %42 : i1, i1, i1, i1)</pre>
+      <pre>    ^bb19(%45: i1, %46: i1, %47: i1, %48: i1):  // pred: ^bb18</pre>
+      <pre>      %49 = comb.icmp cne %u_sm.st, %c-2_i2 : i2</pre>
+      <pre>      cf.cond_br %49, ^bb20, ^bb21</pre>
+      <pre>    ^bb20:  // pred: ^bb19</pre>
+      <pre>      sim.proc.print %2</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false, %false : i1, i1, i1, i1</pre>
+      <pre>    ^bb21:  // 2 preds: ^bb19, ^bb22</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), (%9 : i1), ^bb22(%45, %46, %47, %48, %9 : i1, i1, i1, i1, i1)</pre>
+      <pre>    ^bb22(%50: i1, %51: i1, %52: i1, %53: i1, %54: i1):  // pred: ^bb21</pre>
+      <pre>      %55 = comb.xor bin %54, %true : i1</pre>
+      <pre>      %56 = comb.and bin %55, %9 : i1</pre>
+      <pre>      cf.cond_br %56, ^bb23, ^bb21</pre>
+      <pre>    ^bb23:  // pred: ^bb22</pre>
+      <pre>      llhd.wait yield (%false, %false, %false, %false : i1, i1, i1, i1), delay %7, ^bb24(%50, %51, %52, %53, %54 : i1, i1, i1, i1, i1)</pre>
+      <pre>    ^bb24(%57: i1, %58: i1, %59: i1, %60: i1, %61: i1):  // pred: ^bb23</pre>
+      <pre>      cf.cond_br %21, ^bb25, ^bb26</pre>
+      <pre>    ^bb25:  // pred: ^bb24</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false, %false : i1, i1, i1, i1</pre>
+      <pre>    ^bb26:  // pred: ^bb24</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false, %false, %false, %false : i1, i1, i1, i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %clk, %12#0 after %6 if %12#1 : i1</pre>
+      <pre>    llhd.drv %rst, %12#2 after %6 if %12#3 : i1</pre>
+      <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>

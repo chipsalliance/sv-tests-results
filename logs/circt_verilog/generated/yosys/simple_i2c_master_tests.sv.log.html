@@ -32,14 +32,14 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-04-20 01:51:25</dd></div>
-        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
-        <div><dt>ram usage</dt><dd>21400 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-04-20 14:41:51</dd></div>
+        <div><dt>time elapsed</dt><dd>0.018s</dd></div>
+        <div><dt>ram usage</dt><dd>21516 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
-      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob --top=i2c_test01 <a href="../../../../tests/generated/yosys/simple_i2c_master_tests.sv.html" target="file-frame">tests/generated/yosys/simple_i2c_master_tests.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/i2c_master_tests.v.html" target="file-frame">third_party/tools/yosys/tests/simple/i2c_master_tests.v</a></pre>
+      <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/yosys/tests/simple --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../tests/generated/yosys/simple_i2c_master_tests.sv.html" target="file-frame">tests/generated/yosys/simple_i2c_master_tests.sv</a> <a href="../../../../third_party/tools/yosys/tests/simple/i2c_master_tests.v.html" target="file-frame">third_party/tools/yosys/tests/simple/i2c_master_tests.v</a></pre>
       <pre>module {</pre>
       <pre>  hw.module @i2c_test01(in %clk : i1, in %rst : i1, in %nReset : i1, out al : i1) {</pre>
       <pre>    %true = hw.constant true</pre>
@@ -100,6 +100,67 @@
       <pre>    }</pre>
       <pre>    %2 = llhd.prb %al : i1</pre>
       <pre>    hw.output %2 : i1</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @i2c_test02(in %clk : i1, in %slave_wait : i1, in %clk_cnt : i1, in %cmd : i1, out cmd_stop : i1, out cnt : i16) {</pre>
+      <pre>    %c-1_i16 = hw.constant -1 : i16</pre>
+      <pre>    %c0_i15 = hw.constant 0 : i15</pre>
+      <pre>    %c0_i16 = hw.constant 0 : i16</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %cmd_stop = llhd.sig %false : i1</pre>
+      <pre>    %clk_en = llhd.sig %false : i1</pre>
+      <pre>    %1 = llhd.prb %clk_en : i1</pre>
+      <pre>    %cnt = llhd.sig %c0_i16 : i16</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb1:  // 5 preds: ^bb0, ^bb2, ^bb5, ^bb6, ^bb7</pre>
+      <pre>      llhd.wait (%clk : i1), ^bb2(%clk : i1)</pre>
+      <pre>    ^bb2(%4: i1):  // pred: ^bb1</pre>
+      <pre>      %5 = comb.xor bin %4, %true : i1</pre>
+      <pre>      %6 = comb.and bin %5, %clk : i1</pre>
+      <pre>      cf.cond_br %6, ^bb3, ^bb1</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      %7 = llhd.prb %cnt : i16</pre>
+      <pre>      %8 = comb.icmp eq %7, %c0_i16 : i16</pre>
+      <pre>      cf.cond_br %8, ^bb4, ^bb7</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      %9 = comb.xor %slave_wait, %true : i1</pre>
+      <pre>      cf.cond_br %9, ^bb5, ^bb6</pre>
+      <pre>    ^bb5:  // pred: ^bb4</pre>
+      <pre>      %10 = comb.concat %c0_i15, %clk_cnt : i15, i1</pre>
+      <pre>      llhd.drv %cnt, %10 after %0 : i16</pre>
+      <pre>      llhd.drv %clk_en, %true after %0 : i1</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb6:  // pred: ^bb4</pre>
+      <pre>      %11 = llhd.prb %cnt : i16</pre>
+      <pre>      llhd.drv %cnt, %11 after %0 : i16</pre>
+      <pre>      llhd.drv %clk_en, %false after %0 : i1</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb7:  // pred: ^bb3</pre>
+      <pre>      %12 = llhd.prb %cnt : i16</pre>
+      <pre>      %13 = comb.add %12, %c-1_i16 : i16</pre>
+      <pre>      llhd.drv %cnt, %13 after %0 : i16</pre>
+      <pre>      llhd.drv %clk_en, %false after %0 : i1</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.process {</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    ^bb1:  // 4 preds: ^bb0, ^bb2, ^bb3, ^bb4</pre>
+      <pre>      llhd.wait (%clk : i1), ^bb2(%clk : i1)</pre>
+      <pre>    ^bb2(%4: i1):  // pred: ^bb1</pre>
+      <pre>      %5 = comb.xor bin %4, %true : i1</pre>
+      <pre>      %6 = comb.and bin %5, %clk : i1</pre>
+      <pre>      cf.cond_br %6, ^bb3, ^bb1</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      cf.cond_br %1, ^bb4, ^bb1</pre>
+      <pre>    ^bb4:  // pred: ^bb3</pre>
+      <pre>      llhd.drv %cmd_stop, %cmd after %0 : i1</pre>
+      <pre>      cf.br ^bb1</pre>
+      <pre>    }</pre>
+      <pre>    %2 = llhd.prb %cmd_stop : i1</pre>
+      <pre>    %3 = llhd.prb %cnt : i16</pre>
+      <pre>    hw.output %2, %3 : i1, i16</pre>
       <pre>  }</pre>
       <pre>}</pre>
       <pre></pre>
