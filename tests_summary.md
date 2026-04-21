@@ -1,21 +1,21 @@
 # Changes In Tests
 |          Tool           |New Failures|New Passes|Added|Removed|Not Affected|
 |-------------------------|-----------:|---------:|----:|------:|-----------:|
-|sv_parser                |           0|         0|    0|      0|        5009|
-|Icarus                   |           0|         0|    0|      0|        5076|
-|Yosys                    |           1|         0|    0|      0|        4730|
-|Slang                    |           0|         0|    0|      0|        5073|
-|Verilator                |           0|         0|    0|      0|        5077|
-|Sv2v_zachjs              |           0|         0|    0|      0|        5072|
-|Surelog                  |           0|         0|    0|      0|        5072|
-|VeribleExtractor         |           0|         0|    0|      0|        4918|
-|tree_sitter_systemverilog|           0|         0|    0|      0|        4916|
-|circt_verilog            |          48|        23|    0|      0|        5001|
-|moore                    |         106|      1066|    0|      0|        3837|
-|SynligYosys              |           0|         0|    0|      0|        4730|
-|Slang_parse              |           0|         0|    0|      0|        5009|
-|Odin                     |           0|         0|    0|      0|        5009|
-|moore_parse              |           0|         0|    0|      0|        4918|
+|circt_verilog            |           0|         0|    0|      0|        5072|
+|Yosys                    |           0|         0|    0|      0|        4731|
 |yosys_slang              |           0|         0|    0|      0|        4278|
+|moore_parse              |           0|         0|    0|      0|        4918|
+|tree_sitter_systemverilog|          17|         0|    0|      0|        4899|
 |Verible                  |           0|         0|    0|      0|        4918|
-|tree_sitter_verilog      |           1|         0|    0|      0|        4917|
+|tree_sitter_verilog      |           0|         1|    0|      0|        4917|
+|Surelog                  |           0|         0|    0|      0|        5072|
+|Slang                    |           0|         0|    0|      0|        5073|
+|moore                    |           0|         0|    0|      0|        5009|
+|Verilator                |           1|         5|    0|      0|        5071|
+|VeribleExtractor         |           0|         0|    0|      0|        4918|
+|Slang_parse              |           0|         0|    0|      0|        5009|
+|Icarus                   |           0|         0|    0|      0|        5076|
+|sv_parser                |           0|         0|    0|      0|        5009|
+|Odin                     |           0|         0|    0|      0|        5009|
+|SynligYosys              |           0|         0|    0|      0|        4730|
+|Sv2v_zachjs              |           0|         0|    0|      0|        5072|
