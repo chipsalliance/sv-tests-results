@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/561b74c0468c27e232f8ebaf5d9ea708ee3ac358" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/7dfe97c37be15ed91d20175af90a3e182a8b4dde" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr1421777_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,20 +32,60 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-06-03 02:14:24</dd></div>
-        <div><dt>time elapsed</dt><dd>0.008s</dd></div>
-        <div><dt>ram usage</dt><dd>15280 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-06-05 14:25:00</dd></div>
+        <div><dt>time elapsed</dt><dd>0.014s</dd></div>
+        <div><dt>ram usage</dt><dd>21932 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr1421777.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr1421777.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1421777.v:11:15: error: unknown hierarchical name `tmp`</pre>
-      <pre>   wire foo = dut.tmp;</pre>
-      <pre>              ^</pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1421777.v:28:9: note: no rvalue generated for Net</pre>
-      <pre>   not (tmp, b);</pre>
-      <pre>        ^</pre>
+      <pre>module {</pre>
+      <pre>  hw.module @main() {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;FAILED\0A&#34;</pre>
+      <pre>    %2 = sim.fmt.literal &#34;\0A&#34;</pre>
+      <pre>    %3 = sim.fmt.literal &#34;, tmp=&#34;</pre>
+      <pre>    %4 = sim.fmt.literal &#34;a=&#34;</pre>
+      <pre>    %5 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %6 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %b = llhd.sig %false : i1</pre>
+      <pre>    %7 = llhd.prb %b : i1</pre>
+      <pre>    %dut.a, %dut.tmp = hw.instance &#34;dut&#34; @X(b: %7: i1) -&gt; (a: i1, tmp: !llhd.ref&lt;i1&gt;)</pre>
+      <pre>    %8 = llhd.prb %dut.tmp : i1</pre>
+      <pre>    %9 = llhd.process -&gt; i1 {</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %6, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      %10 = sim.fmt.bin %dut.a : i1</pre>
+      <pre>      %11 = sim.fmt.bin %8 : i1</pre>
+      <pre>      %12 = sim.fmt.concat (%4, %10, %3, %11, %2)</pre>
+      <pre>      sim.proc.print %12</pre>
+      <pre>      %13 = comb.icmp cne %dut.a, %8 : i1</pre>
+      <pre>      cf.cond_br %13, ^bb2, ^bb3</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      llhd.halt %false : i1</pre>
+      <pre>    ^bb3:  // pred: ^bb1</pre>
+      <pre>      sim.proc.print %0</pre>
+      <pre>      llhd.halt %false : i1</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %b, %false after %5 if %9 : i1</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @X(out a : i1, in %b : i1, out tmp : !llhd.ref&lt;i1&gt;) {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %tmp = llhd.sig %false : i1</pre>
+      <pre>    llhd.drv %tmp, %1 after %0 : i1</pre>
+      <pre>    %1 = comb.xor %b, %true : i1</pre>
+      <pre>    %2 = llhd.prb %tmp : i1</pre>
+      <pre>    hw.output %2, %tmp : i1, !llhd.ref&lt;i1&gt;</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>
