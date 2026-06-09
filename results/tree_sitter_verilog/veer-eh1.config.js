@@ -1,1 +1,1 @@
-config_loader_data['tree_sitter_verilog/veer-eh1'] = [["cores","veer-eh1",0,"logs/tree_sitter_verilog/generated/fusesoc/veer-eh1-synth.sv.log.html","build/veer-eh1_synth/synth-vivado/config/common_defines.vh.html"]]
+config_loader_data['tree_sitter_verilog/veer-eh1'] = [["cores","veer-eh1",0,"logs/tree_sitter_verilog/generated/fusesoc/veer-eh1-synth.sv.log.html","build/veer-eh1_synth/chipsalliance.org_cores_VeeR_EH1_1.8/synth-vivado/config/common_defines.vh.html"]]
