@@ -5,14 +5,14 @@
     <link rel="stylesheet" type="text/css" href="../../../../log.css">
   </head>
   <body>
-    <header class="test-failed">
-        <a href="https://github.com/llvm/circt/tree/ffd2188ab345cdaf655ebcec348d9635bedd0f3e" target="_blank"><h1>circt-verilog</h1></a>
+    <header class="test-passed">
+        <a href="https://github.com/llvm/circt/tree/7f24b1285a2f68f8aa1860f72133c96b964c4c0e" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-vlg_pr1087_iv</h2>
     </header>
     <section class="property-list">
       <dl>
         <div><dt>description</dt><dd>Test imported from ivtest</dd></div>
-        <div><dt>rc</dt><dd>1 (means success: 0)</dd></div>
+        <div><dt>rc</dt><dd>0 (means success: 1)</dd></div>
         <div><dt>tags</dt><dd>ivtest</dd></div>
         <div>
           <dt>incdirs</dt>
@@ -32,17 +32,65 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-07-17 01:54:01</dd></div>
-        <div><dt>time elapsed</dt><dd>0.008s</dd></div>
-        <div><dt>ram usage</dt><dd>16800 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-07-18 01:51:15</dd></div>
+        <div><dt>time elapsed</dt><dd>0.019s</dd></div>
+        <div><dt>ram usage</dt><dd>22740 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/pr1087.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/pr1087.v</a></pre>
-      <pre>../../../third_party/tools/icarus/ivtest/ivltests/pr1087.v:33:26: error: unsupported module member: InstanceArray</pre>
-      <pre>COUNTER #(.CBITS(CBITS)) INST_COUNTER[M-1:0] (CLOCK_I, nARST_I, COUNT_O);</pre>
-      <pre>                         ^</pre>
+      <pre>module {</pre>
+      <pre>  hw.module private @COUNTER(in %CLOCK_I : i1, in %nARST_I : i1, out COUNT_O : i2) {</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %c1_i2 = hw.constant 1 : i2</pre>
+      <pre>    %c0_i2 = hw.constant 0 : i2</pre>
+      <pre>    %0 = comb.add %COUNT_O, %c1_i2 : i2</pre>
+      <pre>    %1 = seq.to_clock %CLOCK_I</pre>
+      <pre>    %2 = comb.xor %nARST_I, %true : i1</pre>
+      <pre>    %COUNT_O = seq.firreg %0 clock %1 reset async %2, %c0_i2 : i2</pre>
+      <pre>    hw.output %COUNT_O : i2</pre>
+      <pre>  }</pre>
+      <pre>  hw.module private @MULTIPLE_COUNTERS(in %CLOCK_I : i1, in %nARST_I : i1, out COUNT_O : i4) {</pre>
+      <pre>    %0 = comb.concat %INST_COUNTER_1.COUNT_O, %INST_COUNTER_0.COUNT_O : i2, i2</pre>
+      <pre>    %INST_COUNTER_0.COUNT_O = hw.instance &#34;INST_COUNTER_0&#34; @COUNTER(CLOCK_I: %CLOCK_I: i1, nARST_I: %nARST_I: i1) -&gt; (COUNT_O: i2)</pre>
+      <pre>    %INST_COUNTER_1.COUNT_O = hw.instance &#34;INST_COUNTER_1&#34; @COUNTER(CLOCK_I: %CLOCK_I: i1, nARST_I: %nARST_I: i1) -&gt; (COUNT_O: i2)</pre>
+      <pre>    hw.output %0 : i4</pre>
+      <pre>  }</pre>
+      <pre>  hw.module @TEST_COUNTER() {</pre>
+      <pre>    %0 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %1 = sim.fmt.literal &#34;PASSED\0A&#34;</pre>
+      <pre>    %2 = llhd.constant_time &lt;200000000fs, 0d, 0e&gt;</pre>
+      <pre>    %false = hw.constant false</pre>
+      <pre>    %3 = llhd.constant_time &lt;5000000fs, 0d, 0e&gt;</pre>
+      <pre>    %true = hw.constant true</pre>
+      <pre>    %CLOCK = llhd.sig %false : i1</pre>
+      <pre>    %4 = llhd.prb %CLOCK : i1</pre>
+      <pre>    %INST_MCTR.COUNT_O = hw.instance &#34;INST_MCTR&#34; @MULTIPLE_COUNTERS(CLOCK_I: %4: i1, nARST_I: %6: i1) -&gt; (COUNT_O: i4) {sv.namehint = &#34;COUNTS&#34;}</pre>
+      <pre>    llhd.drv %CLOCK, %true after %0 : i1</pre>
+      <pre>    %5:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>      cf.br ^bb1(%false, %false : i1, i1)</pre>
+      <pre>    ^bb1(%7: i1, %8: i1):  // 2 preds: ^bb0, ^bb2</pre>
+      <pre>      llhd.wait yield (%7, %8 : i1, i1), delay %3, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      %9 = comb.xor %4, %true : i1</pre>
+      <pre>      cf.br ^bb1(%9, %true : i1, i1)</pre>
+      <pre>    }</pre>
+      <pre>    llhd.drv %CLOCK, %5#0 after %0 if %5#1 : i1</pre>
+      <pre>    %6 = llhd.process -&gt; i1 {</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %3, ^bb1</pre>
+      <pre>    ^bb1:  // pred: ^bb0</pre>
+      <pre>      llhd.wait yield (%false : i1), delay %3, ^bb2</pre>
+      <pre>    ^bb2:  // pred: ^bb1</pre>
+      <pre>      llhd.wait yield (%true : i1), delay %2, ^bb3</pre>
+      <pre>    ^bb3:  // pred: ^bb2</pre>
+      <pre>      sim.proc.print %1</pre>
+      <pre>      sim.terminate success, quiet</pre>
+      <pre>      ub.unreachable</pre>
+      <pre>    }</pre>
+      <pre>    hw.output</pre>
+      <pre>  }</pre>
+      <pre>}</pre>
       <pre></pre>
     </section>
   </body>

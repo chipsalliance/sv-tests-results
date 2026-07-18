@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/7.9.10'] = [["","associative-arrays-as-arguments",0,"logs/circt_verilog/chapter-7/arrays/associative/arguments.sv.log.html","tests/chapter-7/arrays/associative/arguments.sv.html"]]
+config_loader_data['circt_verilog/7.9.10'] = [["","associative-arrays-as-arguments",1,"logs/circt_verilog/chapter-7/arrays/associative/arguments.sv.log.html","tests/chapter-7/arrays/associative/arguments.sv.html"]]
