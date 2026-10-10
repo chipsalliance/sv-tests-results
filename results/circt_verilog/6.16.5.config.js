@@ -1,1 +1,1 @@
-config_loader_data['circt_verilog/6.16.5'] = [["","string_tolower",0,"logs/circt_verilog/chapter-6/6.16.5--string_tolower.sv.log.html","tests/chapter-6/6.16.5--string_tolower.sv.html"]]
+config_loader_data['circt_verilog/6.16.5'] = [["","string_tolower",1,"logs/circt_verilog/chapter-6/6.16.5--string_tolower.sv.log.html","tests/chapter-6/6.16.5--string_tolower.sv.html"]]

@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/901ed907bae5325c5fb2b018823e8709842d30ff" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/269ecf1bae7f8445653c37ee6ef448254f5e8eec" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-sv_sv_enum1_iv</h2>
     </header>
     <section class="property-list">
@@ -32,19 +32,18 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-10-08 13:40:47</dd></div>
-        <div><dt>time elapsed</dt><dd>0.015s</dd></div>
-        <div><dt>ram usage</dt><dd>23128 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-10-10 01:46:26</dd></div>
+        <div><dt>time elapsed</dt><dd>0.022s</dd></div>
+        <div><dt>ram usage</dt><dd>23312 KB</dd></div>
       </dl>
     </section>
     <section class="log">
       <pre></pre>
       <pre>circt-verilog -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest -I /root/sv-tests/sv-tests/third_party/tools/icarus/ivtest/ivltests --timescale=1ns/1ns --single-unit -Wno-implicit-conv -Wno-error=index-oob -Wno-error=range-oob -Wno-error=range-width-oob <a href="../../../../third_party/tools/icarus/ivtest/ivltests/sv_enum1.v.html" target="file-frame">third_party/tools/icarus/ivtest/ivltests/sv_enum1.v</a></pre>
       <pre>module {</pre>
-      <pre>  hw.module private @foo_mod(out pass_flag : i1, in %go_flag : i1) {</pre>
+      <pre>  hw.module private @foo_mod(out pass_flag : i1, in %go_flag : !seq.clock) {</pre>
       <pre>    %true = hw.constant true</pre>
-      <pre>    %0 = seq.to_clock %go_flag</pre>
-      <pre>    %pass_flag = seq.firreg %true clock %0 : i1</pre>
+      <pre>    %pass_flag = seq.firreg %true clock %go_flag : i1</pre>
       <pre>    hw.output %pass_flag : i1</pre>
       <pre>  }</pre>
       <pre>  hw.module @main() {</pre>
@@ -56,29 +55,30 @@
       <pre>    %true = hw.constant true</pre>
       <pre>    %4 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
       <pre>    %false = hw.constant false</pre>
-      <pre>    %go_flag = llhd.sig %false : i1</pre>
+      <pre>    %go_flag = llhd.sig %false : &lt;i1&gt;</pre>
       <pre>    %5 = comb.concat %dut_1.pass_flag, %dut_0.pass_flag : i1, i1</pre>
       <pre>    %6 = llhd.prb %go_flag : i1</pre>
-      <pre>    %dut_0.pass_flag = hw.instance &#34;dut_0&#34; @foo_mod(go_flag: %6: i1) -&gt; (pass_flag: i1)</pre>
-      <pre>    %dut_1.pass_flag = hw.instance &#34;dut_1&#34; @foo_mod(go_flag: %6: i1) -&gt; (pass_flag: i1)</pre>
-      <pre>    %7 = llhd.process -&gt; i1 {</pre>
+      <pre>    %7 = seq.to_clock %6</pre>
+      <pre>    %dut_0.pass_flag = hw.instance &#34;dut_0&#34; @foo_mod(go_flag: %7: !seq.clock) -&gt; (pass_flag: i1)</pre>
+      <pre>    %dut_1.pass_flag = hw.instance &#34;dut_1&#34; @foo_mod(go_flag: %7: !seq.clock) -&gt; (pass_flag: i1)</pre>
+      <pre>    %8 = llhd.process -&gt; i1 {</pre>
       <pre>      llhd.wait yield (%false : i1), delay %4, ^bb1</pre>
       <pre>    ^bb1:  // pred: ^bb0</pre>
       <pre>      llhd.wait yield (%true : i1), delay %4, ^bb2</pre>
       <pre>    ^bb2:  // pred: ^bb1</pre>
-      <pre>      %8 = comb.icmp cne %5, %c-1_i2 : i2</pre>
-      <pre>      cf.cond_br %8, ^bb3, ^bb4</pre>
+      <pre>      %9 = comb.icmp cne %5, %c-1_i2 : i2</pre>
+      <pre>      cf.cond_br %9, ^bb3, ^bb4</pre>
       <pre>    ^bb3:  // pred: ^bb2</pre>
-      <pre>      %9 = sim.fmt.bin %5 : i2</pre>
-      <pre>      %10 = sim.fmt.concat (%2, %9, %1)</pre>
-      <pre>      sim.proc.print %10</pre>
+      <pre>      %10 = sim.fmt.bin %5 : i2</pre>
+      <pre>      %11 = sim.fmt.concat (%2, %10, %1)</pre>
+      <pre>      sim.proc.print %11</pre>
       <pre>      sim.terminate success, quiet</pre>
       <pre>      ub.unreachable</pre>
       <pre>    ^bb4:  // pred: ^bb2</pre>
       <pre>      sim.proc.print %0</pre>
       <pre>      llhd.halt %false : i1</pre>
       <pre>    }</pre>
-      <pre>    llhd.drv %go_flag, %true after %3 if %7 : i1</pre>
+      <pre>    llhd.drv %go_flag, %true after %3 if %8 : i1</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>
