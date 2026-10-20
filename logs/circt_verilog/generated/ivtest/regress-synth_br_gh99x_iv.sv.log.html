@@ -6,7 +6,7 @@
   </head>
   <body>
     <header class="test-passed">
-        <a href="https://github.com/llvm/circt/tree/d81dbe9ed59ce13803ce7940d35dc3232c8172c2" target="_blank"><h1>circt-verilog</h1></a>
+        <a href="https://github.com/llvm/circt/tree/e4346fb0af71a0c17c2434e52df067ba7a4005db" target="_blank"><h1>circt-verilog</h1></a>
         <h2>regress-synth_br_gh99x_iv</h2>
     </header>
     <section class="property-list">
@@ -32,9 +32,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-10-19 09:55:32</dd></div>
+        <div><dt>completed</dt><dd>2026-10-20 01:37:52</dd></div>
         <div><dt>time elapsed</dt><dd>0.015s</dd></div>
-        <div><dt>ram usage</dt><dd>24004 KB</dd></div>
+        <div><dt>ram usage</dt><dd>24196 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -50,27 +50,30 @@
       <pre>    %2 = sim.fmt.literal &#34;\0A&#34;</pre>
       <pre>    %3 = sim.fmt.literal &#34; &#34;</pre>
       <pre>    %4 = llhd.constant_time &lt;0ns, 0d, 1e&gt;</pre>
+      <pre>    %c0_i3 = hw.constant 0 : i3</pre>
       <pre>    %c10_i8 = hw.constant 10 : i8</pre>
       <pre>    %5 = llhd.constant_time &lt;1000000fs, 0d, 0e&gt;</pre>
+      <pre>    %value2 = llhd.sig : &lt;i8&gt;</pre>
+      <pre>    %6 = llhd.prb %value2 : i8</pre>
       <pre>    %clk = llhd.sig : &lt;i1&gt;</pre>
-      <pre>    %6 = llhd.prb %clk : i1</pre>
-      <pre>    %7 = comb.extract %value2 from 4 : (i8) -&gt; i4</pre>
-      <pre>    %8 = comb.concat %7, %c-6_i4 : i4, i4</pre>
-      <pre>    %9 = seq.to_clock %6</pre>
-      <pre>    %value2 = seq.firreg %8 clock %9 : i8</pre>
-      <pre>    %10:2 = llhd.process -&gt; i1, i1 {</pre>
+      <pre>    %7 = llhd.prb %clk : i1</pre>
+      <pre>    %8 = llhd.sig.extract %value2 from %c0_i3 : &lt;i8&gt; -&gt; &lt;i4&gt;</pre>
+      <pre>    %9 = seq.to_clock %7</pre>
+      <pre>    %10 = seq.firreg %c-6_i4 clock %9 : i4</pre>
+      <pre>    llhd.drv %8, %10 after %4 : i4</pre>
+      <pre>    %11:2 = llhd.process -&gt; i1, i1 {</pre>
       <pre>      llhd.wait yield (%false, %false : i1, i1), delay %5, ^bb1</pre>
       <pre>    ^bb1:  // pred: ^bb0</pre>
       <pre>      llhd.wait yield (%false, %true : i1, i1), delay %5, ^bb2</pre>
       <pre>    ^bb2:  // pred: ^bb1</pre>
       <pre>      llhd.wait yield (%true, %true : i1, i1), delay %5, ^bb3</pre>
       <pre>    ^bb3:  // pred: ^bb2</pre>
-      <pre>      %11 = sim.fmt.bin %c10_i8 : i8</pre>
-      <pre>      %12 = sim.fmt.bin %value2 : i8</pre>
-      <pre>      %13 = sim.fmt.concat (%11, %3, %12, %2)</pre>
-      <pre>      sim.proc.print %13</pre>
-      <pre>      %14 = comb.icmp ceq %value2, %c10_i8 : i8</pre>
-      <pre>      cf.cond_br %14, ^bb4, ^bb5</pre>
+      <pre>      %12 = sim.fmt.bin %c10_i8 : i8</pre>
+      <pre>      %13 = sim.fmt.bin %6 : i8</pre>
+      <pre>      %14 = sim.fmt.concat (%12, %3, %13, %2)</pre>
+      <pre>      sim.proc.print %14</pre>
+      <pre>      %15 = comb.icmp ceq %6, %c10_i8 : i8</pre>
+      <pre>      cf.cond_br %15, ^bb4, ^bb5</pre>
       <pre>    ^bb4:  // pred: ^bb3</pre>
       <pre>      sim.proc.print %1</pre>
       <pre>      cf.br ^bb6</pre>
@@ -80,7 +83,7 @@
       <pre>    ^bb6:  // 2 preds: ^bb4, ^bb5</pre>
       <pre>      llhd.halt %false, %true : i1, i1</pre>
       <pre>    }</pre>
-      <pre>    llhd.drv %clk, %10#0 after %4 if %10#1 : i1</pre>
+      <pre>    llhd.drv %clk, %11#0 after %4 if %11#1 : i1</pre>
       <pre>    hw.output</pre>
       <pre>  }</pre>
       <pre>}</pre>

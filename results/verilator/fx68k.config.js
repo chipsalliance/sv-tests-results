@@ -1,1 +1,1 @@
-config_loader_data['verilator/fx68k'] = [["cores","fx68k",1,"logs/Verilator/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
+config_loader_data['verilator/fx68k'] = [["cores","fx68k",0,"logs/Verilator/generated/fx68k/fx68k.sv.log.html","third_party/cores/fx68k/fx68k.sv.html"]]
