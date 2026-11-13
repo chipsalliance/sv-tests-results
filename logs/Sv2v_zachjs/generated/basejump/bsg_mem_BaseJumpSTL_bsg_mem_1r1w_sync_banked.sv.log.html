@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-11-12 01:14:44</dd></div>
-        <div><dt>time elapsed</dt><dd>0.150s</dd></div>
-        <div><dt>ram usage</dt><dd>98152 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-11-13 01:15:09</dd></div>
+        <div><dt>time elapsed</dt><dd>0.116s</dd></div>
+        <div><dt>ram usage</dt><dd>100412 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -85,6 +85,7 @@
       <pre>	input r_v_i;</pre>
       <pre>	input [addr_width_lp - 1:0] r_addr_i;</pre>
       <pre>	output wire [width_p - 1:0] r_data_o;</pre>
+      <pre>	localparam interleave_lp = num_depth_bank_p == (1 &lt;&lt; depth_bank_idx_width_lp);</pre>
       <pre>	generate</pre>
       <pre>		if (num_depth_bank_p == 1) begin : db1</pre>
       <pre>			genvar _gv_i_1;</pre>
@@ -111,10 +112,10 @@
       <pre>			wire [num_depth_bank_p - 1:0] bank_r_v_li;</pre>
       <pre>			wire [num_depth_bank_p - 1:0] bank_w_v_li;</pre>
       <pre>			wire [(num_depth_bank_p * width_p) - 1:0] bank_r_data_lo;</pre>
-      <pre>			wire [depth_bank_idx_width_lp - 1:0] depth_bank_r_idx_li = r_addr_i[0+:depth_bank_idx_width_lp];</pre>
-      <pre>			wire [bank_addr_width_lp - 1:0] bank_r_addr_li = r_addr_i[depth_bank_idx_width_lp+:bank_addr_width_lp];</pre>
-      <pre>			wire [depth_bank_idx_width_lp - 1:0] depth_bank_w_idx_li = w_addr_i[0+:depth_bank_idx_width_lp];</pre>
-      <pre>			wire [bank_addr_width_lp - 1:0] bank_w_addr_li = w_addr_i[depth_bank_idx_width_lp+:bank_addr_width_lp];</pre>
+      <pre>			wire [depth_bank_idx_width_lp - 1:0] depth_bank_r_idx_li = (interleave_lp ? r_addr_i[0+:depth_bank_idx_width_lp] : r_addr_i[bank_addr_width_lp+:depth_bank_idx_width_lp]);</pre>
+      <pre>			wire [bank_addr_width_lp - 1:0] bank_r_addr_li = (interleave_lp ? r_addr_i[depth_bank_idx_width_lp+:bank_addr_width_lp] : r_addr_i[0+:bank_addr_width_lp]);</pre>
+      <pre>			wire [depth_bank_idx_width_lp - 1:0] depth_bank_w_idx_li = (interleave_lp ? w_addr_i[0+:depth_bank_idx_width_lp] : w_addr_i[bank_addr_width_lp+:depth_bank_idx_width_lp]);</pre>
+      <pre>			wire [bank_addr_width_lp - 1:0] bank_w_addr_li = (interleave_lp ? w_addr_i[depth_bank_idx_width_lp+:bank_addr_width_lp] : w_addr_i[0+:bank_addr_width_lp]);</pre>
       <pre>			bsg_decode_with_v #(.num_out_p(num_depth_bank_p)) demux_r_v(</pre>
       <pre>				.i(depth_bank_r_idx_li),</pre>
       <pre>				.v_i(r_v_i),</pre>
