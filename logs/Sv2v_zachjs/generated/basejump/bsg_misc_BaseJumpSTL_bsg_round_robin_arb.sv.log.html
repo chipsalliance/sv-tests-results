@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-11-19 01:15:35</dd></div>
-        <div><dt>time elapsed</dt><dd>3.650s</dd></div>
-        <div><dt>ram usage</dt><dd>684376 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-11-20 01:13:57</dd></div>
+        <div><dt>time elapsed</dt><dd>3.029s</dd></div>
+        <div><dt>ram usage</dt><dd>656736 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -85,8 +85,29 @@
       <pre>	wire [lg_inputs_p - 1:0] last;</pre>
       <pre>	reg [lg_inputs_p - 1:0] last_n;</pre>
       <pre>	reg [lg_inputs_p - 1:0] last_r;</pre>
-      <pre>	reg hold_on_sr;</pre>
+      <pre>	wire hold_on_sr;</pre>
       <pre>	wire reset_on_sr;</pre>
+      <pre>	function automatic signed [inputs_p - 1:0] sv2v_cast_CA857_signed;</pre>
+      <pre>		input reg signed [inputs_p - 1:0] inp;</pre>
+      <pre>		sv2v_cast_CA857_signed = inp;</pre>
+      <pre>	endfunction</pre>
+      <pre>	generate</pre>
+      <pre>		if (hold_on_sr_p) begin : hold_on_sr_gen</pre>
+      <pre>			wire [inputs_p - 1:0] last_one_hot;</pre>
+      <pre>			wire [inputs_p - 1:0] highest_priority;</pre>
+      <pre>			assign last_one_hot = sv2v_cast_CA857_signed(1) &lt;&lt; last_r;</pre>
+      <pre>			if (inputs_p == 1) begin : single_input</pre>
+      <pre>				assign highest_priority = last_one_hot;</pre>
+      <pre>			end</pre>
+      <pre>			else begin : multiple_inputs</pre>
+      <pre>				assign highest_priority = {last_one_hot[inputs_p - 2:0], last_one_hot[inputs_p - 1]};</pre>
+      <pre>			end</pre>
+      <pre>			assign hold_on_sr = v_o &amp;&amp; (reqs_i == highest_priority);</pre>
+      <pre>		end</pre>
+      <pre>		else begin : not_hold_on_sr_gen</pre>
+      <pre>			assign hold_on_sr = 1&#39;b0;</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	function automatic signed [lg_inputs_p - 1:0] sv2v_cast_A2820_signed;</pre>
       <pre>		input reg signed [lg_inputs_p - 1:0] inp;</pre>
       <pre>		sv2v_cast_A2820_signed = inp;</pre>
@@ -115,22 +136,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {grants_en_i};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						1&#39;b0: hold_on_sr = reqs_i == 1&#39;b1;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_1</pre>
       <pre>				assign reset_on_sr = reqs_i == 1&#39;b1;</pre>
       <pre>			end</pre>
@@ -173,22 +178,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {2 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						1&#39;b0: hold_on_sr = reqs_i == 2&#39;b01;</pre>
-      <pre>						default: hold_on_sr = reqs_i == 2&#39;b10;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_2</pre>
       <pre>				assign reset_on_sr = (reqs_i == 2&#39;b01) | (reqs_i == 2&#39;b10);</pre>
       <pre>			end</pre>
@@ -251,24 +240,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {3 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						2&#39;b00: hold_on_sr = reqs_i == 3&#39;b010;</pre>
-      <pre>						2&#39;b01: hold_on_sr = reqs_i == 3&#39;b001;</pre>
-      <pre>						2&#39;b10: hold_on_sr = reqs_i == 3&#39;b100;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_3</pre>
       <pre>				assign reset_on_sr = ((reqs_i == 3&#39;b010) | (reqs_i == 3&#39;b001)) | (reqs_i == 3&#39;b100);</pre>
       <pre>			end</pre>
@@ -359,24 +330,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {4 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						2&#39;b00: hold_on_sr = reqs_i == 4&#39;b0100;</pre>
-      <pre>						2&#39;b01: hold_on_sr = reqs_i == 4&#39;b0010;</pre>
-      <pre>						2&#39;b10: hold_on_sr = reqs_i == 4&#39;b0001;</pre>
-      <pre>						default: hold_on_sr = reqs_i == 4&#39;b1000;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_4</pre>
       <pre>				assign reset_on_sr = (((reqs_i == 4&#39;b0100) | (reqs_i == 4&#39;b0010)) | (reqs_i == 4&#39;b0001)) | (reqs_i == 4&#39;b1000);</pre>
       <pre>			end</pre>
@@ -503,26 +456,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {5 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						3&#39;b000: hold_on_sr = reqs_i == 5&#39;b01000;</pre>
-      <pre>						3&#39;b001: hold_on_sr = reqs_i == 5&#39;b00100;</pre>
-      <pre>						3&#39;b010: hold_on_sr = reqs_i == 5&#39;b00010;</pre>
-      <pre>						3&#39;b011: hold_on_sr = reqs_i == 5&#39;b00001;</pre>
-      <pre>						3&#39;b100: hold_on_sr = reqs_i == 5&#39;b10000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_5</pre>
       <pre>				assign reset_on_sr = ((((reqs_i == 5&#39;b01000) | (reqs_i == 5&#39;b00100)) | (reqs_i == 5&#39;b00010)) | (reqs_i == 5&#39;b00001)) | (reqs_i == 5&#39;b10000);</pre>
       <pre>			end</pre>
@@ -693,27 +626,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {6 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						3&#39;b000: hold_on_sr = reqs_i == 6&#39;b010000;</pre>
-      <pre>						3&#39;b001: hold_on_sr = reqs_i == 6&#39;b001000;</pre>
-      <pre>						3&#39;b010: hold_on_sr = reqs_i == 6&#39;b000100;</pre>
-      <pre>						3&#39;b011: hold_on_sr = reqs_i == 6&#39;b000010;</pre>
-      <pre>						3&#39;b100: hold_on_sr = reqs_i == 6&#39;b000001;</pre>
-      <pre>						3&#39;b101: hold_on_sr = reqs_i == 6&#39;b100000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_6</pre>
       <pre>				assign reset_on_sr = (((((reqs_i == 6&#39;b010000) | (reqs_i == 6&#39;b001000)) | (reqs_i == 6&#39;b000100)) | (reqs_i == 6&#39;b000010)) | (reqs_i == 6&#39;b000001)) | (reqs_i == 6&#39;b100000);</pre>
       <pre>			end</pre>
@@ -936,28 +848,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {7 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						3&#39;b000: hold_on_sr = reqs_i == 7&#39;b0100000;</pre>
-      <pre>						3&#39;b001: hold_on_sr = reqs_i == 7&#39;b0010000;</pre>
-      <pre>						3&#39;b010: hold_on_sr = reqs_i == 7&#39;b0001000;</pre>
-      <pre>						3&#39;b011: hold_on_sr = reqs_i == 7&#39;b0000100;</pre>
-      <pre>						3&#39;b100: hold_on_sr = reqs_i == 7&#39;b0000010;</pre>
-      <pre>						3&#39;b101: hold_on_sr = reqs_i == 7&#39;b0000001;</pre>
-      <pre>						3&#39;b110: hold_on_sr = reqs_i == 7&#39;b1000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_7</pre>
       <pre>				assign reset_on_sr = ((((((reqs_i == 7&#39;b0100000) | (reqs_i == 7&#39;b0010000)) | (reqs_i == 7&#39;b0001000)) | (reqs_i == 7&#39;b0000100)) | (reqs_i == 7&#39;b0000010)) | (reqs_i == 7&#39;b0000001)) | (reqs_i == 7&#39;b1000000);</pre>
       <pre>			end</pre>
@@ -1240,28 +1130,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {8 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						3&#39;b000: hold_on_sr = reqs_i == 8&#39;b01000000;</pre>
-      <pre>						3&#39;b001: hold_on_sr = reqs_i == 8&#39;b00100000;</pre>
-      <pre>						3&#39;b010: hold_on_sr = reqs_i == 8&#39;b00010000;</pre>
-      <pre>						3&#39;b011: hold_on_sr = reqs_i == 8&#39;b00001000;</pre>
-      <pre>						3&#39;b100: hold_on_sr = reqs_i == 8&#39;b00000100;</pre>
-      <pre>						3&#39;b101: hold_on_sr = reqs_i == 8&#39;b00000010;</pre>
-      <pre>						3&#39;b110: hold_on_sr = reqs_i == 8&#39;b00000001;</pre>
-      <pre>						default: hold_on_sr = reqs_i == 8&#39;b10000000;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_8</pre>
       <pre>				assign reset_on_sr = (((((((reqs_i == 8&#39;b01000000) | (reqs_i == 8&#39;b00100000)) | (reqs_i == 8&#39;b00010000)) | (reqs_i == 8&#39;b00001000)) | (reqs_i == 8&#39;b00000100)) | (reqs_i == 8&#39;b00000010)) | (reqs_i == 8&#39;b00000001)) | (reqs_i == 8&#39;b10000000);</pre>
       <pre>			end</pre>
@@ -1612,30 +1480,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {9 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 9&#39;b010000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 9&#39;b001000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 9&#39;b000100000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 9&#39;b000010000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 9&#39;b000001000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 9&#39;b000000100;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 9&#39;b000000010;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 9&#39;b000000001;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 9&#39;b100000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_9</pre>
       <pre>				assign reset_on_sr = ((((((((reqs_i == 9&#39;b010000000) | (reqs_i == 9&#39;b001000000)) | (reqs_i == 9&#39;b000100000)) | (reqs_i == 9&#39;b000010000)) | (reqs_i == 9&#39;b000001000)) | (reqs_i == 9&#39;b000000100)) | (reqs_i == 9&#39;b000000010)) | (reqs_i == 9&#39;b000000001)) | (reqs_i == 9&#39;b100000000);</pre>
       <pre>			end</pre>
@@ -2062,31 +1906,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {10 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 10&#39;b0100000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 10&#39;b0010000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 10&#39;b0001000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 10&#39;b0000100000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 10&#39;b0000010000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 10&#39;b0000001000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 10&#39;b0000000100;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 10&#39;b0000000010;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 10&#39;b0000000001;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 10&#39;b1000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_10</pre>
       <pre>				assign reset_on_sr = (((((((((reqs_i == 10&#39;b0100000000) | (reqs_i == 10&#39;b0010000000)) | (reqs_i == 10&#39;b0001000000)) | (reqs_i == 10&#39;b0000100000)) | (reqs_i == 10&#39;b0000010000)) | (reqs_i == 10&#39;b0000001000)) | (reqs_i == 10&#39;b0000000100)) | (reqs_i == 10&#39;b0000000010)) | (reqs_i == 10&#39;b0000000001)) | (reqs_i == 10&#39;b1000000000);</pre>
       <pre>			end</pre>
@@ -2597,32 +2416,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {11 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 11&#39;b01000000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 11&#39;b00100000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 11&#39;b00010000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 11&#39;b00001000000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 11&#39;b00000100000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 11&#39;b00000010000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 11&#39;b00000001000;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 11&#39;b00000000100;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 11&#39;b00000000010;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 11&#39;b00000000001;</pre>
-      <pre>						4&#39;b1010: hold_on_sr = reqs_i == 11&#39;b10000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_11</pre>
       <pre>				assign reset_on_sr = ((((((((((reqs_i == 11&#39;b01000000000) | (reqs_i == 11&#39;b00100000000)) | (reqs_i == 11&#39;b00010000000)) | (reqs_i == 11&#39;b00001000000)) | (reqs_i == 11&#39;b00000100000)) | (reqs_i == 11&#39;b00000010000)) | (reqs_i == 11&#39;b00000001000)) | (reqs_i == 11&#39;b00000000100)) | (reqs_i == 11&#39;b00000000010)) | (reqs_i == 11&#39;b00000000001)) | (reqs_i == 11&#39;b10000000000);</pre>
       <pre>			end</pre>
@@ -3225,33 +3018,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {12 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 12&#39;b010000000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 12&#39;b001000000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 12&#39;b000100000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 12&#39;b000010000000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 12&#39;b000001000000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 12&#39;b000000100000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 12&#39;b000000010000;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 12&#39;b000000001000;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 12&#39;b000000000100;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 12&#39;b000000000010;</pre>
-      <pre>						4&#39;b1010: hold_on_sr = reqs_i == 12&#39;b000000000001;</pre>
-      <pre>						4&#39;b1011: hold_on_sr = reqs_i == 12&#39;b100000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_12</pre>
       <pre>				assign reset_on_sr = (((((((((((reqs_i == 12&#39;b010000000000) | (reqs_i == 12&#39;b001000000000)) | (reqs_i == 12&#39;b000100000000)) | (reqs_i == 12&#39;b000010000000)) | (reqs_i == 12&#39;b000001000000)) | (reqs_i == 12&#39;b000000100000)) | (reqs_i == 12&#39;b000000010000)) | (reqs_i == 12&#39;b000000001000)) | (reqs_i == 12&#39;b000000000100)) | (reqs_i == 12&#39;b000000000010)) | (reqs_i == 12&#39;b000000000001)) | (reqs_i == 12&#39;b100000000000);</pre>
       <pre>			end</pre>
@@ -3954,34 +3720,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {13 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 13&#39;b0100000000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 13&#39;b0010000000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 13&#39;b0001000000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 13&#39;b0000100000000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 13&#39;b0000010000000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 13&#39;b0000001000000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 13&#39;b0000000100000;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 13&#39;b0000000010000;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 13&#39;b0000000001000;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 13&#39;b0000000000100;</pre>
-      <pre>						4&#39;b1010: hold_on_sr = reqs_i == 13&#39;b0000000000010;</pre>
-      <pre>						4&#39;b1011: hold_on_sr = reqs_i == 13&#39;b0000000000001;</pre>
-      <pre>						4&#39;b1100: hold_on_sr = reqs_i == 13&#39;b1000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_13</pre>
       <pre>				assign reset_on_sr = ((((((((((((reqs_i == 13&#39;b0100000000000) | (reqs_i == 13&#39;b0010000000000)) | (reqs_i == 13&#39;b0001000000000)) | (reqs_i == 13&#39;b0000100000000)) | (reqs_i == 13&#39;b0000010000000)) | (reqs_i == 13&#39;b0000001000000)) | (reqs_i == 13&#39;b0000000100000)) | (reqs_i == 13&#39;b0000000010000)) | (reqs_i == 13&#39;b0000000001000)) | (reqs_i == 13&#39;b0000000000100)) | (reqs_i == 13&#39;b0000000000010)) | (reqs_i == 13&#39;b0000000000001)) | (reqs_i == 13&#39;b1000000000000);</pre>
       <pre>			end</pre>
@@ -4792,35 +4530,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {14 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 14&#39;b01000000000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 14&#39;b00100000000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 14&#39;b00010000000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 14&#39;b00001000000000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 14&#39;b00000100000000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 14&#39;b00000010000000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 14&#39;b00000001000000;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 14&#39;b00000000100000;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 14&#39;b00000000010000;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 14&#39;b00000000001000;</pre>
-      <pre>						4&#39;b1010: hold_on_sr = reqs_i == 14&#39;b00000000000100;</pre>
-      <pre>						4&#39;b1011: hold_on_sr = reqs_i == 14&#39;b00000000000010;</pre>
-      <pre>						4&#39;b1100: hold_on_sr = reqs_i == 14&#39;b00000000000001;</pre>
-      <pre>						4&#39;b1101: hold_on_sr = reqs_i == 14&#39;b10000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_14</pre>
       <pre>				assign reset_on_sr = (((((((((((((reqs_i == 14&#39;b01000000000000) | (reqs_i == 14&#39;b00100000000000)) | (reqs_i == 14&#39;b00010000000000)) | (reqs_i == 14&#39;b00001000000000)) | (reqs_i == 14&#39;b00000100000000)) | (reqs_i == 14&#39;b00000010000000)) | (reqs_i == 14&#39;b00000001000000)) | (reqs_i == 14&#39;b00000000100000)) | (reqs_i == 14&#39;b00000000010000)) | (reqs_i == 14&#39;b00000000001000)) | (reqs_i == 14&#39;b00000000000100)) | (reqs_i == 14&#39;b00000000000010)) | (reqs_i == 14&#39;b00000000000001)) | (reqs_i == 14&#39;b10000000000000);</pre>
       <pre>			end</pre>
@@ -5747,36 +5456,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {15 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 15&#39;b010000000000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 15&#39;b001000000000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 15&#39;b000100000000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 15&#39;b000010000000000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 15&#39;b000001000000000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 15&#39;b000000100000000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 15&#39;b000000010000000;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 15&#39;b000000001000000;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 15&#39;b000000000100000;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 15&#39;b000000000010000;</pre>
-      <pre>						4&#39;b1010: hold_on_sr = reqs_i == 15&#39;b000000000001000;</pre>
-      <pre>						4&#39;b1011: hold_on_sr = reqs_i == 15&#39;b000000000000100;</pre>
-      <pre>						4&#39;b1100: hold_on_sr = reqs_i == 15&#39;b000000000000010;</pre>
-      <pre>						4&#39;b1101: hold_on_sr = reqs_i == 15&#39;b000000000000001;</pre>
-      <pre>						4&#39;b1110: hold_on_sr = reqs_i == 15&#39;b100000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_15</pre>
       <pre>				assign reset_on_sr = ((((((((((((((reqs_i == 15&#39;b010000000000000) | (reqs_i == 15&#39;b001000000000000)) | (reqs_i == 15&#39;b000100000000000)) | (reqs_i == 15&#39;b000010000000000)) | (reqs_i == 15&#39;b000001000000000)) | (reqs_i == 15&#39;b000000100000000)) | (reqs_i == 15&#39;b000000010000000)) | (reqs_i == 15&#39;b000000001000000)) | (reqs_i == 15&#39;b000000000100000)) | (reqs_i == 15&#39;b000000000010000)) | (reqs_i == 15&#39;b000000000001000)) | (reqs_i == 15&#39;b000000000000100)) | (reqs_i == 15&#39;b000000000000010)) | (reqs_i == 15&#39;b000000000000001)) | (reqs_i == 15&#39;b100000000000000);</pre>
       <pre>			end</pre>
@@ -6827,36 +6506,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {16 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						4&#39;b0000: hold_on_sr = reqs_i == 16&#39;b0100000000000000;</pre>
-      <pre>						4&#39;b0001: hold_on_sr = reqs_i == 16&#39;b0010000000000000;</pre>
-      <pre>						4&#39;b0010: hold_on_sr = reqs_i == 16&#39;b0001000000000000;</pre>
-      <pre>						4&#39;b0011: hold_on_sr = reqs_i == 16&#39;b0000100000000000;</pre>
-      <pre>						4&#39;b0100: hold_on_sr = reqs_i == 16&#39;b0000010000000000;</pre>
-      <pre>						4&#39;b0101: hold_on_sr = reqs_i == 16&#39;b0000001000000000;</pre>
-      <pre>						4&#39;b0110: hold_on_sr = reqs_i == 16&#39;b0000000100000000;</pre>
-      <pre>						4&#39;b0111: hold_on_sr = reqs_i == 16&#39;b0000000010000000;</pre>
-      <pre>						4&#39;b1000: hold_on_sr = reqs_i == 16&#39;b0000000001000000;</pre>
-      <pre>						4&#39;b1001: hold_on_sr = reqs_i == 16&#39;b0000000000100000;</pre>
-      <pre>						4&#39;b1010: hold_on_sr = reqs_i == 16&#39;b0000000000010000;</pre>
-      <pre>						4&#39;b1011: hold_on_sr = reqs_i == 16&#39;b0000000000001000;</pre>
-      <pre>						4&#39;b1100: hold_on_sr = reqs_i == 16&#39;b0000000000000100;</pre>
-      <pre>						4&#39;b1101: hold_on_sr = reqs_i == 16&#39;b0000000000000010;</pre>
-      <pre>						4&#39;b1110: hold_on_sr = reqs_i == 16&#39;b0000000000000001;</pre>
-      <pre>						default: hold_on_sr = reqs_i == 16&#39;b1000000000000000;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_16</pre>
       <pre>				assign reset_on_sr = (((((((((((((((reqs_i == 16&#39;b0100000000000000) | (reqs_i == 16&#39;b0010000000000000)) | (reqs_i == 16&#39;b0001000000000000)) | (reqs_i == 16&#39;b0000100000000000)) | (reqs_i == 16&#39;b0000010000000000)) | (reqs_i == 16&#39;b0000001000000000)) | (reqs_i == 16&#39;b0000000100000000)) | (reqs_i == 16&#39;b0000000010000000)) | (reqs_i == 16&#39;b0000000001000000)) | (reqs_i == 16&#39;b0000000000100000)) | (reqs_i == 16&#39;b0000000000010000)) | (reqs_i == 16&#39;b0000000000001000)) | (reqs_i == 16&#39;b0000000000000100)) | (reqs_i == 16&#39;b0000000000000010)) | (reqs_i == 16&#39;b0000000000000001)) | (reqs_i == 16&#39;b1000000000000000);</pre>
       <pre>			end</pre>
@@ -8039,38 +7688,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {17 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 17&#39;b01000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 17&#39;b00100000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 17&#39;b00010000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 17&#39;b00001000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 17&#39;b00000100000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 17&#39;b00000010000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 17&#39;b00000001000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 17&#39;b00000000100000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 17&#39;b00000000010000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 17&#39;b00000000001000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 17&#39;b00000000000100000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 17&#39;b00000000000010000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 17&#39;b00000000000001000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 17&#39;b00000000000000100;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 17&#39;b00000000000000010;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 17&#39;b00000000000000001;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 17&#39;b10000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_17</pre>
       <pre>				assign reset_on_sr = ((((((((((((((((reqs_i == 17&#39;b01000000000000000) | (reqs_i == 17&#39;b00100000000000000)) | (reqs_i == 17&#39;b00010000000000000)) | (reqs_i == 17&#39;b00001000000000000)) | (reqs_i == 17&#39;b00000100000000000)) | (reqs_i == 17&#39;b00000010000000000)) | (reqs_i == 17&#39;b00000001000000000)) | (reqs_i == 17&#39;b00000000100000000)) | (reqs_i == 17&#39;b00000000010000000)) | (reqs_i == 17&#39;b00000000001000000)) | (reqs_i == 17&#39;b00000000000100000)) | (reqs_i == 17&#39;b00000000000010000)) | (reqs_i == 17&#39;b00000000000001000)) | (reqs_i == 17&#39;b00000000000000100)) | (reqs_i == 17&#39;b00000000000000010)) | (reqs_i == 17&#39;b00000000000000001)) | (reqs_i == 17&#39;b10000000000000000);</pre>
       <pre>			end</pre>
@@ -9393,39 +9010,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {18 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 18&#39;b010000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 18&#39;b001000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 18&#39;b000100000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 18&#39;b000010000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 18&#39;b000001000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 18&#39;b000000100000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 18&#39;b000000010000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 18&#39;b000000001000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 18&#39;b000000000100000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 18&#39;b000000000010000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 18&#39;b000000000001000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 18&#39;b000000000000100000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 18&#39;b000000000000010000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 18&#39;b000000000000001000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 18&#39;b000000000000000100;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 18&#39;b000000000000000010;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 18&#39;b000000000000000001;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 18&#39;b100000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_18</pre>
       <pre>				assign reset_on_sr = (((((((((((((((((reqs_i == 18&#39;b010000000000000000) | (reqs_i == 18&#39;b001000000000000000)) | (reqs_i == 18&#39;b000100000000000000)) | (reqs_i == 18&#39;b000010000000000000)) | (reqs_i == 18&#39;b000001000000000000)) | (reqs_i == 18&#39;b000000100000000000)) | (reqs_i == 18&#39;b000000010000000000)) | (reqs_i == 18&#39;b000000001000000000)) | (reqs_i == 18&#39;b000000000100000000)) | (reqs_i == 18&#39;b000000000010000000)) | (reqs_i == 18&#39;b000000000001000000)) | (reqs_i == 18&#39;b000000000000100000)) | (reqs_i == 18&#39;b000000000000010000)) | (reqs_i == 18&#39;b000000000000001000)) | (reqs_i == 18&#39;b000000000000000100)) | (reqs_i == 18&#39;b000000000000000010)) | (reqs_i == 18&#39;b000000000000000001)) | (reqs_i == 18&#39;b100000000000000000);</pre>
       <pre>			end</pre>
@@ -10896,40 +10480,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {19 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 19&#39;b0100000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 19&#39;b0010000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 19&#39;b0001000000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 19&#39;b0000100000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 19&#39;b0000010000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 19&#39;b0000001000000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 19&#39;b0000000100000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 19&#39;b0000000010000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 19&#39;b0000000001000000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 19&#39;b0000000000100000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 19&#39;b0000000000010000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 19&#39;b0000000000001000000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 19&#39;b0000000000000100000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 19&#39;b0000000000000010000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 19&#39;b0000000000000001000;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 19&#39;b0000000000000000100;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 19&#39;b0000000000000000010;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 19&#39;b0000000000000000001;</pre>
-      <pre>						5&#39;b10010: hold_on_sr = reqs_i == 19&#39;b1000000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_19</pre>
       <pre>				assign reset_on_sr = ((((((((((((((((((reqs_i == 19&#39;b0100000000000000000) | (reqs_i == 19&#39;b0010000000000000000)) | (reqs_i == 19&#39;b0001000000000000000)) | (reqs_i == 19&#39;b0000100000000000000)) | (reqs_i == 19&#39;b0000010000000000000)) | (reqs_i == 19&#39;b0000001000000000000)) | (reqs_i == 19&#39;b0000000100000000000)) | (reqs_i == 19&#39;b0000000010000000000)) | (reqs_i == 19&#39;b0000000001000000000)) | (reqs_i == 19&#39;b0000000000100000000)) | (reqs_i == 19&#39;b0000000000010000000)) | (reqs_i == 19&#39;b0000000000001000000)) | (reqs_i == 19&#39;b0000000000000100000)) | (reqs_i == 19&#39;b0000000000000010000)) | (reqs_i == 19&#39;b0000000000000001000)) | (reqs_i == 19&#39;b0000000000000000100)) | (reqs_i == 19&#39;b0000000000000000010)) | (reqs_i == 19&#39;b0000000000000000001)) | (reqs_i == 19&#39;b1000000000000000000);</pre>
       <pre>			end</pre>
@@ -12556,41 +12106,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {20 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 20&#39;b01000000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 20&#39;b00100000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 20&#39;b00010000000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 20&#39;b00001000000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 20&#39;b00000100000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 20&#39;b00000010000000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 20&#39;b00000001000000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 20&#39;b00000000100000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 20&#39;b00000000010000000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 20&#39;b00000000001000000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 20&#39;b00000000000100000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 20&#39;b00000000000010000000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 20&#39;b00000000000001000000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 20&#39;b00000000000000100000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 20&#39;b00000000000000010000;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 20&#39;b00000000000000001000;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 20&#39;b00000000000000000100;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 20&#39;b00000000000000000010;</pre>
-      <pre>						5&#39;b10010: hold_on_sr = reqs_i == 20&#39;b00000000000000000001;</pre>
-      <pre>						5&#39;b10011: hold_on_sr = reqs_i == 20&#39;b10000000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_20</pre>
       <pre>				assign reset_on_sr = (((((((((((((((((((reqs_i == 20&#39;b01000000000000000000) | (reqs_i == 20&#39;b00100000000000000000)) | (reqs_i == 20&#39;b00010000000000000000)) | (reqs_i == 20&#39;b00001000000000000000)) | (reqs_i == 20&#39;b00000100000000000000)) | (reqs_i == 20&#39;b00000010000000000000)) | (reqs_i == 20&#39;b00000001000000000000)) | (reqs_i == 20&#39;b00000000100000000000)) | (reqs_i == 20&#39;b00000000010000000000)) | (reqs_i == 20&#39;b00000000001000000000)) | (reqs_i == 20&#39;b00000000000100000000)) | (reqs_i == 20&#39;b00000000000010000000)) | (reqs_i == 20&#39;b00000000000001000000)) | (reqs_i == 20&#39;b00000000000000100000)) | (reqs_i == 20&#39;b00000000000000010000)) | (reqs_i == 20&#39;b00000000000000001000)) | (reqs_i == 20&#39;b00000000000000000100)) | (reqs_i == 20&#39;b00000000000000000010)) | (reqs_i == 20&#39;b00000000000000000001)) | (reqs_i == 20&#39;b10000000000000000000);</pre>
       <pre>			end</pre>
@@ -14381,42 +13896,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {21 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 21&#39;b010000000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 21&#39;b001000000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 21&#39;b000100000000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 21&#39;b000010000000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 21&#39;b000001000000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 21&#39;b000000100000000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 21&#39;b000000010000000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 21&#39;b000000001000000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 21&#39;b000000000100000000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 21&#39;b000000000010000000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 21&#39;b000000000001000000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 21&#39;b000000000000100000000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 21&#39;b000000000000010000000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 21&#39;b000000000000001000000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 21&#39;b000000000000000100000;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 21&#39;b000000000000000010000;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 21&#39;b000000000000000001000;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 21&#39;b000000000000000000100;</pre>
-      <pre>						5&#39;b10010: hold_on_sr = reqs_i == 21&#39;b000000000000000000010;</pre>
-      <pre>						5&#39;b10011: hold_on_sr = reqs_i == 21&#39;b000000000000000000001;</pre>
-      <pre>						5&#39;b10100: hold_on_sr = reqs_i == 21&#39;b100000000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_21</pre>
       <pre>				assign reset_on_sr = ((((((((((((((((((((reqs_i == 21&#39;b010000000000000000000) | (reqs_i == 21&#39;b001000000000000000000)) | (reqs_i == 21&#39;b000100000000000000000)) | (reqs_i == 21&#39;b000010000000000000000)) | (reqs_i == 21&#39;b000001000000000000000)) | (reqs_i == 21&#39;b000000100000000000000)) | (reqs_i == 21&#39;b000000010000000000000)) | (reqs_i == 21&#39;b000000001000000000000)) | (reqs_i == 21&#39;b000000000100000000000)) | (reqs_i == 21&#39;b000000000010000000000)) | (reqs_i == 21&#39;b000000000001000000000)) | (reqs_i == 21&#39;b000000000000100000000)) | (reqs_i == 21&#39;b000000000000010000000)) | (reqs_i == 21&#39;b000000000000001000000)) | (reqs_i == 21&#39;b000000000000000100000)) | (reqs_i == 21&#39;b000000000000000010000)) | (reqs_i == 21&#39;b000000000000000001000)) | (reqs_i == 21&#39;b000000000000000000100)) | (reqs_i == 21&#39;b000000000000000000010)) | (reqs_i == 21&#39;b000000000000000000001)) | (reqs_i == 21&#39;b100000000000000000000);</pre>
       <pre>			end</pre>
@@ -16379,43 +15858,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {22 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 22&#39;b0100000000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 22&#39;b0010000000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 22&#39;b0001000000000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 22&#39;b0000100000000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 22&#39;b0000010000000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 22&#39;b0000001000000000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 22&#39;b0000000100000000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 22&#39;b0000000010000000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 22&#39;b0000000001000000000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 22&#39;b0000000000100000000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 22&#39;b0000000000010000000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 22&#39;b0000000000001000000000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 22&#39;b0000000000000100000000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 22&#39;b0000000000000010000000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 22&#39;b0000000000000001000000;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 22&#39;b0000000000000000100000;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 22&#39;b0000000000000000010000;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 22&#39;b0000000000000000001000;</pre>
-      <pre>						5&#39;b10010: hold_on_sr = reqs_i == 22&#39;b0000000000000000000100;</pre>
-      <pre>						5&#39;b10011: hold_on_sr = reqs_i == 22&#39;b0000000000000000000010;</pre>
-      <pre>						5&#39;b10100: hold_on_sr = reqs_i == 22&#39;b0000000000000000000001;</pre>
-      <pre>						5&#39;b10101: hold_on_sr = reqs_i == 22&#39;b1000000000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_22</pre>
       <pre>				assign reset_on_sr = (((((((((((((((((((((reqs_i == 22&#39;b0100000000000000000000) | (reqs_i == 22&#39;b0010000000000000000000)) | (reqs_i == 22&#39;b0001000000000000000000)) | (reqs_i == 22&#39;b0000100000000000000000)) | (reqs_i == 22&#39;b0000010000000000000000)) | (reqs_i == 22&#39;b0000001000000000000000)) | (reqs_i == 22&#39;b0000000100000000000000)) | (reqs_i == 22&#39;b0000000010000000000000)) | (reqs_i == 22&#39;b0000000001000000000000)) | (reqs_i == 22&#39;b0000000000100000000000)) | (reqs_i == 22&#39;b0000000000010000000000)) | (reqs_i == 22&#39;b0000000000001000000000)) | (reqs_i == 22&#39;b0000000000000100000000)) | (reqs_i == 22&#39;b0000000000000010000000)) | (reqs_i == 22&#39;b0000000000000001000000)) | (reqs_i == 22&#39;b0000000000000000100000)) | (reqs_i == 22&#39;b0000000000000000010000)) | (reqs_i == 22&#39;b0000000000000000001000)) | (reqs_i == 22&#39;b0000000000000000000100)) | (reqs_i == 22&#39;b0000000000000000000010)) | (reqs_i == 22&#39;b0000000000000000000001)) | (reqs_i == 22&#39;b1000000000000000000000);</pre>
       <pre>			end</pre>
@@ -18558,44 +18000,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {23 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 23&#39;b01000000000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 23&#39;b00100000000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 23&#39;b00010000000000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 23&#39;b00001000000000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 23&#39;b00000100000000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 23&#39;b00000010000000000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 23&#39;b00000001000000000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 23&#39;b00000000100000000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 23&#39;b00000000010000000000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 23&#39;b00000000001000000000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 23&#39;b00000000000100000000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 23&#39;b00000000000010000000000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 23&#39;b00000000000001000000000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 23&#39;b00000000000000100000000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 23&#39;b00000000000000010000000;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 23&#39;b00000000000000001000000;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 23&#39;b00000000000000000100000;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 23&#39;b00000000000000000010000;</pre>
-      <pre>						5&#39;b10010: hold_on_sr = reqs_i == 23&#39;b00000000000000000001000;</pre>
-      <pre>						5&#39;b10011: hold_on_sr = reqs_i == 23&#39;b00000000000000000000100;</pre>
-      <pre>						5&#39;b10100: hold_on_sr = reqs_i == 23&#39;b00000000000000000000010;</pre>
-      <pre>						5&#39;b10101: hold_on_sr = reqs_i == 23&#39;b00000000000000000000001;</pre>
-      <pre>						5&#39;b10110: hold_on_sr = reqs_i == 23&#39;b10000000000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_23</pre>
       <pre>				assign reset_on_sr = ((((((((((((((((((((((reqs_i == 23&#39;b01000000000000000000000) | (reqs_i == 23&#39;b00100000000000000000000)) | (reqs_i == 23&#39;b00010000000000000000000)) | (reqs_i == 23&#39;b00001000000000000000000)) | (reqs_i == 23&#39;b00000100000000000000000)) | (reqs_i == 23&#39;b00000010000000000000000)) | (reqs_i == 23&#39;b00000001000000000000000)) | (reqs_i == 23&#39;b00000000100000000000000)) | (reqs_i == 23&#39;b00000000010000000000000)) | (reqs_i == 23&#39;b00000000001000000000000)) | (reqs_i == 23&#39;b00000000000100000000000)) | (reqs_i == 23&#39;b00000000000010000000000)) | (reqs_i == 23&#39;b00000000000001000000000)) | (reqs_i == 23&#39;b00000000000000100000000)) | (reqs_i == 23&#39;b00000000000000010000000)) | (reqs_i == 23&#39;b00000000000000001000000)) | (reqs_i == 23&#39;b00000000000000000100000)) | (reqs_i == 23&#39;b00000000000000000010000)) | (reqs_i == 23&#39;b00000000000000000001000)) | (reqs_i == 23&#39;b00000000000000000000100)) | (reqs_i == 23&#39;b00000000000000000000010)) | (reqs_i == 23&#39;b00000000000000000000001)) | (reqs_i == 23&#39;b10000000000000000000000);</pre>
       <pre>			end</pre>
@@ -20926,45 +20330,6 @@
       <pre>			end</pre>
       <pre>			assign sel_one_hot_o = sel_one_hot_n;</pre>
       <pre>			assign grants_o = sel_one_hot_n &amp; {24 {grants_en_i}};</pre>
-      <pre>			if (hold_on_sr_p) begin : genblk1</pre>
-      <pre>				always @(*) begin</pre>
-      <pre>					if (_sv2v_0)</pre>
-      <pre>						;</pre>
-      <pre>					(* full_case, parallel_case *)</pre>
-      <pre>					casez (last_r)</pre>
-      <pre>						5&#39;b00000: hold_on_sr = reqs_i == 24&#39;b010000000000000000000000;</pre>
-      <pre>						5&#39;b00001: hold_on_sr = reqs_i == 24&#39;b001000000000000000000000;</pre>
-      <pre>						5&#39;b00010: hold_on_sr = reqs_i == 24&#39;b000100000000000000000000;</pre>
-      <pre>						5&#39;b00011: hold_on_sr = reqs_i == 24&#39;b000010000000000000000000;</pre>
-      <pre>						5&#39;b00100: hold_on_sr = reqs_i == 24&#39;b000001000000000000000000;</pre>
-      <pre>						5&#39;b00101: hold_on_sr = reqs_i == 24&#39;b000000100000000000000000;</pre>
-      <pre>						5&#39;b00110: hold_on_sr = reqs_i == 24&#39;b000000010000000000000000;</pre>
-      <pre>						5&#39;b00111: hold_on_sr = reqs_i == 24&#39;b000000001000000000000000;</pre>
-      <pre>						5&#39;b01000: hold_on_sr = reqs_i == 24&#39;b000000000100000000000000;</pre>
-      <pre>						5&#39;b01001: hold_on_sr = reqs_i == 24&#39;b000000000010000000000000;</pre>
-      <pre>						5&#39;b01010: hold_on_sr = reqs_i == 24&#39;b000000000001000000000000;</pre>
-      <pre>						5&#39;b01011: hold_on_sr = reqs_i == 24&#39;b000000000000100000000000;</pre>
-      <pre>						5&#39;b01100: hold_on_sr = reqs_i == 24&#39;b000000000000010000000000;</pre>
-      <pre>						5&#39;b01101: hold_on_sr = reqs_i == 24&#39;b000000000000001000000000;</pre>
-      <pre>						5&#39;b01110: hold_on_sr = reqs_i == 24&#39;b000000000000000100000000;</pre>
-      <pre>						5&#39;b01111: hold_on_sr = reqs_i == 24&#39;b000000000000000010000000;</pre>
-      <pre>						5&#39;b10000: hold_on_sr = reqs_i == 24&#39;b000000000000000001000000;</pre>
-      <pre>						5&#39;b10001: hold_on_sr = reqs_i == 24&#39;b000000000000000000100000;</pre>
-      <pre>						5&#39;b10010: hold_on_sr = reqs_i == 24&#39;b000000000000000000010000;</pre>
-      <pre>						5&#39;b10011: hold_on_sr = reqs_i == 24&#39;b000000000000000000001000;</pre>
-      <pre>						5&#39;b10100: hold_on_sr = reqs_i == 24&#39;b000000000000000000000100;</pre>
-      <pre>						5&#39;b10101: hold_on_sr = reqs_i == 24&#39;b000000000000000000000010;</pre>
-      <pre>						5&#39;b10110: hold_on_sr = reqs_i == 24&#39;b000000000000000000000001;</pre>
-      <pre>						5&#39;b10111: hold_on_sr = reqs_i == 24&#39;b100000000000000000000000;</pre>
-      <pre>						default: hold_on_sr = 1&#39;b0;</pre>
-      <pre>					endcase</pre>
-      <pre>				end</pre>
-      <pre>			end</pre>
-      <pre>			else begin : not_hold_on_sr_p</pre>
-      <pre>				wire [1:1] sv2v_tmp_137B2;</pre>
-      <pre>				assign sv2v_tmp_137B2 = 1&#39;sb0;</pre>
-      <pre>				always @(*) hold_on_sr = sv2v_tmp_137B2;</pre>
-      <pre>			end</pre>
       <pre>			if (reset_on_sr_p) begin : reset_on_24</pre>
       <pre>				assign reset_on_sr = (((((((((((((((((((((((reqs_i == 24&#39;b010000000000000000000000) | (reqs_i == 24&#39;b001000000000000000000000)) | (reqs_i == 24&#39;b000100000000000000000000)) | (reqs_i == 24&#39;b000010000000000000000000)) | (reqs_i == 24&#39;b000001000000000000000000)) | (reqs_i == 24&#39;b000000100000000000000000)) | (reqs_i == 24&#39;b000000010000000000000000)) | (reqs_i == 24&#39;b000000001000000000000000)) | (reqs_i == 24&#39;b000000000100000000000000)) | (reqs_i == 24&#39;b000000000010000000000000)) | (reqs_i == 24&#39;b000000000001000000000000)) | (reqs_i == 24&#39;b000000000000100000000000)) | (reqs_i == 24&#39;b000000000000010000000000)) | (reqs_i == 24&#39;b000000000000001000000000)) | (reqs_i == 24&#39;b000000000000000100000000)) | (reqs_i == 24&#39;b000000000000000010000000)) | (reqs_i == 24&#39;b000000000000000001000000)) | (reqs_i == 24&#39;b000000000000000000100000)) | (reqs_i == 24&#39;b000000000000000000010000)) | (reqs_i == 24&#39;b000000000000000000001000)) | (reqs_i == 24&#39;b000000000000000000000100)) | (reqs_i == 24&#39;b000000000000000000000010)) | (reqs_i == 24&#39;b000000000000000000000001)) | (reqs_i == 24&#39;b100000000000000000000000);</pre>
       <pre>			end</pre>
@@ -20975,12 +20340,12 @@
       <pre>	endgenerate</pre>
       <pre>	assign v_o = |reqs_i;</pre>
       <pre>	generate</pre>
-      <pre>		if (inputs_p == 1) begin : genblk25</pre>
+      <pre>		if (inputs_p == 1) begin : genblk26</pre>
       <pre>			wire [lg_inputs_p:1] sv2v_tmp_46E56;</pre>
       <pre>			assign sv2v_tmp_46E56 = 1&#39;b0;</pre>
       <pre>			always @(*) last_r = sv2v_tmp_46E56;</pre>
       <pre>		end</pre>
-      <pre>		else begin : genblk25</pre>
+      <pre>		else begin : genblk26</pre>
       <pre>			always @(*) begin</pre>
       <pre>				if (_sv2v_0)</pre>
       <pre>					;</pre>
