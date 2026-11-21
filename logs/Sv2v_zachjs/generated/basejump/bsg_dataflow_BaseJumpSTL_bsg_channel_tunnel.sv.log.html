@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-11-20 01:13:56</dd></div>
-        <div><dt>time elapsed</dt><dd>0.117s</dd></div>
-        <div><dt>ram usage</dt><dd>90716 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-11-21 01:17:34</dd></div>
+        <div><dt>time elapsed</dt><dd>0.202s</dd></div>
+        <div><dt>ram usage</dt><dd>93540 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -78,7 +78,7 @@
       <pre>	parameter use_pseudo_large_fifo_p = 0;</pre>
       <pre>	parameter harden_small_fifo_p = 0;</pre>
       <pre>	parameter lg_remote_credits_lp = $clog2(remote_credits_p + 1);</pre>
-      <pre>	parameter lg_credit_decimation_p = (lg_remote_credits_lp &lt; 4 ? lg_remote_credits_lp : 4);</pre>
+      <pre>	parameter lg_credit_decimation_p = 0;</pre>
       <pre>	parameter tag_width_lp = $clog2(num_in_p + 1);</pre>
       <pre>	parameter tagged_width_lp = tag_width_lp + width_p;</pre>
       <pre>	input clk_i;</pre>
@@ -95,6 +95,14 @@
       <pre>	output wire [(num_in_p * width_p) - 1:0] data_o;</pre>
       <pre>	output wire [num_in_p - 1:0] v_o;</pre>
       <pre>	input [num_in_p - 1:0] yumi_i;</pre>
+      <pre>	generate</pre>
+      <pre>		if ((((remote_credits_p &gt; 0) &amp;&amp; (lg_credit_decimation_p &gt;= 0)) &amp;&amp; ((remote_credits_p &gt;&gt; lg_credit_decimation_p) &gt; 0)) !== 1&#39;b1) begin : genblk1</pre>
+      <pre>			initial $display(&#34;Error [elaboration] macro expansion of BSG_ELAB_CHECK at <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_channel_tunnel.sv.html#l-118" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_channel_tunnel.sv:118:93</a> - bsg_channel_tunnel.genblk1\n msg: &#34;, &#34;bsg_channel_tunnel: bad params; remote_credits_p=%0d cannot support lg_credit_decimation_p=%0d&#34;, remote_credits_p, lg_credit_decimation_p);</pre>
+      <pre>		end</pre>
+      <pre>		if ((width_p &gt;= (num_in_p * lg_remote_credits_lp)) !== 1&#39;b1) begin : genblk2</pre>
+      <pre>			initial $display(&#34;Error [elaboration] macro expansion of BSG_ELAB_CHECK at <a href="../../../../third_party/cores/basejump_stl/bsg_dataflow/bsg_channel_tunnel.sv.html#l-122" target="file-frame">third_party/cores/basejump_stl/bsg_dataflow/bsg_channel_tunnel.sv:122:91</a> - bsg_channel_tunnel.genblk2\n msg: &#34;, &#34;bsg_channel_tunnel: bad params; channel width (%0d) must be at least wide enough to route back credits (%0d)&#34;, width_p, num_in_p * lg_remote_credits_lp);</pre>
+      <pre>		end</pre>
+      <pre>	endgenerate</pre>
       <pre>	wire [(num_in_p * lg_remote_credits_lp) - 1:0] credit_local_return_data_oi;</pre>
       <pre>	wire credit_local_return_v_oi;</pre>
       <pre>	wire [(num_in_p * lg_remote_credits_lp) - 1:0] credit_remote_return_data_oi;</pre>
