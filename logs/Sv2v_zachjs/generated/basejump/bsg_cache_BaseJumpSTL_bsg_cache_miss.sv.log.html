@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-11-27 08:46:16</dd></div>
-        <div><dt>time elapsed</dt><dd>0.266s</dd></div>
-        <div><dt>ram usage</dt><dd>216028 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-11-28 01:14:54</dd></div>
+        <div><dt>time elapsed</dt><dd>0.270s</dd></div>
+        <div><dt>ram usage</dt><dd>226336 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -120,7 +120,7 @@
       <pre>	input reset_i;</pre>
       <pre>	input miss_v_i;</pre>
       <pre>	input track_miss_i;</pre>
-      <pre>	input wire [20:0] decode_v_i;</pre>
+      <pre>	input wire [22:0] decode_v_i;</pre>
       <pre>	input [addr_width_p - 1:0] addr_v_i;</pre>
       <pre>	input [data_mask_width_lp - 1:0] mask_v_i;</pre>
       <pre>	input [(ways_p * tag_width_lp) - 1:0] tag_v_i;</pre>
@@ -131,7 +131,7 @@
       <pre>	input tag_hit_found_i;</pre>
       <pre>	input sbuf_empty_i;</pre>
       <pre>	input tbuf_empty_i;</pre>
-      <pre>	output reg [3:0] dma_cmd_o;</pre>
+      <pre>	output reg [7:0] dma_cmd_o;</pre>
       <pre>	output wire [lg_ways_lp - 1:0] dma_way_o;</pre>
       <pre>	output reg [addr_width_p - 1:0] dma_addr_o;</pre>
       <pre>	input dma_done_i;</pre>
@@ -185,10 +185,10 @@
       <pre>	reg [lg_ways_lp - 1:0] flush_way_n;</pre>
       <pre>	reg select_snoop_data_r;</pre>
       <pre>	reg select_snoop_data_n;</pre>
-      <pre>	wire goto_flush_op = ((decode_v_i[13] | decode_v_i[8]) | decode_v_i[10]) | decode_v_i[9];</pre>
-      <pre>	wire goto_lock_op = decode_v_i[6] | (decode_v_i[7] &amp; tag_hit_found_i);</pre>
-      <pre>	wire full_word_op = (decode_v_i[17] ? &amp;mask_v_i : decode_v_i[20-:2] &gt;= lg_data_mask_width_lp);</pre>
-      <pre>	wire st_tag_miss_op = (word_tracking_p ? (decode_v_i[15] &amp; full_word_op) &amp; ~tag_hit_found_i : 1&#39;b0);</pre>
+      <pre>	wire goto_flush_op = ((decode_v_i[15] | decode_v_i[10]) | decode_v_i[12]) | decode_v_i[11];</pre>
+      <pre>	wire goto_lock_op = decode_v_i[8] | (decode_v_i[9] &amp; tag_hit_found_i);</pre>
+      <pre>	wire full_word_op = (decode_v_i[19] ? &amp;mask_v_i : decode_v_i[22-:2] &gt;= lg_data_mask_width_lp);</pre>
+      <pre>	wire st_tag_miss_op = (word_tracking_p ? (decode_v_i[17] &amp; full_word_op) &amp; ~tag_hit_found_i : 1&#39;b0);</pre>
       <pre>	wire [tag_width_lp - 1:0] addr_tag_v;</pre>
       <pre>	wire [lg_sets_lp - 1:0] addr_index_v;</pre>
       <pre>	wire [lg_ways_lp - 1:0] addr_way_v;</pre>
@@ -239,8 +239,10 @@
       <pre>		.o(addr_way_v_decode)</pre>
       <pre>	);</pre>
       <pre>	wire [ways_p - 1:0] flush_way_decode;</pre>
-      <pre>	assign flush_way_decode = (decode_v_i[13] ? addr_way_v_decode : tag_hit_v_i);</pre>
+      <pre>	assign flush_way_decode = (decode_v_i[15] ? addr_way_v_decode : tag_hit_v_i);</pre>
       <pre>	assign select_snoop_data_r_o = select_snoop_data_r;</pre>
+      <pre>	wire uncached_op = decode_v_i[6] | decode_v_i[5];</pre>
+      <pre>	wire sbuf_tbuf_empty = sbuf_empty_i &amp; tbuf_empty_i;</pre>
       <pre>	always @(*) begin</pre>
       <pre>		if (_sv2v_0)</pre>
       <pre>			;</pre>
@@ -259,24 +261,44 @@
       <pre>		chosen_way_n = chosen_way_r;</pre>
       <pre>		flush_way_n = flush_way_r;</pre>
       <pre>		dma_addr_o = 1&#39;sb0;</pre>
-      <pre>		dma_cmd_o = 4&#39;b0000;</pre>
+      <pre>		dma_cmd_o = 8&#39;b00000000;</pre>
       <pre>		recover_o = 1&#39;sb0;</pre>
       <pre>		done_o = 1&#39;sb0;</pre>
       <pre>		select_snoop_data_n = select_snoop_data_r;</pre>
       <pre>		case (miss_state_r)</pre>
       <pre>			4&#39;d0: begin</pre>
-      <pre>				stat_mem_v_o = (miss_v_i &amp; sbuf_empty_i) &amp; tbuf_empty_i;</pre>
-      <pre>				track_mem_v_o = (word_tracking_p ? (miss_v_i &amp; sbuf_empty_i) &amp; tbuf_empty_i : 1&#39;b0);</pre>
-      <pre>				miss_state_n = ((miss_v_i &amp; sbuf_empty_i) &amp; tbuf_empty_i ? (goto_flush_op ? 4&#39;d1 : (goto_lock_op ? 4&#39;d2 : (st_tag_miss_op ? 4&#39;d7 : 4&#39;d4))) : 4&#39;d0);</pre>
+      <pre>				stat_mem_v_o = (miss_v_i &amp; ~uncached_op) &amp; sbuf_tbuf_empty;</pre>
+      <pre>				track_mem_v_o = ((word_tracking_p &amp; miss_v_i) &amp; ~uncached_op) &amp; sbuf_tbuf_empty;</pre>
+      <pre>				if (miss_v_i &amp;&amp; (uncached_op ? 1&#39;b1 : sbuf_tbuf_empty)) begin</pre>
+      <pre>					if (goto_flush_op)</pre>
+      <pre>						miss_state_n = 4&#39;d1;</pre>
+      <pre>					else if (goto_lock_op)</pre>
+      <pre>						miss_state_n = 4&#39;d2;</pre>
+      <pre>					else if (decode_v_i[5])</pre>
+      <pre>						miss_state_n = 4&#39;d10;</pre>
+      <pre>					else if (decode_v_i[6])</pre>
+      <pre>						miss_state_n = 4&#39;d9;</pre>
+      <pre>					else if (st_tag_miss_op)</pre>
+      <pre>						miss_state_n = 4&#39;d7;</pre>
+      <pre>					else</pre>
+      <pre>						miss_state_n = 4&#39;d4;</pre>
+      <pre>				end</pre>
+      <pre>				else</pre>
+      <pre>					miss_state_n = 4&#39;d0;</pre>
       <pre>			end</pre>
       <pre>			4&#39;d4: begin</pre>
       <pre>				chosen_way_n = (track_miss_i ? tag_hit_way_id_i : (invalid_exist ? invalid_way_id : lru_way_id));</pre>
-      <pre>				dma_cmd_o = 4&#39;b0001;</pre>
+      <pre>				dma_cmd_o = 8&#39;b00000001;</pre>
       <pre>				dma_addr_o = {addr_tag_v, {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>				miss_state_n = (dma_done_i ? ((~track_miss_i &amp; stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - chosen_way_n)]) &amp; valid_v_i[chosen_way_n] ? 4&#39;d3 : 4&#39;d6) : 4&#39;d4);</pre>
       <pre>			end</pre>
+      <pre>			4&#39;d9: begin</pre>
+      <pre>				dma_cmd_o = 8&#39;b00100000;</pre>
+      <pre>				dma_addr_o = addr_v_i;</pre>
+      <pre>				miss_state_n = (dma_done_i ? 4&#39;d11 : 4&#39;d9);</pre>
+      <pre>			end</pre>
       <pre>			4&#39;d1: begin</pre>
-      <pre>				flush_way_n = (decode_v_i[13] ? addr_way_v : tag_hit_way_id_i);</pre>
+      <pre>				flush_way_n = (decode_v_i[15] ? addr_way_v : tag_hit_way_id_i);</pre>
       <pre>				stat_mem_v_o = 1&#39;b1;</pre>
       <pre>				stat_mem_w_o = 1&#39;b1;</pre>
       <pre>				stat_mem_data_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = {ways_p {1&#39;b0}};</pre>
@@ -292,12 +314,12 @@
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = 1&#39;b0;</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = 1&#39;b0;</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {1&#39;b0}};</pre>
-      <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = (decode_v_i[8] | decode_v_i[9]) &amp; flush_way_decode[i];</pre>
-      <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = (decode_v_i[8] | decode_v_i[9]) &amp; flush_way_decode[i];</pre>
+      <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = (decode_v_i[10] | decode_v_i[11]) &amp; flush_way_decode[i];</pre>
+      <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = (decode_v_i[10] | decode_v_i[11]) &amp; flush_way_decode[i];</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {1&#39;b0}};</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				miss_state_n = ((~decode_v_i[8] &amp; stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - flush_way_n)]) &amp; valid_v_i[flush_way_n] ? 4&#39;d3 : 4&#39;d9);</pre>
+      <pre>				miss_state_n = ((~decode_v_i[10] &amp; stat_info_in[(ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - ((ways_p - 1) - flush_way_n)]) &amp; valid_v_i[flush_way_n] ? 4&#39;d3 : 4&#39;d13);</pre>
       <pre>			end</pre>
       <pre>			4&#39;d2: begin</pre>
       <pre>				tag_mem_v_o = 1&#39;b1;</pre>
@@ -307,22 +329,27 @@
       <pre>					for (i = 0; i &lt; ways_p; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = 1&#39;b0;</pre>
-      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[7];</pre>
+      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[9];</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {1&#39;b0}};</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = 1&#39;b0;</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = tag_hit_v_i[i];</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {1&#39;b0}};</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				miss_state_n = 4&#39;d9;</pre>
+      <pre>				miss_state_n = 4&#39;d13;</pre>
       <pre>			end</pre>
       <pre>			4&#39;d3: begin</pre>
-      <pre>				dma_cmd_o = 4&#39;b0010;</pre>
+      <pre>				dma_cmd_o = 8&#39;b00000010;</pre>
       <pre>				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>				miss_state_n = (dma_done_i ? 4&#39;d5 : 4&#39;d3);</pre>
       <pre>			end</pre>
+      <pre>			4&#39;d10: begin</pre>
+      <pre>				dma_cmd_o = 8&#39;b00010000;</pre>
+      <pre>				dma_addr_o = addr_v_i;</pre>
+      <pre>				miss_state_n = (dma_done_i ? 4&#39;d12 : 4&#39;d10);</pre>
+      <pre>			end</pre>
       <pre>			4&#39;d5: begin</pre>
-      <pre>				dma_cmd_o = 4&#39;b1000;</pre>
+      <pre>				dma_cmd_o = 8&#39;b00001000;</pre>
       <pre>				dma_addr_o = {tag_v_i[dma_way_o * tag_width_lp+:tag_width_lp], {sets_p &gt; 1 {addr_index_v}}, {block_offset_width_lp {1&#39;b0}}};</pre>
       <pre>				stat_mem_v_o = dma_done_i &amp; st_tag_miss_op;</pre>
       <pre>				stat_mem_w_o = 1&#39;b1;</pre>
@@ -337,7 +364,7 @@
       <pre>					for (i = 0; i &lt; ways_p; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = addr_tag_v;</pre>
-      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[7];</pre>
+      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[9];</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = 1&#39;b1;</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {chosen_way_decode[i]}};</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = chosen_way_decode[i];</pre>
@@ -354,16 +381,16 @@
       <pre>							track_mem_w_mask_o[i * block_size_in_words_p+:block_size_in_words_p] = {block_size_in_words_p {chosen_way_decode[i]}};</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				miss_state_n = (dma_done_i ? (((decode_v_i[13] | decode_v_i[9]) | decode_v_i[10]) | st_tag_miss_op ? 4&#39;d9 : 4&#39;d6) : 4&#39;d5);</pre>
+      <pre>				miss_state_n = (dma_done_i ? (((decode_v_i[15] | decode_v_i[11]) | decode_v_i[12]) | st_tag_miss_op ? 4&#39;d13 : 4&#39;d6) : 4&#39;d5);</pre>
       <pre>			end</pre>
       <pre>			4&#39;d6: begin</pre>
-      <pre>				dma_cmd_o = 4&#39;b0100;</pre>
+      <pre>				dma_cmd_o = 8&#39;b00000100;</pre>
       <pre>				dma_addr_o = {addr_tag_v, {sets_p &gt; 1 {addr_index_v}}, {block_size_in_words_p &gt; 1 {addr_block_offset_v}}, {lg_data_mask_width_lp {1&#39;b0}}};</pre>
       <pre>				stat_mem_v_o = dma_done_i;</pre>
       <pre>				stat_mem_w_o = 1&#39;b1;</pre>
-      <pre>				stat_mem_data_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = {ways_p {decode_v_i[15] | decode_v_i[4]}};</pre>
+      <pre>				stat_mem_data_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = {ways_p {decode_v_i[17] | decode_v_i[4]}};</pre>
       <pre>				stat_mem_data_out[((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1-:((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p)] = chosen_way_lru_data;</pre>
-      <pre>				stat_mem_w_mask_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = (track_miss_i &amp; ~(decode_v_i[15] | decode_v_i[4]) ? {ways_p {1&#39;b0}} : chosen_way_decode);</pre>
+      <pre>				stat_mem_w_mask_out[ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)-:((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) &gt;= (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) ? ((ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1)) - (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0)) + 1 : ((((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) + 0) - (ways_p + (((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1))) + 1)] = (track_miss_i &amp; ~(decode_v_i[17] | decode_v_i[4]) ? {ways_p {1&#39;b0}} : chosen_way_decode);</pre>
       <pre>				stat_mem_w_mask_out[((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p) - 1-:((ways_p - 2) &gt;= 0 ? ways_p - 1 : 3 - ways_p)] = chosen_way_lru_mask;</pre>
       <pre>				tag_mem_v_o = dma_done_i;</pre>
       <pre>				tag_mem_w_o = 1&#39;b1;</pre>
@@ -372,10 +399,10 @@
       <pre>					for (i = 0; i &lt; ways_p; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = addr_tag_v;</pre>
-      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[7];</pre>
+      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[9];</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = 1&#39;b1;</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {chosen_way_decode[i]}};</pre>
-      <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = chosen_way_decode[i];</pre>
+      <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = chosen_way_decode[i] &amp; ~tag_hit_found_i;</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = chosen_way_decode[i];</pre>
       <pre>						end</pre>
       <pre>				end</pre>
@@ -390,7 +417,7 @@
       <pre>						end</pre>
       <pre>				end</pre>
       <pre>				select_snoop_data_n = (dma_done_i ? 1&#39;b1 : select_snoop_data_r);</pre>
-      <pre>				miss_state_n = (dma_done_i ? 4&#39;d9 : 4&#39;d6);</pre>
+      <pre>				miss_state_n = (dma_done_i ? 4&#39;d13 : 4&#39;d6);</pre>
       <pre>			end</pre>
       <pre>			4&#39;d7: begin</pre>
       <pre>				chosen_way_n = (invalid_exist ? invalid_way_id : lru_way_id);</pre>
@@ -410,7 +437,7 @@
       <pre>					for (i = 0; i &lt; ways_p; i = i + 1)</pre>
       <pre>						begin</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = addr_tag_v;</pre>
-      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[7];</pre>
+      <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = decode_v_i[9];</pre>
       <pre>							tag_mem_data_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 1)] = 1&#39;b1;</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp - 1)-:tag_width_lp] = {tag_width_lp {chosen_way_decode[i]}};</pre>
       <pre>							tag_mem_w_mask_out[(i * (2 + tag_width_lp)) + (tag_width_lp + 0)] = chosen_way_decode[i];</pre>
@@ -427,15 +454,26 @@
       <pre>							track_mem_w_mask_o[i * block_size_in_words_p+:block_size_in_words_p] = {block_size_in_words_p {chosen_way_decode[i]}};</pre>
       <pre>						end</pre>
       <pre>				end</pre>
-      <pre>				miss_state_n = 4&#39;d9;</pre>
+      <pre>				miss_state_n = 4&#39;d13;</pre>
       <pre>			end</pre>
-      <pre>			4&#39;d9: begin</pre>
+      <pre>			4&#39;d11: begin</pre>
+      <pre>				dma_cmd_o = 8&#39;b01000000;</pre>
+      <pre>				dma_addr_o = {addr_tag_v, {sets_p &gt; 1 {addr_index_v}}, {block_size_in_words_p &gt; 1 {addr_block_offset_v}}, {lg_data_mask_width_lp {1&#39;b0}}};</pre>
+      <pre>				select_snoop_data_n = (dma_done_i ? 1&#39;b1 : select_snoop_data_r);</pre>
+      <pre>				miss_state_n = (dma_done_i ? 4&#39;d14 : 4&#39;d11);</pre>
+      <pre>			end</pre>
+      <pre>			4&#39;d12: begin</pre>
+      <pre>				dma_cmd_o = 8&#39;b10000000;</pre>
+      <pre>				dma_addr_o = {addr_tag_v, {sets_p &gt; 1 {addr_index_v}}, {block_size_in_words_p &gt; 1 {addr_block_offset_v}}, {lg_data_mask_width_lp {1&#39;b0}}};</pre>
+      <pre>				miss_state_n = (dma_done_i ? 4&#39;d14 : 4&#39;d12);</pre>
+      <pre>			end</pre>
+      <pre>			4&#39;d13: begin</pre>
       <pre>				recover_o = 1&#39;b1;</pre>
-      <pre>				miss_state_n = 4&#39;d10;</pre>
+      <pre>				miss_state_n = 4&#39;d14;</pre>
       <pre>			end</pre>
-      <pre>			4&#39;d10: begin</pre>
+      <pre>			4&#39;d14: begin</pre>
       <pre>				done_o = 1&#39;b1;</pre>
-      <pre>				miss_state_n = (ack_i ? 4&#39;d0 : 4&#39;d10);</pre>
+      <pre>				miss_state_n = (ack_i ? 4&#39;d0 : 4&#39;d14);</pre>
       <pre>				select_snoop_data_n = (ack_i ? 1&#39;b0 : select_snoop_data_r);</pre>
       <pre>			end</pre>
       <pre>			default: miss_state_n = 4&#39;d0;</pre>

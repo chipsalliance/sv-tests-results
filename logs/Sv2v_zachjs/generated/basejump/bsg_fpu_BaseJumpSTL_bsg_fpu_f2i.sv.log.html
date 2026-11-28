@@ -45,9 +45,9 @@
           </ul></dd>
         </div>
         <div><dt>defines</dt><dd><code></code></dd></div>
-        <div><dt>completed</dt><dd>2026-11-27 08:46:13</dd></div>
-        <div><dt>time elapsed</dt><dd>0.138s</dd></div>
-        <div><dt>ram usage</dt><dd>92928 KB</dd></div>
+        <div><dt>completed</dt><dd>2026-11-28 01:14:53</dd></div>
+        <div><dt>time elapsed</dt><dd>0.140s</dd></div>
+        <div><dt>ram usage</dt><dd>101124 KB</dd></div>
       </dl>
     </section>
     <section class="log">
@@ -97,6 +97,8 @@
       <pre>	wire exp_too_small;</pre>
       <pre>	assign exp_too_big = (signed_i ? exp &gt; ((bias_lp + width_lp) - 2) : exp &gt; ((bias_lp + width_lp) - 1));</pre>
       <pre>	assign exp_too_small = exp &lt; bias_lp;</pre>
+      <pre>	wire signed_min;</pre>
+      <pre>	assign signed_min = ((signed_i &amp; sign) &amp; (exp == ((bias_lp + width_lp) - 1))) &amp; (mantissa == {m_p {1&#39;sb0}});</pre>
       <pre>	wire [width_lp - 1:0] preshift;</pre>
       <pre>	wire [e_p - 1:0] shamt;</pre>
       <pre>	wire [width_lp - 1:0] shifted;</pre>
@@ -122,21 +124,21 @@
       <pre>			z_o = (sign ? {signed_i, {width_lp - 1 {1&#39;b0}}} : {~signed_i, {width_lp - 1 {1&#39;b1}}});</pre>
       <pre>			invalid_o = 1&#39;b1;</pre>
       <pre>		end</pre>
+      <pre>		else if (zero | exp_too_small) begin</pre>
+      <pre>			z_o = 1&#39;sb0;</pre>
+      <pre>			invalid_o = 1&#39;b0;</pre>
+      <pre>		end</pre>
       <pre>		else if (~signed_i &amp; sign) begin</pre>
       <pre>			z_o = 1&#39;sb0;</pre>
       <pre>			invalid_o = 1&#39;b1;</pre>
       <pre>		end</pre>
-      <pre>		else if (zero) begin</pre>
-      <pre>			z_o = 1&#39;sb0;</pre>
+      <pre>		else if (signed_min) begin</pre>
+      <pre>			z_o = {1&#39;b1, {width_lp - 1 {1&#39;b0}}};</pre>
       <pre>			invalid_o = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>		else if (exp_too_big) begin</pre>
-      <pre>			z_o = (sign ? {1&#39;b1, {width_lp - 1 {1&#39;b0}}} : {1&#39;b0, {width_lp - 1 {1&#39;b1}}});</pre>
+      <pre>			z_o = (signed_i ? (sign ? {1&#39;b1, {width_lp - 1 {1&#39;b0}}} : {1&#39;b0, {width_lp - 1 {1&#39;b1}}}) : {width_lp {1&#39;b1}});</pre>
       <pre>			invalid_o = 1&#39;b1;</pre>
-      <pre>		end</pre>
-      <pre>		else if (exp_too_small) begin</pre>
-      <pre>			z_o = 1&#39;sb0;</pre>
-      <pre>			invalid_o = 1&#39;b0;</pre>
       <pre>		end</pre>
       <pre>		else begin</pre>
       <pre>			z_o = post_round;</pre>

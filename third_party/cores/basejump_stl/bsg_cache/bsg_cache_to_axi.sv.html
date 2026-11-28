@@ -355,7 +355,19 @@
 <span class="normal"><a href="#l-347">347</a></span>
 <span class="normal"><a href="#l-348">348</a></span>
 <span class="normal"><a href="#l-349">349</a></span>
-<span class="normal"><a href="#l-350">350</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/**</span>
+<span class="normal"><a href="#l-350">350</a></span>
+<span class="normal"><a href="#l-351">351</a></span>
+<span class="normal"><a href="#l-352">352</a></span>
+<span class="normal"><a href="#l-353">353</a></span>
+<span class="normal"><a href="#l-354">354</a></span>
+<span class="normal"><a href="#l-355">355</a></span>
+<span class="normal"><a href="#l-356">356</a></span>
+<span class="normal"><a href="#l-357">357</a></span>
+<span class="normal"><a href="#l-358">358</a></span>
+<span class="normal"><a href="#l-359">359</a></span>
+<span class="normal"><a href="#l-360">360</a></span>
+<span class="normal"><a href="#l-361">361</a></span>
+<span class="normal"><a href="#l-362">362</a></span></pre></div></td><td class="code"><div><pre><span></span><a id="l-1" name="l-1"></a><span class="cm">/**</span>
 <a id="l-2" name="l-2"></a><span class="cm"> *  bsg_cache_to_axi.sv</span>
 <a id="l-3" name="l-3"></a><span class="cm"> *    </span>
 <a id="l-4" name="l-4"></a><span class="cm"> *  @author tommy</span>
@@ -700,11 +712,23 @@
 <a id="l-343" name="l-343"></a><span class="w">    </span><span class="k">assert</span><span class="p">(</span><span class="n">data_width_p</span><span class="o">*</span><span class="n">block_size_in_words_p</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">axi_data_width_p</span><span class="o">*</span><span class="n">axi_burst_len_p</span><span class="p">)</span>
 <a id="l-344" name="l-344"></a><span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">"cache block size and axi transfer size do not match."</span><span class="p">);</span>
 <a id="l-345" name="l-345"></a><span class="w">  </span><span class="k">end</span>
-<a id="l-346" name="l-346"></a><span class="no">`endif</span>
-<a id="l-347" name="l-347"></a>
-<a id="l-348" name="l-348"></a><span class="k">endmodule</span>
-<a id="l-349" name="l-349"></a>
-<a id="l-350" name="l-350"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bsg_cache_to_axi</span><span class="p">)</span>
+<a id="l-346" name="l-346"></a>
+<a id="l-347" name="l-347"></a><span class="w">  </span><span class="c1">// This module does not implement uncached requests (uncached_op in</span>
+<a id="l-348" name="l-348"></a><span class="w">  </span><span class="c1">// bsg_cache_dma_pkt_s). It would run one as a transfer of a whole block,</span>
+<a id="l-349" name="l-349"></a><span class="w">  </span><span class="c1">// and the cache expects a single beat.</span>
+<a id="l-350" name="l-350"></a><span class="w">  </span><span class="k">always_ff</span><span class="w"> </span><span class="p">@</span><span class="w"> </span><span class="p">(</span><span class="k">negedge</span><span class="w"> </span><span class="n">clk_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-351" name="l-351"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">reset_i</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-352" name="l-352"></a><span class="w">      </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">integer</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_cache_p</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<a id="l-353" name="l-353"></a><span class="w">        </span><span class="k">assert</span><span class="p">(</span><span class="o">~</span><span class="p">((</span><span class="n">dma_pkt_v_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mb">1'b1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">dma_pkt</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">uncached_op</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mb">1'b1</span><span class="p">)))</span>
+<a id="l-354" name="l-354"></a><span class="w">          </span><span class="k">else</span><span class="w"> </span><span class="p">$</span><span class="n">error</span><span class="p">(</span><span class="s">"[BSG_ERROR][BSG_CACHE_TO_AXI] uncached request from cache %0d: not supported by this module. %m T=%t"</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="p">$</span><span class="kt">time</span><span class="p">);</span>
+<a id="l-355" name="l-355"></a><span class="w">      </span><span class="k">end</span>
+<a id="l-356" name="l-356"></a><span class="w">    </span><span class="k">end</span>
+<a id="l-357" name="l-357"></a><span class="w">  </span><span class="k">end</span>
+<a id="l-358" name="l-358"></a><span class="no">`endif</span>
+<a id="l-359" name="l-359"></a>
+<a id="l-360" name="l-360"></a><span class="k">endmodule</span>
+<a id="l-361" name="l-361"></a>
+<a id="l-362" name="l-362"></a><span class="no">`BSG_ABSTRACT_MODULE</span><span class="p">(</span><span class="n">bsg_cache_to_axi</span><span class="p">)</span>
 </pre></div></td></tr></table></div>
 
   </body>
